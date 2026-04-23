@@ -58,6 +58,9 @@ git clone https://github.com/lythos-labs/lythoskill.git ~/.claude/skills/lythosk
 | **lythoskill-project-cortex** | GTD-style project management (ADR/Epic/Task/Wiki) | Core |
 | **lythoskill-arena** | Skill comparison benchmark with control-variable decks | Meta |
 | **lythoskill-curator** | Read-only cold pool observer, combo discovery, deck recommendations | Meta |
+| **lythoskill-project-scribe** | Write project memory: Current Quest, Daily Notes, Pitfalls (CQRS write) | Memory |
+| **lythoskill-project-onboarding** | Project onboarding with KV-cache-ordered layer loading (CQRS read) | Memory |
+| **lythoskill-red-green-release** | User-acceptance-driven release workflow with patch archival | Workflow |
 | **lythoskill-hello-world** | Minimal zero-script skill example | Demo |
 
 ## Quick Start
