@@ -154,8 +154,8 @@ function scanSkill(path: string): SkillMeta | null {
   const text = readFileSync(skillMdPath, 'utf-8');
   const { frontmatter, body } = parseFrontmatter(text);
   const metadata = frontmatter.metadata || {};
-  const managedDirs = metadata.sm_managed_dirs || metadata.managed_dirs || [];
-  const niches = metadata.sm_niche ? [metadata.sm_niche] : [];
+  const managedDirs = metadata.lyth_managed_dirs || metadata.managed_dirs || [];
+  const niches = metadata.lyth_niche ? [metadata.lyth_niche] : [];
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
   const hasExamples = statSync(join(path, 'examples'), { throwIfNoEntry: false })?.isDirectory() || false;
   const desc = toString(frontmatter.description);

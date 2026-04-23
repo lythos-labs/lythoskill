@@ -38,10 +38,10 @@
 | 前缀 | 含义 | 例子 | 目的 |
 |------|------|------|------|
 | (无) | 标准字段 | `name`, `description`, `type` | 跨平台兼容 |
-| `sm_` | skill-manager / lythos 私有 | `sm_niche`, `sm_managed_dirs` | 避开 Kimi CLI 等平台对非标准字段的限制 |
+| `lyth_` | lythos 生态私有字段 | `lyth_niche`, `lyth_managed_dirs` | 避开 Kimi CLI 等平台对非标准字段的限制 |
 | `deck_` | deck 治理 | `deck_max_cards`, `deck_priority` | deck 工具专属配置 |
 
-**背景**: Kimi CLI 只接受 `type: standard` 或 `type: flow`，`type: combo` 会被视为 invalid。lythos 用 `sm_` 前缀存储 combo 等扩展信息，避免与平台 frontmatter 校验冲突。
+**背景**: Kimi CLI 只接受 `type: standard` 或 `type: flow`，`type: combo` 会被视为 invalid。lythos 用 `lyth_` 前缀存储 combo 等扩展信息，避免与平台 frontmatter 校验冲突。
 
 ---
 
