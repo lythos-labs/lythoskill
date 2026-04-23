@@ -8,7 +8,7 @@ export async function init(name: string) {
   // directories
   for (const dir of [
     join(root, 'packages', name, 'src'),
-    join(root, 'skills', 'example', 'scripts'),
+    join(root, 'packages', name, 'skill', 'scripts'),
   ]) {
     mkdirSync(dir, { recursive: true })
   }
@@ -24,16 +24,16 @@ export async function init(name: string) {
     [join(root, 'packages', name, 'tsconfig.json'),       t.starterTsconfig()],
     [join(root, 'packages', name, 'src', 'cli.ts'),       t.starterCli(name)],
     [join(root, 'packages', name, 'src', 'index.ts'),     t.starterIndex(name)],
-    // example skill
-    [join(root, 'skills', 'example', 'SKILL.md'),         t.exampleSkillMd('example', name)],
-    [join(root, 'skills', 'example', 'scripts', 'run.sh'), t.skillScript(name, 'hello')],
+    // skill layer
+    [join(root, 'packages', name, 'skill', 'SKILL.md'),         t.exampleSkillMd(name, name)],
+    [join(root, 'packages', name, 'skill', 'scripts', 'run.sh'), t.skillScript(name, 'hello')],
   ]
 
   for (const [path, content] of files) {
     writeFileSync(path, content)
   }
 
-  chmodSync(join(root, 'skills', 'example', 'scripts', 'run.sh'), 0o755)
+  chmodSync(join(root, 'packages', name, 'skill', 'scripts', 'run.sh'), 0o755)
 
   console.log(`
 Created lythoskill project: ${name}
@@ -45,6 +45,6 @@ Created lythoskill project: ${name}
 Structure:
   packages/${name}/        <- your starter (npm publish this)
   packages/${name}/skill/  <- skill source (SKILL.md + scripts)
-  skills/example/          <- built skill output (submit this to git)
+  skills/${name}/          <- built skill output (submit this to git)
 `)
 }

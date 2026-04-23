@@ -1,0 +1,9 @@
+{
+  "name": "@lythos/hello-world",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "lythoskill-hello-world": "./src/cli.ts"
+  },
+  "files": ["src"]
+}

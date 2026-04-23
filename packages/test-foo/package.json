@@ -1,0 +1,11 @@
+{
+  "name": "test-foo",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "test-foo": "./src/cli.ts"
+  },
+  "files": [
+    "src"
+  ]
+}

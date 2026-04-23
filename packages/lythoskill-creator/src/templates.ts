@@ -15,9 +15,9 @@ export const pnpmWorkspace = () =>
 
 export const gitignore = () =>
 `node_modules/
-dist/
 *.tsbuildinfo
 .DS_Store
+playground/
 `
 
 // -- starter package --------------------------------
