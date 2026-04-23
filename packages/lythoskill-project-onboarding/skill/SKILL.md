@@ -42,11 +42,11 @@ cat HANDOFF-TEMPLATE.md  # 了解 handoff 结构
 
 ```bash
 # 如果存在 Handoff，这是最重要的信息源
-cat playground/HANDOFF.md 2>/dev/null || echo "无活跃 Handoff"
+cat daily/HANDOFF.md 2>/dev/null || cat playground/HANDOFF.md 2>/dev/null || echo "无活跃 Handoff"
 ```
 
 **判断 Handoff 是否可用：**
-- ✅ **可用**：存在 `playground/HANDOFF.md`，且 `created_at` 在合理范围内
+- ✅ **可用**：存在 `daily/HANDOFF.md` 或 `playground/HANDOFF.md`，且 `created_at` 在合理范围内
 - ⚠️ **可能过期**：Handoff 存在但 `session_rounds` 很少，或 `git_commit` 与当前 HEAD 不符
 - ❌ **不可用**：Handoff 不存在或明显 stale
 
@@ -109,7 +109,7 @@ git log --oneline -10
 
 📋 项目：xxx（技术栈）
 📌 版本：vX.Y.Z（git: hash）
-📄 Handoff: playground/HANDOFF.md（created_at: 2026-04-23）
+📄 Handoff: daily/HANDOFF.md（created_at: 2026-04-23）
 ⚠️  坑点：Handoff 中记录的关键陷阱 1-2 个
 🎯 当前：Handoff 中的进行中的任务
 💡 待办：Handoff 中的下一步

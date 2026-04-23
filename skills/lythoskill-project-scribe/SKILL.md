@@ -139,8 +139,8 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
     ▼
 ┐──────────────────────────────────────────────────┒
 │ 1. 归档旧 Handoff                              │
-│    - 移动到 playground/archive/handoff/           │
-│    - 添加日期标签和版本号                         │
+│    - 移动到 daily/YYYY-MM-DD.md（或 journal/）    │
+│    - 时间戳命名，平铺存储，无需分类目录             │
 └──────────────────────────────────────────────────┘
               │
               ▼
@@ -155,9 +155,12 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
 
 | 场景 | 文件路径 | 说明 |
 |-----|---------|------|
-| 活跃 session | `playground/HANDOFF.md` | 当前进行中的 handoff |
-| 归档 | `playground/archive/handoff/YYYY-MM-DD-HHMMSS.md` | 历史 handoff |
+| 活跃 session | `daily/HANDOFF.md` 或 `playground/HANDOFF.md` | 当前进行中的 handoff（固定文件名） |
+| 归档 | `daily/2026-04-23.md` | 历史 handoff（时间戳平铺，无压输入） |
 | 模板 | `HANDOFF-TEMPLATE.md` | 项目根目录模板 |
+
+> 命名哲学：不用 `archive/` 这种正式目录，直接用 `daily/` 或 `journal/`。
+> 就像工作手帐，每天一页，自然流动。
 
 ## Pitfalls 记录规范
 
