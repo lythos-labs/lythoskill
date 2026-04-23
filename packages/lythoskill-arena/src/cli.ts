@@ -29,6 +29,7 @@ function parseArgs(argv: string[]) {
   const options: Record<string, string | undefined> = {
     task: undefined,
     skills: undefined,
+    decks: undefined,
     criteria: 'syntax,context,logic,token',
     control: 'project-scribe',
     dir: 'tmp',
@@ -42,6 +43,8 @@ function parseArgs(argv: string[]) {
       options.task = argv[++i]
     } else if (arg === '--skills' || arg === '-s') {
       options.skills = argv[++i]
+    } else if (arg === '--decks') {
+      options.decks = argv[++i]
     } else if (arg === '--criteria' || arg === '-c') {
       options.criteria = argv[++i]
     } else if (arg === '--control') {
@@ -67,13 +70,40 @@ export function runArena(argv: string[]) {
     process.exit(1)
   }
 
-  const SKILLS = (options.skills || '').split(',').map(s => s.trim()).filter(Boolean)
-  if (SKILLS.length < 2) {
+  const HAS_DECKS = !!options.decks
+  const HAS_SKILLS = !!options.skills
+
+  if (!HAS_DECKS && !HAS_SKILLS) {
+    console.error('❌ 请提供 --skills 或 --decks')
+    process.exit(1)
+  }
+  if (HAS_DECKS && HAS_SKILLS) {
+    console.error('❌ --skills 和 --decks 不能同时使用')
+    process.exit(1)
+  }
+
+  const DECK_PATHS = HAS_DECKS
+    ? (options.decks || '').split(',').map(s => s.trim()).filter(Boolean)
+    : []
+
+  const SKILLS = HAS_SKILLS
+    ? (options.skills || '').split(',').map(s => s.trim()).filter(Boolean)
+    : []
+
+  if (HAS_SKILLS && SKILLS.length < 2) {
     console.error('❌ 至少需要 2 个 skill 才能进行 arena')
     process.exit(1)
   }
-  if (SKILLS.length > 5) {
+  if (HAS_SKILLS && SKILLS.length > 5) {
     console.error('❌ 一次 arena 最多 5 个 skill')
+    process.exit(1)
+  }
+  if (HAS_DECKS && DECK_PATHS.length < 2) {
+    console.error('❌ 至少需要 2 个 deck 才能进行 arena')
+    process.exit(1)
+  }
+  if (HAS_DECKS && DECK_PATHS.length > 5) {
+    console.error('❌ 一次 arena 最多 5 个 deck')
     process.exit(1)
   }
 
@@ -93,15 +123,37 @@ export function runArena(argv: string[]) {
   mkdirSync(join(ARENA_DIR, 'runs'), { recursive: true })
 
   // ── 生成参与者与 deck ───────────────────────────────────────
-  const participants = SKILLS.map((skill, i) => {
-    const id = `run-${String(i + 1).padStart(2, '0')}`
-    return {
-      id,
-      name: skill,
-      skill_name: skill,
-      deck_path: join(ARENA_DIR, 'decks', `arena-${id}.toml`),
-    }
-  })
+  let participants: { id: string; name: string; skill_name: string; deck_path: string }[]
+  let mode: 'single-skill' | 'full-deck'
+
+  if (HAS_DECKS) {
+    mode = 'full-deck'
+    participants = DECK_PATHS.map((deckPath, i) => {
+      const id = `run-${String(i + 1).padStart(2, '0')}`
+      const name = basename(deckPath).replace(/\.toml$/, '')
+      const destPath = join(ARENA_DIR, 'decks', `arena-${id}.toml`)
+      // Copy the provided deck to arena directory
+      if (existsSync(deckPath)) {
+        const content = readFileSync(deckPath, 'utf-8')
+        writeFileSync(destPath, content)
+      } else {
+        console.error(`❌ Deck 文件不存在: ${deckPath}`)
+        process.exit(1)
+      }
+      return { id, name, skill_name: name, deck_path: destPath }
+    })
+  } else {
+    mode = 'single-skill'
+    participants = SKILLS.map((skill, i) => {
+      const id = `run-${String(i + 1).padStart(2, '0')}`
+      return {
+        id,
+        name: skill,
+        skill_name: skill,
+        deck_path: join(ARENA_DIR, 'decks', `arena-${id}.toml`),
+      }
+    })
+  }
 
   const criteria = CRITERIA.map((c) => ({
     name: c,
@@ -109,8 +161,9 @@ export function runArena(argv: string[]) {
     weight: 1,
   }))
 
-  for (const p of participants) {
-    const deckContent = `# ============================================================
+  if (mode === 'single-skill') {
+    for (const p of participants) {
+      const deckContent = `# ============================================================
 # Arena Deck: ${p.id} — ${p.name}
 # ============================================================
 # 变量：${p.name}
@@ -128,7 +181,8 @@ skills = [
 ${CONTROL_SKILLS.map(s => `  "${s}",`).join('\n')}
 ]
 `
-    writeFileSync(p.deck_path, deckContent)
+      writeFileSync(p.deck_path, deckContent)
+    }
   }
 
   // ── 生成 arena.json ─────────────────────────────────────────
@@ -164,8 +218,14 @@ ${criteria.map(c => `  - ${c.label}`).join('\n')}
 arena_decks:
 ${participants.map(p => `  - ${p.deck_path.replace(PROJECT_DIR, '.')}`).join('\n')}
 judge_persona: |
-  你是一个中立的技能评测员。对比所有 subagent 的输出，
-  按 evaluation_criteria 给出 1-5 分评分，最终给出 Winner 和选型建议。
+  ${mode === 'full-deck'
+    ? `你是一个多目标优化分析师。不要选 Winner。
+  对每个 deck 配置，按 evaluation_criteria 输出评分向量（1-5 分）。
+  识别 Pareto 非支配解集——没有"最强"，只有"在不同维度上的最优权衡"。
+  对被支配的解，说明它被谁支配、在哪个维度上劣势。
+  如果发现任何涌现 combo（多个 skill 组合产生 1+1>2 的效果），单独标注。`
+    : `你是一个中立的技能评测员。对比所有 subagent 的输出，
+  按 evaluation_criteria 给出 1-5 分评分，最终给出 Winner 和选型建议。`}
 acceptance:
 ${participants.map(p => `  - Subagent ${p.id} 使用 ${p.deck_path.replace(PROJECT_DIR, '.')} 完成任务并写入 runs/${p.id}.md`).join('\n')}
   - Judge 读取所有 run 文件并生成 report.md
@@ -204,9 +264,9 @@ bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}"
 ID:        ${ARENA_ID}
 任务:      ${TASK}
 目录:      ${ARENA_DIR}
-参与者:    ${SKILLS.join(', ')}
-控制变量:  ${CONTROL_SKILLS.join(', ')}
-评测维度:  ${CRITERIA.join(', ')}
+模式:      ${mode === 'full-deck' ? '完整 deck 配置对比' : '单 skill 对比'}
+参与者:    ${participants.map(p => p.name).join(', ')}
+${mode === 'single-skill' ? `控制变量:  ${CONTROL_SKILLS.join(', ')}\n` : ''}评测维度:  ${CRITERIA.join(', ')}
 
 生成文件:
   📋 ${join(ARENA_DIR, 'arena.json')}

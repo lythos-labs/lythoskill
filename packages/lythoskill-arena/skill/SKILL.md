@@ -4,7 +4,7 @@ description: |
   执行 Skill Arena —— 通过控制变量 deck 在同一任务下对比多个 skill/subagent 的效果。
   自动创建 arena 目录、生成 arena deck、收集输出模板、生成评测报告。
 
-  当用户提到"对比一下这几个 skill""跑个 arena""skill 评测""test play""哪个 skill 更好"时激活。
+  当用户提到"对比一下这几个 skill""跑个 arena""skill 评测""test play""哪个 deck 配置更好""Pareto 分析""多目标评测"时激活。
 
 cooperative_skills:
   - lythoskill-deck      # arena 依赖 deck 隔离能力
@@ -19,9 +19,10 @@ type: flow
 
 # Skill Arena
 
-> **核心定位：skill 的 test play 场**
+> **核心定位：skill / deck 配置的 test play 场**
 >
-> 把同类 skill 放在同一任务下控制变量对比，用数据决定哪个 skill 值得进入 working set。
+> 不只是对比"哪个单卡更好"，而是对比"哪个 deck 配置在多目标上最优"。
+> 支持两种模式：单 skill 对比（控制变量）和 完整 deck 配置对比（Pareto 前沿分析）。
 
 ## 流程总览
 
@@ -126,6 +127,8 @@ bunx @lythos/skill-deck link --deck tmp/arena-xxx/decks/arena-run-01.toml
 
 ## 命令行工具
 
+### 模式一：单 Skill 对比（控制变量）
+
 ```bash
 bunx @lythos/skill-arena \
   --task "生成用户认证流程图" \
@@ -133,17 +136,35 @@ bunx @lythos/skill-arena \
   --criteria "syntax,context,token"
 ```
 
+### 模式二：完整 Deck 配置对比（Pareto 前沿分析）
+
+```bash
+bunx @lythos/skill-arena \
+  --task "生成用户认证流程图" \
+  --decks "./decks/v1-minimal.toml,./decks/v2-rich.toml,./decks/v3-superpowers.toml" \
+  --criteria "quality,token,maintainability"
+```
+
+**模式二的 Judge 不选 Winner**，而是输出：
+1. 每个 deck 的评分向量（各维度 1-5 分）
+2. Pareto 非支配解集（没有"最强"，只有不同维度上的最优权衡）
+3. 被支配解的劣势分析（被谁在哪个维度上支配）
+4. 涌现 combo 标注（如果有 1+1>2 的协同效应）
+
 参数：
 - `--task, -t`: 对比任务描述（必填）
-- `--skills, -s`: 逗号分隔的被测 skill 列表（至少 2 个）
+- `--skills, -s`: 逗号分隔的被测 skill 列表（模式一，至少 2 个）
+- `--decks`: 逗号分隔的 deck toml 路径列表（模式二，至少 2 个）
 - `--criteria, -c`: 逗号分隔的评测维度（默认 syntax,context,logic,token）
-- `--control`: 控制变量 skill（默认 project-scribe）
+- `--control`: 控制变量 skill（模式一默认 project-scribe；模式二不使用）
 - `--dir, -d`: arena 目录父路径（默认 tmp）
 - `--project, -p`: 项目根目录（默认 .）
 
+**--skills 和 --decks 互斥，必须且只能提供其一。**
+
 ## 约束
 
-- **max_participants = 5**：一次 arena 最多 5 个 skill
+- **max_participants = 5**：一次 arena 最多 5 个 skill/deck
 - **必须恢复父 deck**：每个 subagent 完成后必须执行 `bunx @lythos/skill-deck link --deck ./skill-deck.toml`
 - **deny-by-default**：未进入 arena deck 的 skill 对 subagent 完全不可见
 
@@ -228,3 +249,46 @@ CLI 做结构，agent 做推理，viz 做渲染。三层分离。
 **Agent Judge 的局限**：只能基于 prompt 中定义的 criteria 评分；无法感知组织战略、政治约束；可能过度偏好结构化输出。
 
 **人类终审可以发现**：Context 误判、价值观冲突、新颖性盲区。
+
+## Test Play 心智模型：卡牌游戏
+
+arena 的操作模型完全映射卡牌游戏的 test play：
+
+| 卡牌游戏 | Arena 对应 | 当前支持 |
+|---------|-----------|---------|
+| **选卡**：A 和 B 哪个更好？ | `--skills "A,B"` 单卡对比 | 是 |
+| **加卡**：现有 28 卡组 + 新卡 C？ | `--decks "v1.toml,v1+C.toml"` 完整 deck 对比 | 是 |
+| **去卡**：去掉卡 D 会不会更好？ | `--decks "v1.toml,v1-D.toml"` | 是 |
+| **换卡**：用 E 替换 F？ | `--decks "v1.toml,v1-E+F.toml"` | 是 |
+| **卡组对决**：lythos deck vs superpowers deck | `--decks "lythos.toml,superpowers.toml"` | 是 |
+
+**关键区别**：单卡对比回答"哪张卡更好"，完整 deck 对比回答"在特定卡组上下文中，加/去/换卡的边际效果如何"。后者才是卡牌玩家真正做的事。
+
+## Pareto 前沿：没有"最强"，只有"最优权衡"
+
+单目标评测（选一个 Winner）把多维度压缩成一个标量。这在 skill 生态中是不合理的：
+
+- 一个 token 效率极高但质量中等的 deck
+- 一个质量极高但 token 昂贵的 deck
+
+两者可能都在 Pareto 前沿上——取决于你最在意什么。
+
+**Arena 的 MOO（多目标优化）评测**：
+
+```
+                token 效率 ↑
+                    │
+                    │    ★ Deck C (高质量, 中等 token)
+                    │         ← Pareto 前沿
+                    │  ★ Deck B (中等质量, 低 token)
+                    │
+                    │              ★ Deck A (高质量, 高 token)
+                    │                   ← 被 C 支配（同质量但更贵）
+                    └──────────────────────── 输出质量 →
+```
+
+Judge 的任务不是选 Winner，而是：
+1. 输出每个 deck 的**评分向量**
+2. 识别**Pareto 非支配解集**
+3. 标注**被支配解**的劣势
+4. 发现**涌现 combo**（多个 skill 组合产生 1+1>2）
