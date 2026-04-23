@@ -1,22 +1,20 @@
 ---
 name: lythoskill-project-scribe
 description: |
-  项目书记 — 负责"写"项目记忆：更新 Current Quest、记录 Daily Notes、维护 Pitfalls。
+  项目书记 — 负责"写"项目记忆：产出单文件 Handoff，记录 Session 中发生的重要但未写入外部文档的事。
 
   与 project-onboarding（读）形成 CQRS 读写分离。
 
-  触发词："记录进度"、"更新任务"、"写日报"、"记个坑"、"完成事项"
+  核心理念：文件探索能恢复 ~70% 的上下文（项目结构、任务内容、决策）。
+  Scribe 的价值是捕获那 ~30% 探索无法恢复的部分：踩过的坑、真实 working tree 状态、具体下一步。
+
+  触发词："记录进度"、"更新任务"、"写日报"、"记个坑"、"完成事项"、"交接"、"session 要结束了"
 
   自动交接信号（session 结束前必须执行）：
   - 用户说"LGTM"、"就这样"、"先到这里"、"记录一下进度"
   - 对话超过 20 轮或 context 接近上限
   - 完成了一个明确的 milestone（如：成功 build、push 到 remote、通过测试）
   - 用户说"换个 agent 继续"、"session 要结束了"
-
-  交接时必须写入：
-  1. `playground/CURRENT-QUEST.md` — 当前任务状态（做了什么、为什么、下一步）
-  2. `playground/PITFALLS.md` — 本次 session 踩的坑和教训
-  3. `playground/DECISIONS.md` — 关键决策记录（选项、选择、理由）
 
 type: standard
 ---
@@ -25,75 +23,112 @@ type: standard
 
 ## 核心定位
 
-> **负责"写"，与 project-onboarding（负责"读"）形成读写分离**
+> **负责"写"，与 project-onboarding（负责"读"）形成 CQRS 读写分离**
+> **核心理念：Scribe 不是重复记录文件探索能恢复的内容，而是 dump session 中重要但未写入外部文档的事。**
 
-就像医生写病历、护士记录体征，这个 skill 负责把项目状态**写入**记忆系统。
+就像医生写病历、护士记录体征，这个 skill 负责把**当前 session 的专属状态**写入记忆系统。
 
-## 使用场景
+## Scribe 的价值边界
 
-| 场景 | 动作 | 输出 |
-|-----|------|------|
-| 完成一个功能 | 记录进度 | 更新 Current Quest + Daily Notes |
-| 踩了一个坑 | 记录教训 | 添加到 Pitfalls |
-| 做了技术决策 | 记录理由 | 创建 ADR |
-| 一天结束 | 总结 | 更新 Daily Notes 完成事项 |
-| 新迭代开始 | 规划 | 创建/重置 Current Quest |
+| 文件探索能恢复的 (~70%) | Scribe 应该 dump 的 (~30%) |
+|------------------------|---------------------------|
+| 项目结构和技术栈 | 本次 session 踩过的坑 |
+| `skill-deck.toml` 的内容 | 真实 working tree 状态（防止 hallucination） |
+| `cortex/` 中的 task/epic | 具体的下一步（不是"测试一下"） |
+| `git log` 历史 | 临时 artifact 的位置和用途 |
+| README 文档 | session 中做过但还没来得及提交的修改 |
+
+**原则：如果下一个 agent 能通过 `ls` + `cat` + `git log` 自己找到，scribe 不需要重复记录。如果只有当前 session 的 agent 知道，必须 dump。**
+
+## 交接前确认流程（必须执行）
+
+在写 handoff 之前，按顺序确认：
+
+1. **确认 git 状态**: `git status` — 哪些已提交、哪些未提交、哪些 untracked
+2. **确认 cortex 状态**: `bun packages/lythoskill-project-cortex/src/cli.ts list` — 活跃的 epic/task
+3. **确认 session 状态**: 回忆一下这个 session 里发生了什么重要但**还没写到任何外部文档**的事
+
+```bash
+# 1. Git 状态
+$ git status
+$ git log --oneline -5
+
+# 2. Cortex 状态
+$ bun packages/lythoskill-project-cortex/src/cli.ts list
+$ bun packages/lythoskill-project-cortex/src/cli.ts stats
+
+# 3. Session 状态
+# 自我提问：
+# - 我做过什么修改还没提交？
+# - 我踩过什么坑？
+# - 我做过什么重要决策？
+# - 我创建了哪些临时文件/artifact？
+# - 下一个 agent 最容易误解什么？
+```
 
 ## 核心流程
 
-### 流程 1: 记录完成事项
+### 流程 1: 产出单文件 Handoff（推荐）
+
+将 `HANDOFF-TEMPLATE.md` 复制为 `playground/HANDOFF.md`（或项目根目录），按模板填写。
 
 ```
-用户：完成了 API 错误处理优化
+用户：ession 要结束了，记录一下进度
     │
     ▼
-┌─────────────────────────────────────┐
-│ 1. 更新 Current Quest                │
-│    - 将任务移到"已完成"              │
-│    - 更新版本号                      │
-│    - 添加关键成果                    │
-└─────────────┬───────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 1. 确认 git 状态                               │
+│    - git status 输出                                │
+│    - git log --oneline -5                           │
+└──────────────────────────────────────────────────┘
               │
               ▼
-┌─────────────────────────────────────┐
-│ 2. 更新 Daily Notes                  │
-│    - 添加到"完成事项"                │
-│    - 记录关键决策（如有）            │
-│    - 更新版本映射                    │
-└─────────────┬───────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 2. 确认 cortex 状态                             │
+│    - 活跃的 epic/task                              │
+│    - 最近完成的里程碑                              │
+└──────────────────────────────────────────────────┘
               │
               ▼
-┌─────────────────────────────────────┐
-│ 3. 检查是否需要创建 ADR              │
-│    - 如果有技术决策 → 创建 ADR      │
-│    - 如果有坑 → 添加到 Pitfalls     │
-└─────────────────────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 3. 回忆 session 状态                             │
+│    - 还没写到外部文档的重要事                      │
+│    - 踩过的坑                                      │
+│    - 做过的临时修改/artifact                       │
+└──────────────────────────────────────────────────┘
+              │
+              ▼
+┐──────────────────────────────────────────────────┒
+│ 4. 填写 Handoff 单文件                           │
+│    - 使用 HANDOFF-TEMPLATE.md 模板                  │
+│    - 重点填写 Pitfalls 和 Ground Truth State        │
+└──────────────────────────────────────────────────┘
+              │
+              ▼
+┐──────────────────────────────────────────────────┒
+│ 5. 给用户确认 diff                              │
+│    - 确认内容准确后再写入                         │
+└──────────────────────────────────────────────────┘
 ```
 
 ### 流程 2: 记录坑点 (Pitfall)
+
+当用户说"踩坑了"时，立即记录到 handoff 的 Pitfalls section。
 
 ```
 用户：踩了个坑，playerKey 加时间戳会导致循环
     │
     ▼
-┌─────────────────────────────────────┐
-│ 1. 记录到 Daily Notes                │
-│    - 添加到 Pitfalls 部分            │
-│    - 包含：现象、原因、解决、教训    │
-└─────────────┬───────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 1. 更新 Handoff 的 Pitfalls 部分               │
+│    - 错误尝试、正确做法、根因、浪费 time          │
+└──────────────────────────────────────────────────┘
               │
               ▼
-┌─────────────────────────────────────┐
-│ 2. 更新 Current Quest                │
-│    - 添加到"已知危险区域"            │
-│    - 确保下次复盘能看到              │
-└─────────────┬───────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────┐
-│ 3. (可选) 更新 Skill                 │
-│    - 如果是通用坑 → 更新 common-pitfalls.md
-└─────────────────────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 2. (可选) 如果是通用坑                       │
+│    → 更新 common-pitfalls.md                    │
+└──────────────────────────────────────────────────┘
 ```
 
 ### 流程 3: 新迭代初始化
@@ -102,109 +137,82 @@ type: standard
 用户：开始 v0.3.0 的新迭代
     │
     ▼
-┌─────────────────────────────────────┐
-│ 1. 归档旧 Current Quest              │
-│    - 移动到 archive/current-quest/   │
-│    - 添加日期标签                    │
-└─────────────┬───────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 1. 归档旧 Handoff                              │
+│    - 移动到 playground/archive/handoff/           │
+│    - 添加日期标签和版本号                         │
+└──────────────────────────────────────────────────┘
               │
               ▼
-┌─────────────────────────────────────┐
-│ 2. 创建新 Current Quest              │
-│    - 基于模板初始化                  │
-│    - 填入迭代目标                    │
-│    - 清空已完成任务                  │
-└─────────────┬───────────────────────┘
-              │
-              ▼
-┌─────────────────────────────────────┐
-│ 3. 创建首日 Daily Note               │
-│    - 记录迭代目标                    │
-│    - 链接到 Current Quest            │
-└─────────────────────────────────────┘
+┐──────────────────────────────────────────────────┒
+│ 2. 创建新 Handoff                               │
+│    - 基于 HANDOFF-TEMPLATE.md 初始化              │
+│    - 填入迭代目标和初始状态                       │
+└──────────────────────────────────────────────────┘
 ```
 
-## 写入规范
+## Handoff 文件位置
 
-### Current Quest 更新规则
+| 场景 | 文件路径 | 说明 |
+|-----|---------|------|
+| 活跃 session | `playground/HANDOFF.md` | 当前进行中的 handoff |
+| 归档 | `playground/archive/handoff/YYYY-MM-DD-HHMMSS.md` | 历史 handoff |
+| 模板 | `HANDOFF-TEMPLATE.md` | 项目根目录模板 |
 
-```markdown
-## 任务板更新
-
-### 进行中 → 已完成
-- 移动任务到"已完成"表格
-- 添加完成时间
-- 添加关键成果（一句话）
-
-### 新增任务
-- 添加到"进行中"或"待确认"
-- 包含：任务名、负责人、开始时间
-
-### 版本更新
-- 更新 YAML frontmatter
-- 同步更新 package.json
-```
-
-### Daily Notes 更新规则
+## Pitfalls 记录规范
 
 ```markdown
-## 完成事项添加格式
-
-### 功能开发
-| 版本 | 内容 | 状态 |
-|------|------|------|
-| v0.2.4 | API 错误处理优化 | ✅ |
-
-### Pitfalls 添加格式
-
 ### 坑 X: 简短描述
-**现象：** 具体表现
-**原因：** 根本原因
-**解决：** 解决方案
-**教训：** 一句话总结
-**浪费 time：** X 分钟
+- **错误尝试**: 具体做了什么
+- **表现**: 具体错误信息
+- **正确做法**: 最终怎么解决的
+- **根因**: 为什么会走弯路
+- **浪费 time**: X 分钟
 ```
 
 ## 与 project-onboarding 的关系
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      CQRS 读写分离                           │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│   用户 ──→ project-scribe (写) ──→ 文件系统                  │
-│              - 更新 Current Quest                             │
-│              - 记录 Daily Notes                               │
-│              - 维护 Pitfalls                                  │
-│                          │                                   │
-│                          ↓                                   │
-│                    Markdown 文件                             │
-│                    (Single Source of Truth)                  │
-│                          │                                   │
-│                          ↓                                   │
-│   用户 ──→ project-onboarding (读) ──→ 上下文重建            │
-│              - 读取 Current Quest                             │
-│              - 解析 Daily Notes                               │
-│              - 提取 Pitfalls                                  │
-│                                                              │
-└─────────────────────────────────────────────────────────────┘
+┐──────────────────────────────────────────────────┒
+│                   单文件 Handoff 交接                   │
+├──────────────────────────────────────────────────┤
+│                                                       │
+│   当前 session ──→ project-scribe (dump)             │
+│              - 确认 git 状态                          │
+│              - 确认 cortex 状态                        │
+│              - 回忆 session 状态                       │
+│              - 填写 HANDOFF.md                       │
+│                          │                            │
+│                          ↓                            │
+│                   HANDOFF.md                          │
+│                   (单文件交接记录)                      │
+│                          │                            │
+│                          ↓                            │
+│   下一 session ─→ project-onboarding (read)          │
+│              - 优先读取 HANDOFF.md                   │
+│              - 然后才探索目录结构                     │
+│              - 验证 Ground Truth State                │
+│                                                       │
+└──────────────────────────────────────────────────┘
 ```
 
 ## 使用示例
 
-### 示例 1: 记录完成
+### 示例 1: Session 结束交接
 
 ```
-用户：完成了移动端播放器优化
+用户：就这样吧，session 快结束了
 
 Scribe 执行：
-1. 更新 Current Quest - 任务移到"已完成"
-2. 更新 Daily Notes - 添加完成事项
-3. 检查是否需要 ADR - 本次不需要
+1. git status 确认状态
+2. 回忆本次 session 重要但未记录的事
+3. 填写 HANDOFF.md
+4. 给用户确认
 
 输出：
-✅ 已记录到 Current Quest 和 Daily Notes
-✅ 版本更新为 v0.2.2
+✅ 已更新 HANDOFF.md
+📌 位置: playground/HANDOFF.md
+⚠️ 警告: 以下文件在 diff artifact 中但不在 working tree，下个 agent 勿误认
 ```
 
 ### 示例 2: 记录坑点
@@ -213,30 +221,13 @@ Scribe 执行：
 用户：踩坑了，sed -i 在 macOS 上不兼容
 
 Scribe 执行：
-1. 添加到 Daily Notes Pitfalls
-2. 更新 Current Quest "已知危险区域"
-3. 建议：更新 skill 的 common-pitfalls.md
+1. 更新 HANDOFF.md Pitfalls 部分
+2. 记录错误尝试、正确做法、根因、浪费 time
 
 输出：
-⚠️ 已记录坑点
-📍 位置：daily/2026/03/2026-03-17.md
-💡 建议：添加到 skills/project-onboarding/references/common-pitfalls.md
-```
-
-### 示例 3: 新迭代
-
-```
-用户：开始 v0.3.0，要做回放功能
-
-Scribe 执行：
-1. 归档旧 Current Quest
-2. 创建新 Current Quest
-3. 创建首日 Daily Note
-
-输出：
-🎯 新迭代已初始化
-📄 Current Quest: docs/guide/current-quest-v0.3.0.md
-📄 Daily Note: daily/2026/03/2026-03-18.md
+⚠️ 已记录坑点到 HANDOFF.md
+📍 位置: playground/HANDOFF.md
+‼️ 下个 agent 使用 sed 时请使用 sed -i '' 或直接用 Edit 工具
 ```
 
 ## 自动化触发点
@@ -245,19 +236,21 @@ Scribe 执行：
 
 | 事件 | 自动触发 |
 |-----|---------|
-| `git commit` | 提示更新 Daily Notes |
-| `git tag` | 自动归档 Current Quest |
-| 用户说"LGTM" | 更新完成状态 |
+| `git commit` | 提示更新 Handoff |
+| `git tag` | 自动归档 Handoff，创建新版本 |
+| 用户说"LGTM" | 强制执行 handoff 流程 |
 | 用户说"又出问题了" | 提示记录 Pitfall |
+| context 接近上限 | 强制执行 handoff 流程 |
 
 ## 注意事项
 
-1. **写前确认** - 更新前给用户看 diff，确认后再写入
-2. **原子性** - 一次完整更新，不要半写状态
-3. **版本同步** - Current Quest、Daily Notes、package.json 保持一致
-4. **链接维护** - 确保 WikiLinks 有效
+1. **单文件优先** - 产出 HANDOFF.md 而不是分散的 CURRENT-QUEST + PITFALLS + DECISIONS
+2. **确认流程** - handoff 前必须执行 git/cortex/session 三重确认
+3. **dump 专属状态** - 不要记录能通过 ls/cat/git log 恢复的内容
+4. **写前确认** - 更新前给用户看 diff，确认后再写入
+5. **防止 hallucination** - Ground Truth State 必须精确，尤其是 diff artifact 与 working tree 的区别
 
 ## 相关 Skill
 
-- **lythoskill-project-onboarding** - 读记忆，建立上下文
+- **lythoskill-project-onboarding** - 读 Handoff，建立上下文
 - **lythoskill-red-green-release** - 版本发布流程
