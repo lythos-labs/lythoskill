@@ -21,7 +21,7 @@ function slugify(input: string): string {
 
 function timestamp(): string {
   const d = new Date()
-  return d.toISOString().replace(/[-:T.Z]/g, '').slice(0, 14)
+  return d.toISOString().replace(/[-:T.Z]/g, '').slice(0, 17) // yyyyMMddHHmmssSSS
 }
 
 // ── 解析参数（简单 slice 风格）──────────────────────────────
@@ -85,7 +85,7 @@ export function runArena(argv: string[]) {
 
   const PROJECT_DIR = resolve(options.project!)
   const ARENA_SLUG = slugify(TASK)
-  const ARENA_ID = `arena-${timestamp()}-${ARENA_SLUG}`
+  const ARENA_ID = `arena-${timestamp()}-${ARENA_SLUG.slice(0, 30)}`
   const ARENA_DIR = resolve(PROJECT_DIR, options.dir!, ARENA_ID)
 
   // ── 创建目录结构 ────────────────────────────────────────────
