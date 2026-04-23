@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/4/23 23:22:39
+> 自动生成于 2026/4/23 23:53:07
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 7 | 进行中: 0, 待验收: 0, 已完成: 2 |
+| Tasks | 8 | 进行中: 0, 待验收: 0, 已完成: 2 |
 | Epics | 2 | 活跃: 2, 已归档: 0 |
 | ADRs | 6 | 已接受: 5 |
 
@@ -27,13 +27,14 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (6)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
 - [ ] **TASK-20260423162055407**: Port skill-curator to lythoskill ecosystem
 - [ ] **TASK-20260423185733611**: Playground Task
 - [ ] **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
+- [ ] **TASK-20260423232250394**: Consumer onboarding: clarify init → add-skill → build workflow
 
 ### 进行中 (0)
 

@@ -31,8 +31,8 @@ bun packages/lythoskill-project-cortex/src/cli.ts <command>
 
 ### Via bunx (as users would run after publishing)
 ```bash
-bunx lythoskill init <project-name>
-bunx lythoskill build <skill-name>
+bunx @lythos/skill-creator init <project-name>
+bunx @lythos/skill-creator build <skill-name>
 bunx @lythos/skill-deck link
 bunx @lythos/project-cortex <command>
 ```

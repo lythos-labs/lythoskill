@@ -21,6 +21,8 @@ You installed 50+ skills from GitHub, skill hubs, and blog posts. Now every time
 
 ## One-Minute Demo
 
+Prerequisite: skills must exist in your cold pool (`~/.agents/skill-repos/` or `skills/` directory). Replace the example names with skills you actually have.
+
 ```bash
 # 1. Declare which skills this project needs
 cat > skill-deck.toml << 'EOF'
@@ -28,7 +30,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 8
 
 [tool]
-skills = ["web-search", "docx", "design-doc-mermaid"]
+skills = ["lythoskill-deck", "lythoskill-creator"]
 EOF
 
 # 2. Sync — only these skills become visible to the agent
@@ -36,7 +38,7 @@ bunx @lythos/skill-deck link
 
 # 3. Agent sees a clean working set, nothing else
 ls .claude/skills/
-# web-search  docx  design-doc-mermaid
+# lythoskill-deck  lythoskill-creator
 ```
 
 **Everything else stays in the cold pool** — stored, but invisible. Add or remove skills by editing `skill-deck.toml` and running `link` again.

@@ -1,8 +1,9 @@
 # Wiki Index
 
-## 📚 Patterns (11)
+## 📚 Patterns (12)
 
 - [epic-granularity](./01-patterns/epic-granularity.md)
+- [skill-selection-pipeline](./01-patterns/skill-selection-pipeline.md)
 - [thin-skill-monorepo](./01-patterns/thin-skill-monorepo.md)
 - [skill-loading-lifecycle](./01-patterns/skill-loading-lifecycle.md)
 - [concurrent-subagent-map-reduce](./01-patterns/concurrent-subagent-map-reduce.md)
