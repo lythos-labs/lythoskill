@@ -7,6 +7,17 @@ description: |
 
   触发词："记录进度"、"更新任务"、"写日报"、"记个坑"、"完成事项"
 
+  自动交接信号（session 结束前必须执行）：
+  - 用户说"LGTM"、"就这样"、"先到这里"、"记录一下进度"
+  - 对话超过 20 轮或 context 接近上限
+  - 完成了一个明确的 milestone（如：成功 build、push 到 remote、通过测试）
+  - 用户说"换个 agent 继续"、"session 要结束了"
+
+  交接时必须写入：
+  1. `playground/CURRENT-QUEST.md` — 当前任务状态（做了什么、为什么、下一步）
+  2. `playground/PITFALLS.md` — 本次 session 踩的坑和教训
+  3. `playground/DECISIONS.md` — 关键决策记录（选项、选择、理由）
+
 type: standard
 ---
 

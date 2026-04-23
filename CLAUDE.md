@@ -147,3 +147,45 @@ All governance documents include a machine-parseable **Status History** table.
 **Always use CLI commands to create governance documents** — do not create ADR/Epic/Task files manually. The CLI handles template alignment and correct timestamp IDs. Playground examples exist in `cortex/epics/` and `cortex/tasks/` but are reference-only.
 
 **For full context on the project governance system, read `cortex/INDEX.md`.**
+
+## Session Handoff Checklist
+
+When a session is ending or context is about to compact, you MUST execute this handoff flow to ensure the next agent can recover context:
+
+### Trigger Conditions (any one is sufficient)
+- User says "LGTM", "就这样", "先到这里", "记录一下进度"
+- Conversation exceeds 20 turns
+- A milestone is completed (build succeeds, push to remote, tests pass)
+- User says "换个 agent 继续" or "session 要结束了"
+
+### Handoff Steps
+
+1. **Record Current Quest** → `CURRENT-QUEST.md` (repo root, tracked by git)
+   - What task was being worked on
+   - What decisions were made and why
+   - Current state (done / in-progress / blocked)
+   - Next steps for the next agent
+
+2. **Record Pitfalls** → `PITFALLS.md` (repo root, tracked by git)
+   - Traps encountered this session
+   - Root causes and solutions
+   - Time wasted (for future prioritization)
+
+3. **Record Decisions** → `DECISIONS.md` (repo root, tracked by git)
+   - Options considered, choice made, reasoning
+   - Rejected alternatives and why
+
+4. **Commit if clean** — If working tree is in a good state, commit with descriptive message
+
+### Onboarding for New Agent
+
+When entering this project with no prior context, read in this exact order:
+1. `CLAUDE.md` (this file)
+2. `playground/CURRENT-QUEST.md` (if exists)
+3. `playground/PITFALLS.md` (if exists)
+4. `playground/DECISIONS.md` (if exists)
+5. `skill-deck.toml`
+6. `cortex/INDEX.md`
+7. `git log --oneline -10`
+
+**All skill enhancements (hooks, templates, configs) are self-contained within each skill's `scripts/`, `references/`, or `assets/` directories. No external platform dependencies.**

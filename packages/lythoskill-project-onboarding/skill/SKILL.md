@@ -6,7 +6,18 @@ description: |
   基于 KV Cache 优化的加载顺序（稳定→多变）：
   Layer 1: 元技能 (AGENTS.md, ONBOARDING.md) → Layer 2: 领域知识 (P0 必读) → Layer 3: 任务状态 (quest status)
 
-  触发词："先复盘"、"了解项目"、"看看历史"
+  触发词："先复盘"、"了解项目"、"看看历史"、"接手这个任务"、"继续之前的工作"
+
+  入职读取顺序（必须按此顺序，不可跳过）：
+  1. `CLAUDE.md` — 项目级 agent 指令（最重要，必读）
+  2. `playground/CURRENT-QUEST.md` — 当前任务指针（如有）
+  3. `playground/PITFALLS.md` — 已知陷阱（如有）
+  4. `playground/DECISIONS.md` — 关键决策记录（如有）
+  5. `skill-deck.toml` — 当前 deck 状态
+  6. `cortex/INDEX.md` — 项目治理索引
+  7. `git log --oneline -10` — 最近变更
+
+  所有增强（hook、模板、配置）都在 skill 内部通过 scripts/、references/、assets/ 解决，不依赖外部平台。
 
 type: standard
 ---
