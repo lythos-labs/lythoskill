@@ -11,4 +11,5 @@ skills = [
 [tool]
 skills = [
   "lythoskill-project-cortex",
+  "lythoskill-arena",
 ]

@@ -1,0 +1,16 @@
+{
+  "name": "@lythos/skill-arena",
+  "version": "0.1.0",
+  "description": "Skill Arena — 在同一任务下控制变量对比多个 skill 效果",
+  "type": "module",
+  "bin": {
+    "lythoskill-arena": "src/cli.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "license": "MIT"
+}
