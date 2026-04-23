@@ -1,0 +1,9 @@
+{
+  "name": "@lythos/project-cortex",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "lythoskill-project-cortex": "./src/cli.ts"
+  },
+  "files": ["src"]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "lythoskill",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "lythoskill": "./src/cli.ts"
+  },
+  "files": ["src"]
+}

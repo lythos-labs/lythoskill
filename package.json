@@ -1,0 +1,5 @@
+{
+  "name": "lythoskill-workspace",
+  "private": true,
+  "workspaces": ["packages/*"]
+}

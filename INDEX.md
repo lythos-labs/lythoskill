@@ -1,0 +1,63 @@
+# Project Index
+
+> 自动生成于 2026/4/23 12:44:40
+
+## 📊 概览
+
+| 类型 | 总数 | 活跃/完成 |
+|------|------|----------|
+| Tasks | 3 | 进行中: 0, 待验收: 0, 已完成: 1 |
+| Epics | 1 | 活跃: 1, 已归档: 0 |
+| ADRs | 2 | 已接受: 2 |
+
+---
+
+## 📋 Epics
+
+### 进行中
+
+- **EPIC-20260423102000000**: lythoskill MVP — Initial Release
+
+### 已归档
+
+_无_
+
+---
+
+## 📄 Tasks
+
+### 待办 (2)
+
+- [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
+- [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
+
+### 进行中 (0)
+
+_无_
+
+### 待验收 (0)
+
+_无_
+
+### 已完成 (1)
+
+- ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
+
+### 悬置 (0)
+
+_无_
+
+### 终止 (0)
+
+_无_
+
+---
+
+## 🏛️ ADRs
+
+- ✅ **ADR-20260423101938000** (02-accepted): Thin Skill Pattern - Development/Release Split
+- ✅ **ADR-20260423101950000** (02-accepted): ESM Import over require for JSON
+
+---
+
+*此文件由 generate-index.ts 自动生成*
