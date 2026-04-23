@@ -10,7 +10,7 @@
  * not by this CLI. See ADR-20260424000744041.
  */
 
-import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 
@@ -246,15 +246,40 @@ function parseCuratorArgs(argv: string[]) {
 
 // ── Main ─────────────────────────────────────────────────────
 
+function findSkillDirs(root: string): string[] {
+  const results: string[] = [];
+  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', 'tmp', 'playground', 'dist', 'build']);
+
+  function walk(dir: string, depth: number) {
+    if (depth > 6) return; // safety limit
+    try {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        if (entry.name.startsWith('.')) continue;
+        if (skip.has(entry.name)) continue;
+
+        const full = join(dir, entry.name);
+        if (existsSync(join(full, 'SKILL.md'))) {
+          results.push(full);
+          // Don't recurse into skill dirs — skills don't nest
+          continue;
+        }
+        walk(full, depth + 1);
+      }
+    } catch {}
+  }
+
+  walk(root, 0);
+  return results;
+}
+
 export function runCurator(argv: string[]) {
   const { poolPath, outputDir } = parseCuratorArgs(argv);
 
-  const entries = readdirSync(poolPath, { withFileTypes: true })
-    .filter(e => e.isDirectory() && !e.name.startsWith('.') && !e.name.includes('node_modules'))
-    .map(e => join(poolPath, e.name));
+  const skillDirs = findSkillDirs(poolPath);
 
   const skills: SkillMeta[] = [];
-  for (const path of entries) { try { const s = scanSkill(path); if (s) skills.push(s); } catch {} }
+  for (const path of skillDirs) { try { const s = scanSkill(path); if (s) skills.push(s); } catch {} }
 
   console.log(`🧠 Skill Curator — Indexed ${skills.length} skills`);
 

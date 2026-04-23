@@ -1,6 +1,6 @@
 [deck]
 max_cards = 10
-cold_pool = "skills"
+cold_pool = "."
 working_set = ".claude/skills"
 
 [innate]

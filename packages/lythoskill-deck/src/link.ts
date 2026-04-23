@@ -83,6 +83,26 @@ function extractArrayField(fm: string, field: string): string[] {
 // ── 冷池查找 ────────────────────────────────────────────────
 
 function findSource(name: string, coldPool: string, projectDir: string): string | null {
+  // 0. Fully-qualified path: host.tld/owner/repo/skill
+  //    → cold_pool/host.tld/owner/repo/skills/skill
+  //    Also handles host.tld/owner/repo (standalone skill without skills/ subdir)
+  const fqMatch = name.match(/^[a-z0-9-]+\.[a-z0-9-]+\//);
+  if (fqMatch) {
+    const parts = name.split("/");
+    const host = parts[0];      // github.com
+    const owner = parts[1];     // lythos-labs
+    const repo = parts[2];      // lythoskill
+    const skill = parts.slice(3).join("/"); // lythoskill-deck
+
+    if (skill) {
+      const fqPath = join(coldPool, host, owner, repo, "skills", skill);
+      if (existsSync(join(fqPath, "SKILL.md"))) return fqPath;
+    }
+    // fallback: standalone skill at repo root
+    const directPath = join(coldPool, host, owner, repo);
+    if (existsSync(join(directPath, "SKILL.md"))) return directPath;
+  }
+
   // 1. 直接路径
   const direct = resolve(coldPool, name);
   if (existsSync(join(direct, "SKILL.md"))) return direct;

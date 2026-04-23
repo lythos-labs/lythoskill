@@ -15,6 +15,9 @@ description: |
   - **max_cards 预算**: 硬约束，超预算拒绝同步
   - **managed_dirs 重叠检测**: 两个 skill 管理同一目录时告警
 
+cooperative_skills:
+  - lythoskill-curator  # 扫描冷池生成 REGISTRY.json，辅助 deck 决策
+
   当用户提到"同步 skill""初始化 deck""working set""skill 冲突""同类 skill 太多""冷池""deck"时激活。
 deck_triggers:
   - "同步 working set / sync skills"
@@ -48,32 +51,64 @@ Agent Skills 的默认行为是**隐式发现**——agent 扫描 `.claude/skill
 
 ## 架构：冷池 → Deck → 工作集
 
-```
-~/.agents/skill-repos/            ← 冷池：个人全量仓库（45+ skills）
-  ├── cocoon-ai/
-  ├── git-workflow/
-  ├── lythoskill-deck/               ← 包含 scripts/、SKILL.md
-  ├── skill-arena/
-  ├── report-generation-combo/
-  └── ... 其他仓库和自定义 skills
+冷池采用 **Go module 式目录结构** ——host 作为顶层，路径即来源：
 
-<project>/
-  ├── skill-deck.toml              ← 声明文件（人类编辑）
-  │     [deck]
-  │     max_cards = 30
-  │     [tool]
-  │     skills = ["skill-arena", "project-scribe", ...]
-  │     [combo]
-  │     skills = ["project-arena-combo", "report-generation-combo"]
-  │
-  ├── skill-deck.lock              ← 锁定文件（机器生成）
-  │     记录：链接状态、内容哈希、目录归属、约束报告
-  │
-  └── .claude/skills/              ← 工作集：只有 symlink（agent 扫描这里）
-        ├── skill-arena → ~/.agents/skill-repos/skill-arena
-        ├── project-scribe → ~/.agents/skill-repos/skills_repo/project-scribe
-        └── ...（未声明的 skill 不存在于这里）
 ```
+~/.agents/skill-repos/              ← 全局冷池
+├── github.com/
+│   ├── lythos-labs/
+│   │   └── lythoskill/             ← git clone 下来的 repo
+│   │       └── skills/
+│   │           ├── lythoskill-deck/
+│   │           ├── lythoskill-creator/
+│   │           └── lythoskill-project-cortex/
+│   ├── PrimeRadiant/
+│   │   └── superpowers/
+│   │       └── skills/
+│   │           └── writing-plans/
+│   └── someone/
+│       └── standalone-skill/       ← 非 monorepo，直接放 SKILL.md
+│           └── SKILL.md
+└── localhost/                      ← 无远程 origin 的本地 skill
+    └── my-experiment/
+        └── SKILL.md
+
+<project>/                          ← 本地开发时 cold_pool = "."
+├── skill-deck.toml                 ← 声明文件（人类编辑）
+│     [deck]
+│     max_cards = 10
+│     cold_pool = "."               ← 项目根 = 冷池条目
+│     [tool]
+│     skills = ["lythoskill-deck", "lythoskill-project-cortex"]
+│
+├── skill-deck.lock                 ← 锁定文件（机器生成）
+│
+├── skills/                         ← 项目本地的 skills/ 目录
+│   ├── lythoskill-deck/
+│   └── lythoskill-project-cortex/
+│
+└── .claude/skills/                 ← 工作集：只有 symlink（agent 扫描这里）
+      ├── lythoskill-deck → ./skills/lythoskill-deck
+      └── lythoskill-project-cortex → ./skills/lythoskill-project-cortex
+```
+
+### 冷池目录约定
+
+| 结构 | 例子 | 含义 |
+|------|------|------|
+| `host.tld/owner/repo/skills/skill-name/` | `github.com/lythos-labs/lythoskill/skills/lythoskill-deck/` | monorepo 中的 skill |
+| `host.tld/owner/repo/` | `github.com/someone/standalone-skill/` | 独立 skill（repo 根即 skill） |
+| `localhost/name/` | `localhost/my-experiment/` | 无远程 origin 的本地 skill |
+
+### 四个核心概念
+
+| 概念 | 类比 | 本质 |
+|------|------|------|
+| **冷池（Cold Pool）** | `$GOPATH/pkg/mod/` | 你的全部 skill，agent 看不到 |
+| **skill-deck.toml** | K8s Deployment / `go.mod` | 声明期望状态 + 依赖来源 |
+| **deck link** | K8s Controller / `go mod tidy` | 调谐器：让实际状态收敛到期望状态 |
+| **.claude/skills/** | 编译产物 / 当前加载的模块 | agent 能扫描到的唯一位置（实际状态） |
+| **skill-deck.lock** | `go.sum` / 锁定文件 | 记录链接状态、哈希、约束，换 agent 可恢复 |
 
 ### 四个核心概念
 
@@ -148,12 +183,36 @@ lythoskill-deck 需要在 SKILL.md front matter 中携带私有元数据（niche
 
 > 若需完全标准兼容，可将所有自定义字段收敛到 `metadata` 命名空间下。
 
+## 前置条件：冷池填充
+
+**deck 不负责下载 skill**。冷池的填充由用户自行完成，可使用任何成熟工具：
+
+| 工具 | 命令示例 | 适用场景 |
+|------|---------|---------|
+| git clone | `git clone https://github.com/owner/repo ~/.agents/skill-repos/github.com/owner/repo` | 任何 git repo |
+| Vercel skills.sh | `npx skills add owner/repo -g --skill skill-name` | 支持 skills.sh 的 repo |
+| 手动复制 | `cp -r /path/to/skill ~/.agents/skill-repos/localhost/my-skill` | 本地开发 |
+
+### 冷池目录约定（Go module 式）
+
+```
+~/.agents/skill-repos/
+├── github.com/<owner>/<repo>/          ← git clone 自然映射
+│   └── skills/                        ← monorepo 的 skill 目录
+│       └── <skill-name>/
+├── gitlab.com/<owner>/<repo>/          ← 同上
+└── localhost/<name>/                   ← 无远程 origin 的本地 skill
+    └── SKILL.md
+```
+
+deck 只关心冷池目录下是否存在 `SKILL.md`，不关心 skill 如何到达冷池。
+
 ## Deck 生命周期
 
 ### 1. 初始化
 
 ```bash
-# 方式一：冷池已就绪，直接创建 toml
+# 方式一：全局冷池已就绪
 cd <project-root>
 cat > skill-deck.toml << 'EOF'
 [deck]
@@ -162,11 +221,23 @@ cold_pool   = "~/.agents/skill-repos"
 max_cards   = 10
 
 [tool]
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 EOF
 
-# 方式二：从现有 .claude/skills/ 迁移
-bash ~/.agents/skill-repos/lythoskill-deck/deck-migrate.sh
+# 方式二：本地开发（项目自身就是冷池条目）
+cd <project-root>
+cat > skill-deck.toml << 'EOF'
+[deck]
+working_set = ".claude/skills"
+cold_pool   = "."                    # ← 项目根目录 = 冷池
+max_cards   = 10
+
+[tool]
+skills = ["lythoskill-deck"]         # ← 解析为 ./skills/lythoskill-deck/
+EOF
+
+# 方式三：从现有 .claude/skills/ 迁移
+bash ~/.agents/skill-repos/github.com/lythos-labs/lythoskill/skills/lythoskill-deck/scripts/deck-migrate.sh
 ```
 
 ### 2. 日常同步（唯一操作）
@@ -189,7 +260,7 @@ bunx @lythos/skill-deck link
 ### 3. 诊断（只读）
 
 ```bash
-bash ~/.agents/skill-repos/lythoskill-deck/deck-status.sh
+bash ~/.agents/skill-repos/github.com/lythos-labs/lythoskill/skills/lythoskill-deck/scripts/deck-status.sh
 # 报告：哪些 skill 在冷池但不在 deck、哪些 transient 即将过期、managed_dirs 归属
 ```
 
