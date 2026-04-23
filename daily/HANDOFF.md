@@ -102,9 +102,16 @@ git_commit: 83a8344
 
 3. **Judge 评估**: 比较两个 Phase B 产出的分类一致性、覆盖率、pitfall 发现
 
-4. **（Phase B 完成后）提交 CATALOG.md**: 如果完整 catalog 质量合格，commit 到 main
+4. **（已完成）提交 CATALOG.md**: 已 commit 到 main
+5. **SQL 版 curator**: CATALOG.md 是人类可读索引卡，但 SQL 查询效率远超文件 grep。考虑 `lythoskill-curator-sqlite` 包，提供 `index/query/audit` CLI，和 markdown CATALOG 互补（SQL → 程序消费，MD → 人类消费）
 
 ## 7. 接手自检
+
+- [x] `git status` 显示 CATALOG.md 和 daily/2026-04-23.md 已提交
+- [x] `git log --oneline -3` 显示最新 commit
+- [x] 冷池 55 个 skills 已全部 indexed
+- [ ] `ls ~/.agents/skill-repos/ | wc -l` 显示约 55 个 skills
+- [ ] `cat CATALOG.md | grep 'Total'` 确认 55 skills
 
 - [ ] `git status` 显示 `CATALOG.md` 和 `daily/HANDOFF.md` 为 untracked
 - [ ] `git log --oneline -3` 显示 `83a8344`
