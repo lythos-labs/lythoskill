@@ -1,0 +1,16 @@
+{
+  "name": "@lythos/skill-curator",
+  "version": "0.1.0",
+  "description": "Skill Curator — read-only observer for skill cold pools, discovers combos and recommends decks",
+  "type": "module",
+  "bin": {
+    "lythoskill-curator": "src/cli.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "license": "MIT"
+}
