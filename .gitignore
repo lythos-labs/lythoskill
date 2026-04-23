@@ -15,3 +15,4 @@ dist/
 
 # Task ID database (if using incremental ID mode)
 .task-id-db.json
+playground/

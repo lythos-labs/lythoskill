@@ -1,6 +1,0 @@
-[deck]
-max_cards = 10
-cold_pool = "skill-repos"
-
-[tool]
-skills = ["skill-a", "skill-b"]

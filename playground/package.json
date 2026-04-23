@@ -1,6 +1,0 @@
-{
-  "name": "playground",
-  "dependencies": {
-    "@lythos/deck": "file:../packages/lythoskill-deck"
-  }
-}
