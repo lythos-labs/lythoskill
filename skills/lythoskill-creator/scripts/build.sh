@@ -1,2 +1,2 @@
 #!/bin/bash
-bunx lythoskill build "$@"
+bunx lythoskill-creator build "$@"

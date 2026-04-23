@@ -15,5 +15,9 @@ dist/
 
 # Task ID database (if using incremental ID mode)
 .task-id-db.json
+
+# npm access token (local-only, never commit)
+.npm-access
+
 playground/
 .claude/

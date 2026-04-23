@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "lythoskill-hello-world": "./src/cli.ts"
+    "lythoskill-hello-world": "src/cli.ts"
   },
-  "files": ["src"]
+  "files": [
+    "src"
+  ]
 }

@@ -215,7 +215,7 @@ fi
 
 echo ""
 echo -e "${D}──────────────────────────────────────────────────${N}"
-echo "  同步: bun run ~/.claude/skills/skill-manager/deck-link.ts"
-echo "  诊断: bash ~/.claude/skills/skill-manager/deck-status.sh"
+echo "  同步: bunx lythoskill-deck link"
+echo "  诊断: bash scripts/deck-status.sh"
 echo -e "${D}──────────────────────────────────────────────────${N}"
 echo ""

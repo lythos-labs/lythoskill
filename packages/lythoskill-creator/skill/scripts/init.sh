@@ -1,2 +1,2 @@
 #!/bin/bash
-bunx lythoskill init "$@"
+bunx lythoskill-creator init "$@"
