@@ -19,7 +19,7 @@ A lythoskill project separates concerns into three layers:
 Scaffold a new lythoskill project.
 
 ```bash
-bunx @lythos/creator init <project-name>
+bunx lythoskill-creator init <project-name>
 ```
 
 Creates a monorepo with a starter package and an example skill.
@@ -29,7 +29,7 @@ Creates a monorepo with a starter package and an example skill.
 Build a skill. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter.
 
 ```bash
-bunx @lythos/creator build <skill-name>
+bunx lythoskill-creator build <skill-name>
 ```
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.
