@@ -120,7 +120,8 @@ function findSource(name: string, coldPool: string, projectDir: string): string 
 
 // ── 主流程 ──────────────────────────────────────────────────
 
-const cliDeck = process.argv.find((_, i, a) => a[i - 1] === "--deck");
+export function linkDeck(cliDeckPath?: string): void {
+const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 const DECK_PATH = cliDeck
   ? resolve(cliDeck)
   : findDeckToml(process.cwd()) || resolve("skill-deck.toml");
@@ -339,4 +340,9 @@ console.log(`✅ 同步完成: ${linkedSkills.length}/${MAX_CARDS} skill`);
 console.log(`   lock: ${LOCK_PATH}`);
 if (dirOverlaps.length > 0) {
   console.log(`   ⚠️  ${dirOverlaps.length} 个目录重叠（详见上方警告）`);
+}
+}
+
+if (import.meta.main) {
+  linkDeck();
 }
