@@ -21,3 +21,6 @@ dist/
 
 playground/
 .claude/
+
+# Private operational docs (local-only, never commit)
+.private/
