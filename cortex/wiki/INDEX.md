@@ -1,6 +1,6 @@
 # Wiki Index
 
-## 📚 Patterns (9)
+## 📚 Patterns (10)
 
 - [epic-granularity](./01-patterns/epic-granularity.md)
 - [thin-skill-monorepo](./01-patterns/thin-skill-monorepo.md)
@@ -10,6 +10,7 @@
 - [thin-skill-pattern](./01-patterns/thin-skill-pattern.md)
 - [self-contained-task-writing](./01-patterns/self-contained-task-writing.md)
 - [project-cortex-porting-guide](./01-patterns/project-cortex-porting-guide.md)
+- [project-scope-and-ecosystem-paths](./01-patterns/project-scope-and-ecosystem-paths.md)
 - [fence-variable-trick](./01-patterns/fence-variable-trick.md)
 
 ## ❓ FAQ (0)
