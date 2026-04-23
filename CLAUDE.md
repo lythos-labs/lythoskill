@@ -150,7 +150,7 @@ All governance documents include a machine-parseable **Status History** table.
 
 ## Session Handoff Checklist
 
-When a session is ending or context is about to compact, you MUST execute this handoff flow to ensure the next agent can recover context:
+When a session is ending or context is about to compact, you MUST execute this handoff flow:
 
 ### Trigger Conditions (any one is sufficient)
 - User says "LGTM", "就这样", "先到这里", "记录一下进度"
@@ -160,20 +160,17 @@ When a session is ending or context is about to compact, you MUST execute this h
 
 ### Handoff Steps
 
-1. **Record Current Quest** → `CURRENT-QUEST.md` (repo root, tracked by git)
-   - What task was being worked on
-   - What decisions were made and why
-   - Current state (done / in-progress / blocked)
-   - Next steps for the next agent
+1. **Confirm triple state** — Before writing anything, verify:
+   - `git status` — what is committed vs unstaged vs untracked
+   - `bun packages/lythoskill-project-cortex/src/cli.ts list` — active epics and tasks
+   - **Session recall** — what happened this session that is NOT yet written anywhere?
 
-2. **Record Pitfalls** → `PITFALLS.md` (repo root, tracked by git)
-   - Traps encountered this session
-   - Root causes and solutions
-   - Time wasted (for future prioritization)
+2. **Write single-file handoff** → `daily/HANDOFF.md` (tracked by git)
+   - Use `HANDOFF-TEMPLATE.md` as template
+   - Focus on what file exploration CANNOT recover: pitfalls, true working-tree state, specific next steps
+   - Do NOT repeat what `git log`, `ls`, or `cat` can already reveal
 
-3. **Record Decisions** → `DECISIONS.md` (repo root, tracked by git)
-   - Options considered, choice made, reasoning
-   - Rejected alternatives and why
+3. **Archive when session ends** — If starting a new day/iteration, move `daily/HANDOFF.md` to `daily/YYYY-MM-DD.md`
 
 4. **Commit if clean** — If working tree is in a good state, commit with descriptive message
 
@@ -181,11 +178,12 @@ When a session is ending or context is about to compact, you MUST execute this h
 
 When entering this project with no prior context, read in this exact order:
 1. `CLAUDE.md` (this file)
-2. `playground/CURRENT-QUEST.md` (if exists)
-3. `playground/PITFALLS.md` (if exists)
-4. `playground/DECISIONS.md` (if exists)
-5. `skill-deck.toml`
-6. `cortex/INDEX.md`
-7. `git log --oneline -10`
+2. `daily/HANDOFF.md` (if exists) — single-file session handoff, highest priority memory
+3. `daily/` history (recent 3 days) — project journal, work log across sessions
+4. `skill-deck.toml`
+5. `cortex/INDEX.md`
+6. `git log --oneline -10`
+
+**Memory bridge:** `.claude/memory/` is Claude Code's native user-level memory. `daily/` is the project's cross-CLI journal — it travels with the repo and can be read by any agent (Cursor, Windsurf, Kimi, etc.) through the skill system.
 
 **All skill enhancements (hooks, templates, configs) are self-contained within each skill's `scripts/`, `references/`, or `assets/` directories. No external platform dependencies.**
