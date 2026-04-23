@@ -25,20 +25,24 @@ type: flow
 
 ## 流程总览
 
+> 🤖 = 脚本自动化（arena-cli.ts） | 🧠 = Agent 推理（subagent / judge）
+
 ```mermaid
 flowchart TD
-    BEGIN([BEGIN]) --> Parse[解析 Arena 请求]
-    Parse --> Setup[创建 arena 目录结构]
-    Setup --> Generate[生成 arena decks]
-    Generate --> Dispatch[并行派发 subagents]
-    Dispatch --> Collect{所有输出已收集?}
+    BEGIN([BEGIN]) --> Parse[🧠 解析 Arena 请求]
+    Parse --> Setup[🤖 创建 arena 目录结构]
+    Setup --> Generate[🤖 生成 arena decks]
+    Generate --> Dispatch[🧠 并行派发 subagents]
+    Dispatch --> Collect{🧠 所有输出已收集?}
     Collect -->|否| Wait[等待 subagent 完成]
     Wait --> Collect
-    Collect -->|是| Judge[调用 Judge 生成报告]
-    Judge --> Report[输出 benchmark 报告]
-    Report --> Archive[归档到 wiki/01-patterns]
+    Collect -->|是| Judge[🧠 Judge 生成评测报告]
+    Judge --> Report[🧠 输出 benchmark 报告]
+    Report --> Archive[🧠 归档到 wiki/01-patterns]
     Archive --> END([END])
 ```
+
+**Arena 的核心设计**：脚本只负责**脚手架**（创建目录、生成 deck 文件、写 metadata），真正的**评测推理**在 agent 端完成。Judge 不是脚本，而是一个遵循 TASK-arena.md 指令的 agent。
 
 ## 前置条件
 
@@ -105,9 +109,16 @@ bunx @lythos/skill-deck link --deck tmp/arena-xxx/decks/arena-run-01.toml
 
 检查 `runs/run-*.md` 是否全部存在且非空。
 
-### 6. Judge 评测
+### 6. Judge 评测（Agent 推理，非脚本）
 
-读取所有 `run-*.md`，按 `evaluation_criteria` 评分，输出 `report.md`。
+**Judge 不是自动化脚本**，而是一个遵循 TASK-arena.md 指令的 agent/subagent。它：
+
+1. 读取所有 `runs/run-*.md`
+2. 按 `evaluation_criteria` 逐项对比
+3. 给出 1-5 分评分 + 文字评述
+4. 输出 `report.md`
+
+为什么不用脚本评分？因为 skill 对比的维度（context 契合度、创新性、可维护性）需要语义理解，无法被规则化。脚本能数 token，但判断"哪个输出更贴合业务场景"需要 agent 推理。
 
 ### 7. 归档
 
