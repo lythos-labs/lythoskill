@@ -37,6 +37,8 @@ jobs:
 
           # Fresh git repo for the skills branch
           git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b skills
           git add .
           git commit -m "chore: sync skills from main @ ${SHORT_SHA}" || echo "No changes to commit"
