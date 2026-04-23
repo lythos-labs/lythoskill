@@ -1,8 +1,12 @@
 # Skill Cold Pool Catalog
 
+> **Agent 不要直接 scan 冷池。读这个文件。**
+>
+> CATALOG 是 skill 冷池的「索引卡片系统」—— curator 做了一次昂贵的全表扫描，
+> 产出这个浓缩版本。后续 agent 直接查 CATALOG，只有需要深入细节时才回原始 skill。
+>
 > Scan of `~/.agents/skill-repos/` — indexed by curator gateway protocol v0.1.0
-> Generated: 2026-04-23
-> Total in pool: ~55 skills | Indexed in Phase A: 20 | Remaining for Phase B: ~35
+> Generated: 2026-04-23 | Total: 55 skills | Format: 8-layer classification + dao-shu-qi-yong
 
 ## Classification System
 
