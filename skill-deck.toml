@@ -1,0 +1,14 @@
+[deck]
+max_cards = 10
+cold_pool = "skills"
+working_set = ".claude/skills"
+
+[innate]
+skills = [
+  "lythoskill-deck",
+]
+
+[tool]
+skills = [
+  "lythoskill-project-cortex",
+]

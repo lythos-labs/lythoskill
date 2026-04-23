@@ -133,8 +133,8 @@ bunx lythoskill build <skill-name>
 ### 修改代码后
 直接运行验证，无编译步骤（Bun 原生运行 TypeScript）：
 ```bash
-bun packages/lythoskill/src/cli.ts init my-test
-bun packages/lythoskill/src/cli.ts build lythoskill-creator
+bun packages/lythoskill-creator/src/cli.ts init my-test
+bun packages/lythoskill-creator/src/cli.ts build lythoskill-creator
 ```
 
 ### 发布路径（计划中）

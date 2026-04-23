@@ -30,7 +30,7 @@ lythos（λίθος，希腊语"石头"）是本项目的品牌标识。lythoski
 ### 1. npm scope: `@lythos/*`
 - [ ] 检查 npm registry 上 `@lythos` scope 是否已被占用
 - [ ] 如未被占用，注册/保留该 scope（需要 npm 账号和组织设置）
-- [ ] 更新 `packages/lythoskill/package.json` 和 `packages/lythoskill-project-cortex/package.json` 的 name 字段为 scoped 格式（如 `@lythos/lythoskill`）
+- [ ] 更新 `packages/lythoskill-creator/package.json` 和 `packages/lythoskill-project-cortex/package.json` 的 name 字段为 scoped 格式（如 `@lythos/lythoskill`）
 - [ ] 在 AGENTS.md 或 Wiki 中记录 npm 发布流程
 
 ### 2. PyPI prefix: `lythos-*`
@@ -69,7 +69,7 @@ bunx @lythos/project-cortex task "Fix login bug"
 ```
 
 需要同步修改的文件：
-- `packages/lythoskill/package.json` 的 `name` 字段
+- `packages/lythoskill-creator/package.json` 的 `name` 字段
 - `packages/lythoskill-project-cortex/package.json` 的 `name` 字段
 - 所有 `skills/*/SKILL.md` 中引用的 `bunx <package>` 命令
 - `skills/*/scripts/*.sh` 中的 `bunx` 调用
@@ -87,7 +87,7 @@ bunx @lythos/project-cortex task "Fix login bug"
 <!-- 执行时更新，带时间戳 -->
 
 ## 关联文件
-- **修改**: `packages/lythoskill/package.json`
+- **修改**: `packages/lythoskill-creator/package.json`
 - **修改**: `packages/lythoskill-project-cortex/package.json`
 - **修改**: `skills/lythoskill-creator/SKILL.md`
 - **修改**: `skills/lythoskill-project-cortex/SKILL.md`
