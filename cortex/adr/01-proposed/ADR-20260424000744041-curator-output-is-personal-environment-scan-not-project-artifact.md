@@ -20,9 +20,12 @@ CATALOG.md 最初作为 curator 扫描冷池的「人类可读索引卡」被提
 ### 场景 1: 个人开发者单机构建
 开发者运行 `curator index`（CLI 命令），扫描冷池下的 skill。冷池路径默认 `~/.agents/skill-repos/`，但可以在 skill-deck.toml 中指定 `cold_pool` 字段覆盖。
 
-产出 catalog.db + REGISTRY.json。**期望**：这些 index 文件放在用户数据目录（如 `~/.lythos/curator/`），供后续 `curator query`（CLI 查询）和 agent 推荐推理消费。
+产出 catalog.db + REGISTRY.json。**期望**：这些 index 文件放在 `~/.agents/lythos/skill-curator/`（与冷池 `~/.agents/skill-repos/` 同层级），供后续 `curator query`（CLI 查询）和 agent 推荐推理消费。
 
-**注意：index 文件不要放在 agent 默认扫描的位置**（如 `.claude/skills/`），否则会被当成普通 skill 加载，造成污染。
+**为什么这个位置：**
+- 和冷池同属 `~/.agents/` 命名空间，用户的 agent 配置集中管理
+- 不在 agent 默认扫描路径（`.claude/skills/`）内，不会被当成普通 skill 加载
+- 与 deck 的 `deck_managed_dirs` 约定兼容：curator 可以声明它管理这个目录
 
 ### 场景 2: 团队共享 Git 仓库
 如果 CATALOG.md 被提交到 git，新 clone 的队友会看到「55 skills」并困惑：「我本地只有 12 个，剩下 43 个去哪下载？」**后果**：误导性文档，团队认知失调。
@@ -133,7 +136,7 @@ curator 产出默认写入用户级目录（如 `~/.lythos/curator/` 或 `~/.con
 - 负面:
   - 已发布的 commit 历史仍包含 CATALOG.md（无法撤销已 push 的历史，除非 force push）
 - 后续:
-  - 确定默认数据目录路径（`~/.lythos/curator/`？`~/.config/lythos/curator/`？）
+  - curator index 默认输出到 `~/.agents/lythos/skill-curator/`（与冷池同层级，避开 agent 扫描）
   - 支持 `--output` / `-o` flag 让用户自定义输出目录
   - 内部测试可使用 `CURATOR_OUTPUT_DIR=./playground` override
   - 文档中明确展示 curator 跨项目、跨技术栈、跨角色的使用案例（Spring Boot deck、React deck 等）
