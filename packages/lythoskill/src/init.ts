@@ -43,8 +43,8 @@ Created lythoskill project: ${name}
   pnpm exec ${name} hello
 
 Structure:
-  packages/${name}/     <- your starter (npm publish this)
-  skills/example/       <- your first skill
-  dist/                 <- bunx lythoskill build example
+  packages/${name}/        <- your starter (npm publish this)
+  packages/${name}/skill/  <- skill source (SKILL.md + scripts)
+  skills/example/          <- built skill output (submit this to git)
 `)
 }

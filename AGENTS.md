@@ -66,9 +66,9 @@ lythoskill/
 ## 架构：Thin Skill Pattern（三层分离）
 
 ```
-Starter (packages/<name>/)   → npm/pip publish → 依赖治理 + CLI 入口
-Skill   (skills/<name>/)     → lythoskill build → 意图描述 + bunx 调用
-Dist    (dist/<name>/)       → release         → 对 agent 的最终产物
+Starter (packages/<name>/)       → npm/pip publish → 依赖治理 + CLI 入口
+Skill   (packages/<name>/skill/) → lythoskill build → 意图描述 + bunx 调用
+Output  (skills/<name>/)         → release/commit  → 对 agent 的最终产物
 ```
 
 1. **Starter**：管理所有依赖，暴露 CLI entry point。agent 不直接读这里的代码。
@@ -90,15 +90,16 @@ Dist    (dist/<name>/)       → release         → 对 agent 的最终产物
 # 初始化一个新 lythoskill 项目
 bunx lythoskill init <project-name>
 
-# 构建指定 skill 到 dist/（过滤测试文件、验证 frontmatter）
+# 构建指定 skill（从 packages/<name>/skill/ 生成到 skills/<name>/）
 bunx lythoskill build <skill-name>
 ```
 
 构建行为细节：
-- 读取 `skills/<skill-name>/`
+- 读取 `packages/<skill-name>/skill/`
 - 要求目录内存在 `SKILL.md` 且必须以 `---` YAML frontmatter 开头
 - 过滤排除：`__tests__`、`node_modules`、`.DS_Store`、`.test.ts`、`.spec.ts` 等
-- 输出到 `dist/<skill-name>/`
+- 输出到 `skills/<skill-name>/`
+- `skills/` 是构建产物，应提交到 Git（agent 用户 clone 后可直接使用）
 
 本项目自身暂无测试框架或 lint 配置。验证方式：手动执行 `bunx lythoskill init <name>` 和 `bunx lythoskill build lythoskill-creator` 检查产物。
 
@@ -165,7 +166,7 @@ bun packages/lythoskill/src/cli.ts build lythoskill-creator
 | 文件 | 职责 |
 |------|------|
 | `src/cli.ts` | 命令路由（init / build） |
-| `src/init.ts` | 生成 10 文件项目模板 |
-| `src/build.ts` | 复制 + 过滤 → dist/ |
+| `src/init.ts` | 生成项目模板 |
+| `src/build.ts` | 从 packages/<name>/skill/ 生成到 skills/<name>/ |
 | `src/templates.ts` | 所有字符串模板 |
 | `skills/lythoskill-creator/SKILL.md` | Agent 可见的使用文档 |

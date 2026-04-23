@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/4/23 12:44:40
+> 自动生成于 2026/4/23 13:00:10
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 3 | 进行中: 0, 待验收: 0, 已完成: 1 |
 | Epics | 1 | 活跃: 1, 已归档: 0 |
-| ADRs | 2 | 已接受: 2 |
+| ADRs | 3 | 已接受: 3 |
 
 ---
 
@@ -57,6 +57,7 @@ _无_
 
 - ✅ **ADR-20260423101938000** (02-accepted): Thin Skill Pattern - Development/Release Split
 - ✅ **ADR-20260423101950000** (02-accepted): ESM Import over require for JSON
+- ✅ **ADR-20260423124812645** (02-accepted): Build output should live in skills/ and be committed to Git
 
 ---
 

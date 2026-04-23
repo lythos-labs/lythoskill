@@ -1,6 +1,6 @@
 import {
   existsSync, mkdirSync, rmSync, cpSync,
-  readFileSync, readdirSync, statSync,
+  readFileSync, readdirSync, statSync, writeFileSync,
 } from 'node:fs'
 import { join, relative } from 'node:path'
 
@@ -9,16 +9,27 @@ const IGNORE_SUFFIXES = ['.test.ts', '.test.js', '.spec.ts', '.spec.js']
 
 export async function build(skillName: string) {
   const root = process.cwd()
-  const src = join(root, 'skills', skillName)
-  const dest = join(root, 'dist', skillName)
+  const src = join(root, 'packages', skillName, 'skill')
+  const dest = join(root, 'skills', skillName)
 
-  // -- validate -------------------------------------
   if (!existsSync(src)) {
-    console.error(`Not found: skills/${skillName}/`)
+    console.error(`Not found: packages/${skillName}/skill/`)
     process.exit(1)
   }
 
-  const mdPath = join(src, 'SKILL.md')
+  if (existsSync(dest)) rmSync(dest, { recursive: true })
+  copyFiltered(src, dest)
+
+  const pkgJsonPath = join(root, 'packages', skillName, 'package.json')
+  if (existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'))
+    const vars = extractVars(pkg)
+    if (Object.keys(vars).length > 0) {
+      substituteVars(dest, vars)
+    }
+  }
+
+  const mdPath = join(dest, 'SKILL.md')
   if (!existsSync(mdPath)) {
     console.error(`Missing SKILL.md in skills/${skillName}/`)
     process.exit(1)
@@ -30,15 +41,40 @@ export async function build(skillName: string) {
     process.exit(1)
   }
 
-  // -- clean & copy ---------------------------------
-  if (existsSync(dest)) rmSync(dest, { recursive: true })
-  copyFiltered(src, dest)
-
-  // -- report ---------------------------------------
   const files = walk(dest).map((f) => relative(dest, f))
-  console.log(`Built skills/${skillName}/ -> dist/${skillName}/`)
+  console.log(`Built packages/${skillName}/skill/ -> skills/${skillName}/`)
   console.log(`   ${files.length} file(s):`)
   for (const f of files) console.log(`   - ${f}`)
+}
+
+function extractVars(pkg: Record<string, unknown>): Record<string, string> {
+  const vars: Record<string, string> = {}
+  if (pkg.name) vars['{{PACKAGE_NAME}}'] = String(pkg.name)
+  if (pkg.version) vars['{{PACKAGE_VERSION}}'] = String(pkg.version)
+  if (pkg.description) vars['{{PACKAGE_DESCRIPTION}}'] = String(pkg.description)
+
+  const bin = pkg.bin as Record<string, string> | undefined
+  if (bin) {
+    const entries = Object.entries(bin)
+    if (entries.length > 0) {
+      vars['{{BIN_NAME}}'] = entries[0][0]
+      vars['{{BIN_ENTRY}}'] = entries[0][1]
+    }
+  }
+  return vars
+}
+
+function substituteVars(dir: string, vars: Record<string, string>) {
+  for (const f of walk(dir)) {
+    const content = readFileSync(f, 'utf-8')
+    let replaced = content
+    for (const [key, val] of Object.entries(vars)) {
+      replaced = replaced.split(key).join(val)
+    }
+    if (replaced !== content) {
+      writeFileSync(f, replaced)
+    }
+  }
 }
 
 function copyFiltered(src: string, dest: string) {
@@ -53,7 +89,6 @@ function copyFiltered(src: string, dest: string) {
     if (statSync(s).isDirectory()) {
       copyFiltered(s, d)
     } else {
-      // cpSync copies single files; directories handled above via recursion
       cpSync(s, d)
     }
   }
