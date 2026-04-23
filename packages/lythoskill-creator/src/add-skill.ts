@@ -72,7 +72,7 @@ Next steps:
   Edit packages/${name}/src/cli.ts        <- implement commands
 
 Build when ready:
-  bunx lythoskill build ${name}
+  bunx @lythos/skill-creator build ${name}
   # Output goes to skills/${name}/ — commit this directory
 `)
 }

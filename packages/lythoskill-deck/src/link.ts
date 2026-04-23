@@ -23,14 +23,8 @@ import {
 // ── 路径工具 ────────────────────────────────────────────────
 
 function findDeckToml(from: string): string | null {
-  let dir = from;
-  for (let i = 0; i < 10; i++) {
-    const p = join(dir, "skill-deck.toml");
-    if (existsSync(p)) return p;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
+  const p = join(from, "skill-deck.toml");
+  if (existsSync(p)) return p;
   return null;
 }
 
@@ -127,7 +121,15 @@ const DECK_PATH = cliDeck
   : findDeckToml(process.cwd()) || resolve("skill-deck.toml");
 
 if (!existsSync(DECK_PATH)) {
-  console.error(`❌ ${DECK_PATH} 不存在`);
+  console.error(`❌ skill-deck.toml not found in ${process.cwd()}`);
+  console.error(`\nCreate one:`);
+  console.error(`  cat > skill-deck.toml <<'EOF'`);
+  console.error(`  [deck]`);
+  console.error(`  max_cards = 10`);
+  console.error(`  \n  [tool]`);
+  console.error(`  skills = ["lythoskill-deck"]`);
+  console.error(`  EOF`);
+  console.error(`\nOr specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
   process.exit(1);
 }
 

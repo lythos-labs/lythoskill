@@ -19,6 +19,7 @@ export async function init(name: string) {
     [join(root, 'package.json'),                          t.rootPackageJson(name)],
     [join(root, 'pnpm-workspace.yaml'),                   t.pnpmWorkspace()],
     [join(root, '.gitignore'),                            t.gitignore()],
+    [join(root, 'skill-deck.toml'),                       t.skillDeckToml(name)],
     // starter
     [join(root, 'packages', name, 'package.json'),        t.starterPackageJson(name)],
     [join(root, 'packages', name, 'tsconfig.json'),       t.starterTsconfig()],
@@ -53,10 +54,10 @@ Edit your skill:
   packages/${name}/src/index.ts      <- implement core logic
 
 Build for distribution:
-  bunx lythoskill build ${name}
+  bunx @lythos/skill-creator build ${name}
   # Output goes to skills/${name}/ — commit this directory
 
 Add more skills later:
-  bunx lythoskill add-skill <another-skill>
+  bunx @lythos/skill-creator add-skill <another-skill>
 `)
 }

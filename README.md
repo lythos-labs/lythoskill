@@ -179,4 +179,4 @@ bun packages/lythoskill-project-cortex/src/cli.ts index
 
 ## License
 
-Proprietary
+MIT

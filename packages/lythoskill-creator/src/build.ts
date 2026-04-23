@@ -52,7 +52,7 @@ Next steps:
   git commit -m "feat(${skillName}): initial skill"
 
 Use your skill (no install needed):
-  bunx lythoskill build ${skillName}   # rebuild after edits
+  bunx @lythos/skill-creator build ${skillName}   # rebuild after edits
 
 Publish to npm (optional):
   cd packages/${skillName}

@@ -31,7 +31,7 @@ switch (command) {
     break
 
   default:
-    console.log(`lythoskill -- thin skill scaffolder
+    console.log(`@lythos/skill-creator -- thin skill scaffolder
 
 Commands:
   init <name>       Create a new lythoskill project
@@ -39,8 +39,8 @@ Commands:
   build <skill>     Build a skill for distribution
 
 Examples:
-  bunx lythoskill init my-tool
-  bunx lythoskill add-skill my-new-skill
-  bunx lythoskill build example
+  bunx @lythos/skill-creator init my-tool
+  bunx @lythos/skill-creator add-skill my-new-skill
+  bunx @lythos/skill-creator build example
 `)
 }

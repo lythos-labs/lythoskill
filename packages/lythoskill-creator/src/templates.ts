@@ -20,6 +20,16 @@ export const gitignore = () =>
 playground/
 `
 
+export const skillDeckToml = (name: string) =>
+`[deck]
+working_set = ".claude/skills"
+cold_pool   = "~/.agents/skill-repos"
+max_cards   = 10
+
+[tool]
+skills = ["${name}"]
+`
+
 // -- starter package --------------------------------
 export const starterPackageJson = (name: string) =>
   JSON.stringify(
