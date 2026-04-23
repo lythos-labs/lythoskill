@@ -34,7 +34,7 @@ if [ -f "$DECK" ]; then
 
   # 展开路径
   [[ "$WS" == .* ]] && WS="$PROJECT_DIR/$WS"
-  [[ "$CP" == ~/* ]] && CP="$HOME/${CP:2}"
+  [[ "$CP" == '~/'* ]] && CP="$HOME/${CP:2}"
   [ -z "$WS" ] && WS="$PROJECT_DIR/.claude/skills"
   [ -z "$CP" ] && CP="$HOME/.agents/skill-repos"
   MC=${MC:-10}
@@ -42,8 +42,9 @@ if [ -f "$DECK" ]; then
   # 提取声明的 skill
   DECLARED=()
   while IFS= read -r line; do
-    n=$(echo "$line" | sed -n 's/^[[:space:]]*"\([^"]*\)".*/\1/p')
-    [ -n "$n" ] && DECLARED+=("$n")
+    for n in $(echo "$line" | grep -o '"[^"]*"' | tr -d '"'); do
+      [ -n "$n" ] && [[ "$n" != ~* ]] && [[ "$n" != .* ]] && DECLARED+=("$n")
+    done
   done < <(grep -v '^\s*#' "$DECK")
 else
   issue "error" "toml 不存在" "运行 deck-migrate.sh 或手动创建"
@@ -82,7 +83,7 @@ if $TOML_OK; then
     [ -z "$a" ] && continue
     found=false
     for d in "${DECLARED[@]:-}"; do [ "$a" = "$d" ] && found=true && break; done
-    $found || issue "warn" "幽灵: $a（已链接但未声明）" "添加到 toml 或执行 deck-link 清除"
+    $found || issue "warn" "幽灵: ${a}（已链接但未声明）" "添加到 toml 或执行 deck-link 清除"
   done
 
   # 缺失：在 toml 但不在 working set
@@ -90,7 +91,7 @@ if $TOML_OK; then
     [ -z "$d" ] && continue
     found=false
     for a in "${ACTUAL[@]:-}"; do [ "$d" = "$a" ] && found=true && break; done
-    $found || issue "warn" "未链接: $d（已声明但无 symlink）" "执行 deck-link 同步"
+    $found || issue "warn" "未链接: ${d}（已声明但无 symlink）" "执行 deck-link 同步"
   done
 
   # 预算
@@ -128,7 +129,7 @@ try:
             dirs.setdefault(d, []).append(s['name'])
     for d, owners in dirs.items():
         if len(owners) > 1:
-            print(f"{d}: {', '.join(owners)}")
+            print(d + ': ' + ', '.join(owners))
 except: pass
 " 2>/dev/null)
   [ -n "$overlaps" ] && while IFS= read -r line; do
@@ -166,7 +167,7 @@ printf "  %-22s" "声明 / 链接 / 上限"
 if [ "$LINKED" -gt "$MC" ]; then
   echo -e "${R}${#DECLARED[@]} / $LINKED / $MC ← 超${N}"
 else
-  echo -e "${G}${#DECLARED[@]:-0} / $LINKED / $MC${N}"
+  echo -e "${G}${#DECLARED[@]} / $LINKED / $MC${N}"
 fi
 
 printf "  %-22s%s\n" "冷池 skill 数" "$POOL_COUNT"
