@@ -18,7 +18,7 @@ CATALOG.md 最初作为 curator 扫描冷池的「人类可读索引卡」被提
 ## 实用场景推演
 
 ### 场景 1: 个人开发者单机构建
-开发者运行 `curator index`，扫描 `~/.agents/skill-repos/` 下自己的 40 个 skill。产出 CATALOG.md + REGISTRY.json + catalog.db。**期望**：这些文件留在自己机器上，供本地 `curator recommend` 和 `curator query` 消费。
+开发者运行 `curator index`（CLI 命令），扫描 `~/.agents/skill-repos/` 下自己的 40 个 skill。产出 catalog.db + REGISTRY.json。**期望**：这些文件留在用户数据目录（如 `~/.lythos/curator/`），供后续 `curator query`（CLI 查询）和 curator skill 的 recommend 推理消费。
 
 ### 场景 2: 团队共享 Git 仓库
 如果 CATALOG.md 被提交到 git，新 clone 的队友会看到「55 skills」并困惑：「我本地只有 12 个，剩下 43 个去哪下载？」**后果**：误导性文档，团队认知失调。
@@ -29,24 +29,26 @@ CI  runner 没有 `~/.agents/skill-repos/`。如果构建流程依赖 CATALOG.md
 ### 场景 4: 跨项目复用冷池
 开发者同时维护 5 个项目，但只有一个冷池（`~/.agents/skill-repos/`）。每个项目的 skill-deck.toml 不同，但 curator 扫描的是同一批 skill。**结论**：扫描结果属于用户/环境，不属于任何特定项目。
 
-### 场景 5: 团队 lead 分享「推荐卡组」
-团队 lead 用 curator 扫描团队共享冷池，然后为「前端项目」生成推荐：`curator recommend --for "React + TypeScript 项目"`。产出是一个 tiered 推荐列表（Core/Force Multiplier/Optional）。**这个推荐结果可以也应该被分享**——它进入项目的 skill-deck.toml、ADR 或 onboarding 文档。**但分享的是「推荐结论」，不是「完整冷池扫描原始数据」**。
+### 场景 5: Agent 使用 curator skill 为当前项目推荐 skills
+**这是 curator 的核心场景。Curator 是 thin skill，不是 CLI 工具。**
 
-### 场景 6: 外部生态发现
-开发者运行 `curator discover --query "web scraping"`，从 GitHub / skill hub 找到 3 个新 skill。这些外部 skill 被下载到冷池，然后进入标准 pipeline（arena → adr → deck）。**发现过程是探索性的，产出（下载到冷池的 skill）是个人化的**，但「发现结果报告」可以作为项目 wiki 的一部分。
+Agent 进入一个新项目，读取 curator 的 SKILL.md。SKILL.md 告诉 agent：
+1. 扫描当前项目上下文（CLAUDE.md、skill-deck.toml、package.json、README、代码结构）
+2. 读取本地冷池的 catalog（catalog.db / REGISTRY.json）了解有什么 skills
+3. 用 LLM 推理分析两者匹配度：这个项目需要什么 skills？哪些 skills 形成 Pipeline/Modality Stack/Orchestrator-Engine 协同？
+4. 产出 tiered 推荐池（Core/Force Multiplier/Optional）
 
-### 场景 7: 为任意开源项目推荐 skills
-你参与了一个知名开源项目（如 React、Vite、某个 AI 框架），想用 curator 从自己的冷池里挑合适的 skills 辅助工作。`curator recommend --for "大型开源项目维护"` 产出的推荐池完全可以被采纳——写入该项目的 skill-deck.toml、ADR 或贡献者指南。
+**产出是 agent 的推理结果，不是文件。** Agent 可以直接修改 skill-deck.toml，然后执行 `deck link`。
 
-### 场景 8: 按角色/职位定制 deck
-你接手了一个 Spring Boot 项目的后续开发。可以为不同角色定制不同 deck：
-- **后端工程师 deck**: Spring Boot + database-migration + API-testing skills
-- **DevOps deck**: CI/CD + docker + monitoring skills
-- **全栈 deck**: 上述全部 + frontend-build skills
+**关键：curator 的「接口」是 SKILL.md 的 prompt 内容，不是 CLI 命令。** 就像 deck 的接口是 SKILL.md 里描述的「link/status/migrate」概念，最终由 agent 调用 `bunx @lythos/skill-deck link` 执行一样。
 
-所有 deck 共享同一个冷池（`~/.agents/skill-repos/`），但通过不同的 skill-deck.toml 声明不同的 working set。**curator 的推荐能力完全跨技术栈、跨角色**。
+### 场景 6: 团队 lead 的推荐结论分享
+团队 lead 在 Spring Boot 项目上让 agent 跑完 curator 推荐，产出的 tiered 推荐池写入项目 wiki 或 ADR。**其他开发者 clone 项目后，可以直接用这个推荐初始化自己的 skill-deck.toml**——前提是他们冷池里有这些 skills。如果缺少，curator discover 会告诉他们去哪找。
 
-**curator 的价值不局限于 lythoskill 自身，它服务于任何需要 skill 治理的项目和团队**。
+**分享的是「推理结论」，不是「完整冷池扫描原始数据」。**
+
+### 场景 7: 未来 — 外部生态发现（尚未实现）
+当 curator 未来支持 web search 时，agent 可以用 curator skill 搜索 GitHub / skill hub，找到新 skills 下载到冷池，然后进入标准 pipeline（arena → adr → deck）。这是设计文档中的未来方向，不是当前已实现的能力。
 
 ## 选项
 
@@ -92,12 +94,12 @@ curator 产出默认写入用户级目录（如 `~/.lythos/curator/` 或 `~/.con
 | 产出类型 | 例子 | 归属 | 是否可共享 |
 |---------|------|------|-----------|
 | **原始扫描数据** | CATALOG.md, catalog.db, REGISTRY.json | 用户/环境 | ❌ 不可共享（你的冷池 ≠ 我的冷池） |
-| **推荐结论** | `curator recommend` 的 tiered 推荐池 | 项目上下文 | ✅ 可共享（可写入 skill-deck.toml、ADR、项目 wiki） |
+| **推荐结论** | Agent 读取 curator SKILL.md 后 LLM 推理产出的 tiered 推荐池 | 项目上下文 | ✅ 可共享（可写入 skill-deck.toml、ADR、项目 wiki） |
 | **外部发现报告** | `curator discover` 的搜索结果摘要 | 探索过程 | ✅ 可共享（作为调研笔记） |
 
 **原因**:
 - curator 的 **index** 扫描的是**用户环境**，不是**项目代码**。原始扫描产出归属必须与环境对齐。
-- 但 curator 的 **recommend / discover** 是**项目上下文驱动的**，其结论（「这个项目适合用哪些 skill」）完全可以、也应该被分享。
+- 但 curator 的 **recommend**（agent 读取 SKILL.md 后的 LLM 推理）是**项目上下文驱动的**，其结论（「这个项目适合用哪些 skill」）完全可以、也应该被分享。
 - 「冷池」概念本身就是用户级/团队级的：我的冷池 ≠ 你的冷池 ≠ 官方生态。但「推荐逻辑」是通用的。
 - 项目仓库不应包含任何特定冷池的扫描原始数据，但可以包含基于 curator 推荐做出的 ADR 和 skill-deck.toml 决策。
 
