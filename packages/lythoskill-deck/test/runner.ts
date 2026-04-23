@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync } from 'node:fs'
+import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 
 // ── 类型定义 ──────────────────────────────────────────────────
@@ -101,8 +100,7 @@ function createMockSkill(dir: string, name: string, skill: MockSkill): void {
   writeFileSync(join(skillDir, 'SKILL.md'), `---\n${fm}\n---\n\n${body}`)
 }
 
-function setupWorkdir(scenario: Scenario): string {
-  const workdir = mkdtempSync(join(tmpdir(), 'deck-test-'))
+function setupWorkdir(scenario: Scenario, workdir: string): void {
   const cpDir = join(workdir, 'cold-pool')
   const wsDir = join(workdir, '.claude', 'skills')
 
@@ -228,34 +226,34 @@ function assert(scenario: Scenario, workdir: string, code: number, output: strin
 
 // ── 核心 ──────────────────────────────────────────────────────
 
-export async function runScenario(scenario: Scenario, keepWorkdir = false): Promise<Result> {
+export async function runScenario(scenario: Scenario, runsDir: string): Promise<Result> {
+  const workdir = join(runsDir, scenario.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
+  // 清理旧目录（支持重跑同一场景）
+  if (existsSync(workdir)) rmSync(workdir, { recursive: true, force: true })
+
   const start = performance.now()
-  const workdir = setupWorkdir(scenario)
+  setupWorkdir(scenario, workdir)
   const { code, output } = runCommands(workdir, scenario.when)
   const errors = assert(scenario, workdir, code, output)
   const duration = performance.now() - start
 
-  if (!keepWorkdir && errors.length === 0) {
-    rmSync(workdir, { recursive: true, force: true })
-  }
-
   return {
     name: scenario.name,
     pass: errors.length === 0,
-    workdir: errors.length > 0 || keepWorkdir ? workdir : '(cleaned)',
+    workdir,
     errors,
     duration,
   }
 }
 
-export async function runParallel(scenarios: Scenario[], concurrency = 4): Promise<Result[]> {
+export async function runParallel(scenarios: Scenario[], runsDir: string, concurrency = 4): Promise<Result[]> {
   const results: Result[] = []
   const queue = [...scenarios]
 
   async function worker() {
     while (queue.length) {
       const s = queue.shift()!
-      const r = await runScenario(s)
+      const r = await runScenario(s, runsDir)
       results.push(r)
     }
   }
@@ -270,7 +268,16 @@ async function main() {
   const args = process.argv.slice(2)
   const parallelIdx = args.indexOf('--parallel')
   const concurrency = parallelIdx >= 0 ? Number(args[parallelIdx + 1]) || 4 : 1
-  const keep = args.includes('--keep')
+
+  const outputIdx = args.indexOf('--output')
+  const baseDir = outputIdx >= 0
+    ? args[outputIdx + 1]
+    : resolve(import.meta.dir, '..', '..', '..', 'playground', 'test-runs')
+
+  const now = new Date()
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
+  const runsDir = join(baseDir, stamp)
+  mkdirSync(runsDir, { recursive: true })
 
   // 自动加载 test/scenarios/*.ts
   const scenarioDir = join(import.meta.dir, 'scenarios')
@@ -283,11 +290,12 @@ async function main() {
     if (s) scenarios.push(s)
   }
 
-  console.log(`\n🧪 加载 ${scenarios.length} 个场景，并发度 ${concurrency}\n`)
+  console.log(`\n🧪 加载 ${scenarios.length} 个场景，并发度 ${concurrency}`)
+  console.log(`📁 产物目录: ${runsDir}\n`)
 
   const results = concurrency > 1
-    ? await runParallel(scenarios, concurrency)
-    : await Promise.all(scenarios.map(s => runScenario(s, keep)))
+    ? await runParallel(scenarios, runsDir, concurrency)
+    : await Promise.all(scenarios.map(s => runScenario(s, runsDir)))
 
   let passed = 0
   for (const r of results) {
@@ -295,7 +303,7 @@ async function main() {
     console.log(`${icon} ${r.name} (${r.duration.toFixed(0)}ms)`)
     if (!r.pass) {
       for (const e of r.errors) console.log(`   → ${e}`)
-      if (r.workdir !== '(cleaned)') console.log(`   📁 ${r.workdir}`)
+      console.log(`   📁 ${r.workdir}`)
     }
     if (r.pass) passed++
   }
