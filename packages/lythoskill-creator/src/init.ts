@@ -38,13 +38,25 @@ export async function init(name: string) {
   console.log(`
 Created lythoskill project: ${name}
 
+Structure:
+  packages/${name}/        <- starter package (implementation + CLI)
+  packages/${name}/skill/  <- skill layer (SKILL.md + thin scripts)
+  skills/${name}/          <- built output (commit this to git)
+
+Next steps:
   cd ${name}
   pnpm install
-  pnpm exec ${name} hello
 
-Structure:
-  packages/${name}/        <- your starter (npm publish this)
-  packages/${name}/skill/  <- skill source (SKILL.md + scripts)
-  skills/${name}/          <- built skill output (submit this to git)
+Edit your skill:
+  packages/${name}/skill/SKILL.md    <- describe what this skill does
+  packages/${name}/src/cli.ts        <- implement the CLI
+  packages/${name}/src/index.ts      <- implement core logic
+
+Build for distribution:
+  bunx lythoskill build ${name}
+  # Output goes to skills/${name}/ — commit this directory
+
+Add more skills later:
+  bunx lythoskill add-skill <another-skill>
 `)
 }

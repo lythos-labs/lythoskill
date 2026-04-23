@@ -68,7 +68,11 @@ Structure:
   packages/${name}/skill/  <- skill source
 
 Next steps:
-  pnpm install
-  bun packages/${name}/src/cli.ts hello
+  Edit packages/${name}/skill/SKILL.md    <- describe intent
+  Edit packages/${name}/src/cli.ts        <- implement commands
+
+Build when ready:
+  bunx lythoskill build ${name}
+  # Output goes to skills/${name}/ — commit this directory
 `)
 }

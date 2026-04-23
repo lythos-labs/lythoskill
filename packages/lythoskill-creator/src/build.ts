@@ -45,6 +45,19 @@ export async function build(skillName: string) {
   console.log(`Built packages/${skillName}/skill/ -> skills/${skillName}/`)
   console.log(`   ${files.length} file(s):`)
   for (const f of files) console.log(`   - ${f}`)
+
+  console.log(`
+Next steps:
+  git add skills/${skillName}/
+  git commit -m "feat(${skillName}): initial skill"
+
+Use your skill (no install needed):
+  bunx lythoskill build ${skillName}   # rebuild after edits
+
+Publish to npm (optional):
+  cd packages/${skillName}
+  npm publish --access public
+`)
 }
 
 function extractVars(pkg: Record<string, unknown>): Record<string, string> {
