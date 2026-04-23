@@ -3,12 +3,13 @@ import {
   readFileSync, readdirSync, statSync, writeFileSync,
 } from 'node:fs'
 import { join, relative } from 'node:path'
+import { findProjectRoot } from './util.js'
 
 const IGNORE_NAMES = new Set(['__tests__', 'node_modules', '.DS_Store'])
 const IGNORE_SUFFIXES = ['.test.ts', '.test.js', '.spec.ts', '.spec.js']
 
 export async function build(skillName: string) {
-  const root = process.cwd()
+  const root = findProjectRoot(process.cwd()) || process.cwd()
   const src = join(root, 'packages', skillName, 'skill')
   const dest = join(root, 'skills', skillName)
 

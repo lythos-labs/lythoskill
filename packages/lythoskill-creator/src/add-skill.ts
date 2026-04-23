@@ -1,18 +1,19 @@
 import { existsSync, mkdirSync, writeFileSync, chmodSync } from 'node:fs'
 import { join } from 'node:path'
+import { findProjectRoot } from './util.js'
 import * as t from './templates'
 
 export async function addSkill(name: string) {
-  const root = process.cwd()
+  const root = findProjectRoot(process.cwd()) || process.cwd()
 
   // Verify we're in a monorepo
   if (!existsSync(join(root, 'package.json'))) {
-    console.error('No package.json found in current directory. Run this from a lythoskill monorepo root.')
+    console.error('No package.json found in project root. Run this from within a lythoskill monorepo.')
     process.exit(1)
   }
 
   if (!existsSync(join(root, 'pnpm-workspace.yaml'))) {
-    console.error('No pnpm-workspace.yaml found in current directory. Run this from a lythoskill monorepo root.')
+    console.error('No pnpm-workspace.yaml found in project root. Run this from within a lythoskill monorepo.')
     process.exit(1)
   }
 

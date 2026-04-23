@@ -37,11 +37,33 @@
 
 **Scope**: 从"我能用哪些"缩小到"哪些值得试"
 
-- 读取当前项目上下文（已有 skills、项目类型、代码结构）
-- 搜索本地冷池（~/.agents/skill-repos/）
-- **可选**: 外部搜索（skill hub、GitHub、registry）
-- **关键**: 所有发现的 skill 都进冷池，不删除。Deck 只决定"这个项目激活哪些"
-- 输出: N 个候选，每个附带 "为什么这个项目需要它"
+Curator 不是简单的关键词过滤。它用 **LLM 推理** 找因果链：
+
+> "project-cortex 产出结构化决策（ADR）。repomix-handoff 消费它们来创建上下文包。它们形成**生产者-消费者对**。"
+
+传统算法只能找到"这两个描述共享 73% 词汇"。Curator 找到的是**为什么它们应该一起用**。
+
+**输出**: 分层推荐池（5-10 个 skill），不是固定集合：
+
+```
+🔴 Tier 1 — Core (must-have):        project-cortex, repomix-handoff
+🟡 Tier 2 — Force Multipliers:       report-generation-combo, epic-tree
+🟢 Tier 3 — Optional:                dev-logging, project-scribe
+```
+
+为什么是池子？Agent 有 curator 不知道的任务细节。Tier 2/3 让 agent 有机会发现 curator 未预料的协同。
+
+**识别的协同模式**：
+
+| Pattern | 例子 | 逻辑 |
+|---------|------|------|
+| **Pipeline** | cortex → repomix-handoff → arena | 生产者-消费者链 |
+| **Modality Stack** | LLM + VLM + TTS + ASR | 互补 I/O 平面 |
+| **Orchestrator-Engine** | report-generation-combo + docx/pptx | 结构 + 渲染器 |
+| **Temporal Sequence** | red-green-release + playwright | CI/CD 阶段对齐 |
+| **Triangulation** | directory-scanner + scribe | 多角度验证 |
+
+**只读原则**: Curator 从不写入被扫描的 skill。它是图书管理员，不是装修队。
 
 ### Arena Benchmark
 
@@ -80,6 +102,25 @@
 | 卡始终在卡池，只是这局不用 | Skill 始终在冷池，只是这个项目不可见 |
 
 **核心洞察**: 不删卡，只调卡组。冷池是完整的收藏，deck 是当下的选择。
+
+**Deck 的实现: deny-by-default + symlink**
+
+Deck link 并不移动或删除 skill 文件。它只控制** agent 能看到的目录**:
+
+```
+冷池 (~/.agents/skill-repos/)          deck 声明          工作集 (.claude/skills/)
+  ├── web-search/                        [tool]              ├── web-search -> ../cold-pool/web-search
+  ├── docx/                              skills = [          ├── docx -> ../cold-pool/docx
+  ├── design-doc-mermaid/                  "docx"          └── (空)
+  └── pdf/                               ]                     ↑
+                                            pdf 不在声明中 = 不存在于工作集 = agent 看不到
+```
+
+**为什么不是"选出最好的"而是"分层推荐池"?**
+- Curator 推荐的是**候选池**，不是最终答案
+- Agent（或人类）根据任务细节从池子里做最终选择
+- 被 reject 的 skill 仍留在冷池，未来项目可能用得上
+- 这避免了"因为当前项目不用就删掉"的短视行为
 
 ## 为什么需要四步
 

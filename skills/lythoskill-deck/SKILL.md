@@ -1,6 +1,6 @@
 ---
 name: lythoskill-deck
-version: 0.1.1
+version: 0.1.2
 deck_niche: meta.governance.deck
 type: standard
 description: |

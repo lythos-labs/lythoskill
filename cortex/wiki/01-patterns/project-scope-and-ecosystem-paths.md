@@ -1,6 +1,6 @@
 # Pattern: lythoskill Scope Boundaries & Recommended Ecosystem Paths
 
-> 状态: ✅ 已验证 | 关联: CATALOG.md 分类体系, ADR-20260423130348396
+> 状态: ✅ 已验证 | 关联: ADR-20260423130348396
 
 ## 核心原则
 
@@ -86,7 +86,7 @@ lythoskill init lythos-embassy
 lythoskill init my-cold-pool
 ```
 
-个人或团队收集的所有第三方 skill，配合 `lythoskill-deck` 的冷池机制使用。CATALOG.md 的分类和 pitfall 检查可以复用。
+个人或团队收集的所有第三方 skill，配合 `lythoskill-deck` 的冷池机制使用。curator 产出的分类体系和 pitfall 检查可以复用。
 
 ## 决策树: 这个 skill 该放哪里?
 
@@ -120,6 +120,6 @@ lythoskill 的定位是 **治理复杂度、防止 skill 屎山**。如果它自
 
 ## 相关
 
-- CATALOG.md: 55 skills 全量索引与 dao-shu-qi-yong 分类
+- curator 本地扫描: 冷池 skill 的 dao-shu-qi-yong 分类示例（你的冷池内容不同，结果也不同）
 - ADR-20260423130348396: lythoskill-deck 移植决策（依赖分层原则）
 - `cortex/wiki/01-patterns/thin-skill-pattern.md`: 三层分离架构

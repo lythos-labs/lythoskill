@@ -9,7 +9,7 @@
 
 ## 背景与目标
 
-当前 curator 产出 markdown CATALOG.md 作为人类可读索引卡，以及 REGISTRY.json 作为 LLM 消费格式。但文件 grep 查询效率远低于 SQL 索引。
+当前 curator 产出 markdown catalog 作为人类可读索引卡（存放于 playground/，个人冷池扫描结果），以及 REGISTRY.json 作为 LLM 消费格式。但文件 grep 查询效率远低于 SQL 索引。
 
 SQL 版 curator 提供程序级查询能力（JOIN、WHERE、INDEX），和 markdown CATALOG 互补：
 - SQL → 程序消费（agent 快速查询）
@@ -70,7 +70,7 @@ bun packages/lythoskill-curator/src/cli.ts audit          # security report
 ```
 
 ## 验收标准
-- [ ] `curator index` 能在 5 秒内完成 55 个 skill 的扫描和入库
+- [ ] `curator index` 能在 5 秒内完成冷池全量扫描和入库（典型规模 30-100 skills）
 - [ ] `curator query` 支持任意 SQL，结果格式化输出为 markdown 表格
 - [ ] `curator recommend` 能返回 tiered 推荐（Core/Force Multiplier/Optional）
 - [ ] `curator audit` 标记所有 unverified ecosystem-bundle 的安全风险

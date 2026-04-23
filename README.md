@@ -88,6 +88,7 @@ lythoskill includes a scaffolding tool for authoring professional skills:
 ```bash
 # Scaffold a skill with TypeScript, testing, and dependency management
 bunx @lythos/skill-creator init my-skill
+cd my-skill
 
 # Develop in packages/my-skill/src/ (full dev experience)
 # Describe intent in packages/my-skill/skill/SKILL.md
