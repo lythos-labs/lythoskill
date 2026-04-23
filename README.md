@@ -9,6 +9,30 @@
 
 ---
 
+## The Silent Blend Problem
+
+You installed **gstack** for project management and **superpowers** for writing workflows. Both are high-assertiveness "dao"-level skills — they define *how* work should be done.
+
+You put both in `.claude/skills/`. The agent sees both. It doesn't crash, it doesn't complain. But half your tasks run with gstack rules and half with superpowers rules. Outputs are unpredictable. Bugs are silent.
+
+**This is the silent blend** — the most insidious failure mode in skill ecosystems. It happens when two skills that *must* be mutually exclusive are both visible to the agent.
+
+lythoskill-deck solves this with **deny-by-default**: undeclared skills are physically absent from `.claude/skills/`. Not "disabled". Not "deprioritized". **Gone.** The agent cannot see, consider, or be confused by them.
+
+```toml
+# Project A: only gstack
+[tool]
+skills = ["gstack"]
+
+# Project B: only superpowers
+[tool]
+skills = ["superpowers"]
+```
+
+Run `deck link` → each project sees exactly one "dao". No silent blend. No chaos.
+
+---
+
 ## Do I need this?
 
 An anti-corruption layer is only useful when complexity reaches a threshold. Before that, it is unnecessary abstraction.
@@ -46,9 +70,9 @@ lythoskill serves two distinct audiences. You can use either layer independently
 
 ### Layer A: Deck Governance — For Every Skill User
 
-You have 50+ skills. Your agent scans all of them, descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
+**The problem**: Your `.claude/skills/` is a zoo. 50+ skills from GitHub, skill hubs, and blog posts. Every time the agent starts, it scans everything — descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
 
-**lythoskill-deck fixes this at the filesystem level** with a Kubernetes-inspired declarative model:
+**The solution**: Declare which skills this project needs. Everything else disappears.
 
 ```bash
 # 1. Declare which skills this project needs
@@ -60,7 +84,7 @@ max_cards = 8
 skills = ["web-search", "project-scribe", "design-doc-mermaid"]
 EOF
 
-# 2. Sync — only declared skills become visible to the agent
+# 2. Sync — only these skills become visible to the agent
 bunx @lythos/skill-deck link
 
 # 3. Agent sees a clean working set. Everything else is physically absent.
@@ -75,6 +99,8 @@ ls .claude/skills/
 | No record of which skills were active | `skill-deck.lock` tracks every session's deck |
 | Context window wasted on irrelevant descriptions | `max_cards` budget enforces focus |
 | Skill overlap corrupts files undetected | `managed_dirs` overlap warnings |
+
+**Multi-role decks**: A curator agent sees only curator skills. An arena agent sees only arena skills. A scribe agent sees only scribe skills. Each agent gets a tailored deck — no cross-contamination, no bloated context.
 
 **Key principle**: lythoskill-deck does not download skills. It governs skills that already exist in your [cold pool](#cold-pool-convention). Filling the cold pool is your job (git clone, Vercel skills.sh, manual copy — whatever you prefer).
 
@@ -112,6 +138,32 @@ Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./co
 
 ---
 
+## Test Play: Tune Your Deck Like a Card Game
+
+Deck building in lythoskill works like a card game. You don't evaluate cards in a vacuum — you test them in the context of your deck.
+
+| Card game operation | Arena equivalent |
+|---|---|
+| **Pick a card**: A or B? | `--skills "A,B"` — single-skill comparison |
+| **Add a card**: Does C improve my deck? | `--decks "v1.toml,v1+C.toml"` — full deck comparison |
+| **Cut a card**: Is D dead weight? | `--decks "v1.toml,v1-D.toml"` — full deck comparison |
+| **Swap a card**: E instead of F? | `--decks "v1.toml,v1-E+F.toml"` — full deck comparison |
+| **Deck duel**: lythos vs superpowers? | `--decks "lythos.toml,superpowers.toml"` — full deck comparison |
+
+**Pareto analysis, not winner-takes-all**: When comparing full decks, the judge does not pick a "winner". It outputs a score vector across dimensions (quality, token efficiency, maintainability) and identifies the **Pareto frontier** — decks that are optimal for different trade-offs. A deck that is cheap but medium quality and a deck that is expensive but high quality can both be on the frontier. You choose based on what you value.
+
+```bash
+# Compare three full deck configurations
+bunx @lythos/skill-arena \
+  --task "Generate auth flow diagram" \
+  --decks "./decks/minimal.toml,./decks/rich.toml,./decks/superpowers.toml" \
+  --criteria "quality,token,maintainability"
+```
+
+**Emergent combos**: During test play, the judge may discover that three skills together produce a 1+1+1>3 effect that no individual skill can achieve — a combo that was never declared in any SKILL.md. These discoveries are written to the project's knowledge base (wiki/ADR) and inform future deck building.
+
+---
+
 ## Cold Pool Convention
 
 Your cold pool is where skills live when they are **not** active. It can grow without bound.
@@ -144,6 +196,18 @@ lythoskill uses a **Go module-style directory structure** for the cold pool:
 
 ---
 
+## Vision
+
+These are not yet implemented. They show where deck governance can go.
+
+**Replay & Observability**: Every agent step — which skill was active, what context it saw, what it decided — recorded as JSONL. Replay any session like a chess game. Analyze why the agent chose gstack rules in one task and superpowers in another.
+
+**Patch Skills from Failure Patterns**: Arena discovers the agent makes the same mistake across multiple tasks. A patch skill is auto-generated — a thin shim that intercepts the problematic pattern and corrects it before it reaches the main skill. Like a "bug fix" for agent behavior.
+
+**Infrastructure as Code for Agent Environments**: `skill-deck.toml` is not just a skill list — it is a complete environment definition. Check it into git, CI runs `deck link`, the agent environment is reproducible across machines, across time, across team members. Like `docker-compose.yml` for agent skills.
+
+---
+
 ## Ecosystem Tools
 
 | Tool | Layer | What it does |
@@ -151,7 +215,7 @@ lythoskill uses a **Go module-style directory structure** for the cold pool:
 | **lythoskill-deck** | A | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
 | **lythoskill-creator** | B | Scaffold and build thin-skill packages |
 | **lythoskill-curator** | A | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
-| **lythoskill-arena** | A | Benchmark skill effectiveness with controlled-variable decks |
+| **lythoskill-arena** | A | Benchmark skill/deck effectiveness with controlled-variable comparisons |
 | **lythoskill-project-cortex** | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
 | **lythoskill-project-scribe** | Both | Write project memory: handoffs, daily notes, pitfalls |
 | **lythoskill-project-onboarding** | Both | Read project memory with structured layer loading |
@@ -177,14 +241,14 @@ Cold Pool (storage)          Declaration (intent)         Working Set (runtime)
 
 ```
 Agent Platforms (Claude Code, Kimi, Codex)
-        ↑  ← 定义 SKILL.md 标准
-   .claude/skills/  ← 工作集（deck 管理）
+        ↑  ← define SKILL.md standard
+   .claude/skills/  ← working set (deck manages)
         ↑
-  lythoskill-deck  ← 声明式治理（防腐层）
+  lythoskill-deck  ← declarative governance (anti-corruption layer)
         ↑
-  skill-deck.toml  ← 人类声明期望状态
+  skill-deck.toml  ← human declares desired state
         ↑
-   Cold Pool       ← 用户自行填充（git clone, skills.sh, etc.）
+   Cold Pool       ← user fills (git clone, skills.sh, etc.)
         ↑
 Skill Sources (GitHub, Vercel, npm, internal repos)
 ```
@@ -212,6 +276,17 @@ bunx @lythos/project-cortex index
 # Cold pool curation
 bunx @lythos/skill-curator ~/.agents/skill-repos
 # → outputs ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
+
+# Arena test play
+bunx @lythos/skill-arena \
+  --task "Generate auth flow" \
+  --skills "design-doc-mermaid,mermaid-tools"
+
+# Arena full deck comparison (Pareto analysis)
+bunx @lythos/skill-arena \
+  --task "Generate auth flow" \
+  --decks "./decks/minimal.toml,./decks/rich.toml" \
+  --criteria "quality,token,maintainability"
 ```
 
 ---
