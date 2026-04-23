@@ -51,7 +51,7 @@ Agent Skills 的默认行为是**隐式发现**——agent 扫描 `.claude/skill
 ~/.agents/skill-repos/            ← 冷池：个人全量仓库（45+ skills）
   ├── cocoon-ai/
   ├── git-workflow/
-  ├── lythoskill-deck/               ← 包含 deck-link.ts、SKILL.md
+  ├── lythoskill-deck/               ← 包含 scripts/、SKILL.md
   ├── skill-arena/
   ├── report-generation-combo/
   └── ... 其他仓库和自定义 skills
@@ -128,21 +128,21 @@ path = ".claude/skills/_fix-encoding"
 expires = "2026-05-01"
 ```
 
-这些 section 只影响 deck-link 的同步行为，不影响 Kimi CLI 对单个 skill 的识别。
+这些 section 只影响 `lythoskill-deck link` 的同步行为，不影响 Kimi CLI 对单个 skill 的识别。
 
-## 自定义字段：sm_ 前缀规则
+## 自定义字段：deck_ 前缀规则
 
 lythoskill-deck 需要在 SKILL.md front matter 中携带私有元数据（niche、triggers、managed_dirs 等），但这些字段不是 Agent Skills 标准的一部分。
 
-为避免与官方标准或未来平台扩展冲突，**所有私有字段必须加 `sm_` 前缀**：
+为避免与官方标准或未来平台扩展冲突，**所有私有字段必须加 `deck_` 前缀**：
 
 | 旧字段 | 新字段 | 用途 |
 |--------|--------|------|
-| `niche` | `sm_niche` | 技能定位标签（如 `meta.governance.deck`） |
-| `triggers` | `sm_triggers` | 激活触发词 |
-| `dependencies` | `sm_dependencies` | 运行时依赖 |
-| `managed_dirs` | `sm_managed_dirs` | 管理的目录列表 |
-| `delegates` | `sm_delegates` | combo 路由规则 |
+| `niche` | `deck_niche` | 技能定位标签（如 `meta.governance.deck`） |
+| `triggers` | `deck_triggers` | 激活触发词 |
+| `dependencies` | `deck_dependencies` | 运行时依赖 |
+| `managed_dirs` | `deck_managed_dirs` | 管理的目录列表 |
+| `delegates` | `deck_delegates` | combo 路由规则 |
 
 > 若需完全标准兼容，可将所有自定义字段收敛到 `metadata` 命名空间下。
 
@@ -172,7 +172,9 @@ bash ~/.agents/skill-repos/lythoskill-deck/deck-migrate.sh
 ```bash
 # 编辑 skill-deck.toml（增删 skill）
 # 然后同步：
-bun run ~/.claude/skills/lythoskill-deck/deck-link.ts
+bunx @lythos/deck link
+# 或直接在 skill 目录下：
+# ./scripts/link.sh
 
 # 输出示例：
 #   🗑️  移除: old-skill
@@ -193,8 +195,8 @@ bash ~/.agents/skill-repos/lythoskill-deck/deck-status.sh
 
 ```bash
 # 新 agent 读 lock 文件即可理解当前 deck 状态
-cat skill-deck.lock | jq '.skills[] | {name, type, sm_niche, sm_managed_dirs}'
-# 然后执行 deck-link.ts 重建 symlink
+cat skill-deck.lock | jq '.skills[] | {name, type, deck_niche, deck_managed_dirs}'
+# 然后执行 lythoskill-deck link 重建 symlink
 ```
 
 ## Arena 集成：Deck Isolation 原则
@@ -228,7 +230,7 @@ cat skill-deck.lock | jq '.skills[] | {name, type, sm_niche, sm_managed_dirs}'
 |------|------|----------|------|
 | **重资产** | npm / pip / cli 工具 | 外部包管理器 | 架构图生成器、代码格式化器 |
 | **调度者** | thin skill（Flow / Combo） | `.claude/skills/` | 工作流编排、语义路由 |
-| **胶水/运维** | light skill（SKILL.md + `scripts/`） | `.claude/skills/` | deck-link.ts、ADR 模板初始化 |
+| **胶水/运维** | light skill（SKILL.md + `scripts/`） | `.claude/skills/` | lythoskill-deck link、ADR 模板初始化 |
 
 ### Flow 与 Combo 的相似性
 
@@ -249,19 +251,20 @@ lythoskill-deck 管理的是**哪些 skill 目录出现在 agent 能扫描到的
 
 **从不手动创建 `.claude/skills/` 目录下的子目录。**
 
-只通过 `deck-link.ts` 管理 symlink。手动创建的目录会导致：
+只通过 `lythoskill-deck link` 管理 symlink。手动创建的目录会导致：
 - deck-link 无法识别（不是 symlink）
 - 换 agent 后这些 skill 不会出现在 lock 文件中
 - 形成"幽灵 skill"——存在但不受治理
 
-唯一例外：transient skill 可以手动放在 `.claude/skills/_xxx/`（下划线前缀会被 deck-link 忽略）。
+唯一例外：transient skill 可以手动放在 `.claude/skills/_xxx/`（下划线前缀会被 lythoskill-deck link 忽略）。
 
 ## 完整命令参考
 
 | 命令 | 用途 | 依赖 |
 |------|------|------|
-| `bun run deck-link.ts` | toml → symlink 同步（reconciler） | bun, zod, @iarna/toml |
-| `bun run deck-link.ts --deck /path/to/deck.toml` | 指定非默认 toml | bun |
+| `bunx @lythos/deck link` | toml → symlink 同步（reconciler） | bun |
+| `bunx @lythos/deck link --deck /path/to/deck.toml` | 指定非默认 toml | bun |
+| `./scripts/link.sh` | 同上（直接调用 skill 脚本） | bash, bun |
 | `bash deck-migrate.sh` | 从肥胖目录迁移到 deck 治理 | 纯 bash |
 | `bash deck-status.sh` | 一致性诊断（只读） | 纯 bash |
 
@@ -272,4 +275,4 @@ lythoskill-deck 管理的是**哪些 skill 目录出现在 agent 能扫描到的
 - **transient expires**: 过期 = 警告
 - **managed_dirs 重叠**: 两个 skill 声明管理同一目录 = 警告（非阻断）
 - **type 严格校验**: `standard` 或 `flow` 之一，其他值导致 skill 被跳过
-- **sm_ 前缀**: 所有私有 front matter 字段必须加前缀
+- **deck_ 前缀**: 所有私有 front matter 字段必须加前缀
