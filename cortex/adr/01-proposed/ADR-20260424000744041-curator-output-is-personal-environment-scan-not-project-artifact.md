@@ -18,7 +18,11 @@ CATALOG.md 最初作为 curator 扫描冷池的「人类可读索引卡」被提
 ## 实用场景推演
 
 ### 场景 1: 个人开发者单机构建
-开发者运行 `curator index`（CLI 命令），扫描 `~/.agents/skill-repos/` 下自己的 40 个 skill。产出 catalog.db + REGISTRY.json。**期望**：这些文件留在用户数据目录（如 `~/.lythos/curator/`），供后续 `curator query`（CLI 查询）和 curator skill 的 recommend 推理消费。
+开发者运行 `curator index`（CLI 命令），扫描冷池下的 skill。冷池路径默认 `~/.agents/skill-repos/`，但可以在 skill-deck.toml 中指定 `cold_pool` 字段覆盖。
+
+产出 catalog.db + REGISTRY.json。**期望**：这些 index 文件放在用户数据目录（如 `~/.lythos/curator/`），供后续 `curator query`（CLI 查询）和 agent 推荐推理消费。
+
+**注意：index 文件不要放在 agent 默认扫描的位置**（如 `.claude/skills/`），否则会被当成普通 skill 加载，造成污染。
 
 ### 场景 2: 团队共享 Git 仓库
 如果 CATALOG.md 被提交到 git，新 clone 的队友会看到「55 skills」并困惑：「我本地只有 12 个，剩下 43 个去哪下载？」**后果**：误导性文档，团队认知失调。
