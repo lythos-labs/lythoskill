@@ -7,7 +7,8 @@
     "lythoskill-curator": "src/cli.ts"
   },
   "files": [
-    "src"
+    "src",
+    "README.md"
   ],
   "engines": {
     "bun": ">=1.0.0"

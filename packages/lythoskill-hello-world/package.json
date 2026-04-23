@@ -6,6 +6,7 @@
     "lythoskill-hello-world": "src/cli.ts"
   },
   "files": [
-    "src"
+    "src",
+    "README.md"
   ]
 }

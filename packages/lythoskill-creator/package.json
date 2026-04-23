@@ -5,5 +5,5 @@
   "bin": {
     "lythoskill-creator": "src/cli.ts"
   },
-  "files": ["src"]
+  "files": ["src", "README.md"]
 }

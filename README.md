@@ -56,6 +56,8 @@ git clone https://github.com/lythos-labs/lythoskill.git ~/.claude/skills/lythosk
 | **lythoskill-creator** | Scaffold and build lythoskill projects (`init`, `build`) | Core |
 | **lythoskill-deck** | Declarative skill deck governance (`link`, `status`, `migrate`) | Core |
 | **lythoskill-project-cortex** | GTD-style project management (ADR/Epic/Task/Wiki) | Core |
+| **lythoskill-arena** | Skill comparison benchmark with control-variable decks | Meta |
+| **lythoskill-curator** | Read-only cold pool observer, combo discovery, deck recommendations | Meta |
 | **lythoskill-hello-world** | Minimal zero-script skill example | Demo |
 
 ## Quick Start
@@ -74,6 +76,12 @@ bunx @lythos/skill-deck link
 bunx @lythos/project-cortex task "Fix login bug"
 bunx @lythos/project-cortex epic "User auth system"
 bunx @lythos/project-cortex adr "Choose database"
+
+# Compare skills with arena
+bunx @lythos/skill-arena --task "Generate auth flow diagram" --skills "skill-a,skill-b"
+
+# Index cold pool and get recommendations
+bunx @lythos/skill-curator --recommend "Document a feature with ADR and diagrams"
 ```
 
 ## Architecture
