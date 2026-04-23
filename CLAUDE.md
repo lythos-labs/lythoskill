@@ -144,4 +144,6 @@ Status directories use numeric prefixes for ordering (`01-`, `02-`, etc.). Docum
 
 All governance documents include a machine-parseable **Status History** table.
 
+**Always use CLI commands to create governance documents** — do not create ADR/Epic/Task files manually. The CLI handles template alignment and correct timestamp IDs. Playground examples exist in `cortex/epics/` and `cortex/tasks/` but are reference-only.
+
 **For full context on the project governance system, read `cortex/INDEX.md`.**
