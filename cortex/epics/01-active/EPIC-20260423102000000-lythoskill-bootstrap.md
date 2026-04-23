@@ -8,6 +8,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-04-23 | Migrated from old format |
+| active | 2026-04-23 | Published @lythos/skill-deck, @lythos/skill-creator, @lythos/project-cortex to npm |
+| active | 2026-04-23 | Created lythos-labs/lythoskill GitHub repo with CI/CD workflow |
 
 ## Background Story
 
@@ -22,15 +24,15 @@ Pattern name: **lythoskill** (lythos + skill, wordplay)
 - [x] **USR-002**: Build skill for distribution (build command)
 - [x] **USR-003**: Self-bootstrap — lythoskill is a lythoskill project itself
 - [x] **USR-004**: ESM-only, no require() in generated code
-- [ ] **USR-005**: 创建 lythoskill 生态三类核心角色的标准化模板
-  - skill-creator：已有 `skills/lythoskill-creator/`，需验证完整性并 build dist
-  - skill-builder：构建分发的标准化流程（当前仅有 build 命令，缺独立 skill 模板）
-  - skill-curator：技能池策展工具（尚未创建，需设计 SKILL.md + scripts）
-- [ ] **USR-006**: 定义并实施 lythos 生态命名规范与发布路径
-  - npm scope: `@lythos/*`
-  - PyPI prefix: `lythos-*`
-  - Skill prefix: `lythoskill-*`
-  - 当前仅停留在 AGENTS.md 计划段落，未实际注册/发布
+- [x] **USR-005**: 创建 lythoskill 生态核心角色模板
+  - skill-creator：✅ 已完成 `skills/lythoskill-creator/` + npm 发布 `@lythos/skill-creator`
+  - skill-builder：⚠️ 合入 creator（build 命令已可用，无需独立模板）
+  - skill-curator：⬜ 尚未创建（待后续迭代）
+- [x] **USR-006**: 定义并实施 lythos 生态命名规范与发布路径
+  - npm scope: `@lythos/*` ✅ 已注册并发布 `@lythos/skill-creator`, `@lythos/skill-deck`, `@lythos/project-cortex`
+  - GitHub org: `lythos-labs/` ✅ 已创建 `lythos-labs/lythoskill`
+  - PyPI prefix: `lythos-*` ⬜ 尚未注册（Python 技能待后续迭代）
+  - Skill prefix: `lythoskill-*` ✅ 已统一使用
 
 ## Technical Decisions
 
@@ -56,6 +58,9 @@ Skills:   lythoskill-* (trademarked prefix)
 2. **fence trick**: 模板字符串中嵌套反引号的唯一干净方式是 `` '`'.repeat(3) ``
 3. **Bun built-ins sufficient**: fs/path all built-in, zero external dependencies needed
 4. **Epic 粒度**: Epic 是里程碑，不是任务分类器。一个迭代周期（如 MVP）只应有一个 Epic，所有相关任务挂在其下。任务粒度用 Task 管理，Epic 粒度用"能否独立交付价值"判断
+5. **Skill naming alignment**: `lythoskill` = `lythos` + `skill`。npm 包名应加 `skill-` 前缀（`@lythos/skill-deck`）与 skill 名语义对齐。非 skill 工具（如 project-cortex）不需要前缀
+6. **Vercel skills 兼容**: `skills/` 目录必须提交到 Git，且 `SKILL.md` frontmatter 必须是合法 YAML（引号要包完整）
+7. **README.md 是 skill repo 的门面**: 必须有技能列表表格、安装方式、项目概述，否则 `npx skills add` 用户无法发现价值
 
 ## Related Tasks
 
@@ -71,3 +76,7 @@ Skills:   lythoskill-* (trademarked prefix)
 - [x] ESM require bug fixed in starterCli template
 - [x] Cortex governance docs complete
 - [x] Thin skill pattern documented in ADR + Wiki
+- [x] npm packages published and installable (`bunx @lythos/*` works)
+- [x] GitHub repo created with CI/CD workflow
+- [x] README.md for skill repo discoverability
+- [x] CLAUDE.md for agent developer guidance
