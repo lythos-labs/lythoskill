@@ -1,5 +1,11 @@
 {
   "name": "lythoskill-workspace",
   "private": true,
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "zod": "^4.3.6"
+  }
 }
