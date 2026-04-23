@@ -9,17 +9,17 @@
 
 ## 背景与目标
 
-当前 curator 产出 markdown catalog 作为人类可读索引卡（存放于 playground/，个人冷池扫描结果），以及 REGISTRY.json 作为 LLM 消费格式。但文件 grep 查询效率远低于 SQL 索引。
+当前 curator 产出 REGISTRY.json（结构化 JSON）和 catalog.db（SQLite）作为 agent 消费格式。CLI 已实现扫描+索引，但缺少交互式查询和审计能力。
 
-SQL 版 curator 提供程序级查询能力（JOIN、WHERE、INDEX），和 markdown CATALOG 互补：
-- SQL → 程序消费（agent 快速查询）
-- MD → 人类消费（阅读、编辑）
+SQL 版 curator 提供程序级查询能力（JOIN、WHERE、INDEX）：
+- catalog.db → 程序消费（agent 快速查询、人类 SQL 查询）
+- REGISTRY.json → LLM 消费（agent 推理推荐时读取）
 
 ## 需求详情
 - [ ] 设计 SQLite schema（skills / conflicts / tags / combos 表）
-- [ ] 实现 `curator index` CLI → scan 冷池 → 写入 catalog.db
-- [ ] 实现 `curator query "<sql>"` CLI → 查询并格式化输出
-- [ ] 实现 `curator recommend "task"` → 自然语言 → SQL → 推荐
+- [x] 实现 `curator index` CLI → scan 冷池 → 写入 catalog.db（已实现：REGISTRY.json + catalog.db 双输出）
+- [ ] 实现 `curator query "<sql>"` CLI → 查询 catalog.db 并格式化输出
+- [ ] ~~实现 `curator recommend`~~ → 推荐由 agent (LLM) 读取 REGISTRY.json/catalog.db 后推理完成，CLI 不做推荐（见 ADR-20260424000744041）
 - [ ] 实现 `curator audit` → 安全检查报告（依赖审计、权限审计）
 - [ ] 支持 `dao_shu_qi_yong` 字段的过滤和聚合查询
 - [ ] 和现有 curator 的 REGISTRY.json 格式保持兼容
@@ -63,18 +63,17 @@ CREATE TABLE tags (
 
 CLI 设计：
 ```bash
-bun packages/lythoskill-curator/src/cli.ts index         # scan → catalog.db
-bun packages/lythoskill-curator/src/cli.ts query "SELECT * FROM skills WHERE assertiveness = 'high'"
-bun packages/lythoskill-curator/src/cli.ts recommend "web scraping with PDF output"
+bun packages/lythoskill-curator/src/cli.ts index         # scan → catalog.db + REGISTRY.json
+bun packages/lythoskill-curator/src/cli.ts query "SELECT * FROM skills WHERE type = 'flow'"
 bun packages/lythoskill-curator/src/cli.ts audit          # security report
 ```
 
 ## 验收标准
 - [ ] `curator index` 能在 5 秒内完成冷池全量扫描和入库（典型规模 30-100 skills）
 - [ ] `curator query` 支持任意 SQL，结果格式化输出为 markdown 表格
-- [ ] `curator recommend` 能返回 tiered 推荐（Core/Force Multiplier/Optional）
+- [ ] ~~`curator recommend`~~ → 由 agent (LLM) 推理完成，不在 CLI 实现（见 ADR-20260424000744041）
 - [ ] `curator audit` 标记所有 unverified ecosystem-bundle 的安全风险
-- [ ] SQL 查询速度比 grep CATALOG.md 快 10x 以上
+- [ ] SQL 查询速度比 grep REGISTRY.json 快 10x 以上
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->

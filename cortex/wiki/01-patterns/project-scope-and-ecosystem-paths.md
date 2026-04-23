@@ -120,6 +120,6 @@ lythoskill 的定位是 **治理复杂度、防止 skill 屎山**。如果它自
 
 ## 相关
 
-- curator 本地扫描: 冷池 skill 的 dao-shu-qi-yong 分类示例（你的冷池内容不同，结果也不同）
+- ADR-20260424013849984: lythoskill 作为防腐层与 meta-governance 边界
 - ADR-20260423130348396: lythoskill-deck 移植决策（依赖分层原则）
 - `cortex/wiki/01-patterns/thin-skill-pattern.md`: 三层分离架构
