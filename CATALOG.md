@@ -31,6 +31,18 @@
 **关键规则**：同一 deck 中只能有一个 **道** 层 skill。多个道层同时激活 = 主见冲突 = agent 不知道听谁的。
 **术** 层可以组合多个 **器**。**用** 层负责翻译和冲突预警。
 
+### Metadata Pattern: Namespaced Prefixes
+
+不同平台对 frontmatter 字段有不同的限制和语义。lythos 用命名空间前缀统一 schema：
+
+| 前缀 | 含义 | 例子 | 目的 |
+|------|------|------|------|
+| (无) | 标准字段 | `name`, `description`, `type` | 跨平台兼容 |
+| `sm_` | skill-manager / lythos 私有 | `sm_niche`, `sm_managed_dirs` | 避开 Kimi CLI 等平台对非标准字段的限制 |
+| `deck_` | deck 治理 | `deck_max_cards`, `deck_priority` | deck 工具专属配置 |
+
+**背景**: Kimi CLI 只接受 `type: standard` 或 `type: flow`，`type: combo` 会被视为 invalid。lythos 用 `sm_` 前缀存储 combo 等扩展信息，避免与平台 frontmatter 校验冲突。
+
 ---
 
 ## Meta / Orchestration Layer
