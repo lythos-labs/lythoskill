@@ -29,26 +29,44 @@ CI  runner 没有 `~/.agents/skill-repos/`。如果构建流程依赖 CATALOG.md
 ### 场景 4: 跨项目复用冷池
 开发者同时维护 5 个项目，但只有一个冷池（`~/.agents/skill-repos/`）。每个项目的 skill-deck.toml 不同，但 curator 扫描的是同一批 skill。**结论**：扫描结果属于用户/环境，不属于任何特定项目。
 
-### 场景 5: Agent 使用 curator skill 为当前项目推荐 skills
-**这是 curator 的核心场景。Curator 是 thin skill，不是 CLI 工具。**
+### 场景 5: Agent 用 curator index 为当前项目推荐 deck
+**这是 curator 的核心场景。**
 
-Agent 进入一个新项目，读取 curator 的 SKILL.md。SKILL.md 告诉 agent：
-1. 扫描当前项目上下文（CLAUDE.md、skill-deck.toml、package.json、README、代码结构）
-2. 读取本地冷池的 catalog（catalog.db / REGISTRY.json）了解有什么 skills
-3. 用 LLM 推理分析两者匹配度：这个项目需要什么 skills？哪些 skills 形成 Pipeline/Modality Stack/Orchestrator-Engine 协同？
-4. 产出 tiered 推荐池（Core/Force Multiplier/Optional）
+Curator CLI 的职责很明确：
+1. 按照 agent skills 规范扫描冷池（`~/.agents/skill-repos/`）
+2. 提取每个 SKILL.md 的 frontmatter 元数据
+3. 生成 `REGISTRY.json` / `catalog.db`（本地索引）
 
-**产出是 agent 的推理结果，不是文件。** Agent 可以直接修改 skill-deck.toml，然后执行 `deck link`。
+然后 **agent（Claude Code）**读取这个 index，结合项目上下文做 LLM 推理：
+- 这个项目是什么类型？（web app、infra、开源维护...）
+- 当前 deck 里有什么 skills？
+- 冷池里还有什么 skills 可以补充？
+- 哪些 skills 形成 Pipeline/Modality Stack/Orchestrator-Engine 协同？
 
-**关键：curator 的「接口」是 SKILL.md 的 prompt 内容，不是 CLI 命令。** 就像 deck 的接口是 SKILL.md 里描述的「link/status/migrate」概念，最终由 agent 调用 `bunx @lythos/skill-deck link` 执行一样。
+**产出 tiered 推荐池（Core/Force Multiplier/Optional）是 agent 的推理结果，不是 curator CLI 算出来的。** Agent 可以直接修改 skill-deck.toml，然后执行 `deck link`。
+
+**分工：**
+| 角色 | 职责 |
+|------|------|
+| curator CLI | 扫描冷池 → 生成结构化 index |
+| agent (LLM) | 读 index + 项目上下文 → 推理推荐 |
+
+Curator SKILL.md 描述这个协作方式：CLI 做什么，agent 推理做什么。
 
 ### 场景 6: 团队 lead 的推荐结论分享
 团队 lead 在 Spring Boot 项目上让 agent 跑完 curator 推荐，产出的 tiered 推荐池写入项目 wiki 或 ADR。**其他开发者 clone 项目后，可以直接用这个推荐初始化自己的 skill-deck.toml**——前提是他们冷池里有这些 skills。如果缺少，curator discover 会告诉他们去哪找。
 
 **分享的是「推理结论」，不是「完整冷池扫描原始数据」。**
 
-### 场景 7: 未来 — 外部生态发现（尚未实现）
-当 curator 未来支持 web search 时，agent 可以用 curator skill 搜索 GitHub / skill hub，找到新 skills 下载到冷池，然后进入标准 pipeline（arena → adr → deck）。这是设计文档中的未来方向，不是当前已实现的能力。
+### 场景 7: 外部生态发现 — curator 定义的 workflow
+Curator SKILL.md 描述当本地冷池缺少合适 skill 时的 workflow：
+
+1. Agent 读取 curator SKILL.md 中的 discover 指引
+2. **Agent 用自己已有的 web search 工具**（不是 curator 提供的）搜索 skill hub / GitHub / registry
+3. 找到候选 skills，用 git clone 下载到冷池（`~/.agents/skill-repos/`）
+4. 进入标准 pipeline：arena 评测 → ADR 决策 → deck 集成
+
+**Curator 不实现 web search，也不提供 `discover` CLI 命令。** 它只是告诉 agent：「如果你冷池里没有合适的，去网上找，找到后 arena 测一下」。Agent 用自带工具执行。
 
 ## 选项
 
