@@ -13,4 +13,7 @@ skills = [
   "lythoskill-project-cortex",
   "lythoskill-arena",
   "lythoskill-curator",
+  "lythoskill-project-scribe",
+  "lythoskill-project-onboarding",
+  "lythoskill-red-green-release",
 ]
