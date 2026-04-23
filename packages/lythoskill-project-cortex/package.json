@@ -1,9 +1,11 @@
 {
   "name": "@lythos/project-cortex",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "Project governance CLI — tasks, epics, ADRs, wiki indexing",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "lythoskill-project-cortex": "src/cli.ts"
   },
-  "files": ["src", "README.md"]
+  "files": ["src", "README.md", "LICENSE"]
 }

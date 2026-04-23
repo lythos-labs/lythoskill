@@ -1,9 +1,11 @@
 {
   "name": "@lythos/skill-creator",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "description": "lythoskill scaffolding tool — init and build thin-skill packages",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "lythoskill-creator": "src/cli.ts"
   },
-  "files": ["src", "README.md"]
+  "files": ["src", "README.md", "LICENSE"]
 }
