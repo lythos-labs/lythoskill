@@ -32,6 +32,19 @@
 | 项目历史 | `daily/` | repo + git | 跨机器 | "这个项目今天发生了什么" |
 | 运行时 | session context | session | 当前窗口 | "我们刚才在聊什么" |
 
+**两个正交维度：**
+
+```
+            项目 A (lythoskill)     项目 B (你的 app)
+用户 1       daily/ + .claude/      daily/ + .claude/
+用户 2       daily/ + .claude/      daily/ + .claude/
+```
+
+- **水平轴**（`daily/`）：这个项目的工作手帐——人走，记忆在
+- **垂直轴**（`.claude/memory/`）：这个用户的偏好——项目换，偏好在
+
+两者缺一不可。`daily/` 不知道"你喜欢短回答"，`.claude/memory/` 不知道"我们在做 curator gateway"。
+
 **关键区别**：
 - `.claude/memory/` 是**关于你**的记忆——换个项目还在，换台机器可能丢
 - `daily/` 是**关于项目**的记忆——clone repo 就有了，任何 agent CLI 都能读
