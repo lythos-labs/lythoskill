@@ -33,7 +33,7 @@ bun packages/lythoskill-project-cortex/src/cli.ts <command>
 ```bash
 bunx lythoskill init <project-name>
 bunx lythoskill build <skill-name>
-bunx @lythos/deck link
+bunx @lythos/skill-deck link
 bunx @lythos/project-cortex <command>
 ```
 
@@ -84,7 +84,7 @@ Skill   (packages/<name>/skill/) -> lythoskill build -> SKILL.md + thin scripts
 Output  (skills/<name>/)         -> committed to Git -> final agent-visible skill
 ```
 
-- **Starter**: The npm package (`@lythos/creator`, `@lythos/deck`, `@lythos/project-cortex`). Contains all implementation logic, dependencies, and CLI entry points. Agents do not read this code directly.
+- **Starter**: The npm package (`@lythos/skill-creator`, `@lythos/skill-deck`, `@lythos/project-cortex`). Contains all implementation logic, dependencies, and CLI entry points. Agents do not read this code directly.
 - **Skill**: Lives in `packages/<name>/skill/`. Contains only `SKILL.md` (intent description) and `scripts/` (thin routers that call `bunx <starter> <command>`). `SKILL.md` has no knowledge of dependencies.
 - **Output**: The `skills/` directory contains the built output. **`skills/` is build output that must be committed to Git** so agent users can clone and use skills without building. It is also the standard discoverable directory structure for skill platforms (e.g. Vercel skills) to consume directly.
 

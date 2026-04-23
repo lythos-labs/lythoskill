@@ -1,9 +1,9 @@
 {
-  "name": "@lythos/creator",
+  "name": "@lythos/skill-creator",
   "version": "0.1.0",
   "type": "module",
   "bin": {
-    "lythoskill-creator": "./src/cli.ts"
+    "lythoskill-creator": "src/cli.ts"
   },
   "files": ["src"]
 }

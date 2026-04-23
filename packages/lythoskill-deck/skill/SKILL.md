@@ -172,7 +172,7 @@ bash ~/.agents/skill-repos/lythoskill-deck/deck-migrate.sh
 ```bash
 # 编辑 skill-deck.toml（增删 skill）
 # 然后同步：
-bunx @lythos/deck link
+bunx @lythos/skill-deck link
 # 或直接在 skill 目录下：
 # ./scripts/link.sh
 
@@ -262,8 +262,8 @@ lythoskill-deck 管理的是**哪些 skill 目录出现在 agent 能扫描到的
 
 | 命令 | 用途 | 依赖 |
 |------|------|------|
-| `bunx @lythos/deck link` | toml → symlink 同步（reconciler） | bun |
-| `bunx @lythos/deck link --deck /path/to/deck.toml` | 指定非默认 toml | bun |
+| `bunx @lythos/skill-deck link` | toml → symlink 同步（reconciler） | bun |
+| `bunx @lythos/skill-deck link --deck /path/to/deck.toml` | 指定非默认 toml | bun |
 | `./scripts/link.sh` | 同上（直接调用 skill 脚本） | bash, bun |
 | `bash deck-migrate.sh` | 从肥胖目录迁移到 deck 治理 | 纯 bash |
 | `bash deck-status.sh` | 一致性诊断（只读） | 纯 bash |

@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/4/23 18:27:03
+> 自动生成于 2026/4/23 19:10:44
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 5 | 进行中: 0, 待验收: 0, 已完成: 2 |
-| Epics | 1 | 活跃: 1, 已归档: 0 |
-| ADRs | 5 | 已接受: 4 |
+| Tasks | 6 | 进行中: 0, 待验收: 0, 已完成: 2 |
+| Epics | 2 | 活跃: 2, 已归档: 0 |
+| ADRs | 6 | 已接受: 4 |
 
 ---
 
@@ -17,6 +17,7 @@
 ### 进行中
 
 - **EPIC-20260423102000000**: lythoskill MVP — Initial Release
+- **EPIC-20260423185732845**: Playground Epic
 
 ### 已归档
 
@@ -26,11 +27,12 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (4)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
 - [ ] **TASK-20260423162055407**: Port skill-curator to lythoskill ecosystem
+- [ ] **TASK-20260423185733611**: Playground Task
 
 ### 进行中 (0)
 
@@ -62,6 +64,7 @@ _无_
 - ✅ **ADR-20260423124812645** (02-accepted): Build output should live in skills/ and be committed to Git
 - ✅ **ADR-20260423130348396** (02-accepted): Port skill-manager into lythoskill ecosystem as deck governance
 - 🤔 **ADR-20260423182606313** (01-proposed): SKILL.md Template Variable Substitution and CLI Help Delegation
+- 🤔 **ADR-20260423191001406** (01-proposed): Deck npm Package Naming
 
 ---
 
