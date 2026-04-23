@@ -6,9 +6,9 @@
  */
 
 import {
-  existsSync, mkdirSync, writeFileSync,
+  existsSync, mkdirSync, writeFileSync, readFileSync,
 } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, resolve, basename } from 'node:path'
 
 // ── 简单的 slugify ──────────────────────────────────────────
 function slugify(input: string): string {
@@ -220,6 +220,242 @@ ID:        ${ARENA_ID}
 `)
 }
 
+// ── Viz: Report Visualizer ─────────────────────────────────
+
+interface ScoreRow {
+  checkpoint: string
+  scores: Record<string, number>
+  notes: string
+  maxScore: number
+}
+
+function parseReportMd(reportPath: string): { title: string; rows: ScoreRow[]; summary?: Record<string, number> } | null {
+  if (!existsSync(reportPath)) return null
+  const text = readFileSync(reportPath, 'utf-8')
+
+  // Extract title
+  const titleMatch = text.match(/^#\s+(.+)$/m)
+  const title = titleMatch ? titleMatch[1].trim() : 'Arena Report'
+
+  const lines = text.split('\n')
+  const rows: ScoreRow[] = []
+  const summaries: Record<string, number> = {}
+
+  let currentSection = ''
+  let inTable = false
+  let headers: string[] = []
+
+  for (const line of lines) {
+    const trimmed = line.trim()
+
+    // Detect section headers like "### Memory Condition" or "### Control Condition"
+    const sectionMatch = trimmed.match(/^#{2,4}\s+(.*Condition.*|.*Variable.*|.*Group.*)/i)
+    if (sectionMatch) {
+      currentSection = sectionMatch[1].replace(/[()]/g, '').trim()
+      inTable = false
+      continue
+    }
+
+    // Table header row
+    if (trimmed.startsWith('|') && trimmed.includes('Checkpoint') && !trimmed.includes('---')) {
+      inTable = true
+      const parts = trimmed.split('|').map(s => s.trim()).filter(Boolean)
+      headers = parts.slice(1)
+      continue
+    }
+
+    // Table separator
+    if (inTable && trimmed.startsWith('|') && trimmed.includes('---')) continue
+
+    // Table data row
+    if (inTable && trimmed.startsWith('|')) {
+      const parts = trimmed.split('|').map(s => s.trim()).filter(Boolean)
+      if (parts.length >= 2) {
+        const firstCell = parts[0]
+        const checkpoint = firstCell.replace(/\*\*/g, '').trim()
+
+        // Skip "Total" rows — handle them as summary
+        if (/^total/i.test(checkpoint)) {
+          for (let i = 1; i < parts.length && i <= headers.length; i++) {
+            const num = parseFloat(parts[i])
+            if (!isNaN(num)) {
+              const key = currentSection
+                ? `${currentSection} ${headers[i - 1]}`.trim()
+                : headers[i - 1]
+              summaries[key] = num
+            }
+          }
+          continue
+        }
+
+        // Skip non-numeric rows (section headers inside table)
+        const secondCell = parts[1]
+        if (isNaN(parseFloat(secondCell))) continue
+
+        const scores: Record<string, number> = {}
+        let maxScore = 0
+        for (let i = 1; i < parts.length && i <= headers.length; i++) {
+          const header = headers[i - 1]
+          if (/notes?/i.test(header)) continue // Skip notes column
+          const val = parts[i]
+          const num = parseFloat(val)
+          if (!isNaN(num)) {
+            // Prefix with section name if multiple condition tables exist
+            const key = currentSection && headers.length <= 2
+              ? `${currentSection} Score`
+              : header
+            scores[key] = num
+            maxScore = Math.max(maxScore, num)
+          }
+        }
+
+        const notes = parts[parts.length - 1] || ''
+        if (Object.keys(scores).length > 0) {
+          rows.push({ checkpoint, scores, notes, maxScore })
+        }
+      }
+      continue
+    }
+
+    // End of table
+    if (inTable && !trimmed.startsWith('|') && trimmed !== '') {
+      inTable = false
+      currentSection = ''
+    }
+  }
+
+  return { title, rows, summary: Object.keys(summaries).length > 0 ? summaries : undefined }
+}
+
+function renderBar(value: number, max: number, width = 30): string {
+  const filled = Math.round((value / max) * width)
+  const empty = width - filled
+  return '█'.repeat(filled) + '░'.repeat(empty)
+}
+
+function renderAsciiChart(report: NonNullable<ReturnType<typeof parseReportMd>>): string {
+  const { title, rows, summary } = report
+  const participants = rows.length > 0 ? Object.keys(rows[0].scores) : []
+  const maxVal = rows.reduce((m, r) => Math.max(m, r.maxScore), 0) || 10
+
+  let out = `\n╔══════════════════════════════════════════════════════════════════════╗\n`
+  out += `║  🏆 ${title.slice(0, 58).padEnd(58)} ║\n`
+  out += `╚══════════════════════════════════════════════════════════════════════╝\n\n`
+
+  // Per-checkpoint bars
+  for (const row of rows) {
+    out += `📋 ${row.checkpoint}\n`
+    for (const [name, score] of Object.entries(row.scores)) {
+      const bar = renderBar(score, maxVal)
+      out += `   ${name.padEnd(12)} ${bar} ${score}/${maxVal}\n`
+    }
+    if (row.notes) {
+      out += `   💡 ${row.notes.slice(0, 80)}${row.notes.length > 80 ? '...' : ''}\n`
+    }
+    out += '\n'
+  }
+
+  // Summary totals
+  if (summary) {
+    out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`
+    out += `📊 TOTAL SCORES\n`
+    for (const [name, score] of Object.entries(summary)) {
+      const bar = renderBar(score, maxVal * rows.length)
+      out += `   ${name.padEnd(12)} ${bar} ${score}\n`
+    }
+    out += '\n'
+  }
+
+  return out
+}
+
+function renderRadarChart(report: NonNullable<ReturnType<typeof parseReportMd>>): string {
+  const { rows } = report
+  if (rows.length === 0) return ''
+
+  const participants = Object.keys(rows[0].scores)
+  if (participants.length < 2) return ''
+
+  // Use checkpoint names as axes
+  const axes = rows.map(r => r.checkpoint.slice(0, 12))
+  const maxVal = rows.reduce((m, r) => Math.max(m, ...Object.values(r.scores)), 0) || 10
+
+  // Simple ASCII radar: concentric circles with labels
+  const size = 16
+  const center = size / 2
+  let out = `\n🕸️  RADAR CHART (MOO Scoring)\n\n`
+
+  // For each participant, show a compact radar representation
+  const symbols = ['■', '●', '▲', '◆', '★']
+  for (let pi = 0; pi < participants.length; pi++) {
+    const p = participants[pi]
+    const sym = symbols[pi % symbols.length]
+    out += `  ${sym} ${p}\n`
+  }
+  out += '\n'
+
+  // Per-axis score table (more readable than pure ASCII art)
+  out += `  Axis          `
+  for (const p of participants) out += `${p.slice(0, 8).padStart(8)} `
+  out += '\n'
+  out += `  ${'─'.repeat(14 + participants.length * 9)}\n`
+
+  for (let i = 0; i < rows.length; i++) {
+    const axis = axes[i].padEnd(12)
+    out += `  ${axis} `
+    for (const p of participants) {
+      const score = rows[i].scores[p] ?? 0
+      out += `${String(score).padStart(8)} `
+    }
+    out += '\n'
+  }
+
+  return out
+}
+
+function runViz(argv: string[]) {
+  const arenaDir = argv.find(a => !a.startsWith('-')) || '.'
+  const resolvedDir = resolve(arenaDir)
+
+  const arenaJsonPath = join(resolvedDir, 'arena.json')
+  const reportPath = join(resolvedDir, 'report.md')
+
+  if (!existsSync(arenaJsonPath)) {
+    console.error(`❌ 找不到 arena.json: ${arenaJsonPath}`)
+    process.exit(1)
+  }
+
+  const arenaJson = JSON.parse(readFileSync(arenaJsonPath, 'utf-8'))
+  const meta = arenaJson.metadata
+
+  console.log(`\n🎮 Arena Viz: ${meta.id}`)
+  console.log(`   任务: ${meta.task_description}`)
+  console.log(`   参与者: ${meta.participants.map((p: any) => p.name).join(', ')}`)
+
+  if (!existsSync(reportPath)) {
+    console.log(`\n⏳ report.md 尚未生成，请先运行 Judge`)
+    return
+  }
+
+  const report = parseReportMd(reportPath)
+  if (!report || report.rows.length === 0) {
+    console.log(`\n⚠️  无法从 report.md 解析评分数据`)
+    return
+  }
+
+  console.log(renderAsciiChart(report))
+  console.log(renderRadarChart(report))
+}
+
+// ── Main Entry ───────────────────────────────────────────────
+
 if (import.meta.main) {
-  runArena(process.argv.slice(2))
+  const args = process.argv.slice(2)
+  const cmd = args[0]
+
+  if (cmd === 'viz') {
+    runViz(args.slice(1))
+  } else {
+    runArena(args)
+  }
 }

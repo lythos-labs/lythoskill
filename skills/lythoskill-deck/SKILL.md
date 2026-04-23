@@ -6,10 +6,11 @@ type: standard
 description: |
   项目级 Skill Working Set 的声明式管理器。解决"下载了 50+ 个 skill 堆在系统目录里导致 agent 选择困难、同类 skill 静默冲突、context 被无关 description 污染"的问题。
 
-  核心机制：
+  核心机制（类似 Kubernetes 声明式配置）：
   - **冷池（Cold Pool）**: 个人全量 skill 仓库（~/.agents/skill-repos/），纯存储，agent 不扫描
   - **工作集（Working Set）**: 项目级 skills 目录（.claude/skills/），只有 symlink，agent 实际扫描
-  - **skill-deck.toml**: 显式声明"本项目只用这些 skill"
+  - **skill-deck.toml**: 声明期望状态（"本项目只用这些 skill"），类似 K8s Deployment
+  - **deck link**: 调谐器（reconciler），让实际 working set 收敛到声明状态
   - **deny-by-default**: 未声明的 skill 从文件系统层面不可见
   - **max_cards 预算**: 硬约束，超预算拒绝同步
   - **managed_dirs 重叠检测**: 两个 skill 管理同一目录时告警
@@ -79,8 +80,9 @@ Agent Skills 的默认行为是**隐式发现**——agent 扫描 `.claude/skill
 | 概念 | 类比 | 本质 |
 |------|------|------|
 | **冷池（Cold Pool）** | 游戏库 / 卡组收藏 | 你的全部 skill，agent 看不到 |
-| **skill-deck.toml** | 卡组构筑清单 | 人类编辑的"本次出战名单" |
-| **.claude/skills/** | 战场 / 当前手牌 | agent 能扫描到的唯一位置 |
+| **skill-deck.toml** | K8s Deployment / 卡组构筑清单 | 声明期望状态："最终应该是这样" |
+| **deck link** | K8s Controller / `kubectl apply` | 调谐器：让实际状态收敛到期望状态 |
+| **.claude/skills/** | 战场 / 当前手牌 | agent 能扫描到的唯一位置（实际状态） |
 | **skill-deck.lock** | 战斗记录 / 公证文件 | 记录链接状态、哈希、约束，换 agent 可读 |
 
 ### deny-by-default

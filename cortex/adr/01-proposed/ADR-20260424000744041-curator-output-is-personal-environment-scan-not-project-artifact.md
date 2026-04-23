@@ -73,7 +73,28 @@ Curator SKILL.md 描述当本地冷池缺少合适 skill 时的 workflow：
 3. 找到候选 skills，用 git clone 下载到冷池（`~/.agents/skill-repos/`）
 4. 进入标准 pipeline：arena 评测 → ADR 决策 → deck 集成
 
-**Curator 不实现 web search，也不提供 `discover` CLI 命令。** 它只是告诉 agent：「如果你冷池里没有合适的，去网上找，找到后 arena 测一下」。Agent 用自带工具执行。
+**Curator 不实现 web search，也不提供 `discover` CLI 命令。**
+
+为什么？因为 agent skills 的机制接近**容器化和控制反转（IoC）**：
+
+| 概念 | 软件工程 | Agent Skills |
+|------|---------|-------------|
+| **容器** | Docker 镜像 | `.claude/skills/` working set |
+| **容器配置** | Dockerfile / docker-compose.yml | `skill-deck.toml` |
+| **容器编排** | `docker run` / `kubectl apply` | `lythoskill-deck link` |
+| **IoC 容器** | Spring / Dagger | deck governance（deny-by-default） |
+| **依赖注入** | `@Autowired` / constructor injection | `cooperative_skills` 声明 |
+| **服务发现** | Consul / Eureka | curator index（REGISTRY.json） |
+
+**控制反转的核心**：不是 agent 主动"找"skills，而是 deck 决定 agent "能看"到什么。agent 只扫描 `.claude/skills/`，它看到什么就激活什么。
+
+**skill combo 原则**：curator 需要 web search 能力时，不自己实现一份，而是：
+1. 在 SKILL.md frontmatter 中声明 `cooperative_skills: [web-search]`
+2. Agent 读取 workflow 时发现需要 web search → 检查当前 deck 是否有 web-search skill
+3. 如果有：组合使用（curator 提供 workflow，web-search 提供搜索能力）
+4. 如果没有：curator workflow 提示 "需要 web-search skill，请添加到 deck"
+
+这和"每个技能都内嵌一个 web search"的重复实现方式完全不同。**combo 是声明式组合，不是嵌入式依赖。**
 
 ## 选项
 
