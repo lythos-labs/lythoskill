@@ -2,20 +2,22 @@
 name: project-cortex
 description: |
   GTD-style project management workflow with numeric-prefixed directories (01-, 02-, etc.)
-  combining ADR (Architecture Decision Records), Epic (requirement tracking), and Task 
+  combining ADR (Architecture Decision Records), Epic (requirement tracking), and Task
   (execution cards). Directories are ordered by workflow stage for easy navigation.
-  
+
   Use this skill when managing software development projects with:
   - Architecture decisions that need documentation and review
   - Feature development that needs requirement tracing
   - Task delegation to subagents with clear acceptance criteria
   - Git-based version control with semantic versioning
-  
-  This workflow creates a structured system: Epics track "why" (requirements origins), 
+
+  This workflow creates a structured system: Epics track "why" (requirements origins),
   ADRs track "how" (technical decisions), Tasks track "what" (executable work).
-  
-  **Key Feature**: Numeric prefixes (01-inbox, 02-backlog, etc.) ensure directories 
+
+  **Key Feature**: Numeric prefixes (01-backlog, 02-in-progress, etc.) ensure directories
   appear in GTD workflow order in file listings.
+  **ID Feature**: Timestamp-based IDs (`PREFIX-yyyyMMddHHmmssSSS`) avoid collision
+  without a central database.
 ---
 
 # Project Cortex: ADR + Epic + Task + Wiki
@@ -23,9 +25,8 @@ description: |
 > **核心原则: 自动化优于记忆 (Automation > Memory)**
 >
 > 不要依赖记忆，使用自动化脚本确保一致性：
-> - `task-cli.ts` - 自动分配 ID，避免冲突
-> - `generate-index.ts` - 自动生成项目索引
-> - `.task-id-db.json` - 自增 ID 数据库
+> - `@lythos/project-cortex` CLI — 自动分配 timestamp ID，生成模板，避免冲突
+> - `generate-index.ts` — 自动生成项目索引
 
 A structured project management system for AI-assisted software development.
 
@@ -52,38 +53,136 @@ This workflow creates three interconnected systems:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Prerequisites
+
+- Bun runtime (scripts use `bunx`)
+- `@lythos/project-cortex` published to npm (or available via workspace link)
+
+## Scripts / CLI Commands
+
+All commands are thin wrappers around `@lythos/project-cortex`:
+
+### Create Task
+```bash
+bunx @lythos/project-cortex task "修复登录 bug"
+```
+
+### Create Epic
+```bash
+bunx @lythos/project-cortex epic "用户认证系统"
+```
+
+### Create ADR
+```bash
+bunx @lythos/project-cortex adr "选择数据库方案"
+```
+
+### Init Workflow
+Initialize cortex directory structure in current project:
+```bash
+bunx @lythos/project-cortex init
+```
+
+### Generate Index
+Auto-generate `INDEX.md` and `cortex/wiki/INDEX.md`:
+```bash
+bunx @lythos/project-cortex index
+```
+
+Generated `INDEX.md` example:
+```markdown
+# Project Index
+
+## 概览
+| 类型 | 总数 | 活跃/完成 |
+|------|------|----------|
+| Tasks | 5 | 进行中: 0, 已完成: 2 |
+| Epics | 1 | 活跃: 1, 已归档: 0 |
+| ADRs | 5 | 已接受: 4 |
+
+## Epics
+- **EPIC-20260423102000000**: lythoskill MVP — Initial Release
+
+## Tasks
+- [ ] TASK-20260423124059736: Create skill templates
+- ✅ ~~TASK-20260423102009000~~: Generate project files
+
+## ADRs
+- ✅ ADR-20260423101938000 (accepted): Thin Skill Pattern
+```
+
+### List Items
+```bash
+bunx @lythos/project-cortex list    # list tasks, epics, adrs
+bunx @lythos/project-cortex stats   # project statistics
+bunx @lythos/project-cortex next-id # show ID format example
+```
+
+### Probe Status (防腐检查)
+扫描所有文件，检查内部状态记录与所在目录是否一致。发现不一致时暴露出来，**由人工确认真实状态**后决定是移动文件还是更新记录。
+
+```bash
+bunx @lythos/project-cortex probe
+```
+
+检查规则：
+- 支持 `## Status History`（新格式）和 `## Status`（旧格式）
+- 目录位置是真相来源（source of truth）
+- 无法判断时标记为 `❓`，必须人工确认
+- **不自动修复**，只暴露问题
+
 ## Directory Structure
 
+After `init`, current project gets:
+
 ```
-project/
-├── cortex/adr/
+cortex/
+├── adr/
 │   ├── ADR-TEMPLATE.md
-│   ├── 01-proposed/        # Proposed ADRs
-│   ├── 02-accepted/        # Accepted ADRs
-│   ├── 03-rejected/        # Rejected ADRs
-│   └── 04-superseded/      # Superseded ADRs
-├── cortex/wiki/
-│   ├── README.md
-│   ├── 01-patterns/        # Reusable solutions
-│   ├── 02-faq/             # Common questions
-│   └── 03-lessons/         # Retrospectives
-├── cortex/epics/
+│   ├── 01-proposed/
+│   ├── 02-accepted/
+│   ├── 03-rejected/
+│   └── 04-superseded/
+├── epics/
 │   ├── EPIC-TEMPLATE.md
-│   ├── 01-active/          # Active epics
-│   └── 02-archived/        # Archived epics
-├── cortex/tasks/                   # GTD workflow (数字前缀排序)
-│   ├── 01-inbox/           # Capture - 新想法
-│   ├── 02-backlog/         # Clarify - 待办任务
-│   ├── 03-in-progress/     # Engage - 进行中
-│   ├── 04-review/          # 待验收
-│   ├── 05-completed/       # 已完成
-│   └── 06-archived/        # 归档
-├── build/
-│   └── coverage/           # Coverage reports
-└── skills/lythoskill-project-cortex/  (this skill)
+│   ├── 01-active/
+│   └── 02-archived/
+├── tasks/
+│   ├── TASK-TEMPLATE.md
+│   ├── 01-backlog/      # Capture + Clarify
+│   ├── 02-in-progress/  # Engage
+│   ├── 03-review/       # 待验收
+│   ├── 04-completed/    # 正常完成
+│   ├── 05-suspended/    # 悬置/阻塞（可恢复）
+│   ├── 06-terminated/   # 终止/取消（非正常结束）
+│   └── 07-archived/     # 最终归档
+└── wiki/
+    ├── README.md
+    ├── 01-patterns/     # Reusable solutions
+    ├── 02-faq/          # Common questions
+    └── 03-lessons/      # Retrospectives
 ```
 
 **Note**: 使用数字前缀（01-, 02-）确保目录按 GTD 流程排序显示。
+
+## ID Format
+
+All items use **timestamp-based IDs** — no central database, no sequential counter:
+
+| Type | Example |
+|------|---------|
+| Task | `TASK-20250420120000000` |
+| Epic | `EPIC-20250420120100000` |
+| ADR  | `ADR-20250420120200000` |
+
+Format: `PREFIX-yyyyMMddHHmmssSSS` (17 digits)
+
+Benefits:
+- **Collision-free**: No two items created at different milliseconds share an ID
+- **Self-sorting**: Files sort chronologically by ID
+- **No registry**: No `.task-id-db.json` or counter file to maintain
+
+---
 
 ## Quick Start
 
@@ -94,7 +193,7 @@ project/
 mkdir -p cortex/adr/{01-proposed,02-accepted,03-rejected,04-superseded}
 mkdir -p cortex/wiki/{01-patterns,02-faq,03-lessons}
 mkdir -p cortex/epics/{01-active,02-archived}
-mkdir -p cortex/tasks/{01-inbox,02-backlog,03-in-progress,04-review,05-completed,06-archived}
+mkdir -p cortex/tasks/{01-backlog,02-in-progress,03-review,04-completed,05-suspended,06-terminated,07-archived}
 
 # Copy templates
 cp ./assets/ADR-TEMPLATE.md cortex/adr/
@@ -102,12 +201,19 @@ cp ./assets/EPIC-TEMPLATE.md cortex/epics/
 cp ./assets/TASK-TEMPLATE.md cortex/tasks/
 ```
 
+Or simply:
+```bash
+bunx @lythos/project-cortex init
+```
+
 ### 2. Start with an Epic
 
-Create `cortex/epics/01-active/EPIC-001-feature-name.md`:
+> 💡 **看不懂模板？** 查看 `cortex/epics/01-active/EPIC-20260423185732845-playground-epic.md` — 这是用 CLI 生成的真实示例文件。
+
+Create `cortex/epics/01-active/EPIC-20250420120100000-feature-name.md`:
 
 ```markdown
-# EPIC-001: Feature Description
+# EPIC-20250420120100000: Feature Description
 
 ## Background Story
 Why does this feature exist? What problem does it solve?
@@ -118,13 +224,13 @@ Why does this feature exist? What problem does it solve?
 - **Trigger**: What event triggered this need?
 - **Requirement**: What needs to be built?
 - **Implementation**: How was it solved?
-- **Output**: TASK-XXX
+- **Output**: TASK-<timestamp>
 - **Validation**: How to verify?
 
 ## Related Tasks
 | Task | Status | Description |
 |------|--------|-------------|
-| TASK-001 | ⬜ | ... |
+| TASK-20250420143321029 | ⬜ | ... |
 
 ## Lessons Learned
 
@@ -138,15 +244,17 @@ Why does this feature exist? What problem does it solve?
 When facing technical choices, create an ADR in `cortex/adr/01-proposed/`:
 
 ```bash
-# Create ADR
-cat > cortex/adr/01-proposed/ADR-001-technology-choice.md << 'EOF'
-# ADR-001: Technology Choice
+# Create ADR (CLI automatically assigns timestamp ID)
+bunx @lythos/project-cortex adr "选择数据库方案"
+# Output: cortex/adr/01-proposed/ADR-20250420120200000-choose-database.md
+```
+
+Content:
+```markdown
+# ADR-20250420120200000: 选择数据库方案
 
 ## Status
-- [ ] Proposed
-- [ ] Accepted
-- [ ] Rejected
-- [ ] Superseded
+- [x] Proposed
 
 ## Context
 What is the problem we're solving?
@@ -155,10 +263,10 @@ What is the problem we're solving?
 
 ### Option A: ...
 **Pros**:
-- 
+-
 
 **Cons**:
-- 
+-
 
 ### Option B: ...
 
@@ -171,24 +279,33 @@ What is the problem we're solving?
 - Positive: ...
 - Negative: ...
 - Follow-up: ...
-EOF
 ```
 
 Move to `cortex/adr/02-accepted/` once decided.
 
 ### 4. Create and Delegate Tasks
 
-From Epic or ADR, create executable tasks in `cortex/tasks/02-backlog/`:
+> 💡 **看不懂模板？** 查看 `cortex/tasks/01-backlog/TASK-20260423185733611-playground-task.md` — 这是用 CLI 生成的真实示例文件。
+
+From Epic or ADR, create executable tasks in `cortex/tasks/01-backlog/`:
 
 ```bash
-cat > cortex/tasks/02-backlog/TASK-001-specific-work.md << 'EOF'
-# TASK-001: Specific Work
+# Create Task (CLI automatically assigns timestamp ID)
+bunx @lythos/project-cortex task "具体工作内容"
+# Output: cortex/tasks/01-backlog/TASK-20250422143321029-specific-work.md
+```
 
-## Status
-- [x] backlog
+Content:
+```markdown
+# TASK-20250422143321029: Specific Work
+
+## Status History
+| Status | Date | Note |
+|--------|------|------|
+| backlog | 2025-04-22 | Created |
 
 ## Background
-Link to EPIC-001 / ADR-001
+Link to EPIC-20250420120100000 / ADR-20250420120200000
 
 ## Requirements
 - [ ] Requirement 1
@@ -210,12 +327,11 @@ Implementation details...
 
 ## Git Commit
 ```
-feat(scope): description (TASK-001)
+feat(scope): description (TASK-20250422143321029)
 
 - Detail 1
 - Detail 2
 ```
-EOF
 ```
 
 ### Task Milestone 协议（防 endless 调研 / 伪完成）
@@ -239,8 +355,8 @@ EOF
 
 ### 明确不交付（超出当前里程碑）
 
-- [ ] 不在本次范围的功能 X → 移至 TASK-XXX
-- [ ]  perfectionism 陷阱："更好"但不是"必须"的 Y → 明确放弃
+- [ ] 不在本次范围的功能 X → 移至 TASK-<timestamp>
+- [ ] perfectionism 陷阱："更好"但不是"必须"的 Y → 明确放弃
 
 ### 结束原因
 
@@ -272,14 +388,14 @@ EOF
 ### 5. Delegate to Subagent
 
 ```
-Please execute: cortex/tasks/02-backlog/TASK-001-specific-work.md
+Please execute: cortex/tasks/01-backlog/TASK-20250422143321029-specific-work.md
 
 Steps:
-1. Move to cortex/tasks/03-in-progress/
+1. Move to cortex/tasks/02-in-progress/
 2. Implement according to requirements
 3. Update progress with timestamps
-4. Commit with "(TASK-001)" in message
-5. Move to cortex/tasks/04-review/
+4. Commit with "(TASK-20250422143321029)" in message
+5. Move to cortex/tasks/03-review/
 ```
 
 ## Workflow Rules
@@ -288,22 +404,26 @@ Steps:
 
 | Role | Permissions | Directories |
 |------|-------------|-------------|
-| **System (You)** | Create Epics/ADRs, archive completed | `cortex/epics/01-active/`, `cortex/adr/02-accepted/`, `cortex/tasks/05-completed/` |
-| **Subagent** | Execute tasks, update progress | `cortex/tasks/03-in-progress/`, `cortex/tasks/04-review/` |
+| **System (You)** | Create Epics/ADRs, archive completed | `cortex/epics/01-active/`, `cortex/adr/02-accepted/`, `cortex/tasks/04-completed/` |
+| **Subagent** | Execute tasks, update progress | `cortex/tasks/02-in-progress/`, `cortex/tasks/03-review/` |
 
 ### Status Flow
 
 ```
 Epic:    01-active → 02-archived (when criteria met)
 ADR:     01-proposed → 02-accepted/03-rejected/04-superseded
-Task:    02-backlog → 03-in-progress → 04-review → 05-completed → 06-archived
+Task:    01-backlog → 02-in-progress → 03-review → 04-completed → 07-archived
+                  ↓
+            05-suspended (paused, recoverable)
+                  ↓
+            06-terminated (cancelled, abnormal end)
 ```
 
 ### Git Integration (⚠️ Critical)
 
-**Commits MUST include task ID**: `(TASK-XXX)` in commit message title
+**Commits MUST include task ID**: `(TASK-<timestamp>)` in commit message title
 
-✅ Good: `git commit -m "feat(api): add endpoint (TASK-001)"`  
+✅ Good: `git commit -m "feat(api): add endpoint (TASK-20250422143321029)"`
 ❌ Bad:  `git commit -m "feat(api): add endpoint"`
 
 **Why required**:
@@ -313,7 +433,7 @@ Task:    02-backlog → 03-in-progress → 04-review → 05-completed → 06-arc
 - Automation: Tools can parse the ID
 
 **Subagent checklist before commit**:
-- [ ] Message title contains `(TASK-XXX)`
+- [ ] Message title contains `(TASK-<timestamp>)`
 - [ ] Using correct type (feat/fix/docs/style/refactor)
 - [ ] Description is clear and concise
 
@@ -356,17 +476,17 @@ See `assets/` directory for:
 ```
 User: "Add real-time data feature"
 
-1. Create Epic: cortex/epics/01-active/EPIC-002-realtime.md
+1. Create Epic: cortex/epics/01-active/EPIC-20250420120100000-realtime.md
    └─ Background: Need real-time updates
    └─ Requirements: SSE, backend job, UI updates
 
 2. Create ADRs:
-   cortex/adr/ADR-001-sse-vs-websocket.md → accepted/
-   cortex/adr/ADR-002-background-job.md → accepted/
+   cortex/adr/01-proposed/ADR-20250420120200000-sse-vs-websocket.md → accepted/
+   cortex/adr/01-proposed/ADR-20250420120200001-background-job.md → accepted/
 
 3. Create Tasks:
-   cortex/tasks/TASK-005-sse-endpoint.md
-   cortex/tasks/TASK-006-data-generator.md
+   cortex/tasks/01-backlog/TASK-20250422143321029-sse-endpoint.md
+   cortex/tasks/01-backlog/TASK-20250422143321030-data-generator.md
 
 4. Delegate to subagents
 
@@ -413,10 +533,10 @@ Task 执行 → LGTM确认 → 沉淀为 Wiki → 未来 Task 参考
 
 ```bash
 # 搜索相关 Pattern
-ls cortex/wiki/patterns/ | grep layout
+ls cortex/wiki/01-patterns/ | grep layout
 
 # 查看解决方案
-cat cortex/wiki/patterns/css-flex-alignment.md
+cat cortex/wiki/01-patterns/css-flex-alignment.md
 ```
 
 发现已有解决方案，直接在 Task 中引用：
@@ -424,7 +544,7 @@ cat cortex/wiki/patterns/css-flex-alignment.md
 ```markdown
 ## Technical Approach
 
-参考 cortex/wiki/patterns/css-flex-alignment.md：
+参考 cortex/wiki/01-patterns/css-flex-alignment.md：
 使用 Flex + 固定宽度实现对齐...
 ```
 
@@ -455,80 +575,6 @@ cat cortex/wiki/patterns/css-flex-alignment.md
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
-
-
----
-
-## CLI 工具 (Hexo-like)
-
-Skill 提供命令行工具来自动化常见操作：
-
-### 可用命令
-
-```bash
-# 初始化工作流
-bash ./scripts/init.sh
-
-# 创建 Task（自动分配 ID，放入 02-backlog/）
-bunx @lythos/project-cortex task "修复登录bug"
-# 输出: ✅ Created: cortex/tasks/02-backlog/TASK-009-fix-login-bug.md
-
-# 创建 Epic
-bunx @lythos/project-cortex epic "用户认证系统"
-
-# 创建 ADR
-bunx @lythos/project-cortex adr "选择数据库方案"
-
-# 查看项目统计
-bunx @lythos/project-cortex stats
-
-# 查看下一个可用 ID
-bunx @lythos/project-cortex next-id
-
-# 生成索引页面 (类似 Hexo)
-bunx @lythos/project-cortex index
-# 生成: INDEX.md, wiki/INDEX.md
-```
-
-### 自增 ID 数据库
-
-`.task-id-db.json`:
-
-```json
-{
-  "lastTaskId": 10,
-  "lastEpicId": 3,
-  "lastAdrId": 5,
-  "tasks": [
-    {"id": "TASK-001", "title": "...", "status": "completed", "createdAt": "..."}
-  ]
-}
-```
-
-自动维护 ID 递增，避免冲突。
-
-### 生成的索引
-
-`INDEX.md`:
-
-```markdown
-# Project Index
-
-## 概览
-| 类型 | 总数 | 状态 |
-
-## Epics
-- **EPIC-001**: 大屏优化
-
-## Tasks
-- [ ] **TASK-010**: 新功能
-- ✅ ~~TASK-001~~: 已完成
-
-## ADRs
-- ✅ **ADR-001** (accepted): SSE 方案
-```
-
-类似 Hexo 的归档页面，自动生成项目全貌。
 
 
 ---
@@ -564,11 +610,64 @@ User signals end → Update HANDOFF.md → Brief summary → New session reads H
 
 ### Template
 
-See `HANDOFF-TEMPLATE.md` for full template.
+Copy this to your project root as `HANDOFF.md` and customize:
+
+```markdown
+# Session Handoff
+
+> Record latest state when session ends, ensure smooth handoff to new session.
+
+## Last Updated
+
+- Date: YYYY-MM-DD
+- Session Rounds: XX
+
+## Current Epics
+
+| Epic | Status | Key Progress |
+|------|--------|--------------|
+| EPIC-XXX | status | description |
+
+## Key Tasks
+
+### Completed
+- TASK-XXX: description
+
+### In Progress
+- TASK-XXX: description + blockers
+
+### Backlog
+- TASK-XXX: description
+
+## Open Issues
+
+1. Issue description
+2. Issue description
+
+## Warnings for New Subagent
+
+- Past mistake to avoid
+- Critical check points
+
+## Quick Links
+
+- Current version: v0.X.X
+- Branch: main
+- Important files: AGENTS.md
+
+## Startup Checklist
+
+New subagent should:
+- [ ] Read HANDOFF.md
+- [ ] Check tasks/backlog/
+- [ ] Check epics/active/
+- [ ] Run status command
+- [ ] Confirm with user if unclear
+```
 
 Quick start:
 ```bash
-cp ./HANDOFF-TEMPLATE.md HANDOFF.md
+cp ./assets/HANDOFF-TEMPLATE.md HANDOFF.md
 # Customize with current state
 ```
 
@@ -581,8 +680,8 @@ cp ./HANDOFF-TEMPLATE.md HANDOFF.md
 Always read `HANDOFF.md` first when starting new session!
 
 Then:
-1. Check `cortex/tasks/02-backlog/` for pending work (数字前缀排序)
-2. Run `bun run scripts/task-cli.ts stats`
+1. Check `cortex/tasks/01-backlog/` for pending work (数字前缀排序)
+2. Run `bunx @lythos/project-cortex stats`
 3. Confirm with user if anything unclear
 
 ---

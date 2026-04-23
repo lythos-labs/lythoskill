@@ -16,7 +16,7 @@ description: |
 
   当用户提到"同步 skill""初始化 deck""working set""skill 冲突""同类 skill 太多""冷池""deck"时激活。
 deck_triggers:
-  - "同步 working set" / "sync skills"
+  - "同步 working set / sync skills"
   - "初始化 skill deck"
   - "skill-deck.toml 变更后"
 deck_dependencies:

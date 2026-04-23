@@ -69,7 +69,7 @@ Refs: EPIC-XXX, ADR-XXX
 
 **标题必须包含 `(TASK-XXX)`**
 
-✅ 正确: `feat(api): add endpoint (TASK-001)`
+✅ 正确: `feat(api): add endpoint (TASK-20250422143321029)`
 ❌ 错误: `feat(api): add endpoint`
 
 **Subagent 执行 `git commit` 前必须自我检查：标题中有 Task ID 吗？**

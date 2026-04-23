@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/4/23 13:14:03
+> 自动生成于 2026/4/23 18:27:03
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 3 | 进行中: 0, 待验收: 0, 已完成: 1 |
+| Tasks | 5 | 进行中: 0, 待验收: 0, 已完成: 2 |
 | Epics | 1 | 活跃: 1, 已归档: 0 |
-| ADRs | 4 | 已接受: 4 |
+| ADRs | 5 | 已接受: 4 |
 
 ---
 
@@ -26,10 +26,11 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (3)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
+- [ ] **TASK-20260423162055407**: Port skill-curator to lythoskill ecosystem
 
 ### 进行中 (0)
 
@@ -39,9 +40,10 @@ _无_
 
 _无_
 
-### 已完成 (1)
+### 已完成 (2)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
+- ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
 
 ### 悬置 (0)
 
@@ -59,6 +61,7 @@ _无_
 - ✅ **ADR-20260423101950000** (02-accepted): ESM Import over require for JSON
 - ✅ **ADR-20260423124812645** (02-accepted): Build output should live in skills/ and be committed to Git
 - ✅ **ADR-20260423130348396** (02-accepted): Port skill-manager into lythoskill ecosystem as deck governance
+- 🤔 **ADR-20260423182606313** (01-proposed): SKILL.md Template Variable Substitution and CLI Help Delegation
 
 ---
 

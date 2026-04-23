@@ -1,9 +1,11 @@
 # Wiki Index
 
-## 📚 Patterns (7)
+## 📚 Patterns (9)
 
 - [epic-granularity](./01-patterns/epic-granularity.md)
 - [thin-skill-monorepo](./01-patterns/thin-skill-monorepo.md)
+- [skill-loading-lifecycle](./01-patterns/skill-loading-lifecycle.md)
+- [concurrent-subagent-map-reduce](./01-patterns/concurrent-subagent-map-reduce.md)
 - [agent-skills-spec](./01-patterns/agent-skills-spec.md)
 - [thin-skill-pattern](./01-patterns/thin-skill-pattern.md)
 - [self-contained-task-writing](./01-patterns/self-contained-task-writing.md)
