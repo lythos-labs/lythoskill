@@ -9,6 +9,37 @@
 
 ---
 
+## Do I need this?
+
+An anti-corruption layer is only useful when complexity reaches a threshold. Before that, it is unnecessary abstraction.
+
+```
+How many skills do you have?
+│
+├─ 0–3, no conflicts
+│   → You don't need lythoskill. Put them in .claude/skills/ manually.
+│
+├─ 5–10, starting to see conflicts or choice paralysis
+│   → You need deck governance only. Install lythoskill-deck.
+│
+├─ 10+, and you author your own skills
+│   ├─ Simple skills (SKILL.md + light bash)
+│   │   → Deck governance only
+│   └─ Complex skills (dependencies, tests, types, multi-skill teamwork)
+│       → Deck + Thin Skill Pattern (full lythoskill)
+│
+└─ Managing a skill ecosystem across teams/projects/sources
+    → Full lythoskill (deck + creator + curator + arena)
+```
+
+**You do NOT need lythoskill if:**
+- You have ≤3 skills that never conflict
+- Your skill set never changes across projects
+- Your skills are pure SKILL.md files with no build step
+- You are a solo developer with one skill and no release cycle
+
+---
+
 ## Two Value Propositions
 
 lythoskill serves two distinct audiences. You can use either layer independently.
