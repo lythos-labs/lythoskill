@@ -4,23 +4,37 @@
   "workspaces": {
     "": {
       "name": "lythoskill-workspace",
+      "dependencies": {
+        "@iarna/toml": "^2.2.5",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "husky": "^9.1.7",
+      },
     },
-    "packages/lythoskill": {
-      "name": "lythoskill",
+    "packages/lythoskill-creator": {
+      "name": "@lythos/skill-creator",
       "version": "0.1.0",
       "bin": {
-        "lythoskill": "./src/cli.ts",
+        "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-deck": {
-      "name": "@lythos/deck",
+      "name": "@lythos/skill-deck",
       "version": "0.1.0",
       "bin": {
-        "lythoskill-deck": "./src/cli.ts",
+        "lythoskill-deck": "src/cli.ts",
       },
       "dependencies": {
         "@iarna/toml": "^2.2.5",
         "zod": "^4.3.6",
+      },
+    },
+    "packages/lythoskill-hello-world": {
+      "name": "@lythos/hello-world",
+      "version": "0.1.0",
+      "bin": {
+        "lythoskill-hello-world": "src/cli.ts",
       },
     },
     "packages/lythoskill-project-cortex": {
@@ -34,11 +48,15 @@
   "packages": {
     "@iarna/toml": ["@iarna/toml@2.2.5", "https://registry.npmmirror.com/@iarna/toml/-/toml-2.2.5.tgz", {}, "sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg=="],
 
-    "@lythos/deck": ["@lythos/deck@workspace:packages/lythoskill-deck"],
+    "@lythos/hello-world": ["@lythos/hello-world@workspace:packages/lythoskill-hello-world"],
 
     "@lythos/project-cortex": ["@lythos/project-cortex@workspace:packages/lythoskill-project-cortex"],
 
-    "lythoskill": ["lythoskill@workspace:packages/lythoskill"],
+    "@lythos/skill-creator": ["@lythos/skill-creator@workspace:packages/lythoskill-creator"],
+
+    "@lythos/skill-deck": ["@lythos/skill-deck@workspace:packages/lythoskill-deck"],
+
+    "husky": ["husky@9.1.7", "", { "bin": { "husky": "bin.js" } }, "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA=="],
 
     "zod": ["zod@4.3.6", "https://registry.npmmirror.com/zod/-/zod-4.3.6.tgz", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
   }

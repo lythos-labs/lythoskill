@@ -4,11 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/**/skill/**'
-      - 'packages/**/package.json'
+      - 'skills/**'
+      - 'README.md'
+  workflow_dispatch:
 
 jobs:
-  build-and-sync:
+  sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,35 +17,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Build skills
-        run: |
-          bun packages/lythoskill-creator/src/cli.ts build lythoskill-creator
-          bun packages/lythoskill-creator/src/cli.ts build lythoskill-deck
-          bun packages/lythoskill-creator/src/cli.ts build lythoskill-project-cortex
-          bun packages/lythoskill-creator/src/cli.ts build lythoskill-hello-world
-
-      - name: Sync to skills branch
+      - name: Sync to skills branch (hexo-style deploy)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Create a temporary orphan branch
-          git checkout --orphan skills-tmp
-          git rm -rf .
+          SHORT_SHA=$(git rev-parse --short HEAD)
 
-          # Copy only skills directory contents to root
-          cp -r skills/* .
+          # Hexo-style: deploy content into isolated directory
+          DEPLOY_DIR=".deploy"
+          rm -rf "$DEPLOY_DIR"
+          mkdir -p "$DEPLOY_DIR"
 
-          # Stage all
+          # Copy only what belongs on the skills branch
+          cp -r skills/* "$DEPLOY_DIR/"
+          cp README.md "$DEPLOY_DIR/" 2>/dev/null || true
+
+          cd "$DEPLOY_DIR"
+
+          # Fresh git repo for the skills branch
+          git init
+          git checkout -b skills
           git add .
+          git commit -m "chore: sync skills from main @ ${SHORT_SHA}" || echo "No changes to commit"
 
-          # Commit with reference to triggering commit
-          git commit -m "chore: sync skills from main @ $(git rev-parse --short ${{ github.sha }})" || echo "No changes to commit"
-
-          # Force push to skills branch
-          git push -f origin skills-tmp:skills
+          # Push to skills branch
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -f origin skills
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
