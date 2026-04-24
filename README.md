@@ -219,6 +219,7 @@ These are not yet implemented. They show where deck governance can go.
 | **lythoskill-project-cortex** | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
 | **lythoskill-project-scribe** | Both | Write project memory: handoffs, daily notes, pitfalls |
 | **lythoskill-project-onboarding** | Both | Read project memory with structured layer loading |
+| **lythoskill-red-green-release** | Both | Heredoc migration patch workflow: plan → patch → user验收 → git tag |
 
 ---
 

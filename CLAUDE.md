@@ -60,6 +60,14 @@ bun packages/lythoskill-project-cortex/src/cli.ts list        # List all tasks a
 bun packages/lythoskill-project-cortex/src/cli.ts stats       # Show statistics
 ```
 
+### Red-Green Release (Migration Patches)
+```bash
+# Create heredoc patch: pr-<timestamp>-<description>.sh
+# Execute → auto-archive to archived-patches/
+# User says LGTM → git commit + tag
+```
+Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
+
 ## Project Skills (Self-Contained)
 
 This repository contains its own built skills under `skills/`:
