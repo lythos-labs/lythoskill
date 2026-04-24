@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/4/24 13:00:21
+> 自动生成于 2026/4/24 14:25:51
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 11 | 进行中: 0, 待验收: 0, 已完成: 2 |
 | Epics | 2 | 活跃: 2, 已归档: 0 |
-| ADRs | 15 | 已接受: 12 |
+| ADRs | 14 | 已接受: 14 |
 
 ---
 
@@ -68,10 +68,9 @@ _无_
 - ✅ **ADR-20260423101950000** (02-accepted): ESM Import over require for JSON
 - ✅ **ADR-20260423124812645** (02-accepted): Build output should live in skills/ and be committed to Git
 - ✅ **ADR-20260423130348396** (02-accepted): Port skill-manager into lythoskill ecosystem as deck governance
-- 🤔 **ADR-20260423182606313** (01-proposed): SKILL.md Template Variable Substitution and CLI Help Delegation
+- ✅ **ADR-20260423182606313** (02-accepted): SKILL.md Template Variable Substitution and CLI Help Delegation
 - ✅ **ADR-20260423191001406** (02-accepted): Deck npm Package Naming
-- 🤔 **ADR-20260424000744041** (01-proposed): Curator output is personal environment scan, not project artifact
-- 🤔 **ADR-20260424001747098** (01-proposed): Skill Selection Pipeline 实战演练
+- ✅ **ADR-20260424000744041** (02-accepted): Curator output is personal environment scan, not project artifact
 - ✅ **ADR-20260424013849984** (02-accepted): lythoskill as anti-corruption layer and meta-governance boundary
 - ✅ **ADR-20260424113352614** (02-accepted): project-scribe remains independent with optional skill cooperation
 - ✅ **ADR-20260424113917838** (02-accepted): red-green-release heredoc migration patch design

@@ -21,9 +21,9 @@
 
 
 
-## 📖 Lessons (0)
+## 📖 Lessons (1)
 
-
+- [skill-selection-case-study-pdf-report](./03-lessons/skill-selection-case-study-pdf-report.md)
 
 ---
 
