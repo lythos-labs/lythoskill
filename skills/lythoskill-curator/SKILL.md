@@ -48,8 +48,10 @@ LLM 推理能做到 curator 算法做不到的事：
 
 ## 快速开始
 
+### 1. 索引冷池
+
 ```bash
-# 索引你的冷池（同时生成 REGISTRY.json + catalog.db）
+# 扫描冷池，生成 REGISTRY.json + catalog.db
 bunx @lythos/skill-curator [POOL_PATH]
 
 # 默认值：
@@ -61,6 +63,32 @@ bunx @lythos/skill-curator [POOL_PATH]
 # 自定义输出目录：
 #   bunx @lythos/skill-curator ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
 ```
+
+### 2. 查询索引（JSON 输出，LLM 直接消费）
+
+```bash
+# 执行 SQL，返回 JSON（默认读取最近生成的 catalog.db）
+bunx @lythos/skill-curator query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
+
+# 指定 db 路径
+bunx @lythos/skill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"
+
+# 查看表结构
+bunx @lythos/skill-curator query "PRAGMA table_info(skills)"
+```
+
+输出为 JSON 数组，LLM 可直接解析：
+```json
+[
+  { "name": "design-doc-mermaid", "type": "standard" },
+  { "name": "mermaid-tools", "type": "standard" }
+]
+```
+
+**查询时的健壮性：**
+- 如果 catalog.db 不存在，CLI 会提示具体搜索了哪些路径，并给出 `lythoskill-curator` 扫描命令
+- 如果 SQL 语法错误，CLI 会提示并建议查看表结构
+- 查询成功时，stderr 会输出索引生成时间；若超过 7 天未更新，会提示刷新
 
 然后 agent 读取注册表（JSON 或 SQLite），结合项目上下文做 LLM 推理推荐。
 
@@ -118,7 +146,7 @@ SELECT value FROM catalog_meta WHERE key = 'generated_at';
 | 表 | 说明 |
 |---|---|
 | `skills` | 主表，name 为 PRIMARY KEY。数组字段（niches/managed_dirs/trigger_phrases）存为 JSON 字符串 |
-| `catalog_meta` | 元数据：generated_at、total_skills、pool_path |
+| `catalog_meta` | 元数据：generated_at、last_scan_at（Unix 时间戳）、total_skills、pool_path |
 | `idx_skills_type` | type 列索引 |
 
 Agent 选择消费格式：

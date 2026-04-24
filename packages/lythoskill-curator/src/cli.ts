@@ -220,6 +220,7 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
 
   const meta = db.query(`INSERT OR REPLACE INTO catalog_meta (key, value) VALUES ($key, $value)`)
   meta.run({ $key: 'generated_at', $value: new Date().toISOString() })
+  meta.run({ $key: 'last_scan_at', $value: String(Date.now()) })
   meta.run({ $key: 'total_skills', $value: String(skills.length) })
   meta.run({ $key: 'pool_path', $value: poolPath })
 
@@ -310,6 +311,105 @@ export function runCurator(argv: string[]) {
   console.log(`💾 Catalog DB: ${dbPath}`);
 }
 
+// ── Query subcommand ─────────────────────────────────────────
+
+function runQuery(argv: string[]) {
+  let dbPath: string | undefined;
+  let sql: string | undefined;
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if ((arg === '--db' || arg === '-d') && argv[i + 1]) {
+      dbPath = argv[++i];
+    } else if (!arg.startsWith('-')) {
+      sql = arg;
+    }
+  }
+
+  if (!sql) {
+    console.error('Usage: lythoskill-curator query <SQL> [--db <path>]')
+    console.error('')
+    console.error('Examples:')
+    console.error('  lythoskill-curator query "SELECT name, type FROM skills"')
+    console.error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
+    process.exit(1)
+  }
+
+  if (!dbPath) {
+    // Default: find the most recently generated catalog.db in common locations
+    const candidates = [
+      `${process.env.HOME}/.agents/skill-repos/.lythos-curator/catalog.db`,
+      `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,
+    ]
+    for (const c of candidates) {
+      if (existsSync(c)) { dbPath = c; break; }
+    }
+  }
+
+  if (!dbPath || !existsSync(dbPath)) {
+    console.error('❌ Catalog DB not found.')
+    console.error('')
+    if (dbPath) {
+      console.error(`  Searched: ${dbPath}`)
+    } else {
+      console.error('  Searched default locations:')
+      console.error('    ~/.agents/skill-repos/.lythos-curator/catalog.db')
+      console.error('    ~/.agents/lythos/skill-curator/catalog.db')
+    }
+    console.error('')
+    console.error('This usually means:')
+    console.error('  1. You have not run curator scan yet')
+    console.error('  2. The index was generated in a different location')
+    console.error('')
+    console.error('To fix:')
+    console.error('  lythoskill-curator                          # scan default cold pool')
+    console.error('  lythoskill-curator <pool> --output <dir>    # custom pool / output')
+    console.error('')
+    console.error('Or specify the exact db path:')
+    console.error(`  lythoskill-curator query --db ./catalog.db "${sql || 'SELECT * FROM skills'}"`)
+    process.exit(1)
+  }
+
+  const db = new Database(dbPath, { readonly: true })
+  try {
+    // Show index freshness (stderr so JSON output on stdout stays clean)
+    try {
+      const generatedRow = db.query("SELECT value FROM catalog_meta WHERE key = 'generated_at'").get() as { value: string } | null
+      if (generatedRow?.value) {
+        const ageMs = Date.now() - new Date(generatedRow.value).getTime()
+        const ageDays = ageMs / (1000 * 60 * 60 * 24)
+        console.error(`ℹ️  Index generated at: ${generatedRow.value}`)
+        if (ageDays > 7) {
+          console.error(`⚠️  Index is ${Math.floor(ageDays)} days old. Consider refreshing:`)
+          console.error('   lythoskill-curator')
+        }
+        console.error('')
+      }
+    } catch {}
+
+    const rows = db.query(sql).all()
+    console.log(JSON.stringify(rows, null, 2))
+  } catch (e: any) {
+    console.error(`❌ SQL error: ${e.message}`)
+    console.error('')
+    console.error('Hint: check available tables and columns:')
+    console.error(`  lythoskill-curator query --db ${dbPath} "PRAGMA table_info(skills)"`)
+    console.error(`  lythoskill-curator query --db ${dbPath} "SELECT name FROM sqlite_master WHERE type='table'"`)
+    process.exit(1)
+  } finally {
+    db.close()
+  }
+}
+
+// ── Main Entry ───────────────────────────────────────────────
+
 if (import.meta.main) {
-  runCurator(process.argv.slice(2));
+  const args = process.argv.slice(2)
+  const cmd = args[0]
+
+  if (cmd === 'query') {
+    runQuery(args.slice(1))
+  } else {
+    runCurator(args)
+  }
 }
