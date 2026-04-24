@@ -157,8 +157,7 @@ git log --oneline -10
 - [ ] 如果 Handoff 缺失/stale：降级探索（CURRENT-QUEST, PITFALLS, DECISIONS, skill-deck.toml, cortex/INDEX.md）
 - [ ] 输出复盘摘要
 
-## 相关文档
+## 相关 Skill
 
-- SSOT: CLAUDE.md（项目根目录）
-- Handoff 模板: HANDOFF-TEMPLATE.md
-- 写记忆: lythoskill-project-scribe
+- **lythoskill-project-scribe** — 写 Handoff。与 onboarding 形成 CQRS 读写分离。scribe 独立可用（handoff 可被人工阅读），onboarding 也独立可用（无 handoff 时降级为文件探索）。二者组合时效果最佳。
+- **lythoskill-project-cortex** — GTD 项目治理。如果项目使用 cortex，onboarding 在降级探索时会读取 `cortex/INDEX.md` 获取任务状态，但**不强制依赖**。cortex 独立运行，onboarding 只是在其存在时顺手读取。

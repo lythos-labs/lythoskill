@@ -19,6 +19,29 @@ git_commit: abc1234
 
 # Handoff: <一句话描述当前进行中的任务>
 
+## 0. 验证当前状态（请先运行）⭐
+
+> Handoff 是 **T0 时刻的快照**，不是实时状态。
+> 运行以下命令构造"从 T0 到现在"的时间感，确认信息是否仍然有效。
+
+```bash
+# 1. 查看从 handoff 创建后有哪些新改动
+git diff {{git_commit}} --stat
+
+# 2. 查看当前 working tree 状态
+git status --short
+
+# 3. 查看最近 commit 是否匹配
+git log --oneline -3
+
+# 4. （如果项目使用 cortex）检查状态一致性
+bun packages/lythoskill-project-cortex/src/cli.ts probe 2>/dev/null || echo "cortex probe 未安装"
+```
+
+**如果上述输出与 handoff 记录不一致**，说明 handoff 已过时。以 `git status` 和 `git log` 的实时输出为准，handoff 作为历史参考。
+
+---
+
 ## 1. 项目身份（Project Identity）
 
 > 文件探索可恢复，但提供快速确认

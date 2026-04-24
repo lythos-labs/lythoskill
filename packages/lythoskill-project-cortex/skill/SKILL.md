@@ -694,3 +694,8 @@ Then:
 - Use **checklists** for all acceptance criteria
 - **Timestamp** all progress updates
 - **Handoff** properly when session ends
+
+## 相关 Skill
+
+- **lythoskill-project-scribe** — Session 记忆存档。如果项目使用 scribe，cortex 的 task/epic 状态会被 scribe 的 handoff 引用，但**不强制依赖**。cortex 独立运行，scribe 只是在其存在时顺手读取活跃 task 列表用于交接。
+- **lythoskill-project-onboarding** — 项目入职复盘。如果项目使用 onboarding，新 session 会读取 scribe 产出的 handoff 来获取 cortex 任务状态，但**不强制依赖**。cortex 的 INDEX.md 和 task 目录本身就是自描述的，任何 agent 都能直接探索。

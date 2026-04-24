@@ -48,6 +48,14 @@ type: standard
 2. **确认 cortex 状态**: `bun packages/lythoskill-project-cortex/src/cli.ts list` — 活跃的 epic/task
 3. **确认 session 状态**: 回忆一下这个 session 里发生了什么重要但**还没写到任何外部文档**的事
 
+**关键原则**：Handoff 不是"那一刻的照片"，而是"那一刻的照片 + 如何验证现在"的指令。
+在 Handoff 的 `## 0. 验证当前状态` 中，必须提供以下命令：
+- `git diff <handoff-commit> --stat` — 让读者自己构造"从 T0 到现在"的时间感
+- `git status --short` — 确认 working tree 实时状态
+- `git log --oneline -3` — 确认最近 commit 是否匹配
+
+如果读者运行命令后发现输出与 handoff 不一致，说明 handoff 已过时。以实时输出为准。
+
 ```bash
 # 1. Git 状态
 $ git status
@@ -255,5 +263,6 @@ Scribe 执行：
 
 ## 相关 Skill
 
-- **lythoskill-project-onboarding** - 读 Handoff，建立上下文
-- **lythoskill-red-green-release** - 版本发布流程
+- **lythoskill-project-onboarding** — 读 Handoff，建立上下文。与 scribe 形成 CQRS 读写分离。二者可独立使用：只有 scribe 时 handoff 仍能被人工阅读；只有 onboarding 时可降级为文件系统探索。
+- **lythoskill-project-cortex** — GTD 项目治理（ADR/Epic/Task）。如果项目也使用 cortex，scribe 的交接流程会自动引用活跃的 epic/task 状态，但**不强制依赖**。cortex 独立运行，scribe 只是在其存在时顺手读取。
+- **lythoskill-red-green-release** — 版本发布流程
