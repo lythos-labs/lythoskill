@@ -249,6 +249,9 @@ bunx @lythos/skill-deck link
 # 或直接在 skill 目录下：
 # ./scripts/link.sh
 
+# deck 文件放在子目录（如 playground/decks/），但 working_set 锚定当前目录：
+bunx @lythos/skill-deck link --deck playground/decks/arena.toml --workdir .
+
 # 输出示例：
 #   🗑️  移除: old-skill
 #   🔗 skill-arena
@@ -257,14 +260,30 @@ bunx @lythos/skill-deck link
 #   ✅ 同步完成: 28/30 skill
 ```
 
-### 3. 诊断（只读）
+### 3. 异常状态修复（Reconciler 自愈）
+
+deck link 是 **K8s Controller 式的 reconciler**：只关心 "desired state → actual state" 的收敛，不关心 actual state 是如何进入异常状态的。用户永远只需要执行同一个命令——`link`——它会自动修复以下异常：
+
+| 异常状态 | 表现 | link 行为 | 类比（K8s） |
+|----------|------|-----------|-------------|
+| **断链 symlink** | Symlink 指向不存在的路径（冷池中的 skill 被删除/移动） | `lstatSync` 检测存在 → `rmSync` 删除 → 重新创建正确 symlink | Pod 引用的镜像不存在 → 重新拉取 |
+| **自引用/循环 symlink** | Symlink 指向自身或形成循环（文件系统层面的逻辑死锁） | `lstatSync` 不跟随 symlink 仍能检测到文件实体 → 删除重建 | 节点上的容器运行时死锁 → 重启容器 |
+| **非 symlink 实体** | `.claude/skills/` 下出现真实目录或文件（用户手动复制、subagent 误写） | 删除实体 → 重建 symlink | 期望是 Pod 但节点上有同名文件 → 清理后重建 |
+| **幽灵 skill** | 在 working set 中但不在 skill-deck.toml 声明中 | 直接删除（deny-by-default） | 期望 3 个 Pod 但实际 4 个 → 终止多余 Pod |
+| **缺失 skill** | 在 toml 中声明但 working set 中不存在 | 从冷池创建 symlink | 期望 3 个 Pod 但实际 2 个 → 创建缺失 Pod |
+
+> **关键设计**：检测存在性时使用 `lstatSync`（不跟随 symlink），而非 `existsSync`（跟随 symlink）。后者对断链/循环 symlink 返回 `false`，导致跳过删除步骤，随后 `symlinkSync` 报 `EEXIST`。`lstatSync` 能正确识别 symlink 实体本身的存在，确保幂等删除在任何异常状态下都有效。
+
+用户不需要知道 working set 里具体发生了什么异常。执行 `link`，等它收敛到绿色即可。
+
+### 4. 诊断（只读）
 
 ```bash
 bash ~/.agents/skill-repos/github.com/lythos-labs/lythoskill/skills/lythoskill-deck/scripts/deck-status.sh
 # 报告：哪些 skill 在冷池但不在 deck、哪些 transient 即将过期、managed_dirs 归属
 ```
 
-### 4. 恢复（换 agent / 换机器）
+### 5. 恢复（换 agent / 换机器）
 
 ```bash
 # 新 agent 读 lock 文件即可理解当前 deck 状态
@@ -337,6 +356,7 @@ lythoskill-deck 管理的是**哪些 skill 目录出现在 agent 能扫描到的
 |------|------|------|
 | `bunx @lythos/skill-deck link` | toml → symlink 同步（reconciler） | bun |
 | `bunx @lythos/skill-deck link --deck /path/to/deck.toml` | 指定非默认 toml | bun |
+| `bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .` | 子目录中的 toml，但 working_set 锚定当前目录 | bun |
 | `./scripts/link.sh` | 同上（直接调用 skill 脚本） | bash, bun |
 | `bash deck-migrate.sh` | 从肥胖目录迁移到 deck 治理 | 纯 bash |
 | `bash deck-status.sh` | 一致性诊断（只读） | 纯 bash |

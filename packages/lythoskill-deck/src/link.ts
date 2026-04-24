@@ -134,7 +134,7 @@ function findSource(name: string, coldPool: string, projectDir: string): string 
 
 // ── 主流程 ──────────────────────────────────────────────────
 
-export function linkDeck(cliDeckPath?: string): void {
+export function linkDeck(cliDeckPath?: string, cliWorkdir?: string): void {
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 const DECK_PATH = cliDeck
   ? resolve(cliDeck)
@@ -153,7 +153,7 @@ if (!existsSync(DECK_PATH)) {
   process.exit(1);
 }
 
-const PROJECT_DIR = dirname(DECK_PATH);
+const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
 const deckRaw = readFileSync(DECK_PATH, "utf-8");
 const deckHash = hashContent(deckRaw);
 const deck = parseToml(deckRaw) as any;
@@ -233,10 +233,11 @@ const linkedSkills: LinkedSkill[] = [];
 for (const item of declared) {
   const dest = join(WORKING_SET, item.name);
 
-  // 幂等：已存在则删除重建
-  if (existsSync(dest)) {
+  // 幂等：已存在则删除重建（lstat 不跟随 symlink，能处理断链/自引用 symlink）
+  try {
+    lstatSync(dest);
     rmSync(dest, { recursive: true, force: true });
-  }
+  } catch {}
 
   try {
     mkdirSync(dirname(dest), { recursive: true });

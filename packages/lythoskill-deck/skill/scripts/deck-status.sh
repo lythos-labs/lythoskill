@@ -8,8 +8,37 @@ set -euo pipefail
 # 不修改任何文件。Skills 是用户资产，status 只看不碰。
 # ============================================================
 
-PROJECT_DIR="${1:-.}"
+# ── 参数解析 ─────────────────────────────────────────────────
+DECK=""
+PROJECT_DIR=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --deck)
+      DECK="$2"
+      shift 2
+      ;;
+    --workdir)
+      PROJECT_DIR="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      # 兼容旧行为：无 flag 的第一个 positional 参数视为 PROJECT_DIR
+      [ -z "$PROJECT_DIR" ] && PROJECT_DIR="$1"
+      shift
+      ;;
+  esac
+done
+
+[ -z "$PROJECT_DIR" ] && PROJECT_DIR="."
 PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
+
+# 如果指定了 --deck，使用它；否则默认找 skill-deck.toml
+[ -z "$DECK" ] && DECK="$PROJECT_DIR/skill-deck.toml"
 
 # 颜色
 if [ -t 1 ]; then
@@ -215,7 +244,7 @@ fi
 
 echo ""
 echo -e "${D}──────────────────────────────────────────────────${N}"
-echo "  同步: bunx lythoskill-deck link"
-echo "  诊断: bash scripts/deck-status.sh"
+echo "  同步: bunx lythoskill-deck link [--deck <path>] [--workdir <dir>]"
+echo "  诊断: bash scripts/deck-status.sh [--deck <path>] [--workdir <dir>]"
 echo -e "${D}──────────────────────────────────────────────────${N}"
 echo ""
