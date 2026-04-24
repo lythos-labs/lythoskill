@@ -111,17 +111,23 @@ Curator SKILL.md 描述当本地冷池缺少合适 skill 时的 workflow：
 - 造成「生态 = 55 skills」的致命误解
 - CI/无头环境无法生成或验证
 
-### 方案 B: 用户级数据目录（推荐）
-curator 产出默认写入用户级目录（如 `~/.lythos/curator/` 或 `~/.config/lythos/curator/`），可通过环境变量或 flag 覆盖。
+### 方案 B: 冷池就近目录（推荐）
+curator 产出默认写入冷池目录下的 `.lythos-curator/` 子目录（如 `~/.agents/skill-repos/.lythos-curator/`），可通过 `--output` flag 覆盖。
 **优点**:
-- 与个人冷池一一对应
-- 多项目共享同一份扫描结果
+- **就近原则**：索引和它描述的数据物理上在一起，逻辑清晰
+- **Go module 心智**：和 `go env GOMODCACHE` 一致，模块缓存和模块在一起
+- **多冷池隔离**：不同冷池（个人/公司）的索引不会混在一起
+- **自包含**：整个 cold pool 目录可以打包迁移，索引跟着走
 - 不会在 git 中制造伪权威
-- 符合 XDG 规范
 
 **缺点**:
+- curator 扫描时需排除 `.lythos-curator/`（避免自引用）
 - 无法通过 git 共享扫描结果（但本就不该共享）
 - 新用户首次运行前没有现成 catalog（但 curator index 只需几秒）
+
+### 方案 B-alt: 用户级统一目录（已放弃）
+早期实现将索引统一放在 `~/.agents/lythos/skill-curator/`。
+**放弃原因**：多个冷池的索引混在一起，违反就近原则；文件名不携带冷池信息，无法区分来源。
 
 ### 方案 C: playground/ 目录（仅内部测试）
 在开发 lyhtoskill 自身时，curator 产出写入 `playground/`（已 gitignored）。
@@ -134,7 +140,12 @@ curator 产出默认写入用户级目录（如 `~/.lythos/curator/` 或 `~/.con
 - playground/ 通常会被清理
 
 ## 决策
-**选择**: 方案 B 为默认，方案 C 为内部开发时的 override。
+**选择**: 方案 B（冷池就近目录 `{pool}/.lythos-curator/`）为默认，方案 C 为内部开发时的 override。
+
+**具体实现**：
+- 默认输出目录：`{pool_path}/.lythos-curator/`
+- 显式覆盖：`--output` / `-o` flag
+- 扫描排除：`.lythos-curator/` 加入 `skip` 集合，防止自引用
 
 **关键区分: 原始扫描数据 vs 推荐结论**
 

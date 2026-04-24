@@ -230,7 +230,7 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
 
 function parseCuratorArgs(argv: string[]) {
   let poolPath = `${process.env.HOME}/.agents/skill-repos`;
-  let outputDir = `${process.env.HOME}/.agents/lythos/skill-curator`;
+  let outputDir: string | undefined;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -241,6 +241,12 @@ function parseCuratorArgs(argv: string[]) {
     }
   }
 
+  // Default: place index inside the cold pool (proximity principle)
+  // e.g. ~/.agents/skill-repos/.lythos-curator/
+  if (!outputDir) {
+    outputDir = `${poolPath}/.lythos-curator`;
+  }
+
   return { poolPath, outputDir };
 }
 
@@ -248,7 +254,7 @@ function parseCuratorArgs(argv: string[]) {
 
 function findSkillDirs(root: string): string[] {
   const results: string[] = [];
-  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', 'tmp', 'playground', 'dist', 'build']);
+  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythos-curator', 'tmp', 'playground', 'dist', 'build']);
 
   function walk(dir: string, depth: number) {
     if (depth > 6) return; // safety limit

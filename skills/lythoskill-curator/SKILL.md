@@ -54,9 +54,12 @@ bunx @lythos/skill-curator [POOL_PATH]
 
 # 默认值：
 #   POOL_PATH  = ~/.agents/skill-repos
-#   输出目录    = ~/.agents/lythos/skill-curator/（与冷池同层级，避开 agent 扫描）
-#   Registry   = ~/.agents/lythos/skill-curator/REGISTRY.json
-#   Catalog DB = ~/.agents/lythos/skill-curator/catalog.db
+#   输出目录    = {POOL_PATH}/.lythos-curator/（就近原则，索引与冷池在一起）
+#   Registry   = {POOL_PATH}/.lythos-curator/REGISTRY.json
+#   Catalog DB = {POOL_PATH}/.lythos-curator/catalog.db
+#
+# 自定义输出目录：
+#   bunx @lythos/skill-curator ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
 ```
 
 然后 agent 读取注册表（JSON 或 SQLite），结合项目上下文做 LLM 推理推荐。
