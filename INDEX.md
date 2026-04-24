@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/4/24 12:11:31
+> 自动生成于 2026/4/24 13:00:21
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 11 | 进行中: 0, 待验收: 0, 已完成: 2 |
 | Epics | 2 | 活跃: 2, 已归档: 0 |
-| ADRs | 14 | 已接受: 5 |
+| ADRs | 15 | 已接受: 12 |
 
 ---
 
@@ -72,12 +72,13 @@ _无_
 - ✅ **ADR-20260423191001406** (02-accepted): Deck npm Package Naming
 - 🤔 **ADR-20260424000744041** (01-proposed): Curator output is personal environment scan, not project artifact
 - 🤔 **ADR-20260424001747098** (01-proposed): Skill Selection Pipeline 实战演练
-- 🤔 **ADR-20260424013849984** (01-proposed): lythoskill as anti-corruption layer and meta-governance boundary
-- 🤔 **ADR-20260424113352614** (01-proposed): project-scribe remains independent with optional skill cooperation
-- 🤔 **ADR-20260424113917838** (01-proposed): red-green-release heredoc migration patch design
-- 🤔 **ADR-20260424114401090** (01-proposed): combo skill as orchestration layer naming and emergence strategy
-- 🤔 **ADR-20260424115621494** (01-proposed): virtual-evaluator-swarm adaptive concurrency skill design
-- 🤔 **ADR-20260424120936541** (01-proposed): player-deck separation and deck boundary rationale
+- ✅ **ADR-20260424013849984** (02-accepted): lythoskill as anti-corruption layer and meta-governance boundary
+- ✅ **ADR-20260424113352614** (02-accepted): project-scribe remains independent with optional skill cooperation
+- ✅ **ADR-20260424113917838** (02-accepted): red-green-release heredoc migration patch design
+- ✅ **ADR-20260424114401090** (02-accepted): combo skill as orchestration layer naming and emergence strategy
+- ✅ **ADR-20260424115621494** (02-accepted): virtual-evaluator-swarm adaptive concurrency skill design
+- ✅ **ADR-20260424120936541** (02-accepted): player-deck separation and deck boundary rationale
+- ✅ **ADR-20260424125637347** (02-accepted): handoff format migration from fixed file to daily-first
 
 ---
 
