@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-04-23 | Created |
+| accepted | 2026-04-24 | Approved by user — curator output stays in cold pool (go module style), not project repo |
 
 ## 背景
 CATALOG.md 最初作为 curator 扫描冷池的「人类可读索引卡」被提交到项目仓库。它记录了 55 个 skill 的分类、冲突风险、道术器用层级等信息。但随着项目向外展示，这个数字和这份文件引发了严重误解：读者以为「lythoskill 生态 = 这 55 个 skill」，而实际上这只是一个特定开发者在特定时间点的个人冷池快照。
