@@ -119,12 +119,13 @@ function findSource(name: string, coldPool: string, projectDir: string): string 
   if (existsSync(join(local, "SKILL.md"))) return local;
 
   // 4. 扁平扫描: cold_pool/<any-repo>/<name> 或 <any-repo>/skills/<name>
-  //    跳过 agent/working-set 相关目录，避免把 symlink 误判为有效源
-  const skipDirs = new Set(['.claude', '.kimi', '.git', 'node_modules', '.lythos-curator']);
+  //    跳过隐藏目录（agent working set、git、配置等）和 node_modules，
+  //    避免把 .claude/skills/ 里的 symlink 误判为有效 cold-pool 源
   try {
     for (const entry of readdirSync(coldPool, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
-      if (skipDirs.has(entry.name)) continue;
+      if (entry.name.startsWith('.')) continue;
+      if (entry.name === 'node_modules') continue;
       const base = join(coldPool, entry.name);
       for (const sub of [join(base, name), join(base, "skills", name)]) {
         if (existsSync(join(sub, "SKILL.md"))) return sub;
