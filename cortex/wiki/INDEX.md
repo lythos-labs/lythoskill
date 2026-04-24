@@ -21,8 +21,9 @@
 
 
 
-## 📖 Lessons (1)
+## 📖 Lessons (2)
 
+- [how-i-govern-130-skills](./03-lessons/how-i-govern-130-skills.md)
 - [skill-selection-case-study-pdf-report](./03-lessons/skill-selection-case-study-pdf-report.md)
 
 ---
