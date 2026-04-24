@@ -7,7 +7,7 @@ description: |
   只有当 Handoff 不存在或明显过时时，才降级为文件系统探索。
 
   基于 KV Cache 优化的加载顺序（稳定→多变）：
-  Layer 1: 元技能 (AGENTS.md, HANDOFF-TEMPLATE.md) → Layer 2: 当前状态 (HANDOFF.md) → Layer 3: 验证 (git status)
+  Layer 1: 元技能 (CLAUDE.md) → Layer 2: 当前状态 (daily/ 下最新日期文件) → Layer 3: 验证 (git status)
 
   触发词："先复盘"、"了解项目"、"看看历史"、"接手这个任务"、"继续之前的工作"
 
@@ -18,10 +18,10 @@ type: standard
 
 ## 核心原则
 
-> **优先读取 Handoff，避免重复探索。加载顺序基于 KV Cache 优化（稳定→多变）**
+> **优先读取 Daily 中的 Handoff section，避免重复探索。加载顺序基于 KV Cache 优化（稳定→多变）**
 >
-> 上一个 agent 通过 project-scribe 产出的 `HANDOFF.md` 已经包含了文件探索无法恢复的信息。
-> 新 agent 如果重新探索，会浪费 token 且可能 hallucination。
+> 上一个 agent 通过 project-scribe 将 handoff 写入 `daily/YYYY-MM-DD.md` 的第一个 section。
+> 新 agent 如果重新探索文件系统，会浪费 token 且可能 hallucination。
 
 ## 复盘流程（分层加载）
 
@@ -30,7 +30,7 @@ type: standard
 ```bash
 # 项目启动期后极少修改
 cat CLAUDE.md
-cat HANDOFF-TEMPLATE.md  # 了解 handoff 结构
+# HANDOFF-TEMPLATE.md 仅供参考结构，不必须读取
 ```
 
 **获取：**
@@ -38,20 +38,25 @@ cat HANDOFF-TEMPLATE.md  # 了解 handoff 结构
 - 工作原则
 - 项目架构
 
-### Layer 2: 当前状态 (Handoff，每次加载)
+### Layer 2: 当前状态 (Daily 文件中的 Handoff section)
 
 ```bash
-# 如果存在 Handoff，这是最重要的信息源
-cat daily/HANDOFF.md 2>/dev/null || cat playground/HANDOFF.md 2>/dev/null || echo "无活跃 Handoff"
+# 找 daily/ 下最新的日期文件（不是固定文件名）
+LATEST_DAILY=$(ls daily/*.md 2>/dev/null | grep -E '^daily/[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1)
+cat "$LATEST_DAILY" 2>/dev/null || echo "无 Daily 文件"
 ```
 
+**读取策略：**
+- 读取文件的第一个 section（`## Session Handoff`）
+- 如果同一天有多个 session，scribe 会在同一个 daily 文件中 append，onboarding 读取最新的 handoff section 即可
+
 **判断 Handoff 是否可用：**
-- ✅ **可用**：存在 `daily/HANDOFF.md` 或 `playground/HANDOFF.md`，且 `created_at` 在合理范围内
-- ⚠️ **可能过期**：Handoff 存在但 `session_rounds` 很少，或 `git_commit` 与当前 HEAD 不符
-- ❌ **不可用**：Handoff 不存在或明显 stale
+- ✅ **可用**：存在 daily 文件，且其中的 `git_commit` 与当前 HEAD 匹配
+- ⚠️ **可能过期**：daily 文件存在但日期较早（如 3 天前），或 `git_commit` 与 HEAD 不符
+- ❌ **不可用**：daily 文件不存在，或 handoff section 明显 stale
 
 **如果 Handoff 可用：**
-- 直接读取 Handoff 获取上下文
+- 直接读取 Handoff section 获取上下文
 - 跳到 Layer 3 验证 Ground Truth State
 - **不需要**重新探索 `cortex/`、`skills/` 等目录
 
@@ -102,24 +107,24 @@ git log --oneline -10
 
 ## 输出格式
 
-### 有 Handoff 时（推荐路径）
+### 有 Daily Handoff 时（推荐路径）
 
 ```
 已复盘项目上下文：
 
 📋 项目：xxx（技术栈）
 📌 版本：vX.Y.Z（git: hash）
-📄 Handoff: daily/HANDOFF.md（created_at: 2026-04-23）
-⚠️  坑点：Handoff 中记录的关键陷阱 1-2 个
-🎯 当前：Handoff 中的进行中的任务
-💡 待办：Handoff 中的下一步
+📄 Daily: daily/2026-04-24.md（git_commit: abc1234）
+⚠️  坑点：Handoff section 中记录的关键陷阱 1-2 个
+🎯 当前：进行中的任务
+💡 待办：下一步
 
 验证状态：✅ git 状态与 Handoff 一致 / ⚠️ 不一致，Handoff 可能过期
 
 有什么可以帮你的？
 ```
 
-### 无 Handoff 时（降级路径）
+### 无 Daily Handoff 时（降级路径）
 
 ```
 已复盘项目上下文：
@@ -130,7 +135,7 @@ git log --oneline -10
 🎯 当前：进行中的任务（来自 CURRENT-QUEST.md）
 💡 待办：今日待办（来自 task list）
 
-⚠️ 警告：未发现 Handoff，部分 session 专属信息可能丢失
+⚠️ 警告：未发现 Daily Handoff，部分 session 专属信息可能丢失
 
 有什么可以帮你的？
 ```
@@ -140,24 +145,24 @@ git log --oneline -10
 | 文档 | 层级 | 内容 | 修改频率 | 读取优先级 |
 |-----|------|------|---------|-----------|
 | CLAUDE.md | Layer 1 | 怎么工作 | 极低 | 必须 |
-| HANDOFF.md | Layer 2 | 当前 session 状态 | 每次 session | **最高** |
+| daily/YYYY-MM-DD.md | Layer 2 | 当前 session 状态（第一个 section） | 每次 session | **最高** |
 | git status | Layer 3 | 真实状态验证 | 实时 | 必须 |
-| CURRENT-QUEST | 降级 | 任务状态 | 高 | Handoff 缺失时 |
-| PITFALLS | 降级 | 已知陷阱 | 低 | Handoff 缺失时 |
+| CURRENT-QUEST | 降级 | 任务状态 | 高 | Daily 缺失时 |
+| PITFALLS | 降级 | 已知陷阱 | 低 | Daily 缺失时 |
 
-**原则：** ONBOARDING.md 不包含"当前进度"，只包含"怎么工作"。当前进度在 Handoff 中。
+**原则：** ONBOARDING.md 不包含"当前进度"，只包含"怎么工作"。当前进度在 Daily 文件的第一个 section 中。
 
 ## 检查清单
 
 - [ ] Layer 1: 读取元技能 (CLAUDE.md)
-- [ ] Layer 2: 查找并读取 Handoff (`playground/HANDOFF.md`)
-- [ ] 判断 Handoff 是否 fresh（git_commit 匹配、created_at 合理）
+- [ ] Layer 2: 查找 daily/ 下最新的日期文件，读取第一个 section (Session Handoff)
+- [ ] 判断 Handoff 是否 fresh（git_commit 匹配、日期合理）
 - [ ] Layer 3: 验证 Ground Truth (`git status`, `git log`)
-- [ ] 如果 Handoff 可用：直接基于 Handoff 开始工作
-- [ ] 如果 Handoff 缺失/stale：降级探索（CURRENT-QUEST, PITFALLS, DECISIONS, skill-deck.toml, cortex/INDEX.md）
+- [ ] 如果 Daily Handoff 可用：直接基于 Handoff 开始工作
+- [ ] 如果 Daily Handoff 缺失/stale：降级探索（CURRENT-QUEST, PITFALLS, DECISIONS, skill-deck.toml, cortex/INDEX.md）
 - [ ] 输出复盘摘要
 
 ## 相关 Skill
 
-- **lythoskill-project-scribe** — 写 Handoff。与 onboarding 形成 CQRS 读写分离。scribe 独立可用（handoff 可被人工阅读），onboarding 也独立可用（无 handoff 时降级为文件探索）。二者组合时效果最佳。
+- **lythoskill-project-scribe** — 写 Daily（含 Handoff section）。与 onboarding 形成 CQRS 读写分离。scribe 独立可用（daily 可被人工阅读），onboarding 也独立可用（无 daily 时降级为文件探索）。二者组合时效果最佳。
 - **lythoskill-project-cortex** — GTD 项目治理。如果项目使用 cortex，onboarding 在降级探索时会读取 `cortex/INDEX.md` 获取任务状态，但**不强制依赖**。cortex 独立运行，onboarding 只是在其存在时顺手读取。

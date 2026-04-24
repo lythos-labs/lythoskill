@@ -76,9 +76,9 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
 
 ## 核心流程
 
-### 流程 1: 产出单文件 Handoff（推荐）
+### 流程 1: 产出 Daily + Handoff 合并文件（推荐）
 
-将 `HANDOFF-TEMPLATE.md` 复制为 `playground/HANDOFF.md`（或项目根目录），按模板填写。
+将 session handoff 内容写入 `daily/YYYY-MM-DD.md`，作为当天的日报文件。Handoff 是该文件的第一个 section（`## Session Handoff`），人类工作日志接在后面。
 
 ```
 用户：ession 要结束了，记录一下进度
@@ -107,9 +107,10 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
               │
               ▼
 ┐──────────────────────────────────────────────────┒
-│ 4. 填写 Handoff 单文件                           │
-│    - 使用 HANDOFF-TEMPLATE.md 模板                  │
-│    - 重点填写 Pitfalls 和 Ground Truth State        │
+│ 4. 填写 Daily 文件（含 Handoff section）          │
+│    - 文件: daily/YYYY-MM-DD.md                     │
+│    - 第一个 section 必须是 Session Handoff         │
+│    - 重点填写 Pitfalls 和 Ground Truth State       │
 └──────────────────────────────────────────────────┘
               │
               ▼
@@ -146,29 +147,30 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
     │
     ▼
 ┐──────────────────────────────────────────────────┒
-│ 1. 归档旧 Handoff                              │
-│    - 移动到 daily/YYYY-MM-DD.md（或 journal/）    │
-│    - 时间戳命名，平铺存储，无需分类目录             │
+│ 1. 确认昨日 Daily 已归档                          │
+│    - daily/ 目录下已有 YYYY-MM-DD.md              │
+│    - 如无，说明昨日无工作，直接创建今天的           │
 └──────────────────────────────────────────────────┘
               │
               ▼
 ┐──────────────────────────────────────────────────┒
-│ 2. 创建新 Handoff                               │
-│    - 基于 HANDOFF-TEMPLATE.md 初始化              │
-│    - 填入迭代目标和初始状态                       │
+│ 2. 创建今天的 Daily                               │
+│    - 文件: daily/YYYY-MM-DD.md                    │
+│    - 第一 section: Session Handoff                │
+│    - 后续 section: 工作日志、Pitfalls、Next       │
 └──────────────────────────────────────────────────┘
 ```
 
-## Handoff 文件位置
+## Daily 文件位置
 
 | 场景 | 文件路径 | 说明 |
 |-----|---------|------|
-| 活跃 session | `daily/HANDOFF.md` 或 `playground/HANDOFF.md` | 当前进行中的 handoff（固定文件名） |
-| 归档 | `daily/2026-04-23.md` | 历史 handoff（时间戳平铺，无压输入） |
-| 模板 | `HANDOFF-TEMPLATE.md` | 项目根目录模板 |
+| 当前日期 | `daily/YYYY-MM-DD.md` | 当天的日报，第一个 section 是 Handoff |
+| 历史 | `daily/2026-04-23.md` | 历史日报（时间戳平铺） |
+| 模板 | `HANDOFF-TEMPLATE.md` | 项目根目录模板（供参考结构） |
 
 > 命名哲学：不用 `archive/` 这种正式目录，直接用 `daily/` 或 `journal/`。
-> 就像工作手帐，每天一页，自然流动。
+> Handoff 不是独立文件，而是 daily 文件的第一个 section。
 
 ## Pitfalls 记录规范
 
@@ -192,16 +194,16 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
 │              - 确认 git 状态                          │
 │              - 确认 cortex 状态                        │
 │              - 回忆 session 状态                       │
-│              - 填写 HANDOFF.md                       │
+│              - 写入 daily/YYYY-MM-DD.md              │
 │                          │                            │
 │                          ↓                            │
-│                   HANDOFF.md                          │
-│                   (单文件交接记录)                      │
+│              daily/2026-04-24.md                      │
+│              (日报，第一个 section 是 Handoff)         │
 │                          │                            │
 │                          ↓                            │
 │   下一 session ─→ project-onboarding (read)          │
-│              - 优先读取 HANDOFF.md                   │
-│              - 然后才探索目录结构                     │
+│              - 找 daily/ 下最新的日期文件              │
+│              - 读取第一个 section (Session Handoff)   │
 │              - 验证 Ground Truth State                │
 │                                                       │
 └──────────────────────────────────────────────────┘
@@ -217,12 +219,12 @@ $ bun packages/lythoskill-project-cortex/src/cli.ts stats
 Scribe 执行：
 1. git status 确认状态
 2. 回忆本次 session 重要但未记录的事
-3. 填写 HANDOFF.md
+3. 写入 daily/YYYY-MM-DD.md（今天日期的文件）
 4. 给用户确认
 
 输出：
-✅ 已更新 HANDOFF.md
-📌 位置: playground/HANDOFF.md
+✅ 已更新 daily/2026-04-24.md
+📌 位置: daily/2026-04-24.md
 ⚠️ 警告: 以下文件在 diff artifact 中但不在 working tree，下个 agent 勿误认
 ```
 
@@ -232,12 +234,12 @@ Scribe 执行：
 用户：踩坑了，sed -i 在 macOS 上不兼容
 
 Scribe 执行：
-1. 更新 HANDOFF.md Pitfalls 部分
+1. 更新 daily/YYYY-MM-DD.md 的 Pitfalls 部分
 2. 记录错误尝试、正确做法、根因、浪费 time
 
 输出：
-⚠️ 已记录坑点到 HANDOFF.md
-📍 位置: playground/HANDOFF.md
+⚠️ 已记录坑点到 daily/2026-04-24.md
+📍 位置: daily/2026-04-24.md
 ‼️ 下个 agent 使用 sed 时请使用 sed -i '' 或直接用 Edit 工具
 ```
 
@@ -255,7 +257,7 @@ Scribe 执行：
 
 ## 注意事项
 
-1. **单文件优先** - 产出 HANDOFF.md 而不是分散的 CURRENT-QUEST + PITFALLS + DECISIONS
+1. **Daily 文件优先** - handoff 写入 daily/YYYY-MM-DD.md 的第一个 section，不是独立 HANDOFF.md
 2. **确认流程** - handoff 前必须执行 git/cortex/session 三重确认
 3. **dump 专属状态** - 不要记录能通过 ls/cat/git log 恢复的内容
 4. **写前确认** - 更新前给用户看 diff，确认后再写入
