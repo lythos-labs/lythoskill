@@ -112,7 +112,7 @@ Curator SKILL.md 描述当本地冷池缺少合适 skill 时的 workflow：
 - CI/无头环境无法生成或验证
 
 ### 方案 B: 冷池就近目录（推荐）
-curator 产出默认写入冷池目录下的 `.lythos-curator/` 子目录（如 `~/.agents/skill-repos/.lythos-curator/`），可通过 `--output` flag 覆盖。
+curator 产出默认写入冷池目录下的 `.lythoskill-curator/` 子目录（如 `~/.agents/skill-repos/.lythoskill-curator/`），可通过 `--output` flag 覆盖。
 **优点**:
 - **就近原则**：索引和它描述的数据物理上在一起，逻辑清晰
 - **Go module 心智**：和 `go env GOMODCACHE` 一致，模块缓存和模块在一起
@@ -121,7 +121,7 @@ curator 产出默认写入冷池目录下的 `.lythos-curator/` 子目录（如 
 - 不会在 git 中制造伪权威
 
 **缺点**:
-- curator 扫描时需排除 `.lythos-curator/`（避免自引用）
+- curator 扫描时需排除 `.lythoskill-curator/`（避免自引用）
 - 无法通过 git 共享扫描结果（但本就不该共享）
 - 新用户首次运行前没有现成 catalog（但 curator index 只需几秒）
 
@@ -140,12 +140,12 @@ curator 产出默认写入冷池目录下的 `.lythos-curator/` 子目录（如 
 - playground/ 通常会被清理
 
 ## 决策
-**选择**: 方案 B（冷池就近目录 `{pool}/.lythos-curator/`）为默认，方案 C 为内部开发时的 override。
+**选择**: 方案 B（冷池就近目录 `{pool}/.lythoskill-curator/`）为默认，方案 C 为内部开发时的 override。
 
 **具体实现**：
-- 默认输出目录：`{pool_path}/.lythos-curator/`
+- 默认输出目录：`{pool_path}/.lythoskill-curator/`
 - 显式覆盖：`--output` / `-o` flag
-- 扫描排除：`.lythos-curator/` 加入 `skip` 集合，防止自引用
+- 扫描排除：`.lythoskill-curator/` 加入 `skip` 集合，防止自引用
 
 **关键区分: 原始扫描数据 vs 推荐结论**
 

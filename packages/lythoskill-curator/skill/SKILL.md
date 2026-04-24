@@ -56,9 +56,9 @@ bunx @lythos/skill-curator [POOL_PATH]
 
 # 默认值：
 #   POOL_PATH  = ~/.agents/skill-repos
-#   输出目录    = {POOL_PATH}/.lythos-curator/（就近原则，索引与冷池在一起）
-#   Registry   = {POOL_PATH}/.lythos-curator/REGISTRY.json
-#   Catalog DB = {POOL_PATH}/.lythos-curator/catalog.db
+#   输出目录    = {POOL_PATH}/.lythoskill-curator/（就近原则，索引与冷池在一起）
+#   Registry   = {POOL_PATH}/.lythoskill-curator/REGISTRY.json
+#   Catalog DB = {POOL_PATH}/.lythoskill-curator/catalog.db
 #
 # 自定义输出目录：
 #   bunx @lythos/skill-curator ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/

@@ -243,9 +243,9 @@ function parseCuratorArgs(argv: string[]) {
   }
 
   // Default: place index inside the cold pool (proximity principle)
-  // e.g. ~/.agents/skill-repos/.lythos-curator/
+  // e.g. ~/.agents/skill-repos/.lythoskill-curator/
   if (!outputDir) {
-    outputDir = `${poolPath}/.lythos-curator`;
+    outputDir = `${poolPath}/.lythoskill-curator`;
   }
 
   return { poolPath, outputDir };
@@ -255,7 +255,7 @@ function parseCuratorArgs(argv: string[]) {
 
 function findSkillDirs(root: string): string[] {
   const results: string[] = [];
-  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythos-curator', 'tmp', 'playground', 'dist', 'build']);
+  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythoskill-curator', 'tmp', 'playground', 'dist', 'build']);
 
   function walk(dir: string, depth: number) {
     if (depth > 6) return; // safety limit
@@ -338,7 +338,7 @@ function runQuery(argv: string[]) {
   if (!dbPath) {
     // Default: find the most recently generated catalog.db in common locations
     const candidates = [
-      `${process.env.HOME}/.agents/skill-repos/.lythos-curator/catalog.db`,
+      `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,
       `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,
     ]
     for (const c of candidates) {
@@ -353,7 +353,7 @@ function runQuery(argv: string[]) {
       console.error(`  Searched: ${dbPath}`)
     } else {
       console.error('  Searched default locations:')
-      console.error('    ~/.agents/skill-repos/.lythos-curator/catalog.db')
+      console.error('    ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
       console.error('    ~/.agents/lythos/skill-curator/catalog.db')
     }
     console.error('')
