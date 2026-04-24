@@ -25,7 +25,7 @@ deck_managed_dirs:
   - ~/.agents/lythos/skill-curator/
 
 type: standard
-version: 0.4.0
+version: {{PACKAGE_VERSION}}
 ---
 
 # Skill Curator
@@ -72,7 +72,7 @@ bunx @lythos/skill-curator [POOL_PATH]
     "name": "repomix-handoff",
     "description": "...",
     "type": "standard",
-    "version": "0.4.0",
+    "version": "{{PACKAGE_VERSION}}",
     "path": "...",
     "managedDirs": ["tmp/handoff-*/"],
     "niches": ["meta.tooling.repomix"],

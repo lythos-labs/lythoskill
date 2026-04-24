@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * lythoskill-curator CLI — Skill Curator v0.4.0 (lythos-adapted)
+ * lythoskill-curator CLI — Skill Curator
  *
  * Read-only observer for skill cold pools.
  * Scans SKILL.md frontmatter, builds indices.
