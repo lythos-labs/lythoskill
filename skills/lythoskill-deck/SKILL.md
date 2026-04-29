@@ -356,6 +356,8 @@ lythoskill-deck 管理的是**哪些 skill 目录出现在 agent 能扫描到的
 | `bunx @lythos/skill-deck link` | toml → symlink 同步（reconciler） | bun |
 | `bunx @lythos/skill-deck link --deck /path/to/deck.toml` | 指定非默认 toml | bun |
 | `bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .` | 子目录中的 toml，但 working_set 锚定当前目录 | bun |
+| `bunx @lythos/skill-deck validate` | 校验 toml 结构、skill 引用、预算约束 | bun |
+| `bunx @lythos/skill-deck validate --deck /path/to/deck.toml` | 校验指定 toml | bun |
 | `./scripts/link.sh` | 同上（直接调用 skill 脚本） | bash, bun |
 | `bash deck-migrate.sh` | 从肥胖目录迁移到 deck 治理 | 纯 bash |
 | `bash deck-status.sh` | 一致性诊断（只读） | 纯 bash |

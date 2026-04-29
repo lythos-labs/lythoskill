@@ -22,13 +22,13 @@ import {
 
 // ── 路径工具 ────────────────────────────────────────────────
 
-function findDeckToml(from: string): string | null {
+export function findDeckToml(from: string): string | null {
   const p = join(from, "skill-deck.toml");
   if (existsSync(p)) return p;
   return null;
 }
 
-function expandHome(p: string, base: string): string {
+export function expandHome(p: string, base: string): string {
   if (p.startsWith("~/")) return join(homedir(), p.slice(2));
   return resolve(base, p);
 }
@@ -82,7 +82,7 @@ function extractArrayField(fm: string, field: string): string[] {
 
 // ── 冷池查找 ────────────────────────────────────────────────
 
-function findSource(name: string, coldPool: string, projectDir: string): string | null {
+export function findSource(name: string, coldPool: string, projectDir: string): string | null {
   // 0. Fully-qualified path: host.tld/owner/repo/skill
   //    → cold_pool/host.tld/owner/repo/skills/skill
   //    Also handles host.tld/owner/repo (standalone skill without skills/ subdir)
