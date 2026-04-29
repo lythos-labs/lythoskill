@@ -31,7 +31,7 @@ function parseArgs(argv: string[]) {
     skills: undefined,
     decks: undefined,
     criteria: 'syntax,context,logic,token',
-    control: 'project-scribe',
+    control: 'lythoskill-project-scribe',
     dir: 'tmp',
     project: '.',
   }
@@ -177,8 +177,7 @@ max_cards   = 10
 
 [tool]
 skills = [
-  "${p.skill_name}",
-${CONTROL_SKILLS.map(s => `  "${s}",`).join('\n')}
+${[...new Set([p.skill_name, ...CONTROL_SKILLS])].map(s => `  "${s}",`).join('\n')}
 ]
 `
       writeFileSync(p.deck_path, deckContent)
@@ -241,16 +240,16 @@ managed_dirs:
 ${participants.map(p => `### ${p.id} (${p.name})
 \`\`\`bash
 cd "${PROJECT_DIR}"
-bunx @lythos/skill-deck link --deck "${p.deck_path}"
+bunx @lythos/skill-deck link --deck "${p.deck_path}" --workdir "${PROJECT_DIR}"
 # 然后执行任务，输出写入 "${join(ARENA_DIR, 'runs', `${p.id}.md`)}"
-bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}"
+bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}" --workdir "${PROJECT_DIR}"
 \`\`\`
 `).join('')}
 
 ### Judge
 \`\`\`bash
 cd "${PROJECT_DIR}"
-bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}"
+bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}" --workdir "${PROJECT_DIR}"
 # 读取所有 run 文件，生成 "${join(ARENA_DIR, 'report.md')}"
 \`\`\`
 `

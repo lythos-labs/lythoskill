@@ -32,6 +32,8 @@ export async function build(skillName: string) {
   }
 
   // Build-time help capture: run `bun src/cli.ts --help` and write to references/COMMANDS.md
+  // Only overwrites if the file is absent or marked with <!-- AUTO-GENERATED -->,
+  // preserving hand-maintained references.
   const cliPath = join(root, 'packages', skillName, 'src', 'cli.ts')
   if (existsSync(cliPath)) {
     try {
@@ -43,7 +45,11 @@ export async function build(skillName: string) {
       })
       const refDir = join(dest, 'references')
       mkdirSync(refDir, { recursive: true })
-      writeFileSync(join(refDir, 'COMMANDS.md'), stdout)
+      const commandsMdPath = join(refDir, 'COMMANDS.md')
+      const marker = '<!-- AUTO-GENERATED -->'
+      if (!existsSync(commandsMdPath) || readFileSync(commandsMdPath, 'utf-8').includes(marker)) {
+        writeFileSync(commandsMdPath, marker + '\n' + stdout)
+      }
     } catch {
       // Graceful degradation: if --help fails, skip references generation
     }

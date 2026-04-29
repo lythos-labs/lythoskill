@@ -1,173 +1,290 @@
 # lythoskill — AGENTS.md
 
-> 本文档面向 AI coding agent。阅读者被假设对该项目一无所知。
+> This is the **single source of truth** for AI coding agents working on this repository.
+> Human contributors: see [README.md](./README.md) for a higher-level overview.
 
 ---
 
-## 项目概述
+## Project Overview
 
-**lythoskill** 是一个自举的 thin-skill 单体仓库（monorepo）脚手架工具。
+**lythoskill** is a self-bootstrapping thin-skill monorepo scaffolding tool for AI agent skills.
 
-它解决的核心矛盾：AI agent skill 的**开发态**需要完整的 monorepo 体验（依赖管理、测试、类型检查），而**发布态**需要极致轻量（仅 SKILL.md + 薄脚本层，context window 敏感）。
+It solves the core tension between **development** (needs full monorepo experience: dependency management, testing, type checking) and **release** (needs minimal context-window footprint: only SKILL.md + thin scripts).
 
-lythoskill 自身就是用 lythoskill 模式创建的——它是自己的第一个用户（self-bootstrap）。
+lythoskill itself is built with the lythoskill pattern — it is its own first user (self-bootstrap).
 
 ---
 
-## 技术栈
+## Tech Stack
 
-| 层级 | 选择 |
+| Layer | Choice |
 |------|------|
-| 运行时 | **Bun** |
-| 语言 | **TypeScript** |
-| 模块系统 | **ESM-only** (`"type": "module"`) |
-| 包管理器 | **pnpm** workspaces |
-| Skill 层依赖 | **零感知** — 消费者通过 `bunx`/`npx` 调用已发布包，无需本地安装依赖 |
-| Starter 层依赖 | 正常的 npm 依赖管理（如 `@iarna/toml`、`zod`），由包管理器自动解析 |
+| Runtime | **Bun** (native TypeScript, no compilation step) |
+| Language | **TypeScript** |
+| Module System | **ESM-only** (`"type": "module"`) |
+| Package Manager | **pnpm** workspaces |
+| Skill-layer dependencies | **Zero-perceived** — consumers call via `bunx`/`npx`, no local install |
+| Starter-layer dependencies | Normal npm dependency management (e.g. `@iarna/toml`, `zod`), resolved by package manager |
 
-关键配置：
-- `tsconfig.json` 中 `moduleResolution` 必须为 `"bundler"`（支持 `import ... with { type: "json" }`）
-- `types` 包含 `"bun-types"`
-- 目标 `"esnext"`，模块 `"esnext"`
+Key config:
+- `tsconfig.json`: `moduleResolution` must be `"bundler"` (supports `import ... with { type: "json" }`)
+- `types` includes `"bun-types"`
+- Target `"esnext"`, module `"esnext"`
 
 ---
 
-## 项目结构
+## Project Structure
 
 ```
 lythoskill/
-├── package.json              # 根 workspace 配置（private: true）
-├── pnpm-workspace.yaml       # pnpm 工作区：packages/*
-├── AGENTS.md                 # 本文件
+├── package.json              # Root workspace config (private: true)
+├── pnpm-workspace.yaml       # pnpm workspace: packages/*
+├── AGENTS.md                 # This file — SSOT for all agents
 │
 ├── packages/
-│   └── lythoskill/           # 核心脚手架工具（npm 可发布包）
+│   └── lythoskill/           # Core scaffolding tool (npm publishable)
 │       ├── package.json      # bin: { "lythoskill": "./src/cli.ts" }
 │       ├── tsconfig.json
 │       └── src/
-│           ├── cli.ts        # CLI 入口：init / build 命令路由
-│           ├── init.ts       # `lythoskill init <name>` — 生成新项目
-│           ├── build.ts      # `lythoskill build <skill>` — 构建技能到 dist/
-│           └── templates.ts  # 所有模板字符串（package.json、tsconfig、SKILL.md 等）
+│           ├── cli.ts        # CLI entry: init / build command routing
+│           ├── init.ts       # `lythoskill init <name>` — scaffold new project
+│           ├── build.ts      # `lythoskill build <skill>` — build skill to skills/
+│           └── templates.ts  # All template strings (package.json, tsconfig, SKILL.md, etc.)
 │
 ├── skills/
-│   └── lythoskill-creator/   # 本项目的 skill 层
-│       └── SKILL.md          # 对 agent 可见的技能描述 + 使用脚本
+│   └── lythoskill-creator/   # This project's skill layer
+│       └── SKILL.md          # Agent-visible skill description + usage scripts
 │
-└── cortex/                   # 项目治理文档（project-cortex 工作流）
-    ├── INDEX.md              # 目录索引与统计
-    ├── adr/accepted/         # 架构决策记录（ADR）
-    ├── epics/active/         # 需求史诗（Epic）
-    ├── tasks/completed/      # 执行任务（Task）
-    └── wiki/patterns/        # 模式文档（Wiki）
+└── cortex/                   # Project governance (project-cortex workflow)
+    ├── INDEX.md              # Directory index and stats
+    ├── adr/accepted/         # Architecture Decision Records
+    ├── epics/active/         # Requirement epics
+    ├── tasks/completed/      # Executed tasks
+    └── wiki/patterns/        # Reusable patterns and conventions
 ```
 
 ---
 
-## 架构：Thin Skill Pattern（三层分离）
+## Architecture: Thin Skill Pattern (Three-Layer Separation)
 
 ```
-Starter (packages/<name>/)       → npm/pip publish → 依赖治理 + CLI 入口
-Skill   (packages/<name>/skill/) → lythoskill build → 意图描述 + bunx 调用
-Output  (skills/<name>/)         → release/commit  → 对 agent 的最终产物
+Starter (packages/<name>/)       → npm publish → dependency management + CLI entry
+Skill   (packages/<name>/skill/) → lythoskill build → SKILL.md + thin scripts
+Output  (skills/<name>/)         → committed to Git → agent-visible skill
 ```
 
-1. **Starter**：管理所有依赖，暴露 CLI entry point。agent 不直接读这里的代码。
-2. **Skill**：仅包含 `SKILL.md` + `scripts/`。脚本通过 `bunx <starter> <command>` 调用已发布的包。`SKILL.md` 不知道依赖的存在。
-3. **Dist**：`build` 命令过滤 dev 文件、验证 frontmatter 后的输出目录。
+1. **Starter**: The npm package (`@lythos/skill-creator`, `@lythos/skill-deck`, etc.). Contains all implementation logic, dependencies, and CLI entry points. Agents do not read this code directly.
+2. **Skill**: Lives in `packages/<name>/skill/`. Contains only `SKILL.md` (intent description) and `scripts/` (thin routers that call `bunx <starter> <command>`). `SKILL.md` has no knowledge of dependencies.
+3. **Output**: The `skills/` directory contains the built output. **`skills/` is build output that must be committed to Git** so agent users can clone and use skills without building.
 
-类比：
-- Skill ≈ Spring Controller（路由层，接口契约）
-- npm/pip 包 ≈ Spring Service（实现层，自由演进）
-- Starter ≈ Spring Boot Starter（BOM + CLI 入口）
+The `build` command (`packages/lythoskill-creator/src/build.ts`) copies from `packages/<name>/skill/` to `skills/<name>/`, filters out dev files (`__tests__`, `node_modules`, `.test.ts`, `.spec.ts`), validates that `SKILL.md` starts with YAML frontmatter (`---`), and substitutes template variables (`{{PACKAGE_NAME}}`, `{{BIN_NAME}}`, etc.) from the package's `package.json`.
+
+Analogy:
+- Skill ≈ Spring Controller (routing layer, interface contract)
+- npm/pip package ≈ Spring Service (implementation layer, free to evolve)
+- Starter ≈ Spring Boot Starter (BOM + CLI entry)
+
+Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./cortex/wiki/01-patterns/thin-skill-pattern.md)
 
 ---
 
-## 构建与运行命令
+## Common Commands
 
-所有命令均从项目根目录执行，使用 `bunx` 运行：
+All commands run from the repository root.
 
+### Development (direct Bun execution)
 ```bash
-# 初始化一个新 lythoskill 项目
-bunx lythoskill init <project-name>
+# Run creator CLI directly (no build step needed)
+bun packages/lythoskill-creator/src/cli.ts init <project-name>
+bun packages/lythoskill-creator/src/cli.ts build <skill-name>
 
-# 构建指定 skill（从 packages/<name>/skill/ 生成到 skills/<name>/）
-bunx lythoskill build <skill-name>
+# Run deck CLI directly
+bun packages/lythoskill-deck/src/cli.ts link
+bun packages/lythoskill-deck/src/cli.ts link --deck <path>
+
+# Run project-cortex CLI directly
+bun packages/lythoskill-project-cortex/src/cli.ts <command>
 ```
 
-构建行为细节：
-- 读取 `packages/<skill-name>/skill/`
-- 要求目录内存在 `SKILL.md` 且必须以 `---` YAML frontmatter 开头
-- 过滤排除：`__tests__`、`node_modules`、`.DS_Store`、`.test.ts`、`.spec.ts` 等
-- 输出到 `skills/<skill-name>/`
-- `skills/` 是构建产物，应提交到 Git（agent 用户 clone 后可直接使用）
+### Via bunx (as users would run after publishing)
+```bash
+bunx @lythos/skill-creator init <project-name>
+bunx @lythos/skill-creator build <skill-name>
+bunx @lythos/skill-deck link
+bunx @lythos/project-cortex <command>
+```
 
-本项目自身暂无测试框架或 lint 配置。验证方式：手动执行 `bunx lythoskill init <name>` 和 `bunx lythoskill build lythoskill-creator` 检查产物。
+### Testing
+```bash
+# Run deck scenario tests (custom lightweight runner, not Jest/Vitest)
+bun packages/lythoskill-deck/test/runner.ts
+
+# Run with parallel workers and custom output directory
+bun packages/lythoskill-deck/test/runner.ts --parallel 4 --output ./playground/test-runs
+```
+
+### Project Governance (project-cortex)
+```bash
+# Create governance documents — ALWAYS use CLI, do NOT create files manually
+bun packages/lythoskill-project-cortex/src/cli.ts task "<title>"
+bun packages/lythoskill-project-cortex/src/cli.ts epic "<title>"
+bun packages/lythoskill-project-cortex/src/cli.ts adr "<title>"
+
+# Maintenance
+bun packages/lythoskill-project-cortex/src/cli.ts index    # Regenerate INDEX.md and wiki/INDEX.md
+bun packages/lythoskill-project-cortex/src/cli.ts probe    # Check status consistency
+bun packages/lythoskill-project-cortex/src/cli.ts list     # List all tasks and epics
+bun packages/lythoskill-project-cortex/src/cli.ts stats    # Show statistics
+```
+
+### Red-Green Release (Migration Patches)
+```bash
+# Create heredoc patch: pr-<timestamp>-<description>.sh
+# Execute → auto-archive to archived-patches/
+# User says LGTM → git commit + tag
+```
+Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 ---
 
-## 代码风格规范
+## Code Conventions
 
-1. **ESM-only**：禁止 `require()`。读取 JSON 使用：
+1. **ESM-only**: No `require()`. Import JSON with assertions:
    ```typescript
    import pkg from '../package.json' with { type: 'json' }
    ```
 
-2. **内置模块前缀**：一律使用 `node:` 前缀（`node:fs`, `node:path`）。
+2. **Built-in module prefix**: Always use `node:` prefix (`node:fs`, `node:path`).
 
-3. **Skill 层零依赖感知**：Skill 脚本（`skills/<name>/scripts/`）对消费者必须是"零安装负担"的——通过 `bunx <pkg>` 调用，依赖由包管理器自动拉取和清理。Starter 层（`packages/*/src/`）可以使用正常的 npm 依赖。
+3. **Skill-layer zero-perceived-dependency**: Skill scripts (`skills/<name>/scripts/`) must be zero-install-burden for consumers — called via `bunx <pkg>`, dependencies auto-fetched and cleaned by the package manager. Starter layer (`packages/*/src/`) can use normal npm dependencies.
 
-4. **模板字符串中的反引号**：如果生成的内容包含代码块（含 `` ` ``），使用 **fence variable trick**：
+4. **Fence variable trick**: When generating content containing code blocks with backticks, use:
    ```typescript
    const fence = '`'.repeat(3)  // => '```'
    ```
-   避免在模板字符串中转义反引号。
 
-5. **CLI 风格**：使用 `process.argv.slice(2)` 解析，简单 `switch` 路由，无 CLI 框架。
+5. **CLI style**: Parse with `process.argv.slice(2)`, route with simple `switch` statements. No CLI frameworks.
 
-6. **文件权限**：生成的 shell 脚本需显式 `chmodSync(path, 0o755)`。
+6. **File permissions**: Generated shell scripts must be executable:
+   ```typescript
+   chmodSync(path, 0o755)
+   ```
+
+7. **tsconfig**: `moduleResolution` must be `"bundler"`, `types` includes `"bun-types"`, target `"esnext"`.
 
 ---
 
-## 开发工作流
+## Project Skills (Self-Contained)
 
-### 修改代码后
-直接运行验证，无编译步骤（Bun 原生运行 TypeScript）：
-```bash
-bun packages/lythoskill-creator/src/cli.ts init my-test
-bun packages/lythoskill-creator/src/cli.ts build lythoskill-creator
+This repository contains its own built skills under `skills/`:
+
+**Core (understanding these is essential to work in this repo):**
+- `skills/lythoskill-creator/SKILL.md` — How the scaffolding tool works (init/build commands)
+- `skills/lythoskill-deck/SKILL.md` — How deck governance works (link/status/migrate, deny-by-default, max_cards)
+- `skills/lythoskill-project-cortex/SKILL.md` — How project governance works (task/epic/adr/index/probe)
+
+**Even without `deck link`, you can read any `skills/<name>/SKILL.md` directly** to understand how that skill works. These files describe intent, usage, and available commands.
+
+---
+
+## Deck Governance
+
+The `skill-deck.toml` file at repo root declares which skills are active. Sections: `innate` (always loaded), `tool` (available), `combo` (multi-skill combos), `transient` (time-bounded).
+
+The `lythoskill-deck` tool reconciles the declared deck against the skills cold pool by creating symlinks in `.claude/skills/` (the working set). It generates a `skill-deck.lock` file tracking the resolved state.
+
+Key principle: lythoskill-deck is a governor, not a package manager. It makes sure the *right* skills are visible — but it doesn't download them. See README.md Cold Pool section for installation examples.
+
+---
+
+## Project Governance (Cortex)
+
+Project documentation lives in `cortex/`:
+
+```
+cortex/
+├── INDEX.md           <- Start here for self-described structure
+├── adr/
+│   └── 02-accepted/   <- Architecture Decision Records
+├── epics/
+│   └── 01-active/     <- Requirement epics
+├── tasks/
+│   ├── 01-backlog/    <- Pending tasks
+│   └── 04-completed/  <- Completed tasks
+└── wiki/
+    ├── INDEX.md       <- Pattern documentation index
+    └── 01-patterns/   <- Reusable patterns and conventions
 ```
 
-### 发布路径（计划中）
-- npm scope: `@lythos/*`
-- PyPI prefix: `lythos-*`
-- Skill 前缀: `lythoskill-*`
+Status directories use numeric prefixes for ordering (`01-`, `02-`, etc.). Document filenames use timestamp IDs: `ADR-yyyyMMddHHmmssSSS-<slug>.md`.
 
-### 治理规范（Cortex）
-项目使用 `project-cortex` 技能管理文档：
-- **ADR**：重大架构决策（目录 `cortex/adr/accepted/`）
-- **Epic**：需求史诗（目录 `cortex/epics/active/`）
-- **Task**：具体执行任务（目录 `cortex/tasks/completed/`）
-- **Wiki**：可复用模式（目录 `cortex/wiki/patterns/`）
-- 文件命名：`ADR-NNN-title.md`, `EPIC-NNN-title.md`, `TASK-NNN-title.md`
+All governance documents include a machine-parseable **Status History** table.
+
+**Always use CLI commands to create governance documents** — do not create ADR/Epic/Task files manually. The CLI handles template alignment and correct timestamp IDs.
+
+**For full context on the project governance system, read `cortex/INDEX.md`.**
 
 ---
 
-## 安全与边界
+## Session Handoff Checklist
 
-- **禁止访问工作目录外文件**：所有 `fs` 操作均相对于 `process.cwd()` 或生成的项目根目录。
-- **无网络请求**：工具本身不发起 HTTP 请求，纯本地文件系统操作。
-- **构建过滤**：`build` 命令显式排除测试文件和 `node_modules`，防止 dev 依赖意外进入发布产物。
-- **模板注入风险低**：模板内容均为硬编码字符串，不拼接用户输入到代码执行路径（仅用于文件名和项目名）。
+When a session is ending or context is about to compact, you MUST execute this handoff flow:
+
+### Trigger Conditions (any one is sufficient)
+- User says "LGTM", "就这样", "先到这里", "记录一下进度"
+- Conversation exceeds 20 turns
+- A milestone is completed (build succeeds, push to remote, tests pass)
+- User says "换个 agent 继续" or "session 要结束了"
+
+### Handoff Steps
+
+1. **Confirm triple state** — Before writing anything, verify:
+   - `git status` — what is committed vs unstaged vs untracked
+   - `bun packages/lythoskill-project-cortex/src/cli.ts list` — active epics and tasks
+   - **Session recall** — what happened this session that is NOT yet written anywhere?
+
+2. **Write single-file handoff** → `daily/HANDOFF.md` (tracked by git)
+   - Use `HANDOFF-TEMPLATE.md` as template
+   - Focus on what file exploration CANNOT recover: pitfalls, true working-tree state, specific next steps
+   - Do NOT repeat what `git log`, `ls`, or `cat` can already reveal
+
+3. **Archive when session ends** — If starting a new day/iteration, move `daily/HANDOFF.md` to `daily/YYYY-MM-DD.md`
+
+4. **Commit if clean** — If working tree is in a good state, commit with descriptive message
 
 ---
 
-## 快速参考
+## Onboarding for New Agent
 
-| 文件 | 职责 |
-|------|------|
-| `src/cli.ts` | 命令路由（init / build） |
-| `src/init.ts` | 生成项目模板 |
-| `src/build.ts` | 从 packages/<name>/skill/ 生成到 skills/<name>/ |
-| `src/templates.ts` | 所有字符串模板 |
-| `skills/lythoskill-creator/SKILL.md` | Agent 可见的使用文档 |
+When entering this project with no prior context, read in this exact order:
+1. `AGENTS.md` (this file) — canonical project guidance
+2. `daily/HANDOFF.md` (if exists) — single-file session handoff, highest priority memory
+3. `daily/` history (recent 3 days) — project journal, work log across sessions
+4. `skill-deck.toml`
+5. `cortex/INDEX.md`
+6. `git log --oneline -10`
+
+**Memory bridge:** `daily/` is the project's cross-CLI journal — it travels with the repo and can be read by any agent (Claude, Cursor, Windsurf, Kimi, etc.) through the skill system.
+
+---
+
+## Safety & Boundaries
+
+- **No filesystem escape**: All `fs` operations are relative to `process.cwd()` or the generated project root.
+- **No network requests**: Tools do not initiate HTTP requests; pure local filesystem operations.
+- **Build filtering**: The `build` command explicitly excludes test files and `node_modules`, preventing dev dependencies from leaking into release artifacts.
+- **Low template injection risk**: Template content is hardcoded strings; user input is only used for filenames and project names, never for code execution paths.
+
+---
+
+## Quick Reference
+
+| File | Purpose |
+|------|---------|
+| `src/cli.ts` | Command routing (init / build) |
+| `src/init.ts` | Project template generation |
+| `src/build.ts` | Build from packages/<name>/skill/ to skills/<name>/ |
+| `src/templates.ts` | All string templates |
+| `skills/lythoskill-creator/SKILL.md` | Agent-visible usage documentation |
+| `cortex/INDEX.md` | Governance system entry |
+| `daily/HANDOFF.md` | Current session handoff (ephemeral) |
