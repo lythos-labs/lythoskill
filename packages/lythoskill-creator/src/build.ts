@@ -3,6 +3,7 @@ import {
   readFileSync, readdirSync, statSync, writeFileSync,
 } from 'node:fs'
 import { join, relative } from 'node:path'
+import { execSync } from 'node:child_process'
 import { findProjectRoot } from './util.js'
 
 const IGNORE_NAMES = new Set(['__tests__', 'node_modules', '.DS_Store'])
@@ -27,6 +28,24 @@ export async function build(skillName: string) {
     const vars = extractVars(pkg)
     if (Object.keys(vars).length > 0) {
       substituteVars(dest, vars)
+    }
+  }
+
+  // Build-time help capture: run `bun src/cli.ts --help` and write to references/COMMANDS.md
+  const cliPath = join(root, 'packages', skillName, 'src', 'cli.ts')
+  if (existsSync(cliPath)) {
+    try {
+      const stdout = execSync(`bun ${cliPath} --help`, {
+        cwd: join(root, 'packages', skillName),
+        encoding: 'utf-8',
+        timeout: 10000,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      const refDir = join(dest, 'references')
+      mkdirSync(refDir, { recursive: true })
+      writeFileSync(join(refDir, 'COMMANDS.md'), stdout)
+    } catch {
+      // Graceful degradation: if --help fails, skip references generation
     }
   }
 
