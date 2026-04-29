@@ -1,3 +1,4 @@
+<!-- AUTO-GENERATED -->
 @lythos/skill-creator -- thin skill scaffolder
 
 Commands:

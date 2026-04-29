@@ -1,3 +1,4 @@
+<!-- AUTO-GENERATED -->
 lythoskill-deck -- Declarative skill deck governance — cold pool, working set, deny-by-default
 
 Usage: lythoskill-deck link | lythoskill-deck validate [deck.toml]

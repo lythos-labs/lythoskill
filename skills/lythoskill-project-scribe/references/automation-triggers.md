@@ -1,235 +1,43 @@
-# 自动化触发机制
-
-> 像 CI/CD 一样，项目记忆的更新也应该有自动化触发点
-
-## 触发器设计
-
+# Automation Triggers
+Suggested hook bindings for automatic handoff prompts:
+| Event | Trigger |
+|-------|---------|
+| `git commit` | Prompt: "Update daily handoff?" |
+| `git tag` | Auto-archive current daily, start new section |
+| User says "LGTM" | Force handoff flow execution |
+| User says "踩坑了" / "又出问题了" | Prompt: "Record pitfall?" |
+| Context approaching limit | Force handoff flow execution |
+| Conversation exceeds 20 turns | Prompt: "Should we do a handoff checkpoint?" |
+## Integration with Claude Code Hooks
+If using Claude Code hooks, you can bind to tool events:
+```json
+{
+  "hooks": {    "after:Bash(git commit *)": "prompt: Update daily/YYYY-MM-DD.md handoff section?"  }
+}
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        触发器矩阵                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  用户行为          触发动作              Scribe 响应              │
-│  ─────────────────────────────────────────────────────────────  │
-│                                                                  │
-│  "完成了 xxx"      完成事件              更新 Current Quest       │
-│                    ↓                     更新 Daily Notes         │
-│  "LGTM"           验收通过               归档任务                  │
-│                    ↓                     创建 git tag             │
-│  "又出问题了"      问题报告              提示记录 Pitfall          │
-│                    ↓                                               │
-│  "开始新迭代"      迭代切换              归档旧 Current Quest      │
-│                    ↓                     创建新 Current Quest     │
-│  "复盘一下"        读取请求              project-onboarding       │
-│                                                                  │
-└─────────────────────────────────────────────────────────────────┘
+This is optional enhancement. The core workflow is manual trigger by user signal.
+## Usage Examples
+### Session Ending
 ```
-
-## 具体触发规则
-
-### 1. 完成检测
-
-**关键词模式：**
+User: 就这样吧，session 快结束了
+Scribe:
+1. Runs git status, confirms state
+2. Recalls session-specific events
+3. Drafts daily/2026-04-24.md handoff section
+4. Shows diff to user for confirmation
+5. Writes file after user approves
+Output:
+✅ Updated daily/2026-04-24.md
+📌 Location: daily/2026-04-24.md
 ```
-"完成了" + 任务名
-"搞定" + 任务名
-"xxx 做完了"
-"xxx 可以了"
+### Recording a Pitfall
 ```
+User: 踩坑了，sed -i 在 macOS 上不兼容
+Scribe:
+1. Updates daily file's Pitfalls section
+2. Records: wrong approach, symptom, fix, root cause, time wasted
 
-**自动执行：**
-```bash
-1. 解析任务名
-2. 在 Current Quest 中查找匹配
-3. 移动到"已完成"
-4. 询问："需要记录什么关键成果吗？"
-5. 更新 Daily Notes
+Output:
+⚠️ Pitfall recorded in daily/2026-04-24.md
+‼️ Next agent: use sed -i '' on macOS or use Edit tool directly
 ```
-
-### 2. 验收检测
-
-**关键词：**
-```
-"LGTM"
-"测试通过"
-"可以上线"
-"打 tag"
-```
-
-**自动执行：**
-```bash
-1. 确认当前版本
-2. 更新 Current Quest 状态为"已发布"
-3. 执行 git tag
-4. 归档 Current Quest
-5. 创建发布记录
-```
-
-### 3. 问题检测
-
-**关键词模式：**
-```
-"又出问题了"
-"又报错了"
-"改坏了"
-"踩坑了"
-"才发现"
-```
-
-**自动执行：**
-```bash
-1. 询问："需要记录这个坑吗？"
-2. 如果确认：
-   - 引导填写 Pitfall 模板
-   - 更新 Current Quest "已知危险区域"
-   - 检查是否更新 common-pitfalls.md
-```
-
-### 4. 迭代切换
-
-**关键词模式：**
-```
-"开始 vX.Y.Z"
-"新迭代"
-"下一阶段"
-"做完这个做 xxx"
-```
-
-**自动执行：**
-```bash
-1. 确认旧迭代状态
-2. 归档旧 Current Quest → archive/current-quest-vX.Y.Z-YYYYMMDD.md
-3. 创建新 Current Quest
-4. 初始化首日 Daily Note
-5. 更新 AGENTS.md 链接
-```
-
-## 半自动化流程
-
-不是所有更新都能全自动，需要人机协作：
-
-```
-全自动 ──────────────────────────────→ 半自动 ────────────────────→ 手动
-                                                                 
-Git tag    完成状态更新    Pitfall 记录    ADR 创建    复杂决策记录
-触发       (确认后)        (引导填写)      (模板填充)   (人工撰写)
-```
-
-## 与 Git 的集成
-
-### Git Hook 建议
-
-```bash
-# post-commit
-#!/bin/bash
-commit_msg=$(git log -1 --pretty=%B)
-if echo "$commit_msg" | grep -q "feat\|fix"; then
-    echo "📝 提示：是否更新 Daily Notes？"
-fi
-
-# post-tag
-#!/bin/bash
-tag_name=$(git describe --tags --abbrev=0)
-echo "🎯 新版本 $tag_name，自动归档 Current Quest"
-# 调用 project-scribe 归档逻辑
-```
-
-### Commit Message 解析
-
-```
-feat: 移动端播放器优化
-     ↓
-自动提取：
-- 类型：功能开发
-- 内容：移动端播放器优化
-- 关联：查找 Current Quest 中匹配任务
-```
-
-## 状态机流转
-
-```
-任务生命周期：
-
-    ┌─────────────┐
-    │   待开始    │
-    └──────┬──────┘
-           │ 用户："开始做 xxx"
-           ▼
-    ┌─────────────┐
-    │   进行中    │◄────────────────┐
-    └──────┬──────┘                 │
-           │ 用户："完成了"          │ 用户："有问题"
-           ▼                        │
-    ┌─────────────┐                 │
-    │  待验收     │                 │
-    └──────┬──────┘                 │
-           │ 用户："LGTM"            │
-           ▼                        │
-    ┌─────────────┐                 │
-    │   已完成    │─────────────────┘
-    └─────────────┘   需要返工
-```
-
-每个状态变化都触发 Scribe 更新。
-
-## 提醒机制
-
-### 日常提醒
-
-```
-每天第一次交互时：
-"今天是 2026-03-18，昨日完成了：
-- v0.2.4 API 错误处理优化
-- 发现 1 个新坑点
-
-今日待办：
-- 回放功能调研（待确认）
-
-需要更新进度吗？"
-```
-
-### 遗忘检测
-
-```
-如果 Current Quest 超过 3 天未更新：
-"⚠️ Current Quest 已经 3 天未更新
-上次记录：2026-03-15
-
-是否：
-1. 更新进度
-2. 查看是否有遗漏的完成事项
-3. 暂时忽略"
-```
-
-## 与 Read Skill 的协作
-
-```
-用户进入项目
-    │
-    ▼
-project-onboarding (读)
-    - 读取 Current Quest
-    - 解析最近 Daily Notes
-    - 提取 Pitfalls
-    │
-    ▼
-输出：项目上下文摘要
-    │
-    ▼
-用户工作...
-    │
-    ▼
-触发完成/问题/迭代事件
-    │
-    ▼
-project-scribe (写)
-    - 更新 Current Quest
-    - 记录 Daily Notes
-    - 维护 Pitfalls
-    │
-    ▼
-下次 onboarding 读取时
-    看到最新状态
-```
-
-这是完整的 CQRS 循环。

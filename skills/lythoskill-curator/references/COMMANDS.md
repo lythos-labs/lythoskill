@@ -1,3 +1,4 @@
+<!-- AUTO-GENERATED -->
 Usage: lythoskill-curator [pool-path] [--output <dir>]
        lythoskill-curator query <SQL> [--db <path>]
 

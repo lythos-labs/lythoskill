@@ -1,3 +1,4 @@
+<!-- AUTO-GENERATED -->
 📋 lythoskill-project-cortex — Project management CLI
 
 Commands:
