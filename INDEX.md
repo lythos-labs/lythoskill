@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/4/30 01:12:47
+> 自动生成于 2026/4/30 01:25:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 17 | 进行中: 0, 待验收: 0, 已完成: 3 |
-| Epics | 4 | 活跃: 3, 已归档: 1 |
+| Tasks | 20 | 进行中: 0, 待验收: 0, 已完成: 3 |
+| Epics | 5 | 活跃: 4, 已归档: 1 |
 | ADRs | 14 | 已接受: 14 |
 
 ---
@@ -19,6 +19,7 @@
 - **EPIC-20260423185732845**: Playground Epic
 - **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
 - **EPIC-20260430011158241**: Monorepo tooling consistency and config debt cleanup
+- **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
 
 ### 已归档
 
@@ -28,7 +29,7 @@
 
 ## 📄 Tasks
 
-### 待办 (14)
+### 待办 (17)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
@@ -44,6 +45,9 @@
 - [ ] **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
 - [ ] **TASK-20260430011206610**: Create root tsconfig.base.json and unify per-package tsconfig
 - [ ] **TASK-20260430011207805**: Standardize package.json template across all packages
+- [ ] **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
+- [ ] **TASK-20260430012458866**: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
+- [ ] **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
 
 ### 进行中 (0)
 
