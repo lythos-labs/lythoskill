@@ -407,6 +407,20 @@ if (import.meta.main) {
   const args = process.argv.slice(2)
   const cmd = args[0]
 
+  if (cmd === '--help' || cmd === '-h') {
+    console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
+    console.log('       lythoskill-curator query <SQL> [--db <path>]')
+    console.log('')
+    console.log('Commands:')
+    console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
+    console.log('  query <SQL>           Query the catalog SQLite database')
+    console.log('')
+    console.log('Options:')
+    console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
+    console.log('  --db, -d <path>       Database path for query subcommand')
+    process.exit(0)
+  }
+
   if (cmd === 'query') {
     runQuery(args.slice(1))
   } else {
