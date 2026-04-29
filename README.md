@@ -11,7 +11,7 @@
 
 ## The Silent Blend Problem
 
-You installed **gstack** for project management and **superpowers** for writing workflows. Both are high-assertiveness "dao"-level skills — they define *how* work should be done.
+You installed **gstack** for project management and **superpowers** for writing workflows. Both are high-assertiveness skills — they define *how* work should be done. They don't just help you write code; they impose a workflow, a style, a philosophy.
 
 You put both in `.claude/skills/`. The agent sees both. It doesn't crash, it doesn't complain. But half your tasks run with gstack rules and half with superpowers rules. Outputs are unpredictable. Bugs are silent.
 
@@ -29,7 +29,7 @@ skills = ["gstack"]
 skills = ["superpowers"]
 ```
 
-Run `deck link` → each project sees exactly one "dao". No silent blend. No chaos.
+Run `deck link` → each project sees exactly one "how". No silent blend. No chaos.
 
 ---
 
@@ -102,7 +102,23 @@ ls .claude/skills/
 
 **Multi-role decks**: A curator agent sees only curator skills. An arena agent sees only arena skills. A scribe agent sees only scribe skills. Each agent gets a tailored deck — no cross-contamination, no bloated context.
 
-**Key principle**: lythoskill-deck does not download skills. It governs skills that already exist in your [cold pool](#cold-pool-convention). Filling the cold pool is your job (git clone, Vercel skills.sh, manual copy — whatever you prefer).
+**Key principle**: lythoskill-deck is a governor, not a package manager. It makes sure the *right* skills are visible — but it doesn't download them for you. The good news: your agent can do that in one shot.
+
+For example, to start using a new skill:
+
+```bash
+# 1. Agent downloads the skill to your cold pool (one-time setup)
+git clone https://github.com/lythos-labs/lythoskill.git \
+  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
+
+# 2. You declare which skills this project needs
+echo 'skills = ["lythoskill-deck"]' >> skill-deck.toml
+
+# 3. Deck takes over — manages symlinks, budgets, overlaps
+bunx @lythos/skill-deck link
+```
+
+Step 1 is a one-time cost per skill source. After that, `deck link` handles everything. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
 
 ### Layer B: Thin Skill Pattern — For Skill Ecosystem Developers
 
