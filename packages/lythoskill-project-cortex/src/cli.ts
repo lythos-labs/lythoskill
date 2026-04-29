@@ -15,8 +15,7 @@ import { probeStatus } from './commands/probe.js';
 import { generateIndex, generateWikiIndex } from './generate-index.js';
 
 function printHelp(): void {
-  console.log(`
-📋 lythoskill-project-cortex — Project management CLI
+  console.log(`📋 lythoskill-project-cortex — Project management CLI
 
 Commands:
   init                  Initialize cortex workflow directories
@@ -33,8 +32,7 @@ Commands:
 Examples:
   lythoskill-project-cortex init
   lythoskill-project-cortex task "Fix login bug"
-  lythoskill-project-cortex epic "User auth system"
-`);
+  lythoskill-project-cortex epic "User auth system"`);
 }
 
 function main(): void {
