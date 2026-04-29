@@ -22,7 +22,8 @@ lythoskill 自身就是用 lythoskill 模式创建的——它是自己的第一
 | 语言 | **TypeScript** |
 | 模块系统 | **ESM-only** (`"type": "module"`) |
 | 包管理器 | **pnpm** workspaces |
-| 外部依赖 | **零** — 仅使用 Node.js 内置模块 (`node:fs`, `node:path`) |
+| Skill 层依赖 | **零感知** — 消费者通过 `bunx`/`npx` 调用已发布包，无需本地安装依赖 |
+| Starter 层依赖 | 正常的 npm 依赖管理（如 `@iarna/toml`、`zod`），由包管理器自动解析 |
 
 关键配置：
 - `tsconfig.json` 中 `moduleResolution` 必须为 `"bundler"`（支持 `import ... with { type: "json" }`）
@@ -114,7 +115,7 @@ bunx lythoskill build <skill-name>
 
 2. **内置模块前缀**：一律使用 `node:` 前缀（`node:fs`, `node:path`）。
 
-3. **零外部依赖**：核心包不安装任何 npm 依赖。Bun 内置 API 足够。
+3. **Skill 层零依赖感知**：Skill 脚本（`skills/<name>/scripts/`）对消费者必须是"零安装负担"的——通过 `bunx <pkg>` 调用，依赖由包管理器自动拉取和清理。Starter 层（`packages/*/src/`）可以使用正常的 npm 依赖。
 
 4. **模板字符串中的反引号**：如果生成的内容包含代码块（含 `` ` ``），使用 **fence variable trick**：
    ```typescript
