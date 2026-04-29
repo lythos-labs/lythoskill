@@ -206,6 +206,23 @@ lythoskill uses a **Go module-style directory structure** for the cold pool:
         └── SKILL.md
 ```
 
+**Adding skills to the cold pool** — this is a one-time setup per skill source. You can do it manually, or ask your agent to run it:
+
+```bash
+# Install any skill repo into the cold pool
+git clone https://github.com/<owner>/<repo>.git \
+  ~/.agents/skill-repos/github.com/<owner>/<repo>
+
+# Real examples:
+git clone https://github.com/lythos-labs/lythoskill.git \
+  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
+
+git clone https://github.com/PrimeRadiant/superpowers.git \
+  ~/.agents/skill-repos/github.com/PrimeRadiant/superpowers
+```
+
+After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.
+
 **Why this structure**: Global uniqueness (`github.com/lythos-labs/lythoskill/lythoskill-deck` vs `github.com/anthropic/lythoskill-deck`), source traceability, and natural multi-host support (GitHub, GitLab, self-hosted).
 
 **Local development**: Set `cold_pool = "."` in your `skill-deck.toml`. Your project root becomes a cold pool entry, and `./skills/` is scanned just like `~/.agents/skill-repos/github.com/.../skills/`.
