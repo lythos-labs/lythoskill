@@ -13,6 +13,7 @@ When reviewing a SKILL.md, produce this table first, then the improvement list.
 | Conditional triggers | _n/total_ | all | ✅/⚠️/❌ | _specific fix_ |
 | One skill one job | _yes/no_ | yes | ✅/⚠️/❌ | _specific fix_ |
 | Factual accuracy | _yes/no_ | yes | ✅/⚠️/❌ | _specific fix_ |
+| Doc-code consistency | _pass/fail_ | pass | ✅/⚠️/❌ | _specific fix_ |
 | Naive agent test | _pass/fail_ | pass | ✅/⚠️/❌ | _specific fix_ |
 
 Status legend:

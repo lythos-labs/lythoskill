@@ -182,6 +182,70 @@ Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./co
 
 ---
 
+## Real-World Example: Deck-Governed Next.js Project
+
+Here's how a subagent works under deck governance in practice.
+
+**Scenario**: Initialize a Next.js project, let the agent discover skills in the cold pool, assemble its own deck, and complete a development task.
+
+```bash
+# 1. Initialize the project
+npx create-next-app@latest my-app --default --use-bun
+cd my-app
+
+# 2. Clone community skills to the cold pool (one-time global setup)
+git clone https://github.com/anthropics/skills.git \
+  ~/.agents/skill-repos/github.com/anthropics/skills
+
+git clone https://github.com/vercel-labs/agent-skills.git \
+  ~/.agents/skill-repos/github.com/vercel-labs/agent-skills
+
+# 3. Agent self-assembles the deck by reading SKILL.md files
+#    and deciding which skills the project needs.
+#    Example result (agent's own decision):
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate]
+skills = [
+  "lythoskill-deck",
+  "lythoskill-project-cortex",
+  "lythoskill-project-onboarding",
+  "lythoskill-project-scribe",
+]
+
+[tool]
+skills = [
+  "github.com/vercel-labs/agent-skills/react-best-practices",
+  "github.com/vercel-labs/agent-skills/composition-patterns",
+  "github.com/anthropics/skills/frontend-design",
+  "github.com/anthropics/skills/web-design-guidelines",
+  "github.com/anthropics/skills/code-reviewer",
+  "github.com/anthropics/skills/performance-profiler",
+]
+EOF
+
+# 4. Sync the deck
+bunx @lythos/skill-deck link
+```
+
+**What the agent does**:
+1. Reads every SKILL.md in `.claude/skills/` to understand capability boundaries
+2. Creates a task via `bunx @lythos/project-cortex task "Build Todo List page"`
+3. Absorbs best practices from multiple skills while coding:
+   - **react-best-practices** → `useReducer`, `React.memo`, `useCallback`
+   - **frontend-design** → zinc palette, `rounded-2xl`, dark mode
+   - **composition-patterns** → Context Provider + barrel exports
+   - **code-reviewer** → strict TypeScript, input validation
+4. Records a session handoff to `daily/YYYY-MM-DD.md` when done
+
+**Outcome**: The agent does not code blindly. It reads skills first, follows governance workflow, and blends best practices from multiple skills into the codebase — all autonomously, without human micromanagement.
+
+---
+
 ## Arena: Skill Comparison
 
 Not sure which skill to use? Arena runs the same task under different skill configurations and scores the results. No guesswork.
@@ -202,20 +266,21 @@ See [SKILL.md](skills/lythoskill-arena/SKILL.md) for full arena workflow documen
 
 Your cold pool is where skills live when they are **not** active. It can grow without bound.
 
-lythoskill uses a **Go module-style directory structure** for the cold pool:
+lythoskill uses a **Go module-style directory structure** for the cold pool, with natural `owner/repo` traceability:
 
 ```
-~/.agents/skill-repos/              ← Global cold pool
+~/.agents/skill-repos/              ← Global cold pool (recommended default)
 ├── github.com/
 │   ├── lythos-labs/
 │   │   └── lythoskill/             ← git clone https://github.com/lythos-labs/lythoskill.git
 │   │       └── skills/
 │   │           ├── lythoskill-deck/
 │   │           └── lythoskill-creator/
-│   ├── PrimeRadiant/
-│   │   └── superpowers/
+│   ├── vercel-labs/
+│   │   └── agent-skills/           ← git clone https://github.com/vercel-labs/agent-skills.git
 │   │       └── skills/
-│   │           └── writing-plans/
+│   │           ├── react-best-practices/
+│   │           └── composition-patterns/
 │   └── someone/
 │       └── standalone-skill/       ← Non-monorepo: repo root = skill
 │           └── SKILL.md
@@ -223,6 +288,11 @@ lythoskill uses a **Go module-style directory structure** for the cold pool:
     └── my-experiment/
         └── SKILL.md
 ```
+
+**Why `~/.agents/skill-repos` is recommended**:
+- It is **global** — all projects share one cold pool; skills are downloaded once
+- It is **structured** — `github.com/<owner>/<repo>` provides source traceability and prevents name collisions
+- It is **extensible** — supports GitHub, GitLab, self-hosted, and local experiments; the path *is* the provenance
 
 **Adding skills to the cold pool** — this is a one-time setup per skill source. You can do it manually, or ask your agent to run it:
 
@@ -242,6 +312,11 @@ git clone https://github.com/PrimeRadiant/superpowers.git \
 After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.
 
 **Why this structure**: Global uniqueness (`github.com/lythos-labs/lythoskill/lythoskill-deck` vs `github.com/anthropic/lythoskill-deck`), source traceability, and natural multi-host support (GitHub, GitLab, self-hosted).
+
+**Path resolution in skill-deck.toml**:
+- Short name `lythoskill-deck` → deck recursively scans the cold pool for a matching directory name
+- Qualified name `github.com/lythos-labs/lythoskill/lythoskill-deck` → direct lookup, avoids name collisions
+- Monorepo sub-skill `owner/repo/skills/skill-name` → `skills/` subdirectory is automatically recognized
 
 **Local development**: Set `cold_pool = "."` in your `skill-deck.toml`. Your project root becomes a cold pool entry, and `./skills/` is scanned just like `~/.agents/skill-repos/github.com/.../skills/`.
 

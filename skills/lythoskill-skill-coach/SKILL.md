@@ -95,7 +95,45 @@ incorrectly** is worse than a messy but honest skill. Check:
 **Always verify before scoring.** Form compliance without factual accuracy
 produces false confidence.
 
-## 8. Naive Agent Test (Content Completeness)
+## 8. Documentation-Code Consistency (Drift Prevention)
+
+A skill has **three surfaces** that must stay in sync:
+
+| Surface | Audience | Content |
+|---------|----------|---------|
+| **CLI --help** | Human users, scripts | Commands, flags, examples |
+| **README.md** | npm/bunx discoverers | What the package does, how to install/use |
+| **SKILL.md** | Agent | When to invoke, workflow orchestration, gotchas |
+
+### Common Drifts
+
+**SKILL.md documents a command that doesn't exist in the CLI.**
+- Example: SKILL.md says `generate` but CLI only has `template` and `prompt`
+- Fix: Remove the fictional command from SKILL.md. Add it to CLI if it belongs there.
+
+**SKILL.md implies output formats the tool doesn't produce.**
+- Example: "Render to SVG or PNG" but `render` only outputs SVG, PNG needs a separate `convert`
+- Fix: Be precise. "`render` produces SVG. Use `convert` for PNG/WebP/JPG/AVIF."
+
+**README.md is missing or stale.**
+- npm/bunx users see an empty README and can't figure out what the package does
+- Fix: README must have: one-line description, install/run commands, at least one example
+
+**SKILL.md does agent work that should be in the CLI, or vice versa.**
+- Example: CLI has a `prompt` command that generates LLM prompt templates. Prompt engineering belongs in SKILL.md (agent layer), not in CLI (tool layer).
+- Rule: CLI does **deterministic** work (templates, rendering, validation). Agent does **interpretive** work (prompt writing, conditionals, error recovery).
+
+### Verification Method: Subagent Test
+
+The only reliable way to detect drift is to **give a zero-context subagent the SKILL.md and a task**:
+
+> "You have no prior knowledge of this project. Use the skills in `.claude/skills/`
+> to [do X]. Read SKILL.md for instructions. Do not ask for help."
+
+If the subagent fails because SKILL.md told it to use a non-existent command,
+you have a drift. Fix it.
+
+## 9. Naive Agent Test (Content Completeness)
 A skill that passes all static checks may still fail in practice because it
 assumes knowledge the agent doesn't have. Test by mental simulation (or actual
 subagent dispatch):
