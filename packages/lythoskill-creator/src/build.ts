@@ -22,13 +22,29 @@ export async function build(skillName: string) {
   if (existsSync(dest)) rmSync(dest, { recursive: true })
   copyFiltered(src, dest)
 
+  const unifiedVersion = getUnifiedVersion(root)
   const pkgJsonPath = join(root, 'packages', skillName, 'package.json')
+  let skillVersion: string | undefined
+
   if (existsSync(pkgJsonPath)) {
     const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'))
+    const pkgVersion = pkg.version as string | undefined
+
+    if (pkgVersion && unifiedVersion && pkgVersion !== unifiedVersion) {
+      console.warn(`\n⚠️  Version drift: packages/${skillName}/package.json is ${pkgVersion}, expected ${unifiedVersion} (root package.json)`)
+    }
+
+    skillVersion = pkgVersion || unifiedVersion
     const vars = extractVars(pkg)
     if (Object.keys(vars).length > 0) {
       substituteVars(dest, vars)
     }
+  } else {
+    skillVersion = unifiedVersion
+  }
+
+  if (skillVersion) {
+    enforceSkillVersion(dest, skillVersion)
   }
 
   // Build-time help capture: run `bun src/cli.ts --help` and write to references/COMMANDS.md
@@ -84,6 +100,27 @@ Publish to npm (optional):
   cd packages/${skillName}
   npm publish --access public
 `)
+}
+
+function getUnifiedVersion(root: string): string | undefined {
+  const rootPkgPath = join(root, 'package.json')
+  if (!existsSync(rootPkgPath)) return undefined
+  try {
+    const pkg = JSON.parse(readFileSync(rootPkgPath, 'utf-8'))
+    return pkg.version as string | undefined
+  } catch {
+    return undefined
+  }
+}
+
+function enforceSkillVersion(dest: string, version: string) {
+  const mdPath = join(dest, 'SKILL.md')
+  if (!existsSync(mdPath)) return
+  const content = readFileSync(mdPath, 'utf-8')
+  const updated = content.replace(/^version:\s*.+$/m, `version: ${version}`)
+  if (updated !== content) {
+    writeFileSync(mdPath, updated)
+  }
 }
 
 function extractVars(pkg: Record<string, unknown>): Record<string, string> {

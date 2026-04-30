@@ -178,6 +178,11 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 8. **Unified version policy**: All packages in `packages/` share a single version number. When bumping, update every `package.json` — no subpackage version drift. The version is the project's release identity, not per-package identity.
 
+   **Build-time enforcement**: Root `package.json` is the single source of truth for the unified version.
+   - Packages with `package.json`: Use `{{PACKAGE_VERSION}}` in `skill/SKILL.md` frontmatter; the `build` command substitutes it from the package's `package.json` (which must match the root version; drift triggers a warning).
+   - Pure-skill packages without `package.json`: The `build` command injects the root version directly into the generated `skills/<name>/SKILL.md` — regardless of what is hard-coded in the source.
+   - **Pre-commit safeguard**: `.husky/pre-commit` runs `build --all` whenever any `packages/**/skill/` file changes. This rebuilds all skills in ~0.6s and auto-stages `skills/`, ensuring the built output never drifts from source.
+
 ---
 
 ## Project Skills (Self-Contained)

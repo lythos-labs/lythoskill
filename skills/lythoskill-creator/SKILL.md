@@ -1,6 +1,6 @@
 ---
 name: lythoskill-creator
-version: 0.6.0
+version: 0.6.1
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
   Creates thin-skill monorepos: heavy logic in npm packages (Starter),
@@ -50,10 +50,16 @@ Creates starter package + skill layer under `packages/<skill-name>/`. Requires `
 
 ### build
 
-Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter.
+Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter, and enforces the unified version.
 
 ```bash
 bunx lythoskill-creator build <skill-name>
+```
+
+Build all skills at once (used by pre-commit):
+
+```bash
+bunx lythoskill-creator build --all
 ```
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.

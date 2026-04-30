@@ -4,11 +4,8 @@
 STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/skill/' || true)
 
 if [ -n "$STAGED" ]; then
-  echo "🛠️  Skill source files changed, rebuilding..."
-  bun packages/lythoskill-creator/src/cli.ts build lythoskill-creator
-  bun packages/lythoskill-creator/src/cli.ts build lythoskill-deck
-  bun packages/lythoskill-creator/src/cli.ts build lythoskill-project-cortex
-  bun packages/lythoskill-creator/src/cli.ts build lythoskill-hello-world
+  echo "🛠️  Skill source files changed, rebuilding all skills..."
+  bun packages/lythoskill-creator/src/cli.ts build --all
 
   # Stage built output so skills/ stays in sync with packages/**/skill/
   git add skills/
