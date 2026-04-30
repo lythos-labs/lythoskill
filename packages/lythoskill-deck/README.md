@@ -127,6 +127,8 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 | Cursor | `.cursor/skills/` |
 | Generic / custom | Configure `working_set` in `skill-deck.toml` |
 
+> **If you are an agent**: verify where your platform scans for skills, then set `working_set` to that path before running `deck link`.
+
 ## Skill Documentation
 
 This package is the **Starter** layer (CLI implementation).  
