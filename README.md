@@ -377,7 +377,7 @@ bun packages/lythoskill-deck/test/runner.ts
 | Document | Purpose |
 |---|---|
 | [CLAUDE.md](./CLAUDE.md) | Guidance for Claude Code |
-| [AGENTS.md](./AGENTS.md) | 中文版项目说明 |
+| [AGENTS.md](./AGENTS.md) | SSOT for all AI agents (project guidance) |
 | [cortex/INDEX.md](./cortex/INDEX.md) | Governance system entry |
 | [cortex/adr/](./cortex/adr/) | Architecture Decision Records |
 | [skill-deck.toml](./skill-deck.toml) | This repo's active skill deck |
