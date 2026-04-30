@@ -289,6 +289,13 @@ Skill Sources (GitHub, Vercel, npm, internal repos)
 
 lythoskill sits **between** skill sources and agent platforms — it does not replace either. It prevents the mess that naturally accumulates when skills grow from 10 to 100+.
 
+**Analogy**: If you're familiar with Java/Maven, the mental model is similar:
+- `skill-deck.toml` ≈ `pom.xml` — declares what you need
+- `deck add` ≈ `mvn dependency:get` — downloads to local storage
+- cold pool ≈ `~/.m2/repository` — local cache of everything you've downloaded
+- `deck link` ≈ making dependencies available to the project — but with symlinks, not copies
+- `.claude/skills/` ≈ project's classpath — only what's declared is visible
+
 ---
 
 ## Quick Reference
