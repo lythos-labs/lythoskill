@@ -14,7 +14,7 @@ by condition:
 
 ```toml
 [combo]
-skills = ["report-generation-combo"]
+skills = ["github.com/anthropics/skills/skills/pdf"]
 ```
 
 The combo skill's SKILL.md contains a condition-dispatch table:

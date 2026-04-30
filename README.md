@@ -212,20 +212,20 @@ working_set = ".claude/skills"
 
 [innate]
 skills = [
-  "lythoskill-deck",
-  "lythoskill-project-cortex",
-  "lythoskill-project-onboarding",
-  "lythoskill-project-scribe",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
 ]
 
 [tool]
 skills = [
-  "github.com/vercel-labs/agent-skills/react-best-practices",
-  "github.com/vercel-labs/agent-skills/composition-patterns",
-  "github.com/anthropics/skills/frontend-design",
-  "github.com/anthropics/skills/web-design-guidelines",
-  "github.com/anthropics/skills/code-reviewer",
-  "github.com/anthropics/skills/performance-profiler",
+  "github.com/anthropics/skills/skills/pdf",
+  "github.com/anthropics/skills/skills/docx",
+  "github.com/mattpocock/skills/write-a-prd",
+  "github.com/mattpocock/skills/tdd",
+  "github.com/obra/superpowers",
+  "github.com/SpillwaveSolutions/design-doc-mermaid",
 ]
 EOF
 
