@@ -1,44 +1,64 @@
 # @lythos/skill-curator
 
-> Read-only observer for skill cold pools. Discover combos, recommend decks, audit your skill ecosystem.
+> Read-only indexer for skill cold pools. Scans, extracts metadata, builds REGISTRY.json + catalog.db. Zero algorithmic recommendation — facts only.
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) meta-skill ecosystem.
+## Why
 
-## What it does
+As your skill ecosystem grows (GitHub trending, awesome lists, marketplace downloads), you lose track of what you have. `skill-curator` scans your cold pool, extracts YAML frontmatter from every SKILL.md, and produces structured indices:
 
-Scans a directory of skill repositories, extracts metadata from `SKILL.md` frontmatter, builds indices, and produces tiered recommendations (Core / Force Multiplier / Optional). Also discovers synergy patterns: Pipeline, Modality Stack, Orchestrator-Engine, Directory Synergy.
+- **REGISTRY.json**: Complete skill index with name, description, triggers, niche, managed dirs.
+- **catalog.db**: SQLite database for structured querying.
 
-**Never modifies any skill.** Read-only forever.
+**Zero algorithmic recommendation.** The CLI never says "use A instead of B." It says "A and B both exist, here are their attributes." The *agent* (reading SKILL.md + project context) combines index data with situational awareness to make informed recommendations.
 
 ## Install
 
 ```bash
 bun add -d @lythos/skill-curator
-# or
-bunx @lythos/skill-curator <args>
+# or use directly
+bunx @lythos/skill-curator <command>
+```
+
+## Quick Start
+
+```bash
+# Index your cold pool (default: ~/.agents/skill-repos)
+bunx @lythos/skill-curator
+
+# Query the catalog with SQL
+bunx @lythos/skill-curator query "SELECT name, description FROM skills WHERE niche LIKE '%documentation%'"
 ```
 
 ## Commands
 
-```bash
-# Index your cold pool (default: ~/.agents/skill-repos)
-bunx @lythos/skill-curator [POOL_PATH]
+```
+Usage: lythoskill-curator [pool-path] [--output <dir>]
+       lythoskill-curator query <SQL> [--db <path>]
 
-# Get recommendations for a task
-bunx @lythos/skill-curator [POOL_PATH] --recommend "Plan a feature with ADR and diagrams"
+Commands:
+  (no args)             Scan cold pool and build REGISTRY.json + catalog.db
+  query <SQL>           Query the catalog SQLite database
 
-# Verbose audit mode: full scoring trail
-bunx @lythos/skill-curator [POOL_PATH] --recommend "..." --verbose
+Options:
+  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)
+  --db, -d <path>       Database path for query subcommand
 ```
 
-## Output
+## Skill Documentation
 
-- `POOL_PATH/.cortex/skill-curator/REGISTRY.json` — full skill index
-- `POOL_PATH/.cortex/skill-curator/RECOMMENDATIONS.json` — scored results + combos
+This package is the **Starter** layer (CLI implementation).  
+The agent-visible **Skill** layer documentation is here:  
+[packages/lythoskill-curator/skill/SKILL.md](../../packages/lythoskill-curator/skill/SKILL.md)
 
 ## Architecture
 
-This is the **Starter** layer of the thin-skill pattern. The agent-visible **Skill** layer is in `packages/lythoskill-curator/skill/`.
+Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
+
+```
+Starter (this package) → npm publish → bunx @lythos/skill-curator ...
+Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
+Output  (skills/<name>/)             → git commit → agent-visible skill
+```
 
 ## License
 

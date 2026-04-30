@@ -1,6 +1,15 @@
 {
   "name": "@lythos/hello-world",
   "version": "0.3.0",
+  "keywords": [
+    "ai-agent",
+    "skill",
+    "claude-code",
+    "agent-skills",
+    "llm-tooling",
+    "lythoskill"
+  ],
+  "author": "lythos-labs",
   "type": "module",
   "bin": {
     "lythoskill-hello-world": "src/cli.ts"
@@ -8,5 +17,14 @@
   "files": [
     "src",
     "README.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-hello-world"
+  },
+  "bugs": {
+    "url": "https://github.com/lythos-labs/lythoskill/issues"
+  },
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-hello-world#readme"
 }

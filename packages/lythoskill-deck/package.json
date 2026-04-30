@@ -2,6 +2,15 @@
   "name": "@lythos/skill-deck",
   "version": "0.3.0",
   "description": "Declarative skill deck governance — cold pool, working set, deny-by-default",
+  "keywords": [
+    "ai-agent",
+    "skill",
+    "claude-code",
+    "agent-skills",
+    "llm-tooling",
+    "lythoskill"
+  ],
+  "author": "lythos-labs",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -15,5 +24,14 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "zod": "^4.3.6"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-deck"
+  },
+  "bugs": {
+    "url": "https://github.com/lythos-labs/lythoskill/issues"
+  },
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-deck#readme"
 }

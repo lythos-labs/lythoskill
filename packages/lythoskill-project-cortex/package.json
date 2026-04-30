@@ -2,10 +2,32 @@
   "name": "@lythos/project-cortex",
   "version": "0.3.0",
   "description": "Project governance CLI — tasks, epics, ADRs, wiki indexing",
+  "keywords": [
+    "ai-agent",
+    "skill",
+    "claude-code",
+    "agent-skills",
+    "llm-tooling",
+    "lythoskill"
+  ],
+  "author": "lythos-labs",
   "license": "MIT",
   "type": "module",
   "bin": {
     "lythoskill-project-cortex": "src/cli.ts"
   },
-  "files": ["src", "README.md", "LICENSE"]
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-project-cortex"
+  },
+  "bugs": {
+    "url": "https://github.com/lythos-labs/lythoskill/issues"
+  },
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-project-cortex#readme"
 }

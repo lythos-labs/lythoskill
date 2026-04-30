@@ -1,52 +1,81 @@
 # @lythos/skill-arena
 
-> Skill comparison benchmark tool. Run control-variable decks against the same task to compare skill effectiveness.
+> Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis.
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) meta-skill ecosystem.
+## Why
 
-## What it does
+"Which skill is better?" is the wrong question. The right question is "which skill is better for what."
 
-Creates an arena directory with isolated decks for each skill under test, generates task cards for subagent dispatch, and produces a structured output for judge evaluation. Core principle: **control variables** — only the tested skill differs between decks.
+`skill-arena` scaffolds isolated environments where subagents complete the same task under different decks. A judge agent scores outputs across multiple dimensions. Supports:
+
+- **Mode 1**: Single-skill comparison (controlled variable — same helper skills, different test skill).
+- **Mode 2**: Full-deck comparison (Pareto frontier — no single winner, only optimal trade-offs).
 
 ## Install
 
 ```bash
 bun add -d @lythos/skill-arena
-# or
-bunx @lythos/skill-arena <args>
+# or use directly
+bunx @lythos/skill-arena <command>
+```
+
+## Quick Start
+
+```bash
+# Mode 1: Compare two skills on the same task
+bunx @lythos/skill-arena \
+  --task "Generate auth flow diagram" \
+  --skills "design-doc-mermaid,mermaid-tools" \
+  --criteria "syntax,context,token"
+
+# Mode 2: Compare full deck configurations
+bunx @lythos/skill-arena \
+  --task "Generate auth flow diagram" \
+  --decks "./decks/minimal.toml,./decks/rich.toml" \
+  --criteria "quality,token,maintainability"
+
+# Visualize results
+bunx @lythos/skill-arena viz tmp/arena-<id>/
 ```
 
 ## Commands
 
-```bash
-# Initialize an arena with 2-5 skills
-bunx @lythos/skill-arena \
-  --task "Generate user auth flow diagram" \
-  --skills "design-doc-mermaid,mermaid-tools" \
-  --criteria "syntax,context,token"
+```
+Usage: bunx @lythos/skill-arena <options> | bunx @lythos/skill-arena viz <dir>
 
-# Options
-# --task, -t     Task description (required)
-# --skills, -s   Comma-separated skill list, min 2, max 5
-# --criteria, -c Evaluation criteria (default: syntax,context,logic,token)
-# --control      Control variable skill (default: project-scribe)
-# --dir, -d      Arena parent directory (default: tmp)
-# --project, -p  Project root (default: .)
+Mode 1 — Single-Skill Comparison:
+  --task, -t <desc>       Task description (required)
+  --skills, -s <list>     Comma-separated skills, 2–5 (Mode 1)
+  --criteria, -c <list>   Evaluation dimensions (default: syntax,context,logic,token)
+  --control <skill>      Control skill (default: lythoskill-project-scribe)
+
+Mode 2 — Full-Deck Comparison:
+  --decks <paths>        Comma-separated deck toml paths, 2–5 (Mode 2)
+  --criteria, -c <list>   Evaluation dimensions
+
+Common:
+  --dir, -d <path>       Arena parent directory (default: tmp)
+  --project, -p <path>   Project root (default: .)
+
+Viz:
+  viz <dir>               Render ASCII charts from report.md
 ```
 
-## Output
+## Skill Documentation
 
-```
-tmp/arena-<timestamp>-<slug>/
-├── arena.json       # metadata + config
-├── decks/           # one control-variable deck per skill
-├── runs/            # subagent output (you fill this)
-└── TASK-arena.md    # task card with subagent instructions
-```
+This package is the **Starter** layer (CLI implementation).  
+The agent-visible **Skill** layer documentation is here:  
+[packages/lythoskill-arena/skill/SKILL.md](../../packages/lythoskill-arena/skill/SKILL.md)
 
 ## Architecture
 
-This is the **Starter** layer of the thin-skill pattern. The agent-visible **Skill** layer is in `packages/lythoskill-arena/skill/`.
+Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
+
+```
+Starter (this package) → npm publish → bunx @lythos/skill-arena ...
+Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
+Output  (skills/<name>/)             → git commit → agent-visible skill
+```
 
 ## License
 

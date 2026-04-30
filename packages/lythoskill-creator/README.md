@@ -1,39 +1,64 @@
 # @lythos/skill-creator
 
-> Scaffold and build lythoskill projects. The bootstrapping tool for thin-skill monorepos.
+> Scaffold and build lythoskill projects — thin-skill monorepos where heavy logic lives in npm packages and skills are lightweight routers.
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) meta-skill ecosystem.
+## Why
 
-## What it does
+AI agent skills are code, and code deserves real tooling. lythoskill separates concerns into three layers:
 
-Creates new lythoskill projects from scratch and builds individual skills for distribution.
+- **Starter** (npm package): Heavy logic, dependencies, CLI entry points.
+- **Skill** (`packages/<name>/skill/`): Thin SKILL.md + scripts that call the starter via `bunx`.
+- **Output** (`skills/<name>/`): Build output committed to Git, visible to agents without building.
+
+This package is the Starter layer that scaffolds new projects and builds skills for distribution.
 
 ## Install
 
 ```bash
 bun add -d @lythos/skill-creator
-# or
+# or use directly
 bunx @lythos/skill-creator <command>
 ```
 
-## Commands
+## Quick Start
 
 ```bash
 # Scaffold a new thin-skill monorepo
 bunx @lythos/skill-creator init my-project
 
-# Build a skill (copies packages/<name>/skill/ to skills/<name>/)
-bunx @lythos/skill-creator build <skill-name>
+# Add a new skill to an existing monorepo
+cd my-project
+bunx @lythos/skill-creator add-skill my-new-skill
+
+# Build a skill (copies skill/ to skills/ with template substitution)
+bunx @lythos/skill-creator build my-new-skill
 ```
+
+## Commands
+
+```
+@lythos/skill-creator — thin skill scaffolder
+
+Commands:
+  init <name>       Create a new lythoskill project
+  add-skill <name>  Add a new skill to an existing monorepo
+  build <skill>     Build a skill for distribution
+```
+
+## Skill Documentation
+
+This package is the **Starter** layer (CLI implementation).  
+The agent-visible **Skill** layer documentation is here:  
+[packages/lythoskill-creator/skill/SKILL.md](../../packages/lythoskill-creator/skill/SKILL.md)
 
 ## Architecture
 
-This is the **Starter** layer of the thin-skill pattern:
+Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
 Starter (this package) → npm publish → bunx @lythos/skill-creator ...
-Skill   (packages/<name>/skill/)     → lythoskill build → SKILL.md + thin scripts
-Output  (skills/<name>/)             → committed to Git → agent-visible skill
+Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
+Output  (skills/<name>/)             → git commit → agent-visible skill
 ```
 
 ## License

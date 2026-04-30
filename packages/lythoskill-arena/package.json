@@ -2,6 +2,15 @@
   "name": "@lythos/skill-arena",
   "version": "0.3.0",
   "description": "Skill Arena — benchmark skill effectiveness with controlled-variable comparison",
+  "keywords": [
+    "ai-agent",
+    "skill",
+    "claude-code",
+    "agent-skills",
+    "llm-tooling",
+    "lythoskill"
+  ],
+  "author": "lythos-labs",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -12,8 +21,16 @@
     "README.md",
     "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-arena"
+  },
+  "bugs": {
+    "url": "https://github.com/lythos-labs/lythoskill/issues"
+  },
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-arena#readme",
   "engines": {
     "bun": ">=1.0.0"
-  },
-  "license": "MIT"
+  }
 }
