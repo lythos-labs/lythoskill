@@ -14,7 +14,7 @@ import {
   existsSync, mkdirSync, readFileSync, readdirSync,
   symlinkSync, lstatSync, rmSync, writeFileSync,
 } from "fs";
-import { resolve, dirname, join } from "path";
+import { resolve, dirname, join, basename, relative } from "path";
 import { homedir } from "os";
 import {
   SkillDeckLockSchema,
@@ -152,7 +152,7 @@ for (const section of ["innate", "tool", "combo"] as const) {
     if (!name || typeof name !== "string") continue;
     const src = findSource(name, COLD_POOL, PROJECT_DIR);
     if (!src) {
-      errors.push(`skill 未找到: ${name}`);
+      errors.push(`Skill not found: ${name}`);
       continue;
     }
     declared.push({ name, type: section, sourcePath: src });
@@ -165,7 +165,7 @@ for (const [key, value] of Object.entries(deck.transient || {})) {
   if (!t?.path) continue;
   const src = resolve(PROJECT_DIR, t.path);
   if (!existsSync(src)) {
-    errors.push(`transient 路径不存在: ${key} → ${src}`);
+    errors.push(`Transient path does not exist: ${key} → ${src}`);
     continue;
   }
   declared.push({ name: key, type: "transient", sourcePath: src, expires: t.expires });
@@ -179,23 +179,54 @@ if (errors.length > 0) {
 // ── 预算检查（硬约束，链接前检查）──────────────────────────
 
 if (declared.length > MAX_CARDS) {
-  console.error(`❌ 超出预算: 声明 ${declared.length} 个，上限 ${MAX_CARDS}`);
-  console.error(`   减少 skill-deck.toml 中的声明，或调整 max_cards`);
+  console.error(`❌ Budget exceeded: declared ${declared.length}, max ${MAX_CARDS}`);
+  console.error(`   Reduce declarations in skill-deck.toml or increase max_cards`);
   process.exit(1);
+}
+
+// ── 工作目录安全 guard ──────────────────────────────────────
+
+const resolvedWorkingSet = resolve(WORKING_SET);
+const resolvedHome = resolve(homedir());
+const resolvedCwd = resolve(process.cwd());
+const resolvedColdPool = resolve(COLD_POOL);
+
+if (resolvedWorkingSet === resolvedHome || resolvedWorkingSet === "/") {
+  console.error(`❌ Refusing operation: working_set resolves to home or root directory (${resolvedWorkingSet})`);
+  console.error(`   Check working_set in skill-deck.toml`);
+  process.exit(1);
+}
+
+const relWs = relative(resolvedColdPool, resolvedWorkingSet);
+if (
+  resolvedWorkingSet.startsWith(resolvedColdPool + "/") &&
+  !relWs.split("/").some(p => p.startsWith("."))
+) {
+  console.warn(`⚠️  working_set is inside cold_pool and not hidden — may be picked up by cold-pool scans`);
+  console.warn(`   working_set: ${resolvedWorkingSet}`);
+  console.warn(`   cold_pool:   ${resolvedColdPool}`);
 }
 
 // ── 收束 working set ────────────────────────────────────────
 
 mkdirSync(WORKING_SET, { recursive: true });
 
-// 清理未声明的条目
+// 清理未声明的条目（只删 symlink，防呆）
 const declaredNames = new Set(declared.map(d => d.name.split("/")[0]));
 try {
   for (const entry of readdirSync(WORKING_SET)) {
     if (entry.startsWith("_")) continue;
     if (!declaredNames.has(entry)) {
-      rmSync(join(WORKING_SET, entry), { recursive: true, force: true });
-      console.log(`  🗑️  移除: ${entry}`);
+      const entryPath = join(WORKING_SET, entry);
+      try {
+        const st = lstatSync(entryPath);
+        if (!st.isSymbolicLink()) {
+          console.warn(`⚠️  Skipping non-symlink entry: ${entry}`);
+          continue;
+        }
+      } catch { continue; }
+      rmSync(entryPath, { recursive: true, force: true });
+      console.log(`  🗑️  Removed: ${entry}`);
     }
   }
 } catch {}
@@ -216,7 +247,7 @@ for (const item of declared) {
     mkdirSync(dirname(dest), { recursive: true });
     symlinkSync(item.sourcePath, dest);
   } catch (err: any) {
-    console.error(`❌ 链接失败: ${item.name}: ${err.message}`);
+    console.error(`❌ Link failed: ${item.name}: ${err.message}`);
     continue;
   }
 
@@ -260,9 +291,9 @@ for (const s of linkedSkills) {
   const days = Math.ceil((exp - now) / 86400000);
   transientWarnings.push({ name: s.name, expires: s.expires, days_remaining: days });
   if (days <= 0) {
-    console.warn(`⚠️  过期: ${s.name}（到期 ${s.expires}）— 评估是否仍需要`);
+    console.warn(`⚠️  Expired: ${s.name} (expires ${s.expires}) — evaluate if still needed`);
   } else if (days <= 14) {
-    console.warn(`⏰ 即将过期: ${s.name}（剩余 ${days} 天）`);
+    console.warn(`⏰ Expiring soon: ${s.name} (${days} days remaining)`);
   }
 }
 
@@ -282,7 +313,7 @@ const dirOverlaps: { dir: string; skills: string[] }[] = [];
 for (const [dir, owners] of dirOwners) {
   if (owners.length > 1) {
     dirOverlaps.push({ dir, skills: owners });
-    console.warn(`⚠️  目录重叠: ${dir} ← ${owners.join(", ")}`);
+    console.warn(`⚠️  Directory overlap: ${dir} ← ${owners.join(", ")}`);
   }
 }
 
@@ -297,7 +328,7 @@ for (let i = 0; i < allDirs.length; i++) {
       const cross = parentOwners.filter(o => !childOwners.includes(o));
       if (cross.length > 0) {
         const msg = `${allDirs[i]} (${parentOwners.join(",")}) 包含 ${allDirs[j]} (${childOwners.join(",")})`;
-        console.warn(`⚠️  目录包含关系: ${msg}`);
+        console.warn(`⚠️  Directory containment: ${msg}`);
         dirOverlaps.push({ dir: `${allDirs[i]} ⊃ ${allDirs[j]}`, skills: [...new Set([...parentOwners, ...childOwners])] });
       }
     }
@@ -326,7 +357,7 @@ const lock: SkillDeckLock = {
 
 const parsed = SkillDeckLockSchema.safeParse(lock);
 if (!parsed.success) {
-  console.error("❌ Lock schema 校验失败:", JSON.stringify(parsed.error.format(), null, 2));
+  console.error("❌ Lock schema validation failed:", JSON.stringify(parsed.error.format(), null, 2));
   process.exit(1);
 }
 
@@ -336,10 +367,10 @@ writeFileSync(LOCK_PATH, JSON.stringify(parsed.data, null, 2) + "\n");
 // ── 报告 ────────────────────────────────────────────────────
 
 console.log("");
-console.log(`✅ 同步完成: ${linkedSkills.length}/${MAX_CARDS} skill`);
+console.log(`✅ Sync complete: ${linkedSkills.length}/${MAX_CARDS} skills`);
 console.log(`   lock: ${LOCK_PATH}`);
 if (dirOverlaps.length > 0) {
-  console.log(`   ⚠️  ${dirOverlaps.length} 个目录重叠（详见上方警告）`);
+  console.log(`   ⚠️  ${dirOverlaps.length} directory overlap(s) (see warnings above)`);
 }
 }
 

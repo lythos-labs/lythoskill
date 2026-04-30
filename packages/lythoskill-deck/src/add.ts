@@ -105,6 +105,11 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
     process.exit(1)
   }
 
+  if (!existsSync(coldPool)) {
+    console.log(`📁 Creating cold pool: ${coldPool}`)
+    mkdirSync(coldPool, { recursive: true })
+  }
+
   const tmpDir = mkdtempSync(join(tmpdir(), 'lythoskill-deck-add-'))
   const tmpRepo = join(tmpDir, 'repo')
 
@@ -113,11 +118,21 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
       const skillsShLocator = `${parsed.owner}/${parsed.repo}`
       console.log(`📦 Downloading via skills.sh: ${skillsShLocator}`)
       execSync(`npx skills add ${skillsShLocator} -g`, { cwd: tmpDir, stdio: 'inherit' })
-      console.error(`⚠️ skills.sh backend: manual cold-pool placement may be needed`)
     } else {
       const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
       console.log(`📦 Cloning: ${gitUrl}`)
       execSync(`git clone --depth 1 ${gitUrl} ${tmpRepo}`, { stdio: 'inherit' })
+    }
+
+    if (!existsSync(tmpRepo)) {
+      if (backend === 'skills.sh' || backend === 'vercel') {
+        console.error(`❌ skills.sh backend installs globally, not to cold pool.`)
+        console.error(`   Please manually place the skill at: ${targetDir}`)
+        console.error(`   Or use: deck add ${locator} --via git`)
+        process.exit(1)
+      }
+      console.error(`❌ Download failed: expected output not found at ${tmpRepo}`)
+      process.exit(1)
     }
 
     mkdirSync(dirname(targetDir), { recursive: true })
