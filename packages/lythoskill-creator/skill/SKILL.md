@@ -4,6 +4,10 @@ version: {{PACKAGE_VERSION}}
 description: |
   Scaffold and build lythoskill projects -- thin skill monorepos where heavy logic
   lives in npm/pip packages and skills are lightweight routers.
+when_to_use: |
+  Create a new skill project, scaffold lythoskill monorepo, add skill to project,
+  build skill for distribution, thin skill pattern, starter package, skill template,
+  init lythoskill, new skill repository.
 ---
 
 # lythoskill-creator
