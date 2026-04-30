@@ -122,7 +122,7 @@ lythoskill serves two distinct audiences. You can use either independently.
 
 **Multi-role decks**: A curator agent sees only curator skills. An arena agent sees only arena skills. A scribe agent sees only scribe skills. Each agent gets a tailored deck — no cross-contamination, no bloated context.
 
-**Key principle**: lythoskill-deck is a governor, not a package manager. It makes sure the *right* skills are visible — but it doesn't download them for you. The good news: your agent can do that in one shot.
+**Key principle**: lythoskill-deck is a declarative package manager *and* a governor. `deck add` downloads skills from GitHub/skills.sh into your cold pool, appends them to `skill-deck.toml`, and runs `link` — all in one shot. `deck link` then reconciles the working set so only declared skills are visible. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
 
 **Declarative sync, like Kubernetes**: `deck link` doesn't just "create links" — it makes the working set match your `skill-deck.toml`. If you remove a skill from the toml and run `link` again, it disappears from `.claude/skills/`. No `unlink` command needed — just change the declaration and re-sync.
 

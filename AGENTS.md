@@ -204,7 +204,7 @@ The `skill-deck.toml` file at repo root declares which skills are active. Sectio
 
 The `lythoskill-deck` tool reconciles the declared deck against the skills cold pool by creating symlinks in `.claude/skills/` (the working set). It generates a `skill-deck.lock` file tracking the resolved state.
 
-Key principle: lythoskill-deck is a governor, not a package manager. It makes sure the *right* skills are visible — but it doesn't download them. See README.md Cold Pool section for installation examples.
+Key principle: lythoskill-deck is a declarative package manager and governor. `deck add` downloads skills from GitHub/skills.sh into your cold pool, appends them to `skill-deck.toml`, and runs `link`. `deck link` reconciles the working set so only declared skills are visible. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
 
 ---
 

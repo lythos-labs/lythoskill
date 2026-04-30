@@ -122,7 +122,7 @@ lythoskill 服务两个不同的受众，你可以独立使用任意一层。
 
 **多角色 deck**：Curator agent 只看到 curator 技能。Arena agent 只看到 arena 技能。Scribe agent 只看到 scribe 技能。每个 agent 拿一套定制 deck——无交叉污染，无膨胀上下文。
 
-**核心原则**：lythoskill-deck 是治理者，不是包管理器。它确保*正确*的技能可见——但不帮你下载。好消息是：你的 agent 可以一步搞定。
+**核心原则**：lythoskill-deck 既是声明式包管理器，也是治理者。`deck add` 从 GitHub/skills.sh 下载技能到 cold pool，追加到 `skill-deck.toml`，并自动跑 `link`——一步搞定。`deck link` 再把 working set 调和到声明状态，只有声明过的技能才可见。你同时拿到了依赖管理（类似 Maven）和运行时治理（类似 Kubernetes RBAC）。
 
 比如，开始使用一个新技能：
 
