@@ -132,8 +132,14 @@ For example, to start using a new skill manually:
 git clone https://github.com/lythos-labs/lythoskill.git \
   ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
 
-# 2. Declare which skills this project needs
-echo 'skills = ["lythoskill-deck"]' >> skill-deck.toml
+# 2. Create skill-deck.toml — copy this exact block:
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+
+[tool]
+skills = ["lythoskill-deck"]
+EOF
 
 # 3. Sync — deck reconciles working set with declaration
 npx @lythos/skill-deck link
