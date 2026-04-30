@@ -27,7 +27,7 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
 | Package Manager | **pnpm** workspaces |
-| Skill-layer dependencies | **Zero-perceived** — consumers call via `bunx`/`npx`, no local install |
+| Skill-layer dependencies | **Zero-perceived** — consumers call via `bunx` (Bun runtime required), no local install |
 | Starter-layer dependencies | Normal npm dependency management (e.g. `@iarna/toml`, `zod`), resolved by package manager |
 
 Key config:

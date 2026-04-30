@@ -66,11 +66,11 @@ How many skills do you have?
 
 ## Quick Start
 
-Zero install — works with `npx` or `bunx`:
+Zero install — Bun runtime required (`bunx`). `npx` works only if Bun is also installed (the shebang calls `env bun`):
 
 ```bash
 # 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
-npx @lythos/skill-deck add mattpocock/skills
+bunx @lythos/skill-deck add mattpocock/skills
 
 # 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
@@ -83,7 +83,7 @@ Prefer a different download method? Use `--via skills.sh` or clone manually — 
 
 ```bash
 # Alternative: Vercel skills.sh
-npx @lythos/skill-deck add mattpocock/skills --via skills.sh
+bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
 
 # Alternative: manual clone
 git clone https://github.com/mattpocock/skills.git \
@@ -142,8 +142,8 @@ skills = ["lythoskill-deck"]
 EOF
 
 # 3. Sync — deck reconciles working set with declaration
-npx @lythos/skill-deck link
-# or: bunx @lythos/skill-deck link
+bunx @lythos/skill-deck link
+# or: npx @lythos/skill-deck link
 ```
 
 Or use `deck add` to automate steps 1–3 in one command. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
@@ -307,31 +307,31 @@ lythoskill sits **between** skill sources and agent platforms — it does not re
 ## Quick Reference
 
 ```bash
-# Deck governance (npx or bunx)
-npx @lythos/skill-deck link                       # Sync toml -> working set
-npx @lythos/skill-deck add owner/repo             # Download skill + add to deck
+# Deck governance (bunx; npx only if Bun is installed)
+bunx @lythos/skill-deck link                       # Sync toml -> working set
+bunx @lythos/skill-deck add owner/repo             # Download skill + add to deck
 bunx @lythos/skill-deck link --deck ./my-deck.toml
 
 # Skill scaffolding
-npx @lythos/skill-creator init my-project
-npx @lythos/skill-creator build my-skill
+bunx @lythos/skill-creator init my-project
+bunx @lythos/skill-creator build my-skill
 
 # Project governance
-npx @lythos/project-cortex task "Fix auth flow"
-npx @lythos/project-cortex list
-npx @lythos/project-cortex index
+bunx @lythos/project-cortex task "Fix auth flow"
+bunx @lythos/project-cortex list
+bunx @lythos/project-cortex index
 
 # Cold pool curation
-npx @lythos/skill-curator ~/.agents/skill-repos
+bunx @lythos/skill-curator ~/.agents/skill-repos
 # → outputs ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
 
 # Arena single-skill comparison
-npx @lythos/skill-arena \
+bunx @lythos/skill-arena \
   --task "Generate auth flow" \
   --skills "design-doc-mermaid,mermaid-tools"
 
 # Arena full deck comparison
-npx @lythos/skill-arena \
+bunx @lythos/skill-arena \
   --task "Generate auth flow" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -360,7 +360,7 @@ bun packages/lythoskill-deck/test/runner.ts
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
 | Package Manager | **pnpm** workspaces |
-| External Deps | **Skill layer**: zero-install via bunx/npx. **Starter layer**: npm deps as needed |
+| External Deps | **Skill layer**: zero-install via `bunx` (Bun runtime required). **Starter layer**: npm deps as needed |
 
 ---
 
