@@ -49,8 +49,9 @@ skills = ["report-generation-combo"]
 
 | Situation | Command |
 |-----------|---------|
-| Sync `.claude/skills/` with `skill-deck.toml` | `bunx @lythos/skill-deck link` |
+| Sync working set with `skill-deck.toml` | `bunx @lythos/skill-deck link` |
 | Validate `skill-deck.toml` before committing | `bunx @lythos/skill-deck validate` |
+| Download a skill to cold pool and add to deck | `bunx @lythos/skill-deck add owner/repo` |
 | Use a custom deck file or working dir | `bunx @lythos/skill-deck link --deck ./my-deck.toml --workdir /path/to/project` |
 
 ### Commands
@@ -59,6 +60,7 @@ skills = ["report-generation-combo"]
 |---------|------|-------------|
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
+| `add` | `<locator> [--via <backend>] [--deck <path>]` | Download skill to cold pool and append to skill-deck.toml. |
 
 ### Options
 
@@ -66,6 +68,11 @@ skills = ["report-generation-combo"]
 |------|-------------|---------|
 | `--deck <path>` | Path to skill-deck.toml | Find upward from cwd |
 | `--workdir <dir>` | Working directory | cwd |
+| `--via <backend>` | Download backend for `add`: `git` or `skills.sh` | `git` |
+
+### Safety guards
+
+`link` refuses to operate if `working_set` resolves to your home directory or root (`/`). It also only removes **symlinks** from the working set — real files or directories are skipped with a warning.
 
 ### Exit codes
 
@@ -106,9 +113,19 @@ bunx @lythos/skill-deck link
 |---------|-----------|
 | **Cold Pool** | All downloaded skills (`~/.agents/skill-repos/`). Agent cannot see here. |
 | **skill-deck.toml** | Declares desired state: "this project uses these skills." |
-| **`deck link`** | Reconciler. Makes `.claude/skills/` match the declaration. |
-| **Working Set** | `.claude/skills/` — symlinks only. What the agent actually scans. |
+| **`deck link`** | Reconciler. Makes the working set match the declaration. |
+| **Working Set** | Symlinks only. Default: `.claude/skills/` — where agents scan for skills. |
 | **deny-by-default** | Undeclared skills are physically absent from the working set. |
+
+### Agent skill scan locations
+
+Different agents look for skills in different directories. `skill-deck.toml` configures the working set to match your agent:
+
+| Agent | Default skills directory |
+|-------|--------------------------|
+| Claude Code | `.claude/skills/` |
+| Cursor | `.cursor/skills/` |
+| Generic / custom | Configure `working_set` in `skill-deck.toml` |
 
 ## Skill Documentation
 
