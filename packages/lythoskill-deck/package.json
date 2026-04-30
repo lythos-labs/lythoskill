@@ -12,6 +12,9 @@
   ],
   "author": "lythos-labs",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "lythoskill-deck": "src/cli.ts"

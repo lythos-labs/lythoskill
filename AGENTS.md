@@ -176,6 +176,8 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 7. **tsconfig**: `moduleResolution` must be `"bundler"`, `types` includes `"bun-types"`, target `"esnext"`.
 
+8. **Unified version policy**: All packages in `packages/` share a single version number. When bumping, update every `package.json` — no subpackage version drift. The version is the project's release identity, not per-package identity.
+
 ---
 
 ## Project Skills (Self-Contained)

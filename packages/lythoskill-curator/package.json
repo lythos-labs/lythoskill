@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-curator",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Skill Curator — read-only observer for skill cold pools. Scans and indexes; recommendation is agent-side LLM reasoning.",
   "keywords": [
     "ai-agent",
@@ -12,6 +12,9 @@
   ],
   "author": "lythos-labs",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "lythoskill-curator": "src/cli.ts"

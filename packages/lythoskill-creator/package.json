@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-creator",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "lythoskill scaffolding tool — init and build thin-skill packages",
   "keywords": [
     "ai-agent",
@@ -12,6 +12,9 @@
   ],
   "author": "lythos-labs",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "lythoskill-creator": "src/cli.ts"
