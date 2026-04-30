@@ -2,7 +2,7 @@
 
 > **治理你的 AI agent 技能。防止技能生态腐烂。**
 >
-> lythoskill 是 agent skill 生态系统的治理层。它不定义技能标准——而是在现有标准之上提供治理基础设施，让你的 agent 在技能从 10 个增长到 100+ 个的过程中始终保持专注、无冲突。
+> lythoskill 是 agent skill 生态的治理层。它不重新定义技能标准——而是在现有标准之上搭一套治理基础设施，让你的 agent 在技能从 10 个膨胀到 100+ 个时，依然保持专注、互不冲突。
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,15 +10,15 @@
 
 ---
 
-## 静默混合问题（Silent Blend）
+## 静默混合（Silent Blend）
 
-你安装了 **gstack** 做项目管理，又安装了 **superpowers** 做写作工作流。两者都是高主张性技能——它们定义了工作*应该怎么做*。它们不只是帮你写代码，而是强加了一套 workflow、一种风格、一种哲学。
+你同时装了 **gstack**（项目管理）和 **superpowers**（写作工作流）。两者都是高主张性技能——它们不只帮你写代码，而是各自强加一套 workflow、一种风格、一种哲学。
 
-你把两者都放进 `.claude/skills/`。Agent 看到了两者。它不崩溃，也不抱怨。但一半任务按 gstack 规则跑，另一半按 superpowers 规则跑。输出不可预测。Bug 是静默的。
+你把两者都丢进 `.claude/skills/`。Agent 看到了，不崩溃，也不抱怨。结果呢？一半任务按 gstack 的规则跑，另一半按 superpowers 的规则跑。输出飘忽不定，Bug 悄无声息地埋进去。
 
-**这就是静默混合**——技能生态系统中最隐蔽的失效模式。它发生在两个*必须互斥*的技能同时被 agent 看到时。
+**这就是静默混合**——技能生态里最隐蔽的失效模式。两个本就该互斥的技能，同时暴露在 agent 面前。
 
-lythoskill-deck 用 **deny-by-default** 解决这个问题：未声明的技能从 `.claude/skills/` 中**物理消失**。不是"禁用"，不是"降权"。**是没了。** Agent 看不到、想不到、不会被它们迷惑。
+lythoskill-deck 用 **deny-by-default** 终结它：未声明的技能从 `.claude/skills/` 里**物理消失**。不是"禁用"，不是"降权"，**是直接没了**。Agent 看不到、想不到、更不会被迷惑。
 
 ```toml
 # 项目 A：只用 gstack
@@ -30,24 +30,24 @@ skills = ["gstack"]
 skills = ["superpowers"]
 ```
 
-运行 `deck link` → 每个项目只看到一个"方法论"。没有静默混合。没有混乱。
+运行 `deck link` → 每个项目只看到一个"方法论"。没有静默混合，没有混乱。
 
 ---
 
-## 我需要这个吗？
+## 我真的需要这个吗？
 
-治理层只有在复杂度达到阈值时才有价值。在此之前，它是不必要的抽象。
+治理只在复杂度越过阈值时才有价值。没到那个点，它就是多余的抽象。
 
 ```
 你有多少个技能？
 │
 ├─ 0–3 个，无冲突
-│   → 不需要 lythoskill。手动放进 .claude/skills/ 即可。
+│   → 不需要 lythoskill。手动丢进 .claude/skills/ 就行。
 │
-├─ 5–10 个，开始出现冲突或选择困难
-│   → 只需要 deck 治理。安装 lythoskill-deck。
+├─ 5–10 个，开始打架或选择困难
+│   → 只需要 deck 治理。装个 lythoskill-deck。
 │
-├─ 10+ 个，且你开始自己写技能
+├─ 10+ 个，而且你开始自己写技能
 │   ├─ 简单技能（SKILL.md + 轻量 bash）
 │   │   → 只需要 deck 治理
 │   └─ 复杂技能（有依赖、测试、类型、多技能协作）
@@ -57,30 +57,30 @@ skills = ["superpowers"]
     → 完整 lythoskill（deck + creator + curator + arena）
 ```
 
-**你不需要 lythoskill，如果：**
-- 你的技能 ≤3 个且从不冲突
-- 你的技能集跨项目从不变化
-- 你的技能是纯 SKILL.md 文件，没有构建步骤
+**以下情况你不需要 lythoskill：**
+- 技能 ≤3 个，从不冲突
+- 技能集跨项目一成不变
+- 技能是纯 SKILL.md，没有构建步骤
 - 你是 solo 开发者，只有一个技能，没有发布周期
 
 ---
 
 ## 快速开始
 
-零安装——只需要 Bun 运行时（`bunx`）。`npx` 只有在同时安装了 Bun 时才可用（shebang 调用 `env bun`）：
+零安装——只需要 Bun 运行时（`bunx`）。`npx` 只有在同时装了 Bun 时才可用（shebang 调用的是 `env bun`）：
 
 ```bash
 # 1. 从 GitHub 添加一个技能（自动下载到 cold pool + 更新 deck + 链接）
 bunx @lythos/skill-deck add mattpocock/skills
 
-# 2. Agent 只看到该技能。其他技能物理上不存在。
+# 2. Agent 只看到它。其余技能物理上不存在。
 ls .claude/skills/
 # skills
 ```
 
-就这些。`deck add` 会把仓库 clone 到你的 [cold pool](#cold-pool-约定)，把技能追加到 `skill-deck.toml`，然后运行 `link`。
+就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
 
-喜欢用其他方式下载？用 `--via skills.sh` 或手动 clone——deck 不关心技能怎么进 cold pool 的。
+想换种方式下载？用 `--via skills.sh` 或手动 clone——deck 不关心技能怎么进 cold pool 的，只关心谁在活跃。
 
 ```bash
 # 替代方案：Vercel skills.sh
@@ -106,7 +106,7 @@ link                 ← 同步 toml 到 working set 的子命令
 
 ## 两层价值主张
 
-lythoskill 服务两个不同的受众。你可以独立使用任意一层。
+lythoskill 服务两个不同的受众，你可以独立使用任意一层。
 
 ### Deck 治理 —— 面向每一位技能使用者
 
@@ -116,13 +116,13 @@ lythoskill 服务两个不同的受众。你可以独立使用任意一层。
 
 | 没有 deck 治理 | 有 deck 治理 |
 |---|---|
-| Agent 扫描 50+ 技能，随机挑选 | Agent 精确看到你声明的 |
+| Agent 扫描 50+ 技能，随机挑 | Agent 精确看到你声明的 |
 | 相似技能静默冲突 | `deny-by-default`：未声明 = 不可见 |
 | 上下文窗口浪费在无关描述上 | `max_cards` 预算强制聚焦 |
 
-**多角色 deck**：Curator agent 只看到 curator 技能。Arena agent 只看到 arena 技能。Scribe agent 只看到 scribe 技能。每个 agent 获得定制 deck——无交叉污染，无膨胀上下文。
+**多角色 deck**：Curator agent 只看到 curator 技能。Arena agent 只看到 arena 技能。Scribe agent 只看到 scribe 技能。每个 agent 拿一套定制 deck——无交叉污染，无膨胀上下文。
 
-**核心原则**：lythoskill-deck 是治理者，不是包管理器。它确保*正确*的技能可见——但它不帮你下载。好消息是：你的 agent 可以一步搞定。
+**核心原则**：lythoskill-deck 是治理者，不是包管理器。它确保*正确*的技能可见——但不帮你下载。好消息是：你的 agent 可以一步搞定。
 
 比如，开始使用一个新技能：
 
@@ -185,10 +185,10 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 
 下面是一个真实的使用场景，展示 subagent 如何在 deck 治理下自主工作。
 
-**场景**：初始化一个 Next.js 项目，让 agent 自己从 cold pool 挑选技能、组建 deck、并完成开发任务。
+**场景**：初始化一个 Next.js 项目，让 agent 自己从 cold pool 挑技能、组 deck、并完成开发任务。
 
 ```bash
-# 1. 初始化 Next.js 项目
+# 1. 初始化项目
 npx create-next-app@latest my-app --default --use-bun
 cd my-app
 
@@ -247,7 +247,7 @@ bunx @lythos/skill-deck link
 
 ## Arena：Skill 对比
 
-不确定该用哪个技能？Arena 在不同 skill 配置下运行相同任务并评分。不用猜。
+不确定该用哪个技能？Arena 在不同 skill 配置下跑相同任务并打分。不用猜。
 
 | 问题 | 测试方式 |
 |---|---|
@@ -263,9 +263,9 @@ bunx @lythos/skill-deck link
 
 ## Cold Pool 约定
 
-Cold pool 是你的技能**不活跃时**居住的地方。它可以无限增长。
+Cold pool 是你的技能**不活跃时**住在哪里。它可以无限增长。
 
-lythoskill 使用 **Go module 风格的目录结构**，天然带有 `owner/repo` 可追溯性：
+lythoskill 用 **Go module 风格的目录结构**，天然带有 `owner/repo` 可追溯性：
 
 ```
 ~/.agents/skill-repos/              ← 全局 cold pool（推荐默认值）
@@ -311,7 +311,7 @@ git clone https://github.com/vercel-labs/agent-skills.git \
 之后，在项目的 `skill-deck.toml` 里声明该技能，然后运行 `deck link`。Deck 从此接管。
 
 **skill-deck.toml 中的路径解析**：
-- 简短名 `lythoskill-deck` → deck 会在 cold pool 中递归扫描同名目录
+- 短名 `lythoskill-deck` → deck 会在 cold pool 中递归扫描同名目录
 - 限定名 `github.com/lythos-labs/lythoskill/lythoskill-deck` → 直接定位，避免同名冲突
 - Monorepo 子技能 `owner/repo/skills/skill-name` → 自动识别 `skills/` 子目录
 
