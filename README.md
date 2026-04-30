@@ -346,7 +346,7 @@ bun packages/lythoskill-deck/test/runner.ts
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
 | Package Manager | **pnpm** workspaces |
-| External Deps | **Zero** for core packages |
+| External Deps | **Skill layer**: zero-install via bunx/npx. **Starter layer**: npm deps as needed |
 
 ---
 
