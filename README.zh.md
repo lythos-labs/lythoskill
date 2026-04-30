@@ -137,7 +137,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 EOF
 
 # 3. 同步——deck 把 working set 调和到声明状态

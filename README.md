@@ -139,7 +139,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 EOF
 
 # 3. Sync — deck reconciles working set with declaration

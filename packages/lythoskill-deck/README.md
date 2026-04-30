@@ -31,7 +31,7 @@ working_set = ".claude/skills"      # Where symlinks are created
 cold_pool = "~/.agents/skill-repos" # Where skills are downloaded
 
 [innate]                    # Always-loaded skills
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 
 [tool]                      # Auto-triggered skills
 skills = ["skill-a", "skill-b"]
@@ -100,7 +100,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 EOF
 
 # 2. Link — creates symlinks in .claude/skills/

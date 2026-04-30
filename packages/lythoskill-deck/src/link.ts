@@ -120,7 +120,7 @@ if (!existsSync(DECK_PATH)) {
   console.error(`  [deck]`);
   console.error(`  max_cards = 10`);
   console.error(`  \n  [tool]`);
-  console.error(`  skills = ["lythoskill-deck"]`);
+  console.error(`  skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]`);
   console.error(`  EOF`);
   console.error(`\nOr specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
   process.exit(1);
