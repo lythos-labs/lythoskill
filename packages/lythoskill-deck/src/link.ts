@@ -174,6 +174,17 @@ for (const [key, value] of Object.entries(deck.transient || {})) {
 if (errors.length > 0) {
   for (const e of errors) console.error(`❌ ${e}`);
   // 继续执行已找到的 skill，不因个别缺失中断全部
+
+  // 引导：如果 cold pool 为空，给出更明确的指引
+  const hasSkills = existsSync(COLD_POOL) && readdirSync(COLD_POOL).filter(e => !e.startsWith('.')).length > 0;
+  if (!hasSkills) {
+    console.error(`\n💡 Cold pool is empty. To add skills:`);
+    console.error(`   bunx @lythos/skill-deck add github.com/owner/repo/skill`);
+    console.error(`   # or manually: git clone <repo> ~/.agents/skill-repos/github.com/owner/repo`);
+  } else {
+    console.error(`\n💡 To install missing skills:`);
+    console.error(`   bunx @lythos/skill-deck add github.com/owner/repo/skill`);
+  }
 }
 
 // ── 预算检查（硬约束，链接前检查）──────────────────────────
