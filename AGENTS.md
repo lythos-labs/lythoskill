@@ -8,7 +8,7 @@
 
 ## Project Overview
 
-**lythoskill** is an anti-corruption layer for the agent skill ecosystem. It provides governance infrastructure on top of existing skill standards, so your agent stays focused and conflict-free as your skill collection grows from 10 to 100+.
+**lythoskill** is a governance layer for the agent skill ecosystem. It provides governance infrastructure on top of existing skill standards, so your agent stays focused and conflict-free as your skill collection grows from 10 to 100+.
 
 It serves two audiences:
 
