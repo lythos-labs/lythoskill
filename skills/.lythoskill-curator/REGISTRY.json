@@ -4,11 +4,11 @@
   "totalSkills": 10,
   "skills": [
     {
-      "name": "lythoskill-skill-coach",
+      "name": "lythoskill-coach",
       "description": "Analyzes SKILL.md files against Agent Skills best practices. Reviews\nbody size, description quality, progressive disclosure, frontmatter\nusage, and context efficiency. Provides actionable optimization advice.",
       "type": "standard",
       "version": "0.3.0",
-      "path": "/Users/chariots/Downloads/lythoskill-main/skills/lythoskill-skill-coach",
+      "path": "/Users/chariots/Downloads/lythoskill-main/skills/lythoskill-coach",
       "managedDirs": [],
       "niches": [],
       "triggerPhrases": [],
@@ -138,11 +138,11 @@
     "byType": {
       "standard": [
         {
-          "name": "lythoskill-skill-coach",
+          "name": "lythoskill-coach",
           "description": "Analyzes SKILL.md files against Agent Skills best practices. Reviews\nbody size, description quality, progressive disclosure, frontmatter\nusage, and context efficiency. Provides actionable optimization advice.",
           "type": "standard",
           "version": "0.3.0",
-          "path": "/Users/chariots/Downloads/lythoskill-main/skills/lythoskill-skill-coach",
+          "path": "/Users/chariots/Downloads/lythoskill-main/skills/lythoskill-coach",
           "managedDirs": [],
           "niches": [],
           "triggerPhrases": [],

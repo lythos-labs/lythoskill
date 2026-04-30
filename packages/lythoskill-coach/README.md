@@ -9,7 +9,7 @@ Writing a good SKILL.md is harder than it looks. This skill codifies the evaluat
 ## Skill Documentation
 
 This package is primarily a **Skill** layer — the agent-visible documentation is here:  
-[packages/lythoskill-skill-coach/skill/SKILL.md](../../packages/lythoskill-skill-coach/skill/SKILL.md)
+[packages/lythoskill-coach/skill/SKILL.md](../../packages/lythoskill-coach/skill/SKILL.md)
 
 There is no CLI starter layer; the value is entirely in the SKILL.md and its reference materials.
 

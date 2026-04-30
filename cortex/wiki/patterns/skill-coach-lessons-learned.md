@@ -2,7 +2,7 @@
 
 > Complete history of skill-coach meta-lessons, including consolidated entries.
 > This is cold storage — read only when researching the evolution of a specific rule.
-> For active lessons, see `skills/lythoskill-skill-coach/references/self-improvement-log.md`.
+> For active lessons, see `skills/lythoskill-coach/references/self-improvement-log.md`.
 
 ---
 
@@ -46,4 +46,4 @@ Arena test results:
 ### Consolidation Status
 
 All lessons from this entry have been promoted to body Gotchas or Evaluation Criteria.
-See `skills/lythoskill-skill-coach/SKILL.md` for current state.
+See `skills/lythoskill-coach/SKILL.md` for current state.
