@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-arena",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Skill Arena — benchmark skill effectiveness with controlled-variable comparison",
   "license": "MIT",
   "type": "module",

@@ -1,5 +1,6 @@
 ---
 name: project-cortex
+version: 0.3.0
 description: |
   GTD-style project governance with ADR, Epic, Task, and Wiki.
   Numeric-prefixed directories (01-backlog, 02-in-progress, etc.)

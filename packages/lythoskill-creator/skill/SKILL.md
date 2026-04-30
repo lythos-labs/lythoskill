@@ -1,5 +1,6 @@
 ---
 name: lythoskill-creator
+version: {{PACKAGE_VERSION}}
 description: |
   Scaffold and build lythoskill projects -- thin skill monorepos where heavy logic
   lives in npm/pip packages and skills are lightweight routers.
