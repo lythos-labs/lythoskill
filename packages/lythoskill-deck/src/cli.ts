@@ -11,8 +11,8 @@ const HELP_CONFIG = {
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
   ],
   options: [
-    { flag: '--deck <path>', description: 'Specify skill-deck.toml path' },
-    { flag: '--workdir <dir>', description: 'Specify working directory' },
+    { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
+    { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
   ],
 }
 

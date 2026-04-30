@@ -94,8 +94,11 @@ function main(): void {
       probeStatus(config);
       break;
 
+    case '--help':
+    case '-h':
     default:
       printHelp();
+      if (command !== '--help' && command !== '-h') process.exit(1);
   }
 }
 

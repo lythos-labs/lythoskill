@@ -25,7 +25,36 @@ function timestamp(): string {
 }
 
 // ── 解析参数（简单 slice 风格）──────────────────────────────
+function printHelp(): void {
+  console.log(`🎭 lythoskill-arena — Skill comparison runner
+
+Usage:
+  lythoskill-arena --task "<task description>" --skills <skill1,skill2,...>
+  lythoskill-arena --task "<task description>" --decks <deck1,deck2,...>
+  lythoskill-arena viz <arena-dir>
+
+Options:
+  -t, --task <desc>      Task description (required)
+  -s, --skills <list>    Comma-separated skill names
+      --decks <list>     Comma-separated deck paths
+  -c, --criteria <list>  Evaluation criteria (default: syntax,context,logic,token)
+      --control <skill>  Control skill for comparison (default: lythoskill-project-scribe)
+  -d, --dir <dir>        Output directory (default: tmp)
+  -p, --project <dir>    Project directory (default: .)
+
+Examples:
+  lythoskill-arena --task "Refactor auth module" --skills skill-a,skill-b
+  lythoskill-arena --task "Write tests" --decks ./decks/minimal.toml,./decks/full.toml
+  lythoskill-arena viz tmp/arena-20260430
+`)
+}
+
 function parseArgs(argv: string[]) {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    printHelp()
+    process.exit(0)
+  }
+
   const options: Record<string, string | undefined> = {
     task: undefined,
     skills: undefined,

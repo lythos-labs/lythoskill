@@ -30,6 +30,8 @@ switch (command) {
     await addSkill(args[0])
     break
 
+  case '--help':
+  case '-h':
   default:
     console.log(`@lythos/skill-creator -- thin skill scaffolder
 
@@ -43,4 +45,5 @@ Examples:
   bunx @lythos/skill-creator add-skill my-new-skill
   bunx @lythos/skill-creator build example
 `)
+    if (command !== '--help' && command !== '-h') process.exit(1)
 }
