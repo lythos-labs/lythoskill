@@ -1,0 +1,19 @@
+{
+  "name": "lythoskill",
+  "description": "Governance layer for the agent skill ecosystem. Prevents silent skill conflicts with declarative deck management and thin-skill monorepo scaffolding.",
+  "version": "0.6.2",
+  "author": {
+    "name": "lythos-labs",
+    "email": "hello@lythos.io"
+  },
+  "homepage": "https://github.com/lythos-labs/lythoskill",
+  "repository": "https://github.com/lythos-labs/lythoskill",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "governance",
+    "deck",
+    "monorepo",
+    "cli"
+  ]
+}

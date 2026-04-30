@@ -1,0 +1,45 @@
+#!/bin/sh
+# post-commit — Hexo-style sync to skills branch (release branch)
+# Mirrors skills/* + README.md into an isolated skills branch for lightweight clone.
+
+# Only sync if this commit touched skills/ or README.md
+if ! git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^(skills/|README\.md)$'; then
+  exit 0
+fi
+
+echo "🔄 Syncing skills branch (hexo-style)..."
+
+export GIT_INDEX_FILE=".git/skills-index"
+rm -f "$GIT_INDEX_FILE"
+
+git read-tree --empty
+
+# Add all skills/ files to root of tree (strip skills/ prefix)
+find skills -type f | while read f; do
+  target="${f#skills/}"
+  if [ -x "$f" ]; then mode=100755; else mode=100644; fi
+  blob=$(git hash-object -w "$f")
+  git update-index --add --cacheinfo "$mode,$blob,$target"
+done
+
+# Add README.md
+if [ -f README.md ]; then
+  blob=$(git hash-object -w README.md)
+  git update-index --add --cacheinfo "100644,$blob,README.md"
+fi
+
+tree=$(git write-tree)
+short_sha=$(git rev-parse --short HEAD)
+
+if git show-ref --verify --quiet refs/heads/skills; then
+  parent=$(git rev-parse refs/heads/skills)
+  commit=$(echo "chore: sync skills from main @ ${short_sha}" | git commit-tree "$tree" -p "$parent")
+else
+  commit=$(echo "chore: sync skills from main @ ${short_sha}" | git commit-tree "$tree")
+fi
+
+git update-ref refs/heads/skills "$commit"
+rm -f "$GIT_INDEX_FILE"
+unset GIT_INDEX_FILE
+
+echo "✅ Skills branch synced: $(git rev-parse --short refs/heads/skills)"

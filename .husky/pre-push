@@ -1,0 +1,14 @@
+#!/bin/sh
+# pre-push — Push skills branch alongside main
+
+remote="$1"
+url="$2"
+
+while read local_ref local_sha remote_ref remote_sha; do
+  if [ "$local_ref" = "refs/heads/main" ]; then
+    if git show-ref --verify --quiet refs/heads/skills; then
+      echo "🚀 Pushing skills branch to $remote..."
+      git push -f "$remote" refs/heads/skills
+    fi
+  fi
+done

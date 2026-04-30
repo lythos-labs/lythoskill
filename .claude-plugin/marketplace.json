@@ -1,0 +1,31 @@
+{
+  "name": "lythoskill",
+  "owner": {
+    "name": "lythos-labs",
+    "email": "hello@lythos.io"
+  },
+  "metadata": {
+    "description": "Governance layer for the agent skill ecosystem",
+    "version": "0.6.2"
+  },
+  "plugins": [
+    {
+      "name": "lythoskill-governance",
+      "description": "Declarative skill deck governance, cold pool indexing, and thin-skill monorepo scaffolding",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/lythoskill-arena",
+        "./skills/lythoskill-coach",
+        "./skills/lythoskill-creator",
+        "./skills/lythoskill-curator",
+        "./skills/lythoskill-deck",
+        "./skills/lythoskill-hello-world",
+        "./skills/lythoskill-project-cortex",
+        "./skills/lythoskill-project-onboarding",
+        "./skills/lythoskill-project-scribe",
+        "./skills/lythoskill-red-green-release"
+      ]
+    }
+  ]
+}
