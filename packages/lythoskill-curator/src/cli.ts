@@ -400,11 +400,11 @@ if (import.meta.main) {
     console.log('')
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
-    console.log('  query <SQL>           Query the catalog SQLite database')
+    console.log('  query <SQL>           Query the catalog SQLite database (output: JSON array)')
     console.log('')
     console.log('Options:')
     console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
-    console.log('  --db, -d <path>       Database path for query subcommand')
+    console.log('  --db, -d <path>       Database path for query (default: find most recent catalog.db)')
     process.exit(0)
   }
 

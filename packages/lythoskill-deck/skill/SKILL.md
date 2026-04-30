@@ -40,6 +40,11 @@ bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
 `link` is a **reconciler** that converges actual state to declared state:
 undeclared symlinks → removed; broken/circular symlinks → recreated;
 non-symlink entities → replaced; missing declared skills → linked from cold pool.
+
+> **If a declared skill is not in the cold pool**, `link` reports `Skill not found`
+> and skips it. Add it first with `bunx @lythos/skill-deck add <locator>`
+> or place it manually in the cold pool.
+
 You never diagnose the working set manually. Just run `link`.
 ## Initialize
 ```bash
