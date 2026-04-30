@@ -378,8 +378,8 @@ bun packages/lythoskill-deck/test/runner.ts
 | 文档 | 用途 |
 |---|---|
 | [README.md](./README.md) | 英文版项目说明 |
-| [AGENTS.md](./AGENTS.md) | 面向 AI agent 的 SSOT 通用指引 |
-| [CLAUDE.md](./CLAUDE.md) | Claude Code 扩展（redirect 到 AGENTS.md） |
+| [AGENTS.md](./AGENTS.md) | 面向 Codex / Kimi / Copilot / Gemini 的项目指引 |
+| [CLAUDE.md](./CLAUDE.md) | 面向 Claude Code 的项目指引 |
 | [cortex/INDEX.md](./cortex/INDEX.md) | 治理系统入口 |
 | [cortex/adr/](./cortex/adr/) | 架构决策记录 |
 | [skill-deck.toml](./skill-deck.toml) | 本仓库的活跃 skill deck |

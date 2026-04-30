@@ -1,6 +1,7 @@
 # lythoskill — AGENTS.md
 
-> This is the **single source of truth** for AI coding agents working on this repository.
+> Project guidance for agents that read `AGENTS.md` (Kimi, Codex, Copilot, Gemini CLI, etc.).
+> If you are Claude Code, read [`CLAUDE.md`](./CLAUDE.md) instead — it points back here for the full content.
 > Human contributors: see [README.md](./README.md) for a higher-level overview.
 
 ---
