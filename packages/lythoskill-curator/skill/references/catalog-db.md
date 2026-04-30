@@ -14,6 +14,13 @@
 | `has_scripts` | INTEGER | 0 or 1 |
 | `has_examples` | INTEGER | 0 or 1 |
 | `body_preview` | TEXT | First 500 chars of body |
+| `source` | TEXT | Provenance: `github.com/<org>/<repo>` or `localhost` |
+| `when_to_use` | TEXT | Additional trigger context |
+| `allowed_tools` | TEXT | JSON array of permitted tools |
+| `author` | TEXT | Declared author; falls back to source org |
+| `user_invocable` | INTEGER | 0, 1, or NULL |
+| `tags` | TEXT | JSON array of tags |
+| `deck_dependencies` | TEXT | JSON object of deck dependencies |
 
 ### catalog_meta (key-value metadata)
 | Key | Value |
@@ -41,6 +48,17 @@ GROUP BY managed_dirs HAVING COUNT(*) > 1;
 
 -- Freshness check
 SELECT value FROM catalog_meta WHERE key = 'generated_at';
+
+-- Group by source (provenance audit)
+SELECT source, COUNT(*) FROM skills GROUP BY source ORDER BY COUNT(*) DESC;
+
+-- Search trigger context
+SELECT name, source FROM skills
+WHERE when_to_use LIKE '%diagram%' OR description LIKE '%diagram%';
+
+-- Tags filter
+SELECT name FROM skills WHERE json_array_length(tags) > 0;
+SELECT name FROM skills WHERE tags LIKE '%testing%';
 ```
 
 ## When to Use catalog.db vs REGISTRY.json

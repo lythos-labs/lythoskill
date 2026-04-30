@@ -19,12 +19,19 @@ Each element in `skills[]`:
 | `type` | string | `standard` or `flow` |
 | `version` | string | From frontmatter `version` |
 | `path` | string | Absolute path to skill directory |
+| `source` | string | Provenance: `github.com/<org>/<repo>` or `localhost` (inferred from path) |
 | `managedDirs` | string[] | From `deck_managed_dirs` |
 | `niches` | string[] | From `deck_niche` (split on `,`) |
-| `triggerPhrases` | string[] | From `when_to_use` (split on `,`/newline) |
+| `triggerPhrases` | string[] | Extracted from `description` + `when_to_use` |
 | `hasScripts` | boolean | `scripts/` directory exists |
 | `hasExamples` | boolean | `examples/` directory exists |
 | `bodyPreview` | string | First 500 characters of SKILL.md body |
+| `whenToUse` | string | From frontmatter `when_to_use` |
+| `allowedTools` | string[] | From frontmatter `allowed-tools` |
+| `author` | string | From frontmatter `author`; falls back to `source` org |
+| `userInvocable` | boolean \| null | From frontmatter `user-invocable` |
+| `tags` | string[] | From frontmatter `tags` |
+| `deckDependencies` | object | From frontmatter `deck_dependencies` |
 
 ## Index (Pre-Computed Lookups)
 ```json

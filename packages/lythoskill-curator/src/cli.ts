@@ -21,6 +21,16 @@ interface SkillMeta {
   path: string; managedDirs: string[]; niches: string[];
   triggerPhrases: string[]; hasScripts: boolean; hasExamples: boolean;
   bodyPreview: string;
+  // Source provenance (inferred from cold-pool path, Go-mod style)
+  source: string; // e.g. "github.com/anthropics/skills" or "localhost"
+  // Agent Skills open-standard fields
+  whenToUse: string;
+  allowedTools: string[];
+  author: string; // from frontmatter; may differ from source org
+  userInvocable: boolean | null;
+  tags: string[];
+  // lythoskill governance extensions
+  deckDependencies: Record<string, any>;
 }
 
 // ── Frontmatter Parser (fixed for multiline) ─────────────────
@@ -125,6 +135,17 @@ function toString(val: any): string {
   return String(val || '');
 }
 
+function parseArrayField(val: any): string[] {
+  if (Array.isArray(val)) return val.map(String);
+  if (typeof val === 'string') {
+    // Inline array: [a, b] or single value
+    const m = val.match(/\[(.*)\]/);
+    if (m) return m[1].split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+    return val ? [val] : [];
+  }
+  return [];
+}
+
 function extractTriggers(description: string): string[] {
   const desc = toString(description);
   const triggers: string[] = [];
@@ -145,26 +166,59 @@ function extractTriggers(description: string): string[] {
   return [...new Set(triggers)];
 }
 
+function inferSource(path: string): string {
+  // Cold-pool layout: <pool>/github.com/<org>/<repo>/.../<skill>/
+  //                  <pool>/localhost/<skill>/
+  const parts = path.split('/');
+  const ghIdx = parts.indexOf('github.com');
+  if (ghIdx >= 0 && parts.length > ghIdx + 2) {
+    return `github.com/${parts[ghIdx + 1]}/${parts[ghIdx + 2]}`;
+  }
+  const localhostIdx = parts.indexOf('localhost');
+  if (localhostIdx >= 0) return 'localhost';
+  return 'unknown';
+}
+
 function scanSkill(path: string): SkillMeta | null {
   const skillMdPath = join(path, 'SKILL.md');
   if (!statSync(skillMdPath, { throwIfNoEntry: false })) return null;
   const text = readFileSync(skillMdPath, 'utf-8');
   const { frontmatter, body } = parseFrontmatter(text);
-  const metadata = frontmatter.metadata || {};
-  const managedDirs = metadata.lyth_managed_dirs || metadata.managed_dirs || [];
-  const niches = metadata.lyth_niche ? [metadata.lyth_niche] : [];
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
   const hasExamples = statSync(join(path, 'examples'), { throwIfNoEntry: false })?.isDirectory() || false;
   const desc = toString(frontmatter.description);
+
+  // lythoskill governance extensions (top-level frontmatter, not nested in metadata)
+  const managedDirs = frontmatter.deck_managed_dirs || frontmatter.managed_dirs || [];
+  const niches = frontmatter.deck_niche ? [frontmatter.deck_niche] : [];
+
+  // allowed-tools can be inline array or list
+  const allowedTools = parseArrayField(frontmatter['allowed-tools']);
+  const tags = parseArrayField(frontmatter.tags);
+
+  const source = inferSource(path);
+  const fmAuthor = toString(frontmatter.author);
+
   return {
     name: toString(frontmatter.name) || basename(path),
-    description: desc.slice(0, 800), type: toString(frontmatter.type) || 'standard',
-    version: toString(frontmatter.version) || 'unknown', path,
+    description: desc.slice(0, 800),
+    type: toString(frontmatter.type) || 'standard',
+    version: toString(frontmatter.version) || 'unknown',
+    path,
     managedDirs: Array.isArray(managedDirs) ? managedDirs : [managedDirs].filter(Boolean),
     niches: Array.isArray(niches) ? niches : [niches].filter(Boolean),
     triggerPhrases: extractTriggers(frontmatter.description),
     hasScripts, hasExamples,
     bodyPreview: body.slice(0, 500).replace(/\s+/g, ' '),
+    source,
+    // Open-standard fields
+    whenToUse: toString(frontmatter.when_to_use).slice(0, 800),
+    allowedTools,
+    author: fmAuthor || source.split('/')[1] || 'unknown', // fallback to org from source
+    userInvocable: frontmatter['user-invocable'] != null ? Boolean(frontmatter['user-invocable']) : null,
+    tags,
+    // lythoskill extensions
+    deckDependencies: frontmatter.deck_dependencies || {},
   };
 }
 
@@ -190,16 +244,25 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
       trigger_phrases TEXT,
       has_scripts INTEGER,
       has_examples INTEGER,
-      body_preview TEXT
+      body_preview TEXT,
+      source TEXT,
+      when_to_use TEXT,
+      allowed_tools TEXT,
+      author TEXT,
+      user_invocable INTEGER,
+      tags TEXT,
+      deck_dependencies TEXT
     )
   `)
   db.run(`CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type)`)
 
   const insert = db.query(`
     INSERT OR REPLACE INTO skills
-      (name, description, type, version, path, niches, managed_dirs, trigger_phrases, has_scripts, has_examples, body_preview)
+      (name, description, type, version, path, niches, managed_dirs, trigger_phrases, has_scripts, has_examples, body_preview,
+       source, when_to_use, allowed_tools, author, user_invocable, tags, deck_dependencies)
     VALUES
-      ($name, $description, $type, $version, $path, $niches, $managed_dirs, $trigger_phrases, $has_scripts, $has_examples, $body_preview)
+      ($name, $description, $type, $version, $path, $niches, $managed_dirs, $trigger_phrases, $has_scripts, $has_examples, $body_preview,
+       $source, $when_to_use, $allowed_tools, $author, $user_invocable, $tags, $deck_dependencies)
   `)
 
   for (const s of skills) {
@@ -215,6 +278,13 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
       $has_scripts: s.hasScripts ? 1 : 0,
       $has_examples: s.hasExamples ? 1 : 0,
       $body_preview: s.bodyPreview,
+      $source: s.source,
+      $when_to_use: s.whenToUse,
+      $allowed_tools: JSON.stringify(s.allowedTools),
+      $author: s.author,
+      $user_invocable: s.userInvocable != null ? (s.userInvocable ? 1 : 0) : null,
+      $tags: JSON.stringify(s.tags),
+      $deck_dependencies: JSON.stringify(s.deckDependencies),
     })
   }
 
