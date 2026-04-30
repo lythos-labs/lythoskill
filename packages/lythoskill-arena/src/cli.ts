@@ -110,7 +110,7 @@ export function runArena(argv: string[]) {
   const CRITERIA = (options.criteria || 'syntax,context,logic,token')
     .split(',').map(s => s.trim()).filter(Boolean)
 
-  const CONTROL_SKILLS = (options.control || 'lythoskill-project-cortex')
+  const CONTROL_SKILLS = (options.control || 'lythoskill-project-scribe')
     .split(',').map(s => s.trim()).filter(Boolean)
 
   const PROJECT_DIR = resolve(options.project!)

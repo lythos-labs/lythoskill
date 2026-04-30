@@ -66,9 +66,9 @@ How many skills do you have?
 
 ## Two Value Propositions
 
-lythoskill serves two distinct audiences. You can use either layer independently.
+lythoskill serves two distinct audiences. You can use either independently.
 
-### Layer A: Deck Governance — For Every Skill User
+### Deck Governance — For Every Skill User
 
 **The problem**: Your `.claude/skills/` is a zoo. 50+ skills from GitHub, skill hubs, and blog posts. Every time the agent starts, it scans everything — descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
 
@@ -120,7 +120,7 @@ bunx @lythos/skill-deck link
 
 Step 1 is a one-time cost per skill source. After that, `deck link` handles everything. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
 
-### Layer B: Thin Skill Pattern — For Skill Ecosystem Developers
+### Thin Skill Pattern — For Skill Ecosystem Developers
 
 You are building a team-internal skill library or a public skill ecosystem. You need version control, CI, testing, and a clean separation between "development experience" and "agent-facing surface."
 
@@ -229,30 +229,28 @@ After that, declare the skill in your project's `skill-deck.toml` and run `deck 
 
 ---
 
-## Vision
+## Future Directions
 
-These are not yet implemented. They show where deck governance can go.
+**Replay & Observability** (experimental): Record every agent step — which skill was active, what context it saw, what it decided — as structured JSONL. Replay any session like a chess game. Analyze why the agent chose one skill's rules in one task and another's in a different task.
 
-**Replay & Observability**: Every agent step — which skill was active, what context it saw, what it decided — recorded as JSONL. Replay any session like a chess game. Analyze why the agent chose gstack rules in one task and superpowers in another.
+**Patch Skills from Failure Patterns**: When arena comparison reveals the same mistake across multiple tasks, auto-generate a thin shim skill that intercepts the problematic pattern and corrects it before it reaches the main skill. Like a "bug fix" for agent behavior.
 
-**Patch Skills from Failure Patterns**: Arena discovers the agent makes the same mistake across multiple tasks. A patch skill is auto-generated — a thin shim that intercepts the problematic pattern and corrects it before it reaches the main skill. Like a "bug fix" for agent behavior.
-
-**Infrastructure as Code for Agent Environments**: `skill-deck.toml` is not just a skill list — it is a complete environment definition. Check it into git, CI runs `deck link`, the agent environment is reproducible across machines, across time, across team members. Like `docker-compose.yml` for agent skills.
+**Infrastructure as Code for Agent Environments**: `skill-deck.toml` is already a declarative environment definition — check it into git, run `deck link` in CI, and the agent environment is reproducible across machines, across time, across team members. Like `docker-compose.yml` for agent skills.
 
 ---
 
 ## Ecosystem Tools
 
-| Tool | Layer | What it does |
+| Tool | Focus | What it does |
 |---|---|---|
-| **lythoskill-deck** | A | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
-| **lythoskill-creator** | B | Scaffold and build thin-skill packages |
-| **lythoskill-curator** | A | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
-| **lythoskill-arena** | A | Benchmark skill/deck effectiveness with controlled-variable comparisons |
+| **lythoskill-deck** | Governance | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
+| **lythoskill-creator** | Pattern | Scaffold and build thin-skill packages |
+| **lythoskill-curator** | Governance | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
+| **lythoskill-arena** | Governance | Benchmark skill/deck effectiveness with controlled-variable comparisons |
 | **lythoskill-project-cortex** | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
 | **lythoskill-project-scribe** | Both | Write project memory: handoffs, daily notes, pitfalls |
 | **lythoskill-project-onboarding** | Both | Read project memory with structured layer loading |
-| **lythoskill-red-green-release** | Both | Heredoc migration patch workflow: plan → patch → user验收 → git tag |
+| **lythoskill-red-green-release** | Both | Heredoc migration patch workflow: plan → patch → user approval → git tag |
 
 ---
 
@@ -378,7 +376,6 @@ bun packages/lythoskill-deck/test/runner.ts
 |---|---|
 | [CLAUDE.md](./CLAUDE.md) | Guidance for Claude Code |
 | [AGENTS.md](./AGENTS.md) | Project guidance for Codex, Kimi, Copilot, Gemini |
-| [CLAUDE.md](./CLAUDE.md) | Project guidance for Claude Code |
 | [cortex/INDEX.md](./cortex/INDEX.md) | Governance system entry |
 | [cortex/adr/](./cortex/adr/) | Architecture Decision Records |
 | [skill-deck.toml](./skill-deck.toml) | This repo's active skill deck |

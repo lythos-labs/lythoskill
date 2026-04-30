@@ -27,3 +27,8 @@ playground/
 
 # Runtime lock file (contains absolute local paths, not portable)
 skill-deck.lock
+
+# Temporary directories and files
+tmp/
+.tmp/
+conversation-boost.txt

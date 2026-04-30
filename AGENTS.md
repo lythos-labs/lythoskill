@@ -8,9 +8,12 @@
 
 ## Project Overview
 
-**lythoskill** is a self-bootstrapping thin-skill monorepo scaffolding tool for AI agent skills.
+**lythoskill** is an anti-corruption layer for the agent skill ecosystem. It provides governance infrastructure on top of existing skill standards, so your agent stays focused and conflict-free as your skill collection grows from 10 to 100+.
 
-It solves the core tension between **development** (needs full monorepo experience: dependency management, testing, type checking) and **release** (needs minimal context-window footprint: only SKILL.md + thin scripts).
+It serves two audiences:
+
+1. **Deck Governance**: Declare which skills a project needs. Undeclared skills are physically absent from the agent's working set — deny-by-default prevents silent conflicts.
+2. **Thin Skill Pattern**: Scaffold and build thin-skill monorepos where heavy logic lives in npm packages (Starter) and agent-facing instructions live in lightweight SKILL.md files (Skill).
 
 lythoskill itself is built with the lythoskill pattern — it is its own first user (self-bootstrap).
 
@@ -43,8 +46,8 @@ lythoskill/
 ├── AGENTS.md                 # This file — SSOT for all agents
 │
 ├── packages/
-│   └── lythoskill/           # Core scaffolding tool (npm publishable)
-│       ├── package.json      # bin: { "lythoskill": "./src/cli.ts" }
+│   └── lythoskill-creator/   # Core scaffolding tool (npm publishable)
+│       ├── package.json      # bin: { "lythoskill-creator": "./src/cli.ts" }
 │       ├── tsconfig.json
 │       └── src/
 │           ├── cli.ts        # CLI entry: init / build command routing
@@ -58,10 +61,10 @@ lythoskill/
 │
 └── cortex/                   # Project governance (project-cortex workflow)
     ├── INDEX.md              # Directory index and stats
-    ├── adr/accepted/         # Architecture Decision Records
-    ├── epics/active/         # Requirement epics
-    ├── tasks/completed/      # Executed tasks
-    └── wiki/patterns/        # Reusable patterns and conventions
+    ├── adr/02-accepted/      # Architecture Decision Records
+    ├── epics/01-active/      # Requirement epics
+    ├── tasks/04-completed/   # Executed tasks
+    └── wiki/01-patterns/     # Reusable patterns and conventions
 ```
 
 ---
@@ -232,10 +235,10 @@ All governance documents include a machine-parseable **Status History** table.
 When a session is ending or context is about to compact, you MUST execute this handoff flow:
 
 ### Trigger Conditions (any one is sufficient)
-- User says "LGTM", "就这样", "先到这里", "记录一下进度"
+- User says "LGTM", "that's it", "stop here for now", "record progress"
 - Conversation exceeds 20 turns
 - A milestone is completed (build succeeds, push to remote, tests pass)
-- User says "换个 agent 继续" or "session 要结束了"
+- User says "switch agent to continue" or "session is ending"
 
 ### Handoff Steps
 
