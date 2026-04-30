@@ -16,13 +16,17 @@ skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 Agent sees descriptions; full content loads only when relevant.
 ```toml
 [tool]
-skills = ["web-search", "design-doc-mermaid", "project-scribe"]
+skills = [
+  "github.com/anthropics/skills/skills/pdf",
+  "github.com/SpillwaveSolutions/design-doc-mermaid",
+  "github.com/mattpocock/skills/write-a-prd",
+]
 ```
 ## [combo] — Router Skills
 Occupies one niche slot, delegates to multiple specialists by condition.
 ```toml
 [combo]
-skills = ["report-generation-combo"]
+skills = ["github.com/testdino-hq/playwright-skill"]
 ```
 ## [transient] — Temporary Workarounds
 Must declare `expires`. Design goal: shrink until removable.

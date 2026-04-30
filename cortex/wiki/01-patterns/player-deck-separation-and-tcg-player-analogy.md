@@ -185,7 +185,7 @@ player.concurrent = 1  → 串行退化：人格切换 + session 轮转
 
 | 配置 | 换 player 后 | 归属 |
 |------|-------------|------|
-| `skills = ["web-search"]` | 任何 player 都能加载 | Deck |
+| `skills = ["github.com/anthropics/skills/skills/pdf"]` | 任何 player 都能加载 | Deck |
 | `max_cards = 8` | 任何 player 都受这个限制 | Deck |
 | `concurrent = 4` | Kimi 可以 8，Web Chat 只能 1 | Player |
 | `model = "claude-opus"` | Kimi 不支持 | Player |

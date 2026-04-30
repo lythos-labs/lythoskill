@@ -122,7 +122,10 @@ Agent 读取 `REGISTRY.json`，结合你的具体需求做推理：
 max_cards = 10
 
 [tool]
-skills = ["docx", "design-doc-mermaid"]
+skills = [
+  "github.com/anthropics/skills/skills/docx",
+  "github.com/SpillwaveSolutions/design-doc-mermaid",
+]
 ```
 
 ```bash

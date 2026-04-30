@@ -64,7 +64,10 @@ concurrent = 4
 # deck-minimal.toml
 [deck]
 max_cards = 4
-skills = ["web-search", "project-scribe"]
+skills = [
+  "github.com/anthropics/skills/skills/pdf",
+  "github.com/mattpocock/skills/write-a-prd",
+]
 ```
 
 Arena 负责交叉组合：`--players A.toml,B.toml --decks X.toml,Y.toml`

@@ -34,10 +34,13 @@ cold_pool = "~/.agents/skill-repos" # Where skills are downloaded
 skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 
 [tool]                      # Auto-triggered skills
-skills = ["skill-a", "skill-b"]
+skills = [
+  "github.com/mattpocock/skills/tdd",
+  "github.com/obra/superpowers",
+]
 
 [combo]                     # Multi-skill bundles
-skills = ["report-generation-combo"]
+skills = ["github.com/anthropics/skills/skills/pdf"]
 
 [transient]                 # Temporary skills with expiry
   [transient.handoff]
