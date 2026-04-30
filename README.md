@@ -23,11 +23,11 @@ lythoskill-deck solves this with **deny-by-default**: undeclared skills are phys
 ```toml
 # Project A: only gstack
 [tool]
-skills = ["gstack"]
+skills = ["github.com/garrytan/gstack"]
 
 # Project B: only superpowers
 [tool]
-skills = ["superpowers"]
+skills = ["github.com/obra/superpowers"]
 ```
 
 Run `deck link` → each project sees exactly one "how". No silent blend. No chaos.

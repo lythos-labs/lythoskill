@@ -1,7 +1,7 @@
 {
   "name": "@lythos/skill-arena",
-  "version": "0.6.1",
-  "description": "Skill Arena — benchmark skill effectiveness with controlled-variable comparison",
+  "version": "0.6.2",
+  "description": "Skill Arena \u2014 benchmark skill effectiveness with controlled-variable comparison",
   "keywords": [
     "ai-agent",
     "skill",

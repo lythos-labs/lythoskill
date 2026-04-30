@@ -23,11 +23,11 @@ lythoskill-deck 用 **deny-by-default** 终结它：未声明的技能从 `.clau
 ```toml
 # 项目 A：只用 gstack
 [tool]
-skills = ["gstack"]
+skills = ["github.com/garrytan/gstack"]
 
 # 项目 B：只用 superpowers
 [tool]
-skills = ["superpowers"]
+skills = ["github.com/obra/superpowers"]
 ```
 
 运行 `deck link` → 每个项目只看到一个"方法论"。没有静默混合，没有混乱。
