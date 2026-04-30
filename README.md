@@ -69,27 +69,37 @@ How many skills do you have?
 Zero install — works with `npx` or `bunx`:
 
 ```bash
-# 1. Declare which skills this project needs
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 8
+# 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
+npx @lythos/skill-deck add mattpocock/skills
 
-[tool]
-skills = ["web-search", "project-scribe", "design-doc-mermaid"]
-EOF
-
-# 2. Sync — only these skills become visible to the agent
-npx @lythos/skill-deck link
-# or: bunx @lythos/skill-deck link
-
-# 3. Agent sees a clean working set. Everything else is physically absent.
+# 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
-# web-search  project-scribe  design-doc-mermaid
+# skills
 ```
 
-That's it. No daemon, no background process. Just a TOML file and a symlink command.
+That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
-To add a new skill, clone it to your [cold pool](#cold-pool-convention) (one-time per source), add its name to `skill-deck.toml`, and run `link` again.
+Prefer a different download method? Use `--via skills.sh` or clone manually — deck doesn't care how skills got into the cold pool.
+
+```bash
+# Alternative: Vercel skills.sh
+npx @lythos/skill-deck add mattpocock/skills --via skills.sh
+
+# Alternative: manual clone
+git clone https://github.com/mattpocock/skills.git \
+  ~/.agents/skill-repos/github.com/mattpocock/skills
+# then edit skill-deck.toml and run `deck link`
+```
+
+### Naming cheat sheet
+
+```
+lythoskill           ← the project / ecosystem
+skill-deck.toml      ← the config file you edit
+@lythos/skill-deck   ← the npm package you install
+deck                 ← the CLI command (short for lythoskill-deck)
+link                 ← the subcommand that syncs working set to toml
+```
 
 ---
 
@@ -107,30 +117,30 @@ lythoskill serves two distinct audiences. You can use either independently.
 |---|---|
 | Agent scans 50+ skills, picks randomly | Agent sees exactly what you declared |
 | Similar skills silently conflict | `deny-by-default`: undeclared = invisible |
-| No record of which skills were active | `skill-deck.lock` tracks every session's deck |
 | Context window wasted on irrelevant descriptions | `max_cards` budget enforces focus |
-| Skill overlap corrupts files undetected | `managed_dirs` overlap warnings |
 
 **Multi-role decks**: A curator agent sees only curator skills. An arena agent sees only arena skills. A scribe agent sees only scribe skills. Each agent gets a tailored deck — no cross-contamination, no bloated context.
 
 **Key principle**: lythoskill-deck is a governor, not a package manager. It makes sure the *right* skills are visible — but it doesn't download them for you. The good news: your agent can do that in one shot.
 
-For example, to start using a new skill:
+**Declarative sync, like Kubernetes**: `deck link` doesn't just "create links" — it makes the working set match your `skill-deck.toml`. If you remove a skill from the toml and run `link` again, it disappears from `.claude/skills/`. No `unlink` command needed — just change the declaration and re-sync.
+
+For example, to start using a new skill manually:
 
 ```bash
-# 1. Agent downloads the skill to your cold pool (one-time setup)
+# 1. Clone the skill repo to your cold pool (one-time setup)
 git clone https://github.com/lythos-labs/lythoskill.git \
   ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
 
-# 2. You declare which skills this project needs
+# 2. Declare which skills this project needs
 echo 'skills = ["lythoskill-deck"]' >> skill-deck.toml
 
-# 3. Deck takes over — manages symlinks, budgets, overlaps
+# 3. Sync — deck reconciles working set with declaration
 npx @lythos/skill-deck link
 # or: bunx @lythos/skill-deck link
 ```
 
-Step 1 is a one-time cost per skill source. After that, `deck link` handles everything. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
+Or use `deck add` to automate steps 1–3 in one command. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
 
 ### Thin Skill Pattern — For Skill Ecosystem Developers
 
@@ -175,20 +185,10 @@ Not sure which skill to use? Arena runs the same task under different skill conf
 | A or B? | `--skills "A,B"` — single-skill comparison |
 | Does C improve my deck? | `--decks "v1.toml,v1+C.toml"` — full deck comparison |
 | Is D dead weight? | `--decks "v1.toml,v1-D.toml"` — full deck comparison |
-| E instead of F? | `--decks "v1.toml,v1-E+F.toml"` — full deck comparison |
-| Which deck config wins? | `--decks "minimal.toml,rich.toml"` — full deck comparison |
 
-**Multi-dimensional scoring, not winner-takes-all**: When comparing full decks, the judge outputs scores across multiple dimensions (quality, token efficiency, maintainability). A cheap but medium-quality deck and an expensive but high-quality deck can both be good choices — just for different trade-offs. You decide what you value.
+**Multi-dimensional scoring**: The judge outputs scores across quality, token efficiency, and maintainability. No single "winner" — you choose based on what you value.
 
-```bash
-# Compare three full deck configurations
-bunx @lythos/skill-arena \
-  --task "Generate auth flow diagram" \
-  --decks "./decks/minimal.toml,./decks/rich.toml,./decks/superpowers.toml" \
-  --criteria "quality,token,maintainability"
-```
-
-**Unexpected synergies**: During comparison, the judge may discover that three skills together produce a 1+1+1>3 effect that no individual skill can achieve. These discoveries are written to the project's knowledge base and inform future deck building.
+See [SKILL.md](skills/lythoskill-arena/SKILL.md) for full arena workflow documentation.
 
 ---
 
@@ -296,6 +296,7 @@ lythoskill sits **between** skill sources and agent platforms — it does not re
 ```bash
 # Deck governance (npx or bunx)
 npx @lythos/skill-deck link                       # Sync toml -> working set
+npx @lythos/skill-deck add owner/repo             # Download skill + add to deck
 bunx @lythos/skill-deck link --deck ./my-deck.toml
 
 # Skill scaffolding
