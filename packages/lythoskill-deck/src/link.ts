@@ -8,6 +8,7 @@
  */
 
 import { parse as parseToml } from "@iarna/toml";
+import YAML from "yaml";
 import { createHash } from "crypto";
 import {
   existsSync, mkdirSync, readFileSync, readdirSync,
@@ -36,49 +37,17 @@ export function expandHome(p: string, base: string): string {
 function hashContent(content: string): string {
   return createHash("sha256").update(content).digest("hex");
 }
-
 // ── Front matter 提取 ───────────────────────────────────────
 
-function getFrontMatter(skillMdPath: string): string {
+function parseSkillFrontmatter(skillMdPath: string): Record<string, any> {
   try {
     const c = readFileSync(skillMdPath, "utf-8");
-    if (!c.startsWith("---")) return "";
-    const parts = c.split("---");
-    return parts.length >= 3 ? parts[1] : "";
-  } catch { return ""; }
+    const match = c.match(/^---\s*\n([\s\S]*?)\n---\s*\n/);
+    if (!match) return {};
+    return YAML.parse(match[1]) || {};
+  } catch { return {}; }
 }
 
-function extractField(fm: string, field: string): string {
-  const m = fm.match(new RegExp(`^${field}:\\s*(.+)$`, "m"));
-  return m ? m[1].trim() : "";
-}
-
-function extractArrayField(fm: string, field: string): string[] {
-  const lines = fm.split("\n");
-  const results: string[] = [];
-  let collecting = false;
-  for (const line of lines) {
-    if (line.match(new RegExp(`^${field}:\\s*$`))) {
-      collecting = true;
-      continue;
-    }
-    if (line.match(new RegExp(`^${field}:\\s*\\[`))) {
-      const inline = line.match(/\[(.+)\]/);
-      if (inline) return inline[1].split(",").map(s => s.trim().replace(/^["']|["']$/g, ""));
-      collecting = true;
-      continue;
-    }
-    if (collecting) {
-      const item = line.match(/^\s+-\s+(.+)/);
-      if (item) {
-        results.push(item[1].trim().replace(/^["']|["']$/g, ""));
-      } else if (line.trim() !== "" && !line.match(/^\s*#/)) {
-        break;
-      }
-    }
-  }
-  return results;
-}
 
 // ── 冷池查找 ────────────────────────────────────────────────
 
@@ -253,9 +222,13 @@ for (const item of declared) {
 
   // 提取元数据
   const skillMdPath = join(item.sourcePath, "SKILL.md");
-  const fm = getFrontMatter(skillMdPath);
-  const niche = extractField(fm, "deck_niche");
-  const managedDirs = extractArrayField(fm, "deck_managed_dirs");
+  const fm = parseSkillFrontmatter(skillMdPath);
+  const niche = String(fm["deck_niche"] || "");
+  const managedDirs = Array.isArray(fm["deck_managed_dirs"])
+    ? fm["deck_managed_dirs"].map(String)
+    : fm["deck_managed_dirs"]
+      ? [String(fm["deck_managed_dirs"])]
+      : [];
   let contentHash: string | undefined;
   try {
     contentHash = hashContent(readFileSync(skillMdPath, "utf-8"));
