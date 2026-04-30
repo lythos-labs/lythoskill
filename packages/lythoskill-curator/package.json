@@ -32,5 +32,8 @@
   "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-curator#readme",
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "yaml": "^2.8.3"
   }
 }

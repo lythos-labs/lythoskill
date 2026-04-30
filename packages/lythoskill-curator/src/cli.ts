@@ -13,6 +13,7 @@
 import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
+import YAML from 'yaml'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -38,95 +39,12 @@ interface SkillMeta {
 function parseFrontmatter(text: string): { frontmatter: Record<string, any>; body: string } {
   const match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
   if (!match) return { frontmatter: {}, body: text };
-
-  const fm: Record<string, any> = {};
-  const lines = match[1].split('\n');
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    const keyVal = line.match(/^(\w+):\s*(.*)$/);
-
-    if (!keyVal) { i++; continue; }
-
-    const key = keyVal[1];
-    const val = keyVal[2].trim();
-
-    // Multiline string: key: |
-    if (val === '|') {
-      i++;
-      const parts: string[] = [];
-      let baseIndent = Infinity;
-      let j = i;
-      while (j < lines.length) {
-        if (lines[j].trim() === '') { j++; continue; }
-        const indent = lines[j].match(/^(\s*)/)?.[1].length || 0;
-        if (indent === 0 && lines[j].match(/^\w+:/)) break;
-        baseIndent = Math.min(baseIndent, indent);
-        j++;
-      }
-      while (i < lines.length) {
-        const nextLine = lines[i];
-        const nextTrim = nextLine.trim();
-        const nextIndent = nextLine.match(/^(\s*)/)?.[1].length || 0;
-        if (nextIndent === 0 && nextLine.match(/^\w+:\s*/)) break;
-        if (nextTrim === '') {
-          parts.push('');
-        } else if (nextIndent >= baseIndent) {
-          parts.push(nextLine.slice(baseIndent));
-        }
-        i++;
-      }
-      fm[key] = parts.join('\n');
-      continue;
-    }
-
-    // Inline array: key: [a, b]
-    if (val.startsWith('[') && val.endsWith(']')) {
-      fm[key] = val.slice(1, -1).split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
-      i++;
-      continue;
-    }
-
-    // Empty value — might be a list or object below
-    if (val === '') {
-      i++;
-      const items: string[] = [];
-      let obj: Record<string, any> = {};
-      let isObject = false;
-
-      while (i < lines.length) {
-        const nextLine = lines[i];
-        const nextTrim = nextLine.trim();
-        const nextIndent = nextLine.match(/^(\s*)/)?.[1].length || 0;
-
-        if (nextIndent === 0) { i--; break; }
-
-        if (nextTrim.startsWith('- ')) {
-          items.push(nextTrim.slice(2).trim().replace(/^["']|["']$/g, ''));
-        } else if (nextLine.match(/^\s+\w+:\s*/)) {
-          isObject = true;
-          const ok = nextLine.match(/^\s+(\w+):\s*(.*)$/);
-          if (ok) {
-            obj[ok[1]] = ok[2].trim().replace(/^["']|["']$/g, '');
-          }
-        }
-        i++;
-      }
-
-      if (isObject) fm[key] = obj;
-      else if (items.length > 0) fm[key] = items;
-      else fm[key] = '';
-      i++;
-      continue;
-    }
-
-    // Simple scalar
-    fm[key] = val.replace(/^["']|["']$/g, '');
-    i++;
+  try {
+    const frontmatter = YAML.parse(match[1]) || {};
+    return { frontmatter, body: match[2].trim() };
+  } catch {
+    return { frontmatter: {}, body: match[2].trim() };
   }
-
-  return { frontmatter: fm, body: match[2].trim() };
 }
 
 function toString(val: any): string {
@@ -146,27 +64,25 @@ function parseArrayField(val: any): string[] {
   return [];
 }
 
-function extractTriggers(description: string): string[] {
-  const desc = toString(description);
+export function extractQuotedPhrases(text: string): string[] {
+  if (!text) return [];
   const triggers: string[] = [];
-  const lines = desc.split('\n');
-  let inTriggers = false;
-  for (const line of lines) {
-    if (line.match(/trigger|使用场景|when to use/i)) inTriggers = true;
-    if (inTriggers) {
-      const m = line.match(/["""']([^"""']+)["""']/);
-      if (m) triggers.push(m[1]);
-      if (line.match(/^\s*$/)) inTriggers = false;
+  // Match quoted phrases with length 2–60 chars to avoid greedy cross-paragraph matches.
+  // Supports Chinese quotes (U+201C/U+201D), half-width quotes (U+0022), and apostrophe (U+0027).
+  const patterns = [
+    /\u201c([^\u201d]{3,60})\u201d/g,
+    /"([^"]{3,60})"/g,
+    /'([^']{3,60})'/g,
+  ];
+  for (const p of patterns) {
+    for (const m of text.matchAll(p)) {
+      triggers.push(m[1]);
     }
-  }
-  if (triggers.length === 0) {
-    const allQuotes = desc.matchAll(/["""']([^"""']{5,})["""']/g);
-    for (const m of allQuotes) triggers.push(m[1]);
   }
   return [...new Set(triggers)];
 }
 
-function inferSource(path: string): string {
+export function inferSource(path: string): string {
   // Cold-pool layout: <pool>/github.com/<org>/<repo>/.../<skill>/
   //                  <pool>/localhost/<skill>/
   const parts = path.split('/');
@@ -179,7 +95,7 @@ function inferSource(path: string): string {
   return 'unknown';
 }
 
-function scanSkill(path: string): SkillMeta | null {
+export function scanSkill(path: string): SkillMeta | null {
   const skillMdPath = join(path, 'SKILL.md');
   if (!statSync(skillMdPath, { throwIfNoEntry: false })) return null;
   const text = readFileSync(skillMdPath, 'utf-8');
@@ -207,7 +123,7 @@ function scanSkill(path: string): SkillMeta | null {
     path,
     managedDirs: Array.isArray(managedDirs) ? managedDirs : [managedDirs].filter(Boolean),
     niches: Array.isArray(niches) ? niches : [niches].filter(Boolean),
-    triggerPhrases: extractTriggers(frontmatter.description),
+    triggerPhrases: extractQuotedPhrases(toString(frontmatter.when_to_use)) || extractQuotedPhrases(desc),
     hasScripts, hasExamples,
     bodyPreview: body.slice(0, 500).replace(/\s+/g, ' '),
     source,
@@ -234,11 +150,11 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
   `)
   db.run(`
     CREATE TABLE IF NOT EXISTS skills (
-      name TEXT PRIMARY KEY,
+      path TEXT PRIMARY KEY,
       description TEXT,
       type TEXT,
       version TEXT,
-      path TEXT NOT NULL,
+      name TEXT NOT NULL,
       niches TEXT,
       managed_dirs TEXT,
       trigger_phrases TEXT,
@@ -255,6 +171,7 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
     )
   `)
   db.run(`CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type)`)
+  db.run(`CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(name)`)
 
   const insert = db.query(`
     INSERT OR REPLACE INTO skills
