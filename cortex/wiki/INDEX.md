@@ -2,6 +2,7 @@
 
 ## 📚 Patterns (14)
 
+- [smart-agent-dumb-tools](./01-patterns/smart-agent-dumb-tools.md)
 - [epic-granularity](./01-patterns/epic-granularity.md)
 - [skill-selection-pipeline](./01-patterns/skill-selection-pipeline.md)
 - [thin-skill-monorepo](./01-patterns/thin-skill-monorepo.md)
