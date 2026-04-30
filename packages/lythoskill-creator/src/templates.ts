@@ -3,7 +3,14 @@ const fence = '`'.repeat(3)
 // -- workspace root --------------------------------
 export const rootPackageJson = (name: string) =>
   JSON.stringify(
-    { name: `${name}-workspace`, private: true, workspaces: ['packages/*'] },
+    {
+      name: `${name}-workspace`,
+      version: '0.1.0',
+      private: true,
+      workspaces: ['packages/*'],
+      devDependencies: { husky: '^9.1.7' },
+      scripts: { prepare: 'husky' },
+    },
     null,
     2
   ) + '\n'
@@ -35,6 +42,9 @@ skill-deck.lock
 # Temporary directories and files
 tmp/
 .tmp/
+
+# Husky internal (auto-generated)
+.husky/_
 `
 
 export const skillDeckToml = (name: string) =>
@@ -45,6 +55,22 @@ max_cards   = 10
 
 [tool]
 skills = ["${name}"]
+`
+
+export const huskyPreCommit = () =>
+`#!/bin/sh
+# Auto-rebuild skills when source files change in packages/**/skill/
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/skill/' || true)
+
+if [ -n "$STAGED" ]; then
+  echo "🛠️  Skill source files changed, rebuilding all skills..."
+  bun packages/lythoskill-creator/src/cli.ts build --all
+
+  # Stage built output so skills/ stays in sync with packages/**/skill/
+  git add skills/
+  echo "✅ Skills rebuilt and staged"
+fi
 `
 
 // -- starter package --------------------------------

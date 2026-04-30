@@ -6,9 +6,13 @@ Commands:
   add-skill <name>  Add a new skill to an existing monorepo
   build <skill>     Build a skill for distribution
   build --all       Build all skills in packages/lythoskill-*/
+  align             Audit project against current conventions
+  align --fix       Auto-apply missing conventions
 
 Examples:
   bunx @lythos/skill-creator init my-tool
   bunx @lythos/skill-creator add-skill my-new-skill
   bunx @lythos/skill-creator build example
+  bunx @lythos/skill-creator align
+  bunx @lythos/skill-creator align --fix
 

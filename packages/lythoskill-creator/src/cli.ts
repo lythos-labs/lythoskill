@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { init } from './init'
-import { build } from './build'
-import { addSkill } from './add-skill'
+import { init } from './init.js'
+import { build } from './build.js'
+import { addSkill } from './add-skill.js'
+import { align } from './align.js'
 
 const [command, ...args] = process.argv.slice(2)
 
@@ -45,6 +46,10 @@ switch (command) {
     await addSkill(args[0])
     break
 
+  case 'align':
+    await align(args.includes('--fix'))
+    break
+
   case '--help':
   case '-h':
   default:
@@ -55,11 +60,15 @@ Commands:
   add-skill <name>  Add a new skill to an existing monorepo
   build <skill>     Build a skill for distribution
   build --all       Build all skills in packages/lythoskill-*/
+  align             Audit project against current conventions
+  align --fix       Auto-apply missing conventions
 
 Examples:
   bunx @lythos/skill-creator init my-tool
   bunx @lythos/skill-creator add-skill my-new-skill
   bunx @lythos/skill-creator build example
+  bunx @lythos/skill-creator align
+  bunx @lythos/skill-creator align --fix
 `)
     if (command !== '--help' && command !== '-h') process.exit(1)
 }

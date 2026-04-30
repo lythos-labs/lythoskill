@@ -19,7 +19,7 @@ No installation required. `bunx` auto-downloads the package.
 max_cards = 10
 
 [tool]
-skills = ["lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
 ```
 
 ### skill-deck.toml (full reference)

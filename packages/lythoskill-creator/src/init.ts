@@ -9,6 +9,7 @@ export async function init(name: string) {
   for (const dir of [
     join(root, 'packages', name, 'src'),
     join(root, 'packages', name, 'skill', 'scripts'),
+    join(root, '.husky'),
   ]) {
     mkdirSync(dir, { recursive: true })
   }
@@ -28,6 +29,8 @@ export async function init(name: string) {
     // skill layer
     [join(root, 'packages', name, 'skill', 'SKILL.md'),         t.exampleSkillMd(name, name)],
     [join(root, 'packages', name, 'skill', 'scripts', 'run.sh'), t.skillScript(name, 'hello')],
+    // husky
+    [join(root, '.husky', 'pre-commit'),                  t.huskyPreCommit()],
   ]
 
   for (const [path, content] of files) {
@@ -35,6 +38,7 @@ export async function init(name: string) {
   }
 
   chmodSync(join(root, 'packages', name, 'skill', 'scripts', 'run.sh'), 0o755)
+  chmodSync(join(root, '.husky', 'pre-commit'), 0o755)
 
   console.log(`
 Created lythoskill project: ${name}
@@ -46,7 +50,7 @@ Structure:
 
 Next steps:
   cd ${name}
-  pnpm install
+  pnpm install          # installs husky; pre-commit hook auto-activates
 
 Edit your skill:
   packages/${name}/skill/SKILL.md    <- describe what this skill does
