@@ -129,21 +129,14 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 
 > **If you are an agent**: verify where your platform scans for skills, then set `working_set` to that path before running `deck link`.
 
-## Skill Documentation
+## More Documentation
 
-This package is the **Starter** layer (CLI implementation).  
-The agent-visible **Skill** layer documentation is here:  
-[packages/lythoskill-deck/skill/SKILL.md](../../packages/lythoskill-deck/skill/SKILL.md)
-
-## Architecture
-
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
-
-```
-Starter (this package) → npm publish → bunx @lythos/skill-deck ...
-Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
-Output  (skills/<name>/)             → git commit → agent-visible skill
-```
+- **Skill layer** (agent-facing instructions):  
+  [`packages/lythoskill-deck/skill/SKILL.md`](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-deck/skill/SKILL.md)
+- **Full project README** (ecosystem overview, cold pool setup):  
+  [`README.md`](https://github.com/lythos-labs/lythoskill#readme)
+- **Architecture** (thin-skill pattern, three-layer separation):  
+  [`AGENTS.md`](https://github.com/lythos-labs/lythoskill/blob/main/AGENTS.md)
 
 ## License
 

@@ -243,16 +243,16 @@ After that, declare the skill in your project's `skill-deck.toml` and run `deck 
 
 ## Ecosystem Tools
 
-| Tool | Focus | What it does |
-|---|---|---|
-| **lythoskill-deck** | Governance | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
-| **lythoskill-creator** | Pattern | Scaffold and build thin-skill packages |
-| **lythoskill-curator** | Governance | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
-| **lythoskill-arena** | Governance | Benchmark skill/deck effectiveness with controlled-variable comparisons |
-| **lythoskill-project-cortex** | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
-| **lythoskill-project-scribe** | Both | Write project memory: handoffs, daily notes, pitfalls |
-| **lythoskill-project-onboarding** | Both | Read project memory with structured layer loading |
-| **lythoskill-red-green-release** | Both | Heredoc migration patch workflow: plan → patch → user approval → git tag |
+| Tool | npm | Focus | What it does |
+|---|---|---|---|
+| **lythoskill-deck** | [`@lythos/skill-deck`](https://www.npmjs.com/package/@lythos/skill-deck) | Governance | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
+| **lythoskill-creator** | [`@lythos/skill-creator`](https://www.npmjs.com/package/@lythos/skill-creator) | Pattern | Scaffold and build thin-skill packages |
+| **lythoskill-curator** | [`@lythos/skill-curator`](https://www.npmjs.com/package/@lythos/skill-curator) | Governance | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
+| **lythoskill-arena** | [`@lythos/skill-arena`](https://www.npmjs.com/package/@lythos/skill-arena) | Governance | Benchmark skill/deck effectiveness with controlled-variable comparisons |
+| **lythoskill-project-cortex** | [`@lythos/project-cortex`](https://www.npmjs.com/package/@lythos/project-cortex) | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
+| **lythoskill-project-scribe** | — | Both | Write project memory: handoffs, daily notes, pitfalls |
+| **lythoskill-project-onboarding** | — | Both | Read project memory with structured layer loading |
+| **lythoskill-red-green-release** | — | Both | Heredoc migration patch workflow: plan → patch → user approval → git tag |
 
 ---
 
