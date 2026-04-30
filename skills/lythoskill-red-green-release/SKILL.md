@@ -41,5 +41,22 @@ encourage skipping the red-green test cycle by implying pre-verified success.
 mkdir -p archived-patches
 # 2. Backup current files (for rollback)
 cp src/target.ts "archived-patches/target.ts.$(date +%Y%m%d).bak"
-# 3. Apply changes (declarative full-file replacement)
-// Full new file content here
+# 3. Apply changes (declarative full-file replacement via heredoc)
+cat > src/target.ts << 'PATCH_EOF'
+// Full replacement content here — exact file state after patch
+PATCH_EOF
+# 4. Self-archive: copy patch to archive, then delete from root
+cp "$0" "archived-patches/$(basename "$0")"
+rm "$0"
+```
+
+> ⚠️ Heredoc delimiter (`PATCH_EOF`) must be quoted in the `cat` command to prevent variable expansion. See [references/archive-format.md](./references/archive-format.md) for multi-file patches and escaping rules.
+
+## Supporting References
+Read these **only when the specific topic arises**:
+
+| When you need to… | Read |
+|--------------------|------|
+| See complete heredoc syntax, multi-file patches, and escaping rules | [references/archive-format.md](./references/archive-format.md) |
+| Understand the 4-phase workflow in detail | [references/phase-details.md](./references/phase-details.md) |
+| See conversation examples of red-green iterations | [references/conversation-examples.md](./references/conversation-examples.md) |

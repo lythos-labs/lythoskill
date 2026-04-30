@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # ============================================================
-# deck-status — 一致性诊断（只读）
+# deck-status — 一致性诊断(只读)
 # ============================================================
-# 检查 toml / lock / symlink / 冷池四层一致性。
-# 不修改任何文件。Skills 是用户资产，status 只看不碰。
+# 检查 toml / lock / symlink / 冷池四层一致性.
+# 不修改任何文件.Skills 是用户资产,status 只看不碰.
 # ============================================================
 
 # ── 参数解析 ─────────────────────────────────────────────────
@@ -27,7 +27,7 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      # 兼容旧行为：无 flag 的第一个 positional 参数视为 PROJECT_DIR
+      # 兼容旧行为:无 flag 的第一个 positional 参数视为 PROJECT_DIR
       [ -z "$PROJECT_DIR" ] && PROJECT_DIR="$1"
       shift
       ;;
@@ -37,7 +37,7 @@ done
 [ -z "$PROJECT_DIR" ] && PROJECT_DIR="."
 PROJECT_DIR=$(cd "$PROJECT_DIR" && pwd)
 
-# 如果指定了 --deck，使用它；否则默认找 skill-deck.toml
+# 如果指定了 --deck,使用它;否则默认找 skill-deck.toml
 [ -z "$DECK" ] && DECK="$PROJECT_DIR/skill-deck.toml"
 
 # 颜色
@@ -107,20 +107,20 @@ fi
 
 # ── 交叉检查 ─────────────────────────────────────────────────
 if $TOML_OK; then
-  # 幽灵：在 working set 但不在 toml
+  # 幽灵:在 working set 但不在 toml
   for a in "${ACTUAL[@]:-}"; do
     [ -z "$a" ] && continue
     found=false
     for d in "${DECLARED[@]:-}"; do [ "$a" = "$d" ] && found=true && break; done
-    $found || issue "warn" "幽灵: ${a}（已链接但未声明）" "添加到 toml 或执行 deck-link 清除"
+    $found || issue "warn" "幽灵: ${a}(已链接但未声明)" "添加到 toml 或执行 deck-link 清除"
   done
 
-  # 缺失：在 toml 但不在 working set
+  # 缺失:在 toml 但不在 working set
   for d in "${DECLARED[@]:-}"; do
     [ -z "$d" ] && continue
     found=false
     for a in "${ACTUAL[@]:-}"; do [ "$d" = "$a" ] && found=true && break; done
-    $found || issue "warn" "未链接: ${d}（已声明但无 symlink）" "执行 deck-link 同步"
+    $found || issue "warn" "未链接: ${d}(已声明但无 symlink)" "执行 deck-link 同步"
   done
 
   # 预算
@@ -138,14 +138,14 @@ if [ -f "$LOCK" ]; then
     TOML_MT=$(stat -c %Y "$DECK" 2>/dev/null || stat -f %m "$DECK" 2>/dev/null || echo 0)
     LOCK_MT=$(stat -c %Y "$LOCK" 2>/dev/null || stat -f %m "$LOCK" 2>/dev/null || echo 0)
     [ "$TOML_MT" -gt "$LOCK_MT" ] && \
-      issue "warn" "toml 比 lock 新（声明变更后未同步）" "执行 deck-link 重新同步"
+      issue "warn" "toml 比 lock 新(声明变更后未同步)" "执行 deck-link 重新同步"
   fi
 else
   $TOML_OK && [ "${#DECLARED[@]}" -gt 0 ] && \
     issue "info" "lock 文件不存在" "执行 deck-link 生成"
 fi
 
-# ── managed_dirs 重叠（从 lock 读取）─────────────────────────
+# ── managed_dirs 重叠(从 lock 读取)─────────────────────────
 if $LOCK_OK && command -v python3 &>/dev/null; then
   overlaps=$(python3 -c "
 import json, sys
@@ -228,7 +228,7 @@ fi
 # 问题
 echo ""
 if [ ${#ISSUES[@]} -eq 0 ]; then
-  echo -e "  ${G}${B}一切正常。${N}"
+  echo -e "  ${G}${B}一切正常.${N}"
 else
   for item in "${ISSUES[@]}"; do
     IFS='|' read -r sev msg rec <<< "$item"

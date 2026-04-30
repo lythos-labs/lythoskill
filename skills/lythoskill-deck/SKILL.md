@@ -1,6 +1,6 @@
 ---
 name: lythoskill-deck
-version: 0.5.1
+version: 0.6.0
 description: |
   Declarative skill deck governance. Syncs .claude/skills/ working set
   to match skill-deck.toml declarations via symlinks. Undeclared skills

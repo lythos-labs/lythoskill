@@ -172,7 +172,24 @@ for (const [key, value] of Object.entries(deck.transient || {})) {
 }
 
 if (errors.length > 0) {
-  for (const e of errors) console.error(`❌ ${e}`);
+  for (const e of errors) {
+    console.error(`❌ ${e}`);
+    // 智能引导：如果 skill 在工作集中以真实目录存在，提示移到冷池
+    const match = e.match(/^Skill not found: (.+)$/);
+    if (match) {
+      const skillName = match[1];
+      const wsEntry = join(WORKING_SET, skillName);
+      if (existsSync(wsEntry)) {
+        const st = lstatSync(wsEntry);
+        if (st.isDirectory() && !st.isSymbolicLink()) {
+          console.error(`   → Found a real directory at ${relative(PROJECT_DIR, wsEntry)}`);
+          const cpRel = relative(PROJECT_DIR, COLD_POOL);
+          const cpHint = cpRel === "" ? `skills/${skillName}` : `${cpRel}/${skillName}`;
+          console.error(`     Move it to your cold pool (${cpHint}) and retry.`);
+        }
+      }
+    }
+  }
   // 继续执行已找到的 skill，不因个别缺失中断全部
 
   // 引导：如果 cold pool 为空，给出更明确的指引
@@ -233,6 +250,10 @@ try {
         const st = lstatSync(entryPath);
         if (!st.isSymbolicLink()) {
           console.warn(`⚠️  Skipping non-symlink entry: ${entry}`);
+          console.warn(`   → ${entry} is a real directory, not a symlink. Deck only manages symlinks.`);
+          const cpRel2 = relative(PROJECT_DIR, COLD_POOL);
+          const cpHint2 = cpRel2 === "" ? `skills/${entry}` : `${cpRel2}/${entry}`;
+          console.warn(`     Move it to your cold pool (${cpHint2}) and run link again.`);
           continue;
         }
       } catch { continue; }

@@ -129,6 +129,19 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 
 > **If you are an agent**: verify where your platform scans for skills, then set `working_set` to that path before running `deck link`.
 
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `❌ Skill not found: <name>` | Skill declared in deck but not in cold pool | `bunx @lythos/skill-deck add github.com/owner/repo/skill` or clone manually into cold pool |
+| `link` skips entries with warnings | Real files/directories exist in working set (not symlinks) | Delete the real directories in `working_set` and re-run `link`. Never create directories manually there |
+| `link` refuses with "budget exceeded" | Declared skills > `max_cards` | Increase `max_cards` in `skill-deck.toml` or remove unused skills |
+| `link` refuses with "unsafe working_set" | `working_set` resolves to `~` or `/` | Check `skill-deck.toml` has correct relative path (e.g. `.claude/skills/`) |
+| Agent doesn't see skills after `link` | `working_set` path doesn't match agent's scan location | Claude Code: `.claude/skills/`; Cursor: `.cursor/skills/`; Kimi: check your platform docs. Set `working_set` correctly |
+| Broken symlinks in working set | Skill moved or deleted from cold pool | Re-run `link` — it recreates symlinks automatically |
+| `deck add` fails with 404 | Locator format wrong or repo doesn't exist | Format: `github.com/owner/repo/skill-name` (path to skill directory inside repo) |
+| `skill-deck.toml not found` | Running `link` outside project tree | Run from project root, or use `--deck ./path/to/skill-deck.toml` |
+
 ## More Documentation
 
 - **Skill layer** (agent-facing instructions):  
