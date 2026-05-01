@@ -2,6 +2,7 @@
 
 ## 📚 Patterns (14)
 
+- [external-skill-governance-bridge](./01-patterns/external-skill-governance-bridge.md)
 - [smart-agent-dumb-tools](./01-patterns/smart-agent-dumb-tools.md)
 - [epic-granularity](./01-patterns/epic-granularity.md)
 - [skill-selection-pipeline](./01-patterns/skill-selection-pipeline.md)
