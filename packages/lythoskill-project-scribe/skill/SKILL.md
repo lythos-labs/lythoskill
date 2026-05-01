@@ -3,7 +3,8 @@ name: lythoskill-project-scribe
 version: 0.6.2
 description: |
   Session memory writer. Dumps what file exploration cannot recover —
-  pitfalls, true working-tree state, uncommitted decisions, specific  next steps — into daily/YYYY-MM-DD.md. Forms CQRS write-side pair
+  pitfalls, true working-tree state, uncommitted decisions, specific  next steps — into daily/HANDOFF.md. When a session ends or a new day
+  begins, archive to daily/YYYY-MM-DD.md. Forms CQRS write-side pair
   with project-onboarding (read-side).
 when_to_use: |
   Record progress, update task, write daily, log a pitfall, session  ending, handoff, LGTM, wrap up, context limit approaching,  踩坑了, 记录一下, 先到这里, 就这样, session 要结束了.
@@ -35,18 +36,32 @@ bunx @lythos/project-cortex list
 #    - What temp files did I create and where?
 #    - What would the next agent most likely misunderstand?
 ```
-## Core Operation: Write Daily File
-Output goes to `daily/YYYY-MM-DD.md`. The first section must be `## Session Handoff`.
-Human work logs follow after the handoff section.
+## Core Operation: Two-Step Handoff
+
+### Step 1: Write `daily/HANDOFF.md`
+During the session, output goes to `daily/HANDOFF.md`. This is the
+**ephemeral single-file handoff** — highest priority memory for the next
+agent. The first section must be `## Session Handoff`.
+
 ```bash
 # File location
 daily/
-├── 2026-04-23.md    # Yesterday's daily (contains handoff + work log)
-├── 2026-04-24.md    # Today's daily
-└── ...              # Flat date-based, no subdirectories
+├── HANDOFF.md        # Current session handoff (ephemeral, tracked by git)
+├── 2026-04-23.md     # Archived daily
+├── 2026-04-24.md     # Archived daily
+└── ...               # Flat date-based archives
 ```
 
-Multiple sessions on the same day: append new handoff section to the same file.
+### Step 2: Archive to `daily/YYYY-MM-DD.md`
+When the session ends or a new day/iteration begins:
+
+```bash
+# Archive the handoff into the daily journal
+mv daily/HANDOFF.md daily/2026-05-01.md
+```
+
+Multiple sessions on the same day: append new handoff sections to the
+same archive file, or overwrite HANDOFF.md and re-archive.
 
 ## Handoff Must Include Verification Commands
 The handoff is not a snapshot — it's a snapshot **plus instructions to verify freshness**.
@@ -78,9 +93,12 @@ When the user says "hit a bug" or "踩坑了", immediately record:
 **Show diff before writing.** Always present the handoff content to the user
 for confirmation before writing to the daily file. Prevents hallucinated state
 from being persisted.
-**daily/ not HANDOFF.md.** Handoff is the first section of the daily file, not
-a separate standalone file. This keeps one file per day, not an ever-growing
-pile of handoff snapshots.
+**HANDOFF.md is ephemeral, not the final沉淀.**
+`daily/HANDOFF.md` is the live working handoff — it gets overwritten by each
+session and must be archived to `daily/YYYY-MM-DD.md` when the session ends.
+This two-step flow (ephemeral handoff → date archive) prevents an
+ever-growing pile of handoff snapshots while keeping the latest state in a
+predictable single file.
 **Diff artifacts ≠ working tree.** If you generated code in a diff artifact
 during the conversation but haven't written it to disk, explicitly warn in the
 handoff: "⚠️ The following changes are in conversation artifacts only, not on disk."
