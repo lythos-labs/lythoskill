@@ -18,15 +18,17 @@
 - [project-cortex-porting-guide](./01-patterns/project-cortex-porting-guide.md)
 - [project-scope-and-ecosystem-paths](./01-patterns/project-scope-and-ecosystem-paths.md)
 - [fence-variable-trick](./01-patterns/fence-variable-trick.md)
+- [adr-to-lint-bridge](./01-patterns/adr-to-lint-bridge.md)
 
 ## ❓ FAQ (0)
 
 
 
-## 📖 Lessons (2)
+## 📖 Lessons (3)
 
 - [how-i-govern-130-skills](./03-lessons/how-i-govern-130-skills.md)
 - [skill-selection-case-study-pdf-report](./03-lessons/skill-selection-case-study-pdf-report.md)
+- [hermes-agent-skill-evolution-and-deck-governance](./03-lessons/hermes-agent-skill-evolution-and-deck-governance.md)
 
 ---
 

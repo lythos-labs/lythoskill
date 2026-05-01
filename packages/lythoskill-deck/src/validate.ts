@@ -7,8 +7,8 @@
  */
 
 import { parse as parseToml } from "@iarna/toml";
-import { existsSync, readFileSync } from "fs";
-import { resolve } from "path";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { findDeckToml, expandHome, findSource } from "./link.js";
 
 export function validateDeck(cliDeckPath?: string, cliWorkdir?: string): void {

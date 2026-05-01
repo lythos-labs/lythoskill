@@ -1,6 +1,12 @@
 #!/bin/sh
-# Auto-rebuild skills when source files change in packages/**/skill/
+# Pre-commit: ADR compliance checks + auto-rebuild skills
 
+# 1. ADR governance checks (fast — fail early if violated)
+if [ -f scripts/adr-check.sh ]; then
+  bash scripts/adr-check.sh || exit 1
+fi
+
+# 2. Auto-rebuild skills when source files change in packages/**/skill/
 STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/skill/' || true)
 
 if [ -n "$STAGED" ]; then

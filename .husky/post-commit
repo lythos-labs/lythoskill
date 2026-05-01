@@ -14,12 +14,11 @@ rm -f "$GIT_INDEX_FILE"
 
 git read-tree --empty
 
-# Add all skills/ files to root of tree (strip skills/ prefix)
+# Add all skills/ files (preserve skills/ prefix so branch structure matches main)
 find skills -type f | while read f; do
-  target="${f#skills/}"
   if [ -x "$f" ]; then mode=100755; else mode=100644; fi
   blob=$(git hash-object -w "$f")
-  git update-index --add --cacheinfo "$mode,$blob,$target"
+  git update-index --add --cacheinfo "$mode,$blob,$f"
 done
 
 # Add README.md

@@ -30,12 +30,17 @@ symlinks in `.claude/skills/` for declared skills and **removes everything else*
 This is deny-by-default: undeclared skills do not exist in the agent's view.
 ## Commands
 ```bash
-# Reconcile working set to match declarations (the only routine command)
+# Reconcile working set to match declarations (the routine command)
 bunx @lythos/skill-deck link
 # Specify a non-default deck file
 bunx @lythos/skill-deck link --deck ./path/to/deck.toml
 # Deck in subdirectory, working set anchored to current dir
 bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
+
+# Download a skill to cold pool and add to deck (one-shot)
+bunx @lythos/skill-deck add github.com/owner/repo/skill-name
+# Or via Vercel skills.sh
+bunx @lythos/skill-deck add owner/repo --via skills.sh
 ```
 `link` is a **reconciler** that converges actual state to declared state:
 undeclared symlinks → removed; broken/circular symlinks → recreated;

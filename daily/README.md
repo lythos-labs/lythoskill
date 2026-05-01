@@ -19,8 +19,8 @@
 
 `daily/` 是一个简单约定：
 
-- `daily/HANDOFF.md` — 当前 session 的交接记录（固定文件名，agent 优先读取）
-- `daily/2026-04-23.md` — 历史工作日志（时间戳命名，平铺存储）
+- `daily/2026-04-23.md` — 每日工作日志 + session handoff（时间戳命名，平铺存储）
+- 同一天多个 session：在同一个文件追加新的 `## Session Handoff` 章节
 
 这些文件**随 repo 一起版本管理**，不是 session 的私有数据。
 
@@ -53,7 +53,7 @@
 
 当一个新 agent 进入这个项目：
 
-1. 先读 `daily/HANDOFF.md` — 上一个 session 留下了什么未竟之事
+1. 先读 `daily/` 下最新的日期文件 — 上一个 session 留下了什么未竟之事
 2. 扫一眼 `daily/` 历史 — 最近几天的工作节奏和模式
 3. 然后才开始探索代码
 
@@ -69,9 +69,9 @@
 
 由 `lythoskill-project-scribe` skill 自动维护：
 
-- session 结束前自动 dump 当前状态到 `daily/HANDOFF.md`
-- 新 session 开始时自动读取 `daily/HANDOFF.md`
-- 归档时简单 `mv daily/HANDOFF.md daily/YYYY-MM-DD.md`
+- session 结束前自动 dump 当前状态到 `daily/YYYY-MM-DD.md`
+- 新 session 开始时自动读取 `daily/` 下最新的日期文件
+- 同一天多个 session：追加新的 `## Session Handoff` 章节到同一文件
 
 无需手动维护目录结构，无压输入。
 

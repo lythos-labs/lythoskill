@@ -1,5 +1,6 @@
 import {
   existsSync, readFileSync, statSync, readdirSync,
+  writeFileSync, appendFileSync, mkdirSync, chmodSync,
 } from 'node:fs'
 import { join } from 'node:path'
 import { findProjectRoot } from './util.js'
@@ -130,7 +131,6 @@ function checkGitignore(root: string): Check[] {
       pass: false,
       label: `.gitignore contains ${e}`,
       fix: () => {
-        const { writeFileSync } = require('node:fs')
         writeFileSync(path, t.gitignore())
       },
     }))
@@ -141,7 +141,6 @@ function checkGitignore(root: string): Check[] {
     pass: content.includes(e),
     label: `.gitignore contains ${e}`,
     fix: () => {
-      const { appendFileSync } = require('node:fs')
       if (!content.includes(e)) {
         appendFileSync(path, `\n${e}\n`)
       }
@@ -159,8 +158,6 @@ function checkHusky(root: string): Check[] {
       pass: existsSync(hookPath),
       label: '.husky/pre-commit exists',
       fix: () => {
-        const { mkdirSync, writeFileSync, chmodSync } = require('node:fs')
-        const { join } = require('node:path')
         mkdirSync(join(root, '.husky'), { recursive: true })
         writeFileSync(hookPath, template)
         chmodSync(hookPath, 0o755)
@@ -170,7 +167,6 @@ function checkHusky(root: string): Check[] {
       pass: existsSync(hookPath) && (statSync(hookPath).mode & 0o111) !== 0,
       label: '.husky/pre-commit is executable',
       fix: () => {
-        const { chmodSync } = require('node:fs')
         chmodSync(hookPath, 0o755)
       },
     },
@@ -254,7 +250,6 @@ function checkPackages(root: string): Check[] {
           fix: () => {
             const content = readFileSync(skillMdPath, 'utf-8')
             const updated = content.replace(/^version:\s*.+$/m, `version: ${pkg.version}`)
-            const { writeFileSync } = require('node:fs')
             writeFileSync(skillMdPath, updated)
           },
         })
@@ -272,7 +267,6 @@ function checkPackages(root: string): Check[] {
             pass: (statSync(fullPath).mode & 0o111) !== 0,
             label: `packages/${name}/${binPath} is executable`,
             fix: () => {
-              const { chmodSync } = require('node:fs')
               chmodSync(fullPath, 0o755)
             },
           })
@@ -292,6 +286,5 @@ function checkPackages(root: string): Check[] {
 }
 
 function writeJson(path: string, data: unknown) {
-  const { writeFileSync } = require('node:fs')
   writeFileSync(path, JSON.stringify(data, null, 2) + '\n')
 }

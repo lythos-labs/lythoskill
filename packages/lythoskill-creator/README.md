@@ -32,6 +32,11 @@ bunx @lythos/skill-creator add-skill my-new-skill
 
 # Build a skill (copies skill/ to skills/ with template substitution)
 bunx @lythos/skill-creator build my-new-skill
+
+# Audit an existing project against current conventions
+bunx @lythos/skill-creator align
+# Auto-fix drift where possible
+bunx @lythos/skill-creator align --fix
 ```
 
 ## Commands
@@ -43,6 +48,7 @@ Commands:
   init <name>       Create a new lythoskill project
   add-skill <name>  Add a new skill to an existing monorepo
   build <skill>     Build a skill for distribution
+  align [path]      Audit project against current conventions (--fix to auto-correct)
 ```
 
 ## Skill Documentation

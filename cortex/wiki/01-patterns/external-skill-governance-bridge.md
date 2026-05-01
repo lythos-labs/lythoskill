@@ -191,6 +191,17 @@ mv "$EXTERNAL_PATH" "$COLD_POOL_PATH"
 bunx @lythos/skill-deck link
 ```
 
+## Branch Structure Note
+
+Some repos maintain a `skills` branch as a lightweight alternative to `main`. In this repo, both branches use the same `skills/<name>/` directory structure, so skill locators are identical regardless of which branch you clone.
+
+| Branch | Clone command | Skill location | Deck locator |
+|--------|--------------|----------------|--------------|
+| `main` | `git clone …` | `repo/skills/<name>/` | `github.com/lythos-labs/lythoskill/skills/<name>` |
+| `skills` | `git clone -b skills …` | `repo/skills/<name>/` | `github.com/lythos-labs/lythoskill/skills/<name>` |
+
+> **Other repos may differ** — if you encounter "Skill not found" after cloning a `-b skills` branch, verify whether that repo strips the `skills/` prefix in its release branch.
+
 ## Constraints
 
 - **Never** run `deck link` after manually copying skills into `.claude/skills/` — they will be deleted

@@ -28,6 +28,9 @@ playground/
 # Runtime lock file (contains absolute local paths, not portable)
 skill-deck.lock
 
+# Curator generated artifacts (cold pool index, regenerated at runtime)
+skills/.lythoskill-curator/
+
 # Temporary directories and files
 tmp/
 .tmp/

@@ -62,4 +62,18 @@ Build all skills at once (used by pre-commit):
 bunx lythoskill-creator build --all
 ```
 
+### align
+
+Audit an existing project against current lythoskill conventions. Reports drift between your project and the latest scaffolding standards.
+
+```bash
+# Audit only — reports what would change
+bunx lythoskill-creator align
+
+# Auto-fix drift where possible
+bunx lythoskill-creator align --fix
+```
+
+Checks for: outdated `package.json` scripts, missing `pnpm-workspace.yaml` entries, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
+
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.

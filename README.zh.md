@@ -14,7 +14,7 @@
 
 你同时装了 **gstack**（项目管理）和 **superpowers**（写作工作流）。两者都是高主张性技能——它们不只帮你写代码，而是各自强加一套 workflow、一种风格、一种哲学。
 
-你把两者都丢进 `.claude/skills/`。Agent 看到了，不崩溃，也不抱怨。结果呢？一半任务按 gstack 的规则跑，另一半按 superpowers 的规则跑。输出飘忽不定，Bug 悄无声息地埋进去。
+你把两者都丢进 `.claude/skills/`。Agent 看到了，不崩溃，也不抱怨。结果呢？一半任务按 gstack 的规则跑，另一半按 tdd 的规则跑。输出飘忽不定，Bug 悄无声息地埋进去。
 
 **这就是静默混合**——技能生态里最隐蔽的失效模式。两个本就该互斥的技能，同时暴露在 agent 面前。
 
@@ -25,9 +25,9 @@ lythoskill-deck 用 **deny-by-default** 终结它：未声明的技能从 `.clau
 [tool]
 skills = ["github.com/garrytan/gstack"]
 
-# 项目 B：只用 superpowers
+# 项目 B：只用 tdd
 [tool]
-skills = ["github.com/obra/superpowers"]
+skills = ["github.com/mattpocock/skills/skills/engineering/tdd"]
 ```
 
 运行 `deck link` → 每个项目只看到一个"方法论"。没有静默混合，没有混乱。
@@ -71,24 +71,27 @@ skills = ["github.com/obra/superpowers"]
 
 ```bash
 # 1. 从 GitHub 添加一个技能（自动下载到 cold pool + 更新 deck + 链接）
-bunx @lythos/skill-deck add mattpocock/skills
+bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
 
 # 2. Agent 只看到它。其余技能物理上不存在。
 ls .claude/skills/
-# skills
+# design-doc-mermaid -> ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 ```
 
 就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
 
-想换种方式下载？用 `--via skills.sh` 或手动 clone——deck 不关心技能怎么进 cold pool 的，只关心谁在活跃。
+如果是 monorepo（一个仓库含多个技能），需要指定技能目录的完整路径：
 
 ```bash
+# Monorepo 示例：指定仓库内的技能路径
+bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
+
 # 替代方案：Vercel skills.sh
 bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
 
 # 替代方案：手动 clone
-git clone https://github.com/mattpocock/skills.git \
-  ~/.agents/skill-repos/github.com/mattpocock/skills
+git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git \
+  ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 # 然后编辑 skill-deck.toml 并运行 `deck link`
 ```
 
@@ -137,7 +140,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 EOF
 
 # 3. 同步——deck 把 working set 调和到声明状态
@@ -220,9 +223,9 @@ skills = [
 skills = [
   "github.com/anthropics/skills/skills/pdf",
   "github.com/anthropics/skills/skills/docx",
-  "github.com/mattpocock/skills/write-a-prd",
-  "github.com/mattpocock/skills/tdd",
-  "github.com/obra/superpowers",
+  "github.com/mattpocock/skills/skills/engineering/to-prd",
+  "github.com/mattpocock/skills/skills/engineering/tdd",
+  "github.com/garrytan/gstack",
   "github.com/SpillwaveSolutions/design-doc-mermaid",
 ]
 EOF
@@ -238,7 +241,7 @@ bunx @lythos/skill-deck link
    - **react-best-practices** → `useReducer` + `React.memo` + `useCallback`
    - **frontend-design** → zinc 配色、rounded-2xl、暗色模式
    - **composition-patterns** → Context Provider + barrel export
-   - **code-reviewer** → TypeScript 严格类型、输入校验
+   - **webapp-testing** → Playwright、无障碍检查
 4. 任务完成后自动记录 session handoff 到 `daily/YYYY-MM-DD.md`
 
 **效果**：agent 不会盲目编码。它会先读 skill、按 governance 流程组织工作、并把多个技能的最佳实践融入代码——全程自主，无需人工指定每一步。

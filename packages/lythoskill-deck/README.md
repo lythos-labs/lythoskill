@@ -19,7 +19,7 @@ No installation required. `bunx` auto-downloads the package.
 max_cards = 10
 
 [tool]
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 ```
 
 ### skill-deck.toml (full reference)
@@ -31,12 +31,12 @@ working_set = ".claude/skills"      # Where symlinks are created
 cold_pool = "~/.agents/skill-repos" # Where skills are downloaded
 
 [innate]                    # Always-loaded skills
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 
 [tool]                      # Auto-triggered skills
 skills = [
-  "github.com/mattpocock/skills/tdd",
-  "github.com/obra/superpowers",
+  "github.com/mattpocock/skills/skills/engineering/tdd",
+  "github.com/garrytan/gstack",
 ]
 
 [combo]                     # Multi-skill bundles
@@ -103,7 +103,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 EOF
 
 # 2. Link — creates symlinks in .claude/skills/
