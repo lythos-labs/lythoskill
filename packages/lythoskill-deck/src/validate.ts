@@ -73,8 +73,10 @@ export function validateDeck(cliDeckPath?: string, cliWorkdir?: string): void {
       }
       declaredNames.add(name);
 
-      const src = findSource(name, COLD_POOL, PROJECT_DIR);
-      if (!src) {
+      const result = findSource(name, COLD_POOL, PROJECT_DIR);
+      if (result.error) {
+        errors.push(result.error);
+      } else if (!result.path) {
         errors.push(`Skill not found: ${name} (${section})`);
       }
     }

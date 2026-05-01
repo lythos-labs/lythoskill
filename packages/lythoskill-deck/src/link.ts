@@ -51,7 +51,12 @@ function parseSkillFrontmatter(skillMdPath: string): Record<string, any> {
 
 // ── 冷池查找 ────────────────────────────────────────────────
 
-export function findSource(name: string, coldPool: string, projectDir: string): string | null {
+export interface FindSourceResult {
+  path: string | null;
+  error?: string;
+}
+
+export function findSource(name: string, coldPool: string, projectDir: string): FindSourceResult {
   // 0. Fully-qualified path: host.tld/owner/repo/skill
   //    → cold_pool/host.tld/owner/repo/skills/skill
   //    Also handles host.tld/owner/repo (standalone skill without skills/ subdir)
@@ -65,31 +70,32 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
 
     if (skill) {
       const fqPath = join(coldPool, host, owner, repo, "skills", skill);
-      if (existsSync(join(fqPath, "SKILL.md"))) return fqPath;
+      if (existsSync(join(fqPath, "SKILL.md"))) return { path: fqPath };
     }
     // fallback: standalone skill at repo root
     const directPath = join(coldPool, host, owner, repo);
-    if (existsSync(join(directPath, "SKILL.md"))) return directPath;
+    if (existsSync(join(directPath, "SKILL.md"))) return { path: directPath };
   }
 
   // 1. 直接路径
   const direct = resolve(coldPool, name);
-  if (existsSync(join(direct, "SKILL.md"))) return direct;
+  if (existsSync(join(direct, "SKILL.md"))) return { path: direct };
 
   // 2. Monorepo: repo/skill → cold_pool/repo/skills/skill
   if (name.includes("/")) {
     const [repo, ...rest] = name.split("/");
     const mono = join(coldPool, repo, "skills", rest.join("/"));
-    if (existsSync(join(mono, "SKILL.md"))) return mono;
+    if (existsSync(join(mono, "SKILL.md"))) return { path: mono };
   }
 
   // 3. 项目本地: <project>/skills/<name>（build 输出目录，优先级高于扁平扫描）
   const local = resolve(projectDir, "skills", name);
-  if (existsSync(join(local, "SKILL.md"))) return local;
+  if (existsSync(join(local, "SKILL.md"))) return { path: local };
 
   // 4. 扁平扫描: cold_pool/<any-repo>/<name> 或 <any-repo>/skills/<name>
   //    跳过隐藏目录（agent working set、git、配置等）和 node_modules，
   //    避免把 .claude/skills/ 里的 symlink 误判为有效 cold-pool 源
+  const matches: string[] = [];
   try {
     for (const entry of readdirSync(coldPool, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue;
@@ -97,12 +103,25 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
       if (entry.name === 'node_modules') continue;
       const base = join(coldPool, entry.name);
       for (const sub of [join(base, name), join(base, "skills", name)]) {
-        if (existsSync(join(sub, "SKILL.md"))) return sub;
+        if (existsSync(join(sub, "SKILL.md"))) {
+          matches.push(sub);
+        }
       }
     }
   } catch {}
 
-  return null;
+  if (matches.length === 1) {
+    return { path: matches[0] };
+  }
+  if (matches.length > 1) {
+    const candidates = matches.map(m => relative(coldPool, m)).join(', ');
+    return {
+      path: null,
+      error: `Ambiguous skill name "${name}": found ${matches.length} matches (${candidates}). Use fully-qualified name (e.g., github.com/owner/repo/${name})`,
+    };
+  }
+
+  return { path: null };
 }
 
 // ── 主流程 ──────────────────────────────────────────────────
@@ -150,12 +169,16 @@ const errors: string[] = [];
 for (const section of ["innate", "tool", "combo"] as const) {
   for (const name of (deck[section]?.skills || [])) {
     if (!name || typeof name !== "string") continue;
-    const src = findSource(name, COLD_POOL, PROJECT_DIR);
-    if (!src) {
+    const result = findSource(name, COLD_POOL, PROJECT_DIR);
+    if (result.error) {
+      errors.push(result.error);
+      continue;
+    }
+    if (!result.path) {
       errors.push(`Skill not found: ${name}`);
       continue;
     }
-    declared.push({ name, type: section, sourcePath: src });
+    declared.push({ name, type: section, sourcePath: result.path });
   }
 }
 
