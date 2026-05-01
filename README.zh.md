@@ -8,53 +8,47 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [English](./README.md)
 
+**👤 技能使用者？** → [快速开始](#快速开始) — 安装 Bun，跑一条命令，搞定。  
+**🤖 AI agent？** → [Agent 专用](#如果你是-ai-agent) — 四步清单。  
+**🛠️ 开发者？** → [开发](#开发) — clone、安装、贡献代码。
+
 ---
 
-## 静默混合（Silent Blend）
+## 问题
 
-你同时装了 **gstack**（项目管理）和 **superpowers**（写作工作流）。两者都是高主张性技能——它们不只帮你写代码，而是各自强加一套 workflow、一种风格、一种哲学。
-
-你把两者都丢进 `.claude/skills/`。Agent 看到了，不崩溃，也不抱怨。结果呢？一半任务按 gstack 的规则跑，另一半按 tdd 的规则跑。输出飘忽不定，Bug 悄无声息地埋进去。
-
-**这就是静默混合**——技能生态里最隐蔽的失效模式。两个本就该互斥的技能，同时暴露在 agent 面前。
-
-lythoskill-deck 用 **deny-by-default** 终结它：未声明的技能从 `.claude/skills/` 里**物理消失**。不是"禁用"，不是"降权"，**是直接没了**。Agent 看不到、想不到、更不会被迷惑。
+当两个冲突的技能同时对 agent 可见，输出变得不可预测。**lythoskill-deck** 用 **deny-by-default** 解决：未声明的技能从 `.claude/skills/` 中**物理消失**。不是"禁用"，不是"降权"。**彻底消失。**
 
 ```toml
-# 项目 A：只用 gstack
 [tool]
-skills = ["github.com/garrytan/gstack"]
-
-# 项目 B：只用 tdd
-[tool]
-skills = ["github.com/mattpocock/skills/skills/engineering/tdd"]
+skills = ["github.com/owner/repo"]
 ```
 
-运行 `deck link` → 每个项目只看到一个"方法论"。没有静默混合，没有混乱。
+运行 `deck link` → 只有声明的技能可见。没有静默混合。没有混乱。
 
 ---
 
 ## 我真的需要这个吗？
 
-治理只在复杂度越过阈值时才有价值。没到那个点，它就是多余的抽象。
+治理只在复杂度达到阈值时才有用。
+
+| 技能数量 | 状态 | 行动 |
+|---------|------|------|
+| 0–3，无冲突 | 简单 | 不需要 lythoskill。手动放到 `.claude/skills/`。 |
+| 5–10，有冲突 | 增长中 | **安装 lythoskill-deck** —— 声明本项目需要的技能。 |
+| 10+，自己编写 | 生态 | 用 **deck + creator** —— thin-skill 模式，可维护。 |
+
+<details>
+<summary>详细决策树（点击展开）</summary>
 
 ```
-你有多少个技能？
-│
-├─ 0–3 个，无冲突
-│   → 不需要 lythoskill。手动丢进 .claude/skills/ 就行。
-│
-├─ 5–10 个，开始打架或选择困难
-│   → 只需要 deck 治理。装个 lythoskill-deck。
-│
-├─ 10+ 个，而且你开始自己写技能
-│   ├─ 简单技能（SKILL.md + 轻量 bash）
-│   │   → 只需要 deck 治理
-│   └─ 复杂技能（有依赖、测试、类型、多技能协作）
-│       → Deck + Thin Skill Pattern（完整 lythoskill）
-│
-└─ 跨团队/项目/来源管理技能生态
-    → 完整 lythoskill（deck + creator + curator + arena）
+10+，且你自己编写技能
+├─ 简单技能（SKILL.md + 轻量 bash）
+│   → 只需要 deck 治理
+└─ 复杂技能（有依赖、测试、类型、多技能协作）
+    → Deck + Thin Skill Pattern（完整 lythoskill）
+
+跨团队/项目/来源管理技能生态
+→ 完整 lythoskill（deck + creator + curator + arena）
 ```
 
 **以下情况你不需要 lythoskill：**
@@ -62,6 +56,7 @@ skills = ["github.com/mattpocock/skills/skills/engineering/tdd"]
 - 技能集跨项目一成不变
 - 技能是纯 SKILL.md，没有构建步骤
 - 你是 solo 开发者，只有一个技能，没有发布周期
+</details>
 
 ---
 
@@ -78,30 +73,28 @@ curl -fsSL https://bun.sh/install | bash
 > **本工具需要 Bun，不是 Node。** `bunx` 是正确的运行方式。`npx` 如果没有安装 Bun 会失败——包的 shebang 调用的是 `env bun`。如果你只有 Node/npm，请先安装 Bun。
 
 ```bash
-# 1. 从 GitHub 添加一个技能（自动下载到 cold pool + 更新 deck + 链接）
-#    请把示例换成你真正想用的技能仓库
-bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
+# 1. 添加一个技能（自动下载到 cold pool + 更新 deck + 链接）
+#    把 <owner>/<repo> 换成你真正想用的技能
+bunx @lythos/skill-deck add <owner>/<repo>
 
 # 2. Agent 只看到它。其余技能物理上不存在。
 ls .claude/skills/
-# design-doc-mermaid -> ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 ```
 
 就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
 
-如果是 monorepo（一个仓库含多个技能），需要指定技能目录的完整路径：
+如果是 monorepo（一个仓库含多个技能），需要指定完整路径：
 
 ```bash
-# Monorepo 示例：指定仓库内的技能路径
-#    请换成你真正想用的技能仓库
-bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
+# Monorepo：指定仓库内的技能路径
+bunx @lythos/skill-deck add github.com/owner/repo/skills/my-skill
 
 # 替代方案：Vercel skills.sh
-bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
+bunx @lythos/skill-deck add owner/repo --via skills.sh
 
 # 替代方案：手动 clone
-git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git \
-  ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
+git clone https://github.com/owner/repo.git \
+  ~/.agents/skill-repos/github.com/owner/repo
 # 然后编辑 skill-deck.toml 并运行 `deck link`
 ```
 
@@ -433,14 +426,31 @@ bunx @lythos/skill-arena \
 
 ## 开发
 
+> 面向在这个仓库内工作的贡献者和开发者。
+
+**前置条件：** Bun ≥1.0，pnpm ≥8.0。
+
 ```bash
-# 直接执行（Bun 原生运行 TypeScript）
+# 安装 Bun（如缺失）
+curl -fsSL https://bun.sh/install | bash
+
+# 安装 pnpm（如缺失）
+npm install -g pnpm
+
+# 1. 安装 workspace 依赖
+pnpm install
+
+# 2. 同步本地 skill deck
 bun packages/lythoskill-deck/src/cli.ts link
-bun packages/lythoskill-creator/src/cli.ts init my-test
+
+# 3. 验证环境
+bun packages/lythoskill-project-cortex/src/cli.ts stats
 
 # 运行测试
 bun packages/lythoskill-deck/test/runner.ts
 ```
+
+环境就绪？查看 [`CONTRIBUTING.md`](./CONTRIBUTING.md) 了解 commit 规范和 PR 流程。
 
 ---
 
