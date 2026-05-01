@@ -30,6 +30,9 @@ symlinks in `.claude/skills/` for declared skills and **removes everything else*
 This is deny-by-default: undeclared skills do not exist in the agent's view.
 ## Commands
 ```bash
+# Always run from your project root (where skill-deck.toml lives)
+cd /path/to/your-project
+
 # Reconcile working set to match declarations (the routine command)
 bunx @lythos/skill-deck link
 # Specify a non-default deck file
