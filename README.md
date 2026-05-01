@@ -2,7 +2,8 @@
 
 > **Govern your AI agent skills. Prevent skill ecosystem rot.**
 >
-> lythoskill is a governance layer for the agent skill ecosystem. It does not define skill standards — it provides governance infrastructure on top of existing standards, so your agent stays focused and conflict-free as your skill collection grows from 10 to 100+.
+> **Use this when:** you have 5+ skills, see conflicts, or want per-project skill control.  
+> **Not when:** you have ≤3 skills and no conflicts — put them in `.claude/skills/` manually.
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
