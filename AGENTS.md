@@ -96,6 +96,8 @@ Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./co
 
 All commands run from the repository root.
 
+> **Troubleshooting:** If `bunx @lythos/...` commands fail, you are likely in development mode. Use `bun packages/<name>/src/cli.ts <command>` instead.
+
 ### Development (direct Bun execution)
 ```bash
 # Run creator CLI directly (no build step needed)
@@ -254,12 +256,11 @@ When a session is ending or context is about to compact, you MUST execute this h
    - `bun packages/lythoskill-project-cortex/src/cli.ts list` — active epics and tasks
    - **Session recall** — what happened this session that is NOT yet written anywhere?
 
-2. **Write single-file handoff** → `daily/HANDOFF.md` (tracked by git)
-   - Use `HANDOFF-TEMPLATE.md` as template
-   - Focus on what file exploration CANNOT recover: pitfalls, true working-tree state, specific next steps
-   - Do NOT repeat what `git log`, `ls`, or `cat` can already reveal
-
-3. **Archive when session ends** — If starting a new day/iteration, move `daily/HANDOFF.md` to `daily/YYYY-MM-DD.md`
+2. **Write handoff to daily journal** → `daily/YYYY-MM-DD.md`
+   - New day: create a new date file. Same day: append to existing file.
+   - Use `skills/lythoskill-project-cortex/HANDOFF-TEMPLATE.md` as the format for the `## Session Handoff` section.
+   - Focus on what file exploration CANNOT recover: pitfalls, true working-tree state, specific next steps.
+   - Do NOT repeat what `git log`, `ls`, or `cat` can already reveal.
 
 4. **Commit if clean** — If working tree is in a good state, commit with descriptive message
 
@@ -269,8 +270,8 @@ When a session is ending or context is about to compact, you MUST execute this h
 
 When entering this project with no prior context, read in this exact order:
 1. `AGENTS.md` (this file) — canonical project guidance
-2. `daily/HANDOFF.md` (if exists) — single-file session handoff, highest priority memory
-3. `daily/` history (recent 3 days) — project journal, work log across sessions
+2. `daily/YYYY-MM-DD.md` (latest date file) — session handoff + work log, highest priority memory
+3. `daily/` history (recent 3 days) — project journal across sessions
 4. `skill-deck.toml`
 5. `cortex/INDEX.md`
 6. `git log --oneline -10`
@@ -298,4 +299,4 @@ When entering this project with no prior context, read in this exact order:
 | `src/templates.ts` | All string templates |
 | `skills/lythoskill-creator/SKILL.md` | Agent-visible usage documentation |
 | `cortex/INDEX.md` | Governance system entry |
-| `daily/HANDOFF.md` | Current session handoff (ephemeral) |
+| `daily/YYYY-MM-DD.md` | Daily journal + session handoff |

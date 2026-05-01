@@ -9,13 +9,13 @@
 
 import { parse as parseToml } from "@iarna/toml";
 import YAML from "yaml";
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 import {
   existsSync, mkdirSync, readFileSync, readdirSync,
   symlinkSync, lstatSync, rmSync, writeFileSync,
-} from "fs";
-import { resolve, dirname, join, basename, relative } from "path";
-import { homedir } from "os";
+} from "node:fs";
+import { resolve, dirname, join, basename, relative } from "node:path";
+import { homedir } from "node:os";
 import {
   SkillDeckLockSchema,
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,
@@ -399,7 +399,7 @@ writeFileSync(LOCK_PATH, JSON.stringify(parsed.data, null, 2) + "\n");
 // ── 报告 ────────────────────────────────────────────────────
 
 console.log("");
-console.log(`✅ Sync complete: ${linkedSkills.length}/${MAX_CARDS} skills`);
+console.log(`✅ Sync complete: ${linkedSkills.length} skill(s) linked (max_cards: ${MAX_CARDS})`);
 console.log(`   lock: ${LOCK_PATH}`);
 if (dirOverlaps.length > 0) {
   console.log(`   ⚠️  ${dirOverlaps.length} directory overlap(s) (see warnings above)`);

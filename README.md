@@ -13,9 +13,9 @@
 
 ## The Silent Blend Problem
 
-You installed **gstack** for project management and **superpowers** for writing workflows. Both are high-assertiveness skills — they define *how* work should be done. They don't just help you write code; they impose a workflow, a style, a philosophy.
+You installed **gstack** for project management and **tdd** for test-driven development workflow. Both are high-assertiveness skills — they define *how* work should be done. They don't just help you write code; they impose a workflow, a style, a philosophy.
 
-You put both in `.claude/skills/`. The agent sees both. It doesn't crash, it doesn't complain. But half your tasks run with gstack rules and half with superpowers rules. Outputs are unpredictable. Bugs are silent.
+You put both in `.claude/skills/`. The agent sees both. It doesn't crash, it doesn't complain. But half your tasks run with gstack rules and half with tdd rules. Outputs are unpredictable. Bugs are silent.
 
 **This is the silent blend** — the worst kind of failure mode in skill ecosystems. It happens when two skills that *must* be mutually exclusive are both visible to the agent.
 
@@ -26,9 +26,9 @@ lythoskill-deck solves this with **deny-by-default**: undeclared skills are phys
 [tool]
 skills = ["github.com/garrytan/gstack"]
 
-# Project B: only superpowers
+# Project B: only tdd
 [tool]
-skills = ["github.com/obra/superpowers"]
+skills = ["github.com/mattpocock/skills/skills/engineering/tdd"]
 ```
 
 Run `deck link` → each project sees exactly one "how". No silent blend. No chaos.
@@ -68,28 +68,33 @@ How many skills do you have?
 
 ## Quick Start
 
+> 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
+
 Zero install — Bun runtime required (`bunx`). `npx` works only if Bun is also installed (the shebang calls `env bun`):
 
 ```bash
 # 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
-bunx @lythos/skill-deck add mattpocock/skills
+bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
 
 # 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
-# skills
+# design-doc-mermaid -> ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 ```
 
 That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
-Prefer a different download method? Use `--via skills.sh` or clone manually — deck doesn't care how skills got into the cold pool.
+For monorepo skills (multiple skills in one repo), include the path to the skill directory:
 
 ```bash
+# Monorepo example: specify the skill path inside the repo
+bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
+
 # Alternative: Vercel skills.sh
 bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
 
 # Alternative: manual clone
-git clone https://github.com/mattpocock/skills.git \
-  ~/.agents/skill-repos/github.com/mattpocock/skills
+git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git \
+  ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 # then edit skill-deck.toml and run `deck link`
 ```
 
@@ -140,7 +145,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 EOF
 
 # 3. Sync — deck reconciles working set with declaration
@@ -223,9 +228,9 @@ skills = [
 skills = [
   "github.com/anthropics/skills/skills/pdf",
   "github.com/anthropics/skills/skills/docx",
-  "github.com/mattpocock/skills/write-a-prd",
-  "github.com/mattpocock/skills/tdd",
-  "github.com/obra/superpowers",
+  "github.com/mattpocock/skills/skills/engineering/to-prd",
+  "github.com/mattpocock/skills/skills/engineering/tdd",
+  "github.com/garrytan/gstack",
   "github.com/SpillwaveSolutions/design-doc-mermaid",
 ]
 EOF
@@ -241,7 +246,7 @@ bunx @lythos/skill-deck link
    - **react-best-practices** → `useReducer`, `React.memo`, `useCallback`
    - **frontend-design** → zinc palette, `rounded-2xl`, dark mode
    - **composition-patterns** → Context Provider + barrel exports
-   - **code-reviewer** → strict TypeScript, input validation
+   - **webapp-testing** → Playwright, accessibility checks
 4. Records a session handoff to `daily/YYYY-MM-DD.md` when done
 
 **Outcome**: The agent does not code blindly. It reads skills first, follows governance workflow, and blends best practices from multiple skills into the codebase — all autonomously, without human micromanagement.
@@ -307,8 +312,8 @@ git clone https://github.com/<owner>/<repo>.git \
 git clone https://github.com/lythos-labs/lythoskill.git \
   ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
 
-git clone https://github.com/PrimeRadiant/superpowers.git \
-  ~/.agents/skill-repos/github.com/PrimeRadiant/superpowers
+git clone https://github.com/garrytan/gstack.git \
+  ~/.agents/skill-repos/github.com/garrytan/gstack
 ```
 
 After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.
@@ -418,7 +423,20 @@ bunx @lythos/skill-arena \
 
 ## Development
 
+> For contributors and developers working **inside this repo**.
+
+**Prerequisites:** Bun ≥1.0, pnpm ≥8.0.
+
 ```bash
+# 1. Install workspace dependencies
+pnpm install
+
+# 2. Sync the local skill deck (links skills/ → .claude/skills/)
+bun packages/lythoskill-deck/src/cli.ts link
+
+# 3. Verify everything works
+bun packages/lythoskill-project-cortex/src/cli.ts stats
+
 # Direct execution (Bun runs TypeScript natively)
 bun packages/lythoskill-deck/src/cli.ts link
 bun packages/lythoskill-creator/src/cli.ts init my-test
