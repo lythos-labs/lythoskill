@@ -72,24 +72,27 @@ Zero install — Bun runtime required (`bunx`). `npx` works only if Bun is also 
 
 ```bash
 # 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
-bunx @lythos/skill-deck add mattpocock/skills
+bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
 
 # 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
-# skills
+# design-doc-mermaid -> ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 ```
 
 That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
-Prefer a different download method? Use `--via skills.sh` or clone manually — deck doesn't care how skills got into the cold pool.
+For monorepo skills (multiple skills in one repo), include the path to the skill directory:
 
 ```bash
+# Monorepo example: specify the skill path inside the repo
+bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
+
 # Alternative: Vercel skills.sh
 bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
 
 # Alternative: manual clone
-git clone https://github.com/mattpocock/skills.git \
-  ~/.agents/skill-repos/github.com/mattpocock/skills
+git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git \
+  ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 # then edit skill-deck.toml and run `deck link`
 ```
 
@@ -140,7 +143,7 @@ cat > skill-deck.toml << 'EOF'
 max_cards = 10
 
 [tool]
-skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]
+skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 EOF
 
 # 3. Sync — deck reconciles working set with declaration
@@ -223,8 +226,8 @@ skills = [
 skills = [
   "github.com/anthropics/skills/skills/pdf",
   "github.com/anthropics/skills/skills/docx",
-  "github.com/mattpocock/skills/write-a-prd",
-  "github.com/mattpocock/skills/tdd",
+  "github.com/mattpocock/skills/skills/engineering/to-prd",
+  "github.com/mattpocock/skills/skills/engineering/tdd",
   "github.com/obra/superpowers",
   "github.com/SpillwaveSolutions/design-doc-mermaid",
 ]
@@ -241,7 +244,7 @@ bunx @lythos/skill-deck link
    - **react-best-practices** → `useReducer`, `React.memo`, `useCallback`
    - **frontend-design** → zinc palette, `rounded-2xl`, dark mode
    - **composition-patterns** → Context Provider + barrel exports
-   - **code-reviewer** → strict TypeScript, input validation
+   - **webapp-testing** → Playwright, accessibility checks
 4. Records a session handoff to `daily/YYYY-MM-DD.md` when done
 
 **Outcome**: The agent does not code blindly. It reads skills first, follows governance workflow, and blends best practices from multiple skills into the codebase — all autonomously, without human micromanagement.
@@ -307,8 +310,8 @@ git clone https://github.com/<owner>/<repo>.git \
 git clone https://github.com/lythos-labs/lythoskill.git \
   ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
 
-git clone https://github.com/PrimeRadiant/superpowers.git \
-  ~/.agents/skill-repos/github.com/PrimeRadiant/superpowers
+git clone https://github.com/obra/superpowers.git \
+  ~/.agents/skill-repos/github.com/obra/superpowers
 ```
 
 After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.

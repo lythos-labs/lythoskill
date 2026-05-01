@@ -19,7 +19,7 @@ Agent sees descriptions; full content loads only when relevant.
 skills = [
   "github.com/anthropics/skills/skills/pdf",
   "github.com/SpillwaveSolutions/design-doc-mermaid",
-  "github.com/mattpocock/skills/write-a-prd",
+  "github.com/mattpocock/skills/skills/engineering/to-prd",
 ]
 ```
 ## [combo] — Router Skills
