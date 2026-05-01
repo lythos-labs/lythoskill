@@ -32,7 +32,25 @@ Choose based on how long you plan to keep the skill:
 
 Move the externally-installed skill into the cold pool at the correct path, then declare it in `skill-deck.toml`. This is the cleanest long-term solution.
 
-### Vercel skills.sh Example
+### Vercel skills.sh — One-Command Adoption
+
+`lythoskill-deck add` with `--via skills.sh` handles the entire pipeline: install → detect → move to cold pool → declare → link.
+
+```bash
+# One command does it all
+bunx @lythos/skill-deck add gstack/gstack --via skills.sh
+```
+
+What happens under the hood:
+1. Runs `npx skills add gstack/gstack -g`
+2. Scans `~/.claude/skills/` to detect the newly installed directory
+3. Moves it to `~/.agents/skill-repos/github.com/gstack/gstack/skills/gstack`
+4. Appends `gstack` to `skill-deck.toml [tool].skills`
+5. Runs `deck link` to create the working-set symlink
+
+### Manual Fallback
+
+If you prefer to control each step, or if `deck add` fails:
 
 ```bash
 # Step 1: Vercel installs to default location
@@ -155,7 +173,13 @@ Is this a skill I want to keep long-term?
 ## Quick Reference
 
 ```bash
-# Adopt an externally-installed skill into deck governance
+# One-command adoption via skills.sh
+bunx @lythos/skill-deck add gstack/gstack --via skills.sh
+
+# Or via git clone (default backend)
+bunx @lythos/skill-deck add github.com/gstack/gstack/skills/gstack
+
+# Manual fallback
 SKILL_NAME="gstack"
 EXTERNAL_PATH="~/.claude/skills/$SKILL_NAME"
 COLD_POOL_PATH="~/.agents/skill-repos/github.com/gstack/gstack/skills/$SKILL_NAME"

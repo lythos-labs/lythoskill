@@ -15,6 +15,8 @@ import { execSync } from 'node:child_process'
 import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
 import { findDeckToml, expandHome } from './link.js'
 
+const CLAUDE_SKILLS_DIR = join(homedir(), '.claude', 'skills')
+
 interface ParsedLocator {
   host: string
   owner: string
@@ -114,29 +116,55 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
   const tmpRepo = join(tmpDir, 'repo')
 
   try {
+    let skillSourceDir: string
+
     if (backend === 'skills.sh' || backend === 'vercel') {
       const skillsShLocator = `${parsed.owner}/${parsed.repo}`
       console.log(`📦 Downloading via skills.sh: ${skillsShLocator}`)
+
+      // Snapshot existing directories in ~/.claude/skills/
+      const beforeDirs = existsSync(CLAUDE_SKILLS_DIR)
+        ? new Set(readdirSync(CLAUDE_SKILLS_DIR, { withFileTypes: true })
+            .filter(e => e.isDirectory())
+            .map(e => e.name))
+        : new Set<string>()
+
       execSync(`npx skills add ${skillsShLocator} -g`, { cwd: tmpDir, stdio: 'inherit' })
+
+      // Detect the newly installed directory
+      const afterDirs = existsSync(CLAUDE_SKILLS_DIR)
+        ? readdirSync(CLAUDE_SKILLS_DIR, { withFileTypes: true })
+            .filter(e => e.isDirectory())
+            .map(e => e.name)
+        : []
+      const newDirs = afterDirs.filter(d => !beforeDirs.has(d))
+
+      if (newDirs.length === 0) {
+        console.error(`❌ skills.sh installed nothing new to ~/.claude/skills/`)
+        console.error(`   The skill may already be installed, or the install failed.`)
+        process.exit(1)
+      }
+      if (newDirs.length > 1) {
+        console.warn(`⚠️  Multiple new directories detected in ~/.claude/skills/`)
+        console.warn(`   Using the first one: ${newDirs[0]}`)
+      }
+      const installedName = newDirs[0]
+      skillSourceDir = join(CLAUDE_SKILLS_DIR, installedName)
+      console.log(`   Detected install: ${installedName}`)
     } else {
       const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
       console.log(`📦 Cloning: ${gitUrl}`)
       execSync(`git clone --depth 1 ${gitUrl} ${tmpRepo}`, { stdio: 'inherit' })
+      skillSourceDir = tmpRepo
     }
 
-    if (!existsSync(tmpRepo)) {
-      if (backend === 'skills.sh' || backend === 'vercel') {
-        console.error(`❌ skills.sh backend installs globally, not to cold pool.`)
-        console.error(`   Please manually place the skill at: ${targetDir}`)
-        console.error(`   Or use: deck add ${locator} --via git`)
-        process.exit(1)
-      }
-      console.error(`❌ Download failed: expected output not found at ${tmpRepo}`)
+    if (!existsSync(skillSourceDir)) {
+      console.error(`❌ Download failed: expected output not found at ${skillSourceDir}`)
       process.exit(1)
     }
 
     mkdirSync(dirname(targetDir), { recursive: true })
-    renameSync(tmpRepo, targetDir)
+    renameSync(skillSourceDir, targetDir)
 
     const skillDir = findSkillDir(targetDir, parsed.skill)
     if (!skillDir) {
