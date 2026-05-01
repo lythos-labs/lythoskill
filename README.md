@@ -70,10 +70,19 @@ How many skills do you have?
 
 > 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
 
-Zero install — Bun runtime required (`bunx`). `npx` works only if Bun is also installed (the shebang calls `env bun`):
+**Prerequisite — Bun runtime** (needed for `bunx`):
+```bash
+# Install Bun (one-time, macOS/Linux/WSL)
+curl -fsSL https://bun.sh/install | bash
+# Windows: powershell -c "irm bun.sh/install.ps1 | iex"
+```
+After install, restart your shell or run `source ~/.bashrc`.
+
+> **This tool requires Bun, not Node.** `bunx` is the correct runner. `npx` will fail unless Bun is also installed — the package shebang calls `env bun`. If you only have Node/npm, install Bun first.
 
 ```bash
 # 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
+#    Replace the example with a real skill repo you want to use
 bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
 
 # 2. Agent sees the skill. Everything else is physically absent.
@@ -87,6 +96,7 @@ For monorepo skills (multiple skills in one repo), include the path to the skill
 
 ```bash
 # Monorepo example: specify the skill path inside the repo
+#    Replace with a real skill repo
 bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
 
 # Alternative: Vercel skills.sh
@@ -107,6 +117,14 @@ skill-deck.toml      ← the config file you edit
 deck                 ← the CLI command (short for lythoskill-deck)
 link                 ← the subcommand that syncs working set to toml
 ```
+
+### For Agents
+
+If you are an AI agent reading this:
+1. Check `bun --version` — if missing, install Bun first (see Quick Start above)
+2. Run `bunx @lythos/skill-deck add <owner>/<repo>` to add a skill
+3. Run `bunx @lythos/skill-deck link` to sync the working set
+4. Skills are now in `.claude/skills/` — you can read them
 
 ---
 
@@ -389,7 +407,7 @@ lythoskill sits **between** skill sources and agent platforms — it does not re
 ## Quick Reference
 
 ```bash
-# Deck governance (bunx; npx only if Bun is installed)
+# Deck governance (bunx only — requires Bun runtime)
 bunx @lythos/skill-deck link                       # Sync toml -> working set
 bunx @lythos/skill-deck add owner/repo             # Download skill + add to deck
 bunx @lythos/skill-deck link --deck ./my-deck.toml
