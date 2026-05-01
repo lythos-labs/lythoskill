@@ -2,7 +2,8 @@
 
 > **治理你的 AI agent 技能。防止技能生态腐烂。**
 >
-> lythoskill 是 agent skill 生态的治理层。它不重新定义技能标准——而是在现有标准之上搭一套治理基础设施，让你的 agent 在技能从 10 个膨胀到 100+ 个时，依然保持专注、互不冲突。
+> **适用场景：** 你有 5+ 个技能、出现冲突、或想按项目控制技能。  
+> **不适用：** 只有 ≤3 个技能且无冲突 —— 手动放到 `.claude/skills/` 即可。
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
