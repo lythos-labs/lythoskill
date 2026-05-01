@@ -3,7 +3,7 @@
 # Mirrors skills/* + README.md into an isolated skills branch for lightweight clone.
 
 # Only sync if this commit touched skills/ or README.md
-if ! git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^(skills/|README\.md)$'; then
+if ! git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^skills/|^README\.md$'; then
   exit 0
 fi
 
