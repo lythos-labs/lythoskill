@@ -9,53 +9,47 @@
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
 [中文](./README.zh.md)
 
+**👤 Skill user?** → [Quick Start](#quick-start) — install Bun, run one command, done.  
+**🤖 AI agent?** → [For Agents](#for-agents) — your 4-step checklist.  
+**🛠️ Developer?** → [Development](#development) — clone, install, contribute.
+
 ---
 
-## The Silent Blend Problem
+## The Problem
 
-You installed **gstack** for project management and **tdd** for test-driven development workflow. Both are high-assertiveness skills — they define *how* work should be done. They don't just help you write code; they impose a workflow, a style, a philosophy.
-
-You put both in `.claude/skills/`. The agent sees both. It doesn't crash, it doesn't complain. But half your tasks run with gstack rules and half with tdd rules. Outputs are unpredictable. Bugs are silent.
-
-**This is the silent blend** — the worst kind of failure mode in skill ecosystems. It happens when two skills that *must* be mutually exclusive are both visible to the agent.
-
-lythoskill-deck solves this with **deny-by-default**: undeclared skills are physically absent from `.claude/skills/`. Not "disabled". Not "deprioritized". **Gone.** The agent cannot see, consider, or be confused by them.
+When two conflicting skills are both visible to your agent, outputs become unpredictable. **lythoskill-deck** solves this with **deny-by-default**: undeclared skills are **physically absent** from `.claude/skills/`. Not "disabled". Not "deprioritized". **Gone.**
 
 ```toml
-# Project A: only gstack
 [tool]
-skills = ["github.com/garrytan/gstack"]
-
-# Project B: only tdd
-[tool]
-skills = ["github.com/mattpocock/skills/skills/engineering/tdd"]
+skills = ["github.com/owner/repo"]
 ```
 
-Run `deck link` → each project sees exactly one "how". No silent blend. No chaos.
+Run `deck link` → only declared skills are visible. No silent blend. No chaos.
 
 ---
 
 ## Do I need this?
 
-Governance is only useful when complexity reaches a threshold. Before that, it is unnecessary abstraction.
+Governance is only useful when complexity reaches a threshold.
+
+| Skills | State | Action |
+|--------|-------|--------|
+| 0–3, no conflicts | Simple | Don't use lythoskill. Put them in `.claude/skills/` manually. |
+| 5–10, some conflicts | Growing | **Install lythoskill-deck** — declare which skills this project needs. |
+| 10+, you author skills | Ecosystem | Use **deck + creator** — thin-skill pattern for maintainable skills. |
+
+<details>
+<summary>Detailed decision tree (click to expand)</summary>
 
 ```
-How many skills do you have?
-│
-├─ 0–3, no conflicts
-│   → You don't need lythoskill. Put them in .claude/skills/ manually.
-│
-├─ 5–10, starting to see conflicts or choice paralysis
-│   → You need deck governance only. Install lythoskill-deck.
-│
-├─ 10+, and you author your own skills
-│   ├─ Simple skills (SKILL.md + light bash)
-│   │   → Deck governance only
-│   └─ Complex skills (dependencies, tests, types, multi-skill teamwork)
-│       → Deck + Thin Skill Pattern (full lythoskill)
-│
-└─ Managing a skill ecosystem across teams/projects/sources
-    → Full lythoskill (deck + creator + curator + arena)
+10+, and you author your own skills
+├─ Simple skills (SKILL.md + light bash)
+│   → Deck governance only
+└─ Complex skills (dependencies, tests, types, multi-skill teamwork)
+    → Deck + Thin Skill Pattern (full lythoskill)
+
+Managing a skill ecosystem across teams/projects/sources
+→ Full lythoskill (deck + creator + curator + arena)
 ```
 
 **You do NOT need lythoskill if:**
@@ -63,6 +57,7 @@ How many skills do you have?
 - Your skill set never changes across projects
 - Your skills are pure SKILL.md files with no build step
 - You are a solo developer with one skill and no release cycle
+</details>
 
 ---
 
@@ -81,30 +76,28 @@ After install, restart your shell or run `source ~/.bashrc`.
 > **This tool requires Bun, not Node.** `bunx` is the correct runner. `npx` will fail unless Bun is also installed — the package shebang calls `env bun`. If you only have Node/npm, install Bun first.
 
 ```bash
-# 1. Add a skill from GitHub (downloads to cold pool + updates deck + links)
-#    Replace the example with a real skill repo you want to use
-bunx @lythos/skill-deck add github.com/SpillwaveSolutions/design-doc-mermaid
+# 1. Add a skill (downloads to cold pool + updates deck + links)
+#    Replace <owner>/<repo> with a real skill you want to use
+bunx @lythos/skill-deck add <owner>/<repo>
 
 # 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
-# design-doc-mermaid -> ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
 ```
 
 That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
-For monorepo skills (multiple skills in one repo), include the path to the skill directory:
+For monorepo skills (multiple skills in one repo), include the full path:
 
 ```bash
-# Monorepo example: specify the skill path inside the repo
-#    Replace with a real skill repo
-bunx @lythos/skill-deck add github.com/mattpocock/skills/skills/engineering/tdd
+# Monorepo: specify the skill path inside the repo
+bunx @lythos/skill-deck add github.com/owner/repo/skills/my-skill
 
 # Alternative: Vercel skills.sh
-bunx @lythos/skill-deck add mattpocock/skills --via skills.sh
+bunx @lythos/skill-deck add owner/repo --via skills.sh
 
 # Alternative: manual clone
-git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git \
-  ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
+git clone https://github.com/owner/repo.git \
+  ~/.agents/skill-repos/github.com/owner/repo
 # then edit skill-deck.toml and run `deck link`
 ```
 
@@ -124,7 +117,7 @@ If you are an AI agent reading this:
 1. Check `bun --version` — if missing, install Bun first (see Quick Start above)
 2. Run `bunx @lythos/skill-deck add <owner>/<repo>` to add a skill
 3. Run `bunx @lythos/skill-deck link` to sync the working set
-4. Skills are now in `.claude/skills/` — you can read them
+4. Skills are now in `.claude/skills/` — read them and follow their instructions
 
 ---
 
@@ -446,22 +439,26 @@ bunx @lythos/skill-arena \
 **Prerequisites:** Bun ≥1.0, pnpm ≥8.0.
 
 ```bash
+# Install Bun (if missing)
+curl -fsSL https://bun.sh/install | bash
+
+# Install pnpm (if missing)
+npm install -g pnpm
+
 # 1. Install workspace dependencies
 pnpm install
 
-# 2. Sync the local skill deck (links skills/ → .claude/skills/)
+# 2. Sync the local skill deck
 bun packages/lythoskill-deck/src/cli.ts link
 
-# 3. Verify everything works
+# 3. Verify environment
 bun packages/lythoskill-project-cortex/src/cli.ts stats
-
-# Direct execution (Bun runs TypeScript natively)
-bun packages/lythoskill-deck/src/cli.ts link
-bun packages/lythoskill-creator/src/cli.ts init my-test
 
 # Run tests
 bun packages/lythoskill-deck/test/runner.ts
 ```
+
+All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and PR workflow.
 
 ---
 
