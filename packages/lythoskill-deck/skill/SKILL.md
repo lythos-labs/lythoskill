@@ -85,6 +85,15 @@ causing `EEXIST` errors on recreation. If writing custom working-set scripts, us
 **SKILL.md type field**: Only `standard` or `flow` are valid (agent platform validation).
 `innate`/`tool`/`combo`/`transient` are **skill-deck.toml section names**, not
 SKILL.md types. Using them as types causes silent skip.
+**Skill locators**: `skill-deck.toml` accepts two locator styles. The cold pool uses Go module-style layout (`host/owner/repo/skills/name`).
+
+| Style | Example | Reliability |
+|-------|---------|-------------|
+| Bare name | `lythoskill-deck` | Fragile — only works if skill is at cold-pool root or wins the flat-scan lottery |
+| Fully-qualified | `github.com/lythos-labs/lythoskill/lythoskill-deck` | Reliable — deterministic path matching |
+
+Bare names fail for monorepo skills because the flat-scan searches `readdirSync` order and is non-deterministic when multiple repos contain the same name. **Always use fully-qualified locators.**
+
 **deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
 to avoid collisions with the Agent Skills open standard or future platform extensions.
 **Standard compliance**: lythoskill-deck does not modify the Agent Skills standard.
