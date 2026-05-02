@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.6.2
+version: 0.7.0
 description: |
   Session memory writer. Dumps what file exploration cannot recover —
   pitfalls, true working-tree state, uncommitted decisions, specific  next steps — into daily/YYYY-MM-DD.md. Forms CQRS write-side pair
