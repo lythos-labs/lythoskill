@@ -14,6 +14,8 @@ when_to_use: |
   lythoskill skill template, new lythoskill repository.
   NOT for: writing a generic skill (just create SKILL.md directly),
   creating a plain npm CLI tool (use your usual scaffolding).
+allowed-tools:
+  - Bash(bunx @lythos/skill-creator *)
 ---
 
 # lythoskill-creator
