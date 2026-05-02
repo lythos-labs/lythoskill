@@ -6,7 +6,6 @@ description: |
   User-acceptance-driven release workflow using heredoc patch files.  Each iteration produces a timestamped pr-<timestamp>-<desc>.sh that  self-archives after execution. No tag without explicit user LGTM.  Supports rollback via archived backups.
 when_to_use: |
   LGTM, ship it, looks good, tag it, rollback, broke it, create patch,  apply changes, version release, 对了, 就是这样, 我觉得ok, 可以打tag,  改坏了, 回滚, 打tag.
-allowed-tools: []
 ---
 # Red-Green Release Workflow
 > No tag without LGTM. Every change is a self-archiving patch. Every state is rollback-able.
