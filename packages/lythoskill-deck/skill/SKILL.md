@@ -44,6 +44,11 @@ bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
 bunx @lythos/skill-deck add github.com/owner/repo/skill-name
 # Or via Vercel skills.sh
 bunx @lythos/skill-deck add owner/repo --via skills.sh
+
+# Pull latest versions of declared skills from upstream
+bunx @lythos/skill-deck update
+# Then re-sync working set
+bunx @lythos/skill-deck link
 ```
 `link` is a **reconciler** that converges actual state to declared state:
 undeclared symlinks → removed; broken/circular symlinks → recreated;
@@ -54,6 +59,10 @@ non-symlink entities → backed up then removed; missing declared skills → lin
 > or place it manually in the cold pool.
 
 You never diagnose the working set manually. Just run `link`.
+
+`update` pulls the latest version of each declared skill from its upstream git
+repository. It skips `localhost/*` skills (user-managed) and non-git directories.
+After `update`, run `link` to sync any changed skills into the working set.
 ## Initialize
 ```bash
 # Copy template and edit [innate]/[tool] sections
