@@ -5,7 +5,6 @@ type: standard
 description: |
   A minimal hello-world skill. No scripts, no dependencies.
   Demonstrates the simplest possible thin-skill: just a SKILL.md.
-allowed-tools: []
 ---
 
 # lythoskill-hello-world
@@ -22,10 +21,3 @@ Prints a greeting when activated. Used to verify:
 ## Usage
 
 No scripts required. The skill is purely descriptive.
-
-## Supporting References
-Read these **only when the specific topic arises**:
-
-| When you need to… | Read |
-|--------------------|------|
-| Understand how a zero-script skill works in the thin-skill pattern | [references/zero-script-anatomy.md](./references/zero-script-anatomy.md) |

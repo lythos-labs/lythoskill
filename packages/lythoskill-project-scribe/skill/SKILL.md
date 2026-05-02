@@ -8,8 +8,6 @@ description: |
   with project-onboarding (read-side).
 when_to_use: |
   Record progress, update task, write daily, log a pitfall, session  ending, handoff, LGTM, wrap up, context limit approaching,  踩坑了, 记录一下, 先到这里, 就这样, session 要结束了.
-allowed-tools:
-  - Bash(bunx @lythos/project-cortex *)
 ---
 
 # Project Scribe
@@ -93,8 +91,6 @@ handoff: "⚠️ The following changes are in conversation artifacts only, not o
 during the pre-handoff check. If not, skip — scribe works independently.
 
 ## Supporting References
-Read these **only when the specific topic arises**:
-
 | When you need to… | Read |
 |--------------------|------|
 | See the full daily file template with all sections | [references/daily-template.md](./references/daily-template.md) |
