@@ -1,20 +1,21 @@
 [deck]
 max_cards = 10
-cold_pool = "."
+cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
 [innate]
 skills = [
-  "lythoskill-deck",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
 ]
 
 [tool]
 skills = [
-  "lythoskill-project-cortex",
-  "lythoskill-arena",
-  "lythoskill-curator",
-  "lythoskill-project-scribe",
-  "lythoskill-project-onboarding",
-  "lythoskill-red-green-release",
-  "lythoskill-coach",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
+  "github.com/lythos-labs/lythoskill/skills/lythoskill-creator",
 ]

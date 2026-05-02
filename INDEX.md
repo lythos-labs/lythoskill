@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/2 22:52:27
+> 自动生成于 2026/5/2 23:16:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 33 | 进行中: 0, 待验收: 0, 已完成: 16 |
+| Tasks | 34 | 进行中: 4, 待验收: 3, 已完成: 16 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
 | ADRs | 26 | 已接受: 18 |
 
@@ -31,24 +31,22 @@
 
 ## 📄 Tasks
 
-### 待办 (8)
+### 待办 (1)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
-- [ ] **TASK-20260430011203412**: Move root package.json dependencies to individual packages
-- [ ] **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
-- [ ] **TASK-20260430011206610**: Create root tsconfig.base.json and unify per-package tsconfig
-- [ ] **TASK-20260430011207805**: Standardize package.json template across all packages
-- [ ] **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
-- [ ] **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
 
-### 进行中 (0)
+### 进行中 (4)
 
-_无_
+- 🔄 **TASK-20260430011203412**: Move root package.json dependencies to individual packages
+- 🔄 **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
+- 🔄 **TASK-20260430011206610**: Create root tsconfig.base.json and unify per-package tsconfig
+- 🔄 **TASK-20260430011207805**: Standardize package.json template across all packages
 
-### 待验收 (0)
+### 待验收 (3)
 
-_无_
+- 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
+- 🔍 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
+- 🔍 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
 
 ### 已完成 (16)
 
@@ -73,7 +71,7 @@ _无_
 
 _无_
 
-### 终止 (8)
+### 终止 (9)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -83,6 +81,7 @@ _无_
 - 🛑 ~~TASK-20260424115735441~~: Curator CLI 实现文档化：扫描逻辑和 schema 说明
 - 🛑 ~~TASK-20260424142722389~~: Curator 全局扫描：冷池 + 活跃池 + 项目本地 skills 统一视图
 - 🛑 ~~TASK-20260502225209862~~: Demo: cancelled flow (backlog → in-progress → terminate)
+- 🛑 ~~TASK-20260502230901152~~: Fix login bug
 
 ---
 
