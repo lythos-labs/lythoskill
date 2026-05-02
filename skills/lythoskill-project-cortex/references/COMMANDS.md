@@ -17,6 +17,7 @@ Commands:
   done <task-id>        Move task to completed (must be in review)
   suspend <task-id>     Move task to suspended
   resume <task-id>      Move suspended task back to in-progress
+  reject <task-id>      Move reviewed task back to in-progress (re-work)
   terminate <task-id>   Move task to terminated (any status)
   archive <task-id>     Move completed task to archived
 
