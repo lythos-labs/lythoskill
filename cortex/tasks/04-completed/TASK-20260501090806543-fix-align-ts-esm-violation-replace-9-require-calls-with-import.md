@@ -5,6 +5,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-01 | Created |
+| in-progress | 2026-05-02 | Work completed |
+| completed | 2026-05-02 | Done |
 | completed | 2026-05-01 | Fixed: replaced all require() with top-level ESM imports |
 
 ## 背景与目标

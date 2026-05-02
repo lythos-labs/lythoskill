@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-04-23 | Created |
+| terminated | 2026-05-02 | Abandoned: early task (04-23) created before specification stabilized. Description outdated. |
 
 ## 背景与目标
 

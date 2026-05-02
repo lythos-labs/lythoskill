@@ -1,11 +1,13 @@
-# TASK-20260430012458866: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
+# TASK-20260424115734221: Red-green-release 在 README/CLAUDE.md 中补全文档
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-04-29 | Created |
+| backlog | 2026-04-24 | Created |
+| in-progress | 2026-05-02 | Work completed |
+| completed | 2026-05-02 | Done |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260430012458866)
+feat(scope): description (TASK-20260424115734221)
 
 - Detail 1
 - Detail 2

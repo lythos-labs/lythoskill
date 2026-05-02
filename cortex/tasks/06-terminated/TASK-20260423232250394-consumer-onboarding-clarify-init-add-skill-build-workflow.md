@@ -1,11 +1,12 @@
-# TASK-20260424115734221: Red-green-release 在 README/CLAUDE.md 中补全文档
+# TASK-20260423232250394: Consumer onboarding: clarify init → add-skill → build workflow
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-04-24 | Created |
+| backlog | 2026-04-23 | Created |
+| terminated | 2026-05-02 | Abandoned: early task (04-23) created before specification stabilized. Description outdated. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260424115734221)
+feat(scope): description (TASK-20260423232250394)
 
 - Detail 1
 - Detail 2

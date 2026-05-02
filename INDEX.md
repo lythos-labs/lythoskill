@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/2 22:36:57
+> 自动生成于 2026/5/2 22:43:37
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 29 | 进行中: 0, 待验收: 0, 已完成: 11 |
+| Tasks | 29 | 进行中: 0, 待验收: 0, 已完成: 14 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
 | ADRs | 26 | 已接受: 18 |
 
@@ -31,26 +31,16 @@
 
 ## 📄 Tasks
 
-### 待办 (18)
+### 待办 (8)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
-- [ ] **TASK-20260423162055407**: Port skill-curator to lythoskill ecosystem
-- [ ] **TASK-20260423185733611**: Playground Task
 - [ ] **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
-- [ ] **TASK-20260423232250394**: Consumer onboarding: clarify init → add-skill → build workflow
-- [ ] **TASK-20260424115732668**: Handoff 时效性机制：git status 漂移检测
-- [ ] **TASK-20260424115734221**: Red-green-release 在 README/CLAUDE.md 中补全文档
-- [ ] **TASK-20260424115735441**: Curator CLI 实现文档化：扫描逻辑和 schema 说明
-- [ ] **TASK-20260424142722389**: Curator 全局扫描：冷池 + 活跃池 + 项目本地 skills 统一视图
 - [ ] **TASK-20260430011203412**: Move root package.json dependencies to individual packages
 - [ ] **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
 - [ ] **TASK-20260430011206610**: Create root tsconfig.base.json and unify per-package tsconfig
 - [ ] **TASK-20260430011207805**: Standardize package.json template across all packages
 - [ ] **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
-- [ ] **TASK-20260430012458866**: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
 - [ ] **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
-- [ ] **TASK-20260501090806543**: Fix align.ts ESM violation: replace 9 require() calls with import
 
 ### 进行中 (0)
 
@@ -60,12 +50,15 @@ _无_
 
 _无_
 
-### 已完成 (11)
+### 已完成 (14)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
+- ✅ ~~TASK-20260424115734221~~: Red-green-release 在 README/CLAUDE.md 中补全文档
 - ✅ ~~TASK-20260429225846405~~: Add --help and validate subcommand to lythoskill-deck CLI
+- ✅ ~~TASK-20260430012458866~~: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
 - ✅ ~~TASK-20260430174753504~~: Implement deck add CLI command with git clone and skills.sh backends
+- ✅ ~~TASK-20260501090806543~~: Fix align.ts ESM violation: replace 9 require() calls with import
 - ✅ ~~TASK-20260501091722647~~: README Quick Start: add developer branch for repo clone context
 - ✅ ~~TASK-20260501091724005~~: README: add Prerequisites section (Bun + pnpm) at top
 - ✅ ~~TASK-20260501091725299~~: AGENTS.md: fix HANDOFF-TEMPLATE.md missing path
@@ -78,9 +71,15 @@ _无_
 
 _无_
 
-### 终止 (0)
+### 终止 (7)
 
-_无_
+- 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
+- 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
+- 🛑 ~~TASK-20260423185733611~~: Playground Task
+- 🛑 ~~TASK-20260423232250394~~: Consumer onboarding: clarify init → add-skill → build workflow
+- 🛑 ~~TASK-20260424115732668~~: Handoff 时效性机制：git status 漂移检测
+- 🛑 ~~TASK-20260424115735441~~: Curator CLI 实现文档化：扫描逻辑和 schema 说明
+- 🛑 ~~TASK-20260424142722389~~: Curator 全局扫描：冷池 + 活跃池 + 项目本地 skills 统一视图
 
 ---
 

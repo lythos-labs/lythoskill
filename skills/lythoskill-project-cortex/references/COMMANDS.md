@@ -12,7 +12,13 @@ Commands:
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
   probe                 Check status consistency (dir vs Status History)
-  done <task-id>        Move task to completed and regenerate index
+  start <task-id>       Move task to in-progress
+  review <task-id>      Move task to review
+  done <task-id>        Move task to completed (must be in review)
+  suspend <task-id>     Move task to suspended
+  resume <task-id>      Move suspended task back to in-progress
+  terminate <task-id>   Move task to terminated (any status)
+  archive <task-id>     Move completed task to archived
 
 Examples:
   lythoskill-project-cortex init
