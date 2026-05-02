@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/3 00:11:13
+> 自动生成于 2026/5/3 01:12:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 35 | 进行中: 6, 待验收: 1, 已完成: 17 |
-| Epics | 7 | 活跃: 6, 已归档: 1 |
-| ADRs | 28 | 已接受: 20 |
+| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 17 |
+| Epics | 8 | 活跃: 7, 已归档: 1 |
+| ADRs | 30 | 已接受: 20 |
 
 ---
 
@@ -22,6 +22,7 @@
 - **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
 - **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
 - **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
+- **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
 
 ### 已归档
 
@@ -31,9 +32,15 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (7)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
+- [ ] **TASK-20260503010227902**: 扩展 cortex CLI 状态机命令(ADR + epic 流转动词)
+- [ ] **TASK-20260503010228602**: 实现 cortex epic create 双轨 + checklist + probe lane 扩展
+- [ ] **TASK-20260503010229362**: 实现 husky post-commit trailer 解析 + 跟随 commit
+- [ ] **TASK-20260503010230554**: 实现 husky pre-commit 软提醒(in-progress 非空)
+- [ ] **TASK-20260503010231389**: 三层文档镜像(AGENTS/CLAUDE/memory)+ cortex skill/README 同步
+- [ ] **TASK-20260503010231988**: BDD 覆盖 cortex trailer + lane FSM(用 test-utils + subagent)
 
 ### 进行中 (6)
 
@@ -116,6 +123,8 @@ _无_
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
+- 🤔 **ADR-20260503003314901** (01-proposed): git-coupling for cortex governance documents via commit trailer
+- 🤔 **ADR-20260503003315478** (01-proposed): epic granularity discipline — one outcome per iteration
 
 ---
 
