@@ -91,6 +91,8 @@ handoff: "⚠️ The following changes are in conversation artifacts only, not o
 during the pre-handoff check. If not, skip — scribe works independently.
 
 ## Supporting References
+Read these **only when the specific topic arises**:
+
 | When you need to… | Read |
 |--------------------|------|
 | See the full daily file template with all sections | [references/daily-template.md](./references/daily-template.md) |

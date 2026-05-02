@@ -78,3 +78,11 @@ bunx lythoskill-creator align --fix
 Checks for: outdated `package.json` scripts, missing `pnpm-workspace.yaml` entries, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.
+
+## Supporting References
+Read these **only when the specific topic arises**:
+
+| When you need to… | Read |
+|--------------------|------|
+| See the full list of template variables available during build | [references/template-variables.md](./references/template-variables.md) |
+| Understand every check that `align` performs and which are auto-fixable | [references/align-checklist.md](./references/align-checklist.md) |
