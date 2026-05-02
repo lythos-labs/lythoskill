@@ -12,8 +12,9 @@ import YAML from "yaml";
 import { createHash } from "node:crypto";
 import {
   existsSync, mkdirSync, readFileSync, readdirSync,
-  symlinkSync, lstatSync, rmSync, writeFileSync,
+  symlinkSync, lstatSync, rmSync, statSync, writeFileSync,
 } from "node:fs";
+import { execSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
 import {
@@ -124,9 +125,33 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
   return { path: null };
 }
 
+// ── 备份工具 ────────────────────────────────────────────────
+
+function calculateDirSize(dir: string): number {
+  let total = 0;
+  try {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        total += calculateDirSize(p);
+      } else if (entry.isFile()) {
+        total += statSync(p).size;
+      }
+    }
+  } catch {}
+  return total;
+}
+
+function formatBackupDate(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+const BACKUP_SIZE_THRESHOLD = 100 * 1024 * 1024; // 100MB
+
 // ── 主流程 ──────────────────────────────────────────────────
 
-export function linkDeck(cliDeckPath?: string, cliWorkdir?: string): void {
+export function linkDeck(cliDeckPath?: string, cliWorkdir?: string, noBackup?: boolean): void {
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 const DECK_PATH = cliDeck
   ? resolve(cliDeck)
@@ -262,23 +287,74 @@ if (
 
 mkdirSync(WORKING_SET, { recursive: true });
 
-// 清理未声明的条目（只删 symlink，防呆）
+// Pre-flight: 备份并清理非 symlink 实体（真实目录/文件）
+const nonSymlinks: string[] = [];
+try {
+  for (const entry of readdirSync(WORKING_SET)) {
+    if (entry.startsWith("_") || entry.startsWith(".")) continue;
+    const entryPath = join(WORKING_SET, entry);
+    try {
+      const st = lstatSync(entryPath);
+      if (!st.isSymbolicLink()) {
+        nonSymlinks.push(entry);
+      }
+    } catch { continue; }
+  }
+} catch {}
+
+if (nonSymlinks.length > 0) {
+  // 计算总大小
+  let totalSize = 0;
+  for (const e of nonSymlinks) {
+    totalSize += calculateDirSize(join(WORKING_SET, e));
+  }
+
+  if (!noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
+    console.error(`❌ Found ${nonSymlinks.length} real directories in ${relative(PROJECT_DIR, WORKING_SET)} (> 100MB total).`);
+    console.error(`   Manual review required: ${nonSymlinks.join(", ")}`);
+    console.error(`   Use --no-backup to skip backup (removes without saving), or clean up manually.`);
+    process.exit(1);
+  }
+
+  if (!noBackup) {
+    const bakName = `skills.bak.${formatBackupDate(new Date())}.tar.gz`;
+    const bakPath = join(PROJECT_DIR, ".claude", bakName);
+    mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
+
+    const tarArgs = [
+      "czf", bakPath,
+      ...nonSymlinks.map(e => relative(PROJECT_DIR, join(WORKING_SET, e))),
+    ];
+    try {
+      execSync("tar " + tarArgs.map(a => a.includes(" ") ? `"${a}"` : a).join(" "), {
+        cwd: PROJECT_DIR,
+        stdio: "pipe",
+      });
+      console.log(`📦 Backed up ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} to .claude/${bakName}`);
+    } catch (err: any) {
+      console.error(`❌ Backup failed: ${err.message || err}`);
+      console.error(`   Use --no-backup to skip backup, or fix the issue and retry.`);
+      process.exit(1);
+    }
+  } else {
+    console.log(`⚠️  --no-backup: removing ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} without backup`);
+  }
+
+  for (const e of nonSymlinks) {
+    rmSync(join(WORKING_SET, e), { recursive: true, force: true });
+  }
+}
+
+// 清理未声明的 symlink
 const declaredNames = new Set(declared.map(d => d.name.split("/")[0]));
 try {
   for (const entry of readdirSync(WORKING_SET)) {
-    if (entry.startsWith("_")) continue;
+    if (entry.startsWith("_") || entry.startsWith(".")) continue;
     if (!declaredNames.has(entry)) {
       const entryPath = join(WORKING_SET, entry);
       try {
         const st = lstatSync(entryPath);
-        if (!st.isSymbolicLink()) {
-          console.warn(`⚠️  Skipping non-symlink entry: ${entry}`);
-          console.warn(`   → ${entry} is a real directory, not a symlink. Deck only manages symlinks.`);
-          const cpRel2 = relative(PROJECT_DIR, COLD_POOL);
-          const cpHint2 = cpRel2 === "" ? `skills/${entry}` : `${cpRel2}/${entry}`;
-          console.warn(`     Move it to your cold pool (${cpHint2}) and run link again.`);
-          continue;
-        }
+        if (!st.isSymbolicLink()) continue; // 已在上文处理
       } catch { continue; }
       rmSync(entryPath, { recursive: true, force: true });
       console.log(`  🗑️  Removed: ${entry}`);

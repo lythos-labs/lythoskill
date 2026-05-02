@@ -1,6 +1,6 @@
 # Hermes Agent 自主进化与 Deck 治理的深层对接
 
-> 类型: 调研报告 | 关联: [lythoskill-deck](../../skills/lythoskill-deck), [skill-selection-pipeline](../01-patterns/skill-selection-pipeline.md), [thin-skill-pattern](../01-patterns/thin-skill-pattern.md)
+> 类型: 调研报告 | 关联: [lythoskill-deck](https://github.com/lythos-labs/lythoskill/tree/main/skills/lythoskill-deck), [skill-selection-pipeline](../01-patterns/skill-selection-pipeline.md), [thin-skill-pattern](../01-patterns/thin-skill-pattern.md)
 >
 > 来源: Web 搜索 + 社区 issues 归纳 + 第一性原理推演
 

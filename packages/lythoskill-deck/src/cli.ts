@@ -15,6 +15,7 @@ const HELP_CONFIG = {
   options: [
     { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
     { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
+    { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
     { flag: '--via <backend>', description: 'Download backend: git (default) | skills.sh' },
   ],
 }
@@ -29,6 +30,7 @@ const viaFlagIdx = args.indexOf('--via')
 const deckPath = deckFlagIdx >= 0 ? args[deckFlagIdx + 1] : undefined
 const workdir = workdirFlagIdx >= 0 ? args[workdirFlagIdx + 1] : undefined
 const via = viaFlagIdx >= 0 ? args[viaFlagIdx + 1] : undefined
+const noBackup = args.includes('--no-backup')
 
 switch (command) {
   case '--help':
@@ -36,7 +38,7 @@ switch (command) {
     console.log(formatHelp(HELP_CONFIG))
     process.exit(0)
   case 'link':
-    linkDeck(deckPath, workdir)
+    linkDeck(deckPath, workdir, noBackup)
     break
   case 'add': {
     const locator = args[1]

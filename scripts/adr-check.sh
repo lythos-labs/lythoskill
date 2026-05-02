@@ -136,6 +136,19 @@ if [ "$TYPE_ERRORS" -eq 0 ]; then
 fi
 echo ""
 
+# ── ADR-20260502010100000: Backup strategy docs consistency ──────
+echo "[ADR-20260502010100000] SKILL.md must not contradict backup strategy"
+CONTRADICTORY_DOCS=$(grep -rn "Deck only manages symlinks" packages/*/skill/SKILL.md 2>/dev/null || true)
+if [ -n "$CONTRADICTORY_DOCS" ]; then
+  error "Found outdated 'Deck only manages symlinks' text (contradicts auto-backup behavior):"
+  echo "$CONTRADICTORY_DOCS" | while read line; do
+    echo "     $line"
+  done
+else
+  ok "No contradictory backup strategy text in SKILL.md"
+fi
+echo ""
+
 # ── Summary ──────────────────────────────────────────────────────
 echo "────────────────────────────────────────"
 if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
