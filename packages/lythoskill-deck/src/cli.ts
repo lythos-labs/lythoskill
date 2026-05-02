@@ -2,6 +2,7 @@
 import { linkDeck } from './link.js'
 import { validateDeck } from './validate.js'
 import { addSkill } from './add.js'
+import { updateDeck } from './update.js'
 import { formatHelp } from './help.js'
 
 const HELP_CONFIG = {
@@ -10,6 +11,7 @@ const HELP_CONFIG = {
   commands: [
     { name: 'link', description: 'Sync working set with skill-deck.toml' },
     { name: 'add', description: 'Download skill to cold pool and add to deck', args: '<locator>' },
+    { name: 'update', description: 'Pull latest versions of declared skills from upstream' },
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
   ],
   options: [
@@ -49,6 +51,9 @@ switch (command) {
     await addSkill(locator, { via, deck: deckPath, workdir })
     break
   }
+  case 'update':
+    updateDeck(deckPath, workdir)
+    break
   case 'validate':
     validateDeck(deckPath, workdir)
     break
