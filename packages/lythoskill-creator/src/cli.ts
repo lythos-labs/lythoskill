@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { init } from './init.js'
 import { build } from './build.js'
@@ -26,7 +26,7 @@ switch (command) {
       const root = process.cwd()
       const packagesDir = join(root, 'packages')
       const skills = readdirSync(packagesDir).filter((name) =>
-        name.startsWith('lythoskill-')
+        name.startsWith('lythoskill-') && existsSync(join(packagesDir, name, 'skill'))
       )
       for (const skill of skills) {
         console.log(`\n=== Building ${skill} ===`)

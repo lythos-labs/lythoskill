@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/2 23:26:27
+> 自动生成于 2026/5/2 23:39:02
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 34 | 进行中: 6, 待验收: 1, 已完成: 16 |
+| Tasks | 35 | 进行中: 6, 待验收: 1, 已完成: 16 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
-| ADRs | 26 | 已接受: 18 |
+| ADRs | 27 | 已接受: 19 |
 
 ---
 
@@ -31,9 +31,10 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (2)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
+- [ ] **TASK-20260502233741335**: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 
 ### 进行中 (6)
 
@@ -113,6 +114,7 @@ _无_
 - 🤔 **ADR-20260502012643444** (01-proposed): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
 - 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
+- ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
 
 ---
 

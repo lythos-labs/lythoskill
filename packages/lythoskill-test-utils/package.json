@@ -1,0 +1,11 @@
+{
+  "name": "@lythos/test-utils",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    "./bdd-runner": "./src/bdd-runner.ts",
+    "./skill-fixtures": "./src/skill-fixtures.ts"
+  }
+}
