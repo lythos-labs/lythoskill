@@ -110,6 +110,20 @@ Bare names fail for monorepo skills because the flat-scan searches `readdirSync`
 
 **deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
 to avoid collisions with the Agent Skills open standard or future platform extensions.
+**deck_skill_type**: Use the custom field `deck_skill_type` to declare a skill's
+intrinsic deck role — never overload the official `type` field. `type` is reserved for
+agent platform validation (`standard` or `flow` only); using `type: combo` causes Kimi
+CLI to silently skip the skill.
+
+| `deck_skill_type` | When to declare | Why |
+|-------------------|-----------------|-----|
+| `combo` | Skill carries `deck_delegates` routing logic | Combo is an architecture mode, not a deployment choice |
+| `transient` | Skill is a temporary workaround with `expires` | Signals "this skill expects to disappear as the ecosystem evolves" |
+| `fork` | Skill is a local adaptation of an upstream skill | Upstream's desc/behavior structurally conflicts with our arena-tested conclusions |
+
+`innate` / `tool` are **deck-level deployment choices** declared in `skill-deck.toml`
+sections, not single-card properties. The same skill can be `innate` in one deck and
+`tool` in another.
 **Standard compliance**: lythoskill-deck does not modify the Agent Skills standard.
 Every skill remains a directory with SKILL.md. Deck only controls which directories
 appear in `.claude/skills/`. Without deck, skills work normally via manual placement.

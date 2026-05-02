@@ -32,6 +32,7 @@ interface SkillMeta {
   tags: string[];
   // lythoskill governance extensions
   deckDependencies: Record<string, any>;
+  deckSkillType: string | null; // combo | transient | fork | null
 }
 
 // ── Frontmatter Parser (fixed for multiline) ─────────────────
@@ -135,6 +136,7 @@ export function scanSkill(path: string): SkillMeta | null {
     tags,
     // lythoskill extensions
     deckDependencies: frontmatter.deck_dependencies || {},
+    deckSkillType: toString(frontmatter.deck_skill_type) || null,
   };
 }
 
@@ -167,19 +169,23 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
       author TEXT,
       user_invocable INTEGER,
       tags TEXT,
-      deck_dependencies TEXT
+      deck_dependencies TEXT,
+      deck_skill_type TEXT
     )
   `)
+  // Schema migration: add columns that may be missing from older indexes
+  try { db.run(`ALTER TABLE skills ADD COLUMN deck_skill_type TEXT`); } catch {}
+  db.run(`CREATE INDEX IF NOT EXISTS idx_skills_deck_skill_type ON skills(deck_skill_type)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type)`)
   db.run(`CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(name)`)
 
   const insert = db.query(`
     INSERT OR REPLACE INTO skills
       (name, description, type, version, path, niches, managed_dirs, trigger_phrases, has_scripts, has_examples, body_preview,
-       source, when_to_use, allowed_tools, author, user_invocable, tags, deck_dependencies)
+       source, when_to_use, allowed_tools, author, user_invocable, tags, deck_dependencies, deck_skill_type)
     VALUES
       ($name, $description, $type, $version, $path, $niches, $managed_dirs, $trigger_phrases, $has_scripts, $has_examples, $body_preview,
-       $source, $when_to_use, $allowed_tools, $author, $user_invocable, $tags, $deck_dependencies)
+       $source, $when_to_use, $allowed_tools, $author, $user_invocable, $tags, $deck_dependencies, $deck_skill_type)
   `)
 
   for (const s of skills) {
@@ -202,6 +208,7 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
       $user_invocable: s.userInvocable != null ? (s.userInvocable ? 1 : 0) : null,
       $tags: JSON.stringify(s.tags),
       $deck_dependencies: JSON.stringify(s.deckDependencies),
+      $deck_skill_type: s.deckSkillType,
     })
   }
 
@@ -239,6 +246,63 @@ function parseCuratorArgs(argv: string[]) {
 }
 
 // ── Main ─────────────────────────────────────────────────────
+
+// ── Backup & Restore ─────────────────────────────────────────
+
+function backupIndex(outputDir: string): { registryBak: string; dbBak: string } | null {
+  const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
+  const registryPath = join(outputDir, 'REGISTRY.json');
+  const dbPath = join(outputDir, 'catalog.db');
+  let registryBak: string | null = null;
+  let dbBak: string | null = null;
+
+  if (existsSync(registryPath)) {
+    registryBak = `${registryPath}.bak.${timestamp}`;
+    writeFileSync(registryBak, readFileSync(registryPath, 'utf-8'));
+  }
+  if (existsSync(dbPath)) {
+    dbBak = `${dbPath}.bak.${timestamp}`;
+    // SQLite backup: just copy the file
+    writeFileSync(dbBak, readFileSync(dbPath));
+  }
+
+  if (registryBak || dbBak) {
+    console.log(`🛡️  Backup created:`);
+    if (registryBak) console.log(`   REGISTRY.json → ${basename(registryBak)}`);
+    if (dbBak) console.log(`   catalog.db → ${basename(dbBak)}`);
+  }
+  return registryBak || dbBak ? { registryBak: registryBak || '', dbBak: dbBak || '' } : null;
+}
+
+function restoreIndex(outputDir: string) {
+  const registryPath = join(outputDir, 'REGISTRY.json');
+  const dbPath = join(outputDir, 'catalog.db');
+
+  // Find the most recent backup for each
+  const entries = readdirSync(outputDir, { withFileTypes: true })
+    .filter(e => e.isFile() && (e.name.startsWith('REGISTRY.json.bak.') || e.name.startsWith('catalog.db.bak.')))
+    .map(e => ({ name: e.name, path: join(outputDir, e.name), mtime: statSync(join(outputDir, e.name)).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime);
+
+  const regBak = entries.find(e => e.name.startsWith('REGISTRY.json.bak.'));
+  const dbBak = entries.find(e => e.name.startsWith('catalog.db.bak.'));
+
+  if (!regBak && !dbBak) {
+    console.error('❌ No backup found to restore.');
+    process.exit(1);
+  }
+
+  if (regBak) {
+    writeFileSync(registryPath, readFileSync(regBak.path, 'utf-8'));
+    console.log(`✅ Restored REGISTRY.json from ${regBak.name}`);
+  }
+  if (dbBak) {
+    writeFileSync(dbPath, readFileSync(dbBak.path));
+    console.log(`✅ Restored catalog.db from ${dbBak.name}`);
+  }
+}
+
+// ── Skill Discovery ──────────────────────────────────────────
 
 function findSkillDirs(root: string): string[] {
   const results: string[] = [];
@@ -279,18 +343,29 @@ export function runCurator(argv: string[]) {
 
   const byType: Record<string, SkillMeta[]> = {};
   const byManagedDir: Record<string, string[]> = {};
+  const byDeckSkillType: Record<string, SkillMeta[]> = {};
   for (const s of skills) {
     byType[s.type] = byType[s.type] || []; byType[s.type].push(s);
     s.managedDirs.forEach(d => { byManagedDir[d] = byManagedDir[d] || []; byManagedDir[d].push(s.name); });
+    if (s.deckSkillType) {
+      byDeckSkillType[s.deckSkillType] = byDeckSkillType[s.deckSkillType] || [];
+      byDeckSkillType[s.deckSkillType].push(s);
+    }
   }
   console.log(`\n📊 Types: ${Object.entries(byType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+  if (Object.keys(byDeckSkillType).length > 0) {
+    console.log(`\n🔖 Deck skill types: ${Object.entries(byDeckSkillType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+  }
   console.log(`\n📂 Dir overlap:`);
   Object.entries(byManagedDir).filter(([_, n]) => n.length > 1).forEach(([d, n]) => console.log(`   ${d}: ${n.join(', ')}`));
 
   mkdirSync(outputDir, { recursive: true });
 
+  // Backup before rebuild (reconciler hygiene: never destroy without backup)
+  backupIndex(outputDir);
+
   const outPath = join(outputDir, 'REGISTRY.json');
-  writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir } }, null, 2));
+  writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir, byDeckSkillType } }, null, 2));
   console.log(`\n💾 Registry: ${outPath}`);
 
   const dbPath = join(outputDir, 'catalog.db');
@@ -397,10 +472,12 @@ if (import.meta.main) {
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
+    console.log('       lythoskill-curator restore [--output <dir>]')
     console.log('')
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
     console.log('  query <SQL>           Query the catalog SQLite database (output: JSON array)')
+    console.log('  restore               Roll back to the most recent backup')
     console.log('')
     console.log('Options:')
     console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
@@ -410,6 +487,9 @@ if (import.meta.main) {
 
   if (cmd === 'query') {
     runQuery(args.slice(1))
+  } else if (cmd === 'restore') {
+    const { outputDir } = parseCuratorArgs(args.slice(1));
+    restoreIndex(outputDir);
   } else {
     runCurator(args)
   }

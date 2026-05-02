@@ -3,8 +3,12 @@ name: lythoskill-curator
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Read-only indexer for skill cold pools. Scans all local skill  directories, extracts SKILL.md frontmatter, and produces
-  REGISTRY.json + catalog.db for structured querying. Does not  install, modify, or recommend skills — only surfaces what exists.
+  Read-only indexer for skill cold pools. Scans all local skill
+  directories, extracts SKILL.md frontmatter, and produces
+  REGISTRY.json + catalog.db for structured querying. Does not
+  install, modify, or recommend skills — only surfaces what exists.
+  Reconciler-style: any state → scan → converges to clean index.
+  Auto-backs up old index before rebuild; rollback via `restore`.
 when_to_use: |
   List all skills, what skills do I have, scan skill pool, skill index,  discover skills, update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
 allowed-tools:
@@ -41,6 +45,17 @@ bunx @lythos/skill-curator [POOL_PATH]
 # Custom output:
 bunx @lythos/skill-curator ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
 ```
+Curator is a **reconciler** (K8s-style): no matter what state the index is in
+(stale, corrupted, missing), running `curator` converges it to a clean, current
+index. Old index is automatically backed up before rebuild.
+
+### Rollback (if rebuild produces bad data)
+```bash
+# Restore the most recent backup
+bunx @lythos/skill-curator restore
+# Custom output directory:
+bunx @lythos/skill-curator restore --output ~/.agents/lythos/skill-curator/
+```
 
 ### Query the index
 ```bash
@@ -63,6 +78,10 @@ bunx @lythos/skill-curator query "SELECT name, managed_dirs FROM skills WHERE ma
 # Duplicate detection (same name, different sources)
 bunx @lythos/skill-curator query \
   "SELECT name, path FROM skills WHERE name IN (SELECT name FROM skills GROUP BY name HAVING COUNT(*) > 1)"
+# Combo / transient / fork skills (localhost-first types)
+bunx @lythos/skill-curator query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
+# Skills by deck governance type
+bunx @lythos/skill-curator query "SELECT name, deck_skill_type, path FROM skills WHERE deck_skill_type = 'combo'"
 ```
 
 ## Curator + Deck Workflow
@@ -80,6 +99,15 @@ arena (optional)                   "Verify it"
 Curator does **not**: score, rank, recommend, modify toml, or download skills.
 Curator does: turn "192 local skills" into structured, queryable data in milliseconds.
 ## Gotchas
+**Reconciler mental model**: Curator is K8s-controller-style. Whatever state the
+index is in — stale, corrupted, missing columns — one `curator` run converges it
+to clean. Schema migrations are automatic (missing columns get added). Old data is
+backed up before any destructive change.
+
+**Backup before rebuild**: Every scan automatically backs up `REGISTRY.json` and
+`catalog.db` with a timestamped `.bak.YYYY-MM-DD-HH-MM-SS` suffix. If a scan
+produces bad data, run `curator restore` to roll back to the most recent backup.
+
 **Index freshness**: Query stderr shows when the index was generated. If older than
 7 days, curator warns you to re-scan. Stale indexes miss newly cloned skills.
 
@@ -92,6 +120,9 @@ SELECT name, json_extract(niches, '$[0]') AS primary_niche FROM skills;
 ```
 **Deterministic output**: Same cold pool always produces the same REGISTRY.json
 (sorted, stable). Safe to diff across scans for drift detection.
+**deck_skill_type**: This is a lythoskill custom frontmatter field (`deck_` prefix),
+not an Agent Skills standard field. It indexes `combo`, `transient`, and `fork`
+skills for curator filtering. Skills without it return `NULL` in queries.
 ## Supporting References
 Read these **only when the specific topic arises**:
 | When you need to… | Read |
