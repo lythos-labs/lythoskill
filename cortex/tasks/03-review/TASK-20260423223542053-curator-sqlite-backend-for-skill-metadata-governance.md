@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-04-23 | Created |
+| in-progress | 2026-05-02 | Started |
+| review | 2026-05-02 | query + audit CLI implemented, tests pass |
 
 ## 背景与目标
 

@@ -1,4 +1,4 @@
-# TASK-20260430011206610: Create root tsconfig.base.json and unify per-package tsconfig
+# TASK-20260430011203412: Move root package.json dependencies to individual packages
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-04-29 | Created |
+| in-progress | 2026-05-02 | Started |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260430011206610)
+feat(scope): description (TASK-20260430011203412)
 
 - Detail 1
 - Detail 2

@@ -1,4 +1,4 @@
-# TASK-20260430012459381: Audit fix: review reference conditional trigger coverage across all skills
+# TASK-20260430011205130: Unify lockfile and workspace config — Bun-only or pnpm-only
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-04-29 | Created |
+| in-progress | 2026-05-02 | Started |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260430012459381)
+feat(scope): description (TASK-20260430011205130)
 
 - Detail 1
 - Detail 2
