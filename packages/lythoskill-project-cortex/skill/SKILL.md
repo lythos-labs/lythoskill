@@ -214,8 +214,7 @@ backlog ──start──► in-progress ──deliver──► review ──acc
 | suspended | in-progress | Any | Blocker resolved | `bunx @lythos/project-cortex resume TASK-xxx` |
 | any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex terminate TASK-xxx` |
 | completed | archived | User/System | Long-term storage | `bunx @lythos/project-cortex archive TASK-xxx` |
-
-**Re-work**: review → in-progress when deliverables are rejected (`start` from review).
+| review | in-progress | User/System | Deliverables rejected, re-work required | `bunx @lythos/project-cortex reject TASK-xxx` |
 ## Git Integration (Critical)
 Commits **must** include task ID in the message title:
 ✅ `git commit -m "feat(api): add endpoint (TASK-20250422143321029)"`

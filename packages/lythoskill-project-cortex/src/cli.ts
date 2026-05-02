@@ -34,6 +34,7 @@ Commands:
   done <task-id>        Move task to completed (must be in review)
   suspend <task-id>     Move task to suspended
   resume <task-id>      Move suspended task back to in-progress
+  reject <task-id>      Move reviewed task back to in-progress (re-work)
   terminate <task-id>   Move task to terminated (any status)
   archive <task-id>     Move completed task to archived
 
@@ -125,6 +126,11 @@ function main(): void {
     case 'resume':
       if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
       moveTask(arg, 'in-progress', config, { note: 'Resumed' });
+      break;
+
+    case 'reject':
+      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
+      moveTask(arg, 'in-progress', config, { note: 'Re-work required' });
       break;
 
     case 'terminate':
