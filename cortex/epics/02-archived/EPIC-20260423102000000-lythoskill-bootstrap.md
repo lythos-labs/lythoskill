@@ -10,6 +10,7 @@
 | active | 2026-04-23 | Migrated from old format |
 | active | 2026-04-23 | Published @lythos/skill-deck, @lythos/skill-creator, @lythos/project-cortex to npm |
 | active | 2026-04-23 | Created lythos-labs/lythoskill GitHub repo with CI/CD workflow |
+| archived | 2026-05-02 | Epic completed; project self-bootstrapped. Migrated to archive. |
 
 ## Background Story
 

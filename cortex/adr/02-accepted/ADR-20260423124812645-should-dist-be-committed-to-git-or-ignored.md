@@ -8,6 +8,7 @@
 | proposed | 2026-04-23 | Created |
 | accepted | 2026-04-23 | Approved: commit skills/ build output to Git (architecture pivoted from dist/ to skills/) |
 | superseded-partial | 2026-05-01 | CI portion (方案G) superseded by ADR-20260501090811296 — pre-commit hook becomes the formal solution
+| accepted | 2026-05-02 | Core decision (commit skills/ to Git) stands. CI portion superseded by ADR-20260501090811296. |
 
 ## 背景
 

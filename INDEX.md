@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/2 22:43:37
+> 自动生成于 2026/5/2 22:52:27
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 29 | 进行中: 0, 待验收: 0, 已完成: 14 |
+| Tasks | 33 | 进行中: 0, 待验收: 0, 已完成: 16 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
 | ADRs | 26 | 已接受: 18 |
 
@@ -50,7 +50,7 @@ _无_
 
 _无_
 
-### 已完成 (14)
+### 已完成 (16)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -66,12 +66,14 @@ _无_
 - ✅ ~~TASK-20260501091727690~~: init command: add side-effect warning in docs and CLI prompt
 - ✅ ~~TASK-20260501091728793~~: AGENTS.md: add bunx vs local path troubleshooting hint
 - ✅ ~~TASK-20260501091729644~~: deck CLI: add status subcommand routing
+- ✅ ~~TASK-20260502225209839~~: Demo: blocked flow (backlog → in-progress → suspend → resume → review → done)
+- ✅ ~~TASK-20260502225209886~~: Demo: re-work flow (backlog → in-progress → review → reject → review → done)
 
 ### 悬置 (0)
 
 _无_
 
-### 终止 (7)
+### 终止 (8)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -80,6 +82,7 @@ _无_
 - 🛑 ~~TASK-20260424115732668~~: Handoff 时效性机制：git status 漂移检测
 - 🛑 ~~TASK-20260424115735441~~: Curator CLI 实现文档化：扫描逻辑和 schema 说明
 - 🛑 ~~TASK-20260424142722389~~: Curator 全局扫描：冷池 + 活跃池 + 项目本地 skills 统一视图
+- 🛑 ~~TASK-20260502225209862~~: Demo: cancelled flow (backlog → in-progress → terminate)
 
 ---
 

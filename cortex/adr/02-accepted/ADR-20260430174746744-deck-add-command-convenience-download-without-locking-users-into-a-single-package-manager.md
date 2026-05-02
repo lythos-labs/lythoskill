@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-04-30 | Created |
+| accepted | 2026-05-02 | Ratified: deck add implemented with git clone and skills.sh backends. |
 
 ## 背景
 <!-- 问题描述和上下文 -->
