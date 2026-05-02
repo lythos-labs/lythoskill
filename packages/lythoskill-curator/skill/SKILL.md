@@ -1,6 +1,7 @@
 ---
 name: lythoskill-curator
 version: {{PACKAGE_VERSION}}
+type: standard
 description: |
   Read-only indexer for skill cold pools. Scans all local skill  directories, extracts SKILL.md frontmatter, and produces
   REGISTRY.json + catalog.db for structured querying. Does not  install, modify, or recommend skills — only surfaces what exists.

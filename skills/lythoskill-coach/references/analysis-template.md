@@ -12,6 +12,8 @@ When reviewing a SKILL.md, produce this table first, then the improvement list.
 | Reference separation | _yes/no_ | yes | ✅/⚠️/❌ | _specific fix_ |
 | Conditional triggers | _n/total_ | all | ✅/⚠️/❌ | _specific fix_ |
 | One skill one job | _yes/no_ | yes | ✅/⚠️/❌ | _specific fix_ |
+| **Type frontmatter** | _standard/flow/missing/other_ | standard or flow | ✅/⚠️/❌ | _add or fix type_ |
+| **Custom field prefix** | _yes/no_ | deck_ | ✅/⚠️/❌ | _prefix custom fields_ |
 | Factual accuracy | _yes/no_ | yes | ✅/⚠️/❌ | _specific fix_ |
 | Doc-code consistency | _pass/fail_ | pass | ✅/⚠️/❌ | _specific fix_ |
 | Naive agent test | _pass/fail_ | pass | ✅/⚠️/❌ | _specific fix_ |
