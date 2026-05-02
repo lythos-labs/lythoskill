@@ -37,6 +37,9 @@ bunx @lythos/project-cortex epic "User auth system"
 bunx @lythos/project-cortex adr "Choose database"
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex init
+```
+
+> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID。
 
 # Generate INDEX.md with overview stats and document listing
 bunx @lythos/project-cortex index
@@ -85,6 +88,106 @@ Numeric prefixes ensure GTD workflow ordering in `ls` output.
 | Task | `TASK-20250420120000000` |
 | Epic | `EPIC-20250420120100000` |
 | ADR | `ADR-20250420120200000` |
+
+**Preview next IDs before creating:**
+```bash
+bunx @lythos/project-cortex next-id
+```
+Output:
+```
+📋 Timestamp ID Format:
+
+  Task: TASK-20260502110420008
+  Epic: EPIC-20260502110420009
+  ADR:  ADR-20260502110420009
+
+  Format: PREFIX-yyyyMMddHHmmssSSS (17 digits)
+```
+
+## Command Output Examples
+
+Agents should expect the following output patterns when invoking CLI commands.
+
+### Creating a document
+```bash
+bunx @lythos/project-cortex adr "Choose database"
+```
+Output:
+```
+✅ Created: cortex/adr/01-proposed/ADR-20260502110308316-Choose-database.md
+🏛️  ADR ID: ADR-20260502110308316
+```
+
+```bash
+bunx @lythos/project-cortex task "Fix login bug"
+```
+Output:
+```
+✅ Created: cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
+📝 Task ID: TASK-20260502110308316
+```
+
+```bash
+bunx @lythos/project-cortex epic "User auth system"
+```
+Output:
+```
+✅ Created: cortex/epics/01-active/EPIC-20260502110308316-User-auth-system.md
+🎯 Epic ID: EPIC-20260502110308316
+```
+
+### Project statistics
+```bash
+bunx @lythos/project-cortex stats
+```
+Output:
+```
+📊 Project Statistics:
+
+Tasks:
+  Backlog        : 3
+  In Progress    : 1
+  Review         : 0
+  Completed      : 5
+  Suspended      : 0
+  Terminated     : 0
+  Archived       : 2
+
+Epics:
+  Active         : 1
+  Archived       : 0
+
+ADRs:
+  Proposed       : 2
+  Accepted       : 1
+  Rejected       : 0
+  Superseded     : 0
+
+Wiki:
+  Patterns       : 4
+  FAQ            : 1
+  Lessons        : 0
+```
+
+### Consistency probe (read-only)
+```bash
+bunx @lythos/project-cortex probe
+```
+Output when consistent:
+```
+🔍 Probing cortex consistency...
+✅ All documents consistent.
+```
+Output when mismatches found:
+```
+🔍 Probing cortex consistency...
+⚠️  1 inconsistency found:
+
+  cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
+    Status History claims: 02-in-progress
+    Actual directory:      01-backlog
+    → File location does not match latest status record
+```
 ## Status Flow
 ```
 Epic:  01-active → 02-archived

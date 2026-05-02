@@ -11,4 +11,5 @@ Commands:
 Options:
   --deck <path>    Specify skill-deck.toml path (default: find upward from cwd)
   --workdir <dir>  Specify working directory (default: cwd)
+  --no-backup      Skip tar backup when removing non-symlink entries
   --via <backend>  Download backend: git (default) | skills.sh

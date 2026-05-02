@@ -47,7 +47,7 @@ bunx @lythos/skill-deck add owner/repo --via skills.sh
 ```
 `link` is a **reconciler** that converges actual state to declared state:
 undeclared symlinks → removed; broken/circular symlinks → recreated;
-non-symlink entities → replaced; missing declared skills → linked from cold pool.
+non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
 
 > **If a declared skill is not in the cold pool**, `link` reports `Skill not found`
 > and skips it. Add it first with `bunx @lythos/skill-deck add <locator>`
@@ -77,10 +77,11 @@ Reports skills in cold pool but not in deck, expiring transients, managed-dir ov
 | **skill-deck.lock** | Machine-generated snapshot: resolved paths, hashes, constraints. |
 ## Constraints
 - **deny-by-default** — undeclared skills are physically absent.
+- **link backs up real directories** — non-symlink entries in `.claude/skills/` are archived to `.claude/skills.bak.YYYYMMDD-HHMMSS.tar.gz` before removal. Total size > 100MB causes link to refuse (use `--no-backup` or clean up manually).
 - **max_cards** — exceeding the budget causes link to refuse.
 - **transient expires** — past-due transients trigger warnings.
 - **managed_dirs overlap** — two skills claiming the same directory triggers a warning.
-- **Never manually create subdirectories in `.claude/skills/`.** Use `deck link`. Manual directories become untracked "ghost skills."
+- **Never manually create subdirectories in `.claude/skills/`.** Use `deck link`. Manual directories become untracked "ghost skills" that get backed up and removed on the next link.
 ## Gotchas
 **lstatSync, not existsSync**: The reconciler uses `lstatSync` (does not follow
 symlinks) to detect entities. `existsSync` returns `false` for broken symlinks,
