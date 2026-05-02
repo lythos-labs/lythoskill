@@ -45,7 +45,9 @@ Arena 从 CLI 标志驱动迁移到 **声明式 TOML 驱动**。`arena.toml` 是
 
 ### 2. 核心抽象：`[[side]]` = 对决方
 
-每一方由 **player（心智配置）+ deck（能力空间）+ env（执行环境）** 三元组构成：
+> **N 元 = 选手拿着指定卡组到指定场地跑指定项目，用自己的风格。**
+
+每一方由 **player（选手/心智）+ deck（卡组/能力）+ env（场地/环境）** 三元组构成：
 
 ```toml
 # arena.toml — 对决声明
@@ -142,6 +144,40 @@ name = "D"
 - 2~5 方：直接 Pareto 前沿分析
 - >5 方：CLI 拒绝，提示拆分为多个 arena（防止 context window 在 judge 阶段爆炸）
 
+### 6. Host-Side 执行边界：Arena 编排 ≠ Side 执行
+
+Arena 目录（`arena.json`、`decks/`、`report/`）位于 **Host（组织者）侧**，负责对决声明解析、结果聚合、评价与可视化。
+
+每个 Side 的实际任务执行发生在 **独立的 Side 环境** 中，该环境与 Host 文件系统隔离：
+
+- Side 环境已预装对应 deck，`.claude/skills/` 处于正确状态（无论什么形式：容器、远程 agent、临时目录）
+- Side **只接收 task card**（任务描述 + 输出格式要求），看不到其他 Side 的配置与输出
+- Side **不访问 Host 项目文件**，包括 Host 的 `.claude/skills/`、`skill-deck.toml`、源代码
+- Side 执行完成后，仅将产物（`runs/*.md`）回传 Host
+
+**为什么必须隔离**：
+
+若 Side 默认 cwd 就是 Host 项目本身，subagent 执行 `deck link` 会直接修改 Host 的 `.claude/skills/`，导致：
+1. Side A 与 Side B 互相覆盖 working set（串信息）
+2. Host 原始 deck 状态被破坏，arena 结束后无法恢复
+3. Side 可能意外读取 Host 的源代码、配置、密钥，引入不可控变量
+
+> 此问题与 deck link 的 CWD 设计直接相通：`deck link --workdir` 要求明确指定工作目录以正确解析 `skill-deck.toml` 中的相对路径。若 Side 在 Host cwd 执行，不仅串改 Host 的 working set，还会因 cwd 语义导致 deck 路径解析错误——arena 的 Side 隔离是 deck CWD 治理在分布式/多租户场景下的自然延伸。
+
+正确的执行模型：
+
+```
+Host（arena 组织者）          Side A（隔离环境）            Side B（隔离环境）
+───────────────               ───────────────              ───────────────
+arena.json                    预装 deck A                  预装 deck B
+report.json                   .claude/skills/ 就绪         .claude/skills/ 就绪
+TASK-arena.md ──task card──→  接收任务描述                 接收任务描述
+                              产出 runs/run-01.md ──→      产出 runs/run-02.md ──→
+                                                        回传 Host 聚合
+```
+
+> **当前实现尚未达成此隔离。** 现有 CLI 生成的 TASK-arena.md 指令默认在 Host 项目目录执行 `deck link`，这是已知缺陷，需在后续迭代中通过容器化或临时工作目录解决。详见 Consequences → Negative。
+
 ## Consequences
 
 ### Positive
@@ -156,6 +192,7 @@ name = "D"
 - **Player 定义尚未成熟**：当前没有 `cortex/players/` 目录规范，player.toml 的 schema 需要单独 ADR
 - **容器化增加冷启动时间**：每个 side 拉取镜像、安装依赖会显著增加 arena 总耗时
 - **N-side 组合爆炸**：如果 player 有 3 种、deck 有 4 种，全组合 = 12 方，超出 `max_participants = 5`。需要显式声明对比矩阵，而非隐式笛卡尔积
+- **当前 CLI 尚未实现 Side 隔离**：现有实现生成的 TASK-arena.md 指令默认在 Host cwd 执行 `deck link`，Side 之间会串改 `.claude/skills/`。需后续通过容器化或临时工作目录解决（参见 Decision §6）
 
 ### Migration Path
 

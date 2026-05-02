@@ -150,6 +150,7 @@ export function runArena(argv: string[]) {
   // ── 创建目录结构 ────────────────────────────────────────────
   mkdirSync(join(ARENA_DIR, 'decks'), { recursive: true })
   mkdirSync(join(ARENA_DIR, 'runs'), { recursive: true })
+  mkdirSync(join(ARENA_DIR, 'sides'), { recursive: true })
 
   // ── 生成参与者与 deck ───────────────────────────────────────
   let participants: { id: string; name: string; skill_name: string; deck_path: string }[]
@@ -213,6 +214,16 @@ ${[...new Set([p.skill_name, ...CONTROL_SKILLS])].map(s => `  "${s}",`).join('\n
     }
   }
 
+  // ── 为每个 side 创建隔离工作空间 ────────────────────────────
+  for (const p of participants) {
+    const sideDir = join(ARENA_DIR, 'sides', p.id)
+    mkdirSync(sideDir, { recursive: true })
+    // 复制 deck 到 side 目录作为 skill-deck.toml
+    const sideDeckPath = join(sideDir, 'skill-deck.toml')
+    const deckContent = readFileSync(p.deck_path, 'utf-8')
+    writeFileSync(sideDeckPath, deckContent)
+  }
+
   // ── 生成 arena.json ─────────────────────────────────────────
   const arenaJson = {
     version: '1.0.0',
@@ -221,13 +232,17 @@ ${[...new Set([p.skill_name, ...CONTROL_SKILLS])].map(s => `  "${s}",`).join('\n
       slug: ARENA_SLUG,
       created_at: new Date().toISOString(),
       task_description: TASK,
-      participants,
+      participants: participants.map(p => ({
+        ...p,
+        side_dir: join(ARENA_DIR, 'sides', p.id),
+      })),
       criteria,
       working_dir: ARENA_DIR,
     },
     status: 'setup',
     runs: participants.map(p => ({
       participant_id: p.id,
+      side_dir: join(ARENA_DIR, 'sides', p.id),
       output_path: join(ARENA_DIR, 'runs', `${p.id}.md`),
     })),
   }
@@ -255,9 +270,8 @@ judge_persona: |
     : `你是一个中立的技能评测员。对比所有 subagent 的输出，
   按 evaluation_criteria 给出 1-5 分评分，最终给出 Winner 和选型建议。`}
 acceptance:
-${participants.map(p => `  - Subagent ${p.id} 使用 ${p.deck_path.replace(PROJECT_DIR, '.')} 完成任务并写入 runs/${p.id}.md`).join('\n')}
+${participants.map(p => `  - Subagent ${p.id} 在 sides/${p.id}/ 隔离环境完成任务并写入 runs/${p.id}.md`).join('\n')}
   - Judge 读取所有 run 文件并生成 report.md
-  - 所有 subagent 完成后恢复父 deck
 managed_dirs:
   - ${relArenaDir}/
 ---
@@ -268,18 +282,19 @@ managed_dirs:
 
 ${participants.map(p => `### ${p.id} (${p.name})
 \`\`\`bash
-cd "${PROJECT_DIR}"
-bunx @lythos/skill-deck link --deck "${p.deck_path}" --workdir "${PROJECT_DIR}"
-# 然后执行任务，输出写入 "${join(ARENA_DIR, 'runs', `${p.id}.md`)}"
-bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}" --workdir "${PROJECT_DIR}"
+# 进入隔离工作空间（已预装 deck）
+cd "${join(ARENA_DIR, 'sides', p.id)}"
+# 确认 skill-deck.toml 存在后 link（首次或 deck 更新时）
+bunx @lythos/skill-deck link
+# 然后执行任务，输出写入 "../../runs/${p.id}.md"
 \`\`\`
 `).join('')}
 
 ### Judge
 \`\`\`bash
-cd "${PROJECT_DIR}"
-bunx @lythos/skill-deck link --deck "${join(PROJECT_DIR, 'skill-deck.toml')}" --workdir "${PROJECT_DIR}"
-# 读取所有 run 文件，生成 "${join(ARENA_DIR, 'report.md')}"
+# 在 Host 侧读取所有 side 输出，生成报告
+cd "${ARENA_DIR}"
+# 读取 runs/*.md，按 evaluation_criteria 评分，生成 report.md
 \`\`\`
 `
 
@@ -299,11 +314,12 @@ ${mode === 'single-skill' ? `控制变量:  ${CONTROL_SKILLS.join(', ')}\n` : ''
 生成文件:
   📋 ${join(ARENA_DIR, 'arena.json')}
   🎴 ${participants.length} 个 arena deck → ${join(ARENA_DIR, 'decks')}
+  🏟️  ${participants.length} 个 side 隔离工作空间 → ${join(ARENA_DIR, 'sides')}
   📝 Task Card → ${taskCardPath}
 
 下一步:
   1. 阅读 Task Card: cat "${taskCardPath}"
-  2. 按指令逐个/并行启动 subagent
+  2. 按指令逐个/并行启动 subagent（每个在独立的 side 目录）
   3. Judge 生成 report.md
 `)
 }
