@@ -4,6 +4,9 @@
 > If you are Claude Code, read [`CLAUDE.md`](./CLAUDE.md) instead — it points back here for the full content.
 > Human contributors: see [README.md](./README.md) for a higher-level overview.
 
+> **⚠️ Before any release / auth / version work, read [Release & Auth Workflow](#release--auth-workflow).**
+> Auth state (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`. Past agents corrupted the git remote URL by trying to "fix" auth and forced manual recovery — do not repeat this. This warning matters even mid-session after context compaction.
+
 ---
 
 ## Project Overview
@@ -116,9 +119,22 @@ bun packages/lythoskill-project-cortex/src/cli.ts <command>
 ```bash
 bunx @lythos/skill-creator init <project-name>
 bunx @lythos/skill-creator build <skill-name>
+bunx @lythos/skill-creator build --all
+bunx @lythos/skill-creator align            # audit conventions
+bunx @lythos/skill-creator align --fix      # auto-apply
+bunx @lythos/skill-creator bump <patch|minor|major|X.Y.Z> [--dry-run]
 bunx @lythos/skill-deck link
 bunx @lythos/project-cortex <command>
 ```
+
+### Release pipeline (full detail below)
+```bash
+bunx @lythos/skill-creator bump patch --dry-run   # preview
+bunx @lythos/skill-creator bump patch             # bump root + all packages, rebuild skills
+git diff && git commit -am "chore(release): vX.Y.Z"
+./scripts/publish.sh                              # publish all packages, reads .npm-access
+```
+See [Release & Auth Workflow](#release--auth-workflow) for the full contract.
 
 ### Testing
 ```bash
@@ -153,6 +169,77 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 ---
 
+## Release & Auth Workflow
+
+> **Read this before running any `git remote`, `npm publish`, `npm login`, or version-bump command.**
+> This contract is the single source of truth for who-writes-what during a release. Past agents have damaged this state by improvising — assume the setup is intentional.
+
+Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **ADR-20260502234833756** (skill package identification).
+
+### Authentication state — pre-configured, do not modify
+
+| File / Resource | Purpose | Rule |
+|------|------|------|
+| `.git/config` (origin URL) | Git push/fetch | Origin uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
+| `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
+| `.github-token` (project root, gitignored) | `gh` CLI auth only | Use as `gh auth login --with-token < .github-token`. **Never embed in a git URL or `.git/config`.** |
+| `.npm-access` (project root, gitignored) | npm publish token | Read by `scripts/publish.sh`. **Never run `npm login`** or prompt the user to log in — fix the token file instead. |
+
+If anything auth-related looks "broken", do not improvise a fix. Ask.
+
+### Lock-step versioning (one version, all packages)
+
+Every `packages/*/package.json` and the root `package.json` carry the **same** version. A bump rolls every package + root together. This includes private infrastructure packages (e.g. `lythoskill-test-utils`) — lock-step is monorepo-wide. Build is filtered separately (see next section).
+
+**Use the dedicated tool. Do not `jq`/`python`/`sed`/hand-edit.**
+
+```bash
+# Preview
+bunx @lythos/skill-creator bump patch --dry-run
+bunx @lythos/skill-creator bump 1.0.0 --dry-run
+
+# Real run
+bunx @lythos/skill-creator bump patch       # 0.7.2 → 0.7.3
+bunx @lythos/skill-creator bump minor       # 0.7.2 → 0.8.0
+bunx @lythos/skill-creator bump major       # 0.7.2 → 1.0.0
+bunx @lythos/skill-creator bump 1.2.3       # explicit X.Y.Z
+```
+
+The `bump` pipeline (see `packages/lythoskill-creator/src/bump.ts`):
+1. Write root `package.json` (only the `version` field changes).
+2. Run `align(fix=true)` — syncs every `packages/*/package.json` to the new version. `align` already protects `{{...}}` placeholders in `SKILL.md` source files.
+3. Run `build` for each package whose `packages/<name>/skill/` directory exists — re-renders `skills/<name>/SKILL.md` with the new version.
+
+`bump` intentionally does NOT git-commit, tag, or push. It refuses downgrades and same-version targets.
+
+### Skill product identification (build-time filter)
+
+A package is a "skill product" iff `packages/<name>/skill/` exists. This filter applies to **build** (which packages render to `skills/<name>/`) but **NOT** to **version sync** (which is universal). Do not filter by `name.startsWith('lythoskill-')` — `lythoskill-test-utils` matches the prefix but is not a skill product. See ADR-20260502234833756.
+
+### SKILL.md source files are templates
+
+`packages/*/skill/SKILL.md` contains placeholders (`{{PACKAGE_VERSION}}`, `{{PACKAGE_NAME}}`, `{{BIN_NAME}}`, `{{BIN_ENTRY}}`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
+
+### Commit policy
+
+- `bump` produces an unstaged diff. Commit it with `chore(release): vX.Y.Z`.
+- `.husky/pre-commit` runs `build --all` whenever `packages/**/skill/**` files change, then auto-stages `skills/`. This is independent of `bump` and protects against drift in everyday edits.
+- Do not `--amend` a published commit. Do not `--no-verify`.
+
+### Publish to npm
+
+```bash
+./scripts/publish.sh
+```
+
+The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order (`hello-world → project-cortex → curator → arena → creator → deck`), and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
+
+### Handoff (release-adjacent)
+
+Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). The path `daily/HANDOFF.md` is **deprecated** — older docs may still reference it; the daily-dated path is canonical.
+
+---
+
 ## Code Conventions
 
 1. **ESM-only**: No `require()`. Import JSON with assertions:
@@ -178,12 +265,7 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 7. **tsconfig**: `moduleResolution` must be `"bundler"`, `types` includes `"bun-types"`, target `"esnext"`.
 
-8. **Unified version policy**: All packages in `packages/` share a single version number. When bumping, update every `package.json` — no subpackage version drift. The version is the project's release identity, not per-package identity.
-
-   **Build-time enforcement**: Root `package.json` is the single source of truth for the unified version.
-   - Packages with `package.json`: Use `{{PACKAGE_VERSION}}` in `skill/SKILL.md` frontmatter; the `build` command substitutes it from the package's `package.json` (which must match the root version; drift triggers a warning).
-   - Pure-skill packages without `package.json`: The `build` command injects the root version directly into the generated `skills/<name>/SKILL.md` — regardless of what is hard-coded in the source.
-   - **Pre-commit safeguard**: `.husky/pre-commit` runs `build --all` whenever any `packages/**/skill/` file changes. This rebuilds all skills in ~0.6s and auto-stages `skills/`, ensuring the built output never drifts from source.
+8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
 
 ---
 
@@ -269,7 +351,7 @@ When a session is ending or context is about to compact, you MUST execute this h
 ## Onboarding for New Agent
 
 When entering this project with no prior context, read in this exact order:
-1. `AGENTS.md` (this file) — canonical project guidance
+1. `AGENTS.md` (this file) — canonical project guidance, including [Release & Auth Workflow](#release--auth-workflow). **Re-read the workflow section if context has been compacted mid-session** — auth/version mistakes here are the most common regression.
 2. `daily/YYYY-MM-DD.md` (latest date file) — session handoff + work log, highest priority memory
 3. `daily/` history (recent 3 days) — project journal across sessions
 4. `skill-deck.toml`
@@ -293,10 +375,15 @@ When entering this project with no prior context, read in this exact order:
 
 | File | Purpose |
 |------|---------|
-| `src/cli.ts` | Command routing (init / build) |
+| `src/cli.ts` | Command routing (init / build / add-skill / align / bump) |
 | `src/init.ts` | Project template generation |
 | `src/build.ts` | Build from packages/<name>/skill/ to skills/<name>/ |
+| `src/align.ts` | Audit & sync `packages/*/package.json` against root |
+| `src/bump.ts` | Lock-step version bump pipeline (write root → align → build) |
 | `src/templates.ts` | All string templates |
+| `scripts/publish.sh` | npm publish for all packages, reads `.npm-access` |
+| `.github-token` | gh-CLI auth token (gitignored, never embed in git URL) |
+| `.npm-access` | npm publish token (gitignored, used by publish.sh) |
 | `skills/lythoskill-creator/SKILL.md` | Agent-visible usage documentation |
 | `cortex/INDEX.md` | Governance system entry |
-| `daily/YYYY-MM-DD.md` | Daily journal + session handoff |
+| `daily/YYYY-MM-DD.md` | Daily journal + session handoff (HANDOFF.md is deprecated) |

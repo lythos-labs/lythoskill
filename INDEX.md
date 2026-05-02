@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/2 23:44:00
+> 自动生成于 2026/5/3 00:11:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 35 | 进行中: 6, 待验收: 2, 已完成: 16 |
+| Tasks | 35 | 进行中: 6, 待验收: 1, 已完成: 17 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
-| ADRs | 27 | 已接受: 19 |
+| ADRs | 28 | 已接受: 20 |
 
 ---
 
@@ -44,12 +44,11 @@
 - 🔄 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
 - 🔄 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
 
-### 待验收 (2)
+### 待验收 (1)
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
-- 🔍 **TASK-20260502233741335**: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 
-### 已完成 (16)
+### 已完成 (17)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -67,6 +66,7 @@
 - ✅ ~~TASK-20260501091729644~~: deck CLI: add status subcommand routing
 - ✅ ~~TASK-20260502225209839~~: Demo: blocked flow (backlog → in-progress → suspend → resume → review → done)
 - ✅ ~~TASK-20260502225209886~~: Demo: re-work flow (backlog → in-progress → review → reject → review → done)
+- ✅ ~~TASK-20260502233741335~~: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 
 ### 悬置 (0)
 
@@ -115,6 +115,7 @@ _无_
 - 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
+- ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
 
 ---
 

@@ -76,6 +76,7 @@ export async function bump(opts: BumpOpts) {
   let built = 0
   for (const name of pkgDirs) {
     if (!name.startsWith('lythoskill-')) continue
+    if (!existsSync(join(packagesDir, name, 'skill'))) continue
     console.log(`\n=== Building ${name} ===`)
     await build(name)
     built++
