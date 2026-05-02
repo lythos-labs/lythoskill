@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/2 23:40:19
+> 自动生成于 2026/5/2 23:44:00
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 35 | 进行中: 7, 待验收: 1, 已完成: 16 |
+| Tasks | 35 | 进行中: 6, 待验收: 2, 已完成: 16 |
 | Epics | 7 | 活跃: 6, 已归档: 1 |
 | ADRs | 27 | 已接受: 19 |
 
@@ -35,7 +35,7 @@
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 
-### 进行中 (7)
+### 进行中 (6)
 
 - 🔄 **TASK-20260430011203412**: Move root package.json dependencies to individual packages
 - 🔄 **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
@@ -43,11 +43,11 @@
 - 🔄 **TASK-20260430011207805**: Standardize package.json template across all packages
 - 🔄 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
 - 🔄 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
-- 🔄 **TASK-20260502233741335**: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 
-### 待验收 (1)
+### 待验收 (2)
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
+- 🔍 **TASK-20260502233741335**: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 
 ### 已完成 (16)
 

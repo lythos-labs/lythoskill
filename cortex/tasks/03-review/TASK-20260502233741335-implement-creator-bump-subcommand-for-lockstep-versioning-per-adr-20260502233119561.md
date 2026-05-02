@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-05-02 | Created |
 | in-progress | 2026-05-02 | Started |
+| review | 2026-05-02 | Deliverables committed |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
