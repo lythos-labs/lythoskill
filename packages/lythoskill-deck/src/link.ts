@@ -175,8 +175,10 @@ const deckRaw = readFileSync(DECK_PATH, "utf-8");
 const deckHash = hashContent(deckRaw);
 const deck = parseToml(deckRaw) as any;
 
-const WORKING_SET = expandHome(deck.deck?.working_set || ".claude/skills", PROJECT_DIR);
-const COLD_POOL = expandHome(deck.deck?.cold_pool || "~/.agents/skill-repos", PROJECT_DIR);
+const WORKING_SET_RAW = deck.deck?.working_set || ".claude/skills";
+const COLD_POOL_RAW = deck.deck?.cold_pool || "~/.agents/skill-repos";
+const WORKING_SET = expandHome(WORKING_SET_RAW, PROJECT_DIR);
+const COLD_POOL = expandHome(COLD_POOL_RAW, PROJECT_DIR);
 const MAX_CARDS = Number(deck.deck?.max_cards || 10);
 
 // ── 收集声明 ────────────────────────────────────────────────
@@ -396,12 +398,17 @@ for (const item of declared) {
     contentHash = hashContent(readFileSync(skillMdPath, "utf-8"));
   } catch {}
 
+  // source: relative to cold_pool (non-transient) or project dir (transient)
+  const sourceRel = item.type === "transient"
+    ? relative(PROJECT_DIR, item.sourcePath)
+    : relative(COLD_POOL, item.sourcePath);
+
   linkedSkills.push({
     name: item.name,
     deck_niche: niche,
     type: item.type,
-    source: item.sourcePath,
-    dest,
+    source: sourceRel,
+    dest: relative(PROJECT_DIR, dest),
     content_hash: contentHash,
     linked_at: new Date().toISOString(),
     ...(item.expires ? { expires: item.expires } : {}),
@@ -479,9 +486,9 @@ const constraints: ConstraintReport = {
 const lock: SkillDeckLock = {
   version: "1.0.0",
   generated_at: new Date().toISOString(),
-  deck_source: { path: DECK_PATH, content_hash: deckHash },
-  working_set: WORKING_SET,
-  cold_pool: COLD_POOL,
+  deck_source: { path: relative(PROJECT_DIR, DECK_PATH), content_hash: deckHash },
+  working_set: WORKING_SET_RAW,
+  cold_pool: COLD_POOL_RAW,
   skills: linkedSkills,
   constraints,
 };
