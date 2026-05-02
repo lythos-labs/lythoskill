@@ -1,6 +1,7 @@
 ---
 name: lythoskill-coach
 version: 0.7.0
+type: standard
 description: |
   Analyzes SKILL.md files against Agent Skills best practices. Reviews
   body size, description quality, progressive disclosure, frontmatter
@@ -77,12 +78,28 @@ Official Claude Code fields: name, description, when_to_use, argument-hint,
 arguments, disable-model-invocation, user-invocable, allowed-tools, model,
 effort, context, agent, hooks, paths, shell.
 
+**Critical: `type` field**
+- Must be `standard` or `flow` (Kimi CLI constraint)
+- Any other value (`innate`, `tool`, `combo`, `transient`) causes Kimi CLI to skip the skill silently
+- These are **deck governance sections**, not SKILL.md types
+
 Custom fields: use a consistent prefix (e.g. `deck_`). Custom fields are
 parsed but not injected into context — zero token cost.
+
+#### 5.1. Type Field (CRITICAL)
+- **Value**: MUST be `standard` or `flow`
+- **Why**: Kimi CLI validates `skill_type in ("standard", "flow")`; other values trigger `ValueError` and the skill is silently skipped
+- **Common mistake**: Using `type: tool` or `type: combo` — these are deck.toml section names, not SKILL.md types
 
 ### 6. One Skill, One Job
 A skill should do one thing well. If it has 3+ unrelated responsibilities,
 split it. Exception: multiple topics sharing one operational workflow.
+
+### 6.1. Thin Skill Principle
+- **Skill = Controller**, not Service. Heavy logic belongs in npm/pip/cli tools
+- **Skill thickness**: SKILL.md should be <500 lines. If it exceeds, move content to `references/` or extract to an external package
+- **Build pipeline**: `lythoskill build` compiles monorepo skill source → thin release directory (SKILL.md + scripts + references)
+- **Mental model**: "Fat agent + thin skill + mature infra" — agent does interpretive work, CLI does deterministic work
 
 ## 7. Factual Accuracy
 A skill that perfectly follows all form rules but **describes its own behavior
@@ -164,6 +181,9 @@ instructions outperforms a 390-line skill full of gaps.
 | description + when_to_use cap | 1,536 characters | Skill listing |
 | All descriptions budget | 1% of context window (fallback: 8,000 chars) | Skill listing |
 | Budget override env var | `SLASH_COMMAND_TOOL_CHAR_BUDGET` | Claude Code config |
+| SKILL.md `type` | `standard` or `flow` only | Kimi CLI validator |
+| Custom field prefix | `deck_` | lythoskill convention |
+| Locator format | FQ: `host.tld/owner/repo/skill` | ADR-20260502012643244 |
 
 ## Gotchas
 **"See references/ for more details" is a bibliography, not a dispatch table.**

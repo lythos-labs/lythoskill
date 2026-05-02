@@ -1,6 +1,7 @@
 ---
 name: lythoskill-arena
 version: 0.7.0
+type: standard
 description: |
   Controlled-variable test play for skills and deck configurations.  Scaffolds isolated arena environments where subagents complete  the same task under different decks, then a judge agent scores outputs  across multiple dimensions. Supports single-skill A/B comparison
   and full-deck Pareto frontier analysis.

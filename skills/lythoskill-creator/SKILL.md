@@ -1,6 +1,7 @@
 ---
 name: lythoskill-creator
 version: 0.7.0
+type: standard
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
   Creates thin-skill monorepos: heavy logic in npm packages (Starter),
