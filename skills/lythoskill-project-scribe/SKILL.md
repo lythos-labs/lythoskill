@@ -8,6 +8,8 @@ description: |
   with project-onboarding (read-side).
 when_to_use: |
   Record progress, update task, write daily, log a pitfall, session  ending, handoff, LGTM, wrap up, context limit approaching,  踩坑了, 记录一下, 先到这里, 就这样, session 要结束了.
+allowed-tools:
+  - Bash(bunx @lythos/project-cortex *)
 ---
 
 # Project Scribe

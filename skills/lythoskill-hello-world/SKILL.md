@@ -5,6 +5,7 @@ type: standard
 description: |
   A minimal hello-world skill. No scripts, no dependencies.
   Demonstrates the simplest possible thin-skill: just a SKILL.md.
+allowed-tools: []
 ---
 
 # lythoskill-hello-world

@@ -10,6 +10,7 @@ when_to_use: |
   Creating a new skill, reviewing SKILL.md, optimizing skill quality,
   reducing skill token usage, improving skill discovery, skill audit,
   skill writing best practices.
+allowed-tools: []
 ---
 
 # Skill Optimization Coach
