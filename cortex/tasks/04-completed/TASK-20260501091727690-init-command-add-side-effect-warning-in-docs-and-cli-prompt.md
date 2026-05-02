@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-01 | Created |
+| review | 2026-05-02 | Deliverables committed |
 | completed | 2026-05-01 | Closed — SKILL.md already states "NOT for: writing a generic skill". Docs are sufficient; subagent missed it.
 
 ## 背景与目标

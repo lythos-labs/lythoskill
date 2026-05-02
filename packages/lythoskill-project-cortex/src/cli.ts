@@ -12,6 +12,7 @@ import { createAdr } from './commands/adr.js';
 import { listAll } from './commands/list.js';
 import { showStats, showNextIds } from './commands/stats.js';
 import { probeStatus } from './commands/probe.js';
+import { markTaskDone } from './commands/done.js';
 import { generateIndex, generateWikiIndex } from './generate-index.js';
 
 function printHelp(): void {
@@ -28,6 +29,7 @@ Commands:
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
   probe                 Check status consistency (dir vs Status History)
+  done <task-id>        Move task to completed and regenerate index
 
 Examples:
   lythoskill-project-cortex init
@@ -92,6 +94,14 @@ function main(): void {
 
     case 'probe':
       probeStatus(config);
+      break;
+
+    case 'done':
+      if (!arg) {
+        console.error('❌ Please provide a task ID');
+        process.exit(1);
+      }
+      markTaskDone(arg, config);
       break;
 
     case '--help':

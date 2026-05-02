@@ -12,6 +12,7 @@ Commands:
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
   probe                 Check status consistency (dir vs Status History)
+  done <task-id>        Move task to completed and regenerate index
 
 Examples:
   lythoskill-project-cortex init

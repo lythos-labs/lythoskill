@@ -189,14 +189,35 @@ Output when mismatches found:
     Actual directory:      01-backlog
     → File location does not match latest status record
 ```
-## Status Flow
+## Task State Machine (FSM)
+
+Directory location is the source of truth. Status History mirrors the directory.
+
 ```
-Epic:  01-active → 02-archived
-ADR:   01-proposed → 02-accepted / 03-rejected / 04-superseded
-Task:  01-backlog → 02-in-progress → 03-review → 04-completed → 07-archived
-                ↘ 05-suspended (recoverable) ↘ 06-terminated (cancelled)
+backlog ──start──► in-progress ──deliver──► review ──accept──► completed ──archive──► archived
+    │                   │                      │
+    │                   └────block────► suspended
+    │                                          │
+    │                                          └──resolved──► in-progress
+    │
+    └────────────────────────────cancel────────────────────► terminated
 ```
-Move files between directories to change status. Directory is the source of truth.
+
+### Transition Table
+
+| From | To | Who | Trigger | Action |
+|------|----|-----|---------|--------|
+| backlog | in-progress | Subagent | Begins implementation | `mv` to `02-in-progress/`, append Status History |
+| in-progress | review | Subagent | Core deliverables done, committed with task ID | `mv` to `03-review/`, append Status History |
+| review | completed | User/System | Exit criteria met, acceptance passed | `bunx @lythos/project-cortex done TASK-xxx` |
+| in-progress | suspended | Any | Blocked by external dependency | `mv` to `05-suspended/`, append Status History |
+| suspended | in-progress | Any | Blocker resolved | `mv` to `02-in-progress/`, append Status History |
+| any | terminated | User/System | Task cancelled or obsolete | `mv` to `06-terminated/`, append Status History |
+| completed | archived | User/System | Long-term storage | `mv` to `07-archived/`, append Status History |
+
+**Re-work**: review → in-progress when deliverables are rejected.
+
+**After every move**, run `bunx @lythos/project-cortex index` to regenerate INDEX.md.
 ## Git Integration (Critical)
 Commits **must** include task ID in the message title:
 ✅ `git commit -m "feat(api): add endpoint (TASK-20250422143321029)"`
@@ -207,11 +228,14 @@ After user says "LGTM": `git tag -a v0.X.0 -m "feat: description"`
 ## Role Separation
 | Role | Can do | Operates on |
 |------|--------|-------------|
-| **User/System** | Create epics/ADRs, archive, final review | epics/, adr/, tasks/04-completed/ |
-| **Subagent** | Execute tasks, update progress | tasks/02-in-progress/, tasks/03-review/ |
-Delegate with: "Execute cortex/tasks/01-backlog/TASK-XXX.md" — subagent moves
-it to 02-in-progress, implements, updates progress, commits with task ID,
-moves to 03-review.
+| **User/System** | Create epics/ADRs, archive, final review, mark done | epics/, adr/, tasks/04-completed/ |
+| **Subagent** | Execute tasks, drive status forward | tasks/01-backlog/ → 02-in-progress/ → 03-review/ |
+
+**Subagent workflow** (delegate with: "Execute TASK-xxx"):
+1. Move from `01-backlog/` to `02-in-progress/`, append Status History
+2. Implement, commit with task ID in message
+3. Move to `03-review/`, append Status History
+4. **Stop here.** Never move to completed — that requires user acceptance.
 ## Milestone Protocol (Prevents Fake Completion)
 Every task must define at creation:
 - **Exit criteria**: one sentence defining "done enough"
@@ -228,6 +252,10 @@ Every task must define at creation:
 ✅ Mark completed when: core deliverables exist, exit reason stated, not-delivering declared.
 ❌ Do not mark completed when: only checkboxes ticked, exit criteria is "roughly done",
 undeclared TODOs remain.
+
+**Status change is a file move + Status History append, not just a checkbox.**
+After the user accepts reviewed work, use `bunx @lythos/project-cortex done TASK-xxx`
+to move it to completed. This command only works for tasks already in `03-review/`.
 ## Gotchas
 **Always use CLI to create documents.** Never create ADR/Epic/Task files manually.
 The CLI handles template alignment, correct timestamp IDs, and initial directory

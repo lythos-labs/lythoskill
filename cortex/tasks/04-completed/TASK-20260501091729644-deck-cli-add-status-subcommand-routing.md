@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-01 | Created |
+| review | 2026-05-02 | Deliverables committed |
 | completed | 2026-05-01 | Closed — deck-status.sh already exists in skill layer. No duplicate CLI routing needed.
 
 ## 背景与目标

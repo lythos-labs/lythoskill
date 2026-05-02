@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/4/30 01:25:24
+> 自动生成于 2026/5/2 22:36:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 20 | 进行中: 0, 待验收: 0, 已完成: 3 |
-| Epics | 5 | 活跃: 4, 已归档: 1 |
-| ADRs | 14 | 已接受: 14 |
+| Tasks | 29 | 进行中: 0, 待验收: 0, 已完成: 11 |
+| Epics | 7 | 活跃: 6, 已归档: 1 |
+| ADRs | 26 | 已接受: 18 |
 
 ---
 
@@ -20,6 +20,8 @@
 - **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
 - **EPIC-20260430011158241**: Monorepo tooling consistency and config debt cleanup
 - **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
+- **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
+- **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
 
 ### 已归档
 
@@ -29,7 +31,7 @@
 
 ## 📄 Tasks
 
-### 待办 (17)
+### 待办 (18)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260423124059766**: Define and implement lythos naming conventions and publish path
@@ -48,6 +50,7 @@
 - [ ] **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
 - [ ] **TASK-20260430012458866**: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
 - [ ] **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
+- [ ] **TASK-20260501090806543**: Fix align.ts ESM violation: replace 9 require() calls with import
 
 ### 进行中 (0)
 
@@ -57,11 +60,19 @@ _无_
 
 _无_
 
-### 已完成 (3)
+### 已完成 (11)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
 - ✅ ~~TASK-20260429225846405~~: Add --help and validate subcommand to lythoskill-deck CLI
+- ✅ ~~TASK-20260430174753504~~: Implement deck add CLI command with git clone and skills.sh backends
+- ✅ ~~TASK-20260501091722647~~: README Quick Start: add developer branch for repo clone context
+- ✅ ~~TASK-20260501091724005~~: README: add Prerequisites section (Bun + pnpm) at top
+- ✅ ~~TASK-20260501091725299~~: AGENTS.md: fix HANDOFF-TEMPLATE.md missing path
+- ✅ ~~TASK-20260501091726708~~: deck link output: clarify 8/10 skills wording to avoid confusion
+- ✅ ~~TASK-20260501091727690~~: init command: add side-effect warning in docs and CLI prompt
+- ✅ ~~TASK-20260501091728793~~: AGENTS.md: add bunx vs local path troubleshooting hint
+- ✅ ~~TASK-20260501091729644~~: deck CLI: add status subcommand routing
 
 ### 悬置 (0)
 
@@ -89,6 +100,18 @@ _无_
 - ✅ **ADR-20260424115621494** (02-accepted): virtual-evaluator-swarm adaptive concurrency skill design
 - ✅ **ADR-20260424120936541** (02-accepted): player-deck separation and deck boundary rationale
 - ✅ **ADR-20260424125637347** (02-accepted): handoff format migration from fixed file to daily-first
+- ✅ **ADR-20260430174746744** (02-accepted): deck add command — convenience download without locking users into a single package manager
+- ✅ **ADR-20260501090811296** (02-accepted): CI consistency check abandoned in favor of pre-commit hook for skill build
+- 🤔 **ADR-20260501091724816** (01-proposed): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
+- ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
+- 🤔 **ADR-20260501160000000** (01-proposed): skill-deck.toml section semantics and innate skill re-attachment after context compaction
+- 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
+- ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
+- 🤔 **ADR-20260502012643244** (01-proposed): FQ-only locator — 删除 bare-name 与隐式策略 fallback
+- 🤔 **ADR-20260502012643344** (01-proposed): 项目自身 skill 通过 `localhost/<name>` symlink 自举，删除 `cold_pool="."` 特例
+- 🤔 **ADR-20260502012643444** (01-proposed): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
+- 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
+- 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
 
 ---
 

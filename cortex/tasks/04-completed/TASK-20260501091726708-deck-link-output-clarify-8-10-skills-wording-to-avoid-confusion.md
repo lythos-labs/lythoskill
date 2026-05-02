@@ -1,11 +1,13 @@
-# TASK-20260430174753504: Implement deck add CLI command with git clone and skills.sh backends
+# TASK-20260501091726708: deck link output: clarify 8/10 skills wording to avoid confusion
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-04-30 | Created |
+| backlog | 2026-05-01 | Created |
+| review | 2026-05-02 | Deliverables committed |
+| completed | 2026-05-02 | Done |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260430174753504)
+feat(scope): description (TASK-20260501091726708)
 
 - Detail 1
 - Detail 2
