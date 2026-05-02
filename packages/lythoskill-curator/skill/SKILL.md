@@ -59,15 +59,34 @@ bunx @lythos/skill-curator restore --output ~/.agents/lythos/skill-curator/
 
 ### Query the index
 ```bash
-# SQL query → JSON array (LLM-consumable)
+# SQL query → Markdown table
 bunx @lythos/skill-curator query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
 # Specify db path
 bunx @lythos/skill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"
 # Inspect table structure
 bunx @lythos/skill-curator query "PRAGMA table_info(skills)"
+# Show schema when no query is provided
+bunx @lythos/skill-curator query
 ```
 
-Output is always a JSON array — agent can parse directly.
+Output is a formatted Markdown table — easy to read in chat or pipe to other tools.
+
+### Audit the index
+```bash
+# Run predefined checks and output a report
+bunx @lythos/skill-curator audit
+# Specify db path
+bunx @lythos/skill-curator audit --db ./catalog.db
+```
+
+Checks performed:
+- **Missing frontmatter**: skills without `version`, `description`, or `when_to_use`
+- **Type anomalies**: `type` values that are not `standard` or `flow`
+- **Empty niches**: skills with no niches declared
+- **Orphan scripts**: skills with `has_scripts=true` but no matching `scripts/` dir
+- **dao_shu_qi_yong coverage**: count skills with/without `deck_skill_type`
+
+Report format: one Markdown table per check, plus a summary score out of 100.
 
 ### Typical queries
 ```bash

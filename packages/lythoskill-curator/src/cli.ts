@@ -373,39 +373,125 @@ export function runCurator(argv: string[]) {
   console.log(`💾 Catalog DB: ${dbPath}`);
 }
 
+// ── Markdown table formatter ─────────────────────────────────
+
+function formatMarkdownTable(rows: Record<string, any>[]): string {
+  if (rows.length === 0) return '*No results.*'
+  const cols = Object.keys(rows[0])
+  const normalize = (s: any) => String(s ?? '').replace(/\s+/g, ' ').trim()
+  const widths = cols.map(c => Math.max(c.length, ...rows.map(r => normalize(r[c]).length)))
+  const sep = cols.map((_, i) => '-'.repeat(widths[i])).join(' | ')
+  const header = cols.map((c, i) => c.padEnd(widths[i])).join(' | ')
+  const lines = [header, sep]
+  for (const row of rows) {
+    lines.push(cols.map((c, i) => normalize(row[c]).padEnd(widths[i])).join(' | '))
+  }
+  return lines.join('\n')
+}
+
 // ── Query subcommand ─────────────────────────────────────────
 
-function runQuery(argv: string[]) {
-  let dbPath: string | undefined;
-  let sql: string | undefined;
+function printSchema(db: Database) {
+  console.log('## catalog.db schema\n')
+
+  const tables = db.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as { name: string }[]
+  for (const { name } of tables) {
+    console.log(`### Table: \`${name}\``)
+    const cols = db.query(`PRAGMA table_info(${name})`).all() as { cid: number; name: string; type: string; notnull: number; dflt_value: any; pk: number }[]
+    const rows = cols.map(c => ({
+      column: c.name,
+      type: c.type,
+      nullable: c.notnull ? 'NOT NULL' : 'NULL',
+      default: c.dflt_value ?? '',
+      pk: c.pk ? 'PK' : '',
+    }))
+    console.log(formatMarkdownTable(rows))
+    console.log('')
+  }
+
+  console.log('### Example queries')
+  console.log('```bash')
+  console.log('lythoskill-curator query "SELECT name, type FROM skills WHERE deck_skill_type = \'combo\'"')
+  console.log('lythoskill-curator query "SELECT name, niches FROM skills WHERE niches LIKE \'%report%\'"')
+  console.log('lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
+  console.log('```')
+}
+
+function resolveDbPath(argv: string[]): string | undefined {
+  let dbPath: string | undefined
+  const positional: string[] = []
 
   for (let i = 0; i < argv.length; i++) {
-    const arg = argv[i];
+    const arg = argv[i]
     if ((arg === '--db' || arg === '-d') && argv[i + 1]) {
-      dbPath = argv[++i];
+      dbPath = argv[++i]
     } else if (!arg.startsWith('-')) {
-      sql = arg;
+      positional.push(arg)
     }
   }
 
-  if (!sql) {
-    console.error('Usage: lythoskill-curator query <SQL> [--db <path>]')
-    console.error('')
-    console.error('Examples:')
-    console.error('  lythoskill-curator query "SELECT name, type FROM skills"')
-    console.error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
-    process.exit(1)
+  if (dbPath) return dbPath
+
+  // If first positional arg looks like a db path and exists, use it
+  if (positional[0] && (positional[0].endsWith('.db') || positional[0].includes('/')) && existsSync(positional[0])) {
+    return positional[0]
   }
 
-  if (!dbPath) {
-    // Default: find the most recently generated catalog.db in common locations
-    const candidates = [
-      `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,
-      `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,
-    ]
-    for (const c of candidates) {
-      if (existsSync(c)) { dbPath = c; break; }
+  // Default: ./catalog.db
+  if (existsSync('./catalog.db')) {
+    return './catalog.db'
+  }
+
+  // Fallback: common locations
+  const candidates = [
+    `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,
+    `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,
+  ]
+  for (const c of candidates) {
+    if (existsSync(c)) { return c }
+  }
+
+  return undefined
+}
+
+function runQuery(argv: string[]) {
+  let sql: string | undefined
+  const positional: string[] = []
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i]
+    if ((arg === '--db' || arg === '-d') && argv[i + 1]) {
+      // consume but don't store here — resolveDbPath will handle it
+      argv[++i]
+    } else if (!arg.startsWith('-')) {
+      positional.push(arg)
     }
+  }
+
+  // Heuristic: if first positional arg is a db file, skip it for sql
+  let dbPath = resolveDbPath(argv)
+  if (positional[0] && dbPath && positional[0] === dbPath) {
+    sql = positional.slice(1).join(' ')
+  } else {
+    sql = positional.join(' ')
+  }
+
+  if (!sql || sql.trim() === '') {
+    if (!dbPath || !existsSync(dbPath)) {
+      console.error('Usage: lythoskill-curator query <SQL> [--db <path>]')
+      console.error('')
+      console.error('Examples:')
+      console.error('  lythoskill-curator query "SELECT name, type FROM skills"')
+      console.error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
+      process.exit(1)
+    }
+    const db = new Database(dbPath, { readonly: true })
+    try {
+      printSchema(db)
+    } finally {
+      db.close()
+    }
+    return
   }
 
   if (!dbPath || !existsSync(dbPath)) {
@@ -415,6 +501,7 @@ function runQuery(argv: string[]) {
       console.error(`  Searched: ${dbPath}`)
     } else {
       console.error('  Searched default locations:')
+      console.error('    ./catalog.db')
       console.error('    ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
       console.error('    ~/.agents/lythos/skill-curator/catalog.db')
     }
@@ -434,7 +521,7 @@ function runQuery(argv: string[]) {
 
   const db = new Database(dbPath, { readonly: true })
   try {
-    // Show index freshness (stderr so JSON output on stdout stays clean)
+    // Show index freshness
     try {
       const generatedRow = db.query("SELECT value FROM catalog_meta WHERE key = 'generated_at'").get() as { value: string } | null
       if (generatedRow?.value) {
@@ -449,14 +536,115 @@ function runQuery(argv: string[]) {
       }
     } catch {}
 
-    const rows = db.query(sql).all()
-    console.log(JSON.stringify(rows, null, 2))
+    const rows = db.query(sql).all() as Record<string, any>[]
+    console.log(formatMarkdownTable(rows))
   } catch (e: any) {
     console.error(`❌ SQL error: ${e.message}`)
     console.error('')
     console.error('Hint: check available tables and columns:')
     console.error(`  lythoskill-curator query --db ${dbPath} "PRAGMA table_info(skills)"`)
     console.error(`  lythoskill-curator query --db ${dbPath} "SELECT name FROM sqlite_master WHERE type='table'"`)
+    process.exit(1)
+  } finally {
+    db.close()
+  }
+}
+
+// ── Audit subcommand ─────────────────────────────────────────
+
+interface AuditCheck {
+  title: string
+  rows: Record<string, any>[]
+  count: number
+}
+
+function runAudit(argv: string[]) {
+  const dbPath = resolveDbPath(argv)
+
+  if (!dbPath || !existsSync(dbPath)) {
+    console.error('❌ Catalog DB not found.')
+    console.error('')
+    console.error('Searched:')
+    console.error('  ./catalog.db')
+    console.error('  ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
+    console.error('  ~/.agents/lythos/skill-curator/catalog.db')
+    console.error('')
+    console.error('Run `lythoskill-curator` first to build the index.')
+    process.exit(1)
+  }
+
+  const db = new Database(dbPath, { readonly: true })
+  const checks: AuditCheck[] = []
+
+  try {
+    // 1. Missing frontmatter
+    const missingFrontmatter = db.query(`
+      SELECT name, path, version, description, when_to_use FROM skills
+      WHERE version = '' OR version IS NULL OR version = 'unknown'
+         OR description = '' OR description IS NULL
+         OR when_to_use = '' OR when_to_use IS NULL
+    `).all() as Record<string, any>[]
+    checks.push({ title: 'Missing frontmatter (version, description, or when_to_use)', rows: missingFrontmatter, count: missingFrontmatter.length })
+
+    // 2. Type anomalies
+    const typeAnomalies = db.query(`
+      SELECT name, path, type FROM skills
+      WHERE type NOT IN ('standard', 'flow')
+    `).all() as Record<string, any>[]
+    checks.push({ title: 'Type anomalies (not standard or flow)', rows: typeAnomalies, count: typeAnomalies.length })
+
+    // 3. Empty niches
+    const emptyNiches = db.query(`
+      SELECT name, path, niches FROM skills
+      WHERE niches = '[]' OR niches IS NULL OR niches = ''
+    `).all() as Record<string, any>[]
+    checks.push({ title: 'Empty niches', rows: emptyNiches, count: emptyNiches.length })
+
+    // 4. Orphan scripts (has_scripts=1 but no scripts/ dir on disk)
+    const scriptPaths = db.query(`
+      SELECT name, path FROM skills WHERE has_scripts = 1
+    `).all() as { name: string; path: string }[]
+    const orphanScripts: Record<string, any>[] = []
+    for (const s of scriptPaths) {
+      if (!existsSync(join(s.path, 'scripts'))) {
+        orphanScripts.push({ name: s.name, path: s.path, issue: 'scripts dir missing' })
+      }
+    }
+    checks.push({ title: 'Orphan scripts (has_scripts=true but no scripts/ dir)', rows: orphanScripts, count: orphanScripts.length })
+
+    // 5. dao_shu_qi_yong coverage (deck_skill_type)
+    const coverage = db.query(`
+      SELECT CASE WHEN deck_skill_type IS NULL OR deck_skill_type = '' THEN '(unset)' ELSE deck_skill_type END AS deck_skill_type, COUNT(*) AS count
+      FROM skills
+      GROUP BY CASE WHEN deck_skill_type IS NULL OR deck_skill_type = '' THEN '(unset)' ELSE deck_skill_type END
+    `).all() as Record<string, any>[]
+    checks.push({ title: 'dao_shu_qi_yong coverage (deck_skill_type)', rows: coverage, count: 0 })
+
+    // Total skills
+    const totalResult = db.query(`SELECT COUNT(*) AS total FROM skills`).get() as { total: number }
+    const total = totalResult?.total || 0
+
+    // Output report
+    let totalIssues = 0
+    for (const check of checks) {
+      console.log(`\n### ${check.title}: ${check.count} issue${check.count === 1 ? '' : 's'}`)
+      if (check.rows.length > 0) {
+        console.log(formatMarkdownTable(check.rows))
+      } else {
+        console.log('*None found.*')
+      }
+      if (!check.title.includes('coverage')) {
+        totalIssues += check.count
+      }
+    }
+
+    const score = Math.max(0, 100 - Math.round((totalIssues / Math.max(total, 1)) * 100))
+    console.log(`\n---`)
+    console.log(`**Summary:** ${total} skills scanned, ${totalIssues} issue${totalIssues === 1 ? '' : 's'} found.`)
+    console.log(`**Audit score:** ${score}/100`)
+
+  } catch (e: any) {
+    console.error(`❌ Audit error: ${e.message}`)
     process.exit(1)
   } finally {
     db.close()
@@ -472,21 +660,25 @@ if (import.meta.main) {
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
+    console.log('       lythoskill-curator audit [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
     console.log('')
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
-    console.log('  query <SQL>           Query the catalog SQLite database (output: JSON array)')
+    console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
+    console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
     console.log('Options:')
     console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
-    console.log('  --db, -d <path>       Database path for query (default: find most recent catalog.db)')
+    console.log('  --db, -d <path>       Database path for query/audit (default: ./catalog.db)')
     process.exit(0)
   }
 
   if (cmd === 'query') {
     runQuery(args.slice(1))
+  } else if (cmd === 'audit') {
+    runAudit(args.slice(1))
   } else if (cmd === 'restore') {
     const { outputDir } = parseCuratorArgs(args.slice(1));
     restoreIndex(outputDir);
