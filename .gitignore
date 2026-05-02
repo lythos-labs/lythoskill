@@ -19,6 +19,9 @@ dist/
 # npm access token (local-only, never commit)
 .npm-access
 
+# GitHub access token (local-only, never commit)
+.github-token
+
 playground/
 .claude/
 
