@@ -377,14 +377,19 @@ export function runCurator(argv: string[]) {
 
 function formatMarkdownTable(rows: Record<string, any>[]): string {
   if (rows.length === 0) return '*No results.*'
+  const MAX_COL_WIDTH = 60
   const cols = Object.keys(rows[0])
   const normalize = (s: any) => String(s ?? '').replace(/\s+/g, ' ').trim()
-  const widths = cols.map(c => Math.max(c.length, ...rows.map(r => normalize(r[c]).length)))
+  const widths = cols.map(c => Math.min(MAX_COL_WIDTH, Math.max(c.length, ...rows.map(r => normalize(r[c]).length))))
+  const truncate = (s: string, width: number) => {
+    if (s.length <= width) return s.padEnd(width)
+    return s.slice(0, width - 1) + '…'
+  }
   const sep = cols.map((_, i) => '-'.repeat(widths[i])).join(' | ')
   const header = cols.map((c, i) => c.padEnd(widths[i])).join(' | ')
   const lines = [header, sep]
   for (const row of rows) {
-    lines.push(cols.map((c, i) => normalize(row[c]).padEnd(widths[i])).join(' | '))
+    lines.push(cols.map((c, i) => truncate(normalize(row[c]), widths[i])).join(' | '))
   }
   return lines.join('\n')
 }
