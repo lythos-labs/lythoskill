@@ -14,6 +14,7 @@ import { join, basename, dirname, resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
 import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
 import { findDeckToml, expandHome } from './link.js'
+import { parseDeck } from './parse-deck.js'
 
 const CLAUDE_SKILLS_DIR = join(homedir(), '.claude', 'skills')
 
@@ -75,7 +76,7 @@ function resolvePath(p: string): string {
   return resolve(p)
 }
 
-export async function addSkill(locator: string, options: { via?: string; deck?: string; workdir?: string }) {
+export async function addSkill(locator: string, options: { via?: string; deck?: string; workdir?: string; as?: string; type?: string }) {
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
   const deckPath = options.deck
     ? resolvePath(options.deck)
@@ -174,26 +175,79 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
     }
 
     const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo
-    console.log(`✅ Skill ready: ${skillName}`)
+    const alias = options.as || skillName
+    const skillType = (options.type || 'tool').toLowerCase()
+
+    if (!['innate', 'tool', 'combo'].includes(skillType)) {
+      console.error(`❌ Invalid type: ${skillType}. Must be innate, tool, or combo.`)
+      process.exit(1)
+    }
+
+    const fqPath = parsed.skill
+      ? `${parsed.host}/${parsed.owner}/${parsed.repo}/${parsed.skill}`
+      : `${parsed.host}/${parsed.owner}/${parsed.repo}`
+
+    console.log(`✅ Skill ready: ${skillName} (alias: ${alias})`)
     console.log(`   Location: ${skillDir}`)
+
+    // ── 写 deck.toml ────────────────────────────────────────────
 
     if (existsSync(deckPath)) {
       const deckRaw = readFileSync(deckPath, 'utf-8')
       const deck = parseToml(deckRaw) as any
-      const toolSkills = deck.tool?.skills || []
-      if (!toolSkills.includes(skillName)) {
-        if (!deck.tool) deck.tool = {}
-        if (!deck.tool.skills) deck.tool.skills = []
-        deck.tool.skills.push(skillName)
-        writeFileSync(deckPath, stringifyToml(deck))
-        console.log(`📝 Added "${skillName}" to ${deckPath}`)
-      } else {
-        console.log(`📝 "${skillName}" already declared in ${deckPath}`)
+
+      // Alias collision check across all sections
+      const allAliases = new Set<string>()
+      for (const section of ['innate', 'tool', 'combo'] as const) {
+        const skills = deck[section]?.skills
+        if (skills && typeof skills === 'object' && !Array.isArray(skills)) {
+          for (const key of Object.keys(skills)) allAliases.add(key)
+        } else if (Array.isArray(skills)) {
+          for (const name of skills) allAliases.add(name.split('/').pop() || name)
+        }
       }
+      for (const key of Object.keys(deck.transient || {})) {
+        allAliases.add(key)
+      }
+      if (allAliases.has(alias)) {
+        console.error(`❌ Alias "${alias}" already exists in deck`)
+        process.exit(1)
+      }
+
+      // Auto-migrate old string-array format to dict
+      for (const section of ['innate', 'tool', 'combo'] as const) {
+        const sectionData = deck[section]
+        if (sectionData && Array.isArray(sectionData.skills)) {
+          const dict: Record<string, { path: string }> = {}
+          for (const name of sectionData.skills) {
+            const a = name.split('/').pop() || name
+            dict[a] = { path: name }
+          }
+          deck[section].skills = dict
+          console.log(`📝 Auto-migrated [${section}] from string-array to dict format`)
+        }
+      }
+
+      // Ensure target section exists and is dict format
+      if (!deck[skillType]) deck[skillType] = {}
+      if (!deck[skillType].skills) deck[skillType].skills = {}
+      if (Array.isArray(deck[skillType].skills)) {
+        const dict: Record<string, { path: string }> = {}
+        for (const name of deck[skillType].skills) {
+          const a = name.split('/').pop() || name
+          dict[a] = { path: name }
+        }
+        deck[skillType].skills = dict
+      }
+
+      deck[skillType].skills[alias] = { path: fqPath }
+      writeFileSync(deckPath, stringifyToml(deck))
+      console.log(`📝 Added "${alias}" to [${skillType}.skills] in ${deckPath}`)
     } else {
-      const minimal = { deck: { max_cards: 10 }, tool: { skills: [skillName] } }
+      const minimal: any = { deck: { max_cards: 10 } }
+      minimal[skillType] = { skills: { [alias]: { path: fqPath } } }
       writeFileSync(deckPath, stringifyToml(minimal))
-      console.log(`📝 Created ${deckPath} with "${skillName}"`)
+      console.log(`📝 Created ${deckPath} with "${alias}"`)
     }
 
     console.log('🔗 Running deck link...')

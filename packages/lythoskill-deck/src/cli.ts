@@ -6,6 +6,22 @@ import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { formatHelp } from './help.js'
 
+const args = process.argv.slice(2)
+const command = args[0]
+
+const deckFlagIdx = args.indexOf('--deck')
+const workdirFlagIdx = args.indexOf('--workdir')
+const viaFlagIdx = args.indexOf('--via')
+const asFlagIdx = args.indexOf('--as')
+const typeFlagIdx = args.indexOf('--type')
+
+const deckPath = deckFlagIdx >= 0 ? args[deckFlagIdx + 1] : undefined
+const workdir = workdirFlagIdx >= 0 ? args[workdirFlagIdx + 1] : undefined
+const via = viaFlagIdx >= 0 ? args[viaFlagIdx + 1] : undefined
+const as = asFlagIdx >= 0 ? args[asFlagIdx + 1] : undefined
+const type = typeFlagIdx >= 0 ? args[typeFlagIdx + 1] : undefined
+const noBackup = args.includes('--no-backup')
+
 const HELP_CONFIG = {
   binName: 'lythoskill-deck',
   description: 'Declarative skill deck governance — cold pool, working set, deny-by-default',
@@ -21,20 +37,10 @@ const HELP_CONFIG = {
     { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
     { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
     { flag: '--via <backend>', description: 'Download backend: git (default) | skills.sh' },
+    { flag: '--as <alias>', description: 'Explicit alias for the skill (default: basename of path)' },
+    { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
   ],
 }
-
-const args = process.argv.slice(2)
-const command = args[0]
-
-const deckFlagIdx = args.indexOf('--deck')
-const workdirFlagIdx = args.indexOf('--workdir')
-const viaFlagIdx = args.indexOf('--via')
-
-const deckPath = deckFlagIdx >= 0 ? args[deckFlagIdx + 1] : undefined
-const workdir = workdirFlagIdx >= 0 ? args[workdirFlagIdx + 1] : undefined
-const via = viaFlagIdx >= 0 ? args[viaFlagIdx + 1] : undefined
-const noBackup = args.includes('--no-backup')
 
 switch (command) {
   case '--help':
@@ -50,7 +56,7 @@ switch (command) {
       console.error('❌ Missing locator. Usage: deck add <github.com/owner/repo[/skill]>')
       process.exit(1)
     }
-    await addSkill(locator, { via, deck: deckPath, workdir })
+    await addSkill(locator, { via, deck: deckPath, workdir, as, type })
     break
   }
   case 'update':
