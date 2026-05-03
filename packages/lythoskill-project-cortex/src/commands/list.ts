@@ -26,6 +26,8 @@ export function listAll(config: WorkflowConfig): void {
 
   const epicDirs = [
     config.epicSubdirs.active,
+    config.epicSubdirs.done,
+    config.epicSubdirs.suspended,
     config.epicSubdirs.archived,
   ].map(d => join(config.epicsDir, d));
 

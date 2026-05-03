@@ -21,6 +21,8 @@ export interface WorkflowConfig {
 
   epicSubdirs: {
     active: string;
+    done: string;
+    suspended: string;
     archived: string;
   };
 

@@ -26,6 +26,8 @@ export function showStats(config: WorkflowConfig): void {
 
   const epicDirs = [
     ['Active', join(config.epicsDir, config.epicSubdirs.active)],
+    ['Done', join(config.epicsDir, config.epicSubdirs.done)],
+    ['Suspended', join(config.epicsDir, config.epicSubdirs.suspended)],
     ['Archived', join(config.epicsDir, config.epicSubdirs.archived)],
   ];
 

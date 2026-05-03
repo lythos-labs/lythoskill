@@ -19,7 +19,7 @@ interface TaskInfo {
 interface EpicInfo {
   id: string;
   title: string;
-  status: 'active' | 'archived';
+  status: 'active' | 'done' | 'suspended' | 'archived';
   file: string;
 }
 
@@ -76,17 +76,25 @@ function scanTasks(config: WorkflowConfig): TaskInfo[] {
 function scanEpics(config: WorkflowConfig): EpicInfo[] {
   const epics: EpicInfo[] = [];
 
-  for (const dir of [config.epicSubdirs.active, config.epicSubdirs.archived]) {
+  const epicDirEntries: Array<{ subdir: string; status: EpicInfo['status'] }> = [
+    { subdir: config.epicSubdirs.active, status: 'active' },
+    { subdir: config.epicSubdirs.done, status: 'done' },
+    { subdir: config.epicSubdirs.suspended, status: 'suspended' },
+    { subdir: config.epicSubdirs.archived, status: 'archived' },
+  ];
+
+  for (const { subdir, status } of epicDirEntries) {
+    if (!subdir) continue;
     try {
-      const files = readdirSync(join(config.epicsDir, dir))
+      const files = readdirSync(join(config.epicsDir, subdir))
         .filter(f => f.endsWith('.md') && f.startsWith('EPIC-') && TS_PATTERN.test(f));
 
       for (const file of files) {
-        const content = readFileSync(join(config.epicsDir, dir, file), 'utf-8');
+        const content = readFileSync(join(config.epicsDir, subdir, file), 'utf-8');
         const id = file.match(/EPIC-\d{17}/)?.[0] || '';
         const title = extractTitle(content);
 
-        epics.push({ id, title, status: dir.includes('active') ? 'active' : 'archived', file });
+        epics.push({ id, title, status, file });
       }
     } catch {
       // 目录不存在
@@ -170,7 +178,7 @@ function generateIndex(config: WorkflowConfig) {
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | ${tasks.length} | 进行中: ${taskStats.inProgress}, 待验收: ${taskStats.review}, 已完成: ${taskStats.completed} |
-| Epics | ${epics.length} | 活跃: ${epics.filter(e => e.status === 'active').length}, 已归档: ${epics.filter(e => e.status === 'archived').length} |
+| Epics | ${epics.length} | 活跃: ${epics.filter(e => e.status === 'active').length}, 已完成: ${epics.filter(e => e.status === 'done').length}, 悬置: ${epics.filter(e => e.status === 'suspended').length}, 已归档: ${epics.filter(e => e.status === 'archived').length} |
 | ADRs | ${adrs.length} | 已接受: ${adrs.filter(a => a.status === config.adrSubdirs.accepted).length} |
 
 ---
@@ -180,6 +188,14 @@ function generateIndex(config: WorkflowConfig) {
 ### 进行中
 
 ${epics.filter(e => e.status === 'active').map(e => `- **${e.id}**: ${e.title}`).join('\n') || '_无_'}
+
+### 已完成
+
+${epics.filter(e => e.status === 'done').map(e => `- ✅ **${e.id}**: ${e.title}`).join('\n') || '_无_'}
+
+### 悬置
+
+${epics.filter(e => e.status === 'suspended').map(e => `- ⏸️ **${e.id}**: ${e.title}`).join('\n') || '_无_'}
 
 ### 已归档
 

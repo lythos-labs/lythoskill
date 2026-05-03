@@ -120,7 +120,7 @@ function checkMatch(expectedKey: string, lastHistory: string | null): { match: P
   // 检测是否包含其他明确状态词
   const statusKeywords = [
     'backlog', 'in progress', 'in-progress', 'review', 'completed', 'suspended',
-    'terminated', 'archived', 'active', 'proposed', 'accepted', 'rejected', 'superseded',
+    'terminated', 'archived', 'active', 'done', 'proposed', 'accepted', 'rejected', 'superseded',
   ];
   const detectedOther = statusKeywords.filter(
     s => s !== expected && normalized.includes(s)
@@ -206,6 +206,8 @@ export function probeStatus(config: WorkflowConfig): void {
 
   const epicFiles = [
     ...scanDir(join(config.epicsDir, config.epicSubdirs.active), 'EPIC-'),
+    ...scanDir(join(config.epicsDir, config.epicSubdirs.done), 'EPIC-'),
+    ...scanDir(join(config.epicsDir, config.epicSubdirs.suspended), 'EPIC-'),
     ...scanDir(join(config.epicsDir, config.epicSubdirs.archived), 'EPIC-'),
   ];
 
