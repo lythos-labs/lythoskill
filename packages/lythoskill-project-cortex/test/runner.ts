@@ -174,7 +174,11 @@ function parseScenario(mdPath: string): Scenario {
     const adrMatch = bullet.match(/adr\s+`?([^`]+)`?\s+exists\s+in\s+`?([^`]+)`?/i)
     if (adrMatch) {
       given.adrs = given.adrs || []
-      given.adrs.push({ id: adrMatch[1], title: 'Test ADR', status: 'proposed' })
+      const dirHint = adrMatch[2].toLowerCase()
+      const status = dirHint.includes('accepted') ? 'accepted' :
+                     dirHint.includes('rejected') ? 'rejected' :
+                     dirHint.includes('superseded') ? 'superseded' : 'proposed'
+      given.adrs.push({ id: adrMatch[1], title: 'Test ADR', status })
       continue
     }
   }
