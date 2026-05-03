@@ -37,6 +37,7 @@ Task state machine:
   start <task-id>       Move task to in-progress
   review <task-id>      Move task to review
   done <task-id>        Move task to completed (must be in review)
+  complete <task-id>    Move task to completed (any status; trailer-driven close)
   suspend <task-id>     Move task to suspended
   resume <task-id>      Move suspended task back to in-progress
   reject <task-id>      Move reviewed task back to in-progress (re-work)
@@ -199,6 +200,13 @@ function main(): void {
     case 'done':
       if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
       moveTask(arg, 'completed', config, { note: 'Done' });
+      break;
+
+    case 'complete':
+      // Trailer-driven close: any status → completed, single Status History entry.
+      // Distinct from `done` which strictly requires review → completed.
+      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
+      moveTask(arg, 'completed', config, { allowAny: true, note: 'Closed via trailer' });
       break;
 
     case 'suspend':

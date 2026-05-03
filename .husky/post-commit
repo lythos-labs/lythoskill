@@ -1,7 +1,160 @@
 #!/bin/sh
-# post-commit — Hexo-style sync to skills branch (release branch)
-# Mirrors skills/* + README.md into an isolated skills branch for lightweight clone.
+# post-commit
+#   1. Trailer-driven cortex governance flow (ADR-20260503003314901, option C)
+#   2. Hexo-style sync to skills branch (release branch)
+#
+# The trailer block runs first; if it creates a follow-up commit, that commit
+# itself reruns this hook — but the recursion guard at the top of the trailer
+# block (Triggered by: marker) lets it skip straight to the hexo sync.
 
+# ---------------------------------------------------------------------------
+# 1. Trailer parsing + cortex follow-up commit
+# ---------------------------------------------------------------------------
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+trailer_block() {
+  # Recursion guard: follow-up commits carry "Triggered by:" — skip trailer
+  # processing for them (but let the hexo block below still run).
+  if git log -1 --format=%B HEAD | grep -q '^Triggered by:'; then
+    return 0
+  fi
+
+  msg=$(git log -1 --format=%B HEAD)
+  source_hash=$(git rev-parse --short HEAD)
+
+  # Collect dispatch lines: "<verb> <ID>" pairs
+  dispatch_file=$(mktemp)
+  warn_file=$(mktemp)
+
+  # shellcheck disable=SC2162
+  echo "$msg" | while IFS= read line; do
+    # Match: Task: TASK-X [verb] | ADR: ADR-X [verb] | Epic: EPIC-X [verb] | Closes: <ID>
+    case "$line" in
+      Task:*|ADR:*|Epic:*|Closes:*)
+        ;;
+      *)
+        continue
+        ;;
+    esac
+
+    # Strip leading "Key: " and trim
+    key=$(echo "$line" | sed -E 's/^([A-Za-z]+):.*/\1/')
+    rest=$(echo "$line" | sed -E 's/^[A-Za-z]+:[[:space:]]+//' | sed -E 's/[[:space:]]+$//')
+
+    id=$(echo "$rest" | awk '{print $1}')
+    verb=$(echo "$rest" | awk '{print $2}')
+
+    # ID must look like FOO-1234...
+    if ! echo "$id" | grep -Eq '^[A-Z]+-[0-9]+$'; then
+      echo "⚠️  post-commit trailer: malformed ID in line: $line" >> "$warn_file"
+      continue
+    fi
+
+    case "$key" in
+      Closes)
+        case "$id" in
+          TASK-*) echo "complete $id" >> "$dispatch_file" ;;
+          ADR-*)  echo "adr accept $id" >> "$dispatch_file" ;;
+          EPIC-*) echo "epic done $id" >> "$dispatch_file" ;;
+          *)
+            echo "⚠️  post-commit trailer: unknown ID prefix in: $line" >> "$warn_file"
+            ;;
+        esac
+        ;;
+      Task)
+        if [ -z "$verb" ]; then
+          echo "⚠️  post-commit trailer: Task: requires a verb in: $line" >> "$warn_file"
+          continue
+        fi
+        echo "$verb $id" >> "$dispatch_file"
+        ;;
+      ADR)
+        if [ -z "$verb" ]; then
+          echo "⚠️  post-commit trailer: ADR: requires a verb in: $line" >> "$warn_file"
+          continue
+        fi
+        echo "adr $verb $id" >> "$dispatch_file"
+        ;;
+      Epic)
+        if [ -z "$verb" ]; then
+          echo "⚠️  post-commit trailer: Epic: requires a verb in: $line" >> "$warn_file"
+          continue
+        fi
+        echo "epic $verb $id" >> "$dispatch_file"
+        ;;
+    esac
+  done
+
+  # Print collected warnings
+  if [ -s "$warn_file" ]; then
+    cat "$warn_file"
+  fi
+
+  # No dispatches? Nothing to do.
+  if [ ! -s "$dispatch_file" ]; then
+    rm -f "$dispatch_file" "$warn_file"
+    return 0
+  fi
+
+  # Run dispatches; collect summary lines for the follow-up commit message.
+  summary_file=$(mktemp)
+  any_success=0
+
+  while IFS= read -r cmd; do
+    [ -z "$cmd" ] && continue
+    echo "🔁 cortex trailer dispatch: $cmd"
+    # shellcheck disable=SC2086
+    if bun packages/lythoskill-project-cortex/src/cli.ts $cmd; then
+      echo "$cmd" >> "$summary_file"
+      any_success=1
+    else
+      echo "⚠️  post-commit trailer: cortex CLI failed for: $cmd"
+    fi
+  done < "$dispatch_file"
+
+  if [ "$any_success" = "1" ]; then
+    # Stage only the paths cortex CLI maintains. We deliberately do NOT sweep
+    # cortex/ or cortex/wiki/ recursively — those dirs may carry unrelated
+    # working-tree changes (e.g. lessons doc edits) that must not be folded
+    # into the follow-up commit.
+    git add cortex/tasks cortex/adr cortex/epics cortex/wiki/INDEX.md INDEX.md 2>/dev/null
+
+    if ! git diff --cached --quiet; then
+      # Build commit message
+      first_line=$(head -1 "$summary_file")
+      n_lines=$(wc -l < "$summary_file" | tr -d ' ')
+      if [ "$n_lines" = "1" ]; then
+        subject="chore(cortex): $first_line"
+      else
+        subject="chore(cortex): $n_lines trailer dispatches"
+      fi
+
+      tmp_msg=$(mktemp)
+      {
+        echo "$subject"
+        echo
+        echo "Dispatches:"
+        sed 's/^/  - /' "$summary_file"
+        echo
+        echo "Triggered by: $source_hash"
+      } > "$tmp_msg"
+
+      # --no-verify: we are inside a hook; pre-commit must not re-enter.
+      git commit --no-verify -F "$tmp_msg" >/dev/null 2>&1 || \
+        echo "⚠️  post-commit trailer: follow-up commit failed"
+      rm -f "$tmp_msg"
+    fi
+  fi
+
+  rm -f "$dispatch_file" "$warn_file" "$summary_file"
+}
+
+trailer_block
+
+# ---------------------------------------------------------------------------
+# 2. Hexo-style sync to skills branch
+# ---------------------------------------------------------------------------
 # Only sync if this commit touched skills/ or README.md
 if ! git diff-tree --no-commit-id --name-only -r HEAD | grep -Eq '^skills/|^README\.md$'; then
   exit 0
