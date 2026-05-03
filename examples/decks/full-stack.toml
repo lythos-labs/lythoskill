@@ -1,0 +1,23 @@
+[deck]
+max_cards = 10
+
+# Full-stack development — React + best practices + docs
+[tool.skills.react-best-practices]
+path = "github.com/vercel-labs/agent-skills/skills/react-best-practices"
+role = "React patterns: hooks, memo, performance"
+
+[tool.skills.composition-patterns]
+path = "github.com/vercel-labs/agent-skills/skills/composition-patterns"
+role = "Component composition and architecture"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+role = "Vertical-slice red-green-refactor discipline"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Read and extract text from PDF files"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams from design docs"

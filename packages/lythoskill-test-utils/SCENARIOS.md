@@ -135,4 +135,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **32 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned for remaining deck refactor**.
+Current totals: **33 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned**.

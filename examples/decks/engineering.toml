@@ -1,0 +1,15 @@
+[deck]
+max_cards = 10
+
+# Engineering discipline skills — TDD + PRD workflow
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+role = "Vertical-slice red-green-refactor discipline"
+
+[tool.skills.to-prd]
+path = "github.com/mattpocock/skills/skills/engineering/to-prd"
+role = "Convert ideas to structured PRD documents"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams from design docs"

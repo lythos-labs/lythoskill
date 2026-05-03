@@ -84,6 +84,33 @@ ls .claude/skills/
 
 就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
 
+### 或者从预组 deck 开始
+
+不知道选什么技能？直接用针对场景的预组 deck：
+
+```bash
+# 文档处理：PDF + DOCX + 网页搜索
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+
+# 工程规范：TDD + PRD + 架构图
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/engineering.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+
+# 全栈开发：React + 模式 + TDD + 文档
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/full-stack.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+```
+
+| 预组 deck | 技能 | 场景 |
+|-----------|------|------|
+| [documents](./examples/decks/documents.toml) | PDF, DOCX, web-search | 文档处理 |
+| [engineering](./examples/decks/engineering.toml) | TDD, to-PRD, design-doc-mermaid | 工程规范 |
+| [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | 全栈开发 |
+| [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | 项目治理 |
+
+> `link` 只会激活 cold pool 里已有的技能。缺失的技能会报 "Skill not found"——用 `deck add <path>` 添加，或手动 clone。
+
 如果是 monorepo（一个仓库含多个技能），需要指定完整路径：
 
 ```bash
@@ -478,7 +505,7 @@ bun run test:all
 
 本地一把跑:
 ```bash
-bun run test:all     # 当前 12 个 cortex + 20 个 deck 场景
+bun run test:all     # 当前 12 个 cortex + 21 个 deck 场景
 ```
 
 全部场景索引:[`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md)

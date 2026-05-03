@@ -1,0 +1,19 @@
+[deck]
+max_cards = 10
+
+# lythoskill governance — project management + skill deck + memory
+[innate.skills.deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+role = "Declarative skill deck governance"
+
+[innate.skills.cortex]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
+role = "GTD-style project governance (tasks, epics, ADRs)"
+
+[innate.skills.scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
+role = "Write project memory: handoffs, daily logs, lessons"
+
+[innate.skills.onboarding]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
+role = "Structured project memory onboarding"
