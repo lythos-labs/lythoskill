@@ -45,9 +45,22 @@ bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
 bunx @lythos/skill-deck add github.com/owner/repo/skill-name
 # Or via Vercel skills.sh
 bunx @lythos/skill-deck add owner/repo --via skills.sh
+# Add with explicit alias and section
+bunx @lythos/skill-deck add github.com/owner/repo/skill-name --as tdd --type combo
 
 # Pull latest versions of declared skills from upstream
-bunx @lythos/skill-deck update
+bunx @lythos/skill-deck refresh
+# Refresh a single skill by alias or FQ path
+bunx @lythos/skill-deck refresh tdd
+
+# Remove a skill from deck and working set (cold pool untouched)
+bunx @lythos/skill-deck remove tdd
+
+# GC cold pool repos no longer referenced by any deck
+bunx @lythos/skill-deck prune
+# Skip confirmation
+bunx @lythos/skill-deck prune --yes
+
 # Then re-sync working set
 bunx @lythos/skill-deck link
 ```
@@ -61,9 +74,44 @@ non-symlink entities → backed up then removed; missing declared skills → lin
 
 You never diagnose the working set manually. Just run `link`.
 
-`update` pulls the latest version of each declared skill from its upstream git
-repository. It skips `localhost/*` skills (user-managed) and non-git directories.
-After `update`, run `link` to sync any changed skills into the working set.
+`refresh` pulls the latest version of declared skills from their upstream git
+repositories. Pass an alias or FQ path to refresh a single skill; omit to refresh
+all declared skills. It skips `localhost/*` skills (user-managed) and non-git
+directories. After `refresh`, run `link` to sync any changed skills into the
+working set.
+
+> `deck update` is deprecated and will be removed in v1.0.0. Use `refresh`.
+## Format Migration
+When you read a project's `skill-deck.toml`, check its format **before** running
+any `deck` command.
+
+**Old string-array format** (deprecated):
+```toml
+[tool]
+skills = ["github.com/owner/repo/skill-name"]
+```
+
+**New alias-as-key dict format** (current):
+```toml
+[tool.skills.skill-name]
+path = "github.com/owner/repo/skill-name"
+```
+
+**Agent duty — detect and prompt**: If you see `skills = [...]` (string array)
+in any `[innate]`, `[tool]`, or `[combo]` section, the deck is in the deprecated
+format. Ask the user whether to migrate before proceeding:
+
+```
+⚠️  This deck uses the deprecated string-array format. Run migrate?
+   bunx @lythos/skill-deck migrate-schema
+```
+
+Do NOT silently migrate. The user may be maintaining backward compatibility.
+Only suggest; let them decide.
+
+**Migration is safe**: `migrate-schema` creates a timestamped backup of the old
+deck before writing the new format. Run `migrate-schema --dry-run` first to
+preview the diff without modifying the file.
 ## Initialize
 ```bash
 # Copy template and edit [innate]/[tool] sections
