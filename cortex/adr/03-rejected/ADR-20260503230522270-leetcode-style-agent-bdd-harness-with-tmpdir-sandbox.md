@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-03 | Identified after deck v0.9.0 release: Agent BDD has zero scenarios, no LLM-in-loop infrastructure; deck add/remove behavior unverified by automated tests |
+| rejected | 2026-05-04 | Bypassed existing `@lythos/test-utils` Agent BDD convention (`*.agent.md`, in-loop LLM verification); written without user consultation; would have built parallel bash world instead of extending the 70-LoC TS runner. See "Why Rejected" below. |
 
 ## 背景
 
@@ -143,3 +144,34 @@ playground/agent-bdd/leetcode/
 - 关联包: `playground/agent-bdd/` (实施位置), `packages/lythoskill-arena/` (结构参照), `packages/lythoskill-test-utils/SCENARIOS.md` (覆盖率定义文件)
 - 关联 CLI: `bunx @lythos/skill-deck`(被测) / `claude -p`(driver)
 - 关联文档: `playground/agent-bdd/README.md`(harness 用法)
+
+## Why Rejected (2026-05-04)
+
+**Process failure** — written and committed (in `e6c3606`) without user consultation. User's correction:
+> "明明可以用ts，学之前的东西吧" / "东西竟然沉淀进不在git管理的playground。应该是个没能好好回忆的session干出来的事"
+
+**Substantive failure** — bypassed existing convention. `packages/lythoskill-test-utils/SCENARIOS.md` already defines the Agent BDD shape and it directly contradicts this ADR's design drivers:
+
+| This ADR proposed | SCENARIOS.md convention |
+|---|---|
+| 新建 `playground/agent-bdd/leetcode/` 目录(需改 `.gitignore` 例外) | Scenarios live alongside CLI scenarios in `packages/<x>/test/scenarios/`(已 tracked) |
+| Bash judge(`init-run.sh` / `judge.sh` / `pre-agent.sh`) | Markdown G/W/T 文件,由 `bdd-runner.ts` (~70 LoC TS) 驱动 |
+| 决定性 shell 断言 | Verification 由 in-loop LLM 做(明文写在 SCENARIOS.md "Agent BDD" 段) |
+| `bun:test` parallel world (`playground/agent-bdd/scenarios/*.test.ts`) | 统一用同一个 `runCli`/`assertOutput`/`setupWorkdir` |
+
+**Decision drivers that don't survive scrutiny**:
+
+- 第 2 条"Agent 端零侵入" — 真要做 zero-侵入,继续用 `@lythos/test-utils` 的 `runCli`/`spawnSync` 即可,不需要新建 bash 层。
+- 第 3 条"Judge 必须是脚本,不能让 LLM 当 judge" — 直接和 SCENARIOS.md "Agent BDD" 段冲突。Agent BDD 的全部信号就来自 in-loop LLM verification;移除 LLM 等于把第 3 档退化成第 2 档。
+- 第 5 条"与 arena 共享基建" — 共享 arena 是真问题,但解法是 `@lythos/test-utils` 抽象,不是新开 leetcode 子目录。
+
+**The legitimate concern that survives**: Agent BDD 类目 = 0 scenario,这是真 gap。但解法是写第一个 `*.agent.md` scenario,而不是替换 runner。
+
+## Replacement
+
+延续此 ADR 想解决的问题,但走既有约定:
+
+1. 在 `packages/lythoskill-test-utils/src/bdd-runner.ts` 加一个 `runClaudeAgent(cwd, brief)` helper(`Bun.$` / `Bun.spawn` 拉 `claude -p --dangerously-skip-permissions`)。
+2. 第一个 `*.agent.md` scenario 落在 `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md` —— 取自本 ADR 后续清单第 3 条衍生想法(JSON 自报技能)。
+3. SCENARIOS.md "Agent BDD — empty today" 段更新计数。
+4. 不再需要 `playground/agent-bdd/leetcode/` 目录、不再需要 `.gitignore` 例外、不再需要单独 ADR(走 SCENARIOS.md 既有规范即可)。
