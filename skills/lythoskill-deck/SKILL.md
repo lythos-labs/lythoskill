@@ -140,6 +140,7 @@ Reports skills in cold pool but not in deck, expiring transients, managed-dir ov
 - **transient expires** — past-due transients trigger warnings.
 - **managed_dirs overlap** — two skills claiming the same directory triggers a warning.
 - **Never manually create subdirectories in `.claude/skills/`.** Use `deck link`. Manual directories become untracked "ghost skills" that get backed up and removed on the next link.
+- **deck does not run post-install steps** — `add`/`link` place skills in the working set. Any additional setup (API keys, env vars, external tool dependencies) is the skill's own responsibility; follow that skill's README.
 ## Gotchas
 **lstatSync, not existsSync**: The reconciler uses `lstatSync` (does not follow
 symlinks) to detect entities. `existsSync` returns `false` for broken symlinks,
