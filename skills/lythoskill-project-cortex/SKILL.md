@@ -107,7 +107,10 @@ cortex/
 │   ├── 06-terminated/    ← Cancelled (abnormal end)
 │   └── 07-archived/      ← Final archive
 └── wiki/
-    ├── 01-patterns/      ← Reusable solutions    ├── 02-faq/           ← Common questions    └── 03-lessons/       ← Retrospectives
+    ├── 01-patterns/      ← Reusable solutions
+    ├── 02-faq/           ← Common questions
+    ├── 03-lessons/       ← Retrospectives
+    └── 04-legacy/        ← Outdated but historically valuable
 ```
 Numeric prefixes ensure GTD workflow ordering in `ls` output.
 ## ID Format

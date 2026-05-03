@@ -37,6 +37,7 @@ export interface WorkflowConfig {
     patterns: string;
     faq: string;
     lessons: string;
+    legacy: string;
   };
 }
 

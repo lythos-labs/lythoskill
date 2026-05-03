@@ -42,6 +42,12 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
+## 🗄️ Legacy (0)
+
+> Historical entries that no longer reflect current practice. Kept for reference.
+
+*No entries yet.*
+
 ---
 
 *自动生成*

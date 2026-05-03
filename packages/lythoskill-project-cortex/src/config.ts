@@ -33,6 +33,7 @@ export const DEFAULT_CONFIG: WorkflowConfig = {
     patterns: '01-patterns',
     faq: '02-faq',
     lessons: '03-lessons',
+    legacy: '04-legacy',
   },
 };
 

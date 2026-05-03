@@ -283,6 +283,7 @@ function generateWikiIndex(config: WorkflowConfig) {
     const patterns = readWikiDir(join(config.wikiDir, config.wikiSubdirs.patterns));
     const faqs = readWikiDir(join(config.wikiDir, config.wikiSubdirs.faq));
     const lessons = readWikiDir(join(config.wikiDir, config.wikiSubdirs.lessons));
+    const legacy = readWikiDir(join(config.wikiDir, config.wikiSubdirs.legacy));
 
     const formatList = (entries: WikiEntry[], subdir: string) =>
       entries.map(e => `- **[${e.date}]** [${e.slug}](./${subdir}/${e.file})`).join('\n');
@@ -302,6 +303,12 @@ ${formatList(faqs, config.wikiSubdirs.faq) || '*No entries yet.*'}
 ## 📖 Lessons (${lessons.length})
 
 ${formatList(lessons, config.wikiSubdirs.lessons) || '*No entries yet.*'}
+
+## 🗄️ Legacy (${legacy.length})
+
+> Historical entries that no longer reflect current practice. Kept for reference.
+
+${formatList(legacy, config.wikiSubdirs.legacy) || '*No entries yet.*'}
 
 ---
 
