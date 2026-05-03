@@ -399,7 +399,7 @@ graph TD
 - Locator = 路径本身，无需中央协调（github / gitlab / self-hosted 同等公民）
 - 版本锚定 = git commit / tag（与 Go module 一致）
 - 没有 skill-to-skill dependency 字段——协作走 combo
-- Library ⊃ Working Set（参见 ADR-20260501091724816 术语分层）
+- Cold Pool（物理隔离，Agent 不可见）与 Working Set（运行时可见）严格分离，deck 作为准入控制层
 
 ### 选型 C: `cold_pool="."` + bare name fallback（**已弃用**）
 
@@ -1063,5 +1063,5 @@ stateDiagram-v2
 - ADR-20260502012643244 — FQ-only locator（去中心化 locator 的工程落地）
 - ADR-20260502012643344 — Self-bootstrap via localhost symlink（删除 lythoskill-only 特例）
 - ADR-20260502012643444 — Deck add 写 FQ + 删 skills.sh backend（反对 wrapper-style backend）
-- ADR-20260501091724816 — Cold pool → library 重命名（术语层）
+- ADR-20260501091724816 — Cold pool → library 重命名提议（**已 rejected**：cold pool 术语保留，与 skill library 概念不对齐）
 - ADR-20260423101938000 — Thin Skill Pattern（accepted，本文扩展自此）

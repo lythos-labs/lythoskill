@@ -90,5 +90,5 @@ skills = ["localhost/lythoskill-deck"]
 
 ## Related
 - ADR-20260502012643244（FQ-only locator）— 必要前置
-- ADR-20260501091724816（cold_pool → library）— 术语层联动
+- ADR-20260501091724816（cold_pool → library 提议）— **已 rejected**：cold pool 术语保留
 - ADR-20260502012643544（Skills as Flat Controllers）— 心智层支持「项目自身 skill 与外部 skill 同等公民」

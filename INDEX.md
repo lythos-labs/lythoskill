@@ -126,7 +126,7 @@ _无_
 - ✅ **ADR-20260424125637347** (02-accepted): handoff format migration from fixed file to daily-first
 - ✅ **ADR-20260430174746744** (02-accepted): deck add command — convenience download without locking users into a single package manager
 - ✅ **ADR-20260501090811296** (02-accepted): CI consistency check abandoned in favor of pre-commit hook for skill build
-- 🤔 **ADR-20260501091724816** (01-proposed): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
+- ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library — **rejected**: cold pool and skill library are fundamentally different concepts; true alignment for skill_library is deck/working_set, not cold pool
 - ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
 - 🤔 **ADR-20260501160000000** (01-proposed): skill-deck.toml section semantics and innate skill re-attachment after context compaction
 - 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
