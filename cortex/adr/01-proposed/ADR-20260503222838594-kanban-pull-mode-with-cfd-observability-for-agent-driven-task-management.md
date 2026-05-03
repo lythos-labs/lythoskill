@@ -90,6 +90,7 @@ Cortex 现有 `probe` / `list` / `stats` 三个状态确认工具，但它们都
   2. 在 daily 顶部 Ground Truth 中加 kanban 状态栏（backlog / in-progress / review / completed）
   3. /loop 定期触发时先跑 `cortex flow`，再决定是否 pull
   4. 跑 2-3 个迭代后 review WIP 限制是否合适（收束率是否稳定）
+  5. **probe 时间分片 + 归档周期**：task 累积后全量扫描 O(n) 爆炸。`probe` 默认只扫活跃层（in-progress + review + 最近 2 周 completed）；`probe --full` 月度/发版前跑一次；`cortex archive` 把 >30 天的 completed task 移入 `07-archived/`。CFD 只读活跃层，历史归档不参与日常 flow 分析 —— lean kanban 的 focus 心智：只看当下流动的卡
 
 ## 相关
 
