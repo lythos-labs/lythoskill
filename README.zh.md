@@ -20,8 +20,8 @@
 当两个冲突的技能同时对 agent 可见，输出变得不可预测。**lythoskill-deck** 用 **deny-by-default** 解决：未声明的技能从 `.claude/skills/` 中**物理消失**。不是"禁用"，不是"降权"。**彻底消失。**
 
 ```toml
-[tool]
-skills = ["github.com/owner/repo"]
+[tool.skills.skill-name]
+path = "github.com/owner/repo"
 ```
 
 运行 `deck link` → 只有声明的技能可见。没有静默混合。没有混乱。
@@ -150,8 +150,8 @@ cat > skill-deck.toml << 'EOF'
 [deck]
 max_cards = 10
 
-[tool]
-skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
+[tool.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 EOF
 
 # 3. 同步——deck 把 working set 调和到声明状态
@@ -222,23 +222,35 @@ max_cards = 10
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
-[innate]
-skills = [
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
-]
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
-[tool]
-skills = [
-  "github.com/anthropics/skills/skills/pdf",
-  "github.com/anthropics/skills/skills/docx",
-  "github.com/mattpocock/skills/skills/engineering/to-prd",
-  "github.com/mattpocock/skills/skills/engineering/tdd",
-  "github.com/garrytan/gstack",
-  "github.com/SpillwaveSolutions/design-doc-mermaid",
-]
+[innate.skills.project-cortex]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
+
+[innate.skills.project-onboarding]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
+
+[innate.skills.project-scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+
+[tool.skills.to-prd]
+path = "github.com/mattpocock/skills/skills/engineering/to-prd"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.gstack]
+path = "github.com/garrytan/gstack"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
 EOF
 
 # 4. 同步 deck
@@ -357,10 +369,12 @@ Cold Pool（存储）              Declaration（意图）            Working Se
   ~/.agents/skill-repos/       skill-deck.toml                .claude/skills/
   ├── github.com/.../            [deck]                         ├── web-search ->
   └── localhost/.../             max_cards = 8                  ├── docx ->
-                                 [tool]                         └── design-doc-mermaid ->
-                                   skills = ["web-search",
-                                             "docx",
-                                             "design-doc-mermaid"]
+                                 [tool.skills.web-search]
+                                 path = "github.com/.../web-search"
+                                 [tool.skills.docx]
+                                 path = "github.com/.../docx"
+                                 [tool.skills.design-doc-mermaid]
+                                 path = "github.com/.../design-doc-mermaid"
 ```
 
 ### 治理层定位
@@ -464,10 +478,10 @@ bun run test:all
 
 本地一把跑:
 ```bash
-bun run test:all     # 当前 12 个 cortex + 5 个 deck 场景
+bun run test:all     # 当前 12 个 cortex + 20 个 deck 场景
 ```
 
-全部场景索引(含 deck 3-axis 重构计划中的 9 个,见 ADR-20260503152000411):[`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md)
+全部场景索引:[`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md)
 
 ---
 
