@@ -22,7 +22,7 @@ export interface Scenario {
   given: {
     // Cortex docs to create before the test action
     tasks?: Array<{ title: string; id?: string; status?: string }>
-    epics?: Array<{ title: string; id?: string; lane?: string; checklist?: string }>
+    epics?: Array<{ title: string; id?: string; lane?: string; checklist?: string; status?: string }>
     adrs?: Array<{ title: string; id?: string; status?: string }>
   }
   when: {
@@ -167,7 +167,11 @@ function parseScenario(mdPath: string): Scenario {
     const epicMatch = bullet.match(/epic\s+`?([^`]+)`?\s+exists\s+in\s+`?([^`]+)`?(?:\s+with\s+`?lane:\s*([^`]+)`?)?/i)
     if (epicMatch) {
       given.epics = given.epics || []
-      given.epics.push({ id: epicMatch[1], title: 'Fixture Epic', lane: epicMatch[3] || undefined })
+      const dirHint = epicMatch[2].toLowerCase()
+      const status = dirHint.includes('done') ? 'done' :
+                     dirHint.includes('suspended') ? 'suspended' :
+                     dirHint.includes('archived') ? 'archived' : 'active'
+      given.epics.push({ id: epicMatch[1], title: 'Fixture Epic', lane: epicMatch[3] || undefined, status })
       continue
     }
     // An ADR `ADR-TEST-001` exists in `01-proposed/`
@@ -343,7 +347,11 @@ function setupCortexFixture(workdir: string, scenario: Scenario): void {
       : (epic.id || generateTimestampId('EPIC'))
     const title = epic.title || 'Fixture Epic'
     const lane = (epic.lane as 'main' | 'emergency') || 'main'
-    const subdir = '01-active'
+    const status = epic.status || 'active'
+    const subdir = status === 'active' ? '01-active' :
+                   status === 'done' ? '02-done' :
+                   status === 'suspended' ? '03-suspended' :
+                   status === 'archived' ? '04-archived' : '01-active'
     const filename = `${id}-fixture-epic.md`
     const dir = join(workdir, 'cortex', 'epics', subdir)
     ensureDir(dir)
