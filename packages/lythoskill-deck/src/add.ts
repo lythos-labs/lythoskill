@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync, readFileSync,
 import { mkdtempSync } from 'node:fs'
 import { tmpdir, homedir } from 'node:os'
 import { join, basename, dirname, resolve } from 'node:path'
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
 import { findDeckToml, expandHome } from './link.js'
 
@@ -129,7 +129,7 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
             .map(e => e.name))
         : new Set<string>()
 
-      execSync(`npx skills add ${skillsShLocator} -g`, { cwd: tmpDir, stdio: 'inherit' })
+      execFileSync('npx', ['skills', 'add', skillsShLocator, '-g'], { cwd: tmpDir, stdio: 'inherit' })
 
       // Detect the newly installed directory
       const afterDirs = existsSync(CLAUDE_SKILLS_DIR)
@@ -154,7 +154,7 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
     } else {
       const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
       console.log(`📦 Cloning: ${gitUrl}`)
-      execSync(`git clone --depth 1 ${gitUrl} ${tmpRepo}`, { stdio: 'inherit' })
+      execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpRepo], { stdio: 'inherit' })
       skillSourceDir = tmpRepo
     }
 

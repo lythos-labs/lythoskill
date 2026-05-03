@@ -14,7 +14,7 @@ import {
   existsSync, mkdirSync, readFileSync, readdirSync,
   symlinkSync, lstatSync, rmSync, statSync, writeFileSync,
 } from "node:fs";
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
 import {
@@ -328,7 +328,7 @@ if (nonSymlinks.length > 0) {
       ...nonSymlinks.map(e => relative(PROJECT_DIR, join(WORKING_SET, e))),
     ];
     try {
-      execSync("tar " + tarArgs.map(a => a.includes(" ") ? `"${a}"` : a).join(" "), {
+      execFileSync("tar", tarArgs, {
         cwd: PROJECT_DIR,
         stdio: "pipe",
       });
