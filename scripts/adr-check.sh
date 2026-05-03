@@ -136,6 +136,27 @@ if [ "$TYPE_ERRORS" -eq 0 ]; then
 fi
 echo ""
 
+# ── Toolchain: Bun-only (no pnpm residuals) ──────────────────────
+echo "[Toolchain] Bun-only: no pnpm lockfile/workspace residuals"
+if [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; then
+  [ -f "pnpm-lock.yaml" ] && error "pnpm-lock.yaml exists — run 'rm pnpm-lock.yaml'"
+  [ -f "pnpm-workspace.yaml" ] && error "pnpm-workspace.yaml exists — run 'rm pnpm-workspace.yaml'"
+else
+  ok "No pnpm residual files"
+fi
+echo ""
+
+# ── Monorepo: root package.json must not carry runtime deps ───────
+echo "[Monorepo] Root package.json must not have runtime dependencies"
+ROOT_DEPS=$(jq -r '.dependencies // empty' package.json 2>/dev/null || echo "")
+if [ -n "$ROOT_DEPS" ] && [ "$ROOT_DEPS" != "{}" ] && [ "$ROOT_DEPS" != "null" ]; then
+  dep_names=$(echo "$ROOT_DEPS" | jq -r 'keys | join(", ")' 2>/dev/null || echo "(unknown)")
+  error "Root package.json has runtime dependencies: $dep_names — move to leaf packages"
+else
+  ok "Root package.json has no runtime dependencies"
+fi
+echo ""
+
 # ── ADR-20260502010100000: Backup strategy docs consistency ──────
 echo "[ADR-20260502010100000] SKILL.md must not contradict backup strategy"
 CONTRADICTORY_DOCS=$(grep -rn "Deck only manages symlinks" packages/*/skill/SKILL.md 2>/dev/null || true)
