@@ -84,21 +84,25 @@ ls .claude/skills/
 
 就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
 
-### 或者从预组 deck 开始
+### 或者从预组 deck 开始（30 秒）
 
-不知道选什么技能？直接用针对场景的预组 deck：
+不知道选什么技能？一句命令安装场景化 deck：
+
+```bash
+# 默认：文档处理 deck（PDF + DOCX + 网页搜索）
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash
+
+# 换其他场景
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s engineering
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s full-stack
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s governance
+```
+
+也可以手动复制 deck 再 link：
 
 ```bash
 # 文档处理：PDF + DOCX + 网页搜索
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
-bunx @lythos/skill-deck link
-
-# 工程规范：TDD + PRD + 架构图
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/engineering.toml > skill-deck.toml
-bunx @lythos/skill-deck link
-
-# 全栈开发：React + 模式 + TDD + 文档
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/full-stack.toml > skill-deck.toml
 bunx @lythos/skill-deck link
 ```
 

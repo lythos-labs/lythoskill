@@ -91,21 +91,25 @@ ls .claude/skills/
 
 That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
-### Or start with a pre-built deck
+### Or start with a pre-built deck (30 seconds)
 
-Not sure which skills to pick? Copy a scenario-tuned deck and link:
+Not sure which skills to pick? One command installs a scenario-tuned deck:
+
+```bash
+# Default: document processing deck (PDF + DOCX + web search)
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash
+
+# Pick a different scene
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s engineering
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s full-stack
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s governance
+```
+
+Or copy a deck manually and link:
 
 ```bash
 # Document processing: PDF + DOCX + web search
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
-bunx @lythos/skill-deck link
-
-# Engineering workflow: TDD + PRD + architecture diagrams
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/engineering.toml > skill-deck.toml
-bunx @lythos/skill-deck link
-
-# Full-stack development: React + patterns + TDD + docs
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/full-stack.toml > skill-deck.toml
 bunx @lythos/skill-deck link
 ```
 
