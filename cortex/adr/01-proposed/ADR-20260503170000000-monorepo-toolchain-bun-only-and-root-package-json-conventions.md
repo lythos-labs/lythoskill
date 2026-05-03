@@ -5,6 +5,13 @@ author: agent-swarm
 
 # ADR-20260503170000000: Monorepo Toolchain — Bun-only and Root Package.json Conventions
 
+## Status History
+<!-- machine-parseable table: directory = current status, last row = latest record -->
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-03 | Created |
+
 ## Context
 
 This project is a single-human + agent-swarm team. Toolchain consistency must be enforceable by automation (pre-commit hooks, `align --fix`) rather than tribal knowledge. Past drift (pnpm artifacts left behind after migrating to Bun, root `package.json` accumulating runtime dependencies) caused confusion for incoming agents.

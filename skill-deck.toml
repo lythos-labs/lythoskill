@@ -10,6 +10,8 @@ skills = [
 
 [tool]
 skills = [
+  "github.com/mattpocock/skills/tdd",
+
   "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",

@@ -5,6 +5,13 @@ author: agent-swarm
 
 # ADR-20260503180000000: Unit Test Framework Selection — Curator Mind Applied
 
+## Status History
+<!-- machine-parseable table: directory = current status, last row = latest record -->
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-03 | Created |
+
 ## Context
 
 Deck is adding new skills. This requires:
