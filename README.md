@@ -438,17 +438,14 @@ bunx @lythos/skill-arena \
 
 > For contributors and developers working **inside this repo**.
 
-**Prerequisites:** Bun ≥1.0, pnpm ≥8.0.
+**Prerequisites:** Bun ≥1.0.
 
 ```bash
 # Install Bun (if missing)
 curl -fsSL https://bun.sh/install | bash
 
-# Install pnpm (if missing)
-npm install -g pnpm
-
 # 1. Install workspace dependencies
-pnpm install
+bun install
 
 # 2. Sync the local skill deck
 bun packages/lythoskill-deck/src/cli.ts link
@@ -456,11 +453,30 @@ bun packages/lythoskill-deck/src/cli.ts link
 # 3. Verify environment
 bun packages/lythoskill-project-cortex/src/cli.ts stats
 
-# Run tests
-bun packages/lythoskill-deck/test/runner.ts
+# Run all BDD scenarios (cortex + deck)
+bun run test:all
 ```
 
 All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and PR workflow.
+
+---
+
+## Testing
+
+BDD scenarios in this repo are **LLM-readable contracts** — Given/When/Then in plain Markdown (or TypeScript), driven by a tiny custom runner. No Cucumber, no plugin layer, so an agent can author and read them without framework knowledge.
+
+| Category | In CI? | Where it lives |
+|----------|--------|----------------|
+| **Unit** | yes | (introduce as needed; Vitest / `bun:test` are fine) |
+| **CLI integration BDD** | yes | `packages/*/test/scenarios/` |
+| **Agent BDD** | **no** — relies on LLM inference, no LLM in CI | not yet authored; will use a `*.agent.md` suffix |
+
+Run everything locally:
+```bash
+bun run test:all     # 12 cortex + 5 deck scenarios today
+```
+
+Full scenario index, including the 9 planned for the deck 3-axis refactor (ADR-20260503152000411): [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
 
 ---
 
@@ -471,7 +487,7 @@ All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and P
 | Runtime | **Bun** (native TypeScript) |
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
-| Package Manager | **pnpm** workspaces |
+| Package Manager | **Bun** workspaces |
 | External Deps | **Skill layer**: zero-install via `bunx` (Bun runtime required). **Starter layer**: npm deps as needed |
 
 ---
