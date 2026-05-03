@@ -81,6 +81,37 @@ directories. After `refresh`, run `link` to sync any changed skills into the
 working set.
 
 > `deck update` is deprecated and will be removed in v1.0.0. Use `refresh`.
+## Format Migration
+When you read a project's `skill-deck.toml`, check its format **before** running
+any `deck` command.
+
+**Old string-array format** (deprecated):
+```toml
+[tool]
+skills = ["github.com/owner/repo/skill-name"]
+```
+
+**New alias-as-key dict format** (current):
+```toml
+[tool.skills.skill-name]
+path = "github.com/owner/repo/skill-name"
+```
+
+**Agent duty — detect and prompt**: If you see `skills = [...]` (string array)
+in any `[innate]`, `[tool]`, or `[combo]` section, the deck is in the deprecated
+format. Ask the user whether to migrate before proceeding:
+
+```
+⚠️  This deck uses the deprecated string-array format. Run migrate?
+   bunx @lythos/skill-deck migrate-schema
+```
+
+Do NOT silently migrate. The user may be maintaining backward compatibility.
+Only suggest; let them decide.
+
+**Migration is safe**: `migrate-schema` creates a timestamped backup of the old
+deck before writing the new format. Run `migrate-schema --dry-run` first to
+preview the diff without modifying the file.
 ## Initialize
 ```bash
 # Copy template and edit [innate]/[tool] sections
