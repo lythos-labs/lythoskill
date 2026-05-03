@@ -55,6 +55,7 @@ Cortex 现有 `probe` / `list` / `stats` 三个状态确认工具，但它们都
 
 **CFD 最小可行**：
 - 复用 `cortex probe` / `cortex stats` 的扫描逻辑
+- **时间戳来源**：task card 的 `Status History` 表已有日期列（`post-commit` hook 在状态变更时自动写入），CFD 直接读取，**不需要新增 hook 或打标**
 - 新增 `cortex flow` 子命令，输出：
   ```
   Column      Count    Avg Age    WIP Limit    Status
