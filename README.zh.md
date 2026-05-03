@@ -452,6 +452,25 @@ bun run test:all
 
 ---
 
+## 测试
+
+仓库里的 BDD 场景是**LLM 可读的契约**——Markdown(或 TypeScript)写的 Given/When/Then,跑在一个极小的自定义 runner 上。不上 Cucumber、不上插件层,agent 不用先学框架就能读和写。
+
+| 类别 | CI 跑? | 在哪 |
+|------|--------|------|
+| **Unit** | 跑 | (按需引入;Vitest / `bun:test` 都可) |
+| **CLI integration BDD** | 跑 | `packages/*/test/scenarios/` |
+| **Agent BDD** | **不跑** —— 验证靠 LLM 推理,CI 没 LLM | 暂未写;未来用 `*.agent.md` 后缀 |
+
+本地一把跑:
+```bash
+bun run test:all     # 当前 12 个 cortex + 5 个 deck 场景
+```
+
+全部场景索引(含 deck 3-axis 重构计划中的 9 个,见 ADR-20260503152000411):[`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md)
+
+---
+
 ## 技术栈
 
 | 层级 | 选择 |
