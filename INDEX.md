@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/3 11:44:36
+> 自动生成于 2026/5/3 11:50:30
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 43 | 进行中: 6, 待验收: 1, 已完成: 22 |
+| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 21 |
 | Epics | 8 | 活跃: 7, 已完成: 0, 悬置: 0, 已归档: 1 |
 | ADRs | 30 | 已接受: 20 |
 
@@ -40,10 +40,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (3)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260503010230554**: 实现 husky pre-commit 软提醒(in-progress 非空)
 - [ ] **TASK-20260503010231389**: 三层文档镜像(AGENTS/CLAUDE/memory)+ cortex skill/README 同步
 - [ ] **TASK-20260503010231988**: BDD 覆盖 cortex trailer + lane FSM(用 test-utils + subagent)
 
@@ -60,7 +59,7 @@ _无_
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
 
-### 已完成 (22)
+### 已完成 (21)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -82,8 +81,7 @@ _无_
 - ✅ ~~TASK-20260503010227902~~: 扩展 cortex CLI 状态机命令(ADR + epic 流转动词)
 - ✅ ~~TASK-20260503010228602~~: 实现 cortex epic create 双轨 + checklist + probe lane 扩展
 - ✅ ~~TASK-20260503010229362~~: 实现 husky post-commit trailer 解析 + 跟随 commit
-- ✅ ~~TASK-20260503114250559~~: T3 smoke test dummy
-- ✅ ~~TASK-20260503114317836~~: T3 hook smoke test
+- ✅ ~~TASK-20260503010230554~~: 实现 husky pre-commit 软提醒(in-progress 非空)
 
 ### 悬置 (0)
 
