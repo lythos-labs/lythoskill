@@ -136,8 +136,8 @@ if [ "$TYPE_ERRORS" -eq 0 ]; then
 fi
 echo ""
 
-# ── Toolchain: Bun-only (no pnpm residuals) ──────────────────────
-echo "[Toolchain] Bun-only: no pnpm lockfile/workspace residuals"
+# ── ADR-20260503170000000: Bun-only toolchain ────────────────────
+echo "[ADR-20260503170000000] Bun-only: no pnpm lockfile/workspace residuals"
 if [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; then
   [ -f "pnpm-lock.yaml" ] && error "pnpm-lock.yaml exists — run 'rm pnpm-lock.yaml'"
   [ -f "pnpm-workspace.yaml" ] && error "pnpm-workspace.yaml exists — run 'rm pnpm-workspace.yaml'"
@@ -146,8 +146,8 @@ else
 fi
 echo ""
 
-# ── Monorepo: root package.json must not carry runtime deps ───────
-echo "[Monorepo] Root package.json must not have runtime dependencies"
+# ── ADR-20260503170000000: Root package.json conventions ─────────
+echo "[ADR-20260503170000000] Root package.json must not have runtime dependencies"
 ROOT_DEPS=$(jq -r '.dependencies // empty' package.json 2>/dev/null || echo "")
 if [ -n "$ROOT_DEPS" ] && [ "$ROOT_DEPS" != "{}" ] && [ "$ROOT_DEPS" != "null" ]; then
   dep_names=$(echo "$ROOT_DEPS" | jq -r 'keys | join(", ")' 2>/dev/null || echo "(unknown)")
