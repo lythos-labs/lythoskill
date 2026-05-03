@@ -429,17 +429,14 @@ bunx @lythos/skill-arena \
 
 > 面向在这个仓库内工作的贡献者和开发者。
 
-**前置条件：** Bun ≥1.0，pnpm ≥8.0。
+**前置条件：** Bun ≥1.0。
 
 ```bash
 # 安装 Bun（如缺失）
 curl -fsSL https://bun.sh/install | bash
 
-# 安装 pnpm（如缺失）
-npm install -g pnpm
-
 # 1. 安装 workspace 依赖
-pnpm install
+bun install
 
 # 2. 同步本地 skill deck
 bun packages/lythoskill-deck/src/cli.ts link
@@ -447,8 +444,8 @@ bun packages/lythoskill-deck/src/cli.ts link
 # 3. 验证环境
 bun packages/lythoskill-project-cortex/src/cli.ts stats
 
-# 运行测试
-bun packages/lythoskill-deck/test/runner.ts
+# 运行全部 BDD 场景（cortex + deck）
+bun run test:all
 ```
 
 环境就绪？查看 [`CONTRIBUTING.md`](./CONTRIBUTING.md) 了解 commit 规范和 PR 流程。
@@ -462,7 +459,7 @@ bun packages/lythoskill-deck/test/runner.ts
 | 运行时 | **Bun**（原生 TypeScript） |
 | 语言 | **TypeScript** |
 | 模块系统 | **ESM-only**（`"type": "module"`） |
-| 包管理器 | **pnpm** workspaces |
+| 包管理器 | **Bun** workspaces |
 | Skill 层依赖 | **零感知** —— 消费者通过 `bunx`/`npx` 调用已发布包，无需本地安装 |
 | Starter 层依赖 | 正常的 npm 依赖管理，由包管理器自动解析 |
 

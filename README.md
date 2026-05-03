@@ -438,17 +438,14 @@ bunx @lythos/skill-arena \
 
 > For contributors and developers working **inside this repo**.
 
-**Prerequisites:** Bun ≥1.0, pnpm ≥8.0.
+**Prerequisites:** Bun ≥1.0.
 
 ```bash
 # Install Bun (if missing)
 curl -fsSL https://bun.sh/install | bash
 
-# Install pnpm (if missing)
-npm install -g pnpm
-
 # 1. Install workspace dependencies
-pnpm install
+bun install
 
 # 2. Sync the local skill deck
 bun packages/lythoskill-deck/src/cli.ts link
@@ -456,8 +453,8 @@ bun packages/lythoskill-deck/src/cli.ts link
 # 3. Verify environment
 bun packages/lythoskill-project-cortex/src/cli.ts stats
 
-# Run tests
-bun packages/lythoskill-deck/test/runner.ts
+# Run all BDD scenarios (cortex + deck)
+bun run test:all
 ```
 
 All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and PR workflow.
@@ -471,7 +468,7 @@ All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and P
 | Runtime | **Bun** (native TypeScript) |
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
-| Package Manager | **pnpm** workspaces |
+| Package Manager | **Bun** workspaces |
 | External Deps | **Skill layer**: zero-install via `bunx` (Bun runtime required). **Starter layer**: npm deps as needed |
 
 ---
