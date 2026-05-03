@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-05-03 | 在 working-set vendor-tree bug 调查 + 命令直觉撞车 + alias collision 缺口暴露之后提出 |
 | proposed (revised Decision A) | 2026-05-03 | 用户反馈:alias 风格更像 dict;改选方案 D(alias-as-key)而非方案 B(array-of-tables);利用 dict object body 写 summary / why_in_deck 元信息 |
+| accepted | 2026-05-03 | 6 关联 task 全部完成 + 20 BDD scenarios 全绿 + README/CI sweep 完成 + install-deck.sh 交付 |
 
 ## 背景
 
