@@ -4,7 +4,10 @@
 Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
-  epic "<title>"        Create a new Epic
+  epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
+                        Create a new Epic. --lane is required.
+                        --override bypasses the lane-full guard (max 1 per lane).
+                        --skip-checklist bypasses the 5-question prompt.
   adr "<title>"         Create a new ADR
   list                  List all tasks and epics
   stats                 Show project statistics
@@ -17,6 +20,7 @@ Task state machine:
   start <task-id>       Move task to in-progress
   review <task-id>      Move task to review
   done <task-id>        Move task to completed (must be in review)
+  complete <task-id>    Move task to completed (any status; trailer-driven close)
   suspend <task-id>     Move task to suspended
   resume <task-id>      Move suspended task back to in-progress
   reject <task-id>      Move reviewed task back to in-progress (re-work)
