@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/3 11:59:37
+> 自动生成于 2026/5/3 13:29:02
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 22 |
-| Epics | 8 | 活跃: 7, 已完成: 0, 悬置: 0, 已归档: 1 |
+| Tasks | 45 | 进行中: 6, 待验收: 1, 已完成: 23 |
+| Epics | 8 | 活跃: 4, 已完成: 3, 悬置: 0, 已归档: 1 |
 | ADRs | 30 | 已接受: 20 |
 
 ---
@@ -20,13 +20,12 @@
 - **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
 - **EPIC-20260430011158241**: Monorepo tooling consistency and config debt cleanup
 - **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
-- **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
-- **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
-- **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
 
 ### 已完成
 
-_无_
+- ✅ **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
+- ✅ **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
+- ✅ **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
 
 ### 悬置
 
@@ -40,25 +39,24 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (1)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260503010231988**: BDD 覆盖 cortex trailer + lane FSM(用 test-utils + subagent)
 
 ### 进行中 (6)
 
-- 🔄 **TASK-20260430011203412**: Move root package.json dependencies to individual packages
-- 🔄 **TASK-20260430011205130**: Unify lockfile and workspace config — Bun-only or pnpm-only
-- 🔄 **TASK-20260430011206610**: Create root tsconfig.base.json and unify per-package tsconfig
-- 🔄 **TASK-20260430011207805**: Standardize package.json template across all packages
 - 🔄 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
 - 🔄 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
+- 🔄 **TASK-20260503132523380**: Move root package.json dependencies to individual packages
+- 🔄 **TASK-20260503132524022**: Unify lockfile and workspace config — Bun-only
+- 🔄 **TASK-20260503132524651**: Create root tsconfig.base.json and unify per-package tsconfig
+- 🔄 **TASK-20260503132525248**: Standardize package.json template across all publishable packages
 
 ### 待验收 (1)
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
 
-### 已完成 (22)
+### 已完成 (23)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -82,12 +80,13 @@ _无_
 - ✅ ~~TASK-20260503010229362~~: 实现 husky post-commit trailer 解析 + 跟随 commit
 - ✅ ~~TASK-20260503010230554~~: 实现 husky pre-commit 软提醒(in-progress 非空)
 - ✅ ~~TASK-20260503010231389~~: 三层文档镜像(AGENTS/CLAUDE/memory)+ cortex skill/README 同步
+- ✅ ~~TASK-20260503010231988~~: BDD 覆盖 cortex trailer + lane FSM(用 test-utils + subagent)
 
 ### 悬置 (0)
 
 _无_
 
-### 终止 (9)
+### 终止 (13)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -96,6 +95,10 @@ _无_
 - 🛑 ~~TASK-20260424115732668~~: Handoff 时效性机制：git status 漂移检测
 - 🛑 ~~TASK-20260424115735441~~: Curator CLI 实现文档化：扫描逻辑和 schema 说明
 - 🛑 ~~TASK-20260424142722389~~: Curator 全局扫描：冷池 + 活跃池 + 项目本地 skills 统一视图
+- 🛑 ~~TASK-20260430011203412~~: Move root package.json dependencies to individual packages
+- 🛑 ~~TASK-20260430011205130~~: Unify lockfile and workspace config — Bun-only or pnpm-only
+- 🛑 ~~TASK-20260430011206610~~: Create root tsconfig.base.json and unify per-package tsconfig
+- 🛑 ~~TASK-20260430011207805~~: Standardize package.json template across all packages
 - 🛑 ~~TASK-20260502225209862~~: Demo: cancelled flow (backlog → in-progress → terminate)
 - 🛑 ~~TASK-20260502230901152~~: Fix login bug
 

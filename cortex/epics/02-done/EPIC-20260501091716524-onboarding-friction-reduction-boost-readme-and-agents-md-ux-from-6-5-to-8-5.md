@@ -13,6 +13,7 @@ checklist_skipped_reason: backfilled pre-ADR-20260503003315478
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-01 | Created from subagent onboarding UX test |
+| done | 2026-05-03 | Done |
 
 ## 背景故事
 

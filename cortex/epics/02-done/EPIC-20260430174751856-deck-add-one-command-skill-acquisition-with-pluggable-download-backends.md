@@ -13,6 +13,7 @@ checklist_skipped_reason: backfilled pre-ADR-20260503003315478
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-04-30 | Created |
+| done | 2026-05-03 | Done |
 
 ## 背景故事
 <!-- 填写需求来源：触发事件、问题描述、目标价值 -->

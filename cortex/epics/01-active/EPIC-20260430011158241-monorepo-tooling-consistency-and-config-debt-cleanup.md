@@ -73,10 +73,18 @@ checklist_skipped_reason: backfilled pre-ADR-20260503003315478
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| TASK-20260430011203412 | backlog | 根 package.json 依赖下沉到具体包 |
-| TASK-20260430011205130 | backlog | 统一 lockfile 和 workspace 配置 |
-| TASK-20260430011206610 | backlog | 创建根 tsconfig.base.json 并统一各包配置 |
-| TASK-20260430011207805 | backlog | 标准化所有包的 package.json 模板 |
+| TASK-20260503132523380 | in-progress | 根 package.json 依赖下沉到具体包 |
+| TASK-20260503132524022 | in-progress | 统一 lockfile 和 workspace 配置（Bun-only） |
+| TASK-20260503132524651 | in-progress | 创建根 tsconfig.base.json 并统一各包配置 |
+| TASK-20260503132525248 | in-progress | 标准化所有 publishable 包的 package.json 模板 |
+
+### 已终止的旧任务（空壳，无内容）
+| 任务 | 状态 | 终止原因 |
+|------|------|---------|
+| TASK-20260430011203412 | terminated | 空模板，无需求详情，重新初始化 |
+| TASK-20260430011205130 | terminated | 空模板，无需求详情，重新初始化 |
+| TASK-20260430011206610 | terminated | 空模板，无需求详情，重新初始化 |
+| TASK-20260430011207805 | terminated | 空模板，无需求详情，重新初始化 |
 
 ## 经验沉淀
 
