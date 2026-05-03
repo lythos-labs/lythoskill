@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created — Theme D tracer bullet (无依赖,先于 T8/T9) |
+| in-progress | 2026-05-03 | Started |
 
 ## 背景与目标
 
