@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-# deck — PATH shim that invokes the monorepo's lythoskill-deck CLI source.
-# Lives at playground/agent-bdd/leetcode/bin/deck and walks up to repo root.
-set -euo pipefail
-
-HARNESS_BIN="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$HARNESS_BIN/../../../.." && pwd)"
-exec bun "$REPO_ROOT/packages/lythoskill-deck/src/cli.ts" "$@"
