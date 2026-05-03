@@ -17,6 +17,54 @@ ADR-20260503003315478 选项 E 的核心机制实现。`cortex epic create` 时:
 
 把 epic 创建从"agent 自觉"变为 admission control 工具不变量。
 
+## ⚠️ 仓库现状 vs Spec 冲突点(T1 经验,必读)
+
+T1 实现时 subagent 在 spec 与仓库现状冲突时(spec 说 `epic done → 02-done/`,仓库已有 `02-archived/` 占用)**自己发明了 data migration**(把 archived 改到 `04-archived/`),没报告就动手 —— 虽然结果可接受,但破坏了"task card = 完整 bootloader"假设。T2 已知 3 个冲突点,**按以下处理**(如发现新冲突点 → **先报告再动手**)。
+
+### 冲突 1: 现有 7 个 active epic 没有 `lane` 字段
+
+仓库现状:`cortex/epics/01-active/` 下 7 个 epic(EPIC-20260423185732845 / 429234732479 / 430011158241 / 430012504755 / 430174751856 / 501091716524 / 503010218940),都没有 `lane` 字段。
+
+**处理**:全部回填 `lane: main`。理由:都是当前项目工作,无"紧急轨"语义;一次性回填后 probe 不会持续 warn。
+
+### 冲突 2: 现有 epics 没有 YAML frontmatter
+
+仓库现状:epics 用 markdown 表格记 Status History,没有 YAML frontmatter 块。
+
+**处理**:新字段用 YAML frontmatter 写在文件顶部,格式严格如下:
+
+```yaml
+---
+lane: main | emergency
+checklist_completed: true | false
+checklist_skipped_reason: <optional string>
+lane_override_reason: <optional string>
+---
+```
+
+现有 Status History markdown 表格保留不动,frontmatter 加在 `# EPIC-XXX:` 标题之前。
+
+### 冲突 3: `packages/lythoskill-project-cortex/templates/` 目录不存在
+
+仓库现状:`templates/` 整个目录不存在,现有 cli.ts 用硬编码字符串生成 epic 文件。
+
+**处理**:新建 `packages/lythoskill-project-cortex/templates/epic.md`,内容 = 现有 cli.ts 硬编码字符串抽出 + 顶部 YAML frontmatter 占位 + 顶部 callout(见下)。CLI 改为读模板替换变量。模板顶部 callout(从 ADR-B 抽):
+
+```markdown
+> **Epic 是什么**:1-3 周可结案的 outcome,有依赖、有顺序、要规划。
+> **Epic 不是什么**:配置漂移类小事(那是 task)、决策选型(那是 ADR)。
+> **Workflowy zoom-in 心智**:屏蔽其他 epic 的诱惑,聚焦本卡。
+> **双轨**:`lane: main`(当前迭代,最多 1)、`lane: emergency`(不可避免紧急,最多 1)。
+```
+
+### 通用规则:遇到未列出的冲突点
+
+如果发现 spec 与仓库现状还有别的不一致,**不要自己发明 migration**:
+1. 在本卡 "进度记录" 段追加 note(或新写一个 note 文件,放在 `cortex/tasks/02-in-progress/` 内)
+2. 报告中明确说明:"我看到 X 与 Y 冲突,我建议方案 Z,但没动手,等用户确认"
+
+完成交付前用户会读你的报告 + working tree 状态;**报告 = 交付的一部分,不只是 working tree 干净就完事**。
+
 ## 需求详情
 
 - [ ] `cortex epic "<title>" --lane main|emergency` — 必填,缺省时报错引导
