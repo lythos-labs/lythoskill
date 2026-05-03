@@ -1,3 +1,8 @@
+---
+lane: main
+checklist_completed: false
+checklist_skipped_reason: backfilled pre-ADR-20260503003315478
+---
 # EPIC-20260429234732479: Virtual evaluator swarm for multi-dimensional skill quality assessment
 
 > Multi-dimensional skill evaluation through platform-adaptive virtual persona swarm.

@@ -1,3 +1,8 @@
+---
+lane: main
+checklist_completed: false
+checklist_skipped_reason: backfilled pre-ADR-20260503003315478
+---
 # EPIC-20260430011158241: Monorepo tooling consistency and config debt cleanup
 
 > Monorepo tooling consistency and config debt cleanup

@@ -1,7 +1,38 @@
 /**
  * Markdown templates for Task, Epic, and ADR.
- * Zero external files — all templates are hardcoded strings.
+ * Task / ADR remain hardcoded strings; Epic is rendered from
+ * `packages/lythoskill-project-cortex/templates/epic.md` so it can carry
+ * frontmatter (lane / checklist) + the workflowy callout out of band.
  */
+
+import { readFileSync, existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+export interface EpicTemplateOptions {
+  lane: 'main' | 'emergency';
+  checklistCompleted: boolean;
+  checklistSkippedReason?: string;
+  laneOverrideReason?: string;
+}
+
+/** Locate the epic template file packaged alongside this CLI. */
+function findEpicTemplatePath(): string {
+  // src/lib/template.ts -> .../lythoskill-project-cortex/templates/epic.md
+  const here = dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    resolve(here, '..', '..', 'templates', 'epic.md'),
+    resolve(here, '..', 'templates', 'epic.md'),
+    // Fallback: when run from monorepo root, project layout
+    resolve(process.cwd(), 'packages', 'lythoskill-project-cortex', 'templates', 'epic.md'),
+  ];
+  for (const p of candidates) {
+    if (existsSync(p)) return p;
+  }
+  throw new Error(
+    `Epic template not found. Looked in: ${candidates.join(', ')}`
+  );
+}
 
 export function createTaskTemplate(id: string, title: string): string {
   const today = new Date().toISOString().split('T')[0];
@@ -47,47 +78,41 @@ feat(scope): description (${id})
 `;
 }
 
-export function createEpicTemplate(id: string, title: string): string {
+export function createEpicTemplate(
+  id: string,
+  title: string,
+  options: EpicTemplateOptions
+): string {
   const today = new Date().toISOString().split('T')[0];
-  return `# ${id}: ${title}
+  const templatePath = findEpicTemplatePath();
+  const raw = readFileSync(templatePath, 'utf-8');
 
-> ${title}
+  const skipLine = options.checklistSkippedReason
+    ? `checklist_skipped_reason: ${escapeYamlScalar(options.checklistSkippedReason)}\n`
+    : '';
+  const overrideLine = options.laneOverrideReason
+    ? `lane_override_reason: ${escapeYamlScalar(options.laneOverrideReason)}\n`
+    : '';
 
-## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
+  return raw
+    .replaceAll('{{LANE}}', options.lane)
+    .replaceAll('{{CHECKLIST_COMPLETED}}', options.checklistCompleted ? 'true' : 'false')
+    .replaceAll('{{CHECKLIST_SKIPPED_REASON_LINE}}', skipLine)
+    .replaceAll('{{LANE_OVERRIDE_REASON_LINE}}', overrideLine)
+    .replaceAll('{{ID}}', id)
+    .replaceAll('{{TITLE}}', title)
+    .replaceAll('{{DATE}}', today);
+}
 
-| Status | Date | Note |
-|--------|------|------|
-| active | ${today} | Created |
-
-## 背景故事
-<!-- 填写需求来源：触发事件、问题描述、目标价值 -->
-
-## 需求树
-
-### 主题A #backlog
-- **触发**:
-- **需求**:
-- **实现**:
-- **产出**:
-- **验证**:
-
-## 技术决策
-
-| ADR | 标题 | 状态 |
-|-----|------|------|
-
-## 关联任务
-
-| 任务 | 状态 | 描述 |
-|------|------|------|
-
-## 经验沉淀
-
-## 归档条件
-- [ ] 所有任务完成
-- [ ] 验证通过
-`;
+/** Quote a YAML scalar if it contains special characters. */
+function escapeYamlScalar(value: string): string {
+  // Simple heuristic: if the string is plain ASCII without YAML-significant chars, leave it alone.
+  if (/^[\w一-龥][\w\s一-龥.,;()/+\-]*$/.test(value)) {
+    return value;
+  }
+  // Otherwise, double-quote and escape backslash + double quote.
+  const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return `"${escaped}"`;
 }
 
 export function createAdrTemplate(id: string, title: string): string {

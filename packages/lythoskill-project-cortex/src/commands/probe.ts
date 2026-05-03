@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import type { WorkflowConfig } from '../types.js';
+import { listActiveEpics, countByLane } from '../lib/lane.js';
 
 interface ProbeResult {
   file: string;
@@ -226,16 +227,45 @@ export function probeStatus(config: WorkflowConfig): void {
   printResults(epicResults, '📋 Epics');
   printResults(adrResults, '🏛️  ADRs');
 
+  // --- Lane occupancy check (per ADR-20260503003315478, option E) ---
+  const laneWarnings: string[] = [];
+  const activeEpics = listActiveEpics(config);
+  const counts = countByLane(activeEpics);
+
+  console.log('\n🛤️  Epic lanes (active):');
+  console.log(`     main:      ${counts.main}`);
+  console.log(`     emergency: ${counts.emergency}`);
+  if (counts.unknown > 0) {
+    console.log(`     (no lane field): ${counts.unknown}`);
+  }
+  if (counts.main > 1) {
+    laneWarnings.push(`main lane has ${counts.main} active epics (>1) — pick one focus, suspend/archive/done the rest`);
+  }
+  if (counts.emergency > 1) {
+    laneWarnings.push(`emergency lane has ${counts.emergency} active epics (>1) — emergency is single-slot by design`);
+  }
+  if (counts.unknown > 0) {
+    laneWarnings.push(`${counts.unknown} active epic(s) missing lane: field — backfill with lane: main | emergency`);
+  }
+  for (const w of laneWarnings) {
+    console.log(`     ⚠️  ${w}`);
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0) {
     console.log('✅ All clear! No inconsistencies found.');
   } else {
-    console.log(`⚠️  Found ${allIssues.length} issue(s) requiring human confirmation.`);
-    console.log('   Please review the items above and decide:');
-    console.log('   - Move file to correct directory, OR');
-    console.log('   - Update Status History inside the file.');
+    if (allIssues.length > 0) {
+      console.log(`⚠️  Found ${allIssues.length} status issue(s) requiring human confirmation.`);
+      console.log('   Please review the items above and decide:');
+      console.log('   - Move file to correct directory, OR');
+      console.log('   - Update Status History inside the file.');
+    }
+    if (laneWarnings.length > 0) {
+      console.log(`⚠️  Found ${laneWarnings.length} lane warning(s) — see "Epic lanes" section above.`);
+    }
   }
   console.log('');
 }

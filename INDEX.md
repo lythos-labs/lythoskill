@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/3 10:15:21
+> 自动生成于 2026/5/3 10:32:15
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 18 |
+| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 19 |
 | Epics | 8 | 活跃: 7, 已完成: 0, 悬置: 0, 已归档: 1 |
 | ADRs | 30 | 已接受: 20 |
 
@@ -40,10 +40,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (6)
+### 待办 (5)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260503010228602**: 实现 cortex epic create 双轨 + checklist + probe lane 扩展
 - [ ] **TASK-20260503010229362**: 实现 husky post-commit trailer 解析 + 跟随 commit
 - [ ] **TASK-20260503010230554**: 实现 husky pre-commit 软提醒(in-progress 非空)
 - [ ] **TASK-20260503010231389**: 三层文档镜像(AGENTS/CLAUDE/memory)+ cortex skill/README 同步
@@ -62,7 +61,7 @@ _无_
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
 
-### 已完成 (18)
+### 已完成 (19)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -82,6 +81,7 @@ _无_
 - ✅ ~~TASK-20260502225209886~~: Demo: re-work flow (backlog → in-progress → review → reject → review → done)
 - ✅ ~~TASK-20260502233741335~~: implement creator bump subcommand for lockstep versioning per ADR-20260502233119561
 - ✅ ~~TASK-20260503010227902~~: 扩展 cortex CLI 状态机命令(ADR + epic 流转动词)
+- ✅ ~~TASK-20260503010228602~~: 实现 cortex epic create 双轨 + checklist + probe lane 扩展
 
 ### 悬置 (0)
 

@@ -21,7 +21,10 @@ function printHelp(): void {
 Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
-  epic "<title>"        Create a new Epic
+  epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
+                        Create a new Epic. --lane is required.
+                        --override bypasses the lane-full guard (max 1 per lane).
+                        --skip-checklist bypasses the 5-question prompt.
   adr "<title>"         Create a new ADR
   list                  List all tasks and epics
   stats                 Show project statistics
@@ -64,11 +67,17 @@ function parseFlag(args: string[], name: string): string | undefined {
   return args[idx + 1];
 }
 
+/** True when a flag is present (regardless of value). Used for `--skip-checklist` with optional reason. */
+function hasFlag(args: string[], name: string): boolean {
+  return args.indexOf(name) !== -1;
+}
+
 function main(): void {
   const config = loadConfig();
   const command = process.argv[2];
   const arg = process.argv[3];
   const restArgs = process.argv.slice(4);
+  const allFlags = process.argv.slice(3);
 
   switch (command) {
     case 'init':
@@ -105,8 +114,24 @@ function main(): void {
         }
         break;
       }
-      // Title form: create new epic
-      createEpic(arg, config);
+      // Title form: create new epic.
+      // allFlags == process.argv.slice(3); arg (the title) is allFlags[0],
+      // so we look for flags starting at index 1.
+      const flagArgs = allFlags.slice(1);
+      const lane = parseFlag(flagArgs, '--lane');
+      const override = parseFlag(flagArgs, '--override');
+      const skipChecklistPresent = hasFlag(flagArgs, '--skip-checklist');
+      const skipChecklistReason = parseFlag(flagArgs, '--skip-checklist');
+      // If --skip-checklist is followed by another --flag (or nothing), treat reason as ''.
+      const skipChecklist = skipChecklistPresent
+        ? (skipChecklistReason && !skipChecklistReason.startsWith('--') ? skipChecklistReason : '')
+        : undefined;
+
+      // Fire-and-await the async create flow; map any rejection to a non-zero exit.
+      createEpic(arg, config, { lane, override, skipChecklist }).catch(err => {
+        console.error('❌ Epic creation failed:', err instanceof Error ? err.message : err);
+        process.exit(1);
+      });
       break;
     }
 

@@ -1,3 +1,8 @@
+---
+lane: main
+checklist_completed: false
+checklist_skipped_reason: backfilled pre-ADR-20260503003315478
+---
 # EPIC-20260501091716524: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
 
 > Onboarding friction reduction — boost README and AGents.md UX from 6.5 to 8.5.

@@ -6,6 +6,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-03 | Created |
+| in-progress | 2026-05-03 | Started |
+| review | 2026-05-03 | Deliverables committed |
+| completed | 2026-05-03 | Done |
 
 ## 背景与目标
 
