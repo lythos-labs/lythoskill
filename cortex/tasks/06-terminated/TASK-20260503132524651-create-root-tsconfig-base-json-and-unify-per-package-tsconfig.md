@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-05-03 | Created |
 | in-progress | 2026-05-03 | Started |
+| terminated | 2026-05-03 | Terminated |
 
 ## 背景与目标
 

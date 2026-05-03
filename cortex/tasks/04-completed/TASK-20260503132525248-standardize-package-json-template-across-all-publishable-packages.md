@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-05-03 | Created |
 | in-progress | 2026-05-03 | Started |
+| completed | 2026-05-03 | Closed via trailer |
 
 ## 背景与目标
 
