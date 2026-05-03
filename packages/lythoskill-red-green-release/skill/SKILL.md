@@ -5,10 +5,21 @@ type: standard
 description: |
   User-acceptance-driven release workflow using heredoc patch files.  Each iteration produces a timestamped pr-<timestamp>-<desc>.sh that  self-archives after execution. No tag without explicit user LGTM.  Supports rollback via archived backups.
 when_to_use: |
-  LGTM, ship it, looks good, tag it, rollback, broke it, create patch,  apply changes, version release, 对了, 就是这样, 我觉得ok, 可以打tag,  改坏了, 回滚, 打tag.
+  LGTM, ship it, looks good, tag it, rollback, broke it, create patch,  apply changes, version release, 对了, 就是这样, 我觉得ok, 可以打tag,  改坏了, 回滚, 打tag, repomix, web chat, no git access, remote agent, apply patch manually.
 ---
 # Red-Green Release Workflow
 > No tag without LGTM. Every change is a self-archiving patch. Every state is rollback-able.
+
+## Typical Scenarios
+
+This skill shines when the agent **does not have direct filesystem or git access** to the user's project. Typical setups:
+
+- **Web chat + Repomix**: User pastes a Repomix dump of their codebase into a web chat. The agent proposes changes as `pr-*.sh` heredoc patches. The user copies the patch locally and runs `bash pr-*.sh`.
+- **Distributed / async review**: Patches are posted in issues, emailed, or shared via web UI for a human to review and apply manually.
+- **No git on target**: Environments (e.g., bare-metal servers, deployed configs) where `git revert` is unavailable — `.bak` files provide rollback.
+
+In these scenarios the agent cannot `git commit`, `git diff`, or write files directly. The heredoc patch is the **only viable delivery format**.
+
 ## Core Principles
 1. **User acceptance drives releases** — "LGTM" / "对了" / "就是这样" → then and only then commit + tag.
 2. **Atomic patches** — Each iteration = one `pr-<timestamp>-<desc>.sh` with heredoc content replacement.

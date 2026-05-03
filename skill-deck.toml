@@ -17,7 +17,6 @@ skills = [
   "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
   "github.com/lythos-labs/lythoskill/skills/lythoskill-creator",
 ]
