@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/3 14:19:08
+> 自动生成于 2026/5/3 15:59:38
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 47 | 进行中: 0, 待验收: 0, 已完成: 27 |
+| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 28 |
 | Epics | 8 | 活跃: 0, 已完成: 5, 悬置: 1, 已归档: 2 |
-| ADRs | 32 | 已接受: 20 |
+| ADRs | 33 | 已接受: 20 |
 
 ---
 
@@ -39,9 +39,16 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (8)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
+- [ ] **TASK-20260503152001333**: Adopt array-of-tables schema with as-alias for skill entries
+- [ ] **TASK-20260503152002342**: Implement alias resolution and collision detection in deck link
+- [ ] **TASK-20260503152003393**: Make deck add write FQ paths with optional as-alias
+- [ ] **TASK-20260503152004433**: Rename deck update to refresh and add per-skill arg
+- [ ] **TASK-20260503152005415**: Add deck remove and deck prune commands
+- [ ] **TASK-20260503152006435**: Add BDD scenarios for refactored deck CRUD
+- [ ] **TASK-20260503154401905**: Make README + CI surface red-green refactor + coverage visible
 
 ### 进行中 (0)
 
@@ -51,7 +58,7 @@ _无_
 
 _无_
 
-### 已完成 (27)
+### 已完成 (28)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -80,6 +87,7 @@ _无_
 - ✅ ~~TASK-20260503132523380~~: Move root package.json dependencies to individual packages
 - ✅ ~~TASK-20260503132524022~~: Unify lockfile and workspace config — Bun-only
 - ✅ ~~TASK-20260503132525248~~: Standardize package.json template across all publishable packages
+- ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
 
 ### 悬置 (0)
 
@@ -126,7 +134,7 @@ _无_
 - ✅ **ADR-20260424125637347** (02-accepted): handoff format migration from fixed file to daily-first
 - ✅ **ADR-20260430174746744** (02-accepted): deck add command — convenience download without locking users into a single package manager
 - ✅ **ADR-20260501090811296** (02-accepted): CI consistency check abandoned in favor of pre-commit hook for skill build
-- ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library — **rejected**: cold pool and skill library are fundamentally different concepts; true alignment for skill_library is deck/working_set, not cold pool
+- ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
 - ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
 - 🤔 **ADR-20260501160000000** (01-proposed): skill-deck.toml section semantics and innate skill re-attachment after context compaction
 - 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
@@ -140,6 +148,7 @@ _无_
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
 - 🤔 **ADR-20260503003314901** (01-proposed): git-coupling for cortex governance documents via commit trailer
 - 🤔 **ADR-20260503003315478** (01-proposed): epic granularity discipline — one outcome per iteration
+- 🤔 **ADR-20260503152000411** (01-proposed): deck 3-axis CRUD model with as-alias schema for working-set collisions
 - 🤔 **ADR-20260503170000000** (01-proposed): Monorepo Toolchain — Bun-only and Root Package.json Conventions
 - 🤔 **ADR-20260503180000000** (01-proposed): Unit Test Framework Selection — Curator Mind Applied
 

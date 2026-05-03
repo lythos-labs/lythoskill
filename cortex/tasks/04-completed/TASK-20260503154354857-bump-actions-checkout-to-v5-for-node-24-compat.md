@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-03 | Created — non-blocking deprecation flagged on CI run 25273343292 |
+| completed | 2026-05-03 | Closed via trailer |
 
 ## 背景与目标
 
