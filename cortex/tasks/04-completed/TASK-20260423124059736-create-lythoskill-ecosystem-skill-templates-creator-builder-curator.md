@@ -60,7 +60,10 @@ builder 和 curator 的 Starter 包可以暂时为空（仅预留目录），但
 - [ ] 三个 skill 的 SKILL.md 脱离本项目任何内部文档（包括 AGENTS.md、Epic、Wiki）仍能独立理解
 
 ## 进度记录
-<!-- 执行时更新，带时间戳 -->
+
+| Date | Update |
+|------|--------|
+| 2026-05-03 | Task audited — creator and curator skills already complete via project evolution. Builder role covered by `creator build` command (natural emergence, no premature split). Backlog empty. |
 
 ## 关联文件
 - **修改**: `skills/lythoskill-creator/SKILL.md`（如需补全）
