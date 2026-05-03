@@ -5,6 +5,8 @@ import { addSkill } from './add.js'
 import { refreshDeck } from './refresh.js'
 import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
+import { removeSkill } from './remove.js'
+import { pruneDeck } from './prune.js'
 import { formatHelp } from './help.js'
 
 const args = process.argv.slice(2)
@@ -22,6 +24,7 @@ const via = viaFlagIdx >= 0 ? args[viaFlagIdx + 1] : undefined
 const as = asFlagIdx >= 0 ? args[asFlagIdx + 1] : undefined
 const type = typeFlagIdx >= 0 ? args[typeFlagIdx + 1] : undefined
 const noBackup = args.includes('--no-backup')
+const yes = args.includes('--yes')
 
 const HELP_CONFIG = {
   binName: 'lythoskill-deck',
@@ -31,6 +34,8 @@ const HELP_CONFIG = {
     { name: 'add', description: 'Download skill to cold pool and add to deck', args: '<locator>' },
     { name: 'refresh', description: 'Pull latest versions of declared skills from upstream', args: '[<fq|alias>]' },
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
+    { name: 'remove', description: 'Remove a skill from deck.toml and working set', args: '<fq|alias>' },
+    { name: 'prune', description: 'GC cold pool repos no longer referenced by any deck', args: '[--yes]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
@@ -40,6 +45,7 @@ const HELP_CONFIG = {
     { flag: '--via <backend>', description: 'Download backend: git (default) | skills.sh' },
     { flag: '--as <alias>', description: 'Explicit alias for the skill (default: basename of path)' },
     { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
+    { flag: '--yes', description: 'Skip interactive confirmation (for prune)' },
   ],
 }
 
@@ -73,6 +79,19 @@ switch (command) {
   case 'validate':
     validateDeck(deckPath, workdir)
     break
+  case 'remove': {
+    const removeTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!removeTarget) {
+      console.error('❌ Missing target. Usage: deck remove <fq|alias>')
+      process.exit(1)
+    }
+    removeSkill(removeTarget, deckPath, workdir)
+    break
+  }
+  case 'prune': {
+    await pruneDeck(deckPath, workdir, yes)
+    break
+  }
   case 'migrate-schema': {
     const dryRun = args.includes('--dry-run')
     const targetPath = deckPath || 'skill-deck.toml'

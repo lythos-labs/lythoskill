@@ -52,6 +52,15 @@ bunx @lythos/skill-deck add github.com/owner/repo/skill-name --as tdd --type com
 bunx @lythos/skill-deck refresh
 # Refresh a single skill by alias or FQ path
 bunx @lythos/skill-deck refresh tdd
+
+# Remove a skill from deck and working set (cold pool untouched)
+bunx @lythos/skill-deck remove tdd
+
+# GC cold pool repos no longer referenced by any deck
+bunx @lythos/skill-deck prune
+# Skip confirmation
+bunx @lythos/skill-deck prune --yes
+
 # Then re-sync working set
 bunx @lythos/skill-deck link
 ```

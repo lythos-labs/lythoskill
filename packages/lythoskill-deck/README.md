@@ -57,6 +57,8 @@ skills = ["github.com/anthropics/skills/skills/pdf"]
 | Download a skill to cold pool and add to deck | `bunx @lythos/skill-deck add owner/repo` |
 | Pull latest versions of declared skills | `bunx @lythos/skill-deck refresh` |
 | Refresh a single skill by alias | `bunx @lythos/skill-deck refresh tdd` |
+| Remove a skill from deck and working set | `bunx @lythos/skill-deck remove tdd` |
+| GC unreferenced repos from cold pool | `bunx @lythos/skill-deck prune` |
 | Use a custom deck file or working dir | `bunx @lythos/skill-deck link --deck ./my-deck.toml --workdir /path/to/project` |
 
 ### Commands
@@ -67,6 +69,8 @@ skills = ["github.com/anthropics/skills/skills/pdf"]
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
 | `add` | `<locator> [--via <backend>] [--as <alias>] [--type <type>] [--deck <path>]` | Download skill to cold pool and append to skill-deck.toml. |
 | `refresh` | `[<fq|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
+| `remove` | `<fq|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
+| `prune` | `[--yes] [--deck <path>]` | GC cold pool repos no longer referenced. Interactive confirm (skip with `--yes`). |
 
 ### Options
 
