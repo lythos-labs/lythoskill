@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/3 11:45:24
+> 自动生成于 2026/5/3 11:44:36
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 41 | 进行中: 6, 待验收: 1, 已完成: 20 |
+| Tasks | 43 | 进行中: 6, 待验收: 1, 已完成: 22 |
 | Epics | 8 | 活跃: 7, 已完成: 0, 悬置: 0, 已归档: 1 |
 | ADRs | 30 | 已接受: 20 |
 
@@ -60,7 +60,7 @@ _无_
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
 
-### 已完成 (20)
+### 已完成 (22)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -82,6 +82,8 @@ _无_
 - ✅ ~~TASK-20260503010227902~~: 扩展 cortex CLI 状态机命令(ADR + epic 流转动词)
 - ✅ ~~TASK-20260503010228602~~: 实现 cortex epic create 双轨 + checklist + probe lane 扩展
 - ✅ ~~TASK-20260503010229362~~: 实现 husky post-commit trailer 解析 + 跟随 commit
+- ✅ ~~TASK-20260503114250559~~: T3 smoke test dummy
+- ✅ ~~TASK-20260503114317836~~: T3 hook smoke test
 
 ### 悬置 (0)
 
