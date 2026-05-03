@@ -12,6 +12,7 @@ import { createAdr } from './commands/adr.js';
 import { listAll } from './commands/list.js';
 import { showStats, showNextIds } from './commands/stats.js';
 import { probeStatus } from './commands/probe.js';
+import { showFlow } from './commands/flow.js';
 import { moveTask, moveAdr, moveEpic } from './commands/move.js';
 import { generateIndex, generateWikiIndex } from './generate-index.js';
 import { createWiki } from './commands/wiki.js';
@@ -34,6 +35,7 @@ Commands:
   index wiki            Generate wiki/INDEX.md only
   wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
+  flow                  Show kanban CFD — count, avg age, WIP limits
 
 Task state machine:
   start <task-id>       Move task to in-progress
@@ -198,6 +200,10 @@ function main(): void {
 
     case 'probe':
       probeStatus(config);
+      break;
+
+    case 'flow':
+      showFlow(config);
       break;
 
     case 'start':

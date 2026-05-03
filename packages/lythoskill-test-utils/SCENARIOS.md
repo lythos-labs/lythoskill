@@ -20,7 +20,7 @@ Agent BDD relies on LLM inference for the verification step — CI has no LLM, s
 
 Wired into [`.github/workflows/test.yml`](../../.github/workflows/test.yml) via `bun run test:all` at repo root.
 
-### `@lythos/project-cortex` — 12 scenarios
+### `@lythos/project-cortex` — 13 scenarios
 
 `packages/lythoskill-project-cortex/test/scenarios/*.md`
 
@@ -30,8 +30,9 @@ Wired into [`.github/workflows/test.yml`](../../.github/workflows/test.yml) via 
 | [`adr-double-accept-rejected.md`](../lythoskill-project-cortex/test/scenarios/adr-double-accept-rejected.md) | ADR: accept from rejected is invalid |
 | [`adr-reject-moves-proposed.md`](../lythoskill-project-cortex/test/scenarios/adr-reject-moves-proposed.md) | ADR: reject moves proposed to rejected |
 | [`epic-done-moves-active.md`](../lythoskill-project-cortex/test/scenarios/epic-done-moves-active.md) | Epic: done moves active to done |
-| [`epic-resume-moves-suspended.md`](../lythoskill-project-cortex/test/scenarios/epic-resume-moves-suspended.md) | Epic: resume moves suspended to active |
+| [`epic-resume-moves-suspended.md`](../lythoskill-project-cortex/test/scenarios/epic-resume-moves-active.md) | Epic: resume moves suspended to active |
 | [`epic-suspend-moves-active.md`](../lythoskill-project-cortex/test/scenarios/epic-suspend-moves-active.md) | Epic: suspend moves active to suspended |
+| [`flow-shows-cfd-table.md`](../lythoskill-project-cortex/test/scenarios/flow-shows-cfd-table.md) | Flow: kanban CFD shows task counts and WIP limits |
 | [`lane-main-rejected.md`](../lythoskill-project-cortex/test/scenarios/lane-main-rejected.md) | Lane: main full rejects new epic |
 | [`lane-override-accepted.md`](../lythoskill-project-cortex/test/scenarios/lane-override-accepted.md) | Lane: override bypasses full lane |
 | [`task-backlog-to-completed-invalid.md`](../lythoskill-project-cortex/test/scenarios/task-backlog-to-completed-invalid.md) | Task: backlog to completed is invalid |
@@ -135,4 +136,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **33 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned**.
+Current totals: **34 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned**.
