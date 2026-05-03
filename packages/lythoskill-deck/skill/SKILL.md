@@ -45,9 +45,13 @@ bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
 bunx @lythos/skill-deck add github.com/owner/repo/skill-name
 # Or via Vercel skills.sh
 bunx @lythos/skill-deck add owner/repo --via skills.sh
+# Add with explicit alias and section
+bunx @lythos/skill-deck add github.com/owner/repo/skill-name --as tdd --type combo
 
 # Pull latest versions of declared skills from upstream
-bunx @lythos/skill-deck update
+bunx @lythos/skill-deck refresh
+# Refresh a single skill by alias or FQ path
+bunx @lythos/skill-deck refresh tdd
 # Then re-sync working set
 bunx @lythos/skill-deck link
 ```
@@ -61,9 +65,13 @@ non-symlink entities → backed up then removed; missing declared skills → lin
 
 You never diagnose the working set manually. Just run `link`.
 
-`update` pulls the latest version of each declared skill from its upstream git
-repository. It skips `localhost/*` skills (user-managed) and non-git directories.
-After `update`, run `link` to sync any changed skills into the working set.
+`refresh` pulls the latest version of declared skills from their upstream git
+repositories. Pass an alias or FQ path to refresh a single skill; omit to refresh
+all declared skills. It skips `localhost/*` skills (user-managed) and non-git
+directories. After `refresh`, run `link` to sync any changed skills into the
+working set.
+
+> `deck update` is deprecated and will be removed in v1.0.0. Use `refresh`.
 ## Initialize
 ```bash
 # Copy template and edit [innate]/[tool] sections

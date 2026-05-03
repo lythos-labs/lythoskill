@@ -55,7 +55,8 @@ skills = ["github.com/anthropics/skills/skills/pdf"]
 | Sync working set with `skill-deck.toml` | `bunx @lythos/skill-deck link` |
 | Validate `skill-deck.toml` before committing | `bunx @lythos/skill-deck validate` |
 | Download a skill to cold pool and add to deck | `bunx @lythos/skill-deck add owner/repo` |
-| Pull latest versions of declared skills | `bunx @lythos/skill-deck update` |
+| Pull latest versions of declared skills | `bunx @lythos/skill-deck refresh` |
+| Refresh a single skill by alias | `bunx @lythos/skill-deck refresh tdd` |
 | Use a custom deck file or working dir | `bunx @lythos/skill-deck link --deck ./my-deck.toml --workdir /path/to/project` |
 
 ### Commands
@@ -64,8 +65,8 @@ skills = ["github.com/anthropics/skills/skills/pdf"]
 |---------|------|-------------|
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
-| `add` | `<locator> [--via <backend>] [--deck <path>]` | Download skill to cold pool and append to skill-deck.toml. |
-| `update` | `[--deck <path>]` | Pull latest versions of declared skills from upstream git repos. |
+| `add` | `<locator> [--via <backend>] [--as <alias>] [--type <type>] [--deck <path>]` | Download skill to cold pool and append to skill-deck.toml. |
+| `refresh` | `[<fq|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
 
 ### Options
 
@@ -74,6 +75,8 @@ skills = ["github.com/anthropics/skills/skills/pdf"]
 | `--deck <path>` | Path to skill-deck.toml | Find upward from cwd |
 | `--workdir <dir>` | Working directory | cwd |
 | `--via <backend>` | Download backend for `add`: `git` or `skills.sh` | `git` |
+| `--as <alias>` | Explicit alias for the skill (default: basename of path) | — |
+| `--type <type>` | Target section for `add`: `innate`, `tool`, or `combo` | `tool` |
 
 ### Safety guards
 
@@ -140,7 +143,8 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 |---------|-------|-----|
 | `❌ Skill not found: <name>` | Skill declared in deck but not in cold pool | `bunx @lythos/skill-deck add github.com/owner/repo/skill` or clone manually into cold pool |
 | `link` skips entries with warnings | Real files/directories exist in working set (not symlinks) | Delete the real directories in `working_set` and re-run `link`. Never create directories manually there |
-| `update` reports "Not a git repository" | Skill was copied (not cloned) into cold pool | Re-clone with `git clone` or use `deck add` which clones by default |
+| `refresh` reports "Not a git repository" | Skill was copied (not cloned) into cold pool | Re-clone with `git clone` or use `deck add` which clones by default |
+| `deck update` prints deprecation warning | `update` was renamed to `refresh` in v0.8+ | Use `deck refresh` instead |
 | `link` refuses with "budget exceeded" | Declared skills > `max_cards` | Increase `max_cards` in `skill-deck.toml` or remove unused skills |
 | `link` refuses with "unsafe working_set" | `working_set` resolves to `~` or `/` | Check `skill-deck.toml` has correct relative path (e.g. `.claude/skills/`) |
 | Agent doesn't see skills after `link` | `working_set` path doesn't match agent's scan location | Claude Code: `.claude/skills/`; Cursor: `.cursor/skills/`; Kimi: check your platform docs. Set `working_set` correctly |

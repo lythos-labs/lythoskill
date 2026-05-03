@@ -2,6 +2,7 @@
 import { linkDeck } from './link.js'
 import { validateDeck } from './validate.js'
 import { addSkill } from './add.js'
+import { refreshDeck } from './refresh.js'
 import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { formatHelp } from './help.js'
@@ -28,7 +29,7 @@ const HELP_CONFIG = {
   commands: [
     { name: 'link', description: 'Sync working set with skill-deck.toml' },
     { name: 'add', description: 'Download skill to cold pool and add to deck', args: '<locator>' },
-    { name: 'update', description: 'Pull latest versions of declared skills from upstream' },
+    { name: 'refresh', description: 'Pull latest versions of declared skills from upstream', args: '[<fq|alias>]' },
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
@@ -59,9 +60,16 @@ switch (command) {
     await addSkill(locator, { via, deck: deckPath, workdir, as, type })
     break
   }
-  case 'update':
-    updateDeck(deckPath, workdir)
+  case 'refresh': {
+    const refreshTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    refreshDeck(deckPath, workdir, refreshTarget)
     break
+  }
+  case 'update': {
+    const updateTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    updateDeck(deckPath, workdir, updateTarget)
+    break
+  }
   case 'validate':
     validateDeck(deckPath, workdir)
     break
