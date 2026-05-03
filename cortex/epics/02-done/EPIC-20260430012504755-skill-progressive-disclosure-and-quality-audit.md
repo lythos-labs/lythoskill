@@ -13,6 +13,7 @@ checklist_skipped_reason: backfilled pre-ADR-20260503003315478
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-04-29 | Created |
+| done | 2026-05-03 | Done |
 
 ## 背景故事
 基于 Claude Code 官方 Agent Skills 文档对项目内所有 SKILL.md 进行质量审计。核心问题：

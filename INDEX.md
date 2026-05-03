@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/3 13:52:45
+> 自动生成于 2026/5/3 14:19:08
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 47 | 进行中: 2, 待验收: 1, 已完成: 26 |
-| Epics | 8 | 活跃: 1, 已完成: 4, 悬置: 1, 已归档: 2 |
-| ADRs | 30 | 已接受: 20 |
+| Tasks | 47 | 进行中: 0, 待验收: 0, 已完成: 27 |
+| Epics | 8 | 活跃: 0, 已完成: 5, 悬置: 1, 已归档: 2 |
+| ADRs | 32 | 已接受: 20 |
 
 ---
 
@@ -16,11 +16,12 @@
 
 ### 进行中
 
-- **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
+_无_
 
 ### 已完成
 
 - ✅ **EPIC-20260430011158241**: Monorepo tooling consistency and config debt cleanup
+- ✅ **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
 - ✅ **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
 - ✅ **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
 - ✅ **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
@@ -42,19 +43,19 @@
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 
-### 进行中 (2)
+### 进行中 (0)
 
-- 🔄 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
-- 🔄 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
+_无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
+_无_
 
-### 已完成 (26)
+### 已完成 (27)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
+- ✅ ~~TASK-20260423223542053~~: Curator SQLite backend for skill metadata governance
 - ✅ ~~TASK-20260424115734221~~: Red-green-release 在 README/CLAUDE.md 中补全文档
 - ✅ ~~TASK-20260429225846405~~: Add --help and validate subcommand to lythoskill-deck CLI
 - ✅ ~~TASK-20260430012458866~~: Audit fix: add version frontmatter to cortex/release/scribe SKILL.md
@@ -84,7 +85,7 @@
 
 _无_
 
-### 终止 (16)
+### 终止 (18)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -97,6 +98,8 @@ _无_
 - 🛑 ~~TASK-20260430011205130~~: Unify lockfile and workspace config — Bun-only or pnpm-only
 - 🛑 ~~TASK-20260430011206610~~: Create root tsconfig.base.json and unify per-package tsconfig
 - 🛑 ~~TASK-20260430011207805~~: Standardize package.json template across all packages
+- 🛑 ~~TASK-20260430012458517~~: Audit fix: add allowed-tools to release and scribe SKILL.md
+- 🛑 ~~TASK-20260430012459381~~: Audit fix: review reference conditional trigger coverage across all skills
 - 🛑 ~~TASK-20260502225209862~~: Demo: cancelled flow (backlog → in-progress → terminate)
 - 🛑 ~~TASK-20260502230901152~~: Fix login bug
 - 🛑 ~~TASK-20260503132524651~~: Create root tsconfig.base.json and unify per-package tsconfig
@@ -137,6 +140,8 @@ _无_
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
 - 🤔 **ADR-20260503003314901** (01-proposed): git-coupling for cortex governance documents via commit trailer
 - 🤔 **ADR-20260503003315478** (01-proposed): epic granularity discipline — one outcome per iteration
+- 🤔 **ADR-20260503170000000** (01-proposed): Monorepo Toolchain — Bun-only and Root Package.json Conventions
+- 🤔 **ADR-20260503180000000** (01-proposed): Unit Test Framework Selection — Curator Mind Applied
 
 ---
 

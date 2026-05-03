@@ -5,7 +5,7 @@
  * 适配时间戳 ID 格式 (PREFIX-yyyyMMddHHmmssSSS)
  */
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { WorkflowConfig } from './types.js';
 
@@ -253,25 +253,55 @@ ${adrs.map(a => {
 }
 
 // 生成 Wiki 索引
+interface WikiEntry {
+  file: string;
+  date: string;
+  slug: string;
+}
+
+function readWikiDir(dir: string): WikiEntry[] {
+  if (!existsSync(dir)) return [];
+  try {
+    return readdirSync(dir)
+      .filter(f => f.endsWith('.md') && f !== 'INDEX.md')
+      .map(f => {
+        const dateMatch = f.match(/^(\d{4}-\d{2}-\d{2})-/);
+        return {
+          file: f,
+          date: dateMatch ? dateMatch[1] : '0000-00-00',
+          slug: f.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', ''),
+        };
+      })
+      .sort((a, b) => b.date.localeCompare(a.date));
+  } catch {
+    return [];
+  }
+}
+
 function generateWikiIndex(config: WorkflowConfig) {
   try {
-    const patterns = readdirSync(join(config.wikiDir, config.wikiSubdirs.patterns)).filter(f => f.endsWith('.md'));
-    const faqs = readdirSync(join(config.wikiDir, config.wikiSubdirs.faq)).filter(f => f.endsWith('.md'));
-    const lessons = readdirSync(join(config.wikiDir, config.wikiSubdirs.lessons)).filter(f => f.endsWith('.md'));
+    const patterns = readWikiDir(join(config.wikiDir, config.wikiSubdirs.patterns));
+    const faqs = readWikiDir(join(config.wikiDir, config.wikiSubdirs.faq));
+    const lessons = readWikiDir(join(config.wikiDir, config.wikiSubdirs.lessons));
+
+    const formatList = (entries: WikiEntry[], subdir: string) =>
+      entries.map(e => `- **[${e.date}]** [${e.slug}](./${subdir}/${e.file})`).join('\n');
 
     const content = `# Wiki Index
 
+> Sorted by creation date (newest first). Older entries may be superseded by newer ones.
+
 ## 📚 Patterns (${patterns.length})
 
-${patterns.map(p => `- [${p.replace('.md', '')}](./${config.wikiSubdirs.patterns}/${p})`).join('\n')}
+${formatList(patterns, config.wikiSubdirs.patterns) || '*No entries yet.*'}
 
 ## ❓ FAQ (${faqs.length})
 
-${faqs.map(f => `- [${f.replace('.md', '')}](./${config.wikiSubdirs.faq}/${f})`).join('\n')}
+${formatList(faqs, config.wikiSubdirs.faq) || '*No entries yet.*'}
 
 ## 📖 Lessons (${lessons.length})
 
-${lessons.map(l => `- [${l.replace('.md', '')}](./${config.wikiSubdirs.lessons}/${l})`).join('\n')}
+${formatList(lessons, config.wikiSubdirs.lessons) || '*No entries yet.*'}
 
 ---
 

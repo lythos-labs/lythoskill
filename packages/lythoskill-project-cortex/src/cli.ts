@@ -14,6 +14,7 @@ import { showStats, showNextIds } from './commands/stats.js';
 import { probeStatus } from './commands/probe.js';
 import { moveTask, moveAdr, moveEpic } from './commands/move.js';
 import { generateIndex, generateWikiIndex } from './generate-index.js';
+import { createWiki } from './commands/wiki.js';
 
 function printHelp(): void {
   console.log(`📋 lythoskill-project-cortex — Project management CLI
@@ -31,6 +32,7 @@ Commands:
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
+  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
 
 Task state machine:
@@ -180,6 +182,17 @@ function main(): void {
       } else {
         generateIndex(config);
         generateWikiIndex(config);
+      }
+      break;
+
+    case 'wiki':
+      if (!arg) {
+        console.error('❌ Please provide a wiki title');
+        process.exit(1);
+      }
+      {
+        const category = parseFlag(restArgs, '--category') || 'pattern';
+        createWiki(arg, config, category);
       }
       break;
 

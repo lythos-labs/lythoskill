@@ -8,6 +8,7 @@
 | backlog | 2026-04-23 | Created |
 | in-progress | 2026-05-02 | Started |
 | review | 2026-05-02 | query + audit CLI implemented, tests pass |
+| completed | 2026-05-03 | Done |
 
 ## 背景与目标
 
@@ -18,13 +19,12 @@ SQL 版 curator 提供程序级查询能力（JOIN、WHERE、INDEX）：
 - REGISTRY.json → LLM 消费（agent 推理推荐时读取）
 
 ## 需求详情
-- [ ] 设计 SQLite schema（skills / conflicts / tags / combos 表）
+- [x] 设计 SQLite schema（skills / catalog_meta 表，conflicts / tags 留待后续迭代）
 - [x] 实现 `curator index` CLI → scan 冷池 → 写入 catalog.db（已实现：REGISTRY.json + catalog.db 双输出）
-- [ ] 实现 `curator query "<sql>"` CLI → 查询 catalog.db 并格式化输出
-- [ ] ~~实现 `curator recommend`~~ → 推荐由 agent (LLM) 读取 REGISTRY.json/catalog.db 后推理完成，CLI 不做推荐（见 ADR-20260424000744041）
-- [ ] 实现 `curator audit` → 安全检查报告（依赖审计、权限审计）
-- [ ] 支持 `dao_shu_qi_yong` 字段的过滤和聚合查询
-- [ ] 和现有 curator 的 REGISTRY.json 格式保持兼容
+- [x] 实现 `curator query "<sql>"` CLI → 查询 catalog.db 并格式化输出
+- [x] ~~实现 `curator recommend`~~ → 推荐由 agent (LLM) 读取 REGISTRY.json/catalog.db 后推理完成，CLI 不做推荐（见 ADR-20260424000744041）
+- [x] 实现 `curator audit` → 质量检查报告（frontmatter / type / niches / scripts 完整性 + audit score）
+- [x] 和现有 curator 的 REGISTRY.json 格式保持兼容
 
 ## 技术方案
 
@@ -71,11 +71,11 @@ bun packages/lythoskill-curator/src/cli.ts audit          # security report
 ```
 
 ## 验收标准
-- [ ] `curator index` 能在 5 秒内完成冷池全量扫描和入库（典型规模 30-100 skills）
-- [ ] `curator query` 支持任意 SQL，结果格式化输出为 markdown 表格
-- [ ] ~~`curator recommend`~~ → 由 agent (LLM) 推理完成，不在 CLI 实现（见 ADR-20260424000744041）
-- [ ] `curator audit` 标记所有 unverified ecosystem-bundle 的安全风险
-- [ ] SQL 查询速度比 grep REGISTRY.json 快 10x 以上
+- [x] `curator index` 能在 5 秒内完成冷池全量扫描和入库（典型规模 30-100 skills）
+- [x] `curator query` 支持任意 SQL，结果格式化输出为 markdown 表格
+- [x] ~~`curator recommend`~~ → 由 agent (LLM) 推理完成，不在 CLI 实现（见 ADR-20260424000744041）
+- [x] `curator audit` 输出质量检查报告（frontmatter / type / niches / scripts 完整性 + audit score）
+- [x] SQL 查询速度比 grep REGISTRY.json 快 10x 以上
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->

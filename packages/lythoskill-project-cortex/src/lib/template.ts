@@ -115,6 +115,31 @@ function escapeYamlScalar(value: string): string {
   return `"${escaped}"`;
 }
 
+export function createWikiTemplate(title: string, date: string, category: string): string {
+  return `---
+created: ${date}
+updated: ${date}
+category: ${category}
+---
+
+# ${title}
+
+> One-line summary of this ${category}.
+
+## Context
+<!-- When does this apply? What problem does it solve? -->
+
+## Details
+<!-- The core content. Be specific. -->
+
+## When to Apply / When Not to Apply
+<!-- Boundaries and exceptions. -->
+
+## Related
+<!-- Links to related wiki entries, ADRs, or tasks. -->
+`;
+}
+
 export function createAdrTemplate(id: string, title: string): string {
   const today = new Date().toISOString().split('T')[0];
   return `# ${id}: ${title}

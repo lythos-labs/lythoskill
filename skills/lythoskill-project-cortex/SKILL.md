@@ -36,6 +36,8 @@ tasks succeed.
 bunx @lythos/project-cortex task "Fix login bug"
 bunx @lythos/project-cortex epic "User auth system" --lane main|emergency
 bunx @lythos/project-cortex adr "Choose database"
+# Create a Wiki entry (dated, for knowledge capture)
+bunx @lythos/project-cortex wiki "Your insight" --category pattern|faq|lesson
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex init
 ```
