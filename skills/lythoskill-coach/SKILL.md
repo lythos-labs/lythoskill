@@ -1,6 +1,6 @@
 ---
 name: lythoskill-coach
-version: 0.8.0
+version: 0.9.0
 type: standard
 description: |
   Analyzes SKILL.md files against Agent Skills best practices. Reviews
