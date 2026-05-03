@@ -1,6 +1,6 @@
 ---
 lane: main
-checklist_completed: false
+checklist_completed: true
 ---
 
 # EPIC-20260503220647: Deck onboarding friction reduction — pre-built decks and 30s quick-start
@@ -14,6 +14,7 @@ checklist_completed: false
 | active | 2026-05-03 | Created — pre-built deck templates + README quick-start refresh |
 | active | 2026-05-03 | Themes A+B completed — 4 pre-built decks + README refresh + hyphen alias BDD |
 | active | 2026-05-03 | Theme C completed — install-deck.sh one-command installer |
+| done | 2026-05-03 | Themes A+B+C done. Theme D (deck demo CLI) remains backlog — value unclear vs install.sh |
 
 ## Lane / Granularity 标记
 
