@@ -55,7 +55,10 @@
       "name": "@lythos/project-cortex",
       "version": "0.8.0",
       "bin": {
-        "lythoskill-project-cortex": "./src/cli.ts",
+        "lythoskill-project-cortex": "src/cli.ts",
+      },
+      "devDependencies": {
+        "@lythos/test-utils": "workspace:*",
       },
     },
     "packages/lythoskill-test-utils": {

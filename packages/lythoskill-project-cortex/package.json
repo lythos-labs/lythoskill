@@ -32,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/lythos-labs/lythoskill/issues"
   },
-  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-project-cortex#readme"
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-project-cortex#readme",
+  "devDependencies": {
+    "@lythos/test-utils": "workspace:*"
+  }
 }
