@@ -12,6 +12,7 @@ checklist_completed: false
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-03 | Created — pre-built deck templates + README quick-start refresh |
+| active | 2026-05-03 | Themes A+B completed — 4 pre-built decks + README refresh + hyphen alias BDD |
 
 ## Lane / Granularity 标记
 
@@ -30,14 +31,14 @@ K8s 心智的解法：**预组 deck（pre-built deck）= Helm chart / kustomizat
 
 ## 需求树
 
-### 主题A: 预组 deck 模板库 #backlog
+### 主题A: 预组 deck 模板库 ✅ completed
 - **触发**: 用户"pdf 和 word 那些第三方广泛传播的，特化了场景的 deck"
 - **需求**: 提供 4+ 场景化预组 deck toml，覆盖常见工作流
 - **实现**: `examples/decks/*.toml`（documents / engineering / full-stack / governance）
 - **产出**: 用户 `curl` 一个 toml → `link` 就能看到技能生效
-- **验证**: BDD scenario 覆盖 hyphen alias（`web-search`、`design-doc-mermaid`）在 link 中正确创建 symlink
+- **验证**: BDD scenario 覆盖 hyphen alias（`web-search`、`design-doc-mermaid`）在 link 中正确创建 symlink — **21/21 passed**
 
-### 主题B: README 快速开始刷新 #backlog
+### 主题B: README 快速开始刷新 ✅ completed
 - **触发**: 当前 Quick Start 只展示"add 一个技能"，没有展示"场景化 deck"的价值
 - **需求**: Quick Start 加入预组 deck 一行命令体验
 - **实现**: README.md / README.zh.md 新增 "Or start with a pre-built deck" 段
