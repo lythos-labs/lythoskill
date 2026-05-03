@@ -34,8 +34,10 @@ tasks succeed.
 ```bash
 # Create documents (CLI assigns timestamp ID, generates from template)
 bunx @lythos/project-cortex task "Fix login bug"
-bunx @lythos/project-cortex epic "User auth system"
+bunx @lythos/project-cortex epic "User auth system" --lane main|emergency
 bunx @lythos/project-cortex adr "Choose database"
+# Create a Wiki entry (dated, for knowledge capture)
+bunx @lythos/project-cortex wiki "Your insight" --category pattern|faq|lesson
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex init
 ```
@@ -51,8 +53,32 @@ bunx @lythos/project-cortex list
 # Show project statistics
 bunx @lythos/project-cortex stats
 
-# Probe: check if file location matches internal status record
+# Probe: check if file location matches internal status record + epic lane counts
 bunx @lythos/project-cortex probe
+```
+
+## State Machine Commands
+
+```bash
+# Task state machine
+bunx @lythos/project-cortex start TASK-xxx
+bunx @lythos/project-cortex review TASK-xxx
+bunx @lythos/project-cortex done TASK-xxx        # review → completed only
+bunx @lythos/project-cortex complete TASK-xxx    # any status → completed (trailer-driven)
+bunx @lythos/project-cortex suspend TASK-xxx
+bunx @lythos/project-cortex resume TASK-xxx
+bunx @lythos/project-cortex terminate TASK-xxx
+bunx @lythos/project-cortex archive TASK-xxx
+
+# ADR state machine
+bunx @lythos/project-cortex adr accept ADR-xxx
+bunx @lythos/project-cortex adr reject ADR-xxx
+bunx @lythos/project-cortex adr supersede ADR-xxx --by ADR-yyy
+
+# Epic state machine
+bunx @lythos/project-cortex epic done EPIC-xxx
+bunx @lythos/project-cortex epic suspend EPIC-xxx
+bunx @lythos/project-cortex epic resume EPIC-xxx
 ```
 
 `probe` is a read-only consistency check. It compares each document's directory
@@ -69,7 +95,9 @@ cortex/
 │   └── 04-superseded/
 ├── epics/
 │   ├── 01-active/
-│   └── 02-archived/
+│   ├── 02-done/
+│   ├── 03-suspended/
+│   └── 04-archived/
 ├── tasks/
 │   ├── 01-backlog/       ← Capture + Clarify
 │   ├── 02-in-progress/   ← Engage
@@ -210,11 +238,39 @@ backlog ──start──► in-progress ──deliver──► review ──acc
 | backlog | in-progress | Subagent | Begins implementation | `bunx @lythos/project-cortex start TASK-xxx` |
 | in-progress | review | Subagent | Core deliverables done, committed with task ID | `bunx @lythos/project-cortex review TASK-xxx` |
 | review | completed | User/System | Exit criteria met, acceptance passed | `bunx @lythos/project-cortex done TASK-xxx` |
+| any | completed | Trailer/Hook | Commit trailer closes task | `bunx @lythos/project-cortex complete TASK-xxx` |
 | in-progress | suspended | Any | Blocked by external dependency | `bunx @lythos/project-cortex suspend TASK-xxx` |
 | suspended | in-progress | Any | Blocker resolved | `bunx @lythos/project-cortex resume TASK-xxx` |
 | any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex terminate TASK-xxx` |
 | completed | archived | User/System | Long-term storage | `bunx @lythos/project-cortex archive TASK-xxx` |
 | review | in-progress | User/System | Deliverables rejected, re-work required | `bunx @lythos/project-cortex reject TASK-xxx` |
+## Commit Trailer Integration
+
+Cortex governance is **commit-driven** via git trailers parsed by `.husky/post-commit`:
+
+```
+Closes: TASK-<id>        # Any status → completed (task), proposed → accepted (ADR), active → done (epic)
+Task: TASK-<id> <verb>   # Explicit task verb
+ADR: ADR-<id> <verb>     # ADR verb: accept, reject, supersede
+Epic: EPIC-<id> <verb>   # Epic verb: done, suspend, resume
+```
+
+Example:
+```bash
+git commit -m "feat(api): add endpoint
+
+Closes: TASK-20260503010227902"
+```
+
+The post-commit hook auto-dispatches to `cortex` CLI and creates a follow-up commit with the state changes. Malformed trailers print warnings but do not block.
+
+## Epic Lane Discipline
+
+- **Dual-track lanes**: `lane: main` (current iteration focus, max 1 active) and `lane: emergency` (unavoidable urgent insert, max 1 active).
+- **5-question checklist** at creation: outcome clear? / closable in 1-3 weeks? / fits 1-3 week size? / not a task? / not an ADR?
+- Lane-full = rejection unless `--override "<reason>"` is provided.
+- `cortex probe` warns when >1 active epic per lane.
+
 ## Git Integration (Critical)
 Commits **must** include task ID in the message title:
 ✅ `git commit -m "feat(api): add endpoint (TASK-20250422143321029)"`

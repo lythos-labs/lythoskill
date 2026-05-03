@@ -14,6 +14,7 @@ Commands:
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
+  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
 
 Task state machine:
