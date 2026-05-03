@@ -170,6 +170,13 @@ function parseScenario(mdPath: string): Scenario {
       given.epics.push({ id: epicMatch[1], title: 'Fixture Epic', lane: epicMatch[3] || undefined })
       continue
     }
+    // An ADR `ADR-TEST-001` exists in `01-proposed/`
+    const adrMatch = bullet.match(/adr\s+`?([^`]+)`?\s+exists\s+in\s+`?([^`]+)`?/i)
+    if (adrMatch) {
+      given.adrs = given.adrs || []
+      given.adrs.push({ id: adrMatch[1], title: 'Test ADR', status: 'proposed' })
+      continue
+    }
   }
 
   // Parse When
