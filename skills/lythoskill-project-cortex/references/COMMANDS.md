@@ -12,6 +12,8 @@ Commands:
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
   probe                 Check status consistency (dir vs Status History)
+
+Task state machine:
   start <task-id>       Move task to in-progress
   review <task-id>      Move task to review
   done <task-id>        Move task to completed (must be in review)
@@ -21,7 +23,19 @@ Commands:
   terminate <task-id>   Move task to terminated (any status)
   archive <task-id>     Move completed task to archived
 
+ADR state machine:
+  adr accept <adr-id>                  Move ADR to accepted
+  adr reject <adr-id>                  Move ADR to rejected
+  adr supersede <adr-id> [--by <new-id>]  Move ADR to superseded
+
+Epic state machine:
+  epic done <epic-id>     Move epic to done
+  epic suspend <epic-id>  Move epic to suspended
+  epic resume <epic-id>   Move suspended epic back to active
+
 Examples:
   lythoskill-project-cortex init
   lythoskill-project-cortex task "Fix login bug"
   lythoskill-project-cortex epic "User auth system"
+  lythoskill-project-cortex adr accept ADR-20260502234833756
+  lythoskill-project-cortex epic done EPIC-20260503010218940
