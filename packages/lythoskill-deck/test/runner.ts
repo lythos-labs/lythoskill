@@ -42,6 +42,7 @@ export interface Scenario {
     stderrContains?: string[]
     stderrExcludes?: string[]
     stdoutContains?: string[]
+    stdoutExcludes?: string[]
   }
 }
 
@@ -86,6 +87,12 @@ function buildDeckToml(deck: Scenario['given']['deck']): string {
       if (entries.length) {
         out += `\n[${section}]\n`
         out += toTomlField('skills', entries)
+      }
+    } else if (Array.isArray(entries.skills)) {
+      // Legacy object wrapper: { skills: ['...'] }
+      if (entries.skills.length) {
+        out += `\n[${section}]\n`
+        out += toTomlField('skills', entries.skills)
       }
     } else {
       // alias-as-key dict 格式
@@ -276,6 +283,15 @@ function assert(scenario: Scenario, workdir: string, code: number, output: strin
     for (const needle of then.stdoutContains) {
       if (!lowerOutput.includes(needle.toLowerCase())) {
         errors.push(`stdout missing: "${needle}"`)
+      }
+    }
+  }
+
+  if (then.stdoutExcludes) {
+    const lowerOutput = output.toLowerCase()
+    for (const needle of then.stdoutExcludes) {
+      if (lowerOutput.includes(needle.toLowerCase())) {
+        errors.push(`stdout should not contain: "${needle}"`)
       }
     }
   }

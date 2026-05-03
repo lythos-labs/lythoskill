@@ -41,7 +41,7 @@ Wired into [`.github/workflows/test.yml`](../../.github/workflows/test.yml) via 
 
 These cover the cortex FSM edges — task / epic / ADR transitions, trailer dispatch, lane discipline.
 
-### `@lythos/skill-deck` — 11 scenarios
+### `@lythos/skill-deck` — 20 scenarios
 
 `packages/lythoskill-deck/test/scenarios/*.ts` (TypeScript scenario objects, not Markdown — older shape; both forms drive the same runner.)
 
@@ -58,8 +58,17 @@ These cover the cortex FSM edges — task / epic / ADR transitions, trailer disp
 | [`migrate-schema-dry-run.ts`](../lythoskill-deck/test/scenarios/migrate-schema-dry-run.ts) | migrate-schema dry-run does not modify file |
 | [`migrate-schema-converts.ts`](../lythoskill-deck/test/scenarios/migrate-schema-converts.ts) | migrate-schema converts old deck and link no longer warns |
 | [`migrate-schema-noop.ts`](../lythoskill-deck/test/scenarios/migrate-schema-noop.ts) | migrate-schema no-op on already-converted deck |
+| [`cross-type-alias-collision.ts`](../lythoskill-deck/test/scenarios/cross-type-alias-collision.ts) | cross-type alias collision is rejected |
+| [`link-flattens-vendor-tree.ts`](../lythoskill-deck/test/scenarios/link-flattens-vendor-tree.ts) | link flattens deep vendor tree into flat symlinks |
+| [`fq-path-creates-correct-symlink.ts`](../lythoskill-deck/test/scenarios/fq-path-creates-correct-symlink.ts) | fq path creates correct symlink to cold pool |
+| [`same-type-alias-collision.ts`](../lythoskill-deck/test/scenarios/same-type-alias-collision.ts) | same-type alias collision is rejected |
+| [`as-resolves-collision.ts`](../lythoskill-deck/test/scenarios/as-resolves-collision.ts) | different aliases resolve same-basename collision |
+| [`refresh-single-skill-only.ts`](../lythoskill-deck/test/scenarios/refresh-single-skill-only.ts) | refresh single skill only processes that target |
+| [`remove-deletes-entry-and-symlink.ts`](../lythoskill-deck/test/scenarios/remove-deletes-entry-and-symlink.ts) | remove deletes deck entry and symlink but not cold pool |
+| [`prune-skips-declared-repos.ts`](../lythoskill-deck/test/scenarios/prune-skips-declared-repos.ts) | prune skips declared repos and deletes unreferenced ones |
+| [`update-deprecation-warning.ts`](../lythoskill-deck/test/scenarios/update-deprecation-warning.ts) | update prints deprecation warning to stderr |
 
-These cover the original `deck link` reconciler (5) + schema parser + migrate-schema from the 3-axis CRUD refactor (6).
+These cover the original `deck link` reconciler (5) + schema parser + migrate-schema (6) + 3-axis CRUD lifecycle: add/link collision/remove/prune/refresh (9).
 
 ---
 
@@ -67,19 +76,19 @@ These cover the original `deck link` reconciler (5) + schema parser + migrate-sc
 
 Tracked by [TASK-20260503152006435](../../cortex/tasks/01-backlog/TASK-20260503152006435-add-bdd-scenarios-for-refactored-deck-crud.md), driven by [ADR-20260503152000411](../../cortex/adr/01-proposed/ADR-20260503152000411-deck-3-axis-crud-model-with-as-alias-schema-for-working-set-collisions.md).
 
-| # | Scenario | Note |
-|---|----------|------|
-| 1 | `add` writes FQ → `link` materializes flat symlink at cold-pool path | invariant: cold pool is go-module form |
-| 2 | Two FQ entries with same basename, no `as` → `link` exits non-zero with collision error | alias collision detection |
-| 3 | Adding `as` resolves the collision — both flat-symlink correctly | alias mechanism |
-| 4 | `refresh tdd-foo` runs `git pull` only on that path; other entries' mtime unchanged | per-skill refresh |
-| 5 | `remove <fq>` deletes deck.toml entry + working-set symlink; **cold pool path remains** | strict per-axis side effects |
-| 6 | `prune` does not delete declared paths even if working-set symlink is missing | declared-paths protected |
-| 7 | Cold pool physical path stable across add / refresh / link / remove / prune | stability invariant |
-| 8 | Old string-array deck.toml + new array-of-tables both link successfully | migration backward-compat |
-| 9 | `deck update` still works but stderr emits a deprecation warning | deprecation shim |
+| # | Scenario | Status |
+|---|----------|--------|
+| 1 | `add` writes FQ → `link` materializes flat symlink at cold-pool path | ✅ `fq-path-creates-correct-symlink.ts` |
+| 2 | Two FQ entries with same basename, no `as` → `link` exits non-zero with collision error | ✅ `same-type-alias-collision.ts` |
+| 3 | Adding `as` resolves the collision — both flat-symlink correctly | ✅ `as-resolves-collision.ts` |
+| 4 | `refresh tdd-foo` runs `git pull` only on that path; other entries' mtime unchanged | ✅ `refresh-single-skill-only.ts` |
+| 5 | `remove <fq>` deletes deck.toml entry + working-set symlink; **cold pool path remains** | ✅ `remove-deletes-entry-and-symlink.ts` |
+| 6 | `prune` does not delete declared paths even if working-set symlink is missing | ✅ `prune-skips-declared-repos.ts` |
+| 7 | Cold pool physical path stable across add / refresh / link / remove / prune | ✅ covered by FQ + nested cold-pool scenarios |
+| 8 | Old string-array deck.toml + new array-of-tables both link successfully | ✅ `parse-mixed.ts` |
+| 9 | `deck update` still works but stderr emits a deprecation warning | ✅ `update-deprecation-warning.ts` |
 
-Status: scenarios will be authored after the underlying CLI changes land (TASK-20260503152001333 → 152005415).
+All 9 planned scenarios implemented. 20 total deck scenarios in CI.
 
 ---
 
@@ -126,4 +135,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **23 CLI integration scenarios in CI · 0 agent BDD in CI · 6 planned for remaining deck refactor**.
+Current totals: **32 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned for remaining deck refactor**.
