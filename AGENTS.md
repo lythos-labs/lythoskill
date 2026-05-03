@@ -149,12 +149,32 @@ bun packages/lythoskill-deck/test/runner.ts --parallel 4 --output ./playground/t
 ```bash
 # Create governance documents — ALWAYS use CLI, do NOT create files manually
 bun packages/lythoskill-project-cortex/src/cli.ts task "<title>"
-bun packages/lythoskill-project-cortex/src/cli.ts epic "<title>"
+bun packages/lythoskill-project-cortex/src/cli.ts epic "<title>" --lane main|emergency
 bun packages/lythoskill-project-cortex/src/cli.ts adr "<title>"
+
+# Task state machine
+bun packages/lythoskill-project-cortex/src/cli.ts start TASK-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts review TASK-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts done TASK-xxx        # review → completed only
+bun packages/lythoskill-project-cortex/src/cli.ts complete TASK-xxx    # any status → completed (trailer-driven)
+bun packages/lythoskill-project-cortex/src/cli.ts suspend TASK-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts resume TASK-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts terminate TASK-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts archive TASK-xxx
+
+# ADR state machine
+bun packages/lythoskill-project-cortex/src/cli.ts adr accept ADR-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts adr reject ADR-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts adr supersede ADR-xxx --by ADR-yyy
+
+# Epic state machine
+bun packages/lythoskill-project-cortex/src/cli.ts epic done EPIC-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts epic suspend EPIC-xxx
+bun packages/lythoskill-project-cortex/src/cli.ts epic resume EPIC-xxx
 
 # Maintenance
 bun packages/lythoskill-project-cortex/src/cli.ts index    # Regenerate INDEX.md and wiki/INDEX.md
-bun packages/lythoskill-project-cortex/src/cli.ts probe    # Check status consistency
+bun packages/lythoskill-project-cortex/src/cli.ts probe    # Check status consistency + epic lane counts
 bun packages/lythoskill-project-cortex/src/cli.ts list     # List all tasks and epics
 bun packages/lythoskill-project-cortex/src/cli.ts stats    # Show statistics
 ```
@@ -300,15 +320,27 @@ Project documentation lives in `cortex/`:
 cortex/
 ├── INDEX.md           <- Start here for self-described structure
 ├── adr/
-│   └── 02-accepted/   <- Architecture Decision Records
+│   ├── 01-proposed/   <- Pending decisions
+│   ├── 02-accepted/   <- Accepted decisions
+│   ├── 03-rejected/   <- Rejected decisions
+│   └── 04-superseded/ <- Superseded decisions
 ├── epics/
-│   └── 01-active/     <- Requirement epics
+│   ├── 01-active/     <- Active epics
+│   ├── 02-done/       <- Completed epics
+│   ├── 03-suspended/  <- Suspended epics
+│   └── 04-archived/   <- Archived epics
 ├── tasks/
 │   ├── 01-backlog/    <- Pending tasks
-│   └── 04-completed/  <- Completed tasks
+│   ├── 02-in-progress/<- Active tasks
+│   ├── 03-review/     <- Pending acceptance
+│   ├── 04-completed/  <- Normal completion
+│   ├── 05-suspended/  <- Blocked (recoverable)
+│   ├── 06-terminated/ <- Cancelled (abnormal end)
+│   └── 07-archived/   <- Final archive
 └── wiki/
-    ├── INDEX.md       <- Pattern documentation index
-    └── 01-patterns/   <- Reusable patterns and conventions
+    ├── 01-patterns/   <- Reusable solutions
+    ├── 02-faq/        <- Common questions
+    └── 03-lessons/    <- Retrospectives
 ```
 
 Status directories use numeric prefixes for ordering (`01-`, `02-`, etc.). Document filenames use timestamp IDs: `ADR-yyyyMMddHHmmssSSS-<slug>.md`.
@@ -316,6 +348,56 @@ Status directories use numeric prefixes for ordering (`01-`, `02-`, etc.). Docum
 All governance documents include a machine-parseable **Status History** table.
 
 **Always use CLI commands to create governance documents** — do not create ADR/Epic/Task files manually. The CLI handles template alignment and correct timestamp IDs.
+
+### Cortex Lifecycle Integration
+
+Cortex governance is **commit-driven** via git trailers in commit messages. The `post-commit` hook parses trailers and auto-creates follow-up commits with state changes.
+
+**Trailer Syntax** (add at the end of the commit message body):
+
+```
+Closes: TASK-<id>        # Any status → completed (task), proposed → accepted (ADR), active → done (epic)
+Task: TASK-<id> <verb>   # Explicit task verb: start, review, done, suspend, resume, terminate, archive
+ADR: ADR-<id> <verb>     # ADR verb: accept, reject, supersede
+Epic: EPIC-<id> <verb>   # Epic verb: done, suspend, resume
+```
+
+Examples:
+```
+feat(api): add endpoint
+
+Closes: TASK-20260503010227902
+```
+```
+docs(cortex): accept ADR-B
+
+ADR: ADR-20260503003315478 accept
+```
+
+**Hooks:**
+- **`.husky/pre-commit`**: When `cortex/tasks/02-in-progress/` is non-empty, prints a soft reminder with the in-progress task ID list and trailer syntax. Does **NOT** block commit.
+- **`.husky/post-commit`**: Parses trailers from the just-committed message, dispatches to `cortex` CLI, and creates a follow-up commit with the state changes. Follow-up commits carry `Triggered by: <hash>` to prevent recursion. Malformed trailers or invalid transitions print warnings but do not block.
+
+**Failure fallback:** `cortex probe` runs reconciliation checks. Run it periodically to catch silent drift (e.g. hook silently failed, or a manual file move bypassed the CLI).
+
+### Cortex Granularity
+
+Three governance layers with distinct responsibilities:
+
+| Layer | Question | When to use | Example |
+|-------|----------|-------------|---------|
+| **ADR** | WHY this choice? | Technical decision, option comparison, irreversible choice | "Use Bun over Node" |
+| **Epic** | WHAT outcome and HOW decomposed? | 1-3 week outcome with dependencies, plan-aligned, zoom-in focus | "Implement trailer-driven governance" |
+| **Task** | WHAT specific action? | 1-3 day executable work for subagent | "Add `task complete` verb to CLI" |
+
+**Epic Discipline:**
+- **Dual-track lanes**: `lane: main` (current iteration focus, max 1 active epic) and `lane: emergency` (unavoidable urgent insert, max 1 active epic).
+- **5-question checklist** at creation: outcome clear? / closable in 1-3 weeks? / fits 1-3 week size? / not a task? / not an ADR?
+- Lane-full = rejection unless `--override "<reason>"` is provided (reason recorded in frontmatter).
+- `cortex probe` warns when >1 active epic per lane.
+
+**Task = Subagent Bootloader:**
+A task card should be self-contained: frontmatter metadata + concise body + external references to ADRs/Epics/sibling tasks. A subagent reading only the task card + AGENTS.md should have enough context to implement the work. If the card needs to invent migrations not pre-decided by the user, that is a signal the card is incomplete.
 
 **For full context on the project governance system, read `cortex/INDEX.md`.**
 

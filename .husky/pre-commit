@@ -17,3 +17,23 @@ if [ -n "$STAGED" ]; then
   git add skills/
   echo "✅ Skills rebuilt and staged"
 fi
+
+# 3. Soft reminder for in-progress tasks (no blocker)
+IN_PROGRESS_DIR="cortex/tasks/02-in-progress"
+count=0
+ids=""
+for f in "$IN_PROGRESS_DIR"/*.md; do
+  [ -f "$f" ] || continue
+  count=$((count + 1))
+  id=$(basename "$f" | sed -E 's/^([A-Z]+-[0-9]+)-.*/\1/')
+  ids="${ids}${id}, "
+done
+
+if [ "$count" -gt 0 ]; then
+  ids="${ids%, }"
+  echo ""
+  echo "💡 你有 ${count} 张 in-progress task,如果本次 commit 完成了某张,在 message 末尾加 trailer:"
+  echo "     Closes: TASK-<id>"
+  echo "   或 Task: TASK-<id> review/done"
+  echo "   当前 in-progress: ${ids}"
+fi

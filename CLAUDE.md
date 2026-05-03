@@ -4,6 +4,8 @@
 > This file only contains Claude Code-specific extensions.
 
 > **⚠️ Compaction-safe reminder.** Before any release, version, git remote, or npm command, re-read [`AGENTS.md` → Release & Auth Workflow](./AGENTS.md#release--auth-workflow). Auth (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator bump`, never `jq`/`python`/hand-edit. Past Claude sessions corrupted the git remote URL after losing context — this warning lives at the top so a post-compaction agent sees it on the next read.
+>
+> **Cortex trailer + lane discipline.** After compaction, you may not remember the trailer syntax or epic lane rules. Quick reference: commit message trailers (`Closes: TASK-xxx`, `Task: TASK-xxx review`, `ADR: ADR-xxx accept`) are parsed by `.husky/post-commit` and auto-create follow-up commits. Epic lanes are dual-track (`main` + `emergency`, max 1 active each). For full details see [`AGENTS.md` → Project Governance (Cortex)](./AGENTS.md#project-governance-cortex).
 
 ## Claude-Specific Notes
 

@@ -56,6 +56,46 @@ Commands:
   probe                 Check status consistency (dir vs Status History)
 ```
 
+## Commit-Driven Governance
+
+Cortex state transitions are triggered by **git trailers** in commit messages. The `.husky/post-commit` hook parses trailers and auto-creates follow-up commits with the state changes.
+
+```bash
+# Close a task from any status
+git commit -m "feat(api): add endpoint
+
+Closes: TASK-20260503010227902"
+
+# Accept an ADR
+git commit -m "docs(adr): accept database choice
+
+ADR: ADR-20260503003315478 accept"
+
+# Mark an epic as done
+git commit -m "feat(cortex): finish dual-lane implementation
+
+Epic: EPIC-20260503010218940 done"
+```
+
+The `.husky/pre-commit` hook prints a soft reminder when you have in-progress tasks, so you don't forget to add a trailer.
+
+## Epic Dual-Track
+
+Epics use **dual-track lanes** to enforce focus:
+
+- **`lane: main`** — Current iteration focus. Max 1 active epic. This is your "Workflowy zoom-in" — everything else is background noise.
+- **`lane: emergency`** — Unavoidable urgent insert. Max 1 active epic. For genuinely blocking issues that cannot wait.
+
+```bash
+# Create a focused epic (will reject if main lane is full)
+bunx @lythos/project-cortex epic "User auth system" --lane main
+
+# Override with reason (recorded in frontmatter)
+bunx @lythos/project-cortex epic "Hotfix login" --lane main --override "security incident"
+```
+
+Run `bunx @lythos/project-cortex probe` to check lane occupancy and catch drift.
+
 ## Skill Documentation
 
 This package is the **Starter** layer (CLI implementation).  
