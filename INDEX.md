@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/3 23:43:41
+> 自动生成于 2026/5/4 01:11:20
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 35 |
-| Epics | 8 | 活跃: 0, 已完成: 5, 悬置: 1, 已归档: 2 |
+| Tasks | 64 | 进行中: 0, 待验收: 1, 已完成: 35 |
+| Epics | 9 | 活跃: 1, 已完成: 5, 悬置: 1, 已归档: 2 |
 | ADRs | 35 | 已接受: 26 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260503234346583**: Verification coverage for deck — TDD unit + Agent BDD (leetcode-shape + LLM judge)
 
 ### 已完成
 
@@ -39,17 +39,24 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (8)
 
-_无_
+- [ ] **TASK-20260503235009959**: Reconciler core A: linkDeck empty deck and symlink creation
+- [ ] **TASK-20260503235011219**: Reconciler core B: linkDeck deny-by-default and alias collision
+- [ ] **TASK-20260503235012454**: Command layer A: validateDeck and addSkill tests
+- [ ] **TASK-20260503235013705**: Command layer B: removeSkill, refreshDeck, pruneDeck tests
+- [ ] **TASK-20260503235014489**: Coverage sweep: backfill edge cases to 80% coverage
+- [ ] **TASK-20260504004947351**: runClaudeAgent helper + checkpoint JSONL schema in bdd-runner
+- [ ] **TASK-20260504004954526**: First *.agent.md scenario — skills-introspection (Agent BDD tracer bullet)
+- [ ] **TASK-20260504005000534**: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260503235008935**: Tracer bullet: test findDeckToml, expandHome, findSource pure functions
 
 ### 已完成 (35)
 
@@ -153,7 +160,7 @@ _无_
 - ✅ **ADR-20260503170000000** (02-accepted): Monorepo Toolchain — Bun-only and Root Package.json Conventions
 - ✅ **ADR-20260503180000000** (02-accepted): Unit Test Framework Selection — Curator Mind Applied
 - ✅ **ADR-20260503222838594** (02-accepted): Kanban pull mode with CFD observability for agent-driven task management
-- 🤔 **ADR-20260503230522270** (01-proposed): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
+- ❌ **ADR-20260503230522270** (03-rejected): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
 
 ---
 

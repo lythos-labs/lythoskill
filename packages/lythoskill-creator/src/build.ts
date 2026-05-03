@@ -41,6 +41,10 @@ export async function build(skillName: string) {
     }
   } else {
     skillVersion = unifiedVersion
+    // Pure skills: still substitute template vars from root package.json
+    if (unifiedVersion) {
+      substituteVars(dest, { '{{PACKAGE_VERSION}}': unifiedVersion })
+    }
   }
 
   if (skillVersion) {

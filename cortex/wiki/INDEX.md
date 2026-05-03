@@ -29,8 +29,9 @@
 
 *No entries yet.*
 
-## 📖 Lessons (10)
+## 📖 Lessons (11)
 
+- **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)
 - **[2026-05-03]** [hermes-self-evolving-skill-field-notes](./03-lessons/2026-05-03-hermes-self-evolving-skill-field-notes.md)
 - **[2026-05-03]** [hermes-deck-future-proposals](./03-lessons/2026-05-03-hermes-deck-future-proposals.md)
 - **[2026-05-03]** [hermes-skill-governance-real-pain-points](./03-lessons/2026-05-03-hermes-skill-governance-real-pain-points.md)
