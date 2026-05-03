@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/4 01:11:20
+> 自动生成于 2026/5/4 01:19:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 64 | 进行中: 0, 待验收: 1, 已完成: 35 |
+| Tasks | 64 | 进行中: 0, 待验收: 0, 已完成: 36 |
 | Epics | 9 | 活跃: 1, 已完成: 5, 悬置: 1, 已归档: 2 |
 | ADRs | 35 | 已接受: 26 |
 
@@ -54,11 +54,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260503235008935**: Tracer bullet: test findDeckToml, expandHome, findSource pure functions
+_无_
 
-### 已完成 (35)
+### 已完成 (36)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -95,6 +95,7 @@ _无_
 - ✅ ~~TASK-20260503152006435~~: Add BDD scenarios for refactored deck CRUD
 - ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
 - ✅ ~~TASK-20260503154401905~~: Make README + CI surface red-green refactor + coverage visible
+- ✅ ~~TASK-20260503235008935~~: Tracer bullet: test findDeckToml, expandHome, findSource pure functions
 
 ### 悬置 (0)
 
