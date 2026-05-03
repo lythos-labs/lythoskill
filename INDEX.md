@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/3 13:47:49
+> 自动生成于 2026/5/3 13:51:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 45 | 进行中: 6, 待验收: 1, 已完成: 23 |
+| Tasks | 45 | 进行中: 4, 待验收: 1, 已完成: 25 |
 | Epics | 8 | 活跃: 2, 已完成: 3, 悬置: 1, 已归档: 2 |
 | ADRs | 30 | 已接受: 20 |
 
@@ -42,12 +42,10 @@
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 
-### 进行中 (6)
+### 进行中 (4)
 
 - 🔄 **TASK-20260430012458517**: Audit fix: add allowed-tools to release and scribe SKILL.md
 - 🔄 **TASK-20260430012459381**: Audit fix: review reference conditional trigger coverage across all skills
-- 🔄 **TASK-20260503132523380**: Move root package.json dependencies to individual packages
-- 🔄 **TASK-20260503132524022**: Unify lockfile and workspace config — Bun-only
 - 🔄 **TASK-20260503132524651**: Create root tsconfig.base.json and unify per-package tsconfig
 - 🔄 **TASK-20260503132525248**: Standardize package.json template across all publishable packages
 
@@ -55,7 +53,7 @@
 
 - 🔍 **TASK-20260423223542053**: Curator SQLite backend for skill metadata governance
 
-### 已完成 (23)
+### 已完成 (25)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -80,6 +78,8 @@
 - ✅ ~~TASK-20260503010230554~~: 实现 husky pre-commit 软提醒(in-progress 非空)
 - ✅ ~~TASK-20260503010231389~~: 三层文档镜像(AGENTS/CLAUDE/memory)+ cortex skill/README 同步
 - ✅ ~~TASK-20260503010231988~~: BDD 覆盖 cortex trailer + lane FSM(用 test-utils + subagent)
+- ✅ ~~TASK-20260503132523380~~: Move root package.json dependencies to individual packages
+- ✅ ~~TASK-20260503132524022~~: Unify lockfile and workspace config — Bun-only
 
 ### 悬置 (0)
 
