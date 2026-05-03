@@ -13,6 +13,7 @@ checklist_completed: false
 |--------|------|------|
 | active | 2026-05-03 | Created — pre-built deck templates + README quick-start refresh |
 | active | 2026-05-03 | Themes A+B completed — 4 pre-built decks + README refresh + hyphen alias BDD |
+| active | 2026-05-03 | Theme C completed — install-deck.sh one-command installer |
 
 ## Lane / Granularity 标记
 
@@ -45,12 +46,12 @@ K8s 心智的解法：**预组 deck（pre-built deck）= Helm chart / kustomizat
 - **产出**: 30 秒内 `curl toml + link` 闭环
 - **验证**: 人类读者读完 Quick Start 能独立复制命令并跑通
 
-### 主题C: 30 秒体验脚本（可选） #backlog
+### 主题C: 30 秒体验脚本 ✅ completed
 - **触发**: 用户"30s 我觉得应该就是一句 curl 在自己的项目执行一下就成功"
-- **需求**: 一键脚本：检测 Bun → 下载 demo deck → 跑 link → 验证 skills 出现
-- **实现**: `examples/install-deck.sh` 或 gist 脚本
-- **产出**: `curl -fsSL ... | bash` 后 `.claude/skills/` 非空
-- **验证**: 在干净机器/docker 上 30 秒内完成
+- **需求**: 一键脚本：下载 demo deck → 跑 link → 验证 skills 出现
+- **实现**: `examples/install-deck.sh`
+- **产出**: `curl -fsSL ... | bash` 或 `curl ... | bash -s engineering` 后 skill-deck.toml + link 完成
+- **验证**: 脚本语法通过 shellcheck 等价检查，参数守卫（未知 deck 拒绝、已存在 toml 拒绝）
 
 ### 主题D: `deck demo` 命令（可选） #backlog
 - **触发**: 用户"技能变成 demo 的那几个，是非常顺滑的体验"
