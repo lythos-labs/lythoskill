@@ -17,5 +17,5 @@ description: |
 ## Then
 
 - CLI exits non-zero
-- stderr contains "main lane is full" or similar
+- stderr contains "Cannot create another" or similar
 - No new epic file is created in `01-active/`

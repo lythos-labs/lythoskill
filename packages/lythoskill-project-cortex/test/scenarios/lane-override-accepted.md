@@ -17,5 +17,5 @@ description: |
 ## Then
 
 - CLI exits 0
-- New epic file exists in `01-active/`
+- New epic file exists in `cortex/epics/01-active/`
 - Frontmatter contains `lane_override_reason: "security incident"`
