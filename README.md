@@ -22,8 +22,11 @@
 When two conflicting skills are both visible to your agent, outputs become unpredictable. **lythoskill-deck** solves this with **deny-by-default**: undeclared skills are **physically absent** from `.claude/skills/`. Not "disabled". Not "deprioritized". **Gone.**
 
 ```toml
-[tool]
-skills = ["github.com/owner/repo"]
+[deck]
+max_cards = 10
+
+[tool.skills.my-skill]
+path = "github.com/owner/repo"
 ```
 
 Run `deck link` → only declared skills are visible. No silent blend. No chaos.
@@ -229,23 +232,35 @@ max_cards = 10
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
-[innate]
-skills = [
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
-]
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
-[tool]
-skills = [
-  "github.com/anthropics/skills/skills/pdf",
-  "github.com/anthropics/skills/skills/docx",
-  "github.com/mattpocock/skills/skills/engineering/to-prd",
-  "github.com/mattpocock/skills/skills/engineering/tdd",
-  "github.com/garrytan/gstack",
-  "github.com/SpillwaveSolutions/design-doc-mermaid",
-]
+[innate.skills.project-cortex]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
+
+[innate.skills.project-onboarding]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
+
+[innate.skills.project-scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+
+[tool.skills.to-prd]
+path = "github.com/mattpocock/skills/skills/engineering/to-prd"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.gstack]
+path = "github.com/garrytan/gstack"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
 EOF
 
 # 4. Sync the deck
@@ -473,10 +488,10 @@ BDD scenarios in this repo are **LLM-readable contracts** — Given/When/Then in
 
 Run everything locally:
 ```bash
-bun run test:all     # 12 cortex + 5 deck scenarios today
+bun run test:all     # 12 cortex + 20 deck scenarios
 ```
 
-Full scenario index, including the 9 planned for the deck 3-axis refactor (ADR-20260503152000411): [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
+Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
 
 ---
 
