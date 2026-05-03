@@ -1,7 +1,7 @@
 # TASK-20260503152001333: Adopt alias-as-key dict schema for skill entries
 
 ## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
+| terminated | 2026-05-03 | Superseded by alias-as-key dict schema (Decision D in ADR-20260503152000411) |<!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|

@@ -1,7 +1,7 @@
 # TASK-20260503154401905: Make README + CI surface red-green refactor + coverage visible
 
 ## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
+| completed | 2026-05-03 | Completed during deck 3-axis CRUD refactor |<!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
