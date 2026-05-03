@@ -21,6 +21,7 @@ export interface Scenario {
   given: {
     coldPool: Record<string, MockSkill>
     workingSet?: string[] // 预先放置的 skill 名（从 coldPool 复制）
+    preExistingDirs?: string[] // 预先在 working set 创建的真目录（vendor tree 等）
     deck: {
       max_cards?: number
       cold_pool?: string
@@ -161,6 +162,14 @@ function setupWorkdir(scenario: Scenario, workdir: string): void {
       if (existsSync(join(cpDir, name))) {
         symlinkSync(join(cpDir, name), join(wsDir, name))
       }
+    }
+  }
+
+  // 在 working set 预先创建真目录（vendor tree 等）
+  if (scenario.given.preExistingDirs?.length) {
+    mkdirSync(wsDir, { recursive: true })
+    for (const dir of scenario.given.preExistingDirs) {
+      mkdirSync(join(wsDir, dir), { recursive: true })
     }
   }
 

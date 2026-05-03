@@ -225,6 +225,21 @@ for (const [key, value] of Object.entries(parsedToml.transient || {})) {
   declared.push({ name: key, alias: key, type: "transient", sourcePath: src, expires: t.expires });
 }
 
+// ── 跨 type alias collision 检测 ──────────────────────────────
+const aliasToTypes = new Map<string, string[]>();
+for (const d of declared) {
+  const types = aliasToTypes.get(d.alias) || [];
+  types.push(d.type);
+  aliasToTypes.set(d.alias, types);
+}
+for (const [alias, types] of aliasToTypes) {
+  if (types.length > 1) {
+    errors.push(
+      `Alias collision: "${alias}" appears in [${types.join('], [')}]. Use --as to specify different aliases.`
+    );
+  }
+}
+
 if (errors.length > 0) {
   for (const e of errors) {
     console.error(`❌ ${e}`);
@@ -245,6 +260,12 @@ if (errors.length > 0) {
     }
   }
   // 继续执行已找到的 skill，不因个别缺失中断全部
+
+  // fatal errors: alias collision must block
+  const fatalErrors = errors.filter(e => e.includes('Alias collision'));
+  if (fatalErrors.length > 0) {
+    process.exit(1);
+  }
 
   // 引导：如果 cold pool 为空，给出更明确的指引
   const hasSkills = existsSync(COLD_POOL) && readdirSync(COLD_POOL).filter(e => !e.startsWith('.')).length > 0;
@@ -408,7 +429,8 @@ for (const item of declared) {
     : relative(COLD_POOL, item.sourcePath);
 
   linkedSkills.push({
-    name: item.alias,
+    name: item.name,
+    alias: item.alias,
     deck_niche: niche,
     type: item.type,
     source: sourceRel,

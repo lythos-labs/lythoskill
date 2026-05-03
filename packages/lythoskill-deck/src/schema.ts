@@ -3,6 +3,7 @@ import { z } from "zod";
 // ── 单个已链接 Skill ────────────────────────────────────────
 export const LinkedSkillSchema = z.object({
   name: z.string(),
+  alias: z.string(),
   deck_niche: z.string(),
   type: z.enum(["innate", "tool", "combo", "transient"]),
   source: z.string(),

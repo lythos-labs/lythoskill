@@ -14,10 +14,12 @@ ADR-20260503152000411 钉死 `deck link` 的契约:**纯 idempotent reconciler**
 需要兼容当前项目里残留的 deep vendor 树(`.claude/skills/github.com/<owner>/<repo>/skills/<name>/`),link 一跑应被识别为非 symlink 实体,backup 到 `.claude/skills.bak.<ts>.tar.gz` 后移除,然后 materialize 出 flat symlink。
 
 ## 需求详情
-- [ ] resolver:对每条 entry 计算 (cold-pool 物理路径, 解析 alias)
-  - alias = explicit `as` 字段 或 `basename(path)` 默认
+- [ ] resolver:对每条 entry 计算 (cold-pool 物理路径, alias)
+  - alias = dict key(显式);path = body 中的 `path` 字段
+  - 旧格式兼容:alias = `basename(path)`
 - [ ] collision detection:跨 type(innate + tool + combo + transient)合并所有 alias,同名 = 报错
-  - 错误信息列出冲突条目的 `path` 和当前 alias,建议加 `as`
+  - 同 type 内已由 TOML parser 兜底;跨 type 由 deck CLI 校验
+  - 错误信息列出冲突条目的 `path` 和当前 alias,建议用 `--as` 指定不同 alias
 - [ ] working-set materializer:`.claude/skills/<alias>/` 创建 symlink → cold-pool 路径
 - [ ] 顶层非 symlink 实体(目录、普通文件)→ 备份 + 移除(沿用现有 backup 逻辑)
   - 包括当前残留的 `github.com/` 真目录
