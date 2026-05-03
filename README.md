@@ -91,6 +91,33 @@ ls .claude/skills/
 
 That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
 
+### Or start with a pre-built deck
+
+Not sure which skills to pick? Copy a scenario-tuned deck and link:
+
+```bash
+# Document processing: PDF + DOCX + web search
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+
+# Engineering workflow: TDD + PRD + architecture diagrams
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/engineering.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+
+# Full-stack development: React + patterns + TDD + docs
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/full-stack.toml > skill-deck.toml
+bunx @lythos/skill-deck link
+```
+
+| Deck | Skills | Scene |
+|------|--------|-------|
+| [documents](./examples/decks/documents.toml) | PDF, DOCX, web-search | Document processing |
+| [engineering](./examples/decks/engineering.toml) | TDD, to-PRD, design-doc-mermaid | Engineering workflow |
+| [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | Full-stack development |
+| [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | Project governance |
+
+> `link` only activates skills already in your cold pool. Missing skills report "Skill not found" — add them with `deck add <path>` or clone manually.
+
 For monorepo skills (multiple skills in one repo), include the full path:
 
 ```bash
@@ -488,7 +515,7 @@ BDD scenarios in this repo are **LLM-readable contracts** — Given/When/Then in
 
 Run everything locally:
 ```bash
-bun run test:all     # 12 cortex + 20 deck scenarios
+bun run test:all     # 12 cortex + 21 deck scenarios
 ```
 
 Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
