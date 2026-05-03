@@ -4,31 +4,27 @@
   "workspaces": {
     "": {
       "name": "lythoskill-workspace",
-      "dependencies": {
-        "@iarna/toml": "^2.2.5",
-        "zod": "^4.3.6",
-      },
       "devDependencies": {
         "husky": "^9.1.7",
       },
     },
     "packages/lythoskill-arena": {
       "name": "@lythos/skill-arena",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-arena": "src/cli.ts",
       },
     },
     "packages/lythoskill-creator": {
       "name": "@lythos/skill-creator",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-curator": {
       "name": "@lythos/skill-curator",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-curator": "src/cli.ts",
       },
@@ -38,7 +34,7 @@
     },
     "packages/lythoskill-deck": {
       "name": "@lythos/skill-deck",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-deck": "src/cli.ts",
       },
@@ -50,17 +46,21 @@
     },
     "packages/lythoskill-hello-world": {
       "name": "@lythos/hello-world",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-hello-world": "src/cli.ts",
       },
     },
     "packages/lythoskill-project-cortex": {
       "name": "@lythos/project-cortex",
-      "version": "0.3.0",
+      "version": "0.8.0",
       "bin": {
         "lythoskill-project-cortex": "./src/cli.ts",
       },
+    },
+    "packages/lythoskill-test-utils": {
+      "name": "@lythos/test-utils",
+      "version": "0.8.0",
     },
   },
   "packages": {
@@ -77,6 +77,8 @@
     "@lythos/skill-curator": ["@lythos/skill-curator@workspace:packages/lythoskill-curator"],
 
     "@lythos/skill-deck": ["@lythos/skill-deck@workspace:packages/lythoskill-deck"],
+
+    "@lythos/test-utils": ["@lythos/test-utils@workspace:packages/lythoskill-test-utils"],
 
     "husky": ["husky@9.1.7", "", { "bin": { "husky": "bin.js" } }, "sha512-5gs5ytaNjBrh5Ow3zrvdUUY+0VxIuWVL4i9irt6friV+BqdCfmV11CQTWMiBYWHbXhco+J1kHfTOUkePhCDvMA=="],
 

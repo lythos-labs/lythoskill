@@ -105,16 +105,20 @@ function checkMatch(expectedKey: string, lastHistory: string | null): { match: P
   }
 
   const normalized = lastHistory.toLowerCase();
-  const expected = expectedKey.toLowerCase().replace(/-/g, ' ');
+  // 把 camelCase key 转为 kebab-case（inProgress → in-progress）
+  const expectedKebab = expectedKey
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
+  const expected = expectedKebab.replace(/-/g, ' ');
 
-  // 直接包含期望状态
-  if (normalized.includes(expected)) {
+  // 直接包含期望状态（支持 in-progress 匹配 in progress 或 in-progress）
+  if (normalized.includes(expected) || normalized.includes(expectedKebab)) {
     return { match: 'ok', suggestion: '' };
   }
 
   // 初始状态允许 "Created"
   const initialStates = ['backlog', 'active', 'proposed'];
-  if (initialStates.includes(expectedKey) && normalized.includes('created')) {
+  if (initialStates.includes(expectedKebab) && normalized.includes('created')) {
     return { match: 'ok', suggestion: '' };
   }
 
@@ -124,7 +128,7 @@ function checkMatch(expectedKey: string, lastHistory: string | null): { match: P
     'terminated', 'archived', 'active', 'done', 'proposed', 'accepted', 'rejected', 'superseded',
   ];
   const detectedOther = statusKeywords.filter(
-    s => s !== expected && normalized.includes(s)
+    s => s !== expected && s !== expectedKebab && normalized.includes(s)
   );
 
   if (detectedOther.length > 0) {

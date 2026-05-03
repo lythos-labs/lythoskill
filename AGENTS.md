@@ -29,7 +29,7 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 | Runtime | **Bun** (native TypeScript, no compilation step) |
 | Language | **TypeScript** |
 | Module System | **ESM-only** (`"type": "module"`) |
-| Package Manager | **pnpm** workspaces |
+| Package Manager | **Bun** workspaces (`workspaces` in root `package.json`) |
 | Skill-layer dependencies | **Zero-perceived** — consumers call via `bunx` (Bun runtime required), no local install |
 | Starter-layer dependencies | Normal npm dependency management (e.g. `@iarna/toml`, `zod`), resolved by package manager |
 
@@ -45,7 +45,7 @@ Key config:
 ```
 lythoskill/
 ├── package.json              # Root workspace config (private: true)
-├── pnpm-workspace.yaml       # pnpm workspace: packages/*
+├── bun.lock                  # Bun lockfile (single source of truth)
 ├── AGENTS.md                 # This file — SSOT for all agents
 │
 ├── packages/

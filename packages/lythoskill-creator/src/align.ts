@@ -1,6 +1,7 @@
 import {
   existsSync, readFileSync, statSync, readdirSync,
   writeFileSync, appendFileSync, mkdirSync, chmodSync,
+  unlinkSync,
 } from 'node:fs'
 import { join } from 'node:path'
 import { findProjectRoot } from './util.js'
@@ -25,6 +26,8 @@ export async function align(fix: boolean) {
 
   const checks: Check[] = [
     ...checkRootPackageJson(root),
+    ...checkRootRuntimeDeps(root),
+    ...checkPnpmResiduals(root),
     ...checkGitignore(root),
     ...checkHusky(root),
     ...checkPackages(root),
@@ -114,6 +117,59 @@ function checkRootPackageJson(root: string): Check[] {
       },
     },
   ]
+}
+
+// ── Root runtime dependencies check ────────────────────────
+function checkRootRuntimeDeps(root: string): Check[] {
+  const path = join(root, 'package.json')
+  if (!existsSync(path)) return []
+
+  let pkg: Record<string, unknown>
+  try {
+    pkg = JSON.parse(readFileSync(path, 'utf-8'))
+  } catch {
+    return []
+  }
+
+  const deps = (pkg.dependencies ?? {}) as Record<string, string>
+  const depNames = Object.keys(deps)
+
+  if (depNames.length === 0) {
+    return [{ pass: true, label: 'Root package.json has no runtime dependencies' }]
+  }
+
+  return [
+    {
+      pass: false,
+      label: `Root package.json has runtime dependencies: ${depNames.join(', ')} (should be in leaf packages)`,
+      fix: () => {
+        const p = JSON.parse(readFileSync(path, 'utf-8'))
+        delete p.dependencies
+        writeJson(path, p)
+      },
+    },
+  ]
+}
+
+// ── pnpm residual files check ──────────────────────────────
+function checkPnpmResiduals(root: string): Check[] {
+  const files = ['pnpm-lock.yaml', 'pnpm-workspace.yaml']
+  const checks: Check[] = []
+
+  for (const file of files) {
+    const fullPath = join(root, file)
+    checks.push({
+      pass: !existsSync(fullPath),
+      label: `No residual pnpm file: ${file}`,
+      fix: () => {
+        if (existsSync(fullPath)) {
+          unlinkSync(fullPath)
+        }
+      },
+    })
+  }
+
+  return checks
 }
 
 // ── .gitignore checks ──────────────────────────────────────
@@ -274,12 +330,15 @@ function checkPackages(root: string): Check[] {
       }
     }
 
-    // skills/ build output exists
-    const builtSkillPath = join(root, 'skills', name, 'SKILL.md')
-    checks.push({
-      pass: existsSync(builtSkillPath),
-      label: `skills/${name}/SKILL.md exists (built output)`,
-    })
+    // skills/ build output exists (only for packages that have skill/ source)
+    const skillSourcePath = join(pkgDir, 'skill')
+    if (existsSync(skillSourcePath)) {
+      const builtSkillPath = join(root, 'skills', name, 'SKILL.md')
+      checks.push({
+        pass: existsSync(builtSkillPath),
+        label: `skills/${name}/SKILL.md exists (built output)`,
+      })
+    }
   }
 
   return checks

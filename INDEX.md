@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/3 13:29:02
+> 自动生成于 2026/5/3 13:47:49
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 45 | 进行中: 6, 待验收: 1, 已完成: 23 |
-| Epics | 8 | 活跃: 4, 已完成: 3, 悬置: 0, 已归档: 1 |
+| Epics | 8 | 活跃: 2, 已完成: 3, 悬置: 1, 已归档: 2 |
 | ADRs | 30 | 已接受: 20 |
 
 ---
@@ -16,8 +16,6 @@
 
 ### 进行中
 
-- **EPIC-20260423185732845**: Playground Epic
-- **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
 - **EPIC-20260430011158241**: Monorepo tooling consistency and config debt cleanup
 - **EPIC-20260430012504755**: Skill progressive disclosure and quality audit
 
@@ -29,11 +27,12 @@
 
 ### 悬置
 
-_无_
+- ⏸️ **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
 
 ### 已归档
 
 - ~~EPIC-20260423102000000~~: lythoskill MVP — Initial Release
+- ~~EPIC-20260423185732845~~: Playground Epic
 
 ---
 

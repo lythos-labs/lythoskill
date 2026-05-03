@@ -13,6 +13,7 @@ checklist_skipped_reason: backfilled pre-ADR-20260503003315478
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-04-29 | Created from ADR-20260424115621494 |
+| suspended | 2026-05-03 | Suspended |
 
 ## 背景故事
 
