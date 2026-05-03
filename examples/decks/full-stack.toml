@@ -11,7 +11,7 @@ path = "github.com/vercel-labs/agent-skills/skills/composition-patterns"
 role = "Component composition and architecture"
 
 [tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
+path = "github.com/mattpocock/skills/tdd"
 role = "Vertical-slice red-green-refactor discipline"
 
 [tool.skills.pdf]
