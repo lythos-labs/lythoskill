@@ -23,6 +23,15 @@ dist/
 .github-token
 
 playground/
+# Exception: track the leetcode-style Agent BDD harness as a deliverable
+# (per ADR-20260503230522270). Existing playground/agent-bdd/scenarios/
+# remains local scratch and stays ignored.
+!playground/
+playground/*
+!playground/agent-bdd/
+playground/agent-bdd/*
+!playground/agent-bdd/leetcode/
+!playground/agent-bdd/leetcode/**
 .claude/
 
 # Private operational docs (local-only, never commit)

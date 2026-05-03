@@ -18,7 +18,25 @@ if [ -n "$STAGED" ]; then
   echo "✅ Skills rebuilt and staged"
 fi
 
-# 3. Soft reminder for in-progress tasks (no blocker)
+# 3. Epic-ADR coupling guard: auto-accept ADR when its epic is staged
+STAGED_EPICS=$(git diff --cached --name-only --diff-filter=A | grep '^cortex/epics/01-active/EPIC-' || true)
+if [ -n "$STAGED_EPICS" ]; then
+  for epic_file in $STAGED_EPICS; do
+    epic_id=$(basename "$epic_file" | sed -E 's/^(EPIC-[0-9]+)-.*/\1/')
+    for adr_file in cortex/adr/01-proposed/ADR-*.md; do
+      [ -f "$adr_file" ] || continue
+      if grep -q "Epic: $epic_id" "$adr_file"; then
+        adr_id=$(basename "$adr_file" | sed -E 's/^(ADR-[0-9]+)-.*/\1/')
+        echo "🔗 Auto-accepting $adr_id (linked to $epic_id)"
+        bun packages/lythoskill-project-cortex/src/cli.ts adr accept "$adr_id"
+      fi
+    done
+  done
+  # Stage any ADR moves produced by the accept commands
+  git add cortex/adr/ cortex/INDEX.md cortex/wiki/INDEX.md 2>/dev/null
+fi
+
+# 4. Soft reminder for in-progress tasks (no blocker)
 IN_PROGRESS_DIR="cortex/tasks/02-in-progress"
 count=0
 ids=""

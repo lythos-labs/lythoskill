@@ -1,7 +1,11 @@
-# ADR-20260501: Desc Preference Learning via Arena Monte Carlo
+# ADR-202605011600: Desc Preference Learning via Arena Monte Carlo
 
-## Status
-proposed
+## Status History
+<!-- machine-parseable table: directory = current status, last row = latest record -->
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-01 | Created — pending implementation |
 
 ## Context
 

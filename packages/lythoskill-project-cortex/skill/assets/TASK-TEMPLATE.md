@@ -1,5 +1,8 @@
 # TASK-XXX: Task Title
 
+> **Self-contained subagent bootloader**: A subagent with only AGENTS.md + this card should be able to implement the work without asking for clarification.  
+> **Pass by reference, not by value**: Don't copy encyclopedic content into this card. Provide precise pointers (file paths, ADR links, epic context, docs) so the reader can navigate to the source of truth. The card is a map, not a warehouse.
+
 ## Status History
 <!-- 仅人工记录，不用于机器解析。目录位置即当前状态 -->
 - Created: YYYY-MM-DDTHH:MM:SSZ

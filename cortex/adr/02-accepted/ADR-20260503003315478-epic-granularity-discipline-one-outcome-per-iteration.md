@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-03 | Created — couples with ADR-20260503003314901 to make epics actually closable |
+| accepted | 2026-05-03 | Accepted |
 
 ## 背景
 

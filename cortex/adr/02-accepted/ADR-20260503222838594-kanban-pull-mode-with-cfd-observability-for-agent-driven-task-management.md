@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-03 | Created — backlog emptied, perfect timing to establish flow discipline |
+| accepted | 2026-05-03 | Accepted |
 
 ## 背景
 

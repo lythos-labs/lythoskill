@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/3 21:47:13
+> 自动生成于 2026/5/3 23:43:41
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 32 |
+| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 35 |
 | Epics | 8 | 活跃: 0, 已完成: 5, 悬置: 1, 已归档: 2 |
-| ADRs | 33 | 已接受: 20 |
+| ADRs | 35 | 已接受: 26 |
 
 ---
 
@@ -39,12 +39,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (0)
 
-- [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
-- [ ] **TASK-20260503152001333**: Adopt alias-as-key dict schema for skill entries
-- [ ] **TASK-20260503152002342**: Implement alias resolution and collision detection in deck link
-- [ ] **TASK-20260503154401905**: Make README + CI surface red-green refactor + coverage visible
+_无_
 
 ### 进行中 (0)
 
@@ -54,9 +51,10 @@ _无_
 
 _无_
 
-### 已完成 (32)
+### 已完成 (35)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
+- ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
 - ✅ ~~TASK-20260423223542053~~: Curator SQLite backend for skill metadata governance
 - ✅ ~~TASK-20260424115734221~~: Red-green-release 在 README/CLAUDE.md 中补全文档
@@ -83,17 +81,19 @@ _无_
 - ✅ ~~TASK-20260503132523380~~: Move root package.json dependencies to individual packages
 - ✅ ~~TASK-20260503132524022~~: Unify lockfile and workspace config — Bun-only
 - ✅ ~~TASK-20260503132525248~~: Standardize package.json template across all publishable packages
+- ✅ ~~TASK-20260503152002342~~: Implement alias resolution and collision detection in deck link
 - ✅ ~~TASK-20260503152003393~~: Make deck add write FQ paths with optional as-alias
 - ✅ ~~TASK-20260503152004433~~: Rename deck update to refresh and add per-skill arg
 - ✅ ~~TASK-20260503152005415~~: Add deck remove and deck prune commands
 - ✅ ~~TASK-20260503152006435~~: Add BDD scenarios for refactored deck CRUD
 - ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
+- ✅ ~~TASK-20260503154401905~~: Make README + CI surface red-green refactor + coverage visible
 
 ### 悬置 (0)
 
 _无_
 
-### 终止 (18)
+### 终止 (19)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -113,6 +113,7 @@ _无_
 - 🛑 ~~TASK-20260503132524651~~: Create root tsconfig.base.json and unify per-package tsconfig
 - 🛑 ~~TASK-20260503135205264~~: terminate
 - 🛑 ~~TASK-20260503135212184~~: --help
+- 🛑 ~~TASK-20260503152001333~~: Adopt alias-as-key dict schema for skill entries
 
 ---
 
@@ -146,11 +147,13 @@ _无_
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
-- 🤔 **ADR-20260503003314901** (01-proposed): git-coupling for cortex governance documents via commit trailer
-- 🤔 **ADR-20260503003315478** (01-proposed): epic granularity discipline — one outcome per iteration
-- 🤔 **ADR-20260503152000411** (01-proposed): deck 3-axis CRUD model with as-alias schema for working-set collisions
-- 🤔 **ADR-20260503170000000** (01-proposed): Monorepo Toolchain — Bun-only and Root Package.json Conventions
-- 🤔 **ADR-20260503180000000** (01-proposed): Unit Test Framework Selection — Curator Mind Applied
+- ✅ **ADR-20260503003314901** (02-accepted): git-coupling for cortex governance documents via commit trailer
+- ✅ **ADR-20260503003315478** (02-accepted): epic granularity discipline — one outcome per iteration
+- ✅ **ADR-20260503152000411** (02-accepted): deck 3-axis CRUD model with as-alias schema for working-set collisions
+- ✅ **ADR-20260503170000000** (02-accepted): Monorepo Toolchain — Bun-only and Root Package.json Conventions
+- ✅ **ADR-20260503180000000** (02-accepted): Unit Test Framework Selection — Curator Mind Applied
+- ✅ **ADR-20260503222838594** (02-accepted): Kanban pull mode with CFD observability for agent-driven task management
+- 🤔 **ADR-20260503230522270** (01-proposed): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
 
 ---
 

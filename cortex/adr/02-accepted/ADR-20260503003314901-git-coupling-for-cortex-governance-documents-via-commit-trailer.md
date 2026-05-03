@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-03 | Created — couples cortex FSM transitions to commit messages |
+| accepted | 2026-05-03 | Accepted |
 
 ## 背景
 

@@ -11,6 +11,7 @@ author: agent-swarm
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-03 | Created |
+| accepted | 2026-05-03 | Accepted |
 
 ## Context
 

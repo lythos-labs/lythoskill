@@ -20,15 +20,23 @@ allowed-tools:
 # Project Cortex: ADR + Epic + Task + Wiki
 > Automation over memory. Use CLI for IDs and templates. Use index for discovery.
 ## Three Systems
+
 ```
 Epic (WHY)          ADR (HOW)           Task (WHAT)
 requirement origin  technical decision  executable work
 derives tasks       guides tasks        links to epic/adr
 ```
 
-Epics track why a feature exists. ADRs track how technical decisions were made.
-Tasks track what specific work to do. Wiki captures reusable knowledge after
-tasks succeed.
+**OS analogy**: Think of the governance system like an operating memory model.
+
+| Component | OS Analogy | Role |
+|-----------|-----------|------|
+| **Epic** | Memory segment (heap) | Stores the full context — background, requirement tree, zoom-in map. **Workflowy-style**, not a todo list. |
+| **ADR** | Code segment (text) | Stores ratified decisions — options considered, consequences, follow-ups. Immutable once accepted. |
+| **Wiki** | Shared library | Reusable knowledge extracted after tasks complete. Patterns, FAQs, lessons. |
+| **Task** | **Pointer / Reference** | A task card is a `pointer` to epic/adr context plus executable instructions. It does **not** inline the full epic or ADR body — that would be "pass by value" and create drift. |
+
+**Pass by reference, not by value**: A task card should contain precise pointers (`Refs: EPIC-xxx`, `See ADR-yyy §Decision`, `Modify: src/path.ts`) so a subagent can navigate to source of truth. The card is a **map**, not a warehouse. A new team member reading only AGENTS.md + the task card should be able to find everything needed without asking for clarification.
 
 ## CLI Commands
 ```bash
@@ -273,6 +281,28 @@ The post-commit hook auto-dispatches to `cortex` CLI and creates a follow-up com
 - **5-question checklist** at creation: outcome clear? / closable in 1-3 weeks? / fits 1-3 week size? / not a task? / not an ADR?
 - Lane-full = rejection unless `--override "<reason>"` is provided.
 - `cortex probe` warns when >1 active epic per lane.
+
+## Epic-ADR Coupling
+
+When an epic is created to implement a proposed ADR, **accept the ADR immediately**.  
+An epic in `01-active/` means the decision is ratified and work is underway — a proposed ADR must not lag behind its implementation epic.
+
+**Let pre-commit handle it.** The `.husky/pre-commit` hook scans staged epic files in `cortex/epics/01-active/`. If an epic's corresponding ADR is still in `01-proposed/` (detected via the ADR's `Related → Epic:` field), the hook **auto-accepts** the ADR and stages the move — before the commit even finishes.
+
+```bash
+# 1. Create the epic (generates the file)
+bunx @lythos/project-cortex epic "Implement kanban flow" --lane main
+
+# 2. Commit the epic — pre-commit auto-accepts the linked ADR
+#    (ADR must reference the epic in its ## Related section: "Epic: EPIC-xxx")
+git add cortex/epics/01-active/EPIC-xxx-Implement-kanban-flow.md
+git commit -m "epic(kanban): start kanban flow implementation"
+# ↑ pre-commit auto-runs: cortex adr accept ADR-yyy
+```
+
+**Probe also guards this**: `cortex probe` reports any proposed ADR that references an active epic as an **ADR-Epic coupling warning** — a proposed ADR should not reference an epic that is already underway.
+
+**Why this matters**: Agents frequently forget to `adr accept` after creating an epic. By making the accept **pre-commit automated** (plus probe as a read-only safety net), the ADR state stays in sync with the epic lifecycle without relying on working memory.
 
 ## Git Integration (Critical)
 Commits **must** include task ID in the message title:

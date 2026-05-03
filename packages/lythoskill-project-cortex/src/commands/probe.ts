@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { basename, join, relative } from 'node:path';
 import type { WorkflowConfig } from '../types.js';
 import { listActiveEpics, countByLane } from '../lib/lane.js';
 
@@ -255,10 +255,32 @@ export function probeStatus(config: WorkflowConfig): void {
     console.log(`     ⚠️  ${w}`);
   }
 
+  // --- ADR-Epic coupling check ---
+  // If a proposed ADR references an epic in its Related section, it should be accepted.
+  const couplingWarnings: string[] = [];
+  const proposedAdrFiles = scanDir(join(config.adrDir, config.adrSubdirs.proposed), 'ADR-');
+
+  for (const adrFile of proposedAdrFiles) {
+    const content = readFileSync(adrFile, 'utf-8');
+    const epicMatch = content.match(/##\s+Related\s*\n[\s\S]*?Epic:\s*(EPIC-\d+)/i);
+    if (epicMatch) {
+      const epicId = epicMatch[1];
+      const adrId = basename(adrFile).replace(/^(ADR-\d+)-.*/, '$1');
+      couplingWarnings.push(`${adrId} references ${epicId} but is still proposed → run 'cortex adr accept ${adrId}'`);
+    }
+  }
+
+  if (couplingWarnings.length > 0) {
+    console.log('\n🔗 ADR-Epic coupling:');
+    for (const w of couplingWarnings) {
+      console.log(`     ⚠️  ${w}`);
+    }
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0) {
     console.log('✅ All clear! No inconsistencies found.');
   } else {
     if (allIssues.length > 0) {
@@ -266,6 +288,9 @@ export function probeStatus(config: WorkflowConfig): void {
       console.log('   Please review the items above and decide:');
       console.log('   - Move file to correct directory, OR');
       console.log('   - Update Status History inside the file.');
+    }
+    if (couplingWarnings.length > 0) {
+      console.log(`⚠️  Found ${couplingWarnings.length} ADR-Epic coupling warning(s) — proposed ADRs should not reference active epics.`);
     }
     if (laneWarnings.length > 0) {
       console.log(`⚠️  Found ${laneWarnings.length} lane warning(s) — see "Epic lanes" section above.`);

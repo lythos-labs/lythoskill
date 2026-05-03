@@ -16,6 +16,7 @@ Commands:
   index wiki            Generate wiki/INDEX.md only
   wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
+  flow                  Show kanban CFD — count, avg age, WIP limits
 
 Task state machine:
   start <task-id>       Move task to in-progress
