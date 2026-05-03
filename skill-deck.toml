@@ -3,20 +3,29 @@ max_cards = 10
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
-[innate]
-skills = [
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-]
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
-[tool]
-skills = [
-  "github.com/mattpocock/skills/tdd",
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/tdd"
 
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
-  "github.com/lythos-labs/lythoskill/skills/lythoskill-creator",
-]
+[tool.skills.lythoskill-project-cortex]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
+
+[tool.skills.lythoskill-arena]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-arena"
+
+[tool.skills.lythoskill-curator]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-curator"
+
+[tool.skills.lythoskill-project-scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
+
+[tool.skills.lythoskill-project-onboarding]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
+
+[tool.skills.lythoskill-coach]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-coach"
+
+[tool.skills.lythoskill-creator]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-creator"
