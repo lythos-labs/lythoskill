@@ -41,7 +41,7 @@ Wired into [`.github/workflows/test.yml`](../../.github/workflows/test.yml) via 
 
 These cover the cortex FSM edges — task / epic / ADR transitions, trailer dispatch, lane discipline.
 
-### `@lythos/skill-deck` — 5 scenarios
+### `@lythos/skill-deck` — 11 scenarios
 
 `packages/lythoskill-deck/test/scenarios/*.ts` (TypeScript scenario objects, not Markdown — older shape; both forms drive the same runner.)
 
@@ -52,8 +52,14 @@ These cover the cortex FSM edges — task / epic / ADR transitions, trailer disp
 | [`budget-rejection.ts`](../lythoskill-deck/test/scenarios/budget-rejection.ts) | budget rejection when exceeding `max_cards` |
 | [`deny-by-default.ts`](../lythoskill-deck/test/scenarios/deny-by-default.ts) | deny-by-default removes undeclared skills |
 | [`workdir-override.ts`](../lythoskill-deck/test/scenarios/workdir-override.ts) | workdir override anchors `working_set` to specified directory |
+| [`parse-old-string-array.ts`](../lythoskill-deck/test/scenarios/parse-old-string-array.ts) | old string-array deck still links with deprecation warning |
+| [`parse-new-alias-dict.ts`](../lythoskill-deck/test/scenarios/parse-new-alias-dict.ts) | new alias-dict deck links correctly |
+| [`parse-mixed.ts`](../lythoskill-deck/test/scenarios/parse-mixed.ts) | mixed old+new deck links with deprecation on old section |
+| [`migrate-schema-dry-run.ts`](../lythoskill-deck/test/scenarios/migrate-schema-dry-run.ts) | migrate-schema dry-run does not modify file |
+| [`migrate-schema-converts.ts`](../lythoskill-deck/test/scenarios/migrate-schema-converts.ts) | migrate-schema converts old deck and link no longer warns |
+| [`migrate-schema-noop.ts`](../lythoskill-deck/test/scenarios/migrate-schema-noop.ts) | migrate-schema no-op on already-converted deck |
 
-These cover the original `deck link` reconciler. The 3-axis CRUD refactor (see below) will add 9 more.
+These cover the original `deck link` reconciler (5) + schema parser + migrate-schema from the 3-axis CRUD refactor (6).
 
 ---
 
@@ -120,4 +126,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **17 CLI integration scenarios in CI · 0 agent BDD in CI · 9 planned for deck refactor**.
+Current totals: **23 CLI integration scenarios in CI · 0 agent BDD in CI · 6 planned for remaining deck refactor**.

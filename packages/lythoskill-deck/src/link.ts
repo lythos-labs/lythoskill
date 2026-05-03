@@ -21,6 +21,7 @@ import {
   SkillDeckLockSchema,
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,
 } from "./schema.js";
+import { parseDeck } from "./parse-deck.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
 
@@ -173,44 +174,47 @@ if (!existsSync(DECK_PATH)) {
 const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
 const deckRaw = readFileSync(DECK_PATH, "utf-8");
 const deckHash = hashContent(deckRaw);
-const deck = parseToml(deckRaw) as any;
 
-const WORKING_SET_RAW = deck.deck?.working_set || ".claude/skills";
-const COLD_POOL_RAW = deck.deck?.cold_pool || "~/.agents/skill-repos";
+const { entries: parsedEntries, deprecated: isDeprecated, errors: parseErrors } = parseDeck(deckRaw);
+if (isDeprecated) {
+  console.warn("⚠️  Deprecation: string-array skill entries are deprecated. Run `deck migrate-schema` to upgrade.");
+}
+
+const parsedToml = parseToml(deckRaw) as any;
+const WORKING_SET_RAW = parsedToml.deck?.working_set || ".claude/skills";
+const COLD_POOL_RAW = parsedToml.deck?.cold_pool || "~/.agents/skill-repos";
 const WORKING_SET = expandHome(WORKING_SET_RAW, PROJECT_DIR);
 const COLD_POOL = expandHome(COLD_POOL_RAW, PROJECT_DIR);
-const MAX_CARDS = Number(deck.deck?.max_cards || 10);
+const MAX_CARDS = Number(parsedToml.deck?.max_cards || 10);
 
 // ── 收集声明 ────────────────────────────────────────────────
 
 interface DeclaredSkill {
-  name: string;
+  name: string;        // original path/name (for lock.source backward-compat)
+  alias: string;       // working-set flat symlink name
   type: "innate" | "tool" | "combo" | "transient";
   sourcePath: string;
   expires?: string;
 }
 
 const declared: DeclaredSkill[] = [];
-const errors: string[] = [];
+const errors: string[] = [...parseErrors];
 
-for (const section of ["innate", "tool", "combo"] as const) {
-  for (const name of (deck[section]?.skills || [])) {
-    if (!name || typeof name !== "string") continue;
-    const result = findSource(name, COLD_POOL, PROJECT_DIR);
-    if (result.error) {
-      errors.push(result.error);
-      continue;
-    }
-    if (!result.path) {
-      errors.push(`Skill not found: ${name}`);
-      continue;
-    }
-    declared.push({ name, type: section, sourcePath: result.path });
+for (const entry of parsedEntries) {
+  const result = findSource(entry.path, COLD_POOL, PROJECT_DIR);
+  if (result.error) {
+    errors.push(result.error);
+    continue;
   }
+  if (!result.path) {
+    errors.push(`Skill not found: ${entry.path}`);
+    continue;
+  }
+  declared.push({ name: entry.path, alias: entry.alias, type: entry.type, sourcePath: result.path });
 }
 
-// transient: sub-tables with path field
-for (const [key, value] of Object.entries(deck.transient || {})) {
+// transient: sub-tables with path field (kept backward-compat; future ADR may unify)
+for (const [key, value] of Object.entries(parsedToml.transient || {})) {
   const t = value as any;
   if (!t?.path) continue;
   const src = resolve(PROJECT_DIR, t.path);
@@ -218,7 +222,7 @@ for (const [key, value] of Object.entries(deck.transient || {})) {
     errors.push(`Transient path does not exist: ${key} → ${src}`);
     continue;
   }
-  declared.push({ name: key, type: "transient", sourcePath: src, expires: t.expires });
+  declared.push({ name: key, alias: key, type: "transient", sourcePath: src, expires: t.expires });
 }
 
 if (errors.length > 0) {
@@ -348,7 +352,7 @@ if (nonSymlinks.length > 0) {
 }
 
 // 清理未声明的 symlink
-const declaredNames = new Set(declared.map(d => d.name.split("/")[0]));
+const declaredNames = new Set(declared.map(d => d.alias));
 try {
   for (const entry of readdirSync(WORKING_SET)) {
     if (entry.startsWith("_") || entry.startsWith(".")) continue;
@@ -368,7 +372,7 @@ try {
 const linkedSkills: LinkedSkill[] = [];
 
 for (const item of declared) {
-  const dest = join(WORKING_SET, item.name);
+  const dest = join(WORKING_SET, item.alias);
 
   // 幂等：已存在则删除重建（lstat 不跟随 symlink，能处理断链/自引用 symlink）
   try {
@@ -380,7 +384,7 @@ for (const item of declared) {
     mkdirSync(dirname(dest), { recursive: true });
     symlinkSync(item.sourcePath, dest);
   } catch (err: any) {
-    console.error(`❌ Link failed: ${item.name}: ${err.message}`);
+    console.error(`❌ Link failed: ${item.alias}: ${err.message}`);
     continue;
   }
 
@@ -404,7 +408,7 @@ for (const item of declared) {
     : relative(COLD_POOL, item.sourcePath);
 
   linkedSkills.push({
-    name: item.name,
+    name: item.alias,
     deck_niche: niche,
     type: item.type,
     source: sourceRel,
@@ -415,7 +419,7 @@ for (const item of declared) {
     deck_managed_dirs: managedDirs,
   });
 
-  console.log(`  🔗 ${item.name}`);
+  console.log(`  🔗 ${item.alias}`);
 }
 
 // ── Transient 过期检查 ──────────────────────────────────────

@@ -10,6 +10,12 @@ export interface MockSkill {
   body?: string
 }
 
+export interface SkillEntryLike {
+  path: string
+  role?: string
+  why_in_deck?: string
+}
+
 export interface Scenario {
   name: string
   given: {
@@ -19,10 +25,10 @@ export interface Scenario {
       max_cards?: number
       cold_pool?: string
       working_set?: string
-      innate?: string[]
-      tool?: string[]
-      combo?: string[]
-      transient?: Record<string, { skills?: string[]; expires?: string }>
+      innate?: string[] | Record<string, SkillEntryLike>
+      tool?: string[] | Record<string, SkillEntryLike>
+      combo?: string[] | Record<string, SkillEntryLike>
+      transient?: Record<string, { path?: string; skills?: string[]; expires?: string }>
     }
   }
   when: string[]
@@ -32,6 +38,9 @@ export interface Scenario {
     allSymlinks?: boolean
     lockValid?: boolean
     exitCode?: number
+    stderrContains?: string[]
+    stderrExcludes?: string[]
+    stdoutContains?: string[]
   }
 }
 
@@ -70,9 +79,21 @@ function buildDeckToml(deck: Scenario['given']['deck']): string {
   if (deck.working_set != null) out += `working_set = "${deck.working_set}"\n`
 
   for (const section of ['innate', 'tool', 'combo'] as const) {
-    if (deck[section]?.length) {
-      out += `\n[${section}]\n`
-      out += toTomlField('skills', deck[section])
+    const entries = deck[section]
+    if (!entries) continue
+    if (Array.isArray(entries)) {
+      if (entries.length) {
+        out += `\n[${section}]\n`
+        out += toTomlField('skills', entries)
+      }
+    } else {
+      // alias-as-key dict 格式
+      for (const [alias, entry] of Object.entries(entries)) {
+        out += `\n[${section}.skills.${alias}]\n`
+        out += `path = "${entry.path}"\n`
+        if (entry.role) out += `role = "${entry.role}"\n`
+        if (entry.why_in_deck) out += `why_in_deck = "${entry.why_in_deck}"\n`
+      }
     }
   }
 
@@ -113,7 +134,9 @@ function setupWorkdir(scenario: Scenario, workdir: string): void {
   //  innate skills 如果在 coldPool 找不到，从本包 skill/ 复制到项目本地 skills/
   const selfSkillDir = resolve(import.meta.dir, '..', 'skill')
   for (const section of ['innate', 'tool', 'combo'] as const) {
-    for (const name of scenario.given.deck[section] ?? []) {
+    const entries = scenario.given.deck[section] ?? []
+    const names = Array.isArray(entries) ? entries : Object.keys(entries)
+    for (const name of names) {
       if (name === 'lythoskill-deck' && existsSync(selfSkillDir)) {
         const localDir = join(workdir, 'skills', name)
         mkdirSync(localDir, { recursive: true })
@@ -217,6 +240,33 @@ function assert(scenario: Scenario, workdir: string, code: number, output: strin
         }
       } catch {
         errors.push('skill-deck.lock not valid JSON')
+      }
+    }
+  }
+
+  if (then.stderrContains) {
+    const lowerOutput = output.toLowerCase()
+    for (const needle of then.stderrContains) {
+      if (!lowerOutput.includes(needle.toLowerCase())) {
+        errors.push(`stderr missing: "${needle}"`)
+      }
+    }
+  }
+
+  if (then.stderrExcludes) {
+    const lowerOutput = output.toLowerCase()
+    for (const needle of then.stderrExcludes) {
+      if (lowerOutput.includes(needle.toLowerCase())) {
+        errors.push(`stderr should not contain: "${needle}"`)
+      }
+    }
+  }
+
+  if (then.stdoutContains) {
+    const lowerOutput = output.toLowerCase()
+    for (const needle of then.stdoutContains) {
+      if (!lowerOutput.includes(needle.toLowerCase())) {
+        errors.push(`stdout missing: "${needle}"`)
       }
     }
   }

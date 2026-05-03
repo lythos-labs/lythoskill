@@ -3,6 +3,7 @@ import { linkDeck } from './link.js'
 import { validateDeck } from './validate.js'
 import { addSkill } from './add.js'
 import { updateDeck } from './update.js'
+import { migrateSchema } from './migrate-schema.js'
 import { formatHelp } from './help.js'
 
 const HELP_CONFIG = {
@@ -13,6 +14,7 @@ const HELP_CONFIG = {
     { name: 'add', description: 'Download skill to cold pool and add to deck', args: '<locator>' },
     { name: 'update', description: 'Pull latest versions of declared skills from upstream' },
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
+    { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
     { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
@@ -57,6 +59,20 @@ switch (command) {
   case 'validate':
     validateDeck(deckPath, workdir)
     break
+  case 'migrate-schema': {
+    const dryRun = args.includes('--dry-run')
+    const targetPath = deckPath || 'skill-deck.toml'
+    const result = migrateSchema(targetPath, dryRun)
+    if (result.diff) {
+      console.log(result.message)
+      console.log('---')
+      console.log(result.diff)
+    } else {
+      console.log(result.message)
+    }
+    if (!result.migrated) process.exit(0)
+    break
+  }
   default:
     console.error(formatHelp(HELP_CONFIG))
     process.exit(1)

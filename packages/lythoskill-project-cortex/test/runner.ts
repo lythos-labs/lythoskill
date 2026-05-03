@@ -403,7 +403,7 @@ function resolveGlobPattern(workdir: string, pattern: string): string[] {
   if (!existsSync(baseDir)) return []
 
   const entries = readdirSync(baseDir, { withFileTypes: true })
-  const regex = new RegExp('^' + filePattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$')
+  const regex = new RegExp('^' + filePattern.replace(/\\/g, '\\\\').replace(/\./g, '\\.').replace(/\*/g, '.*') + '$')
   return entries
     .filter(e => !e.isDirectory() && regex.test(e.name))
     .map(e => join(baseDir, e.name))

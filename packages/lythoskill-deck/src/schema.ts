@@ -49,6 +49,15 @@ export const SkillDeckLockSchema = z.object({
   constraints: ConstraintReportSchema,
 });
 
+// ── Skill entry (alias-as-key dict body) ──────────────────────
+export const SkillEntrySchema = z.object({
+  path: z.string().min(1),
+  role: z.string().optional(),
+  why_in_deck: z.string().optional(),
+}).passthrough();
+
+export type SkillEntry = z.infer<typeof SkillEntrySchema>;
+
 export type LinkedSkill = z.infer<typeof LinkedSkillSchema>;
 export type ConstraintReport = z.infer<typeof ConstraintReportSchema>;
 export type SkillDeckLock = z.infer<typeof SkillDeckLockSchema>;
