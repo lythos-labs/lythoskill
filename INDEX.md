@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/3 21:37:07
+> 自动生成于 2026/5/3 21:47:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 31 |
+| Tasks | 55 | 进行中: 0, 待验收: 0, 已完成: 32 |
 | Epics | 8 | 活跃: 0, 已完成: 5, 悬置: 1, 已归档: 2 |
 | ADRs | 33 | 已接受: 20 |
 
@@ -39,12 +39,11 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (4)
 
 - [ ] **TASK-20260423124059736**: Create lythoskill ecosystem skill templates (creator/builder/curator)
 - [ ] **TASK-20260503152001333**: Adopt alias-as-key dict schema for skill entries
 - [ ] **TASK-20260503152002342**: Implement alias resolution and collision detection in deck link
-- [ ] **TASK-20260503152006435**: Add BDD scenarios for refactored deck CRUD
 - [ ] **TASK-20260503154401905**: Make README + CI surface red-green refactor + coverage visible
 
 ### 进行中 (0)
@@ -55,7 +54,7 @@ _无_
 
 _无_
 
-### 已完成 (31)
+### 已完成 (32)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423170056315~~: Add add-skill command to lythoskill-creator
@@ -87,6 +86,7 @@ _无_
 - ✅ ~~TASK-20260503152003393~~: Make deck add write FQ paths with optional as-alias
 - ✅ ~~TASK-20260503152004433~~: Rename deck update to refresh and add per-skill arg
 - ✅ ~~TASK-20260503152005415~~: Add deck remove and deck prune commands
+- ✅ ~~TASK-20260503152006435~~: Add BDD scenarios for refactored deck CRUD
 - ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
 
 ### 悬置 (0)
