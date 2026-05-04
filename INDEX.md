@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/4 20:08:34
+> 自动生成于 2026/5/4 22:44:19
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 78 | 进行中: 0, 待验收: 0, 已完成: 53 |
+| Tasks | 78 | 进行中: 0, 待验收: 0, 已完成: 54 |
 | Epics | 12 | 活跃: 1, 已完成: 8, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
@@ -42,12 +42,11 @@
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (4)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260504183646317**: T3: Migrate deck Agent BDD to unified runner (single+absolute mode, regression 26/26)
 - [ ] **TASK-20260504183708932**: T4: Migrate arena to unified runner (multi-variant + comparative judge mode + Pareto output)
 
 ### 进行中 (0)
@@ -58,7 +57,7 @@ _无_
 
 _无_
 
-### 已完成 (53)
+### 已完成 (54)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -110,6 +109,7 @@ _无_
 - ✅ ~~TASK-20260504170630080~~: Fix add Agent BDD scenario: investigate why deck link fails to sync skill-b into working set
 - ✅ ~~TASK-20260504183628823~~: T1: Extract runAgentScenario / parseAgentMd / Judge core from deck to test-utils (variant-aware)
 - ✅ ~~TASK-20260504183637828~~: T2: Structured Judge schema (Zod-first) — ADR + implementation
+- ✅ ~~TASK-20260504183646317~~: T3: Migrate deck Agent BDD to unified runner (single+absolute mode, regression 26/26)
 - ✅ ~~TASK-20260504194307589~~: Split bdd-runner.test.ts: pure unit tests vs Agent BDD tracer (runClaudeAgent)
 - ✅ ~~TASK-20260504194315989~~: Add test-utils pure unit tests to CI test workflow (test:all or independent step)
 - ✅ ~~TASK-20260504194319386~~: Align CI coverage scope: include test-utils pure logic, exclude agent spawn layer
