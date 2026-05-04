@@ -1,6 +1,6 @@
 ---
 name: lythoskill-creator
-version: 0.9.3
+version: 0.9.4
 type: standard
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
