@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-05-03 | Created |
 | in-progress | 2026-05-04 | Pulled from backlog — T4 done, remove/refresh/prune next |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 

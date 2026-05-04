@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/4 01:29:26
+> 自动生成于 2026/5/4 10:08:39
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 65 | 进行中: 2, 待验收: 0, 已完成: 36 |
+| Tasks | 65 | 进行中: 0, 待验收: 0, 已完成: 42 |
 | Epics | 9 | 活跃: 1, 已完成: 5, 悬置: 1, 已归档: 2 |
 | ADRs | 35 | 已接受: 26 |
 
@@ -39,26 +39,21 @@
 
 ## 📄 Tasks
 
-### 待办 (7)
+### 待办 (3)
 
-- [ ] **TASK-20260503235011219**: Reconciler core B: linkDeck deny-by-default and alias collision
-- [ ] **TASK-20260503235012454**: Command layer A: validateDeck and addSkill tests
-- [ ] **TASK-20260503235013705**: Command layer B: removeSkill, refreshDeck, pruneDeck tests
 - [ ] **TASK-20260503235014489**: Coverage sweep: backfill edge cases to 80% coverage
 - [ ] **TASK-20260504004954526**: First *.agent.md scenario — skills-introspection (Agent BDD tracer bullet)
 - [ ] **TASK-20260504005000534**: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
-- [ ] **TASK-20260504012457126**: fix deck refresh: traverse up to git root for monorepo skills
 
-### 进行中 (2)
+### 进行中 (0)
 
-- 🔄 **TASK-20260503235009959**: Reconciler core A: linkDeck empty deck and symlink creation
-- 🔄 **TASK-20260504004947351**: runClaudeAgent helper + checkpoint JSONL schema in bdd-runner
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (36)
+### 已完成 (42)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -96,6 +91,12 @@ _无_
 - ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
 - ✅ ~~TASK-20260503154401905~~: Make README + CI surface red-green refactor + coverage visible
 - ✅ ~~TASK-20260503235008935~~: Tracer bullet: test findDeckToml, expandHome, findSource pure functions
+- ✅ ~~TASK-20260503235009959~~: Reconciler core A: linkDeck empty deck and symlink creation
+- ✅ ~~TASK-20260503235011219~~: Reconciler core B: linkDeck deny-by-default and alias collision
+- ✅ ~~TASK-20260503235012454~~: Command layer A: validateDeck and addSkill tests
+- ✅ ~~TASK-20260503235013705~~: Command layer B: removeSkill, refreshDeck, pruneDeck tests
+- ✅ ~~TASK-20260504004947351~~: runClaudeAgent helper + checkpoint JSONL schema in bdd-runner
+- ✅ ~~TASK-20260504012457126~~: fix deck refresh: traverse up to git root for monorepo skills
 
 ### 悬置 (0)
 
