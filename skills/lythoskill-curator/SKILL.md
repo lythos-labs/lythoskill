@@ -1,6 +1,6 @@
 ---
 name: lythoskill-curator
-version: 0.9.6
+version: 0.9.7
 type: standard
 description: |
   Read-only indexer for skill cold pools. Scans all local skill
