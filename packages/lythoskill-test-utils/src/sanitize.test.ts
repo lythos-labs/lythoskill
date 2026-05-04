@@ -147,6 +147,37 @@ describe("sanitizePaths (convenience)", () => {
   });
 });
 
+describe("restore", () => {
+  const config = {
+    projectRoot: "/home/user/project",
+    homeDir: "/home/user",
+    workDir: "/tmp/run-123",
+  };
+
+  it("replaces portable tokens back to absolute paths", () => {
+    const s = createSanitizer(config);
+    const restored = s.restore("Found at $PROJECT_ROOT/src/file.ts in $HOME/.config");
+    expect(restored).toContain("/home/user/project/src/file.ts");
+    expect(restored).toContain("/home/user/.config");
+    expect(restored).not.toContain("$PROJECT_ROOT");
+    expect(restored).not.toContain("$HOME");
+  });
+
+  it("round-trip: sanitize then restore returns original (minus secrets)", () => {
+    const s = createSanitizer(config);
+    const original = "Reading from /home/user/project/src/index.ts";
+    const sanitized = s.sanitize(original);
+    const restored = s.restore(sanitized);
+    expect(restored).toBe(original);
+  });
+
+  it("restore replaces $WORK_DIR token", () => {
+    const s = createSanitizer(config);
+    const restored = s.restore("Output in $WORK_DIR/artifacts");
+    expect(restored).toContain("/tmp/run-123/artifacts");
+  });
+});
+
 describe("DEFAULT_SECRET_PATTERNS", () => {
   it("is exported and non-empty", () => {
     expect(DEFAULT_SECRET_PATTERNS.length).toBeGreaterThan(0);

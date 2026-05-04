@@ -1,6 +1,7 @@
 import { describe, test, expect, spyOn } from 'bun:test'
 import { useAgent } from '../src/agents'
-import { runCli, defaultSpawn } from '../src/bdd-runner'
+import { buildToolPrompt } from '../src/agents/claude'
+import { runCli } from '../src/bdd-runner'
 
 describe('runCli with injectable spawn', () => {
   test('uses mock spawn to verify command building', () => {
@@ -71,5 +72,27 @@ describe('claude adapter spawn', () => {
     // Timeout is passed as CLI flag to claude -p
     // This is a structural test: adapter should accept timeoutMs
     // Actual spawn behavior tested via Agent BDD integration (T3)
+  })
+})
+
+describe('buildToolPrompt', () => {
+  test('includes tool name, description, and schema', () => {
+    const prompt = buildToolPrompt(
+      { name: 'test_tool', description: 'A test tool', input_schema: { type: 'object', properties: {} } },
+      'Please use the tool.'
+    )
+    expect(prompt).toContain('test_tool')
+    expect(prompt).toContain('A test tool')
+    expect(prompt).toContain('Please use the tool.')
+    expect(prompt).toContain('"type": "object"')
+  })
+
+  test('includes JSON Schema in output', () => {
+    const prompt = buildToolPrompt(
+      { name: 'judge', description: 'Submit verdict', input_schema: { verdict: 'object' } },
+      'Evaluate.'
+    )
+    expect(prompt).toContain('Submit verdict')
+    expect(prompt).toContain('"verdict": "object"')
   })
 })

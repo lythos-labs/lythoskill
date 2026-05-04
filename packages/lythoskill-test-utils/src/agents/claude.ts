@@ -1,7 +1,7 @@
 import type { AgentAdapter, AgentRunResult, ToolDefinition } from './types'
 import { readCheckpoints } from '../bdd-runner'
 
-function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
+export function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
   const schemaJson = JSON.stringify(tool.input_schema, null, 2)
   const fence = '```'
   return [
