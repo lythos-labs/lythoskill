@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/5 01:51:03
+> 自动生成于 2026/5/5 01:54:48
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 99 | 进行中: 0, 待验收: 0, 已完成: 71 |
+| Tasks | 99 | 进行中: 0, 待验收: 0, 已完成: 72 |
 | Epics | 16 | 活跃: 1, 已完成: 12, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
@@ -46,12 +46,11 @@
 
 ## 📄 Tasks
 
-### 待办 (8)
+### 待办 (7)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260505015050270**: T1: Extract CuratorPlan from scan: pure dir listing + source resolution (no file IO)
 - [ ] **TASK-20260505015051145**: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 - [ ] **TASK-20260505015052748**: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 - [ ] **TASK-20260505015054313**: T4: Feed source abstraction — cold pool / GitHub / URL as source types
@@ -65,7 +64,7 @@ _无_
 
 _无_
 
-### 已完成 (71)
+### 已完成 (72)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -138,6 +137,7 @@ _无_
 - ✅ ~~TASK-20260504235614732~~: T4: RunCi/Spawn 重 IO 提取到 injectable function，加 mock 测试默认错误路径
 - ✅ ~~TASK-20260504235618571~~: T5: Arena runner 接入 injectable log，验证 dry-run 输出与期望一致
 - ✅ ~~TASK-20260505001534316~~: Extract buildClaudeCommand from claudeAdapter.spawn: pure command DSL + pattern-match tests (no spawn needed)
+- ✅ ~~TASK-20260505015050270~~: T1: Extract CuratorPlan from scan: pure dir listing + source resolution (no file IO)
 
 ### 悬置 (0)
 
