@@ -10,6 +10,7 @@ import { parse as parseToml } from "@iarna/toml";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { findDeckToml, expandHome, findSource } from "./link.js";
+import { parseDeck } from "./parse-deck.js";
 
 export function validateDeck(cliDeckPath?: string, cliWorkdir?: string): void {
   const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : process.cwd();
@@ -52,33 +53,27 @@ export function validateDeck(cliDeckPath?: string, cliWorkdir?: string): void {
 
   // ── Validate skill declarations ────────────────────────────
 
+  const { entries: parsedEntries, deprecated: isDeprecated, errors: parseErrors } = parseDeck(deckRaw);
+  if (isDeprecated) {
+    warnings.push("string-array skill entries are deprecated. Run `deck migrate-schema` to upgrade.");
+  }
+  errors.push(...parseErrors);
+
   const declaredNames = new Set<string>();
   let declaredCount = 0;
 
-  for (const section of ["innate", "tool", "combo"] as const) {
-    const skills = deck[section]?.skills;
-    if (skills === undefined) continue;
-    if (!Array.isArray(skills)) {
-      errors.push(`[${section}].skills must be an array`);
-      continue;
+  for (const entry of parsedEntries) {
+    declaredCount++;
+    if (declaredNames.has(entry.path)) {
+      warnings.push(`Skill "${entry.path}" is declared in multiple sections`);
     }
-    for (const name of skills) {
-      if (!name || typeof name !== "string") {
-        errors.push(`[${section}] contains invalid skill name`);
-        continue;
-      }
-      declaredCount++;
-      if (declaredNames.has(name)) {
-        warnings.push(`Skill "${name}" is declared in multiple sections`);
-      }
-      declaredNames.add(name);
+    declaredNames.add(entry.path);
 
-      const result = findSource(name, COLD_POOL, PROJECT_DIR);
-      if (result.error) {
-        errors.push(result.error);
-      } else if (!result.path) {
-        errors.push(`Skill not found: ${name} (${section})`);
-      }
+    const result = findSource(entry.path, COLD_POOL, PROJECT_DIR);
+    if (result.error) {
+      errors.push(result.error);
+    } else if (!result.path) {
+      errors.push(`Skill not found: ${entry.path} (${entry.type})`);
     }
   }
 

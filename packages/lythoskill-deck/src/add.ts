@@ -252,7 +252,7 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
 
     console.log('🔗 Running deck link...')
     const { linkDeck } = await import('./link.js')
-    linkDeck(deckPath === join(workdir, 'skill-deck.toml') ? undefined : deckPath, workdir)
+    linkDeck(deckPath, workdir)
 
   } catch (err) {
     console.error(`❌ Failed to add skill: ${err}`)
