@@ -98,17 +98,23 @@ T4(`TASK-20260503235012454`)已覆盖 `validateDeck` + `addSkill`。本卡完成
 
 ## 验收标准
 
-- [ ] `remove.test.ts` 落地，3 个 `it()` 全绿
-- [ ] `refresh.test.ts` 落地，3 个 `it()` 全绿
-- [ ] `prune.test.ts` 落地，2 个 `it()` 全绿
-- [ ] `bun test packages/lythoskill-deck/src/*.test.ts` 本地全绿
-- [ ] `bun run test:all` 未被破坏
-- [ ] 所有断言通过公共接口
-- [ ] 每个 test 独立 tmpdir
-- [ ] 进度记录段保留 RED→GREEN 节奏脚注
+- [x] `remove.test.ts` 落地，3 个 `it()` 全绿
+- [x] `refresh.test.ts` 落地，3 个 `it()` 全绿（补充至已有 `findGitRoot` 3 个之上）
+- [x] `prune.test.ts` 落地，2 个 `it()` 全绿
+- [x] `bun test packages/lythoskill-deck/src/*.test.ts` 本地全绿
+- [x] `bun run test:all` 未被破坏
+- [x] 所有断言通过公共接口
+- [x] 每个 test 独立 tmpdir
+- [x] 进度记录段保留 RED→GREEN 节奏脚注
 
 ## 进度记录
-<!-- 执行时更新，带时间戳 -->
+
+| 阶段 | 时间 | 内容 |
+|------|------|------|
+| RED | 2026-05-04 | C9 首跑红 — remove.test.ts 缺 `spyOn` import；C12 首跑红 — refresh.test.ts 仅含 `findGitRoot` helper，无 `refreshDeck` 接口测试 |
+| GREEN | 2026-05-04 | 补 `spyOn` import → C9/C10/C11 绿；补充 `refreshDeck` C12/C13/C14（`git init` fixture + `execSync` mock for `git pull`）→ 绿；`pruneDeck` C15/C16（`yes=true` + `placeRepo`/`placeSkillInRepo` helper）→ 绿 |
+| 回归 | 2026-05-04 | 全量 `bun test packages/lythoskill-deck/src/*.test.ts` — **35 pass / 0 fail / 104 expect()**（原 27 pass → 新增 8 pass）|
+| REFACTOR | — | 无 — 测试代码与 T1-T4 模式一致，无重复抽象 |
 
 ## 关联文件
 - 修改: 无
