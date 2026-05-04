@@ -80,6 +80,9 @@ function parseArgs(argv: string[]) {
     control: 'lythoskill-project-scribe',
     dir: 'tmp',
     project: '.',
+    config: undefined,
+    out: undefined,
+    players: undefined,
   }
   const positionals: string[] = []
 
@@ -99,6 +102,12 @@ function parseArgs(argv: string[]) {
       options.dir = argv[++i]
     } else if (arg === '--project' || arg === '-p') {
       options.project = argv[++i]
+    } else if (arg === '--config') {
+      options.config = argv[++i]
+    } else if (arg === '--out') {
+      options.out = argv[++i]
+    } else if (arg === '--players') {
+      options.players = argv[++i]
     } else if (!arg.startsWith('-')) {
       positionals.push(arg)
     }
