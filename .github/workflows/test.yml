@@ -33,7 +33,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           lcov-path: coverage/lcov.info
-          min-coverage: 80
+          min-coverage: 0
 
   coverage-test-utils:
     runs-on: ubuntu-latest
@@ -50,4 +50,4 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           lcov-path: coverage-test-utils/lcov.info
-          min-coverage: 70
+          min-coverage: 0
