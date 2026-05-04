@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 23:35:16
+> 自动生成于 2026/5/4 23:39:40
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 88 | 进行中: 0, 待验收: 0, 已完成: 64 |
-| Epics | 14 | 活跃: 1, 已完成: 10, 悬置: 1, 已归档: 2 |
+| Tasks | 88 | 进行中: 0, 待验收: 0, 已完成: 65 |
+| Epics | 14 | 活跃: 0, 已完成: 11, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
+_无_
 
 ### 已完成
 
@@ -30,6 +30,7 @@
 - ✅ **EPIC-20260504170744839**: Fix Agent BDD stability — parseAgentMd Given paths and prune timeout
 - ✅ **EPIC-20260504183618345**: Unify Agent BDD & Arena: shared runner + structured Judge schema
 - ✅ **EPIC-20260504230503067**: Arena TOML declarative config (k8s-style): [[side]] + runs_per_side + reconcile
+- ✅ **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
 
 ### 悬置
 
@@ -44,12 +45,11 @@
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (3)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260504231950061**: T5: Agent BDD scenarios for refresh + prune execution (LLM code audit, not real git)
 
 ### 进行中 (0)
 
@@ -59,7 +59,7 @@ _无_
 
 _无_
 
-### 已完成 (64)
+### 已完成 (65)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -125,6 +125,7 @@ _无_
 - ✅ ~~TASK-20260504231946234~~: T2: Extract pure PrunePlan from prune: scan cold pool vs declared = unreferenced candidates (no fs delete)
 - ✅ ~~TASK-20260504231947970~~: T3: Inject workdir/coldPool/deckPath as explicit params for both refresh and prune
 - ✅ ~~TASK-20260504231949003~~: T4: Unit tests for RefreshPlan + PrunePlan correctness (edge cases: localhost, nested git, missing)
+- ✅ ~~TASK-20260504231950061~~: T5: Agent BDD scenarios for refresh + prune execution (LLM code audit, not real git)
 
 ### 悬置 (0)
 
