@@ -142,3 +142,71 @@ export function buildRefreshPlan(
 
   return { deckPath, workdir, coldPool, targets, allDeclared }
 }
+
+// ── Execution (IO layer, injectable for testing) ───────────────────────────
+
+export interface RefreshResult {
+  alias: string
+  path: string
+  status: 'updated' | 'up-to-date' | 'skipped' | 'failed' | 'not-git'
+  message?: string
+}
+
+export interface RefreshIO {
+  gitPull?: (dir: string) => { status: 'updated' | 'up-to-date' | 'failed'; message: string }
+  log?: (msg: string) => void
+  linkDeck?: (deckPath?: string, workdir?: string) => void
+}
+
+export function executeRefreshPlan(plan: RefreshPlan, io?: RefreshIO): RefreshResult[] {
+  const gitPull = io?.gitPull ?? (() => ({ status: 'failed' as const, message: 'gitPull not injected' }))
+  const log = io?.log ?? (() => {})
+
+  const results: RefreshResult[] = []
+  let updated = 0, upToDate = 0, skipped = 0, failed = 0
+
+  for (const t of plan.targets) {
+    switch (t.type) {
+      case 'missing':
+        results.push({ alias: t.alias, path: '', status: 'failed', message: 'Skill not found in cold pool' })
+        failed++
+        break
+      case 'localhost':
+        results.push({ alias: t.alias, path: t.sourceRel, status: 'skipped', message: 'localhost skill — user-managed' })
+        skipped++
+        break
+      case 'not-git':
+        results.push({ alias: t.alias, path: t.sourceRel, status: 'not-git', message: 'skipped: not a git repository' })
+        skipped++
+        break
+      case 'git': {
+        const pullResult = gitPull(t.gitRoot!)
+        results.push({ alias: t.alias, path: t.sourceRel, status: pullResult.status, message: pullResult.message })
+        if (pullResult.status === 'updated') updated++
+        else if (pullResult.status === 'up-to-date') upToDate++
+        else failed++
+        break
+      }
+    }
+  }
+
+  // Report phase
+  const scope = plan.targets.length === plan.allDeclared.length
+    ? `${plan.allDeclared.length} skill(s)`
+    : 'single skill'
+  log(`\n📦 Skill Refresh Report — ${scope} checked`)
+  log(`   Updated: ${updated} | Up-to-date: ${upToDate} | Skipped: ${skipped} | Failed: ${failed}`)
+
+  for (const r of results) {
+    const icon = r.status === 'updated' ? '🔄' : r.status === 'up-to-date' ? '✅' :
+      r.status === 'skipped' ? '⏭️' : r.status === 'not-git' ? '📁' : '❌'
+    log(`${icon} ${r.alias}`)
+    if (r.message) log(`   ${r.message}`)
+  }
+
+  if (updated > 0) {
+    io?.linkDeck?.()
+  }
+
+  return results
+}

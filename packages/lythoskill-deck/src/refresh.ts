@@ -12,7 +12,7 @@ import { execSync } from "node:child_process";
 import { resolve } from "node:path";
 import { findDeckToml, linkDeck } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
-import { buildRefreshPlan, detectGitRoot } from "./refresh-plan.js";
+import { buildRefreshPlan, detectGitRoot, executeRefreshPlan } from "./refresh-plan.js";
 
 // Backward compat: old findGitRoot returns string|null
 export function findGitRoot(dir: string, coldPool: string): string | null {
@@ -85,58 +85,16 @@ export function refreshDeck(cliDeckPath?: string, cliWorkdir?: string, target?: 
     process.exit(1)
   }
 
-  // ── Execute: git pull for git-type targets ──────────────────────
-  const results: RefreshResult[] = []
-  let updated = 0, upToDate = 0, skipped = 0, failed = 0
+  // ── Execute with real IO ────────────────────────────────────
+  const results = executeRefreshPlan(plan, {
+    gitPull,
+    log: console.log,
+    linkDeck: () => {
+      console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
+      console.log('🔗 Running deck link...')
+      linkDeck(cliDeckPath, cliWorkdir)
+    },
+  })
 
-  for (const t of plan.targets) {
-    switch (t.type) {
-      case 'missing':
-        results.push({ name: t.alias, path: '', status: 'failed', message: 'Skill not found in cold pool' })
-        failed++
-        break
-      case 'localhost':
-        results.push({ name: t.alias, path: t.sourceRel, status: 'skipped', message: 'localhost skill — user-managed' })
-        skipped++
-        break
-      case 'not-git':
-        results.push({ name: t.alias, path: t.sourceRel, status: 'not-git', message: 'skipped: not a git repository' })
-        skipped++
-        break
-      case 'git': {
-        const pullResult = gitPull(t.gitRoot!)
-        results.push({ name: t.alias, path: t.sourceRel, status: pullResult.status, message: pullResult.message })
-        if (pullResult.status === 'updated') updated++
-        else if (pullResult.status === 'up-to-date') upToDate++
-        else failed++
-        break
-      }
-    }
-  }
-
-  // ── Report ──────────────────────────────────────────────────────
-  const scope = target ? 'single skill' : `${parsedEntries.length} skill(s)`
-  console.log(`\n📦 Skill Refresh Report — ${scope} checked`)
-  console.log(`   Updated: ${updated} | Up-to-date: ${upToDate} | Skipped: ${skipped} | Failed: ${failed}`)
-  console.log()
-
-  for (const r of results) {
-    const icon =
-      r.status === 'updated' ? '🔄' : r.status === 'up-to-date' ? '✅' :
-      r.status === 'skipped' ? '⏭️' : r.status === 'not-git' ? '📁' : '❌'
-    console.log(`${icon} ${r.name}`)
-    if (r.message && r.status !== 'up-to-date') {
-      for (const line of r.message.split('\n').filter(l => l.trim()).slice(0, 3)) {
-        console.log(`   ${line.trim()}`)
-      }
-    }
-  }
-
-  if (updated > 0) {
-    console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
-    console.log('🔗 Running deck link...')
-    linkDeck(cliDeckPath, cliWorkdir)
-  }
-
-  if (failed > 0) process.exit(1)
+  if (results.some(r => r.status === 'failed')) process.exit(1)
 }

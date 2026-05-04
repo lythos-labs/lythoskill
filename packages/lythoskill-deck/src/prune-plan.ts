@@ -142,3 +142,47 @@ export function buildPrunePlan(
     totalSize,
   }
 }
+
+// ── Execution (IO layer, injectable for testing) ───────────────────────────
+
+export interface PruneResult {
+  repoRel: string
+  deleted: boolean
+  error?: string
+}
+
+export interface PruneIO {
+  delete?: (path: string) => void
+  log?: (msg: string) => void
+  formatSize?: (bytes: number) => string
+}
+
+export function executePrunePlan(plan: PrunePlan, io?: PruneIO): PruneResult[] {
+  const deleteFn = io?.delete ?? ((_path: string) => { throw new Error('delete not injected') })
+  const log = io?.log ?? (() => {})
+  const fmtSize = io?.formatSize ?? ((b: number) => b < 1024 ? `${b}B` : b < 1024 * 1024 ? `${(b / 1024).toFixed(1)}KB` : `${(b / (1024 * 1024)).toFixed(1)}MB`)
+
+  log(`\n🧹 Prune candidates — ${plan.candidates.length} repo(s), ${fmtSize(plan.totalSize)} total:\n`)
+  for (const c of plan.candidates) {
+    log(`   ${c.repoRel} (${fmtSize(c.size)})`)
+  }
+
+  const results: PruneResult[] = []
+  let deleted = 0, failed = 0
+
+  for (const c of plan.candidates) {
+    try {
+      deleteFn(c.repoPath)
+      log(`  🗑️  Deleted: ${c.repoRel}`)
+      results.push({ repoRel: c.repoRel, deleted: true })
+      deleted++
+    } catch (err: any) {
+      log(`  ❌ Failed to delete ${c.repoRel}: ${err.message}`)
+      results.push({ repoRel: c.repoRel, deleted: false, error: err.message })
+      failed++
+    }
+  }
+
+  log(`\n📦 Prune complete: ${deleted} deleted, ${failed} failed`)
+  return results
+}

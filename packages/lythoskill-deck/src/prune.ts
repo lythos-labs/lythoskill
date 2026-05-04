@@ -11,7 +11,7 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { findDeckToml } from "./link.js";
-import { buildPrunePlan } from "./prune-plan.js";
+import { buildPrunePlan, executePrunePlan } from "./prune-plan.js";
 
 interface PruneCandidate {
   repoPath: string;
@@ -136,12 +136,6 @@ export async function pruneDeck(cliDeckPath?: string, cliWorkdir?: string, yes?:
     process.exit(0)
   }
 
-  // ── Report ──────────────────────────────────────────────────────
-  console.log(`\n🧹 Prune candidates — ${plan.candidates.length} repo(s), ${formatSize(plan.totalSize)} total:\n`)
-  for (const c of plan.candidates) {
-    console.log(`   ${c.repoRel} (${formatSize(c.size)})`)
-  }
-
   // ── Confirm ──────────────────────────────────────────────────────
   let shouldDelete = false
   if (yes) {
@@ -156,19 +150,12 @@ export async function pruneDeck(cliDeckPath?: string, cliWorkdir?: string, yes?:
     process.exit(0)
   }
 
-  // ── Execute: delete unreferenced repos ──────────────────────────
-  let deleted = 0, failed = 0
-  for (const c of plan.candidates) {
-    try {
-      rmSync(c.repoPath, { recursive: true, force: true })
-      console.log(`  🗑️  Deleted: ${c.repoRel}`)
-      deleted++
-    } catch (err: any) {
-      console.error(`  ❌ Failed to delete ${c.repoRel}: ${err.message}`)
-      failed++
-    }
-  }
+  // ── Execute with real IO ──────────────────────────────────────────
+  const results = executePrunePlan(plan, {
+    delete: (path: string) => rmSync(path, { recursive: true, force: true }),
+    log: console.log,
+    formatSize,
+  })
 
-  console.log(`\n📦 Prune complete: ${deleted} deleted, ${failed} failed`)
-  if (failed > 0) process.exit(1)
+  if (results.some(r => !r.deleted)) process.exit(1)
 }
