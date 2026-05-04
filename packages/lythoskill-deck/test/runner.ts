@@ -1,12 +1,9 @@
 #!/usr/bin/env bun
 import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync, chmodSync } from 'node:fs'
 import { join, resolve, relative } from 'node:path'
-import { homedir } from 'node:os'
 import { spawnSync } from 'node:child_process'
-import { runClaudeAgent, readCheckpoints, type AgentRunResult, type CheckpointEntry } from '../../lythoskill-test-utils/src/bdd-runner.ts'
-import { createSanitizer } from '../../lythoskill-test-utils/src/sanitize.ts'
-import { parseAgentMd, type AgentScenario, type JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
-import { buildJudgePrompt, runLLMJudge } from '../../lythoskill-test-utils/src/judge'
+import { type CheckpointEntry } from '../../lythoskill-test-utils/src/bdd-runner.ts'
+import { runAgentScenario as runAgentScenarioExt, type AgentScenario, type JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
 import { useAgent } from '../../lythoskill-test-utils/src/agents'
 
 // ── 类型定义 ──────────────────────────────────────────────────
@@ -345,7 +342,9 @@ export async function runParallel(scenarios: Scenario[], runsDir: string, concur
 
 // ── Agent BDD extensions ──────────────────────────────────────
 
-export { parseAgentMd } from '../../lythoskill-test-utils/src/agent-bdd'
+export { parseAgentMd, type AgentScenario, type JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
+export type { JudgeCriterion } from '../../lythoskill-test-utils/src/agent-bdd'
+export { runAgentScenario } from '../../lythoskill-test-utils/src/agent-bdd'
 
 function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   if (existsSync(workdir)) rmSync(workdir, { recursive: true, force: true })
@@ -371,37 +370,11 @@ function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   chmodSync(wrapperPath, 0o755)
 }
 
-// ── LLM Judge (Hybrid Judge: semantic evaluation) ─────────────
+// ── Deck-specific validation ────────────────────────────────────
 
-export type { JudgeCriterion, JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
-
-const PROJECT_ROOT = resolve(import.meta.dir, '..', '..', '..')
-
-export async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
-  const start = performance.now()
-  setupAgentWorkdir(scenario, workdir)
-
-  const agentResult = await runClaudeAgent({
-    cwd: workdir,
-    brief: scenario.when,
-    timeoutMs: scenario.timeout,
-  })
-
-  // Sanitize absolute paths in artifacts for portability
-  const sanitizer = createSanitizer({
-    projectRoot: PROJECT_ROOT,
-    homeDir: homedir(),
-    workDir: workdir,
-  })
-
-  // Persist agent output for debugging / review
-  writeFileSync(join(workdir, 'agent-stdout.txt'), sanitizer.sanitize(agentResult.stdout), 'utf-8')
-  writeFileSync(join(workdir, 'agent-stderr.txt'), sanitizer.sanitize(agentResult.stderr), 'utf-8')
-
-  const checkpoints = readCheckpoints(workdir)
+function validateDeckCheckpoints(scenario: AgentScenario, checkpoints: CheckpointEntry[]): string[] {
   const errors: string[] = []
 
-  // Scenario-aware automated judge: verify checkpoint shape
   const nameLower = scenario.name.toLowerCase()
   let expectedStep = 'deck.introspection'
   if (nameLower.includes('add')) expectedStep = 'deck.add'
@@ -416,7 +389,6 @@ export async function runAgentScenario(scenario: AgentScenario, workdir: string)
     if (cp.step !== expectedStep) {
       errors.push(`expected step "${expectedStep}", got "${cp.step ?? '(missing)'}"`)
     }
-    // Introspection-specific: validate skill count
     if (expectedStep === 'deck.introspection') {
       const count = cp.final_state?.tool_skill_count
       if (count !== 2) {
@@ -425,64 +397,7 @@ export async function runAgentScenario(scenario: AgentScenario, workdir: string)
     }
   }
 
-  if (agentResult.code !== 0) {
-    errors.push(`agent exit code: ${agentResult.code}`)
-  }
-
-  // ── LLM Judge: semantic evaluation from ## Judge section ───────
-  let llmJudgeResult: Awaited<ReturnType<typeof runLLMJudge>> | null = null
-  if (scenario.judge) {
-    llmJudgeResult = await runLLMJudge(scenario, agentResult, checkpoints, workdir, useAgent('claude'))
-
-    writeFileSync(
-      join(workdir, 'judge-verdict.json'),
-      JSON.stringify(
-        {
-          verdict: llmJudgeResult.verdict?.verdict ?? null,
-          reason: llmJudgeResult.verdict?.reason ?? null,
-          criteria: llmJudgeResult.verdict?.criteria ?? null,
-          raw_output: llmJudgeResult.raw,
-          error: llmJudgeResult.error ?? null,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        2
-      ),
-      'utf-8'
-    )
-
-    if (llmJudgeResult.verdict?.verdict === 'FAIL') {
-      errors.push(`LLM judge: ${llmJudgeResult.verdict.reason}`)
-    } else if (llmJudgeResult.error) {
-      // Judge infrastructure failure: log but don't fail the test
-      // (observability should not be a hard gate)
-      console.warn(`⚠️  LLM judge error for "${scenario.name}": ${llmJudgeResult.error}`)
-    }
-  } else {
-    writeFileSync(
-      join(workdir, 'judge-verdict.json'),
-      JSON.stringify(
-        {
-          verdict: null,
-          reason: 'No ## Judge section in scenario',
-          error: null,
-          timestamp: new Date().toISOString(),
-        },
-        null,
-        2
-      ),
-      'utf-8'
-    )
-  }
-
-  const duration = performance.now() - start
-  return {
-    name: scenario.name,
-    pass: errors.length === 0,
-    workdir,
-    errors,
-    duration,
-  }
+  return errors
 }
 
 // ── Main ──────────────────────────────────────────────────────
@@ -511,35 +426,20 @@ async function main(): Promise<void> {
   }
 
   // Load Agent BDD scenarios (.agent.md) only when --agent
-  const agentScenarios: AgentScenario[] = []
-  if (runAgent) {
-    if (Bun.which('claude')) {
-      const agentFiles = readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md'))
-      for (const file of agentFiles) {
-        try {
-          const content = readFileSync(join(scenarioDir, file), 'utf-8')
-          agentScenarios.push(parseAgentMd(content))
-        } catch (e) {
-          console.error(`❌ Failed to parse ${file}: ${e instanceof Error ? e.message : String(e)}`)
-        }
-      }
-    } else {
-      console.warn('⚠️  claude not found in PATH, skipping Agent BDD scenarios')
-    }
+  const agentFiles = runAgent ? readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md')) : []
+  if (runAgent && !Bun.which('claude')) {
+    console.warn('⚠️  claude not found in PATH, skipping Agent BDD scenarios')
   }
 
   const now = new Date()
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
 
   const cliSandboxDir = join(baseDir, stamp)
-  const agentReportDir = join(import.meta.dir, '..', '..', '..', 'runs', 'agent-bdd', stamp)
-
   mkdirSync(cliSandboxDir, { recursive: true })
-  if (agentScenarios.length > 0) {
-    mkdirSync(agentReportDir, { recursive: true })
-    console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentScenarios.length} 个 Agent 场景`)
+  if (agentFiles.length > 0) {
+    console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentFiles.length} 个 Agent 场景`)
     console.log(`📁 CLI 产物目录: ${cliSandboxDir}`)
-    console.log(`📁 Agent BDD evidence → runs/agent-bdd/${stamp}/ (tracked)\n`)
+    console.log(`📁 Agent BDD evidence → runs/agent-bdd/<ts>/ (tracked)\n`)
   } else {
     console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景，并发度 ${concurrency}`)
     console.log(`📁 产物目录: ${cliSandboxDir}\n`)
@@ -553,11 +453,50 @@ async function main(): Promise<void> {
     : await Promise.all(cliScenarios.map(s => runScenario(s, cliSandboxDir)))
   results.push(...cliResults)
 
-  // Run Agent BDD scenarios in tracked report dir (serial, claude-heavy)
-  for (const s of agentScenarios) {
-    const workdir = join(agentReportDir, s.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
-    const r = await runAgentScenario(s, workdir)
-    results.push(r)
+  // Run Agent BDD scenarios via unified test-utils runner (serial, claude-heavy)
+  for (const file of agentFiles) {
+    const scenarioPath = join(scenarioDir, file)
+    const start = performance.now()
+    const errors: string[] = []
+
+    try {
+      const result = await runAgentScenarioExt({
+        scenarioPath,
+        agent: useAgent('claude'),
+        setupWorkdir: setupAgentWorkdir,
+        baseDir: join(import.meta.dir, '..', '..', '..', 'runs', 'agent-bdd'),
+      })
+
+      // Deck-specific checkpoint validation
+      errors.push(...validateDeckCheckpoints(result.scenario, result.checkpoints))
+
+      if (result.agentResult.code !== 0) {
+        errors.push(`agent exit code: ${result.agentResult.code}`)
+      }
+
+      if (result.verdict?.verdict === 'FAIL') {
+        errors.push(`LLM judge: ${result.verdict.reason}`)
+      } else if (result.verdict?.verdict === 'ERROR') {
+        console.warn(`⚠️  LLM judge ERROR for "${result.scenario.name}": ${result.verdict.error ?? 'unknown'}`)
+      }
+
+      results.push({
+        name: result.scenario.name,
+        pass: errors.length === 0,
+        workdir: result.artifactDir,
+        errors,
+        duration: performance.now() - start,
+      })
+    } catch (e) {
+      errors.push(`scenario exception: ${e instanceof Error ? e.message : String(e)}`)
+      results.push({
+        name: file.replace('.agent.md', ''),
+        pass: false,
+        workdir: '',
+        errors,
+        duration: performance.now() - start,
+      })
+    }
   }
 
   let passed = 0
