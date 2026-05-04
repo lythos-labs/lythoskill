@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/4 13:22:23
+> 自动生成于 2026/5/4 16:34:08
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 65 | 进行中: 0, 待验收: 0, 已完成: 44 |
+| Tasks | 65 | 进行中: 0, 待验收: 0, 已完成: 45 |
 | Epics | 9 | 活跃: 1, 已完成: 5, 悬置: 1, 已归档: 2 |
-| ADRs | 35 | 已接受: 26 |
+| ADRs | 37 | 已接受: 26 |
 
 ---
 
@@ -39,9 +39,9 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260504005000534**: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
+_无_
 
 ### 进行中 (0)
 
@@ -51,7 +51,7 @@ _无_
 
 _无_
 
-### 已完成 (44)
+### 已完成 (45)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -96,6 +96,7 @@ _无_
 - ✅ ~~TASK-20260503235014489~~: Coverage sweep: backfill edge cases to 80% coverage
 - ✅ ~~TASK-20260504004947351~~: runClaudeAgent helper + checkpoint JSONL schema in bdd-runner
 - ✅ ~~TASK-20260504004954526~~: First *.agent.md scenario — skills-introspection (Agent BDD tracer bullet)
+- ✅ ~~TASK-20260504005000534~~: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
 - ✅ ~~TASK-20260504012457126~~: fix deck refresh: traverse up to git root for monorepo skills
 
 ### 悬置 (0)
@@ -163,6 +164,8 @@ _无_
 - ✅ **ADR-20260503180000000** (02-accepted): Unit Test Framework Selection — Curator Mind Applied
 - ✅ **ADR-20260503222838594** (02-accepted): Kanban pull mode with CFD observability for agent-driven task management
 - ❌ **ADR-20260503230522270** (03-rejected): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
+- 🤔 **ADR-20260504134942164** (01-proposed): description-when-to-use-field-stratification-for-cross-cli-compatibility
+- 🤔 **ADR-20260504135256566** (01-proposed): cortex init ships trailer-driven hooks as the jira-simulation deliverable
 
 ---
 
