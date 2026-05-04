@@ -18,6 +18,7 @@ checklist_skipped_reason: agent execution, stability fix blocking B-direction wo
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-04 | Created |
+| done | 2026-05-04 | Done |
 
 ## 背景故事
 <!-- 填写需求来源:触发事件、问题描述、目标价值 -->
