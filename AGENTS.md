@@ -389,6 +389,7 @@ Three governance layers with distinct responsibilities:
 | **ADR** | WHY this choice? | Technical decision, option comparison, irreversible choice | "Use Bun over Node" |
 | **Epic** | WHAT outcome and HOW decomposed? | 1-3 week outcome with dependencies, plan-aligned, zoom-in focus | "Implement trailer-driven governance" |
 | **Task** | WHAT specific action? | 1-3 day executable work for subagent | "Add `task complete` verb to CLI" |
+| **Wiki** | WHAT do we know and HOW do we apply it? | Reusable pattern, FAQ, or retrospective; knowledge that outlives a single epic/task | "GitHub Actions + Bun CI/CD pattern" |
 
 **Epic Discipline:**
 - **Dual-track lanes**: `lane: main` (current iteration focus, max 1 active epic) and `lane: emergency` (unavoidable urgent insert, max 1 active epic).

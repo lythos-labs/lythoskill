@@ -51,6 +51,7 @@ Use the CLI (do not create files by hand):
 bunx @lythos/project-cortex adr  "Your decision title"
 bunx @lythos/project-cortex epic "Your epic title"
 bunx @lythos/project-cortex task "Your task title"
+bunx @lythos/project-cortex wiki "Your knowledge entry title" --category pattern|faq|lesson
 ```
 
 The CLI auto-assigns timestamp IDs, generates templates, and places files in the correct status directory.
