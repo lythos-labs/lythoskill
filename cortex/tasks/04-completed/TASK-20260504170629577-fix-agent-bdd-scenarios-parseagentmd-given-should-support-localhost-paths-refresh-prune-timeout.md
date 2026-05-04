@@ -1,4 +1,4 @@
-# TASK-20260504170630080: Fix add Agent BDD scenario: investigate why deck link fails to sync skill-b into working set
+# TASK-20260504170629577: Fix Agent BDD scenarios: parseAgentMd Given should support localhost paths (refresh + prune timeout)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260504170630080)
+feat(scope): description (TASK-20260504170629577)
 
 - Detail 1
 - Detail 2

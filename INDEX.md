@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/4 16:51:48
+> 自动生成于 2026/5/4 17:37:08
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 65 | 进行中: 0, 待验收: 0, 已完成: 45 |
-| Epics | 9 | 活跃: 0, 已完成: 6, 悬置: 1, 已归档: 2 |
-| ADRs | 37 | 已接受: 26 |
+| Tasks | 71 | 进行中: 0, 待验收: 0, 已完成: 48 |
+| Epics | 11 | 活跃: 2, 已完成: 6, 悬置: 1, 已归档: 2 |
+| ADRs | 38 | 已接受: 27 |
 
 ---
 
@@ -16,7 +16,8 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260504165156064**: Extract cortex husky hooks to testable TypeScript modules
+- **EPIC-20260504170744839**: Fix Agent BDD stability — parseAgentMd Given paths and prune timeout
 
 ### 已完成
 
@@ -40,9 +41,11 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (3)
 
-_无_
+- [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
+- [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
+- [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 
 ### 进行中 (0)
 
@@ -52,7 +55,7 @@ _无_
 
 _无_
 
-### 已完成 (45)
+### 已完成 (48)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -99,6 +102,9 @@ _无_
 - ✅ ~~TASK-20260504004954526~~: First *.agent.md scenario — skills-introspection (Agent BDD tracer bullet)
 - ✅ ~~TASK-20260504005000534~~: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
 - ✅ ~~TASK-20260504012457126~~: fix deck refresh: traverse up to git root for monorepo skills
+- ✅ ~~TASK-20260504170113207~~: Investigate and fix Agent BDD prune scenario timeout (exit 143)
+- ✅ ~~TASK-20260504170629577~~: Fix Agent BDD scenarios: parseAgentMd Given should support localhost paths (refresh + prune timeout)
+- ✅ ~~TASK-20260504170630080~~: Fix add Agent BDD scenario: investigate why deck link fails to sync skill-b into working set
 
 ### 悬置 (0)
 
@@ -167,6 +173,7 @@ _无_
 - ❌ **ADR-20260503230522270** (03-rejected): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
 - 🤔 **ADR-20260504134942164** (01-proposed): description-when-to-use-field-stratification-for-cross-cli-compatibility
 - 🤔 **ADR-20260504135256566** (01-proposed): cortex init ships trailer-driven hooks as the jira-simulation deliverable
+- ✅ **ADR-20260504172913972** (02-accepted): Agent BDD budget governance — time/token/retry limits as first-class constraints
 
 ---
 
