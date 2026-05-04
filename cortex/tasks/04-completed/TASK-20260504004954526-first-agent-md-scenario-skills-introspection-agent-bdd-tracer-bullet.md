@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created — Theme D tracer bullet, T9 解锁起点 |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 
