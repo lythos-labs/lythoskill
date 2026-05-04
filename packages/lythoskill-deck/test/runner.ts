@@ -1,8 +1,10 @@
 #!/usr/bin/env bun
 import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync, chmodSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, resolve, relative } from 'node:path'
+import { homedir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { runClaudeAgent, readCheckpoints, type AgentRunResult, type CheckpointEntry } from '../../lythoskill-test-utils/src/bdd-runner.ts'
+import { createSanitizer } from '../../lythoskill-test-utils/src/sanitize.ts'
 
 // ── 类型定义 ──────────────────────────────────────────────────
 
@@ -455,7 +457,8 @@ function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   }
 
   // Create a local deck CLI wrapper so the agent can use `./deck <cmd>`
-  const deckCliPath = resolve(import.meta.dir, '..', 'src', 'cli.ts')
+  // Use a relative path so the wrapper is portable across machines.
+  const deckCliPath = relative(workdir, resolve(import.meta.dir, '..', 'src', 'cli.ts'))
   const wrapperPath = join(workdir, 'deck')
   writeFileSync(
     wrapperPath,
@@ -551,6 +554,8 @@ async function runLLMJudge(
   return { verdict, raw, error }
 }
 
+const PROJECT_ROOT = resolve(import.meta.dir, '..', '..', '..')
+
 export async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
   const start = performance.now()
   setupAgentWorkdir(scenario, workdir)
@@ -561,9 +566,16 @@ export async function runAgentScenario(scenario: AgentScenario, workdir: string)
     timeoutMs: scenario.timeout,
   })
 
+  // Sanitize absolute paths in artifacts for portability
+  const sanitizer = createSanitizer({
+    projectRoot: PROJECT_ROOT,
+    homeDir: homedir(),
+    workDir: workdir,
+  })
+
   // Persist agent output for debugging / review
-  writeFileSync(join(workdir, 'agent-stdout.txt'), agentResult.stdout, 'utf-8')
-  writeFileSync(join(workdir, 'agent-stderr.txt'), agentResult.stderr, 'utf-8')
+  writeFileSync(join(workdir, 'agent-stdout.txt'), sanitizer.sanitize(agentResult.stdout), 'utf-8')
+  writeFileSync(join(workdir, 'agent-stderr.txt'), sanitizer.sanitize(agentResult.stderr), 'utf-8')
 
   const checkpoints = readCheckpoints(workdir)
   const errors: string[] = []
