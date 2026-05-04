@@ -568,24 +568,34 @@ async function main(): Promise<void> {
 
   const totalScenarios = cliScenarios.length + agentScenarios.length
   console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentScenarios.length} 个 Agent 场景`)
-  console.log(`📁 Agent BDD 产物保留在 runs/ 下供 review\n`)
 
   const now = new Date()
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
-  const runsDir = join(import.meta.dir, '..', '..', '..', 'playground', 'test-runs', stamp)
-  mkdirSync(runsDir, { recursive: true })
+
+  // CLI BDD: ephemeral sandbox (ignored) — nested git repos / cold-pool dirs / .bak.<ts> files live here
+  const cliSandboxDir = join(import.meta.dir, '..', '..', '..', 'playground', 'test-runs', stamp)
+  // Agent BDD: tracked report dir — pure-text evidence (stdout / stderr / _checkpoints / input snapshot)
+  const agentReportDir = join(import.meta.dir, '..', '..', '..', 'runs', 'agent-bdd', stamp)
+
+  mkdirSync(cliSandboxDir, { recursive: true })
+  if (agentScenarios.length > 0) {
+    mkdirSync(agentReportDir, { recursive: true })
+    console.log(`📁 Agent BDD evidence → runs/agent-bdd/${stamp}/ (tracked)\n`)
+  } else {
+    console.log()
+  }
 
   const results: Result[] = []
 
-  // Run CLI BDD scenarios
+  // Run CLI BDD scenarios in sandbox
   for (const s of cliScenarios) {
-    const r = await runScenario(s, runsDir)
+    const r = await runScenario(s, cliSandboxDir)
     results.push(r)
   }
 
-  // Run Agent BDD scenarios
+  // Run Agent BDD scenarios in tracked report dir
   for (const s of agentScenarios) {
-    const workdir = join(runsDir, s.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
+    const workdir = join(agentReportDir, s.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
     const r = await runAgentScenario(s, workdir)
     results.push(r)
   }

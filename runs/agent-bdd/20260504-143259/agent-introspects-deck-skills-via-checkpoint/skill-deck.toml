@@ -1,0 +1,7 @@
+[deck]
+
+[tool.skills.skill-a]
+path = "github.com/foo/bar/skill-a"
+
+[tool.skills.skill-b]
+path = "github.com/foo/bar/skill-b"

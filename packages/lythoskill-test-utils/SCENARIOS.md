@@ -104,6 +104,7 @@ Convention:
 - Verification: automated judge for tracer bullet (checkpoint shape assertions); LLM judge for semantic scenarios (T8+)
 - Pass/fail into separate report — never the green CI badge
 - Timeout: 300s default (agent BDD is token-heavy; observability via `agent-stdout.txt` + `agent-stderr.txt` + `_checkpoints/*.jsonl`)
+- **Evidence path**: `runs/agent-bdd/<stamp>/<scenario-slug>/` — tracked in git, pure-text only. CLI BDD sandbox stays in `playground/test-runs/` (gitignored, may contain nested git repos / cold-pool fixtures / `.bak.<ts>` files). Sandbox vs report split keeps repo clean and is forward-compatible with future docker/sandbox isolation.
 
 ---
 

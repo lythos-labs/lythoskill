@@ -27,5 +27,6 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
 [tool.skills.lythoskill-coach]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-coach"
 
-[tool.skills.lythoskill-creator]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-creator"
+[tool.skills.bdd-lythos]
+path = "localhost/bdd-lythos"
+role = "Fork: fuses BDD methodology + Gherkin production, Bun-native, lythoskill-adapted"
