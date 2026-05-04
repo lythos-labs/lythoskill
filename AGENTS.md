@@ -95,6 +95,60 @@ Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./co
 
 ---
 
+## Architecture: Intent / Plan / Execute (Fractal Pattern)
+
+Every CLI command, test harness, and arena run decomposes into three layers. The pattern repeats at every scale — you get value at any layer you stop at.
+
+```
+Intent (DSL)   →  Plan (pure data)  →  Execute (IO with injectable adapters)
+arena.toml      →  ExecutionPlan     →  runArenaFromToml
+deck config     →  RefreshPlan       →  executeRefreshPlan
+.agent.md       →  AgentScenario     →  runAgentScenario
+```
+
+### Layer responsibilities
+
+| Layer | What | Test strategy |
+|-------|------|---------------|
+| **Intent** | Declarative input (TOML, markdown, Zod schema). Version-controlled, agent-auditable | Schema validation |
+| **Plan** | Pure function `buildXPlan(input, opts)` → typed data structure. Zero side effects | Unit tests |
+| **Execute** | `executeXPlan(plan, io)` where `io = { spawn, delete, log, ... }` with defaults | Mock injection |
+
+### Why this matters in practice
+
+1. **Dry-run emerges naturally**: print the plan, skip execution
+2. **Coverage without IO**: pure plan functions unit-test without git clone / agent spawn / `rm -rf`
+3. **Expected log = spec**: inject `log: capture[]` → diff against expected output → testable
+4. **Training signal**: agent actual log vs expected log → delta shows what went wrong
+5. **`--yes` / non-interactive emerges naturally**: `io.confirm = () => true`
+
+### The IO injection table
+
+| IO function | Production default | Test swap |
+|-------------|-------------------|-----------|
+| `spawn` | `Bun.spawn` / `spawnSync` | return `{ status, stdout, stderr }` |
+| `delete` | `rmSync` | no-op |
+| `log` | `console.log` | push to capture buffer |
+| `gitPull` | `execSync git pull` | return `{ status, message }` |
+| `linkDeck` | call `linkDeck()` | no-op |
+
+### When to apply
+
+- When a function mixes logic (filtering, classification, branching) with IO (spawn, fs, network)
+- When test coverage is low because IO can't run in CI
+- When the same logic needs different IO backends
+- When `--dry-run` would be useful to the user or agent
+
+### When NOT to apply
+
+- Pure data transforms (already no IO)
+- Trivial wrappers (over-abstraction)
+- One-shot scripts (testability not beneficial)
+
+Full pattern documentation: [cortex/wiki/01-patterns/intent-plan-execute-fractal-architecture-pattern.md](./cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
+
+---
+
 ## Common Commands
 
 All commands run from the repository root.
