@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 22:44:19
+> 自动生成于 2026/5/4 22:53:22
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 78 | 进行中: 0, 待验收: 0, 已完成: 54 |
-| Epics | 12 | 活跃: 1, 已完成: 8, 悬置: 1, 已归档: 2 |
+| Tasks | 78 | 进行中: 0, 待验收: 0, 已完成: 55 |
+| Epics | 12 | 活跃: 0, 已完成: 9, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260504183618345**: Unify Agent BDD & Arena: shared runner + structured Judge schema
+_无_
 
 ### 已完成
 
@@ -28,6 +28,7 @@
 - ✅ **EPIC-20260503234346583**: Verification coverage for deck — TDD unit + Agent BDD (leetcode-shape + LLM judge)
 - ✅ **EPIC-20260504165156064**: Extract cortex husky hooks to testable TypeScript modules
 - ✅ **EPIC-20260504170744839**: Fix Agent BDD stability — parseAgentMd Given paths and prune timeout
+- ✅ **EPIC-20260504183618345**: Unify Agent BDD & Arena: shared runner + structured Judge schema
 
 ### 悬置
 
@@ -42,12 +43,11 @@
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (3)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260504183708932**: T4: Migrate arena to unified runner (multi-variant + comparative judge mode + Pareto output)
 
 ### 进行中 (0)
 
@@ -57,7 +57,7 @@ _无_
 
 _无_
 
-### 已完成 (54)
+### 已完成 (55)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -110,6 +110,7 @@ _无_
 - ✅ ~~TASK-20260504183628823~~: T1: Extract runAgentScenario / parseAgentMd / Judge core from deck to test-utils (variant-aware)
 - ✅ ~~TASK-20260504183637828~~: T2: Structured Judge schema (Zod-first) — ADR + implementation
 - ✅ ~~TASK-20260504183646317~~: T3: Migrate deck Agent BDD to unified runner (single+absolute mode, regression 26/26)
+- ✅ ~~TASK-20260504183708932~~: T4: Migrate arena to unified runner (multi-variant + comparative judge mode + Pareto output)
 - ✅ ~~TASK-20260504194307589~~: Split bdd-runner.test.ts: pure unit tests vs Agent BDD tracer (runClaudeAgent)
 - ✅ ~~TASK-20260504194315989~~: Add test-utils pure unit tests to CI test workflow (test:all or independent step)
 - ✅ ~~TASK-20260504194319386~~: Align CI coverage scope: include test-utils pure logic, exclude agent spawn layer

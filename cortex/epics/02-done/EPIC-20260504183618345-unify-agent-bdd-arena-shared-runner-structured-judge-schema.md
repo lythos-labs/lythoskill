@@ -11,6 +11,7 @@ checklist_skipped_reason: "Design discussed: arena = N-run agent BDD with compar
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-04 | Created |
+| done | 2026-05-04 | Done |
 
 ## 背景故事
 
