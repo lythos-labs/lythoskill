@@ -8,7 +8,7 @@
  */
 
 import { parse as parseToml } from "@iarna/toml";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { resolve, dirname, join, relative } from "node:path";
 import { findDeckToml, expandHome, findSource, linkDeck } from "./link.js";
@@ -21,8 +21,37 @@ interface RefreshResult {
   message?: string;
 }
 
-function isGitRepo(dir: string): boolean {
-  return existsSync(join(dir, ".git"));
+export function findGitRoot(dir: string, coldPool: string): string | null {
+  // Standalone skill: .git directly in skill dir
+  if (existsSync(join(dir, ".git"))) {
+    return dir;
+  }
+
+  try {
+    const out = execSync("git rev-parse --show-toplevel", {
+      cwd: dir,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    const resolvedRoot = realpathSync(out);
+    const resolvedDir = realpathSync(dir);
+    const resolvedColdPool = realpathSync(coldPool);
+
+    // Must be an ancestor of dir (standalone case handled above)
+    if (!resolvedDir.startsWith(resolvedRoot + "/")) {
+      return null;
+    }
+
+    // Must be within cold_pool — prevents finding an unrelated git repo outside
+    if (resolvedRoot === resolvedColdPool || resolvedRoot.startsWith(resolvedColdPool + "/")) {
+      return out;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function gitPull(dir: string): { status: "updated" | "up-to-date" | "failed"; message: string } {
@@ -131,13 +160,14 @@ export function refreshDeck(cliDeckPath?: string, cliWorkdir?: string, target?: 
       continue;
     }
 
-    if (!isGitRepo(path)) {
-      results.push({ name: item.alias, path: relativePath, status: "not-git", message: "Not a git repository" });
+    const gitRoot = findGitRoot(path, COLD_POOL);
+    if (!gitRoot) {
+      results.push({ name: item.alias, path: relativePath, status: "not-git", message: "skipped: not a git repository" });
       skipped++;
       continue;
     }
 
-    const pullResult = gitPull(path);
+    const pullResult = gitPull(gitRoot);
     results.push({ name: item.alias, path: relativePath, status: pullResult.status, message: pullResult.message });
 
     if (pullResult.status === "updated") updated++;
