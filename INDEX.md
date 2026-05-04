@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 23:18:00
+> 自动生成于 2026/5/4 23:23:12
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 83 | 进行中: 0, 待验收: 0, 已完成: 60 |
-| Epics | 13 | 活跃: 0, 已完成: 10, 悬置: 1, 已归档: 2 |
+| Tasks | 88 | 进行中: 0, 待验收: 0, 已完成: 61 |
+| Epics | 14 | 活跃: 1, 已完成: 10, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
 
 ### 已完成
 
@@ -44,11 +44,15 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (7)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
+- [ ] **TASK-20260504231946234**: T2: Extract pure PrunePlan from prune: scan cold pool vs declared = unreferenced candidates (no fs delete)
+- [ ] **TASK-20260504231947970**: T3: Inject workdir/coldPool/deckPath as explicit params for both refresh and prune
+- [ ] **TASK-20260504231949003**: T4: Unit tests for RefreshPlan + PrunePlan correctness (edge cases: localhost, nested git, missing)
+- [ ] **TASK-20260504231950061**: T5: Agent BDD scenarios for refresh + prune execution (LLM code audit, not real git)
 
 ### 进行中 (0)
 
@@ -58,7 +62,7 @@ _无_
 
 _无_
 
-### 已完成 (60)
+### 已完成 (61)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -120,6 +124,7 @@ _无_
 - ✅ ~~TASK-20260504230521082~~: T3: runs_per_side statistical aggregation (mean, variance, confidence)
 - ✅ ~~TASK-20260504230521853~~: T4: Declarative reconciler: arena.toml → ArenaManifest → runAgentScenario per side × runs
 - ✅ ~~TASK-20260504230523260~~: T5: CLI integration + end-to-end BDD (arena run --config arena.toml)
+- ✅ ~~TASK-20260504231944285~~: T1: Extract pure RefreshPlan from refreshDeck: resolve config + build target list (no git IO)
 
 ### 悬置 (0)
 
