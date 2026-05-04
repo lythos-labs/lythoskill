@@ -1,70 +1,27 @@
 import { mkdirSync, rmSync, existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { useAgent } from './agents'
 
 // ── Checkpoint schema (Agent BDD substrate) ───────────────────────────────
 
-export interface FsMutation {
-  action: 'create' | 'modify' | 'delete' | 'create-symlink'
-  path: string
-  target?: string
-}
-
-export interface CheckpointEntry {
-  step: string
-  tool: string
-  args: string[]
-  exit_code?: number
-  stdout_summary?: string
-  fs_mutations?: FsMutation[]
-  final_state?: Record<string, unknown>
-  timestamp: string
-}
-
-export interface AgentRunResult {
-  stdout: string
-  stderr: string
-  code: number
-  durationMs: number
-  checkpoints: CheckpointEntry[]
-}
+export type { FsMutation, CheckpointEntry, AgentRunResult } from './agents/types'
 
 export async function runClaudeAgent(opts: {
   cwd: string
   brief: string
   timeoutMs?: number
   env?: Record<string, string>
-}): Promise<AgentRunResult> {
-  const { cwd, brief, timeoutMs = 60000, env = {} } = opts
-
-  if (!Bun.which('claude')) {
-    throw new Error('claude not found in PATH')
-  }
-
-  const start = Date.now()
-
-  const proc = Bun.spawn(['claude', '-p', '--dangerously-skip-permissions'], {
-    cwd,
-    stdin: new TextEncoder().encode(brief),
-    env: { ...process.env, FORCE_COLOR: '0', ...env },
+}): Promise<import('./agents/types').AgentRunResult> {
+  return useAgent('claude').spawn({
+    cwd: opts.cwd,
+    brief: opts.brief,
+    timeoutMs: opts.timeoutMs ?? 60000,
+    env: opts.env,
   })
-
-  const timeout = setTimeout(() => proc.kill(), timeoutMs)
-
-  await proc.exited
-  clearTimeout(timeout)
-
-  const durationMs = Date.now() - start
-  const stdout = await new Response(proc.stdout).text()
-  const stderr = await new Response(proc.stderr).text()
-  const code = proc.exitCode ?? 1
-
-  const checkpoints = readCheckpoints(cwd)
-
-  return { stdout, stderr, code, durationMs, checkpoints }
 }
 
-export function readCheckpoints(cwd: string): CheckpointEntry[] {
+export function readCheckpoints(cwd: string): import('./agents/types').CheckpointEntry[] {
   const checkpointDir = join(cwd, '_checkpoints')
   if (!existsSync(checkpointDir)) return []
 
@@ -72,14 +29,14 @@ export function readCheckpoints(cwd: string): CheckpointEntry[] {
     .filter(f => f.endsWith('.jsonl'))
     .sort()
 
-  const entries: CheckpointEntry[] = []
+  const entries: import('./agents/types').CheckpointEntry[] = []
   for (const file of files) {
     const content = readFileSync(join(checkpointDir, file), 'utf-8')
     for (const line of content.split('\n')) {
       const trimmed = line.trim()
       if (!trimmed) continue
       try {
-        entries.push(JSON.parse(trimmed) as CheckpointEntry)
+        entries.push(JSON.parse(trimmed))
       } catch {
         // skip malformed lines
       }

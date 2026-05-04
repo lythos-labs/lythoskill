@@ -5,6 +5,9 @@ import { homedir } from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { runClaudeAgent, readCheckpoints, type AgentRunResult, type CheckpointEntry } from '../../lythoskill-test-utils/src/bdd-runner.ts'
 import { createSanitizer } from '../../lythoskill-test-utils/src/sanitize.ts'
+import { parseAgentMd, type AgentScenario, type JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
+import { buildJudgePrompt, runLLMJudge } from '../../lythoskill-test-utils/src/judge'
+import { useAgent } from '../../lythoskill-test-utils/src/agents'
 
 // ── 类型定义 ──────────────────────────────────────────────────
 
@@ -342,106 +345,7 @@ export async function runParallel(scenarios: Scenario[], runsDir: string, concur
 
 // ── Agent BDD extensions ──────────────────────────────────────
 
-interface AgentScenario {
-  name: string
-  description: string
-  timeout: number
-  given: {
-    deck: Scenario['given']['deck']
-  }
-  when: string
-  then: string[]
-  judge: string
-}
-
-export function parseAgentMd(content: string): AgentScenario {
-  const lines = content.split('\n')
-  if (lines[0].trim() !== '---') {
-    throw new Error('Invalid .agent.md: missing frontmatter')
-  }
-  const endIdx = lines.findIndex((l, i) => i > 0 && l.trim() === '---')
-  if (endIdx === -1) {
-    throw new Error('Invalid .agent.md: frontmatter not closed')
-  }
-
-  const fmLines = lines.slice(1, endIdx)
-  const body = lines.slice(endIdx + 1).join('\n')
-
-  let name = 'unnamed agent scenario'
-  let description = ''
-  let timeout = 30000
-
-  for (const line of fmLines) {
-    const colonIdx = line.indexOf(':')
-    if (colonIdx === -1) continue
-    const key = line.slice(0, colonIdx).trim()
-    let value = line.slice(colonIdx + 1).trim()
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1)
-    }
-    if (key === 'name') name = value
-    if (key === 'description') description = value
-    if (key === 'timeout') timeout = Number(value) || 30000
-  }
-
-  // Extract sections
-  const sectionRegex = /##\s*(Given|When|Then|Judge)\s*\n/i
-  const sections: Record<string, string> = {}
-  let pos = 0
-  while (true) {
-    const match = body.slice(pos).match(sectionRegex)
-    if (!match) break
-    const secStart = pos + match.index! + match[0].length
-    const nextMatch = body.slice(secStart).match(sectionRegex)
-    const secEnd = nextMatch ? secStart + nextMatch.index! : body.length
-    sections[match[1].toLowerCase()] = body.slice(secStart, secEnd).trim()
-    pos = secStart
-  }
-
-  if (!sections.when) {
-    throw new Error('Invalid .agent.md: missing ## When')
-  }
-
-  // Parse Given — look for deck declaration bullets
-  const givenDeck: Scenario['given']['deck'] = {}
-  const givenText = sections.given || ''
-  const toolMatch = givenText.match(/tool skills?:\s*([^\n]+)/i)
-  if (toolMatch) {
-    const items = toolMatch[1].split(/,\s*/).map(s => s.trim()).filter(Boolean)
-    givenDeck.tool = {}
-    for (const item of items) {
-      // Support "alias (localhost)" syntax for path-prefix override
-      let alias = item
-      let path = `github.com/foo/bar/${item}`
-      const parenMatch = item.match(/^([^(]+)\s*\(([^)]+)\)\s*$/)
-      if (parenMatch) {
-        alias = parenMatch[1].trim()
-        path = `${parenMatch[2].trim()}/${alias}`
-      }
-      (givenDeck.tool as Record<string, SkillEntryLike>)[alias] = { path }
-    }
-  }
-
-  // Parse Then bullets
-  const thenBullets: string[] = []
-  const thenText = sections.then || ''
-  for (const line of thenText.split('\n')) {
-    const trimmed = line.trim()
-    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-      thenBullets.push(trimmed.slice(2).trim())
-    }
-  }
-
-  return {
-    name,
-    description,
-    timeout,
-    given: { deck: givenDeck },
-    when: sections.when,
-    then: thenBullets,
-    judge: sections.judge || '',
-  }
-}
+export { parseAgentMd } from '../../lythoskill-test-utils/src/agent-bdd'
 
 function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   if (existsSync(workdir)) rmSync(workdir, { recursive: true, force: true })
@@ -469,90 +373,7 @@ function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
 
 // ── LLM Judge (Hybrid Judge: semantic evaluation) ─────────────
 
-interface JudgeCriterion {
-  name: string
-  passed: boolean
-  note?: string
-}
-
-interface JudgeVerdict {
-  verdict: 'PASS' | 'FAIL'
-  reason: string
-  criteria: JudgeCriterion[]
-}
-
-function buildJudgePrompt(
-  scenario: AgentScenario,
-  agentResult: AgentRunResult,
-  checkpoints: CheckpointEntry[]
-): string {
-  return `You are a test judge evaluating whether an AI agent correctly executed a task.
-
-## Task Instructions
-${scenario.when}
-
-## Evaluation Criteria
-${scenario.judge}
-
-## Evidence
-
-### Agent stdout
-${agentResult.stdout}
-
-### Agent stderr
-${agentResult.stderr}
-
-### Checkpoints
-${JSON.stringify(checkpoints, null, 2)}
-
-## Your Job
-Evaluate the agent's execution against the Evaluation Criteria above.
-Return ONLY a JSON object with this exact shape:
-{
-  "verdict": "PASS" | "FAIL",
-  "reason": "One sentence summary of your decision",
-  "criteria": [
-    {"name": "criterion 1 description", "passed": true, "note": "optional detail"},
-    ...
-  ]
-}
-
-No markdown fences, no commentary outside JSON.`
-}
-
-async function runLLMJudge(
-  scenario: AgentScenario,
-  agentResult: AgentRunResult,
-  checkpoints: CheckpointEntry[],
-  workdir: string
-): Promise<{ verdict: JudgeVerdict | null; raw: string; error?: string }> {
-  const prompt = buildJudgePrompt(scenario, agentResult, checkpoints)
-
-  const judgeResult = await runClaudeAgent({
-    cwd: workdir,
-    brief: prompt,
-    timeoutMs: 60000,
-  })
-
-  const raw = judgeResult.stdout
-  let verdict: JudgeVerdict | null = null
-  let error: string | undefined
-
-  try {
-    // Extract JSON from output — may be wrapped in markdown fences or inline
-    const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-    const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
-    verdict = JSON.parse(jsonStr) as JudgeVerdict
-    if (!verdict.verdict || !['PASS', 'FAIL'].includes(verdict.verdict)) {
-      error = `Invalid verdict value: ${JSON.stringify(verdict.verdict)}`
-      verdict = null
-    }
-  } catch (e) {
-    error = `Failed to parse judge output as JSON: ${e instanceof Error ? e.message : String(e)}`
-  }
-
-  return { verdict, raw, error }
-}
+export type { JudgeCriterion, JudgeVerdict } from '../../lythoskill-test-utils/src/agent-bdd'
 
 const PROJECT_ROOT = resolve(import.meta.dir, '..', '..', '..')
 
@@ -611,7 +432,7 @@ export async function runAgentScenario(scenario: AgentScenario, workdir: string)
   // ── LLM Judge: semantic evaluation from ## Judge section ───────
   let llmJudgeResult: Awaited<ReturnType<typeof runLLMJudge>> | null = null
   if (scenario.judge) {
-    llmJudgeResult = await runLLMJudge(scenario, agentResult, checkpoints, workdir)
+    llmJudgeResult = await runLLMJudge(scenario, agentResult, checkpoints, workdir, useAgent('claude'))
 
     writeFileSync(
       join(workdir, 'judge-verdict.json'),

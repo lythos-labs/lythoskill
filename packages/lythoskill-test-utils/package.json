@@ -5,7 +5,10 @@
   "main": "./src/index.ts",
   "exports": {
     "./bdd-runner": "./src/bdd-runner.ts",
-    "./skill-fixtures": "./src/skill-fixtures.ts"
+    "./skill-fixtures": "./src/skill-fixtures.ts",
+    "./agent-bdd": "./src/agent-bdd.ts",
+    "./judge": "./src/judge.ts",
+    "./agents": "./src/agents/index.ts"
   },
   "license": "MIT",
   "publishConfig": {
