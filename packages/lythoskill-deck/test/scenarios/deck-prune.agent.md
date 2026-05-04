@@ -8,7 +8,7 @@ timeout: 300000
 ---
 
 ## Given
-- skill-deck.toml with tool skills: skill-a
+- skill-deck.toml with tool skills: skill-a (localhost)
 
 ## When
 1. Create cold-pool/skill-a/SKILL.md and cold-pool/skill-b/SKILL.md with minimal content.

@@ -48,9 +48,23 @@ function scanColdPoolRepos(coldPool: string): string[] {
     for (const host of readdirSync(coldPool, { withFileTypes: true })) {
       if (!host.isDirectory() || host.name.startsWith(".")) continue;
       const hostPath = join(coldPool, host.name);
+
+      // Flat skill: cold-pool/skill-name/ (localhost style)
+      if (existsSync(join(hostPath, "SKILL.md"))) {
+        repos.push(hostPath);
+        continue;
+      }
+
       for (const owner of readdirSync(hostPath, { withFileTypes: true })) {
         if (!owner.isDirectory() || owner.name.startsWith(".")) continue;
         const ownerPath = join(hostPath, owner.name);
+
+        // Standalone repo: cold-pool/host.tld/owner/repo/
+        if (existsSync(join(ownerPath, "SKILL.md"))) {
+          repos.push(ownerPath);
+          continue;
+        }
+
         for (const repo of readdirSync(ownerPath, { withFileTypes: true })) {
           if (!repo.isDirectory() || repo.name.startsWith(".")) continue;
           repos.push(join(ownerPath, repo.name));

@@ -20,6 +20,7 @@ checklist_skipped_reason: agent execution, checklist verified verbally
 | active | 2026-05-03 | Created — ADR-20260503180000000 accepted, framework = bun:test |
 | active | 2026-05-04 | Scope expanded: 加入 Agent BDD 侧(`*.agent.md` via `bdd-runner.ts` 扩展 + 结构化产物 + LLM judge);标题 "unit test coverage" → "verification coverage" |
 | active | 2026-05-04 | T7-T9 task cards created via cortex CLI(`TASK-20260504004947351` / `004954526` / `005000534`);依赖链 T7 → T8 → T9 |
+| done | 2026-05-04 | Done |
 
 ## 背景故事
 

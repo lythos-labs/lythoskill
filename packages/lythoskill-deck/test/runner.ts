@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync, chmodSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { runClaudeAgent, readCheckpoints } from '../../lythoskill-test-utils/src/bdd-runner.ts'
+import { runClaudeAgent, readCheckpoints, type AgentRunResult, type CheckpointEntry } from '../../lythoskill-test-utils/src/bdd-runner.ts'
 
 // ── 类型定义 ──────────────────────────────────────────────────
 
@@ -352,7 +352,7 @@ interface AgentScenario {
   judge: string
 }
 
-function parseAgentMd(content: string): AgentScenario {
+export function parseAgentMd(content: string): AgentScenario {
   const lines = content.split('\n')
   if (lines[0].trim() !== '---') {
     throw new Error('Invalid .agent.md: missing frontmatter')
@@ -405,12 +405,18 @@ function parseAgentMd(content: string): AgentScenario {
   const givenText = sections.given || ''
   const toolMatch = givenText.match(/tool skills?:\s*([^\n]+)/i)
   if (toolMatch) {
-    const aliases = toolMatch[1].split(/,\s*/).map(s => s.trim()).filter(Boolean)
+    const items = toolMatch[1].split(/,\s*/).map(s => s.trim()).filter(Boolean)
     givenDeck.tool = {}
-    for (const alias of aliases) {
-      (givenDeck.tool as Record<string, SkillEntryLike>)[alias] = {
-        path: `github.com/foo/bar/${alias}`,
+    for (const item of items) {
+      // Support "alias (localhost)" syntax for path-prefix override
+      let alias = item
+      let path = `github.com/foo/bar/${item}`
+      const parenMatch = item.match(/^([^(]+)\s*\(([^)]+)\)\s*$/)
+      if (parenMatch) {
+        alias = parenMatch[1].trim()
+        path = `${parenMatch[2].trim()}/${alias}`
       }
+      (givenDeck.tool as Record<string, SkillEntryLike>)[alias] = { path }
     }
   }
 
@@ -458,7 +464,94 @@ function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   chmodSync(wrapperPath, 0o755)
 }
 
-async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
+// ── LLM Judge (Hybrid Judge: semantic evaluation) ─────────────
+
+interface JudgeCriterion {
+  name: string
+  passed: boolean
+  note?: string
+}
+
+interface JudgeVerdict {
+  verdict: 'PASS' | 'FAIL'
+  reason: string
+  criteria: JudgeCriterion[]
+}
+
+function buildJudgePrompt(
+  scenario: AgentScenario,
+  agentResult: AgentRunResult,
+  checkpoints: CheckpointEntry[]
+): string {
+  return `You are a test judge evaluating whether an AI agent correctly executed a task.
+
+## Task Instructions
+${scenario.when}
+
+## Evaluation Criteria
+${scenario.judge}
+
+## Evidence
+
+### Agent stdout
+${agentResult.stdout}
+
+### Agent stderr
+${agentResult.stderr}
+
+### Checkpoints
+${JSON.stringify(checkpoints, null, 2)}
+
+## Your Job
+Evaluate the agent's execution against the Evaluation Criteria above.
+Return ONLY a JSON object with this exact shape:
+{
+  "verdict": "PASS" | "FAIL",
+  "reason": "One sentence summary of your decision",
+  "criteria": [
+    {"name": "criterion 1 description", "passed": true, "note": "optional detail"},
+    ...
+  ]
+}
+
+No markdown fences, no commentary outside JSON.`
+}
+
+async function runLLMJudge(
+  scenario: AgentScenario,
+  agentResult: AgentRunResult,
+  checkpoints: CheckpointEntry[],
+  workdir: string
+): Promise<{ verdict: JudgeVerdict | null; raw: string; error?: string }> {
+  const prompt = buildJudgePrompt(scenario, agentResult, checkpoints)
+
+  const judgeResult = await runClaudeAgent({
+    cwd: workdir,
+    brief: prompt,
+    timeoutMs: 60000,
+  })
+
+  const raw = judgeResult.stdout
+  let verdict: JudgeVerdict | null = null
+  let error: string | undefined
+
+  try {
+    // Extract JSON from output — may be wrapped in markdown fences or inline
+    const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+    const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+    verdict = JSON.parse(jsonStr) as JudgeVerdict
+    if (!verdict.verdict || !['PASS', 'FAIL'].includes(verdict.verdict)) {
+      error = `Invalid verdict value: ${JSON.stringify(verdict.verdict)}`
+      verdict = null
+    }
+  } catch (e) {
+    error = `Failed to parse judge output as JSON: ${e instanceof Error ? e.message : String(e)}`
+  }
+
+  return { verdict, raw, error }
+}
+
+export async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
   const start = performance.now()
   setupAgentWorkdir(scenario, workdir)
 
@@ -501,6 +594,52 @@ async function runAgentScenario(scenario: AgentScenario, workdir: string): Promi
 
   if (agentResult.code !== 0) {
     errors.push(`agent exit code: ${agentResult.code}`)
+  }
+
+  // ── LLM Judge: semantic evaluation from ## Judge section ───────
+  let llmJudgeResult: Awaited<ReturnType<typeof runLLMJudge>> | null = null
+  if (scenario.judge) {
+    llmJudgeResult = await runLLMJudge(scenario, agentResult, checkpoints, workdir)
+
+    writeFileSync(
+      join(workdir, 'judge-verdict.json'),
+      JSON.stringify(
+        {
+          verdict: llmJudgeResult.verdict?.verdict ?? null,
+          reason: llmJudgeResult.verdict?.reason ?? null,
+          criteria: llmJudgeResult.verdict?.criteria ?? null,
+          raw_output: llmJudgeResult.raw,
+          error: llmJudgeResult.error ?? null,
+          timestamp: new Date().toISOString(),
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
+
+    if (llmJudgeResult.verdict?.verdict === 'FAIL') {
+      errors.push(`LLM judge: ${llmJudgeResult.verdict.reason}`)
+    } else if (llmJudgeResult.error) {
+      // Judge infrastructure failure: log but don't fail the test
+      // (observability should not be a hard gate)
+      console.warn(`⚠️  LLM judge error for "${scenario.name}": ${llmJudgeResult.error}`)
+    }
+  } else {
+    writeFileSync(
+      join(workdir, 'judge-verdict.json'),
+      JSON.stringify(
+        {
+          verdict: null,
+          reason: 'No ## Judge section in scenario',
+          error: null,
+          timestamp: new Date().toISOString(),
+        },
+        null,
+        2
+      ),
+      'utf-8'
+    )
   }
 
   const duration = performance.now() - start
@@ -603,4 +742,6 @@ async function main(): Promise<void> {
   process.exit(passed === results.length ? 0 : 1)
 }
 
-main()
+if (import.meta.main) {
+  main()
+}

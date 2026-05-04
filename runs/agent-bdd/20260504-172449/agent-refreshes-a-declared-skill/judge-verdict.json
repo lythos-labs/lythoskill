@@ -1,0 +1,24 @@
+{
+  "verdict": "PASS",
+  "reason": "All evaluation criteria are satisfied: refresh was executed for skill-a, output indicated localhost skip, and checkpoint matches expected schema exactly.",
+  "criteria": [
+    {
+      "name": "Refresh command executed for skill-a",
+      "passed": true,
+      "note": "Evidence confirms `./deck refresh skill-a` was run"
+    },
+    {
+      "name": "Output indicates localhost skills are skipped",
+      "passed": true,
+      "note": "Output reported 'Skipped: 1' with 'localhost skill — refresh skipped, no git fetch'"
+    },
+    {
+      "name": "Checkpoint shape matches expected schema",
+      "passed": true,
+      "note": "Checkpoint contains exact fields: step, tool, args, final_state.result='skipped-localhost'"
+    }
+  ],
+  "raw_output": "{\n  \"verdict\": \"PASS\",\n  \"reason\": \"All evaluation criteria are satisfied: refresh was executed for skill-a, output indicated localhost skip, and checkpoint matches expected schema exactly.\",\n  \"criteria\": [\n    {\"name\": \"Refresh command executed for skill-a\", \"passed\": true, \"note\": \"Evidence confirms `./deck refresh skill-a` was run\"},\n    {\"name\": \"Output indicates localhost skills are skipped\", \"passed\": true, \"note\": \"Output reported 'Skipped: 1' with 'localhost skill — refresh skipped, no git fetch'\"},\n    {\"name\": \"Checkpoint shape matches expected schema\", \"passed\": true, \"note\": \"Checkpoint contains exact fields: step, tool, args, final_state.result='skipped-localhost'\"}\n  ]\n}\n",
+  "error": null,
+  "timestamp": "2026-05-04T09:26:42.547Z"
+}

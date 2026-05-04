@@ -79,6 +79,15 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
     if (existsSync(join(directPath, "SKILL.md"))) return { path: directPath };
   }
 
+  // 0.5 localhost skills: localhost/skill → cold_pool/skill
+  if (name.startsWith('localhost/')) {
+    const skill = name.slice('localhost/'.length);
+    if (skill) {
+      const localPath = join(coldPool, skill);
+      if (existsSync(join(localPath, "SKILL.md"))) return { path: localPath };
+    }
+  }
+
   // 1. 直接路径
   const direct = resolve(coldPool, name);
   if (existsSync(join(direct, "SKILL.md"))) return { path: direct };

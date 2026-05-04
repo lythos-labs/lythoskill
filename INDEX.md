@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 16:34:08
+> 自动生成于 2026/5/4 16:51:48
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 65 | 进行中: 0, 待验收: 0, 已完成: 45 |
-| Epics | 9 | 活跃: 1, 已完成: 5, 悬置: 1, 已归档: 2 |
+| Epics | 9 | 活跃: 0, 已完成: 6, 悬置: 1, 已归档: 2 |
 | ADRs | 37 | 已接受: 26 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260503234346583**: Verification coverage for deck — TDD unit + Agent BDD (leetcode-shape + LLM judge)
+_无_
 
 ### 已完成
 
@@ -25,6 +25,7 @@
 - ✅ **EPIC-20260430174751856**: deck add — one-command skill acquisition with pluggable download backends
 - ✅ **EPIC-20260501091716524**: Onboarding friction reduction — boost README and AGENTS.md UX from 6.5 to 8.5
 - ✅ **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
+- ✅ **EPIC-20260503234346583**: Verification coverage for deck — TDD unit + Agent BDD (leetcode-shape + LLM judge)
 
 ### 悬置
 

@@ -1,0 +1,6 @@
+Done. Here's what happened:
+
+1. **Created** `cold-pool/skill-a/SKILL.md` and `cold-pool/skill-b/SKILL.md` with minimal frontmatter and content.
+2. **Ran** `./deck link` — established the working set, linking `skill-a` (as declared in `skill-deck.toml`).
+3. **Ran** `./deck prune --yes` — garbage-collected the unreferenced `skill-b` repo (1 deleted).
+4. **Wrote** `_checkpoints/prune.jsonl` with the exact shape you specified, capturing `pruned: 1` and `retained: ["skill-a"]`.

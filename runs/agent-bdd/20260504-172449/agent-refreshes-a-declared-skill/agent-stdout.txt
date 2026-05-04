@@ -1,0 +1,6 @@
+All four steps complete:
+
+1. Created `cold-pool/skill-a/SKILL.md` with `# skill-a\n`.
+2. `./deck link` linked 1 skill (skill-a).
+3. `./deck refresh skill-a` reported `Skipped: 1` (localhost skill — refresh skipped, no git fetch).
+4. Wrote checkpoint to `_checkpoints/refresh.jsonl` with the exact shape specified.
