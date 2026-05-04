@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/5 00:06:10
+> 自动生成于 2026/5/5 00:15:41
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 93 | 进行中: 0, 待验收: 0, 已完成: 70 |
+| Tasks | 94 | 进行中: 1, 待验收: 0, 已完成: 70 |
 | Epics | 15 | 活跃: 0, 已完成: 12, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
@@ -52,9 +52,9 @@ _无_
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260505001534316**: Extract buildClaudeCommand from claudeAdapter.spawn: pure command DSL + pattern-match tests (no spawn needed)
 
 ### 待验收 (0)
 

@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (21)
+## 📚 Patterns (22)
 
+- **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
 - **[2026-05-03]** [github-actions-bun-ci-cd-配置模式](./01-patterns/2026-05-03-github-actions-bun-ci-cd-配置模式.md)
 - **[2026-05-02]** [skills-as-flat-controllers-evolution](./01-patterns/2026-05-02-skills-as-flat-controllers-evolution.md)
 - **[2026-05-02]** [thin-skill-monorepo](./01-patterns/2026-05-02-thin-skill-monorepo.md)

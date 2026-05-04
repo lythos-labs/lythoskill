@@ -1,6 +1,6 @@
 import { describe, test, expect, spyOn } from 'bun:test'
 import { useAgent } from '../src/agents'
-import { buildToolPrompt } from '../src/agents/claude'
+import { buildToolPrompt, buildClaudeCommand, type SpawnCommand } from '../src/agents/claude'
 import { runCli } from '../src/bdd-runner'
 
 describe('runCli with injectable spawn', () => {
@@ -25,6 +25,57 @@ describe('runCli with injectable spawn', () => {
     const result = runCli('/tmp', ['bad-command'], mockSpawn)
     expect(result.code).toBe(1)
     expect(result.stderr).toBe('command failed')
+  })
+})
+
+describe('buildClaudeCommand', () => {
+  test('produces correct CLI: claude -p --dangerously-skip-permissions', () => {
+    const cmd = buildClaudeCommand({ brief: 'say ok', cwd: '/tmp' })
+    expect(cmd.cmd).toBe('claude')
+    expect(cmd.args).toEqual(['-p', '--dangerously-skip-permissions'])
+    expect(cmd.cwd).toBe('/tmp')
+  })
+
+  test('stdin contains the brief text', () => {
+    const cmd = buildClaudeCommand({ brief: 'write hello world', cwd: '/tmp' })
+    expect(cmd.stdin).toBe('write hello world')
+  })
+
+  test('env always includes FORCE_COLOR=0', () => {
+    const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp' })
+    expect(cmd.env.FORCE_COLOR).toBe('0')
+  })
+
+  test('env merges caller-supplied env vars over FORCE_COLOR', () => {
+    const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp', env: { FORCE_COLOR: '1', DEBUG: '1' } })
+    expect(cmd.env.FORCE_COLOR).toBe('1')  // overridden
+    expect(cmd.env.DEBUG).toBe('1')         // merged
+  })
+
+  test('default timeoutMs is 60000', () => {
+    const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp' })
+    expect(cmd.timeoutMs).toBe(60000)
+  })
+
+  test('explicit timeoutMs overrides default', () => {
+    const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp', timeoutMs: 30000 })
+    expect(cmd.timeoutMs).toBe(30000)
+  })
+
+  test('command structure is valid for Bun.spawn', () => {
+    const cmd = buildClaudeCommand({ brief: 'say hi', cwd: '/tmp/test' })
+    // Verify every field Bun.spawn needs is present and well-typed
+    expect(typeof cmd.cmd).toBe('string')
+    expect(Array.isArray(cmd.args)).toBe(true)
+    expect(cmd.args.every(a => typeof a === 'string')).toBe(true)
+    expect(typeof cmd.cwd).toBe('string')
+    expect(typeof cmd.stdin).toBe('string')
+    expect(typeof cmd.env).toBe('object')
+    expect(typeof cmd.timeoutMs).toBe('number')
+    // Verify key invariants
+    expect(cmd.args).toContain('-p')
+    expect(cmd.args).toContain('--dangerously-skip-permissions')
+    expect(Object.keys(cmd.env).length).toBeGreaterThanOrEqual(1) // at least FORCE_COLOR
   })
 })
 
