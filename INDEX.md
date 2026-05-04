@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/5 01:54:48
+> 自动生成于 2026/5/5 01:56:07
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 99 | 进行中: 0, 待验收: 0, 已完成: 72 |
+| Tasks | 99 | 进行中: 1, 待验收: 0, 已完成: 72 |
 | Epics | 16 | 活跃: 1, 已完成: 12, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
@@ -46,19 +46,18 @@
 
 ## 📄 Tasks
 
-### 待办 (7)
+### 待办 (6)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260505015051145**: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 - [ ] **TASK-20260505015052748**: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 - [ ] **TASK-20260505015054313**: T4: Feed source abstraction — cold pool / GitHub / URL as source types
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260505015051145**: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 
 ### 待验收 (0)
 

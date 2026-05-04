@@ -70,6 +70,29 @@ export function buildCuratorPlan(poolPath: string): CuratorPlan {
   }
 }
 
+// ── Add plan (pure: compute target path from source) ────────────────────────
+
+export interface AddPlan {
+  source: SkillSource
+  targetPath: string         // where in cold pool
+  relPath: string            // relative to cold pool root
+}
+
+/** Compute where a skill should land in the cold pool. Pure — no git clone. */
+export function buildAddPlan(locator: string, coldPool: string): AddPlan {
+  // locator format: github.com/owner/repo[/skill-path]
+  const source = /^github\.com/.test(locator) ? 'github' : 'url' as const
+  const clean = locator.replace(/^https?:\/\//, '').replace(/\.git$/, '')
+  const targetPath = join(coldPool, clean)
+  const relPath = clean
+
+  return {
+    source: { type: source, locator, label: locator },
+    targetPath,
+    relPath,
+  }
+}
+
 // ── Skill metadata (pure transform: file content → structured) ─────────────
 
 export interface ParsedSkillMeta {

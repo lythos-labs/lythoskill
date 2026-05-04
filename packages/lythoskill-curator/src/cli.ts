@@ -14,6 +14,8 @@ import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSy
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
+import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan } from './curator-core'
+import { execSync } from 'node:child_process'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -100,43 +102,40 @@ export function scanSkill(path: string): SkillMeta | null {
   const skillMdPath = join(path, 'SKILL.md');
   if (!statSync(skillMdPath, { throwIfNoEntry: false })) return null;
   const text = readFileSync(skillMdPath, 'utf-8');
-  const { frontmatter, body } = parseFrontmatter(text);
+  const { frontmatter: rawFm, body } = parseFrontmatter(text);
+  const frontmatter = YAML.parse(rawFm._raw as string) || {};
+
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
   const hasExamples = statSync(join(path, 'examples'), { throwIfNoEntry: false })?.isDirectory() || false;
-  const desc = toString(frontmatter.description);
 
-  // lythoskill governance extensions (top-level frontmatter, not nested in metadata)
+  // Pure metadata transform
+  const core = buildSkillMeta(frontmatter, path, body);
+
+  // CLI-specific IO extras
   const managedDirs = frontmatter.deck_managed_dirs || frontmatter.managed_dirs || [];
   const niches = frontmatter.deck_niche ? [frontmatter.deck_niche] : [];
 
-  // allowed-tools can be inline array or list
-  const allowedTools = parseArrayField(frontmatter['allowed-tools']);
-  const tags = parseArrayField(frontmatter.tags);
-
-  const source = inferSource(path);
-  const fmAuthor = toString(frontmatter.author);
-
   return {
-    name: toString(frontmatter.name) || basename(path),
-    description: desc.slice(0, 800),
-    type: toString(frontmatter.type) || 'standard',
-    version: toString(frontmatter.version) || 'unknown',
+    ...core,
     path,
     managedDirs: Array.isArray(managedDirs) ? managedDirs : [managedDirs].filter(Boolean),
     niches: Array.isArray(niches) ? niches : [niches].filter(Boolean),
-    triggerPhrases: extractQuotedPhrases(toString(frontmatter.when_to_use)) || extractQuotedPhrases(desc),
     hasScripts, hasExamples,
-    bodyPreview: body.slice(0, 500).replace(/\s+/g, ' '),
-    source,
-    // Open-standard fields
-    whenToUse: toString(frontmatter.when_to_use).slice(0, 800),
-    allowedTools,
-    author: fmAuthor || source.split('/')[1] || 'unknown', // fallback to org from source
-    userInvocable: frontmatter['user-invocable'] != null ? Boolean(frontmatter['user-invocable']) : null,
-    tags,
-    // lythoskill extensions
     deckDependencies: frontmatter.deck_dependencies || {},
-    deckSkillType: toString(frontmatter.deck_skill_type) || null,
+    // Ensure these match SkillMeta interface
+    source: core.source || inferSource(path),
+    allowedTools: core.allowedTools,
+    name: core.name || basename(path),
+    description: core.description.slice(0, 800),
+    type: core.type,
+    version: core.version,
+    triggerPhrases: core.triggerPhrases,
+    bodyPreview: body.slice(0, 500).replace(/\s+/g, ' '),
+    whenToUse: (frontmatter.when_to_use ? String(frontmatter.when_to_use) : '').slice(0, 800),
+    author: core.author || (core.source.split('/')[1] || 'unknown'),
+    userInvocable: core.userInvocable,
+    tags: core.tags,
+    deckSkillType: core.deckSkillType,
   };
 }
 
@@ -656,6 +655,43 @@ function runAudit(argv: string[]) {
   }
 }
 
+// ── Add: download to cold pool only (no deck.toml, no link) ──
+
+function runAdd(argv: string[]) {
+  const locator = argv.find(a => !a.startsWith('-'))
+  if (!locator) {
+    console.error('Usage: lythoskill-curator add <github.com/owner/repo> [--pool <dir>]')
+    process.exit(1)
+  }
+
+  const poolIdx = argv.indexOf('--pool')
+  const poolPath = poolIdx >= 0 ? argv[poolIdx + 1] : `${process.env.HOME}/.agents/skill-repos`
+
+  const plan = buildAddPlan(locator, poolPath)
+
+  if (existsSync(plan.targetPath)) {
+    console.log(`✅ Already in cold pool: ${plan.relPath}`)
+    console.log(`   Location: ${plan.targetPath}`)
+    return
+  }
+
+  console.log(`📦 Cloning: https://${plan.relPath}`)
+  try {
+    mkdirSync(plan.targetPath, { recursive: true })
+    execSync(`git clone https://${plan.relPath}.git "${plan.targetPath}"`, {
+      stdio: 'inherit',
+      timeout: 60000,
+    })
+    console.log(`✅ Skill added to cold pool: ${plan.relPath}`)
+    console.log(`   Location: ${plan.targetPath}`)
+    console.log(`\n💡 To use this skill in a project, run:`)
+    console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
+  } catch (e: any) {
+    console.error(`❌ Failed to clone: ${e.message}`)
+    process.exit(1)
+  }
+}
+
 // ── Main Entry ───────────────────────────────────────────────
 
 if (import.meta.main) {
@@ -664,23 +700,28 @@ if (import.meta.main) {
 
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
+    console.log('       lythoskill-curator add <github.com/owner/repo> [--pool <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
     console.log('       lythoskill-curator audit [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
     console.log('')
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
+    console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
     console.log('Options:')
     console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
+    console.log('  --pool <dir>          Cold pool path for add (default: ~/.agents/skill-repos)')
     console.log('  --db, -d <path>       Database path for query/audit (default: ./catalog.db)')
     process.exit(0)
   }
 
-  if (cmd === 'query') {
+  if (cmd === 'add') {
+    runAdd(args.slice(1))
+  } else if (cmd === 'query') {
     runQuery(args.slice(1))
   } else if (cmd === 'audit') {
     runAudit(args.slice(1))
