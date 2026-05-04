@@ -1,4 +1,4 @@
-# TASK-20260504235614732: T4: RunCi/Spawn 重 IO 提取到 injectable function，加 mock 测试默认错误路径
+# TASK-20260504235613937: T3: Add unit test for buildToolPrompt in agents/claude.ts (pure, uncovered)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260504235614732)
+feat(scope): description (TASK-20260504235613937)
 
 - Detail 1
 - Detail 2
