@@ -93,13 +93,17 @@ All 9 planned scenarios implemented. 20 total deck scenarios in CI.
 
 ---
 
-## Agent BDD — empty today
+## Agent BDD — 1 scenario locally
 
-Zero scenarios in this category currently. They are not blocked by tooling — they're blocked by the fact that we haven't yet needed to verify "agent reads SKILL.md → makes the right CLI choice" with formal scenarios. When that becomes useful (e.g. after curator's L3 metadata lands), the convention will be:
+| File | Scenario | Status |
+|------|----------|--------|
+| [`skills-introspection.agent.md`](../lythoskill-deck/test/scenarios/skills-introspection.agent.md) | Agent reads skill-deck.toml and reports skills via checkpoint | ✅ Local pass |
 
-- Filename suffix: `*.agent.md` (so the runner can skip them in CI environments)
-- Verification step is delegated to the in-loop LLM, not deterministic file diff
-- Pass/fail goes into a separate report — never the green CI badge
+Convention:
+- Filename suffix: `*.agent.md` (runner loads them alongside `.ts` scenarios; CI skips because they need LLM)
+- Verification: automated judge for tracer bullet (checkpoint shape assertions); LLM judge for semantic scenarios (T8+)
+- Pass/fail into separate report — never the green CI badge
+- Timeout: 300s default (agent BDD is token-heavy; observability via `agent-stdout.txt` + `agent-stderr.txt` + `_checkpoints/*.jsonl`)
 
 ---
 
@@ -136,4 +140,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **34 CLI integration scenarios in CI · 0 agent BDD in CI · 0 planned**.
+Current totals: **34 CLI integration scenarios in CI · 1 agent BDD locally · 4 planned** (T8).

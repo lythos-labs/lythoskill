@@ -2,6 +2,7 @@
 import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { runClaudeAgent, readCheckpoints } from '../../lythoskill-test-utils/src/bdd-runner.ts'
 
 // ── 类型定义 ──────────────────────────────────────────────────
 
@@ -371,6 +372,223 @@ async function main() {
   const results = concurrency > 1
     ? await runParallel(scenarios, runsDir, concurrency)
     : await Promise.all(scenarios.map(s => runScenario(s, runsDir)))
+
+  let passed = 0
+  for (const r of results) {
+    const icon = r.pass ? '✅' : '❌'
+    console.log(`${icon} ${r.name} (${r.duration.toFixed(0)}ms)`)
+    if (!r.pass) {
+      for (const e of r.errors) console.log(`   → ${e}`)
+      console.log(`   📁 ${r.workdir}`)
+    }
+    if (r.pass) passed++
+  }
+
+  console.log(`\n${passed}/${results.length} passed\n`)
+  process.exit(passed === results.length ? 0 : 1)
+}
+
+// ── Agent BDD extensions ──────────────────────────────────────
+
+interface AgentScenario {
+  name: string
+  description: string
+  timeout: number
+  given: {
+    deck: Scenario['given']['deck']
+  }
+  when: string
+  then: string[]
+  judge: string
+}
+
+function parseAgentMd(content: string): AgentScenario {
+  const lines = content.split('\n')
+  if (lines[0].trim() !== '---') {
+    throw new Error('Invalid .agent.md: missing frontmatter')
+  }
+  const endIdx = lines.findIndex((l, i) => i > 0 && l.trim() === '---')
+  if (endIdx === -1) {
+    throw new Error('Invalid .agent.md: frontmatter not closed')
+  }
+
+  const fmLines = lines.slice(1, endIdx)
+  const body = lines.slice(endIdx + 1).join('\n')
+
+  let name = 'unnamed agent scenario'
+  let description = ''
+  let timeout = 30000
+
+  for (const line of fmLines) {
+    const colonIdx = line.indexOf(':')
+    if (colonIdx === -1) continue
+    const key = line.slice(0, colonIdx).trim()
+    let value = line.slice(colonIdx + 1).trim()
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1)
+    }
+    if (key === 'name') name = value
+    if (key === 'description') description = value
+    if (key === 'timeout') timeout = Number(value) || 30000
+  }
+
+  // Extract sections
+  const sectionRegex = /##\s*(Given|When|Then|Judge)\s*\n/i
+  const sections: Record<string, string> = {}
+  let pos = 0
+  while (true) {
+    const match = body.slice(pos).match(sectionRegex)
+    if (!match) break
+    const secStart = pos + match.index! + match[0].length
+    const nextMatch = body.slice(secStart).match(sectionRegex)
+    const secEnd = nextMatch ? secStart + nextMatch.index! : body.length
+    sections[match[1].toLowerCase()] = body.slice(secStart, secEnd).trim()
+    pos = secStart
+  }
+
+  if (!sections.when) {
+    throw new Error('Invalid .agent.md: missing ## When')
+  }
+
+  // Parse Given — look for deck declaration bullets
+  const givenDeck: Scenario['given']['deck'] = {}
+  const givenText = sections.given || ''
+  const toolMatch = givenText.match(/tool skills?:\s*([^\n]+)/i)
+  if (toolMatch) {
+    const aliases = toolMatch[1].split(/,\s*/).map(s => s.trim()).filter(Boolean)
+    givenDeck.tool = {}
+    for (const alias of aliases) {
+      (givenDeck.tool as Record<string, SkillEntryLike>)[alias] = {
+        path: `github.com/foo/bar/${alias}`,
+      }
+    }
+  }
+
+  // Parse Then bullets
+  const thenBullets: string[] = []
+  const thenText = sections.then || ''
+  for (const line of thenText.split('\n')) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      thenBullets.push(trimmed.slice(2).trim())
+    }
+  }
+
+  return {
+    name,
+    description,
+    timeout,
+    given: { deck: givenDeck },
+    when: sections.when,
+    then: thenBullets,
+    judge: sections.judge || '',
+  }
+}
+
+function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
+  if (existsSync(workdir)) rmSync(workdir, { recursive: true, force: true })
+  mkdirSync(workdir, { recursive: true })
+
+  const deck = scenario.given.deck
+  if (Object.keys(deck).length > 0) {
+    writeFileSync(join(workdir, 'skill-deck.toml'), buildDeckToml(deck))
+  }
+}
+
+async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
+  const start = performance.now()
+  setupAgentWorkdir(scenario, workdir)
+
+  const agentResult = await runClaudeAgent({
+    cwd: workdir,
+    brief: scenario.when,
+    timeoutMs: scenario.timeout,
+  })
+
+  // Persist agent output for debugging / review
+  writeFileSync(join(workdir, 'agent-stdout.txt'), agentResult.stdout, 'utf-8')
+  writeFileSync(join(workdir, 'agent-stderr.txt'), agentResult.stderr, 'utf-8')
+
+  const checkpoints = readCheckpoints(workdir)
+  const errors: string[] = []
+
+  // Tracer-bullet automated judge: verify checkpoint shape
+  if (checkpoints.length === 0) {
+    errors.push('no checkpoints found in _checkpoints/')
+  } else {
+    const cp = checkpoints[0]
+    if (cp.step !== 'deck.introspection') {
+      errors.push(`expected step "deck.introspection", got "${cp.step ?? '(missing)'}"`)
+    }
+    const count = cp.final_state?.tool_skill_count
+    if (count !== 2) {
+      errors.push(`expected final_state.tool_skill_count 2, got ${count ?? '(missing)'}`)
+    }
+  }
+
+  if (agentResult.code !== 0) {
+    errors.push(`agent exit code: ${agentResult.code}`)
+  }
+
+  const duration = performance.now() - start
+  return {
+    name: scenario.name,
+    pass: errors.length === 0,
+    workdir,
+    errors,
+    duration,
+  }
+}
+
+// ── Main (extended) ───────────────────────────────────────────
+
+async function main(): Promise<void> {
+  const scenarioDir = join(import.meta.dir, 'scenarios')
+
+  // Load CLI BDD scenarios (.ts)
+  const tsFiles = readdirSync(scenarioDir).filter(f => f.endsWith('.ts'))
+  const cliScenarios: Scenario[] = []
+  for (const file of tsFiles) {
+    const mod = await import(join(scenarioDir, file))
+    const s = mod.default || mod.scenario
+    if (s) cliScenarios.push(s)
+  }
+
+  // Load Agent BDD scenarios (.agent.md)
+  const agentFiles = readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md'))
+  const agentScenarios: AgentScenario[] = []
+  for (const file of agentFiles) {
+    try {
+      const content = readFileSync(join(scenarioDir, file), 'utf-8')
+      agentScenarios.push(parseAgentMd(content))
+    } catch (e) {
+      console.error(`❌ Failed to parse ${file}: ${e instanceof Error ? e.message : String(e)}`)
+    }
+  }
+
+  const totalScenarios = cliScenarios.length + agentScenarios.length
+  console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentScenarios.length} 个 Agent 场景`)
+  console.log(`📁 Agent BDD 产物保留在 runs/ 下供 review\n`)
+
+  const now = new Date()
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
+  const runsDir = join(import.meta.dir, '..', '..', '..', 'playground', 'test-runs', stamp)
+  mkdirSync(runsDir, { recursive: true })
+
+  const results: Result[] = []
+
+  // Run CLI BDD scenarios
+  for (const s of cliScenarios) {
+    const r = await runScenario(s, runsDir)
+    results.push(r)
+  }
+
+  // Run Agent BDD scenarios
+  for (const s of agentScenarios) {
+    const workdir = join(runsDir, s.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
+    const r = await runAgentScenario(s, workdir)
+    results.push(r)
+  }
 
   let passed = 0
   for (const r of results) {
