@@ -10,21 +10,24 @@
     },
     "packages/lythoskill-arena": {
       "name": "@lythos/skill-arena",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-arena": "src/cli.ts",
+      },
+      "dependencies": {
+        "@lythos/test-utils": "^0.9.1",
       },
     },
     "packages/lythoskill-creator": {
       "name": "@lythos/skill-creator",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-curator": {
       "name": "@lythos/skill-curator",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-curator": "src/cli.ts",
       },
@@ -34,7 +37,7 @@
     },
     "packages/lythoskill-deck": {
       "name": "@lythos/skill-deck",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-deck": "src/cli.ts",
       },
@@ -46,14 +49,14 @@
     },
     "packages/lythoskill-hello-world": {
       "name": "@lythos/hello-world",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-hello-world": "src/cli.ts",
       },
     },
     "packages/lythoskill-project-cortex": {
       "name": "@lythos/project-cortex",
-      "version": "0.8.0",
+      "version": "0.9.1",
       "bin": {
         "lythoskill-project-cortex": "src/cli.ts",
       },
@@ -63,7 +66,11 @@
     },
     "packages/lythoskill-test-utils": {
       "name": "@lythos/test-utils",
-      "version": "0.8.0",
+      "version": "0.9.1",
+      "dependencies": {
+        "zod": "^4.4.3",
+        "zod-to-json-schema": "^3.25.2",
+      },
     },
   },
   "packages": {
@@ -88,5 +95,11 @@
     "yaml": ["yaml@2.8.3", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg=="],
 
     "zod": ["zod@4.3.6", "https://registry.npmmirror.com/zod/-/zod-4.3.6.tgz", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
+
+    "zod-to-json-schema": ["zod-to-json-schema@3.25.2", "", { "peerDependencies": { "zod": "^3.25.28 || ^4" } }, "sha512-O/PgfnpT1xKSDeQYSCfRI5Gy3hPf91mKVDuYLUHZJMiDFptvP41MSnWofm8dnCm0256ZNfZIM7DSzuSMAFnjHA=="],
+
+    "@lythos/skill-arena/@lythos/test-utils": ["@lythos/test-utils@0.9.1", "", {}, "sha512-aIGSBv1PBb3cAbzQQQVZzVctMUHcY19Ohoj1BikMUdnWdsfr17Xp83FQkyrCIZZU7W3cHr8WyvCmnFpTuf9bXw=="],
+
+    "@lythos/test-utils/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
   }
 }
