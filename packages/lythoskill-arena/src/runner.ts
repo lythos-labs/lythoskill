@@ -119,6 +119,14 @@ export async function runArenaFromToml(opts: {
         criteria: [],
       }) as JudgeVerdict
 
+      // Persist per-cell verdict + agent output for auditability
+      writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify({
+        ...v,
+        agent_stdout: result.agentResult.stdout.slice(0, 5000),
+        agent_stderr: result.agentResult.stderr.slice(0, 1000),
+        duration_ms: result.agentResult.durationMs,
+      }, null, 2) + '\n')
+
       if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
       verdictsBySide.get(cell.side)!.push(v)
     } catch (e) {
