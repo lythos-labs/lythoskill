@@ -119,4 +119,27 @@ describe('removeSkill', () => {
       errorSpy.mockRestore()
     }
   })
+
+  it('C11.b: remove legacy string-array entry by alias', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    const skillDir = placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool]\nskills = ["github.com/owner/repo/skill-a"]\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const workingSet = join(projectDir, '.claude', 'skills')
+    mkdirSync(workingSet, { recursive: true })
+    symlinkSync(skillDir, join(workingSet, 'skill-a'))
+
+    const { removeSkill } = await import('./remove.ts')
+    removeSkill('skill-a', deckPath, projectDir)
+
+    const deckContentAfter = readFileSync(deckPath, 'utf-8')
+    expect(deckContentAfter).not.toContain('skills = [')
+    expect(existsSync(join(workingSet, 'skill-a'))).toBe(false)
+    expect(existsSync(skillDir)).toBe(true)
+  })
 })

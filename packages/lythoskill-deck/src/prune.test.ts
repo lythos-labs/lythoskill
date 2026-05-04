@@ -99,4 +99,39 @@ describe('pruneDeck', () => {
       logSpy.mockRestore()
     }
   })
+
+  it('C17: prune with empty cold pool reports nothing to prune', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    mkdirSync(coldPool, { recursive: true })
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const logs: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((msg: string) => {
+      logs.push(String(msg))
+    })
+
+    const originalExit = process.exit
+    let exitCode: number | undefined
+    process.exit = ((code?: number) => {
+      exitCode = code ?? 0
+      throw new Error(`EXIT:${code}`)
+    }) as typeof process.exit
+
+    try {
+      const { pruneDeck } = await import('./prune.ts')
+      await pruneDeck(deckPath, projectDir, true)
+      expect(false).toBe(true)
+    } catch (err: any) {
+      expect(exitCode).toBe(0)
+      expect(logs.some(l => l.includes('empty'))).toBe(true)
+    } finally {
+      process.exit = originalExit
+      logSpy.mockRestore()
+    }
+  })
 })

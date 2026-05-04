@@ -119,4 +119,42 @@ describe('validateDeck', () => {
     expect(result.status).toBe(1)
     expect(result.stderr).toContain('Budget exceeded')
   })
+
+  it('C6: toml parse error exits', () => {
+    const projectDir = makeTmp()
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, '[invalid toml\n')
+
+    const result = runValidate(deckPath, projectDir)
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('TOML parse error')
+  })
+
+  it('C7: deprecated string-array format warns', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    placeSkill(coldPool, 'github.com/owner/repo/skill')
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool]\nskills = ["github.com/owner/repo/skill"]\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const result = runValidate(deckPath, projectDir)
+
+    expect(result.status).toBe(0)
+    expect(result.stderr).toContain('deprecated')
+  })
+
+  it('C8: invalid transient expires errors', () => {
+    const projectDir = makeTmp()
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, `[deck]\nmax_cards = 10\n\n[transient.foo]\npath = "./nonexistent"\nexpires = "not-a-date"\n`)
+
+    const result = runValidate(deckPath, projectDir)
+
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain('invalid expires')
+  })
 })

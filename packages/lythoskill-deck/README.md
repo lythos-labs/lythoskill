@@ -1,5 +1,7 @@
 # @lythos/skill-deck
 
+![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
+
 > Declarative skill deck governance. Reconcile declared skills against your cold pool via symlinks — deny-by-default, max-cards budgeting, transient expiry.
 
 ## For AI Agents

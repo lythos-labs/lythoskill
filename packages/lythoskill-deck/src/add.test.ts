@@ -147,4 +147,49 @@ describe('addSkill', () => {
       errorSpy.mockRestore()
     }
   })
+
+  it('C9: invalid skill type rejects', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    mkdirSync(coldPool, { recursive: true })
+
+    const fixtureDir = makeTmp()
+    writeFileSync(join(fixtureDir, 'SKILL.md'), '---\nname: skill\n---\n')
+
+    const originalExec = childProcess.execFileSync
+    const execSpy = spyOn(childProcess, 'execFileSync').mockImplementation(((cmd: string, args: string[], options?: any) => {
+      if (cmd === 'git' && args[0] === 'clone') {
+        const dest = args[args.length - 1]
+        cpSync(fixtureDir, dest, { recursive: true })
+        return Buffer.from('')
+      }
+      return originalExec(cmd, args, options)
+    }) as any)
+
+    const errors: string[] = []
+    const errorSpy = spyOn(console, 'error').mockImplementation((msg: string) => {
+      errors.push(String(msg))
+    })
+
+    const originalExit = process.exit
+    let exitCode: number | undefined
+    process.exit = ((code?: number) => {
+      exitCode = code ?? 0
+      throw new Error(`EXIT:${code}`)
+    }) as typeof process.exit
+
+    try {
+      const { addSkill } = await import('./add.ts')
+      await addSkill('github.com/owner/repo', { deck: join(projectDir, 'skill-deck.toml'), workdir: projectDir, type: 'invalid' })
+      expect(false).toBe(true)
+    } catch (err: any) {
+      expect(exitCode).toBe(1)
+      expect(errors.some(e => e.includes('Invalid type'))).toBe(true)
+    } finally {
+      process.exit = originalExit
+      errorSpy.mockRestore()
+      execSpy.mockRestore()
+    }
+  })
 })

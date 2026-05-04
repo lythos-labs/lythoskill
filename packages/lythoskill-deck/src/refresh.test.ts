@@ -175,4 +175,92 @@ describe('refreshDeck', () => {
     expect(logs.some(l => l.includes('Running deck link'))).toBe(true)
     expect(logs.some(l => l.includes('Updated: 1'))).toBe(true)
   })
+
+  it('C15: refresh skips localhost skills', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    const skillDir = placeSkill(coldPool, 'localhost/my-skill')
+    initGitRepo(skillDir)
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.local]\npath = "localhost/my-skill"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    mockGitPull('up-to-date')
+
+    const logs: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((msg: string) => {
+      logs.push(String(msg))
+    })
+
+    const { refreshDeck } = await import('./refresh.ts')
+    refreshDeck(deckPath, projectDir)
+
+    logSpy.mockRestore()
+
+    expect(logs.some(l => l.includes('local'))).toBe(true)
+    expect(logs.some(l => l.includes('Skipped: 1'))).toBe(true)
+  })
+
+  it('C16: refresh reports not-git for non-git directories', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+    // NO git init
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo/skill-a"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const logs: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((msg: string) => {
+      logs.push(String(msg))
+    })
+
+    const { refreshDeck } = await import('./refresh.ts')
+    refreshDeck(deckPath, projectDir)
+
+    logSpy.mockRestore()
+
+    expect(logs.some(l => l.includes('not a git repository'))).toBe(true)
+  })
+
+  it('C17: refresh target not found exits with error', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    mkdirSync(coldPool, { recursive: true })
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo/skill-a"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const errors: string[] = []
+    const errorSpy = spyOn(console, 'error').mockImplementation((msg: string) => {
+      errors.push(String(msg))
+    })
+
+    const originalExit = process.exit
+    let exitCode: number | undefined
+    process.exit = ((code?: number) => {
+      exitCode = code ?? 0
+      throw new Error(`EXIT:${code}`)
+    }) as typeof process.exit
+
+    try {
+      const { refreshDeck } = await import('./refresh.ts')
+      refreshDeck(deckPath, projectDir, 'nonexistent')
+      expect(false).toBe(true)
+    } catch (err: any) {
+      expect(exitCode).toBe(1)
+      expect(errors.some(e => e.includes('not found'))).toBe(true)
+    } finally {
+      process.exit = originalExit
+      errorSpy.mockRestore()
+    }
+  })
 })
