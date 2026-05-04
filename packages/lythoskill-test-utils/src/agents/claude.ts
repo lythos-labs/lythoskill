@@ -53,6 +53,15 @@ export function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
   ].join('\n')
 }
 
+// ── JSON extraction (pure: parse LLM output without IO) ─────────────────
+
+/** Extract JSON from LLM stdout — handles markdown fences and raw output. Pure. */
+export function extractJson(raw: string): unknown {
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+  const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+  return JSON.parse(jsonStr)
+}
+
 // ── Executor: consume SpawnCommand + collect result ────────────────────────
 
 async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
@@ -96,13 +105,7 @@ export const claudeAdapter: AgentAdapter = {
   async invokeTool(opts): Promise<unknown> {
     const { tool, prompt, cwd, timeoutMs = 60000 } = opts
     const toolPrompt = buildToolPrompt(tool, prompt)
-
     const result = await this.spawn({ cwd, brief: toolPrompt, timeoutMs })
-
-    // Extract JSON from markdown fence or raw output
-    const fenceMatch = result.stdout.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-    const jsonStr = fenceMatch ? fenceMatch[1].trim() : result.stdout.trim()
-
-    return JSON.parse(jsonStr)
+    return extractJson(result.stdout)
   },
 }

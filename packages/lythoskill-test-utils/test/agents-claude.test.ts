@@ -1,6 +1,6 @@
 import { describe, test, expect, spyOn } from 'bun:test'
 import { useAgent } from '../src/agents'
-import { buildToolPrompt, buildClaudeCommand, type SpawnCommand } from '../src/agents/claude'
+import { buildToolPrompt, buildClaudeCommand, extractJson, type SpawnCommand } from '../src/agents/claude'
 import { runCli } from '../src/bdd-runner'
 
 describe('runCli with injectable spawn', () => {
@@ -76,6 +76,34 @@ describe('buildClaudeCommand', () => {
     expect(cmd.args).toContain('-p')
     expect(cmd.args).toContain('--dangerously-skip-permissions')
     expect(Object.keys(cmd.env).length).toBeGreaterThanOrEqual(1) // at least FORCE_COLOR
+  })
+})
+
+describe('extractJson', () => {
+  test('parses raw JSON string', () => {
+    expect(extractJson('{"a":1}')).toEqual({ a: 1 })
+  })
+
+  test('extracts JSON from ```json fence', () => {
+    expect(extractJson('```json\n{"b":2}\n```')).toEqual({ b: 2 })
+  })
+
+  test('extracts JSON from bare ``` fence', () => {
+    expect(extractJson('```\n{"c":3}\n```')).toEqual({ c: 3 })
+  })
+
+  test('extracts JSON from fence with surrounding text', () => {
+    const raw = 'Here is the result:\n```json\n{"verdict":"PASS"}\n```\nHope that helps.'
+    expect(extractJson(raw)).toEqual({ verdict: 'PASS' })
+  })
+
+  test('throws on non-JSON input', () => {
+    expect(() => extractJson('not json')).toThrow()
+  })
+
+  test('handles nested JSON objects', () => {
+    expect(extractJson('```json\n{"criteria":[{"name":"a","passed":true}]}\n```'))
+      .toEqual({ criteria: [{ name: 'a', passed: true }] })
   })
 })
 
