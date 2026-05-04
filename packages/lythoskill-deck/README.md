@@ -1,6 +1,6 @@
 # @lythos/skill-deck
 
-![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen) ![CI](https://img.shields.io/badge/CI-71%20unit%20%2B%2021%20CLI%20BDD-brightgreen) ![Agent BDD](https://img.shields.io/badge/Agent%20BDD-5%20scenarios-local-blue)
 
 > Declarative skill deck governance. Reconcile declared skills against your cold pool via symlinks — deny-by-default, max-cards budgeting, transient expiry.
 
@@ -156,6 +156,30 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 | Broken symlinks in working set | Skill moved or deleted from cold pool | Re-run `link` — it recreates symlinks automatically |
 | `deck add` fails with 404 | Locator format wrong or repo doesn't exist | Format: `github.com/owner/repo/skill-name` (path to skill directory inside repo) |
 | `skill-deck.toml not found` | Running `link` outside project tree | Run from project root, or use `--deck ./path/to/skill-deck.toml` |
+
+## Architecture: Intent / Plan / Execute
+
+Deck commands separate pure logic from IO:
+
+```
+deck.toml  →  RefreshPlan / PrunePlan (pure)  →  execute with injectable IO
+```
+
+- **Plan**: `buildRefreshPlan()`, `buildPrunePlan()` — pure functions, unit-testable
+- **Execute**: `executeRefreshPlan(plan, io)`, `executePrunePlan(plan, io)` — IO injected (`gitPull`, `delete`, `log`)
+- **Config**: `workdir`, `coldPool`, `deckPath` all accept explicit overrides, defaults are fallback
+
+This enables testing without real git operations — inject mock `gitPull`, capture `log` output, assert expected behavior.
+
+## Test Coverage
+
+| Layer | Count | CI | Notes |
+|-------|-------|----|-------|
+| Unit tests | 71 | ✅ | Plan generation, link, add, remove, schema |
+| CLI BDD | 21 | ✅ | End-to-end via real CLI invocations in tmpdir |
+| Agent BDD | 5 | ❌ | Requires `claude -p` CLI; `.agent.test.ts` convention |
+
+Coverage is honest — no gate, no inflation. Agent BDD scenarios run locally only.
 
 ## More Documentation
 

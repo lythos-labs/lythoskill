@@ -1,6 +1,8 @@
 # @lythos/skill-arena
 
-> Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis.
+![CI](https://img.shields.io/badge/CI-41%20unit%20tests-brightgreen)
+
+> Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis. Now with declarative `arena.toml` (k8s-manifest style) and deterministic Pareto frontier.
 
 ## Why
 
@@ -40,25 +42,36 @@ bunx @lythos/skill-arena viz tmp/arena-<id>/
 
 ## Commands
 
+### Declarative mode (k8s-style, recommended)
+
+```bash
+# Print execution plan without running
+bunx @lythos/skill-arena run --config arena.toml --dry-run
+
+# Execute with per-side runs_per_side and statistical aggregation
+bunx @lythos/skill-arena run --config arena.toml
 ```
-Usage: bunx @lythos/skill-arena <options> | bunx @lythos/skill-arena viz <dir>
 
-Mode 1 — Single-Skill Comparison:
-  --task, -t <desc>       Task description (required)
-  --skills, -s <list>     Comma-separated skills, 2–5 (Mode 1)
-  --criteria, -c <list>   Evaluation dimensions (default: syntax,context,logic,token)
-  --control <skill>      Control skill (default: lythoskill-project-scribe)
+### CLI-flag mode (backward compat)
 
-Mode 2 — Full-Deck Comparison:
-  --decks <paths>        Comma-separated deck toml paths, 2–5 (Mode 2)
-  --criteria, -c <list>   Evaluation dimensions
+```
+bunx @lythos/skill-arena run \
+  --task ./TASK-arena.md \
+  --players ./players/claude.toml \
+  --decks ./decks/run-01.toml,./decks/run-02.toml \
+  --criteria coverage,relevance,actionability,depth
+```
 
-Common:
-  --dir, -d <path>       Arena parent directory (default: tmp)
-  --project, -p <path>   Project root (default: .)
+### Scaffold mode (legacy, manual execution)
 
-Viz:
-  viz <dir>               Render ASCII charts from report.md
+```
+bunx @lythos/skill-arena scaffold --task "..." --skills a,b
+```
+
+### Viz
+
+```bash
+bunx @lythos/skill-arena viz runs/arena-<id>/
 ```
 
 ## Skill Documentation
@@ -69,13 +82,29 @@ The agent-visible **Skill** layer documentation is here:
 
 ## Architecture
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
+```
+arena.toml  →  ArenaToml (Zod)  →  ExecutionPlan (pure)  →  per-cell agent spawn (IO)
+                                    ↓
+                aggregateAllStats (pure)  ←  verdicts[]
+                                    ↓
+                runComparativeJudge (IO)  →  report.md + Pareto frontier
+```
 
-```
-Starter (this package) → npm publish → bunx @lythos/skill-arena ...
-Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
-Output  (skills/<name>/)             → git commit → agent-visible skill
-```
+Intent/plan/execute separation:
+- **Intent**: `arena.toml` declarative config (k8s-manifest style)
+- **Plan**: `buildExecutionPlan()`, `aggregateSideStats()`, `computePareto()` — pure functions
+- **Execute**: `runAgentScenario` per cell, `runComparativeJudge` — IO via `AgentAdapter`
+
+Built on `@lythos/test-utils` shared infrastructure.
+
+## Test Coverage
+
+| Layer | Count | CI | Notes |
+|-------|-------|----|-------|
+| Unit tests | 41 | ✅ | TOML parser, player resolution, Pareto, stats |
+| Agent BDD | — | ❌ | Requires `claude` CLI; run locally |
+
+Pareto frontier is a **deterministic algorithm** — never delegated to LLM. 8 unit tests cover dominance, cross-dominance, transitive chains, partial criteria, and empty scores.
 
 ## License
 
