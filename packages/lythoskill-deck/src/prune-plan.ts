@@ -97,7 +97,16 @@ export function buildPrunePlan(
   deckRaw: string,
   opts?: { deckPath?: string; workdir?: string; coldPool?: string }
 ): PrunePlan {
-  const { deckPath, workdir, coldPool } = resolvePruneConfig(opts)
+  const { deckPath, workdir, coldPool: configuredColdPool } = resolvePruneConfig(opts)
+
+  // Read cold_pool from deck.toml if not explicitly overridden
+  let coldPool = configuredColdPool
+  if (!opts?.coldPool) {
+    const deckMatch = deckRaw.match(/cold_pool\s*=\s*"([^"]+)"/)
+    if (deckMatch) {
+      coldPool = expandHome(deckMatch[1], workdir)
+    }
+  }
 
   // Get declared skill paths from deck
   const { entries: declared } = parseDeck(deckRaw)

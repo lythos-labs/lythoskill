@@ -7,12 +7,11 @@
  * Does NOT modify deck.toml or the working set.
  */
 
-import { parse as parseToml } from "@iarna/toml";
-import { existsSync, readFileSync, readdirSync, statSync, rmSync } from "node:fs";
-import { resolve, dirname, join, relative } from "node:path";
+import { existsSync, readFileSync, rmSync } from "node:fs";
+import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { findDeckToml, expandHome, findSource } from "./link.js";
-import { parseDeck } from "./parse-deck.js";
+import { findDeckToml } from "./link.js";
+import { buildPrunePlan } from "./prune-plan.js";
 
 interface PruneCandidate {
   repoPath: string;
@@ -103,108 +102,73 @@ async function confirm(message: string): Promise<boolean> {
 }
 
 export async function pruneDeck(cliDeckPath?: string, cliWorkdir?: string, yes?: boolean): Promise<void> {
-  const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
-  const DECK_PATH = cliDeck
-    ? resolve(cliDeck)
-    : findDeckToml(process.cwd()) || resolve("skill-deck.toml");
+  const deckPath = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
+  const workdir = cliWorkdir
+
+  const DECK_PATH = deckPath ? resolve(deckPath) : findDeckToml(process.cwd()) || resolve('skill-deck.toml')
 
   if (!existsSync(DECK_PATH)) {
-    console.error(`❌ skill-deck.toml not found in ${process.cwd()}`);
-    console.error(`\nCreate one or specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
-    process.exit(1);
+    console.error(`❌ skill-deck.toml not found in ${process.cwd()}`)
+    console.error(`\nCreate one or specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`)
+    process.exit(1)
   }
 
-  const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
-  const deckRaw = readFileSync(DECK_PATH, "utf-8");
-  const deck = parseToml(deckRaw) as any;
+  const deckRaw = readFileSync(DECK_PATH, 'utf-8')
 
-  const COLD_POOL = expandHome(deck.deck?.cold_pool || "~/.agents/skill-repos", PROJECT_DIR);
+  // ── Plan: pure unreferenced detection ──────────────────────────────
+  const plan = buildPrunePlan(deckRaw, {
+    deckPath: DECK_PATH,
+    workdir: workdir ? resolve(workdir) : undefined,
+  })
 
-  // ── 收集声明 ────────────────────────────────────────────────
-
-  const { entries: parsedEntries } = parseDeck(deckRaw);
-  const declaredPaths = parsedEntries.map(e => e.path);
-
-  // Legacy string-array fallback
-  for (const section of ["innate", "tool", "combo"] as const) {
-    const skills = deck[section]?.skills;
-    if (Array.isArray(skills)) {
-      for (const name of skills) {
-        if (name && typeof name === "string" && !declaredPaths.includes(name)) {
-          declaredPaths.push(name);
-        }
-      }
-    }
+  if (!existsSync(plan.coldPool)) {
+    console.log('📭 Cold pool does not exist. Nothing to prune.')
+    process.exit(0)
   }
 
-  // ── 扫描 cold pool ──────────────────────────────────────────
-
-  if (!existsSync(COLD_POOL)) {
-    console.log("📭 Cold pool does not exist. Nothing to prune.");
-    process.exit(0);
+  if (plan.candidates.length === 0 && plan.declared.length === 0) {
+    console.log('📭 Cold pool is empty. Nothing to prune.')
+    process.exit(0)
   }
 
-  const allRepos = scanColdPoolRepos(COLD_POOL);
-  if (allRepos.length === 0) {
-    console.log("📭 Cold pool is empty. Nothing to prune.");
-    process.exit(0);
+  if (plan.candidates.length === 0) {
+    console.log('✅ All cold pool repositories are referenced. Nothing to prune.')
+    process.exit(0)
   }
 
-  // ── 求差集 ──────────────────────────────────────────────────
-
-  const candidates: PruneCandidate[] = [];
-  for (const repoPath of allRepos) {
-    if (isRepoReferenced(repoPath, declaredPaths, COLD_POOL, PROJECT_DIR)) continue;
-    const size = calculateDirSize(repoPath);
-    candidates.push({ repoPath, repoRel: relative(COLD_POOL, repoPath), size });
+  // ── Report ──────────────────────────────────────────────────────
+  console.log(`\n🧹 Prune candidates — ${plan.candidates.length} repo(s), ${formatSize(plan.totalSize)} total:\n`)
+  for (const c of plan.candidates) {
+    console.log(`   ${c.repoRel} (${formatSize(c.size)})`)
   }
 
-  if (candidates.length === 0) {
-    console.log("✅ All cold pool repositories are referenced. Nothing to prune.");
-    process.exit(0);
-  }
-
-  // ── 报告 ────────────────────────────────────────────────────
-
-  const totalSize = candidates.reduce((sum, c) => sum + c.size, 0);
-  console.log(`\n🧹 Prune candidates — ${candidates.length} repo(s), ${formatSize(totalSize)} total:\n`);
-  for (const c of candidates) {
-    console.log(`   ${c.repoRel} (${formatSize(c.size)})`);
-  }
-
-  // ── 确认 ────────────────────────────────────────────────────
-
-  let shouldDelete = false;
+  // ── Confirm ──────────────────────────────────────────────────────
+  let shouldDelete = false
   if (yes) {
-    shouldDelete = true;
-    console.log("\n⚠️  --yes flag set: deleting without confirmation.");
+    shouldDelete = true
+    console.log('\n⚠️  --yes flag set: deleting without confirmation.')
   } else {
-    shouldDelete = await confirm(`\nDelete ${candidates.length} unreferenced repo(s)?`);
+    shouldDelete = await confirm(`\nDelete ${plan.candidates.length} unreferenced repo(s)?`)
   }
 
   if (!shouldDelete) {
-    console.log("❎ Prune cancelled.");
-    process.exit(0);
+    console.log('❎ Prune cancelled.')
+    process.exit(0)
   }
 
-  // ── 执行删除 ────────────────────────────────────────────────
-
-  let deleted = 0;
-  let failed = 0;
-  for (const c of candidates) {
+  // ── Execute: delete unreferenced repos ──────────────────────────
+  let deleted = 0, failed = 0
+  for (const c of plan.candidates) {
     try {
-      rmSync(c.repoPath, { recursive: true, force: true });
-      console.log(`  🗑️  Deleted: ${c.repoRel}`);
-      deleted++;
+      rmSync(c.repoPath, { recursive: true, force: true })
+      console.log(`  🗑️  Deleted: ${c.repoRel}`)
+      deleted++
     } catch (err: any) {
-      console.error(`  ❌ Failed to delete ${c.repoRel}: ${err.message}`);
-      failed++;
+      console.error(`  ❌ Failed to delete ${c.repoRel}: ${err.message}`)
+      failed++
     }
   }
 
-  console.log(`\n📦 Prune complete: ${deleted} deleted, ${failed} failed`);
-
-  if (failed > 0) {
-    process.exit(1);
-  }
+  console.log(`\n📦 Prune complete: ${deleted} deleted, ${failed} failed`)
+  if (failed > 0) process.exit(1)
 }

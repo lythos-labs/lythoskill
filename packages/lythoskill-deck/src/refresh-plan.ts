@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs'
 import { resolve, dirname, relative } from 'node:path'
+import { realpathSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { findDeckToml, expandHome, findSource } from './link'
 import { parseDeck, type ParsedSkillEntry } from './parse-deck'
@@ -66,8 +67,14 @@ export function detectGitRoot(skillDir: string, coldPool: string): { gitRoot?: s
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim()
 
+    // Normalize paths (macOS /tmp → /private/tmp)
+    const resolvedRoot = realpathSync(out)
+    const resolvedDir = realpathSync(skillDir)
+    const resolvedPool = realpathSync(coldPool)
+
     // Must be ancestor of skillDir and within coldPool
-    if (out && out.startsWith('/') && skillDir.startsWith(out + '/') && (out === coldPool || out.startsWith(coldPool + '/'))) {
+    if (resolvedDir.startsWith(resolvedRoot + '/') &&
+        (resolvedRoot === resolvedPool || resolvedRoot.startsWith(resolvedPool + '/'))) {
       return { gitRoot: out, type: 'git' }
     }
   } catch {}
@@ -81,7 +88,16 @@ export function buildRefreshPlan(
   deckRaw: string,
   opts?: { deckPath?: string; workdir?: string; coldPool?: string; target?: string }
 ): RefreshPlan {
-  const { deckPath, workdir, coldPool } = resolveRefreshConfig(opts)
+  const { deckPath, workdir, coldPool: configuredColdPool } = resolveRefreshConfig(opts)
+
+  // Read cold_pool from deck.toml [deck] section if not explicitly overridden
+  let coldPool = configuredColdPool
+  if (!opts?.coldPool) {
+    const deckMatch = deckRaw.match(/cold_pool\s*=\s*"([^"]+)"/)
+    if (deckMatch) {
+      coldPool = expandHome(deckMatch[1], workdir)
+    }
+  }
 
   const { entries: allDeclared } = parseDeck(deckRaw)
 
