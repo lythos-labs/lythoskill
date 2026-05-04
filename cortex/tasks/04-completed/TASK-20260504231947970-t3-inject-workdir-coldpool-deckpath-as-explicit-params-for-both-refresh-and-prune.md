@@ -1,4 +1,4 @@
-# TASK-20260504231949003: T4: Unit tests for RefreshPlan + PrunePlan correctness (edge cases: localhost, nested git, missing)
+# TASK-20260504231947970: T3: Inject workdir/coldPool/deckPath as explicit params for both refresh and prune
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created |
+| in-progress | 2026-05-04 | Started |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260504231949003)
+feat(scope): description (TASK-20260504231947970)
 
 - Detail 1
 - Detail 2
