@@ -1,4 +1,4 @@
-# TASK-20260505015051145: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
+# TASK-20260505015052748: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,7 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created |
-| in-progress | 2026-05-04 | Started |
+| completed | 2026-05-04 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -31,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260505015051145)
+feat(scope): description (TASK-20260505015052748)
 
 - Detail 1
 - Detail 2
