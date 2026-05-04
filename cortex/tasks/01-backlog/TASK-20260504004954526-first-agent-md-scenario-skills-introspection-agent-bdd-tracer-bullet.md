@@ -5,104 +5,100 @@
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-04 | Created — Theme D 集成 tracer bullet,依赖 T7 |
+| backlog | 2026-05-04 | Created — Theme D tracer bullet, T9 解锁起点 |
 
 ## 背景与目标
 
-T7 落地 substrate(helper + schema)后,需要第一个 `*.agent.md` scenario 端到端验证三层模型联通(pattern + substrate + judge)。读型 scenario("agent 内省 deck 状态")是最小可行 tracer bullet:
+T7(`TASK-20260504004947351`)已实现 `runClaudeAgent` helper + checkpoint JSONL schema。本卡是 **Theme D(Agent BDD)** 的 tracer bullet：验证"agent 读 SKILL.md → 执行 CLI → 产生正确副作用 + checkpoint"这一完整链路 **端到端可跑通**。
 
-- 不动 fs(零 mutation,降低 helper-bug 与 scenario-bug 的耦合)
-- 仍走完 helper → checkpoint → judge 全链路
-- 失败定位最容易(只测 helper 是否真能拉起 agent + agent 是否真会输出 checkpoint)
+具体场景：给 agent 一个空项目，让它读 `@lythos/skill-deck` 的 SKILL.md，然后执行一次 `deck add` + `deck link`。验证 deck.toml 被正确修改、symlink 创建、agent 留下了可解析的 checkpoint JSONL。
 
-T9(写型 scenario:add/refresh/remove/prune)在本卡通过后再起,引入 fs mutation 验证。
-
-依赖:**TASK-20260504004947351 (T7)** — 需 `runClaudeAgent` + `readCheckpoints` 已可用。
+本卡是 T9（4 个完整 scenario）的**前置依赖**——T8 证明 helper + checkpoint + LLM judge 三者能协同工作后，T9 才能批量扩场景。
 
 ## 关联引用(零上下文 subagent boot 用)
 
 | 引用 | 路径 | 用途 |
 |---|---|---|
-| Epic | `cortex/epics/01-active/EPIC-20260503234346583-...md` 主题 D / D4 | 范围、tracer bullet 定义 |
-| 前置 task | `cortex/tasks/01-backlog/TASK-20260504004947351-...md` (T7) | 本卡依赖其交付的 helper + schema |
-| Wiki/lessons | `cortex/wiki/03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md` | 三层模型;checkpoint 字段语义("我做完了 / 位置在 / 你看") |
-| 反例 ADR | `cortex/adr/03-rejected/ADR-20260503230522270-...md` | 不要 grep 字面量 stdout,不要进 `playground/` |
-| 现存约定 | `packages/lythoskill-test-utils/SCENARIOS.md` "Agent BDD" 段 | `*.agent.md` 文件结构惯例 |
-| Judge 范本 | `packages/lythoskill-arena/skill/references/agent-autonomous-arena.md` | "Judge = Agent, Agent = Judge" 模式 |
-| Bootloader 原则 | `cortex/adr/02-accepted/ADR-20260503003315478-...md` | task = pointers + action |
+| Epic | `cortex/epics/01-active/EPIC-20260503234346583-...md` 主题 D | 范围、三层模型、LLM judge 原则 |
+| 前序任务 | `cortex/tasks/02-in-progress/TASK-20260504004947351-...md`(T7) | `runClaudeAgent` helper + checkpoint schema |
+| 后续任务 | `cortex/tasks/01-backlog/TASK-20260504005000534-...md`(T9) | 4 个完整 Agent BDD scenario |
+| 反例 ADR | `cortex/adr/03-rejected/ADR-20260503230522270-...md` | 不要 bash judge、不要 playground/、不要写脚本判官 |
+| Wiki/lessons | `cortex/wiki/03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md` | 三层模型 + checkpoint 字段来源 |
+| 现存约定 | `packages/lythoskill-test-utils/SCENARIOS.md` "Agent BDD — empty today" 段 | 格式约定: `*.agent.md`，LLM 读 G/W/T，不进 CI |
+| 范本 | `packages/lythoskill-arena/skill/references/agent-autonomous-arena.md` | "Judge = Agent, Agent = Judge" |
+| /tdd 准则 | `.claude/skills/tdd/SKILL.md` | tracer bullet first; no speculative tests |
 
-## 需求详情
+## 需求详情(每条 = 1 vertical slice, RED→GREEN 单独走完)
 
-- [ ] **D4.a** scenario 文件落位 `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
-  - **注意**:目录 `test/scenarios/` 是 git tracked,**不是** `playground/`
-  - 文件结构(参考 SCENARIOS.md):**Brief** 段(给 agent 的指令)+ **Expected** 段(给 judge 的标准)+ **Setup** 段(预置 fixture 描述)
-- [ ] **D4.b** Brief(给 agent 看,LLM 直接读 G/W/T,无 Cucumber)
-  - **Given**:cwd 含一个最小 `skill-deck.toml`(声明 2-3 个 skill)+ 对应 cold pool fixtures
-  - **When**:agent 被要求"读 deck 状态,列出已声明 skill 名 + 各自源路径,落到 `_checkpoints/introspect.jsonl`"
-  - **Then**:agent 不能修改 deck.toml,不能 link/unlink,只输出 checkpoint
-- [ ] **D4.c** Expected(给 judge 看)
-  - `_checkpoints/introspect.jsonl` 存在
-  - JSONL 第一行 parse 后含 `step: "deck.introspect"` + `final_state.skills_declared` 数组,每元素含 `name` + `source_path`
-  - 数组与 fixture deck.toml 完全对应(数量 + 名称 + 顺序无关)
-  - **不**做字面量 stdout 断言(stdout 措辞 agent 自由)
-- [ ] **D4.d** runner harness 接入
-  - 在 `packages/lythoskill-deck/test/runner.ts` 或新增 `agent-bdd-runner.ts` 中加一个 `bun test` 入口,**显式标注 not-for-CI**
-  - 用 T7 的 `runClaudeAgent({ cwd, brief })` + `readCheckpoints(cwd)` 跑
-  - judge 调用方式见下(D4.e)
-- [ ] **D4.e** LLM judge 实现
-  - 选项 1(推荐):同样用 `runClaudeAgent` 拉一个 judge agent,brief 给 "verify these checkpoints against this expected"
-  - 选项 2(回退):human review,test 只断 checkpoint 文件存在 + 字段非空(judge 推后)
-  - 选 1 时,judge 必须能输出可解析的 verdict(`{verdict: "pass"|"fail", reason: string}`)
-- [ ] **D4.f** SCENARIOS.md "Agent BDD — empty today" 段更新
-  - 计数 0 → 1
-  - 列出 `skills-introspection` 作首例
+- [ ] **D2.a** 编写第一个 `*.agent.md` scenario 文件
+  - 位置: `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
+  - 格式: Markdown，frontmatter(`name` / `description`) + `Given` / `When` / `Then`
+  - Given: 空项目目录（无 deck.toml、无 .claude/skills、无 cold pool）
+  - When: agent 被赋予 brief —— "你有一个空项目，请阅读 `@lythos/skill-deck` 的 SKILL.md，然后声明 `tdd` skill 进 deck 并 link"
+  - Then: deck.toml 被创建且包含 `tdd` 声明；`.claude/skills/tdd` symlink 存在；`_checkpoints/*.jsonl` 至少包含 1 条有效 checkpoint
+
+- [ ] **D2.b** 实现 scenario 驱动脚本（或扩 runner）
+  - 用 `runClaudeAgent({ cwd: tmpdir, brief })` 执行 scenario
+  - brief 中必须指导 agent：**在操作完成后写 checkpoint JSONL** 到 `_checkpoints/add-skill.jsonl`
+  - 返回后调用 `readCheckpoints(cwd)` 读取产物
+
+- [ ] **D2.c** 实现 LLM judge（最小版本）
+  - judge brief: "请检查以下 agent 执行结果：项目目录中有 deck.toml 吗？有 tdd symlink 吗？checkpoint JSONL 内容合理吗？输出 pass/fail + 解释"
+  - 输入: `runClaudeAgent` 返回的 `{ stdout, stderr, code, checkpoints }` + fs state（用 `runCli` 跑 `ls`/`cat`）
+  - 输出: `{ verdict: 'pass'|'fail', explanation: string }`
+  - **可以是同一 agent session 的第二次 `runClaudeAgent` 调用**（Judge = Agent, Agent = Judge）
+
+- [ ] **D2.d** TDD tracer bullet 验证
+  - 本地 agent session 跑一次完整流程：`runClaudeAgent` 执行 → fs 检查 → `runClaudeAgent` judge → 拿到 pass/fail
+  - 目标不是"一次就 pass"，而是"链路端到端跑得通"——fail 时能看到清晰的 checkpoint 和 judge 解释，方便 debug
 
 ## 技术方案
 
-- **文件位置全部 git tracked**:`packages/lythoskill-deck/test/scenarios/*.agent.md` + harness in `test/runner.ts`
-- **Fixture 隔离**:用 T7 的 `setupWorkdir`(或同等)在 tmpdir 拷一份 fixture deck,**不**污染真 `~/.agents/skill-repos/`
-- **Brief 写作准则**:
-  - 自然语言,但**明确指令 agent 落 checkpoint** + **明确 checkpoint 路径**
-  - 不规约 stdout 措辞(留语义自由度)
-  - 规约 final_state 字段名(judge 才能机器对齐)
-- **Judge 复算性**:两次跑 judge,verdict 应一致(否则 brief 太模糊,需收敛)
-- **Tracer 严守**:本卡不引入 mutation 场景(留给 T9),不引入 multi-step checkpoint(留给 T9)
+- **位置**:
+  - `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
+  - `packages/lythoskill-test-utils/src/bdd-runner.ts`（若需要扩 judge helper）
+- **不新建 runner**: 复用 T7 的 `runClaudeAgent` + `readCheckpoints`
+- **Judge 实现**: 最小版本即可——一个 `judgeAgentRun(cwd, checkpoints, brief): Promise<{verdict, explanation}>` helper，内部用第二次 `runClaudeAgent` 调用。不要写成 bash 脚本。
+- **Brief 设计**: brief 中要给 agent 足够上下文（SKILL.md 内容摘要或路径），但不要把整个 SKILL.md 塞进去——brief 长度应控制在 500 字以内，让 agent 能读得完。
+- **Checkpoint 约定**: agent 在 brief 指导下写 `_checkpoints/<step>.jsonl`，字段至少含 `step`, `tool`, `args`, `timestamp`。T7 的 schema 已定义，brief 中引用即可。
+- **CI 策略**: `*.agent.md` 文件在 `test:all` 中**被跳过**（runner 用文件名后缀过滤），因为 CI 无 LLM。
 
 ## 验收标准
 
-- [ ] `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md` 落地
-- [ ] 本地 session 跑 harness 一次,checkpoint JSONL 产生,judge 给 pass
-- [ ] 同一 brief 跑 2 次 judge,verdict 一致(可视为"可 replay")
-- [ ] SCENARIOS.md "Agent BDD — empty today" 段计数从 0 → 1,例子被列
-- [ ] **不进 CI**(`bun run test:all` 不应触发本 scenario)
-- [ ] T7 的 helper 在本卡跑通后**未被改动**(若需要改 → 倒灌回 T7 重测)
+- [ ] `skills-introspection.agent.md` 落地，格式符合 SCENARIOS.md 约定
+- [ ] 本地 agent session 能跑一次完整链路（执行 + judge），拿到 pass/fail 结果
+- [ ] `_checkpoints/*.jsonl` 内容可被 `readCheckpoints()` 正确解析
+- [ ] `bun run test:all` 未被破坏（agent BDD 文件被 runner 正确跳过）
+- [ ] `SCENARIOS.md` "Agent BDD — empty today" 段更新为 "1 scenario in local verification"
+- [ ] 不进 CI，但场景文件和 judge helper 代码都进 git
+- [ ] 进度记录段附第一次跑通的日志摘要（含 checkpoint 样本）
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->
 
 ## 关联文件
 - 修改:
-  - `packages/lythoskill-test-utils/SCENARIOS.md`("Agent BDD — empty today" 段计数)
-  - `packages/lythoskill-deck/test/runner.ts`(或新建 `agent-bdd-runner.ts` 兄弟模块)
+  - `packages/lythoskill-test-utils/src/bdd-runner.ts`（若扩 judge helper）
+  - `packages/lythoskill-test-utils/SCENARIOS.md`（更新 Agent BDD 计数）
 - 新增:
   - `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
-  - `packages/lythoskill-deck/test/fixtures/introspection/skill-deck.toml`(及配套 cold pool fixture)
 
 ## Git 提交信息建议
 ```
-feat(deck): add first Agent BDD scenario — skills-introspection (TASK-20260504004954526)
+test(deck): add first Agent BDD scenario — skills-introspection tracer bullet (TASK-20260504004954526)
 
-- Read-only tracer bullet exercising helper → checkpoint → judge end-to-end
-- Brief lives in test/scenarios/skills-introspection.agent.md (LLM reads G/W/T)
-- Judge implemented as second runClaudeAgent invocation, two-run replay verified
-- SCENARIOS.md Agent BDD count 0 → 1
+- skills-introspection.agent.md: agent reads SKILL.md, adds tdd skill, links
+- runClaudeAgent drives the scenario; checkpoint JSONL captured
+- Minimal LLM judge verifies deck.toml + symlink + checkpoints
+- SCENARIOS.md: Agent BDD count 0 → 1
 
 Closes: TASK-20260504004954526
 ```
 
 ## 备注
 
-- **依赖**:T7 (`TASK-20260504004947351`) 必须先合入并跑通
-- **不要**:跨入 mutation 测试领域(那是 T9)
-- **不要**:把 brief 写成 spec 长篇——agent 越短越好,用 SKILL.md 已声明的能力做事
-- 失败诊断顺序:helper 拉不起 agent? → 检查 T7;agent 拉得起但不写 checkpoint? → brief 不够明确;checkpoint 格式不一致? → schema 模糊回 T7;judge 一致性差? → expected 标准不够具体
+- **这是 Theme D 的 tracer bullet**: 目标不是"一个完美的 scenario"，而是"helper + checkpoint + judge 的端到端链路第一次跑通"。scenario 内容可以简单，但链路必须完整。
+- **Judge 的准确性**: tracer bullet 阶段 judge 可能出错（false pass/fail）。没关系——T9 会在更多 scenario 中训练 judge 的 prompt，提高稳定性。
+- **不要**引入 Cucumber / Mocha / Jest（参见 ADR-20260503180000000 第 4 条）。
+- **不要**sediment 任何东西到 `playground/` 或非 git-tracked 目录（参见反例 ADR）。
+- **失败诊断顺序**: 1) agent 是否被正确拉起？2) brief 是否被正确送达？3) agent 是否写了 checkpoint？4) checkpoint 格式是否正确？5) judge 是否拿到了所有输入？

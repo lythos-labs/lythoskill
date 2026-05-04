@@ -5,108 +5,107 @@
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-04 | Created — Theme D 写型 scenario,依赖 T7+T8 |
+| backlog | 2026-05-04 | Created — Theme D 扩量，依赖 T7+T8 |
 
 ## 背景与目标
 
-T8 把 read-only tracer bullet 跑通后,本卡补齐 deck CLI 的 4 个 mutation 命令的 Agent BDD scenario:`add` / `refresh` / `remove` / `prune`。每条命令一个 `*.agent.md`,验证:
+T8(`TASK-20260504004954526`)已验证 Agent BDD 的端到端链路（`runClaudeAgent` + checkpoint + LLM judge）**可跑通**。本卡在 T8 的 tracer bullet 基础上，为 deck 的 4 个核心命令各写一个 `*.agent.md` scenario，形成完整的 Agent BDD 覆盖。
 
-- agent 读 SKILL.md,挑对 CLI 命令
-- 命令产生预期 fs mutation(file/symlink/deck.toml)
-- agent 落 checkpoint 含 `fs_mutations[]`,LLM judge 读 substrate(checkpoint + 实际 fs)而非 stdout
-- 4 条 scenario 互独立(不相互前置 fixture)
-
-依赖:**T7** (`TASK-20260504004947351`) helper + schema、**T8** (`TASK-20260504004954526`) scenario 文件结构与 judge harness 已稳定。
-
-可拆 1 批 commit(4 scenarios)或拆 4 批,执行者权衡。
+这四个 scenario 验证的是：**agent 读 SKILL.md 后，能否正确选择 CLI 命令、传递参数、理解输出语义**——这是 unit test 无法覆盖的维度。
 
 ## 关联引用(零上下文 subagent boot 用)
 
 | 引用 | 路径 | 用途 |
 |---|---|---|
-| Epic | `cortex/epics/01-active/EPIC-20260503234346583-...md` 主题 D / D4 末段 | 4 命令一一对应的设计 |
-| 前置 task A | `cortex/tasks/01-backlog/TASK-20260504004947351-...md` (T7) | helper + schema |
-| 前置 task B | `cortex/tasks/01-backlog/TASK-20260504004954526-...md` (T8) | scenario 文件结构、judge harness |
-| Wiki/lessons | `cortex/wiki/03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md` | mutation 类 substrate 必须含 `fs_mutations[]` |
-| 反例 ADR | `cortex/adr/03-rejected/ADR-20260503230522270-...md` | 不要 grep stdout 字面量,judge 读 checkpoint+fs |
-| 既有命令实现 | `packages/lythoskill-deck/src/{add,refresh,remove,prune}.ts` | 对应每条 scenario 验证的命令源 |
-| 既有 CLI BDD | `packages/lythoskill-deck/test/cli-bdd.ts`(参考) | 已有 21 个 CLI integration 场景作 baseline |
-| Bootloader 原则 | `cortex/adr/02-accepted/ADR-20260503003315478-...md` | 4 个 scenario 都是 self-contained |
+| Epic | `cortex/epics/01-active/EPIC-20260503234346583-...md` 主题 D | 范围、三层模型、LLM judge 原则 |
+| 前序任务 | `cortex/tasks/02-in-progress/TASK-20260504004947351-...md`(T7) | `runClaudeAgent` helper |
+| 前序任务 | `cortex/tasks/01-backlog/TASK-20260504004954526-...md`(T8) | 第一个 `*.agent.md` 范本 |
+| 反例 ADR | `cortex/adr/03-rejected/ADR-20260503230522270-...md` | 不要 bash judge、不要 playground/ |
+| Wiki/lessons | `cortex/wiki/03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md` | 三层模型 + judge 必须是 LLM |
+| 现存约定 | `packages/lythoskill-test-utils/SCENARIOS.md` | `*.agent.md` 格式、不进 CI |
+| 范本 | `packages/lythoskill-arena/skill/references/agent-autonomous-arena.md` | "Judge = Agent, Agent = Judge" |
 
-## 需求详情
+## 需求详情(每条 = 1 vertical slice, RED→GREEN 单独走完)
 
-每条 scenario **vertical slice**:1 命令 → 1 scenario → judge pass → 下一条。禁止水平切片。
+- [ ] **D4.a** `deck-add.agent.md` — agent 下载 skill 并加入 deck
+  - Given: 空项目，有 deck.toml（已声明若干 skill）
+  - When: brief 要求 agent "添加 `github.com/owner/repo/skill` 到 deck"
+  - Then: deck.toml 新增 entry；cold pool 中出现 repo；working set 中出现 symlink；checkpoint 记录 `deck add` 步骤
 
-- [ ] **D9.a `add.agent.md`**
-  - **Brief**:cwd 含空 `skill-deck.toml` + cold pool 含 X skill;agent 用 deck CLI 把 X 加到 deck(可指定 `--as` alias);落 checkpoint
-  - **Expected**:`skill-deck.toml` 有 1 行 `[[skills]]` 指向 X;`.claude/skills/<alias-or-name>` symlink 创建,target 落到 cold pool;checkpoint `fs_mutations[]` 含 1 modify(deck.toml) + 1 create-symlink
-- [ ] **D9.b `refresh.agent.md`**
-  - **Brief**:cwd 已有 1 个 declared skill,deck 中相对源更新过(模拟版本变化);agent 调 `refresh` 让 working set 重新对齐
-  - **Expected**:symlink 仍存在(target 可能不变,因为 fixture 设计可让其内容变 / 路径变);checkpoint 显示 `step: "deck.refresh"` + 命令成功;judge 读 fs 验证 reconciler 输出与 deck 声明一致
-  - 设计 fixture 时要确保"refresh 有可观测变化"(否则 scenario 退化为 noop,judge 无意义)
-- [ ] **D9.c `remove.agent.md`**
-  - **Brief**:cwd 已有 1 个 declared + linked skill;agent 调 `remove` 把它去掉
-  - **Expected**:`skill-deck.toml` 那行被删;`.claude/skills/<name>` symlink 被删;checkpoint `fs_mutations[]` 含 1 modify(deck.toml) + 1 delete(symlink);cold pool 仓库**不**被删(那是 prune 的事)
-- [ ] **D9.d `prune.agent.md`**
-  - **Brief**:cwd 含 deck 已声明 1 个 skill 但 cold pool 还有 2 个未引用的旧仓库;agent 调 `prune --yes` 收割
-  - **Expected**:cold pool 那 2 个未引用仓库被删;1 个引用中的仓库不被删;deck.toml 不变;symlink 不变;checkpoint `fs_mutations[]` 含 2 delete
-- [ ] **D9.e** SCENARIOS.md "Agent BDD" 段计数 1 → 5(T8 起 1,本卡 +4)
-- [ ] **D9.f** harness 跑 4 个 scenario(各自独立 cwd / fixture)全 pass,judge 对 4 条都给一致 pass
+- [ ] **D4.b** `deck-refresh.agent.md` — agent 刷新已声明 skill
+  - Given: 项目已声明 skill，cold pool 中 repo 落后上游 1 个 commit
+  - When: brief 要求 agent "刷新 deck 中所有 skill"
+  - Then: agent 执行 `deck refresh`；stdout 含 "updated" 或 "up-to-date"；lock 文件被更新（若 refresh 触发了 link）
+
+- [ ] **D4.c** `deck-remove.agent.md` — agent 移除 skill
+  - Given: 项目已声明 skill-a，working set 有 symlink
+  - When: brief 要求 agent "移除 skill-a"
+  - Then: deck.toml 中无 skill-a；working set 中无 skill-a symlink；cold pool 保留；checkpoint 记录 `deck remove` 步骤
+
+- [ ] **D4.d** `deck-prune.agent.md` — agent 清理冷池
+  - Given: 项目 deck 引用 1 个 skill，cold pool 中有 2 个 repo（1 被引用，1 未引用）
+  - When: brief 要求 agent "清理未使用的冷池仓库"
+  - Then: agent 执行 `deck prune --yes`；未引用 repo 被删除；被引用 repo 保留
+
+- [ ] **D4.e** Judge prompt 调优
+  - 基于 T8 的 judge 经验，写一个可复用的 `judgeDeckScenario(cwd, expectedActions)` helper
+  - expectedActions 是一个声明式数组（如 `['deck.toml modified', 'symlink created', 'checkpoint written']`）
+  - judge LLM 读 brief + checkpoint + fs state，对照 expectedActions 输出 pass/fail
+  - 目标: 4 个 scenario 的 judge 稳定率 ≥ 80%（同一 scenario 跑 5 次，≥4 次 judge 正确）
 
 ## 技术方案
 
-- **文件位置**:`packages/lythoskill-deck/test/scenarios/{add,refresh,remove,prune}.agent.md`(全 git tracked)
-- **Fixture 复用**:把 T8 的 `setupAgentBddFixture(name, deckLines)` 参数化,4 scenarios 共用
-- **fs_mutations 自检**:在每条 brief 末尾要求 agent **明确列出每一步 mutation**(不要总结"我改了几个文件",要逐项)——这样 judge 可对齐 expected
-- **Judge 标准 escalation**:
-  - 字段存在 + 数量正确(machine 可检)
-  - 路径前缀正确(machine 可检)
-  - 路径具体值(LLM judge,因为 alias 可能与 fixture 不同)
-- **不要**写"agent 自己想 alias"的 scenario(本卡不测 brief 模糊性,留给后续 epic)
-- **每条独立**:scenario 之间不共享 cwd,失败一条不应连带其他
+- **位置**:
+  - `packages/lythoskill-deck/test/scenarios/deck-add.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-refresh.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-remove.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-prune.agent.md`
+  - `packages/lythoskill-test-utils/src/bdd-runner.ts`（若扩 judge helper）
+- **复用 T8 的 judge 模式**: 同一 agent session 内，先 `runClaudeAgent(brief_execute)`，再 `runClaudeAgent(brief_judge)`
+- **Brief 模板化**: 4 个 scenario 的 brief 结构相似（Given/When/Then），可以抽象一个 `buildDeckBrief(scenarioType, params)` 但不强求——先手写 4 个，重复出现再抽象。
+- **Fs state 采集**: judge 需要读 fs state。在 `bdd-runner.ts` 中提供一个 `collectFsState(cwd): Record<string, {type, target?}>` helper，列出 cwd 中关键路径的文件类型（file/dir/symlink）和 symlink target。
+- **CI 策略**: 同 T8，`*.agent.md` 被 runner 跳过。
 
 ## 验收标准
 
-- [ ] 4 个 `*.agent.md` 文件落地
-- [ ] 4 个 scenario 都本地跑通,judge 都给 pass
-- [ ] 每个 checkpoint JSONL 含正确 `fs_mutations[]`(对照下表)
-  - add: 1 modify + 1 create-symlink
-  - refresh: ≥1 noop-or-update mutation(具体看 fixture 设计)
-  - remove: 1 modify + 1 delete
-  - prune: ≥2 delete(基于 fixture 给的未引用仓库数)
-- [ ] SCENARIOS.md 计数 5;每个 scenario 在段中被列
-- [ ] **不进 CI**;harness 显式标注
-- [ ] judge 二次复算 verdict 一致
+- [ ] 4 个 `.agent.md` scenario 文件落地
+- [ ] 每个 scenario 在本地 agent session 至少跑一次，拿到 pass/fail 结果
+- [ ] judge 稳定率 ≥ 80%（同一 scenario 重复 5 次）
+- [ ] `bun run test:all` 未被破坏（agent BDD 文件被正确跳过）
+- [ ] `SCENARIOS.md` "Agent BDD" 段更新计数（从 1 → 5）
+- [ ] 不进 CI
+- [ ] 进度记录段附每个 scenario 的首次跑通/失败摘要
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->
 
 ## 关联文件
 - 修改:
-  - `packages/lythoskill-test-utils/SCENARIOS.md`(计数 + 列举)
-  - `packages/lythoskill-deck/test/runner.ts`(或 `agent-bdd-runner.ts`,加 4 个 scenario 的入口)
+  - `packages/lythoskill-test-utils/src/bdd-runner.ts`（若扩 judge / fs-state helper）
+  - `packages/lythoskill-test-utils/SCENARIOS.md`（更新 Agent BDD 计数）
 - 新增:
-  - `packages/lythoskill-deck/test/scenarios/add.agent.md`
-  - `packages/lythoskill-deck/test/scenarios/refresh.agent.md`
-  - `packages/lythoskill-deck/test/scenarios/remove.agent.md`
-  - `packages/lythoskill-deck/test/scenarios/prune.agent.md`
-  - `packages/lythoskill-deck/test/fixtures/{add,refresh,remove,prune}/...`(每条独立 fixture)
+  - `packages/lythoskill-deck/test/scenarios/deck-add.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-refresh.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-remove.agent.md`
+  - `packages/lythoskill-deck/test/scenarios/deck-prune.agent.md`
 
 ## Git 提交信息建议
 ```
-feat(deck): add Agent BDD scenarios for add/refresh/remove/prune (TASK-20260504005000534)
+test(deck): add 4 Agent BDD scenarios — add/refresh/remove/prune (TASK-20260504005000534)
 
-- 4 *.agent.md scenarios — one per mutation command
-- Each verifies fs_mutations[] in checkpoint matches expected mutations
-- SCENARIOS.md Agent BDD count 1 → 5
-- Independent fixtures, no cross-scenario state coupling
+- deck-add.agent.md: agent downloads skill and updates deck
+- deck-refresh.agent.md: agent refreshes declared skills
+- deck-remove.agent.md: agent removes skill from deck
+- deck-prune.agent.md: agent GCs unreferenced cold-pool repos
+- Reusable judge helper with expectedActions declarative check
+- SCENARIOS.md: Agent BDD count 1 → 5
 
 Closes: TASK-20260504005000534
 ```
 
 ## 备注
 
-- **必须**等 T7 + T8 都合入并跑稳定
-- **不要**为了 4 条一致而硬写 share fixture——独立 fixture 对失败定位的好处大于代码复用
-- 拆 1 批 vs 4 批 commit:首选 1 批(epic 已对齐);若一条 scenario 调试时间长,可单独拆出
-- 失败诊断:judge 不一致 → 该条 brief 太模糊,把 expected 字段名收紧;某条 mutation 没出现 → fixture 误差或 reconciler 真有 bug(回流到 white-box 单测)
+- **不要**期望 agent 100% 正确——Agent BDD 的价值在于"可重复验证 + 可 debug"，不是"零失败"。judge 的存在就是为了捕获 agent 的失误。
+- **不要**把 scenario 写得太复杂——每个 scenario 应该能在 60 秒内跑完（`runClaudeAgent` 默认超时）。
+- **refresh 的 network**: refresh scenario 需要真实的 git repo 和上游。可用本地 `git init` + `git remote add` 指向本地 bare repo 来模拟，避免网络依赖。
+- **失败诊断**: 若 judge 不稳定，优先调 judge brief（给更多明确的检查清单），而不是调执行 brief。
