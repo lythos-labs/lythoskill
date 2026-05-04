@@ -27,6 +27,9 @@ export const ArenaToml = z.object({
     criteria: z.array(z.string()).min(1),
     runs_per_side: z.number().int().positive().default(1),
     max_participants: z.number().int().min(2).max(5).default(5),
+    model: z.string().optional(),  // e.g. "claude-sonnet-4-6"
+    endpoint: z.string().optional(), // e.g. "api.anthropic.com"
+    notes: z.string().optional(),  // freeform reproducibility notes
   }),
   side: z.array(Side).min(2).max(5),
 })

@@ -106,61 +106,75 @@ export async function runComparativeJudge(opts: {
 
   const prompt = buildComparativePrompt({ manifest, verdicts })
 
-  let raw: string
+  let raw = ''
   let parsed: unknown
+  let lastError: string | undefined
 
-  if (judge.invokeTool) {
-    parsed = await judge.invokeTool({
-      tool: SCORE_TOOL,
-      prompt,
-      cwd: workdir,
-      timeoutMs: 120000,
-    })
-    raw = JSON.stringify(parsed)
-  } else {
-    const result = await judge.spawn({ cwd: workdir, brief: prompt, timeoutMs: 120000 })
-    raw = result.stdout
-    const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-    const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
-    parsed = JSON.parse(jsonStr)
-  }
-
-  // Validate LLM output
-  const llmResult = ComparativeReport.pick({
-    score_matrix: true,
-    key_findings: true,
-    recommendations: true,
-  }).parse(parsed)
-
-  const scoreMatrix = toScoreMatrix(manifest, llmResult.score_matrix)
-
-  // Pareto: deterministic, never delegated to LLM
-  const participantScores = manifest.participants.map(p => {
-    const pScores: Record<string, number> = {}
-    for (const cell of scoreMatrix) {
-      if (cell.participant_id === p.id) {
-        pScores[cell.criterion] = cell.score
+  for (let attempt = 0; attempt <= 2; attempt++) {
+    try {
+      if (judge.invokeTool) {
+        parsed = await judge.invokeTool({
+          tool: SCORE_TOOL,
+          prompt,
+          cwd: workdir,
+          timeoutMs: 120000,
+        })
+        raw = JSON.stringify(parsed)
+      } else {
+        const result = await judge.spawn({ cwd: workdir, brief: prompt, timeoutMs: 120000 })
+        raw = result.stdout
+        const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+        const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+        parsed = JSON.parse(jsonStr)
       }
+
+      // Validate LLM output through Zod
+      const llmResult = ComparativeReport.pick({
+        score_matrix: true,
+        key_findings: true,
+        recommendations: true,
+      }).parse(parsed)
+
+      // Success — proceed to Pareto computation
+      const scoreMatrix = toScoreMatrix(manifest, llmResult.score_matrix)
+      const participantScores = manifest.participants.map(p => {
+        const pScores: Record<string, number> = {}
+        for (const cell of scoreMatrix) {
+          if (cell.participant_id === p.id) pScores[cell.criterion] = cell.score
+        }
+        return { participant_id: p.id, scores: pScores }
+      })
+      const pareto = computePareto(participantScores)
+      const weightedTotals: Record<string, number> = {}
+      for (const p of manifest.participants) {
+        const pCells = scoreMatrix.filter(c => c.participant_id === p.id)
+        weightedTotals[p.id] = pCells.reduce((sum, c) => sum + c.score * c.weight, 0) / (pCells.length || 1)
+      }
+
+      return ComparativeReport.parse({
+        arena_id: manifest.id,
+        generated_at: new Date().toISOString(),
+        score_matrix: scoreMatrix,
+        weighted_totals: weightedTotals,
+        pareto,
+        key_findings: llmResult.key_findings ?? [],
+        recommendations: llmResult.recommendations ?? [],
+      })
+    } catch (e) {
+      lastError = e instanceof Error ? e.message : String(e)
+      if (attempt < 2) continue // retry
     }
-    return { participant_id: p.id, scores: pScores }
-  })
-
-  const pareto = computePareto(participantScores)
-
-  // Weighted totals (equal weight by default)
-  const weightedTotals: Record<string, number> = {}
-  for (const p of manifest.participants) {
-    const pCells = scoreMatrix.filter(c => c.participant_id === p.id)
-    weightedTotals[p.id] = pCells.reduce((sum, c) => sum + c.score * c.weight, 0) / (pCells.length || 1)
   }
 
-  return ComparativeReport.parse({
+  // All retries exhausted: return fallback report
+  const empty: typeof ComparativeReport._output = {
     arena_id: manifest.id,
     generated_at: new Date().toISOString(),
-    score_matrix: scoreMatrix,
-    weighted_totals: weightedTotals,
-    pareto,
-    key_findings: llmResult.key_findings ?? [],
-    recommendations: llmResult.recommendations ?? [],
-  })
+    score_matrix: [],
+    weighted_totals: {},
+    pareto: [],
+    key_findings: [`Comparative judge failed after 3 attempts: ${lastError}`],
+    recommendations: [],
+  }
+  return empty
 }
