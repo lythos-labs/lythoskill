@@ -1,14 +1,30 @@
 #!/bin/sh
-# pre-push — Push skills branch alongside main
+# pre-push — Push skills branch alongside main (with retry for concurrent agents)
 
 remote="$1"
 url="$2"
+
+MAX_RETRIES=3
+RETRY_DELAY=2
 
 while read local_ref local_sha remote_ref remote_sha; do
   if [ "$local_ref" = "refs/heads/main" ]; then
     if git show-ref --verify --quiet refs/heads/skills; then
       echo "🚀 Pushing skills branch to $remote..."
-      git push -f "$remote" refs/heads/skills
+      for i in $(seq 1 $MAX_RETRIES); do
+        if git push -f "$remote" refs/heads/skills 2>/dev/null; then
+          echo "✅ Skills branch synced"
+          break
+        fi
+        if [ $i -lt $MAX_RETRIES ]; then
+          echo "⏳ Skills push conflict (attempt $i/$MAX_RETRIES), retrying in ${RETRY_DELAY}s..."
+          sleep $RETRY_DELAY
+          git fetch "$remote" refs/heads/skills 2>/dev/null
+          git update-ref refs/heads/skills FETCH_HEAD 2>/dev/null
+        else
+          echo "⚠️  Skills push failed after $MAX_RETRIES attempts — proceeding anyway"
+        fi
+      done
     fi
   fi
 done
