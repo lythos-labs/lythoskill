@@ -1,6 +1,7 @@
 {
   "name": "@lythos/hello-world",
   "version": "0.9.1",
+  "description": "The thinnest possible lythoskill skill — template for minimal CLI sanity-check skills.",
   "keywords": [
     "ai-agent",
     "skill",
@@ -16,7 +17,8 @@
   },
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",

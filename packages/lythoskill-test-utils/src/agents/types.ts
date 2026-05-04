@@ -1,0 +1,55 @@
+// ── Agent BDD substrate types ──────────────────────────────────────────────
+
+export interface FsMutation {
+  action: 'create' | 'modify' | 'delete' | 'create-symlink'
+  path: string
+  target?: string
+}
+
+export interface CheckpointEntry {
+  step: string
+  tool: string
+  args: string[]
+  exit_code?: number
+  stdout_summary?: string
+  fs_mutations?: FsMutation[]
+  final_state?: Record<string, unknown>
+  timestamp: string
+}
+
+export interface AgentRunResult {
+  stdout: string
+  stderr: string
+  code: number
+  durationMs: number
+  checkpoints: CheckpointEntry[]
+}
+
+export interface AgentAdapter {
+  name: string
+  spawn(opts: {
+    cwd: string
+    brief: string
+    timeoutMs: number
+    idleTimeoutMs?: number
+    env?: Record<string, string>
+  }): Promise<AgentRunResult>
+}
+
+// ── Minimal deck config types (for parseAgentMd, not a full schema) ────────
+
+export interface SkillEntryLike {
+  path: string
+  role?: string
+  why_in_deck?: string
+}
+
+export interface DeckConfig {
+  max_cards?: number
+  cold_pool?: string
+  working_set?: string
+  innate?: Record<string, SkillEntryLike>
+  tool?: Record<string, SkillEntryLike>
+  combo?: Record<string, SkillEntryLike>
+  transient?: Record<string, { path?: string; skills?: string[]; expires?: string }>
+}

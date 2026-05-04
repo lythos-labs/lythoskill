@@ -1,6 +1,8 @@
 # @lythos/skill-deck
 
-![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
+![npm](https://img.shields.io/npm/v/@lythos/skill-deck)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/skill-deck)
 
 > Declarative skill deck governance. Reconcile declared skills against your cold pool via symlinks — deny-by-default, max-cards budgeting, transient expiry.
 

@@ -17,6 +17,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run test:all
+      - run: bun run test:unit
       - run: bun packages/lythoskill-creator/src/cli.ts align
 
   coverage:
@@ -28,9 +29,17 @@ jobs:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage packages/lythoskill-deck/src/
+      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:
           lcov-path: coverage/lcov.info
-          min-coverage: 80
+          min-coverage: 55
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun packages/lythoskill-creator/src/cli.ts build --all

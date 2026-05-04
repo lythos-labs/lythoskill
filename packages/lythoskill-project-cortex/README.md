@@ -1,5 +1,9 @@
 # @lythos/project-cortex
 
+![npm](https://img.shields.io/npm/v/@lythos/project-cortex)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/project-cortex)
+
 > GTD-style project governance for AI agent workflows. ADR, Epic, Task, Wiki — timestamp-ID based, machine-parseable, CLI-driven.
 
 ## Why

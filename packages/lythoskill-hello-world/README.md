@@ -1,5 +1,9 @@
 # @lythos/hello-world
 
+![npm](https://img.shields.io/npm/v/@lythos/hello-world)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/hello-world)
+
 > The thinnest possible lythoskill skill. A single SKILL.md and a one-line sanity-check CLI. Use as a template when starting a new skill from scratch.
 
 ## Why

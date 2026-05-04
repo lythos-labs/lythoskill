@@ -1,5 +1,9 @@
 # @lythos/skill-arena
 
+![npm](https://img.shields.io/npm/v/@lythos/skill-arena)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/skill-arena)
+
 > Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis.
 
 ## Why

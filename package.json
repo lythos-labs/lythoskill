@@ -10,6 +10,7 @@
   },
   "scripts": {
     "prepare": "husky",
-    "test:all": "bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts"
+    "test:all": "bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts",
+    "test:unit": "bun test"
   }
 }

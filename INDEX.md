@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 18:07:57
+> 自动生成于 2026/5/4 18:36:04
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 71 | 进行中: 0, 待验收: 0, 已完成: 48 |
-| Epics | 11 | 活跃: 1, 已完成: 7, 悬置: 1, 已归档: 2 |
+| Epics | 11 | 活跃: 0, 已完成: 8, 悬置: 1, 已归档: 2 |
 | ADRs | 38 | 已接受: 27 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260504170744839**: Fix Agent BDD stability — parseAgentMd Given paths and prune timeout
+_无_
 
 ### 已完成
 
@@ -27,6 +27,7 @@
 - ✅ **EPIC-20260503010218940**: Cortex 流转自动化 + epic 双轨纪律落地
 - ✅ **EPIC-20260503234346583**: Verification coverage for deck — TDD unit + Agent BDD (leetcode-shape + LLM judge)
 - ✅ **EPIC-20260504165156064**: Extract cortex husky hooks to testable TypeScript modules
+- ✅ **EPIC-20260504170744839**: Fix Agent BDD stability — parseAgentMd Given paths and prune timeout
 
 ### 悬置
 

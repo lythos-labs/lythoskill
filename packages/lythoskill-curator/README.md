@@ -1,5 +1,9 @@
 # @lythos/skill-curator
 
+![npm](https://img.shields.io/npm/v/@lythos/skill-curator)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/skill-curator)
+
 > Read-only indexer for skill cold pools. Scans, extracts metadata, builds REGISTRY.json + catalog.db. Zero algorithmic recommendation — facts only.
 
 ## Why

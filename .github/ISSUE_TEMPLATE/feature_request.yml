@@ -1,0 +1,33 @@
+name: Feature Request
+description: Suggest an idea for lythoskill
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Motivation
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: What should happen?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What else did you consider?
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - "Single package"
+        - "Cross-package / ecosystem"
+        - "Documentation / process"
+        - "Unsure"

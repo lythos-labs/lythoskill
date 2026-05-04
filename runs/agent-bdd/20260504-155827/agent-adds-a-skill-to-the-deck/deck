@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec bun /Users/chariots/Downloads/lythoskill-main/packages/lythoskill-deck/src/cli.ts "$@"

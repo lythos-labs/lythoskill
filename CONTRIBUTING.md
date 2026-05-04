@@ -47,8 +47,11 @@ Scope is the package/skill name (`deck`, `creator`, `cortex`, etc.).
 ## Build & Test
 
 ```bash
-# Run deck tests
-bun packages/lythoskill-deck/test/runner.ts
+# Run unit tests (all packages)
+bun run test:unit
+
+# Run BDD scenario tests (deck + cortex)
+bun run test:all
 
 # Build a skill after editing its skill/ source
 bun packages/lythoskill-creator/src/cli.ts build <skill-name>
@@ -75,9 +78,24 @@ bun packages/lythoskill-creator/src/cli.ts build my-skill
 git add skills/my-skill/ packages/my-skill/
 ```
 
+## Pull Request Workflow
+
+1. **Fork & branch** from `main`
+   - Branch naming: `feat/<scope>-<summary>` or `fix/<scope>-<summary>`
+   - Example: `feat/deck-transient-expiry`, `fix/creator-align-json-import`
+2. **Commit** with conventional commit messages
+3. **Push** and open a PR against `main`
+4. **Ensure CI is green** — the `test`, `coverage`, and `build` jobs must pass
+5. **Request review** — CODEOWNERS will auto-assign `@lythos-labs`
+6. **Merge** via squash or rebase (linear history preferred)
+
+> `main` is protected — all changes must go through a PR with at least one review and green CI.
+
 ## PR Checklist
 
-- [ ] `bun packages/lythoskill-deck/test/runner.ts` passes
+- [ ] `bun run test:unit` passes
+- [ ] `bun run test:all` passes
+- [ ] `bun packages/lythoskill-creator/src/cli.ts align` passes
 - [ ] If you edited `packages/<name>/skill/`, run `build --all` and commit `skills/`
 - [ ] If you changed ADR/Epic/Task, run `bun packages/lythoskill-project-cortex/src/cli.ts index`
 - [ ] If you changed README, check `README.zh.md` for sync needs

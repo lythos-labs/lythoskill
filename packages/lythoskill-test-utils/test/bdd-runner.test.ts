@@ -3,8 +3,10 @@ import { describe, test, expect } from 'bun:test'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { runClaudeAgent, readCheckpoints, setupWorkdir } from '../src/bdd-runner'
 
+const hasClaude = !!Bun.which('claude')
+
 describe('runClaudeAgent', () => {
-  test(
+  test.skipIf(!hasClaude)(
     'tracer bullet: brief returns ok and writes at least one checkpoint',
     async () => {
       const cwd = setupWorkdir('/tmp', 'runClaudeAgent-tracer')

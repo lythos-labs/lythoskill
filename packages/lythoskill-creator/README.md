@@ -1,5 +1,9 @@
 # @lythos/skill-creator
 
+![npm](https://img.shields.io/npm/v/@lythos/skill-creator)
+![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)
+![License](https://img.shields.io/npm/l/@lythos/skill-creator)
+
 > Scaffold and build lythoskill projects — thin-skill monorepos where heavy logic lives in npm packages and skills are lightweight routers.
 
 ## Why
