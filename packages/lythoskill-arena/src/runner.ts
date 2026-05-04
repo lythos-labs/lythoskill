@@ -43,10 +43,23 @@ export async function runArenaFromToml(opts: {
   outDir?: string
   dryRun?: boolean
   log?: (msg: string) => void
+  configDir?: string    // for resolving relative paths
 }): Promise<ArenaResult | { plan: ReturnType<typeof buildExecutionPlan> }> {
-  const { toml, taskPath, outDir, dryRun, log } = opts
+  const { toml, taskPath, outDir, dryRun, log, configDir } = opts
 
-  const plan = buildExecutionPlan(toml)
+  // Resolve relative paths against config dir (anti-footgun: cwd may differ)
+  const resolvePath = (p: string) => {
+    if (p.startsWith('/')) return p
+    if (configDir) return resolve(configDir, p)
+    return resolve(p)
+  }
+  const taskAbs = resolvePath(taskPath)
+  const resolvedToml: ArenaToml = {
+    ...toml,
+    side: toml.side.map(s => ({ ...s, deck: resolvePath(s.deck) })),
+  }
+
+  const plan = buildExecutionPlan(resolvedToml)
 
   // dry-run: return plan without executing
   if (dryRun) {
@@ -58,13 +71,13 @@ export async function runArenaFromToml(opts: {
 
   const arenaId = `arena-${stamp()}`
   const artifactsDir = outDir || join(process.cwd(), 'runs', arenaId)
-  const resolved = resolveSides(toml)
+  const resolved = resolveSides(resolvedToml)
 
   // Build manifest
   const manifest = ArenaManifest.parse({
     id: arenaId,
     created_at: new Date().toISOString(),
-    task: readFileSync(resolve(taskPath), 'utf-8').slice(0, 200),
+    task: readFileSync(taskAbs, 'utf-8').slice(0, 200),
     mode: 'decks',
     participants: [...new Map(resolved.map(r => [r.side.name, r])).values()].map(r => ({
       id: r.side.name,
@@ -73,7 +86,7 @@ export async function runArenaFromToml(opts: {
       deck: r.side.deck,
       description: `${r.playerName} × ${r.side.deck}`,
     })),
-    criteria: toml.arena.criteria,
+    criteria: resolvedToml.arena.criteria,
     status: 'running',
   })
 

@@ -593,11 +593,11 @@ async function runProgrammaticArena(argv: string[]) {
     const configPath = (options as Record<string, string | undefined>).config!
 
     const toml = parseArenaToml(readFileSync(configPath, 'utf-8'))
+    const { dirname } = await import('node:path')
     const result = await runArenaFromToml({
       toml,
-      taskPath: toml.arena.task.startsWith('/') || toml.arena.task.startsWith('./')
-        ? toml.arena.task
-        : (options as Record<string, string | undefined>).task ?? toml.arena.task,
+      taskPath: toml.arena.task,
+      configDir: dirname(configPath),  // resolve relative paths against config file dir
       outDir: (options as Record<string, string | undefined>).out,
       dryRun,
     })
