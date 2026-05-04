@@ -34,3 +34,20 @@ jobs:
         with:
           lcov-path: coverage/lcov.info
           min-coverage: 80
+
+  coverage-test-utils:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # CI-safe tests only: excludes *.agent.test.ts (Agent BDD requires claude CLI)
+      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage-test-utils packages/lythoskill-test-utils/test/bdd-runner.test.ts packages/lythoskill-test-utils/test/agent-bdd.test.ts packages/lythoskill-test-utils/test/judge.test.ts packages/lythoskill-test-utils/test/agents-claude.test.ts
+      - uses: 70-10/bun-coverage-report-action@v1.0.3
+        if: github.event_name == 'pull_request'
+        with:
+          lcov-path: coverage-test-utils/lcov.info
+          min-coverage: 70

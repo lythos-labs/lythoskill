@@ -1,27 +1,6 @@
-// agent-bdd: not for CI — requires `claude` CLI and LLM inference
 import { describe, test, expect } from 'bun:test'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { runClaudeAgent, readCheckpoints, setupWorkdir } from '../src/bdd-runner'
-
-describe('runClaudeAgent', () => {
-  test(
-    'tracer bullet: brief returns ok and writes at least one checkpoint',
-    async () => {
-      const cwd = setupWorkdir('/tmp', 'runClaudeAgent-tracer')
-
-      const brief = `Please write a checkpoint file to _checkpoints/test.jsonl containing this exact single-line JSON object and nothing else in that file:
-{"step":"test","tool":"echo","args":["ok"],"timestamp":"2026-05-04T00:00:00Z"}
-Then reply with exactly the word "ok".`
-
-      const result = await runClaudeAgent({ cwd, brief, timeoutMs: 60000 })
-
-      expect(result.code).toBe(0)
-      expect(result.stdout.toLowerCase()).toContain('ok')
-      expect(result.checkpoints.length).toBeGreaterThanOrEqual(1)
-    },
-    35000
-  )
-})
+import { readCheckpoints, setupWorkdir } from '../src/bdd-runner'
 
 describe('readCheckpoints', () => {
   test('returns empty array when checkpoint dir does not exist', () => {

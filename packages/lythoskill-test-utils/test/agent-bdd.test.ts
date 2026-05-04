@@ -1,5 +1,8 @@
 import { describe, test, expect } from 'bun:test'
-import { parseAgentMd } from '../src/agent-bdd'
+import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { parseAgentMd, runAgentScenario } from '../src/agent-bdd'
+import type { AgentAdapter } from '../src/agents/types'
 
 describe('parseAgentMd', () => {
   test('parses frontmatter fields (name, description, timeout)', () => {
@@ -120,5 +123,112 @@ Execute.
     const tool = result.given.deck.tool!
     expect(Object.keys(tool)).toHaveLength(3)
     expect(tool['skill-a']).toEqual({ path: 'github.com/foo/bar/skill-a' })
+  })
+})
+
+describe('runAgentScenario', () => {
+  const mockAdapter: AgentAdapter = {
+    name: 'mock',
+    async spawn() {
+      return {
+        stdout: 'task completed',
+        stderr: '',
+        code: 0,
+        durationMs: 5,
+        checkpoints: [],
+      }
+    },
+  }
+
+  test('runs scenario end-to-end with mock agent (no judge)', async () => {
+    const baseDir = join('/tmp', 'agent-bdd-test-' + Date.now())
+    const agentMdPath = join(baseDir, 'test.agent.md')
+    mkdirSync(baseDir, { recursive: true })
+    writeFileSync(agentMdPath, `---
+name: Mock Scenario
+timeout: 5000
+---
+
+## When
+Please say "task completed".
+`)
+
+    const setupCalled = { called: false }
+
+    const result = await runAgentScenario({
+      scenarioPath: agentMdPath,
+      agent: mockAdapter,
+      setupWorkdir(_scenario, workdir) {
+        setupCalled.called = true
+        mkdirSync(workdir, { recursive: true })
+      },
+      baseDir,
+    })
+
+    expect(result.scenario.name).toBe('Mock Scenario')
+    expect(result.agentResult.stdout).toBe('task completed')
+    expect(result.agentResult.code).toBe(0)
+    expect(result.checkpoints).toEqual([])
+    expect(result.verdict).toBeNull() // no Judge section
+    expect(result.artifactDir).toContain('mock-scenario')
+    expect(setupCalled.called).toBe(true)
+
+    // Verify artifacts were persisted
+    expect(existsSync(join(result.artifactDir, 'agent-stdout.txt'))).toBe(true)
+    expect(existsSync(join(result.artifactDir, 'agent-stderr.txt'))).toBe(true)
+    expect(existsSync(join(result.artifactDir, 'judge-verdict.json'))).toBe(true)
+
+    const judgeVerdict = JSON.parse(readFileSync(join(result.artifactDir, 'judge-verdict.json'), 'utf-8'))
+    expect(judgeVerdict.verdict).toBeNull()
+    expect(judgeVerdict.reason).toContain('No ## Judge')
+
+    // Cleanup
+    rmSync(baseDir, { recursive: true, force: true })
+  })
+
+  test('runs scenario with judge section', async () => {
+    const baseDir = join('/tmp', 'agent-bdd-judge-' + Date.now())
+    const agentMdPath = join(baseDir, 'judge-test.agent.md')
+    mkdirSync(baseDir, { recursive: true })
+    writeFileSync(agentMdPath, `---
+name: Judged Scenario
+---
+
+## When
+Run the task.
+
+## Judge
+Check correctness.
+
+## Then
+- Output correct
+`)
+
+    // Mock judge that returns PASS
+    const judgeAdapter: AgentAdapter = {
+      name: 'mock-judge',
+      async spawn() {
+        return {
+          stdout: '{"verdict":"PASS","reason":"Looks good.","criteria":[{"name":"correctness","passed":true}]}',
+          stderr: '',
+          code: 0,
+          durationMs: 3,
+          checkpoints: [],
+        }
+      },
+    }
+
+    const result = await runAgentScenario({
+      scenarioPath: agentMdPath,
+      agent: mockAdapter,
+      setupWorkdir(_s, wd) { mkdirSync(wd, { recursive: true }) },
+      judgeAgent: judgeAdapter,
+      baseDir,
+    })
+
+    expect(result.verdict).not.toBeNull()
+    expect(result.verdict!.verdict).toBe('PASS')
+
+    rmSync(baseDir, { recursive: true, force: true })
   })
 })
