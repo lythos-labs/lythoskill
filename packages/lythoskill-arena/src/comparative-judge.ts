@@ -78,6 +78,28 @@ ${criteriaDesc}
 For each participant, score them 1-5 on each criterion. Provide a brief rationale.
 Score meanings: 1=poor, 3=acceptable, 5=excellent.
 
+## Output Schema
+Your response must conform to this Zod schema:
+\`\`\`ts
+z.object({
+  score_matrix: z.array(z.object({
+    participant_id: z.string(),
+    criterion: z.string(),
+    weight: z.number().min(0).max(1),
+    score: z.number().int().min(1).max(5),
+    rationale: z.string(),
+  })),
+  key_findings: z.array(z.string()),
+  recommendations: z.array(z.object({
+    audience: z.string(),
+    recommendation: z.string(),
+  })),
+})
+\`\`\`
+score_matrix is a FLAT ARRAY of objects — NOT nested by participant or criterion.
+weight: 0.25 for each cell (1 / num_criteria).
+score: 1=poor, 3=acceptable, 5=excellent.
+
 Use the submit_scores tool to return your structured evaluation.`
 }
 
@@ -92,6 +114,112 @@ function toScoreMatrix(
   scores: { participant_id: string; criterion: string; weight: number; score: number; rationale: string }[]
 ): typeof ScoreCell._output[] {
   return scores.map(s => ScoreCell.parse(s))
+}
+
+// ── LLM Output Normalization (handle common schema mismatches) ─────────────
+
+interface NormalizedScoreCell {
+  participant_id: string
+  criterion: string
+  weight: number
+  score: number
+  rationale: string
+}
+
+function normalizeComparativeOutput(parsed: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...parsed }
+
+  // Detect pivot-table format: { participant: { criterion: { score, rationale } } }
+  // Also handles flat format: { participant: { criterion: <score>, criterion_rationale: "..." } }
+  // Convert to expected score_matrix: [{ participant_id, criterion, score, weight, rationale }]
+  if (!Array.isArray(out.score_matrix)) {
+    const participants = Object.keys(out).filter(k => {
+      const v = out[k]
+      return v && typeof v === 'object' && !Array.isArray(v) && k !== 'key_findings' && k !== 'recommendations'
+    })
+    if (participants.length >= 2) {
+      const matrix: NormalizedScoreCell[] = []
+      for (const p of participants) {
+        const criteria = out[p] as Record<string, unknown>
+        // Collect criterion keys (exclude _rationale, _reason, _note suffixed keys)
+        const criterionKeys = Object.keys(criteria).filter(k =>
+          !k.endsWith('_rationale') && !k.endsWith('_reason') && !k.endsWith('_note') && !k.endsWith('_notes')
+        )
+        for (const criterion of criterionKeys) {
+          const rawScore = criteria[criterion]
+          const rationale = criteria[`${criterion}_rationale`] ?? criteria[`${criterion}_reason`] ?? criteria[`${criterion}_note`] ?? criteria[`${criterion}_notes`] ?? ''
+          let score = 3
+          if (typeof rawScore === 'number') score = rawScore
+          else if (typeof rawScore === 'string') {
+            const n = Number(rawScore)
+            if (!isNaN(n)) score = n
+            else {
+              // If it's a descriptive string (not a score), it might be the rationale
+              if (!rationale) criteria[`${criterion}_rationale`] = rawScore
+            }
+          } else if (typeof rawScore === 'object' && rawScore !== null) {
+            const obj = rawScore as Record<string, unknown>
+            score = typeof obj.score === 'number' ? obj.score : (typeof obj.score === 'string' ? Number(obj.score) || 3 : 3)
+          }
+          matrix.push({
+            participant_id: p,
+            criterion,
+            weight: 0.25,
+            score: Math.max(1, Math.min(5, Math.round(score))),
+            rationale: String(rationale).slice(0, 300),
+          })
+        }
+      }
+      if (matrix.length > 0) {
+        out.score_matrix = matrix
+        for (const p of participants) delete out[p]
+      }
+    }
+  }
+
+  // Normalize score_matrix entries
+  if (Array.isArray(out.score_matrix)) {
+    out.score_matrix = (out.score_matrix as Record<string, unknown>[]).map((cell): NormalizedScoreCell => {
+      const c = { ...cell }
+      // Map common field name variants
+      if (!c.participant_id && c.participantId) c.participant_id = c.participantId
+      if (!c.participant_id && c.side) c.participant_id = c.side
+      // Normalize score to number
+      if (typeof c.score === 'string') c.score = Number(c.score) || 3
+      // Normalize weight: if >1, assume percentage scale
+      if (typeof c.weight === 'number' && c.weight > 1) c.weight = c.weight / 100
+      if (c.weight === undefined) c.weight = 0.25
+      // Map rationale field name variants
+      if (!c.rationale && c.reason) c.rationale = c.reason
+      if (!c.rationale && c.notes) c.rationale = c.notes
+      if (!c.rationale && c.explanation) c.rationale = c.explanation
+      if (!c.rationale) c.rationale = ''
+
+      return {
+        participant_id: String(c.participant_id ?? 'unknown'),
+        criterion: String(c.criterion ?? 'unknown'),
+        weight: Number(c.weight),
+        score: Number(c.score),
+        rationale: String(c.rationale),
+      }
+    })
+  }
+
+  // Normalize recommendations
+  if (Array.isArray(out.recommendations)) {
+    out.recommendations = (out.recommendations as Record<string, unknown>[]).map(r => ({
+      audience: String(r.audience ?? r.role ?? 'general'),
+      recommendation: String(r.recommendation ?? r.text ?? r.advice ?? ''),
+    }))
+  }
+
+  // Ensure key_findings is an array of strings
+  if (!out.key_findings) out.key_findings = []
+  if (Array.isArray(out.key_findings)) {
+    out.key_findings = out.key_findings.map(f => String(f))
+  }
+
+  return out
 }
 
 // ── Comparative Judge ─────────────────────────────────────────────────────
@@ -128,12 +256,15 @@ export async function runComparativeJudge(opts: {
         parsed = JSON.parse(jsonStr)
       }
 
+      // Normalize LLM output before Zod validation
+      const normalizedParsed = normalizeComparativeOutput(parsed as Record<string, unknown>)
+
       // Validate LLM output through Zod
       const llmResult = ComparativeReport.pick({
         score_matrix: true,
         key_findings: true,
         recommendations: true,
-      }).parse(parsed)
+      }).parse(normalizedParsed)
 
       // Success — proceed to Pareto computation
       const scoreMatrix = toScoreMatrix(manifest, llmResult.score_matrix)

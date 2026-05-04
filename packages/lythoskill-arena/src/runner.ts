@@ -103,11 +103,11 @@ export async function runArenaFromToml(opts: {
     try {
       const agent = useAgent(resolvePlayer(cell.player))
       const result = await runAgentScenario({
-        scenarioPath: resolve(taskPath),
+        scenarioPath: taskAbs,
         agent,
         setupWorkdir(_scenario: AgentScenario, workdir: string) {
           mkdirSync(workdir, { recursive: true })
-          const deckContent = readFileSync(resolve(cell.deck), 'utf-8')
+          const deckContent = readFileSync(cell.deck, 'utf-8')
           writeFileSync(join(workdir, 'skill-deck.toml'), deckContent)
         },
         baseDir: join(artifactsDir, 'runs', cell.side),
