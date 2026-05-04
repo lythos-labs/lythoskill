@@ -35,7 +35,7 @@ Usage:
   lythoskill-arena viz <arena-dir>
 
 Commands:
-  run       Run arena programmatically (cartesian player × deck → judge → report)
+  run       Run arena programmatically (declarative arena.toml or CLI flags)
   scaffold  Create arena directory structure (legacy, manual subagent execution)
   viz       Visualize arena report (ASCII charts)
 
@@ -44,14 +44,23 @@ Options:
   -s, --skills <list>    Comma-separated skill names (scaffold only)
       --decks <list>     Comma-separated deck paths
   -c, --criteria <list>  Evaluation criteria (default: syntax,context,logic,token)
-      --players <list>   Comma-separated player.toml paths (run only)
+      --players <list>   Comma-separated player.toml paths (CLI run only)
+      --config <path>    Path to arena.toml (declarative mode, k8s-style)
+      --dry-run          Print execution plan without running (with --config)
       --control <skill>  Control skill for comparison (scaffold only)
       --out <dir>        Output directory (run: defaults to runs/arena-<id>)
   -d, --dir <dir>        Output directory (scaffold: defaults to tmp)
   -p, --project <dir>    Project directory (default: .)
 
 Examples:
-  lythoskill-arena run --task ./TASK-arena.md --players ./players/claude.toml,./players/kimi.toml --decks ./decks/run-01.toml,./decks/run-02.toml --criteria coverage,relevance
+  # Declarative mode (k8s-style)
+  lythoskill-arena run --config ./arena.toml
+  lythoskill-arena run --config ./arena.toml --dry-run
+
+  # CLI-flag mode (backward compat)
+  lythoskill-arena run --task ./TASK-arena.md --players ./players/claude.toml --decks ./decks/run-01.toml,./decks/run-02.toml --criteria coverage,relevance
+
+  # Legacy scaffolding
   lythoskill-arena scaffold --task "Refactor auth module" --skills skill-a,skill-b
   lythoskill-arena viz runs/arena-20260504
 `)
@@ -563,9 +572,45 @@ function runViz(argv: string[]) {
 
 async function runProgrammaticArena(argv: string[]) {
   const { options } = parseArgs(argv)
+  const { readFileSync } = await import('node:fs')
 
+  const hasConfig = !!(options as Record<string, string | undefined>).config
+  const dryRun = argv.includes('--dry-run')
+
+  if (hasConfig) {
+    // arena.toml declarative mode
+    const { parseArenaToml } = await import('./arena-toml')
+    const { runArenaFromToml } = await import('./runner')
+    const configPath = (options as Record<string, string | undefined>).config!
+
+    const toml = parseArenaToml(readFileSync(configPath, 'utf-8'))
+    const result = await runArenaFromToml({
+      toml,
+      taskPath: toml.arena.task.startsWith('/') || toml.arena.task.startsWith('./')
+        ? toml.arena.task
+        : (options as Record<string, string | undefined>).task ?? toml.arena.task,
+      outDir: (options as Record<string, string | undefined>).out,
+      dryRun,
+    })
+
+    if ('plan' in result) {
+      // dry-run
+      console.log(`\n📋 Dry-run: ${result.plan.total_runs} cells across ${result.plan.cells.length / Math.max(1, toml.arena.runs_per_side)} sides × ${toml.arena.runs_per_side} runs`)
+      for (const cell of result.plan.cells) {
+        console.log(`   ${cell.side}/run-${cell.run}: ${cell.player} × ${cell.deck}${cell.control ? ' [control]' : ''}`)
+      }
+      return
+    }
+
+    console.log(`\n🎮 Arena complete: ${result.manifest.id}`)
+    console.log(`📁 Artifacts: ${result.artifactsDir}`)
+    console.log(`📊 Report: ${result.artifactsDir}/report.md`)
+    return
+  }
+
+  // CLI-flag mode (backward compat)
   if (!options.task || !options.decks) {
-    console.error('❌ --task <path> and --decks <list> are required for "run"')
+    console.error('❌ --task <path> and --decks <list> are required for "run" (or use --config <arena.toml>)')
     process.exit(1)
   }
 
@@ -577,7 +622,6 @@ async function runProgrammaticArena(argv: string[]) {
     deckPaths: options.decks.split(',').map(s => s.trim()).filter(Boolean),
     criteria: (options.criteria ?? 'syntax,context,logic,token').split(',').map(s => s.trim()).filter(Boolean),
     outDir: options.out ?? `runs/arena-${timestamp()}`,
-    projectDir: options.project,
   })
 
   console.log(`\n🎮 Arena complete: ${result.manifest.id}`)
