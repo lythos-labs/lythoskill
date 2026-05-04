@@ -45,3 +45,24 @@ export function countByLane(epics: ActiveEpicInfo[]): { main: number; emergency:
   }
   return { main, emergency, unknown };
 }
+
+export interface LaneGuardResult {
+  valid: boolean;
+  errors: string[];
+}
+
+/** Validate that main and emergency lanes each have at most 1 active epic. */
+export function validateLaneGuard(config: WorkflowConfig): LaneGuardResult {
+  const epics = listActiveEpics(config);
+  const counts = countByLane(epics);
+  const errors: string[] = [];
+
+  if (counts.main > 1) {
+    errors.push(`main lane has ${counts.main} active epics (max 1)`);
+  }
+  if (counts.emergency > 1) {
+    errors.push(`emergency lane has ${counts.emergency} active epics (max 1)`);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
