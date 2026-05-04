@@ -18,6 +18,7 @@ checklist_skipped_reason: agent execution, scope aligned with ADR-20260504135256
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-04 | Created |
+| done | 2026-05-04 | Done |
 
 ## 背景故事
 
