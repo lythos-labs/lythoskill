@@ -13,15 +13,28 @@ export interface SpawnCommand {
 }
 
 /** Build the claude -p command specification. Pure — no spawn, no IO. */
+/** Default allowed tools for non-interactive agent execution. */
+export const DEFAULT_ALLOWED_TOOLS = 'Read,Write,Edit,Grep,Glob,WebSearch,WebFetch'
+
+/** Default disallowed: dangerous shell operations. */
+export const DEFAULT_DISALLOWED_TOOLS = 'Bash(rm *),Bash(sudo *),Bash(curl *),Bash(git push *)'
+
 export function buildClaudeCommand(opts: {
   brief: string
   cwd: string
   timeoutMs?: number
   env?: Record<string, string>
+  allowedTools?: string
+  disallowedTools?: string
 }): SpawnCommand {
   return {
     cmd: 'claude',
-    args: ['-p', '--dangerously-skip-permissions'],
+    args: [
+      '-p',
+      '--permission-mode', 'bypassPermissions',
+      '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
+      '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
+    ],
     cwd: opts.cwd,
     stdin: opts.brief,
     env: { FORCE_COLOR: '0', ...(opts.env ?? {}) },

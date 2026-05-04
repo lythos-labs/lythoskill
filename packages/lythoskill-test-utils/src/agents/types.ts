@@ -39,6 +39,8 @@ export interface AgentAdapter {
     timeoutMs: number
     idleTimeoutMs?: number
     env?: Record<string, string>
+    allowedTools?: string
+    disallowedTools?: string
   }): Promise<AgentRunResult>
 
   /** Optional: structured tool invocation (function-calling). If absent, judge falls back to prompt + parse + Zod. */

@@ -29,10 +29,14 @@ describe('runCli with injectable spawn', () => {
 })
 
 describe('buildClaudeCommand', () => {
-  test('produces correct CLI: claude -p --dangerously-skip-permissions', () => {
+  test('produces correct CLI: claude -p --permission-mode bypassPermissions --allowedTools ...', () => {
     const cmd = buildClaudeCommand({ brief: 'say ok', cwd: '/tmp' })
     expect(cmd.cmd).toBe('claude')
-    expect(cmd.args).toEqual(['-p', '--dangerously-skip-permissions'])
+    expect(cmd.args).toContain('-p')
+    expect(cmd.args).toContain('--permission-mode')
+    expect(cmd.args).toContain('bypassPermissions')
+    expect(cmd.args).toContain('--allowedTools')
+    expect(cmd.args).toContain('--disallowedTools')
     expect(cmd.cwd).toBe('/tmp')
   })
 
@@ -74,7 +78,9 @@ describe('buildClaudeCommand', () => {
     expect(typeof cmd.timeoutMs).toBe('number')
     // Verify key invariants
     expect(cmd.args).toContain('-p')
-    expect(cmd.args).toContain('--dangerously-skip-permissions')
+    expect(cmd.args).toContain('--permission-mode')
+    expect(cmd.args.join(' ')).toContain('WebSearch')
+    expect(cmd.args.join(' ')).toContain('WebFetch')
     expect(Object.keys(cmd.env).length).toBeGreaterThanOrEqual(1) // at least FORCE_COLOR
   })
 })
