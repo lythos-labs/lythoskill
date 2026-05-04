@@ -1,6 +1,6 @@
 ---
 name: lythoskill-deck
-version: 0.9.5
+version: 0.9.6
 type: standard
 description: |
   Declarative skill deck governance. Syncs .claude/skills/ working set
