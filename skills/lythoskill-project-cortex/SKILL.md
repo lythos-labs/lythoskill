@@ -1,6 +1,6 @@
 ---
 name: project-cortex
-version: 0.9.11
+version: 0.9.12
 type: standard
 description: |
   GTD-style project governance with ADR, Epic, Task, and Wiki.
