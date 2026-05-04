@@ -130,12 +130,14 @@ export async function runArenaFromToml(opts: {
       if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
       verdictsBySide.get(cell.side)!.push(v)
     } catch (e) {
-      if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
-      verdictsBySide.get(cell.side)!.push({
+      const errVerdict: JudgeVerdict = {
         verdict: 'ERROR' as const,
         reason: `Runner exception: ${e instanceof Error ? e.message : String(e)}`,
         criteria: [],
-      })
+      }
+      writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify(errVerdict, null, 2) + '\n')
+      if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
+      verdictsBySide.get(cell.side)!.push(errVerdict)
     }
   }
 
