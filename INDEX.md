@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/5 02:02:15
+> 自动生成于 2026/5/5 02:04:02
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 99 | 进行中: 1, 待验收: 0, 已完成: 74 |
-| Epics | 16 | 活跃: 1, 已完成: 12, 悬置: 1, 已归档: 2 |
+| Tasks | 99 | 进行中: 0, 待验收: 0, 已完成: 75 |
+| Epics | 16 | 活跃: 0, 已完成: 13, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260505015029961**: Curator intent/plan/execute extraction + curator add (cold pool download, no install)
+_无_
 
 ### 已完成
 
@@ -32,6 +32,7 @@
 - ✅ **EPIC-20260504230503067**: Arena TOML declarative config (k8s-style): [[side]] + runs_per_side + reconcile
 - ✅ **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
 - ✅ **EPIC-20260504235551635**: Extract pure functions from test-utils low-coverage modules (bdd-runner, agents/claude): plan/execute separation for CLI helpers
+- ✅ **EPIC-20260505015029961**: Curator intent/plan/execute extraction + curator add (cold pool download, no install)
 
 ### 悬置
 
@@ -53,15 +54,15 @@
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260505015054313**: T4: Feed source abstraction — cold pool / GitHub / URL as source types
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (74)
+### 已完成 (75)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -137,6 +138,7 @@ _无_
 - ✅ ~~TASK-20260505015050270~~: T1: Extract CuratorPlan from scan: pure dir listing + source resolution (no file IO)
 - ✅ ~~TASK-20260505015051145~~: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 - ✅ ~~TASK-20260505015052748~~: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
+- ✅ ~~TASK-20260505015054313~~: T4: Feed source abstraction — cold pool / GitHub / URL as source types
 
 ### 悬置 (0)
 
