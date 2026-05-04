@@ -1,0 +1,1 @@
+{"step":"deck.introspection","tool":"read","args":["skill-deck.toml"],"final_state":{"tool_skill_count":2}}

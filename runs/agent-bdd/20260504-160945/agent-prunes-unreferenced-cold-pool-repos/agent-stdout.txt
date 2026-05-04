@@ -1,0 +1,8 @@
+All four steps are complete. Here's the final state:
+
+1. **Created** `cold-pool/skill-a/SKILL.md` and `cold-pool/skill-b/SKILL.md`
+2. **Linked** working set — `.claude/skills/skill-a` symlink created successfully
+3. **Prune output**: `📭 Cold pool is empty. Nothing to prune.`
+4. **Checkpoint** written to `_checkpoints/prune.jsonl`
+
+**Important finding**: `./deck prune --yes` did **not** delete `skill-b` because `scanColdPoolRepos` in `prune.ts` only scans the FQ `host/owner/repo` directory structure. Flat repos like `cold-pool/skill-b/` are invisible to the current prune implementation — both skills remain in the cold pool. This is a code-level gap between what the agent BDD scenario expects and what the CLI currently implements.

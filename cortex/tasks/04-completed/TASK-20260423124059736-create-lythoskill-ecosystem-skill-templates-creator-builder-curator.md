@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-04-23 | Created |
+| completed | 2026-05-04 | Probe fix: reconciled Status History with directory state |
 
 ## 背景与目标
 

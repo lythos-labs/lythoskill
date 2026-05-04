@@ -1,0 +1,5 @@
+[deck]
+cold_pool = "cold-pool"
+
+[tool.skills.skill-b]
+path = "skill-b"
