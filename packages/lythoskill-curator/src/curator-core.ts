@@ -6,7 +6,7 @@
 // ── Source abstraction (forward-compatible: local + remote) ─────────────────
 
 export interface SkillSource {
-  type: 'cold-pool' | 'github' | 'url' | 'marketplace'
+  type: 'cold-pool' | 'github' | 'url' | 'marketplace' | 'lobehub' | 'npm'
   locator: string           // path, URL, or org/repo
   label: string             // human-readable name
 }
@@ -16,6 +16,14 @@ export interface SkillItem {
   source: string            // inferred: "github.com/owner/repo" or "localhost"
   name: string
   relPath: string           // relative to cold pool root
+}
+
+// ── Feed source adapter ────────────────────────────────────────────────────
+
+export interface SourceAdapter {
+  readonly source: SkillSource
+  /** Discover skill items from this source. Pure planner: no mutation. */
+  discover(): Promise<SkillItem[]>
 }
 
 // ── Frontmatter parser ─────────────────────────────────────────────────────
@@ -56,16 +64,65 @@ export function extractQuotedPhrases(text: string): string[] {
   return [...new Set(phrases)]
 }
 
-// ── Plan: skill directory listing (pure after filesystem scan) ─────────────
+// ── Skill directory finder ──────────────────────────────────────────────────
+
+import { readdirSync, existsSync } from 'node:fs'
+import { join, basename } from 'node:path'
+
+const SKIP_DIRS = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythoskill-curator', 'tmp', 'playground', 'dist', 'build'])
+
+export function findSkillDirs(root: string): string[] {
+  const results: string[] = []
+
+  function walk(dir: string, depth: number) {
+    if (depth > 6) return
+    try {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue
+        if (entry.name.startsWith('.')) continue
+        if (SKIP_DIRS.has(entry.name)) continue
+
+        const full = join(dir, entry.name)
+        if (existsSync(join(full, 'SKILL.md'))) {
+          results.push(full)
+          continue
+        }
+        walk(full, depth + 1)
+      }
+    } catch {}
+  }
+
+  walk(root, 0)
+  return results
+}
+
+// ── Cold pool source (local filesystem adapter) ────────────────────────────
+
+export function createColdPoolSource(poolPath: string): SourceAdapter {
+  return {
+    source: { type: 'cold-pool', locator: poolPath, label: poolPath },
+    async discover(): Promise<SkillItem[]> {
+      const dirs = findSkillDirs(poolPath)
+      return dirs.map(dir => ({
+        path: dir,
+        source: inferSource(dir),
+        name: basename(dir),
+        relPath: dir.slice(poolPath.length + 1),
+      }))
+    },
+  }
+}
+
+// ── Plan: skill directory listing ──────────────────────────────────────────
 
 export interface CuratorPlan {
-  source: SkillSource
+  sources: SourceAdapter[]
   skillDirs: string[]
 }
 
 export function buildCuratorPlan(poolPath: string): CuratorPlan {
   return {
-    source: { type: 'cold-pool', locator: poolPath, label: poolPath },
+    sources: [createColdPoolSource(poolPath)],
     skillDirs: [],  // populated by findSkillDirs (IO)
   }
 }

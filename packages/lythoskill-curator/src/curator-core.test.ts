@@ -109,10 +109,11 @@ describe('formatMarkdownTable', () => {
 })
 
 describe('buildCuratorPlan', () => {
-  test('creates plan with cold-pool source', () => {
+  test('creates plan with cold-pool source adapter', () => {
     const plan = buildCuratorPlan('/tmp/cold-pool')
-    expect(plan.source.type).toBe('cold-pool')
-    expect(plan.source.locator).toBe('/tmp/cold-pool')
+    expect(plan.sources).toHaveLength(1)
+    expect(plan.sources[0].source.type).toBe('cold-pool')
+    expect(plan.sources[0].source.locator).toBe('/tmp/cold-pool')
     expect(plan.skillDirs).toEqual([])
   })
 })
