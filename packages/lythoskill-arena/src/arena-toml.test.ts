@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { parseArenaToml, buildExecutionPlan, ArenaToml } from './arena-toml'
+import { formatPlanOutput } from './runner'
 
 const minimalToml = `
 [arena]
@@ -148,6 +149,32 @@ describe('buildExecutionPlan', () => {
     const baselineCells = plan.cells.filter(c => c.side === 'baseline')
     expect(baselineCells).toHaveLength(3)
     expect(baselineCells.every(c => c.control)).toBe(true)
+  })
+
+  test('dry-run output format matches expected log', () => {
+    const toml = parseArenaToml(minimalToml)
+    const plan = buildExecutionPlan(toml)
+
+    // Simulate what --dry-run would log
+    const logs: string[] = []
+    for (const line of formatPlanOutput(plan)) {
+      logs.push(line)
+    }
+
+    expect(logs.some(l => l.includes('2 cells'))).toBe(true)
+    expect(logs.some(l => l.includes('runner-a'))).toBe(true)
+    expect(logs.some(l => l.includes('runner-b'))).toBe(true)
+    expect(logs.some(l => l.includes('claude-code'))).toBe(true)
+    expect(logs.every(l => !l.includes('control'))).toBe(true) // no control flags in minimal
+  })
+
+  test('dry-run output shows control flag for control sides', () => {
+    const toml = parseArenaToml(fullToml)
+    const plan = buildExecutionPlan(toml)
+    const lines = formatPlanOutput(plan)
+    const baselineLines = lines.filter(l => l.includes('baseline'))
+    // All baseline cells should have [control] flag
+    expect(baselineLines.every(l => l.includes('[control]'))).toBe(true)
   })
 
   test('dry-run: plan is pure data, no side effects', () => {

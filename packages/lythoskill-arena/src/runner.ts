@@ -5,7 +5,7 @@ import { useAgent } from '@lythos/test-utils/agents'
 import { ArenaManifest, Player } from '@lythos/test-utils/schema'
 import type { ArenaManifest as ArenaManifestType, JudgeVerdict } from '@lythos/test-utils/schema'
 import { runComparativeJudge } from './comparative-judge'
-import { parseArenaToml, buildExecutionPlan, type ArenaToml } from './arena-toml'
+import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan } from './arena-toml'
 import { resolvePlayer, resolveSides } from './player'
 import { aggregateAllStats } from './stats'
 import type { SideStats } from './stats'
@@ -26,18 +26,33 @@ export interface ArenaResult {
   artifactsDir: string
 }
 
+/** Format an execution plan as readable CLI output (pure). */
+export function formatPlanOutput(plan: ExecutionPlan): string[] {
+  const lines: string[] = []
+  const sideCount = new Set(plan.cells.map(c => c.side)).size
+  lines.push(`\n📋 Dry-run: ${plan.total_runs} cells across ${sideCount} sides × ${plan.cells.length / Math.max(1, sideCount)} runs`)
+  for (const cell of plan.cells) {
+    lines.push(`   ${cell.side}/run-${cell.run}: ${cell.player} × ${cell.deck}${cell.control ? ' [control]' : ''}`)
+  }
+  return lines
+}
+
 export async function runArenaFromToml(opts: {
   toml: ArenaToml
   taskPath: string
   outDir?: string
   dryRun?: boolean
+  log?: (msg: string) => void
 }): Promise<ArenaResult | { plan: ReturnType<typeof buildExecutionPlan> }> {
-  const { toml, taskPath, outDir, dryRun } = opts
+  const { toml, taskPath, outDir, dryRun, log } = opts
 
   const plan = buildExecutionPlan(toml)
 
   // dry-run: return plan without executing
   if (dryRun) {
+    for (const line of formatPlanOutput(plan)) {
+      log?.(line)
+    }
     return { plan }
   }
 

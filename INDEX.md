@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/5 00:02:55
+> 自动生成于 2026/5/5 00:03:15
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 93 | 进行中: 0, 待验收: 0, 已完成: 69 |
+| Tasks | 93 | 进行中: 1, 待验收: 0, 已完成: 69 |
 | Epics | 15 | 活跃: 1, 已完成: 11, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
@@ -45,16 +45,15 @@
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (3)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
-- [ ] **TASK-20260504235618571**: T5: Arena runner 接入 injectable log，验证 dry-run 输出与期望一致
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260504235618571**: T5: Arena runner 接入 injectable log，验证 dry-run 输出与期望一致
 
 ### 待验收 (0)
 
