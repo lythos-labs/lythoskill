@@ -93,11 +93,15 @@ All 9 planned scenarios implemented. 20 total deck scenarios in CI.
 
 ---
 
-## Agent BDD — 1 scenario locally
+## Agent BDD — 5 scenarios locally
 
 | File | Scenario | Status |
 |------|----------|--------|
 | [`skills-introspection.agent.md`](../lythoskill-deck/test/scenarios/skills-introspection.agent.md) | Agent reads skill-deck.toml and reports skills via checkpoint | ✅ Local pass |
+| [`deck-add.agent.md`](../lythoskill-deck/test/scenarios/deck-add.agent.md) | Agent adds a skill, updates deck, syncs working set | 🆕 Ready |
+| [`deck-refresh.agent.md`](../lythoskill-deck/test/scenarios/deck-refresh.agent.md) | Agent refreshes a declared skill (localhost skipped) | 🆕 Ready |
+| [`deck-remove.agent.md`](../lythoskill-deck/test/scenarios/deck-remove.agent.md) | Agent removes a skill from deck (cold pool untouched) | 🆕 Ready |
+| [`deck-prune.agent.md`](../lythoskill-deck/test/scenarios/deck-prune.agent.md) | Agent prunes unreferenced cold-pool repos | 🆕 Ready |
 
 Convention:
 - Filename suffix: `*.agent.md` (runner loads them alongside `.ts` scenarios; CI skips because they need LLM)
@@ -141,4 +145,4 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **34 CLI integration scenarios in CI · 1 agent BDD locally · 4 planned** (T8).
+Current totals: **34 CLI integration scenarios in CI · 5 agent BDD locally**.

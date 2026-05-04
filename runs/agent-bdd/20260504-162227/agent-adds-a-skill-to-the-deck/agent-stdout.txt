@@ -1,0 +1,6 @@
+Done. All four steps completed:
+
+1. **Created** `cold-pool/skill-b/SKILL.md`
+2. **Added** `[tool.skills.skill-b]` to `skill-deck.toml`
+3. **Ran** `./deck link` — completed (0 linked because `github.com/foo/bar/skill-a` and `localhost/skill-b` don't resolve to installable sources in this environment)
+4. **Wrote** `_checkpoints/add.jsonl` with the exact shape requested

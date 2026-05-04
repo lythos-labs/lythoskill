@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync } from 'node:fs'
+import { mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync, readdirSync, lstatSync, existsSync, chmodSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { runClaudeAgent, readCheckpoints } from '../../lythoskill-test-utils/src/bdd-runner.ts'
@@ -338,56 +338,6 @@ export async function runParallel(scenarios: Scenario[], runsDir: string, concur
   return results
 }
 
-// ── CLI ──────────────────────────────────────────────────────
-
-async function main() {
-  const args = process.argv.slice(2)
-  const parallelIdx = args.indexOf('--parallel')
-  const concurrency = parallelIdx >= 0 ? Number(args[parallelIdx + 1]) || 4 : 1
-
-  const outputIdx = args.indexOf('--output')
-  const baseDir = outputIdx >= 0
-    ? args[outputIdx + 1]
-    : resolve(import.meta.dir, '..', '..', '..', 'playground', 'test-runs')
-
-  const now = new Date()
-  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
-  const runsDir = join(baseDir, stamp)
-  mkdirSync(runsDir, { recursive: true })
-
-  // 自动加载 test/scenarios/*.ts
-  const scenarioDir = join(import.meta.dir, 'scenarios')
-  const files = readdirSync(scenarioDir).filter(f => f.endsWith('.ts'))
-
-  const scenarios: Scenario[] = []
-  for (const file of files) {
-    const mod = await import(join(scenarioDir, file))
-    const s = mod.default || mod.scenario
-    if (s) scenarios.push(s)
-  }
-
-  console.log(`\n🧪 加载 ${scenarios.length} 个场景，并发度 ${concurrency}`)
-  console.log(`📁 产物目录: ${runsDir}\n`)
-
-  const results = concurrency > 1
-    ? await runParallel(scenarios, runsDir, concurrency)
-    : await Promise.all(scenarios.map(s => runScenario(s, runsDir)))
-
-  let passed = 0
-  for (const r of results) {
-    const icon = r.pass ? '✅' : '❌'
-    console.log(`${icon} ${r.name} (${r.duration.toFixed(0)}ms)`)
-    if (!r.pass) {
-      for (const e of r.errors) console.log(`   → ${e}`)
-      console.log(`   📁 ${r.workdir}`)
-    }
-    if (r.pass) passed++
-  }
-
-  console.log(`\n${passed}/${results.length} passed\n`)
-  process.exit(passed === results.length ? 0 : 1)
-}
-
 // ── Agent BDD extensions ──────────────────────────────────────
 
 interface AgentScenario {
@@ -489,10 +439,23 @@ function setupAgentWorkdir(scenario: AgentScenario, workdir: string): void {
   if (existsSync(workdir)) rmSync(workdir, { recursive: true, force: true })
   mkdirSync(workdir, { recursive: true })
 
-  const deck = scenario.given.deck
+  // Isolate cold pool to workdir so agent ops never touch ~/.agents/skill-repos
+  const deck = { ...scenario.given.deck }
+  if (!deck.cold_pool) {
+    deck.cold_pool = './cold-pool'
+  }
   if (Object.keys(deck).length > 0) {
     writeFileSync(join(workdir, 'skill-deck.toml'), buildDeckToml(deck))
   }
+
+  // Create a local deck CLI wrapper so the agent can use `./deck <cmd>`
+  const deckCliPath = resolve(import.meta.dir, '..', 'src', 'cli.ts')
+  const wrapperPath = join(workdir, 'deck')
+  writeFileSync(
+    wrapperPath,
+    `#!/usr/bin/env sh\nexec bun "${deckCliPath}" "$@"\n`,
+  )
+  chmodSync(wrapperPath, 0o755)
 }
 
 async function runAgentScenario(scenario: AgentScenario, workdir: string): Promise<Result> {
@@ -512,17 +475,27 @@ async function runAgentScenario(scenario: AgentScenario, workdir: string): Promi
   const checkpoints = readCheckpoints(workdir)
   const errors: string[] = []
 
-  // Tracer-bullet automated judge: verify checkpoint shape
+  // Scenario-aware automated judge: verify checkpoint shape
+  const nameLower = scenario.name.toLowerCase()
+  let expectedStep = 'deck.introspection'
+  if (nameLower.includes('add')) expectedStep = 'deck.add'
+  else if (nameLower.includes('refresh')) expectedStep = 'deck.refresh'
+  else if (nameLower.includes('remove')) expectedStep = 'deck.remove'
+  else if (nameLower.includes('prune')) expectedStep = 'deck.prune'
+
   if (checkpoints.length === 0) {
     errors.push('no checkpoints found in _checkpoints/')
   } else {
     const cp = checkpoints[0]
-    if (cp.step !== 'deck.introspection') {
-      errors.push(`expected step "deck.introspection", got "${cp.step ?? '(missing)'}"`)
+    if (cp.step !== expectedStep) {
+      errors.push(`expected step "${expectedStep}", got "${cp.step ?? '(missing)'}"`)
     }
-    const count = cp.final_state?.tool_skill_count
-    if (count !== 2) {
-      errors.push(`expected final_state.tool_skill_count 2, got ${count ?? '(missing)'}`)
+    // Introspection-specific: validate skill count
+    if (expectedStep === 'deck.introspection') {
+      const count = cp.final_state?.tool_skill_count
+      if (count !== 2) {
+        errors.push(`expected final_state.tool_skill_count 2, got ${count ?? '(missing)'}`)
+      }
     }
   }
 
@@ -540,9 +513,20 @@ async function runAgentScenario(scenario: AgentScenario, workdir: string): Promi
   }
 }
 
-// ── Main (extended) ───────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const args = process.argv.slice(2)
+  const parallelIdx = args.indexOf('--parallel')
+  const concurrency = parallelIdx >= 0 ? Number(args[parallelIdx + 1]) || 4 : 1
+
+  const outputIdx = args.indexOf('--output')
+  const baseDir = outputIdx >= 0
+    ? args[outputIdx + 1]
+    : resolve(import.meta.dir, '..', '..', '..', 'playground', 'test-runs')
+
+  const runAgent = args.includes('--agent')
+
   const scenarioDir = join(import.meta.dir, 'scenarios')
 
   // Load CLI BDD scenarios (.ts)
@@ -554,46 +538,50 @@ async function main(): Promise<void> {
     if (s) cliScenarios.push(s)
   }
 
-  // Load Agent BDD scenarios (.agent.md)
-  const agentFiles = readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md'))
+  // Load Agent BDD scenarios (.agent.md) only when --agent
   const agentScenarios: AgentScenario[] = []
-  for (const file of agentFiles) {
-    try {
-      const content = readFileSync(join(scenarioDir, file), 'utf-8')
-      agentScenarios.push(parseAgentMd(content))
-    } catch (e) {
-      console.error(`❌ Failed to parse ${file}: ${e instanceof Error ? e.message : String(e)}`)
+  if (runAgent) {
+    if (Bun.which('claude')) {
+      const agentFiles = readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md'))
+      for (const file of agentFiles) {
+        try {
+          const content = readFileSync(join(scenarioDir, file), 'utf-8')
+          agentScenarios.push(parseAgentMd(content))
+        } catch (e) {
+          console.error(`❌ Failed to parse ${file}: ${e instanceof Error ? e.message : String(e)}`)
+        }
+      }
+    } else {
+      console.warn('⚠️  claude not found in PATH, skipping Agent BDD scenarios')
     }
   }
-
-  const totalScenarios = cliScenarios.length + agentScenarios.length
-  console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentScenarios.length} 个 Agent 场景`)
 
   const now = new Date()
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
 
-  // CLI BDD: ephemeral sandbox (ignored) — nested git repos / cold-pool dirs / .bak.<ts> files live here
-  const cliSandboxDir = join(import.meta.dir, '..', '..', '..', 'playground', 'test-runs', stamp)
-  // Agent BDD: tracked report dir — pure-text evidence (stdout / stderr / _checkpoints / input snapshot)
+  const cliSandboxDir = join(baseDir, stamp)
   const agentReportDir = join(import.meta.dir, '..', '..', '..', 'runs', 'agent-bdd', stamp)
 
   mkdirSync(cliSandboxDir, { recursive: true })
   if (agentScenarios.length > 0) {
     mkdirSync(agentReportDir, { recursive: true })
+    console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景 + ${agentScenarios.length} 个 Agent 场景`)
+    console.log(`📁 CLI 产物目录: ${cliSandboxDir}`)
     console.log(`📁 Agent BDD evidence → runs/agent-bdd/${stamp}/ (tracked)\n`)
   } else {
-    console.log()
+    console.log(`\n🧪 加载 ${cliScenarios.length} 个 CLI 场景，并发度 ${concurrency}`)
+    console.log(`📁 产物目录: ${cliSandboxDir}\n`)
   }
 
   const results: Result[] = []
 
-  // Run CLI BDD scenarios in sandbox
-  for (const s of cliScenarios) {
-    const r = await runScenario(s, cliSandboxDir)
-    results.push(r)
-  }
+  // Run CLI BDD scenarios in sandbox (parallel supported)
+  const cliResults = concurrency > 1
+    ? await runParallel(cliScenarios, cliSandboxDir, concurrency)
+    : await Promise.all(cliScenarios.map(s => runScenario(s, cliSandboxDir)))
+  results.push(...cliResults)
 
-  // Run Agent BDD scenarios in tracked report dir
+  // Run Agent BDD scenarios in tracked report dir (serial, claude-heavy)
   for (const s of agentScenarios) {
     const workdir = join(agentReportDir, s.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
     const r = await runAgentScenario(s, workdir)

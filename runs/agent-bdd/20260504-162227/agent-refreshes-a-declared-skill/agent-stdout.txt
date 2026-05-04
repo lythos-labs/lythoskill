@@ -1,0 +1,8 @@
+Done. Here's what happened:
+
+1. **Created** `cold-pool/skill-a/SKILL.md` with content `# skill-a\n`.
+2. **Ran `./deck link`** — Output: "Skill not found: github.com/foo/bar/skill-a". The working set was not established because the declared FQ path `github.com/foo/bar/skill-a` doesn't match the local `cold-pool/skill-a` directory.
+3. **Ran `./deck refresh skill-a`** — Exit code 1. Output: "Skill not found in cold pool". Same path mismatch caused the refresh to fail.
+4. **Wrote checkpoint** to `_checkpoints/refresh.jsonl` with the exact shape you specified.
+
+The checkpoint file is written, but note that the actual `deck refresh` result was `"failed"` (skill not found in cold pool), not `"skipped-localhost"`, because `skill-deck.toml` declares `path = "github.com/foo/bar/skill-a"` which doesn't resolve to `cold-pool/skill-a`. To get a true `skipped-localhost` result, the deck would need to declare `path = "localhost/skill-a"` with the skill placed at `cold-pool/localhost/skill-a/SKILL.md`.

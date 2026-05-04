@@ -1,0 +1,1 @@
+{"step":"deck.remove","tool":"Bash","args":["./deck remove skill-a"],"final_state":{"removed":"skill-a"}}
