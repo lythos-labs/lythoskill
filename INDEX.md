@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/4 22:53:22
+> 自动生成于 2026/5/4 23:10:20
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 78 | 进行中: 0, 待验收: 0, 已完成: 55 |
-| Epics | 12 | 活跃: 0, 已完成: 9, 悬置: 1, 已归档: 2 |
+| Tasks | 83 | 进行中: 0, 待验收: 0, 已完成: 56 |
+| Epics | 13 | 活跃: 1, 已完成: 9, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260504230503067**: Arena TOML declarative config (k8s-style): [[side]] + runs_per_side + reconcile
 
 ### 已完成
 
@@ -43,11 +43,15 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (7)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
+- [ ] **TASK-20260504230519619**: T2: Player resolution + side mapping: player.toml → useAgent (pure)
+- [ ] **TASK-20260504230521082**: T3: runs_per_side statistical aggregation (mean, variance, confidence)
+- [ ] **TASK-20260504230521853**: T4: Declarative reconciler: arena.toml → ArenaManifest → runAgentScenario per side × runs
+- [ ] **TASK-20260504230523260**: T5: CLI integration + end-to-end BDD (arena run --config arena.toml)
 
 ### 进行中 (0)
 
@@ -57,7 +61,7 @@ _无_
 
 _无_
 
-### 已完成 (55)
+### 已完成 (56)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -114,6 +118,7 @@ _无_
 - ✅ ~~TASK-20260504194307589~~: Split bdd-runner.test.ts: pure unit tests vs Agent BDD tracer (runClaudeAgent)
 - ✅ ~~TASK-20260504194315989~~: Add test-utils pure unit tests to CI test workflow (test:all or independent step)
 - ✅ ~~TASK-20260504194319386~~: Align CI coverage scope: include test-utils pure logic, exclude agent spawn layer
+- ✅ ~~TASK-20260504230517395~~: T1: arena.toml Zod schema + parser (pure, unit-testable)
 
 ### 悬置 (0)
 
