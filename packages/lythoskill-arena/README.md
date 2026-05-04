@@ -82,6 +82,16 @@ The agent-visible **Skill** layer documentation is here:
 
 ## Architecture
 
+Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
+
+```
+Starter (this package) → npm publish → bunx @lythos/skill-arena ...
+Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
+Output  (skills/<name>/)             → git commit → agent-visible skill
+```
+
+### Runtime architecture (intent/plan/execute)
+
 ```
 arena.toml  →  ArenaToml (Zod)  →  ExecutionPlan (pure)  →  per-cell agent spawn (IO)
                                     ↓
@@ -90,7 +100,6 @@ arena.toml  →  ArenaToml (Zod)  →  ExecutionPlan (pure)  →  per-cell agent
                 runComparativeJudge (IO)  →  report.md + Pareto frontier
 ```
 
-Intent/plan/execute separation:
 - **Intent**: `arena.toml` declarative config (k8s-manifest style)
 - **Plan**: `buildExecutionPlan()`, `aggregateSideStats()`, `computePareto()` — pure functions
 - **Execute**: `runAgentScenario` per cell, `runComparativeJudge` — IO via `AgentAdapter`
