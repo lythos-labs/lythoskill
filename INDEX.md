@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/5 00:03:15
+> 自动生成于 2026/5/5 00:06:10
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 93 | 进行中: 1, 待验收: 0, 已完成: 69 |
-| Epics | 15 | 活跃: 1, 已完成: 11, 悬置: 1, 已归档: 2 |
+| Tasks | 93 | 进行中: 0, 待验收: 0, 已完成: 70 |
+| Epics | 15 | 活跃: 0, 已完成: 12, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 28 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260504235551635**: Extract pure functions from test-utils low-coverage modules (bdd-runner, agents/claude): plan/execute separation for CLI helpers
+_无_
 
 ### 已完成
 
@@ -31,6 +31,7 @@
 - ✅ **EPIC-20260504183618345**: Unify Agent BDD & Arena: shared runner + structured Judge schema
 - ✅ **EPIC-20260504230503067**: Arena TOML declarative config (k8s-style): [[side]] + runs_per_side + reconcile
 - ✅ **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
+- ✅ **EPIC-20260504235551635**: Extract pure functions from test-utils low-coverage modules (bdd-runner, agents/claude): plan/execute separation for CLI helpers
 
 ### 悬置
 
@@ -51,15 +52,15 @@
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260504235618571**: T5: Arena runner 接入 injectable log，验证 dry-run 输出与期望一致
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (69)
+### 已完成 (70)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -130,6 +131,7 @@ _无_
 - ✅ ~~TASK-20260504235613030~~: T2: Add unit tests for assertOutput (already pure, just uncovered)
 - ✅ ~~TASK-20260504235613937~~: T3: Add unit test for buildToolPrompt in agents/claude.ts (pure, uncovered)
 - ✅ ~~TASK-20260504235614732~~: T4: RunCi/Spawn 重 IO 提取到 injectable function，加 mock 测试默认错误路径
+- ✅ ~~TASK-20260504235618571~~: T5: Arena runner 接入 injectable log，验证 dry-run 输出与期望一致
 
 ### 悬置 (0)
 
