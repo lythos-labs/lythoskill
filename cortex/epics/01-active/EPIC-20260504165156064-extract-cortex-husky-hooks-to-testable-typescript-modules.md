@@ -70,5 +70,11 @@ checklist_skipped_reason: agent execution, scope aligned with ADR-20260504135256
 ## 经验沉淀
 
 ## 归档条件
-- [ ] 所有任务完成
-- [ ] 验证通过
+- [x] 所有任务完成
+- [x] 验证通过
+
+## 经验沉淀
+
+- TDD 提取 shell→TS 时，保持 hook 不动、只提取纯函数，是冻结期和 mixin 准备阶段的最小阻力路径
+- 脱敏基础设施（sanitize.ts）应在 artifact 产出第一时间接入，而不是事后清理
+- 默认 secret 规则保守为主（高置信度匹配），宁可漏报也不要误报
