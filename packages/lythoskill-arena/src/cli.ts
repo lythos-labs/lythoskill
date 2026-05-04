@@ -29,23 +29,31 @@ function printHelp(): void {
   console.log(`🎭 lythoskill-arena — Skill comparison runner
 
 Usage:
-  lythoskill-arena --task "<task description>" --skills <skill1,skill2,...>
-  lythoskill-arena --task "<task description>" --decks <deck1,deck2,...>
+  lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
+  lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
+  lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
   lythoskill-arena viz <arena-dir>
 
+Commands:
+  run       Run arena programmatically (cartesian player × deck → judge → report)
+  scaffold  Create arena directory structure (legacy, manual subagent execution)
+  viz       Visualize arena report (ASCII charts)
+
 Options:
-  -t, --task <desc>      Task description (required)
-  -s, --skills <list>    Comma-separated skill names
+  -t, --task <path|desc> Task description or path to TASK-arena.md
+  -s, --skills <list>    Comma-separated skill names (scaffold only)
       --decks <list>     Comma-separated deck paths
   -c, --criteria <list>  Evaluation criteria (default: syntax,context,logic,token)
-      --control <skill>  Control skill for comparison (default: lythoskill-project-scribe)
-  -d, --dir <dir>        Output directory (default: tmp)
+      --players <list>   Comma-separated player.toml paths (run only)
+      --control <skill>  Control skill for comparison (scaffold only)
+      --out <dir>        Output directory (run: defaults to runs/arena-<id>)
+  -d, --dir <dir>        Output directory (scaffold: defaults to tmp)
   -p, --project <dir>    Project directory (default: .)
 
 Examples:
-  lythoskill-arena --task "Refactor auth module" --skills skill-a,skill-b
-  lythoskill-arena --task "Write tests" --decks ./decks/minimal.toml,./decks/full.toml
-  lythoskill-arena viz tmp/arena-20260430
+  lythoskill-arena run --task ./TASK-arena.md --players ./players/claude.toml,./players/kimi.toml --decks ./decks/run-01.toml,./decks/run-02.toml --criteria coverage,relevance
+  lythoskill-arena scaffold --task "Refactor auth module" --skills skill-a,skill-b
+  lythoskill-arena viz runs/arena-20260504
 `)
 }
 
@@ -551,6 +559,32 @@ function runViz(argv: string[]) {
   console.log(renderRadarChart(report))
 }
 
+// ── Run: programmatic arena execution ───────────────────────
+
+async function runProgrammaticArena(argv: string[]) {
+  const { options } = parseArgs(argv)
+
+  if (!options.task || !options.decks) {
+    console.error('❌ --task <path> and --decks <list> are required for "run"')
+    process.exit(1)
+  }
+
+  const { runArena: runArenaProgrammatic } = await import('./runner')
+
+  const result = await runArenaProgrammatic({
+    taskPath: options.task,
+    playerPaths: (options.players ?? 'players/claude-code.toml').split(',').map(s => s.trim()).filter(Boolean),
+    deckPaths: options.decks.split(',').map(s => s.trim()).filter(Boolean),
+    criteria: (options.criteria ?? 'syntax,context,logic,token').split(',').map(s => s.trim()).filter(Boolean),
+    outDir: options.out ?? `runs/arena-${timestamp()}`,
+    projectDir: options.project,
+  })
+
+  console.log(`\n🎮 Arena complete: ${result.manifest.id}`)
+  console.log(`📁 Artifacts: ${result.artifactsDir}`)
+  console.log(`📊 Report: ${result.artifactsDir}/report.md`)
+}
+
 // ── Main Entry ───────────────────────────────────────────────
 
 if (import.meta.main) {
@@ -559,7 +593,14 @@ if (import.meta.main) {
 
   if (cmd === 'viz') {
     runViz(args.slice(1))
+  } else if (cmd === 'run') {
+    runProgrammaticArena(args.slice(1))
+  } else if (cmd === 'scaffold' || !cmd || args[0]?.startsWith('-')) {
+    // Legacy behavior: if no subcommand or starts with flags, treat as scaffold
+    runArena(cmd === 'scaffold' ? args.slice(1) : args)
   } else {
-    runArena(args)
+    console.error(`❌ Unknown command: ${cmd}`)
+    printHelp()
+    process.exit(1)
   }
 }

@@ -35,5 +35,9 @@
   "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-arena#readme",
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@lythos/test-utils": "^0.9.1",
+    "zod-to-json-schema": "^3.25.2"
   }
 }

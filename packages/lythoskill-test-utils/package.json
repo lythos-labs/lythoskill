@@ -8,7 +8,8 @@
     "./skill-fixtures": "./src/skill-fixtures.ts",
     "./agent-bdd": "./src/agent-bdd.ts",
     "./judge": "./src/judge.ts",
-    "./agents": "./src/agents/index.ts"
+    "./agents": "./src/agents/index.ts",
+    "./schema": "./src/schema.ts"
   },
   "license": "MIT",
   "publishConfig": {
