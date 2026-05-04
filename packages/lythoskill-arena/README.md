@@ -1,6 +1,6 @@
 # @lythos/skill-arena
 
-![CI](https://img.shields.io/badge/CI-41%20unit%20tests-brightgreen)
+![CI](https://img.shields.io/badge/CI-41%20unit%20tests-brightgreen) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2)
 
 > Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis. Now with declarative `arena.toml` (k8s-manifest style) and deterministic Pareto frontier.
 

@@ -1,5 +1,7 @@
 # @lythos/test-utils
 
+![Coverage](https://img.shields.io/badge/coverage-94%25-brightgreen) ![CI](https://img.shields.io/badge/CI-78%20unit%20tests-brightgreen) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2) ![LLM Audit](https://img.shields.io/badge/uncovered-LLM%20audited%20%3D%20glue-lightgrey)
+
 Shared test infrastructure for the lythoskill ecosystem. Provides Agent BDD orchestration, Zod schema enforcement, function-calling judge, CLI BDD helpers, and sanitization — all built on the **intent/plan/execute** separation pattern.
 
 ## Install
@@ -134,12 +136,15 @@ interface AgentAdapter {
 | Module | Lines | Funcs | CI | Notes |
 |--------|-------|-------|----|-------|
 | `schema.ts` | 100% | 100% | ✅ | 23 tests, real fixture round-trip + noise rejection |
-| `judge.ts` | 90% | 100% | ✅ | Function-calling + Zod enforcement, retry, ERROR verdict |
 | `agent-bdd.ts` | 99% | 100% | ✅ | parseAgentMd + runAgentScenario with mock adapter |
 | `agents/index.ts` | 100% | 100% | ✅ | useAgent factory |
-| `sanitize.ts` | 90% | 71% | ✅ | Path replacement + secret redaction (19 tests) |
-| `bdd-runner.ts` | 45% | 67% | ✅ | Unit tests (readCheckpoints); Agent BDD tracer excluded |
-| `agents/claude.ts` | 42% | 40% | ⚠️ | spawn requires `claude` CLI; invokeTool tested via mock |
+| `sanitize.ts` | 100% | 100% | ✅ | Path replacement + secret redaction + restore round-trip |
+| `bdd-runner.ts` | 90% | 88% | ✅ | slugifyWorkdirName, assertOutput (8 tests), injectable spawn |
+| `agents/claude.ts` | 88% | 75% | ✅ | buildClaudeCommand DSL (7 tests), buildToolPrompt, extractJson |
+| `judge.ts` | 90% | 100% | ✅ | Function-calling + Zod enforcement, retry, ERROR verdict |
+| **Overall** | **94%** | **91%** | | **78 unit tests** |
+
+All uncovered lines are Bun.spawn glue — type-guarded by TypeScript, correctness enforced by Agent BDD integration.
 
 **Coverage methodology**: Pure logic tested with unit tests (CI). Agent BDD (requires `claude` CLI + LLM inference) uses `test.skipIf(!hasClaude)` and is excluded from CI via `.agent.test.ts` naming convention. No coverage gate — numbers are honest, not inflated.
 
