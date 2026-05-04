@@ -25,6 +25,12 @@ export interface AgentRunResult {
   checkpoints: CheckpointEntry[]
 }
 
+export interface ToolDefinition {
+  name: string
+  description: string
+  input_schema: Record<string, unknown>
+}
+
 export interface AgentAdapter {
   name: string
   spawn(opts: {
@@ -34,6 +40,14 @@ export interface AgentAdapter {
     idleTimeoutMs?: number
     env?: Record<string, string>
   }): Promise<AgentRunResult>
+
+  /** Optional: structured tool invocation (function-calling). If absent, judge falls back to prompt + parse + Zod. */
+  invokeTool?(opts: {
+    tool: ToolDefinition
+    prompt: string
+    cwd: string
+    timeoutMs: number
+  }): Promise<unknown>
 }
 
 // ── Minimal deck config types (for parseAgentMd, not a full schema) ────────

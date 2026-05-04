@@ -1,38 +1,14 @@
 import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { homedir } from 'node:os'
-import type { AgentAdapter, AgentRunResult, CheckpointEntry, DeckConfig } from './agents/types'
+import type { AgentAdapter, AgentRunResult, CheckpointEntry } from './agents/types'
 import { createSanitizer } from './sanitize'
 import { readCheckpoints } from './bdd-runner'
 import { runLLMJudge } from './judge'
+import { AgentScenario as AgentScenarioSchema, type AgentScenario, type JudgeVerdict } from './schema'
 
-// ── Agent Scenario type ────────────────────────────────────────────────────
-
-export interface AgentScenario {
-  name: string
-  description: string
-  timeout: number
-  given: {
-    deck: DeckConfig
-  }
-  when: string
-  then: string[]
-  judge: string
-}
-
-// ── Judge result types ─────────────────────────────────────────────────────
-
-export interface JudgeCriterion {
-  name: string
-  passed: boolean
-  note?: string
-}
-
-export interface JudgeVerdict {
-  verdict: 'PASS' | 'FAIL'
-  reason: string
-  criteria: JudgeCriterion[]
-}
+// Re-export for backward compat
+export type { AgentScenario, JudgeVerdict, JudgeCriterion } from './schema'
 
 // ── Scenario result type ───────────────────────────────────────────────────
 
@@ -132,7 +108,7 @@ export function parseAgentMd(content: string): AgentScenario {
     }
   }
 
-  return {
+  const result = {
     name,
     description,
     timeout,
@@ -141,6 +117,8 @@ export function parseAgentMd(content: string): AgentScenario {
     then: thenBullets,
     judge: sections.judge || '',
   }
+
+  return AgentScenarioSchema.parse(result)
 }
 
 // ── runAgentScenario ───────────────────────────────────────────────────────

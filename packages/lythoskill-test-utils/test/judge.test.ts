@@ -27,7 +27,7 @@ function makeAgentResult(overrides?: Partial<AgentRunResult>): AgentRunResult {
 }
 
 describe('buildJudgePrompt', () => {
-  test('includes scenario instructions, criteria, and evidence', () => {
+  test('includes scenario instructions, criteria, evidence, and tool instruction', () => {
     const scenario = makeScenario()
     const result = makeAgentResult()
     const prompt = buildJudgePrompt(scenario, result, result.checkpoints)
@@ -35,7 +35,7 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('Run a test command.')
     expect(prompt).toContain('Check that output contains OK.')
     expect(prompt).toContain('OK')
-    expect(prompt).toContain('"verdict"')
+    expect(prompt).toContain('submit_verdict')
   })
 })
 
@@ -98,7 +98,7 @@ describe('runLLMJudge', () => {
     expect(result.verdict!.verdict).toBe('PASS')
   })
 
-  test('returns error for invalid JSON output', async () => {
+  test('returns ERROR verdict for unparseable output', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -113,11 +113,12 @@ describe('runLLMJudge', () => {
     }
 
     const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
-    expect(result.verdict).toBeNull()
-    expect(result.error).toContain('Failed to parse judge output')
+    expect(result.verdict!.verdict).toBe('ERROR')
+    expect(result.verdict!.reason).toContain('Judge failed')
+    expect(result.verdict!.error).toBeTruthy()
   })
 
-  test('returns error for invalid verdict value', async () => {
+  test('returns ERROR verdict for invalid verdict value', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -132,7 +133,7 @@ describe('runLLMJudge', () => {
     }
 
     const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
-    expect(result.verdict).toBeNull()
-    expect(result.error).toContain('Invalid verdict value')
+    expect(result.verdict!.verdict).toBe('ERROR')
+    expect(result.verdict!.error).toContain('invalid_value')
   })
 })

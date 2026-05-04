@@ -1,5 +1,27 @@
-import type { AgentAdapter, AgentRunResult } from './types'
+import type { AgentAdapter, AgentRunResult, ToolDefinition } from './types'
 import { readCheckpoints } from '../bdd-runner'
+
+function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
+  const schemaJson = JSON.stringify(tool.input_schema, null, 2)
+  const fence = '```'
+  return [
+    prompt,
+    '',
+    '## Tool: ' + tool.name,
+    tool.description,
+    '',
+    '## Output Schema',
+    'You MUST respond with a single JSON object matching this schema exactly.',
+    'Wrap your JSON in a ' + fence + 'json fence.',
+    '',
+    'Schema:',
+    fence + 'json',
+    schemaJson,
+    fence,
+    '',
+    'Return ONLY the JSON object (in a ' + fence + 'json fence), no other text.',
+  ].join('\n')
+}
 
 export const claudeAdapter: AgentAdapter = {
   name: 'claude',
@@ -32,5 +54,18 @@ export const claudeAdapter: AgentAdapter = {
     const checkpoints = readCheckpoints(cwd)
 
     return { stdout, stderr, code, durationMs, checkpoints }
+  },
+
+  async invokeTool(opts): Promise<unknown> {
+    const { tool, prompt, cwd, timeoutMs = 60000 } = opts
+    const toolPrompt = buildToolPrompt(tool, prompt)
+
+    const result = await this.spawn({ cwd, brief: toolPrompt, timeoutMs })
+
+    // Extract JSON from markdown fence or raw output
+    const fenceMatch = result.stdout.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+    const jsonStr = fenceMatch ? fenceMatch[1].trim() : result.stdout.trim()
+
+    return JSON.parse(jsonStr)
   },
 }
