@@ -51,18 +51,26 @@ export interface CliResult {
   stderr: string
 }
 
-export function runCli(cwd: string, command: string[]): CliResult {
-  const [cmd, ...args] = command
+export type SpawnFn = (cmd: string, args: string[], opts: { cwd: string }) => { status: number | null; stdout: string; stderr: string }
+
+export const defaultSpawn: SpawnFn = (cmd, args, opts) => {
   const result = spawnSync(cmd, args, {
-    cwd,
+    cwd: opts.cwd,
     encoding: 'utf-8',
     timeout: 30000,
     env: { ...process.env, FORCE_COLOR: '0' },
   })
+  return { status: result.status, stdout: result.stdout ?? '', stderr: result.stderr ?? '' }
+}
+
+export function runCli(cwd: string, command: string[], spawnFn?: SpawnFn): CliResult {
+  const [cmd, ...args] = command
+  const spawn = spawnFn ?? defaultSpawn
+  const result = spawn(cmd, args, { cwd })
   return {
     code: result.status ?? 1,
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
+    stdout: result.stdout,
+    stderr: result.stderr,
   }
 }
 
@@ -102,8 +110,13 @@ export function assertOutput(
   return errors
 }
 
+/** Slugify a workdir name: lowercase, replace non-alphanum with hyphens. Pure. */
+export function slugifyWorkdirName(name: string): string {
+  return name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+}
+
 export function setupWorkdir(baseDir: string, name: string): string {
-  const dir = join(baseDir, name.replace(/[^a-z0-9]+/gi, '-').toLowerCase())
+  const dir = join(baseDir, slugifyWorkdirName(name))
   if (existsSync(dir)) rmSync(dir, { recursive: true, force: true })
   mkdirSync(dir, { recursive: true })
   return dir

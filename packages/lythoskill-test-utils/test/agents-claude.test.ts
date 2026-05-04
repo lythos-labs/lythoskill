@@ -1,5 +1,31 @@
 import { describe, test, expect, spyOn } from 'bun:test'
 import { useAgent } from '../src/agents'
+import { runCli, defaultSpawn } from '../src/bdd-runner'
+
+describe('runCli with injectable spawn', () => {
+  test('uses mock spawn to verify command building', () => {
+    const captured: { cmd: string; args: string[]; cwd: string }[] = []
+    const mockSpawn = (cmd: string, args: string[], opts: { cwd: string }) => {
+      captured.push({ cmd, args, cwd: opts.cwd })
+      return { status: 0, stdout: 'ok', stderr: '' }
+    }
+
+    const result = runCli('/tmp/test', ['echo', 'hello'], mockSpawn)
+    expect(result.code).toBe(0)
+    expect(result.stdout).toBe('ok')
+    expect(captured).toHaveLength(1)
+    expect(captured[0].cmd).toBe('echo')
+    expect(captured[0].args).toEqual(['hello'])
+    expect(captured[0].cwd).toBe('/tmp/test')
+  })
+
+  test('mock spawn can simulate errors', () => {
+    const mockSpawn = () => ({ status: 1, stdout: '', stderr: 'command failed' })
+    const result = runCli('/tmp', ['bad-command'], mockSpawn)
+    expect(result.code).toBe(1)
+    expect(result.stderr).toBe('command failed')
+  })
+})
 
 describe('useAgent', () => {
   test('returns claude adapter', () => {
