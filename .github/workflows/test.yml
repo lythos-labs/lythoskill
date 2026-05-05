@@ -39,6 +39,14 @@ jobs:
       - name: arena
         run: bun test packages/lythoskill-arena/src/
       - run: bun packages/lythoskill-creator/src/cli.ts align
+      - name: test report
+        if: always()
+        run: bun scripts/test-report.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report
+          path: test-results/
 
   coverage-deck:
     runs-on: ubuntu-latest
