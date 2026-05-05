@@ -720,7 +720,7 @@ async function runDiscover(argv: string[]) {
 export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
-    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]')
+    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
     process.exit(1)
   }
 
@@ -741,11 +741,16 @@ export function runAdd(argv: string[]) {
 
   const reason = getFlag(argv, '--reason') || ''
   const forkedFrom = getFlag(argv, '--forked-from')
+  const fullClone = argv.includes('--full')
+  const branch = getFlag(argv, '--branch')
 
-  console.log(`📦 Cloning: https://${plan.relPath}`)
+  // Shallow clone by default (fast, low risk). --full for complete history.
+  const depthFlag = fullClone ? '' : '--depth 1'
+  const branchFlag = branch ? `--branch ${branch}` : ''
+  console.log(`📦 Cloning: https://${plan.relPath}${fullClone ? '' : ' (--depth 1)'}`)
   try {
     mkdirSync(plan.targetPath, { recursive: true })
-    execSync(`git clone https://${plan.relPath}.git "${plan.targetPath}"`, {
+    execSync(`git clone ${depthFlag} ${branchFlag} https://${plan.relPath}.git "${plan.targetPath}"`.replace(/\s+/g, ' ').trim(), {
       stdio: 'inherit',
       timeout: 60000,
     })
@@ -774,7 +779,7 @@ if (import.meta.main) {
 
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
-    console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]')
+    console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
     console.log('       lythoskill-curator audit [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
@@ -784,6 +789,8 @@ if (import.meta.main) {
     console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
     console.log('                         --reason <text>      Why this skill was added')
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
+    console.log('                         --branch <name>      Specific branch (default: default branch)')
+    console.log('                         --full              Full clone (default: --depth 1 shallow)')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
     console.log('  discover              Discover new skills from remote feeds (GitHub, LobeHub, agentskill)')
     console.log('  audit                 Run predefined checks and output an audit report')
