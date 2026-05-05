@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@lythos/test-utils": "^0.9.1",
+    "zod": "^3.24.0",
     "zod-to-json-schema": "^3.25.2"
   }
 }
