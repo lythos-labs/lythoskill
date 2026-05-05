@@ -2,7 +2,7 @@ import { describe, test, expect } from 'bun:test'
 import {
   JudgeVerdict, JudgeCriterion, CheckpointEntry, AgentScenario,
   ArenaManifest, ComparativeReport, Player, DeckConfig, Metrics,
-} from '../src/schema'
+} from './schema'
 
 // ── JudgeVerdict ───────────────────────────────────────────────────────────
 

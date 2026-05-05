@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { readCheckpoints, setupWorkdir, assertOutput, slugifyWorkdirName } from '../src/bdd-runner'
+import { readCheckpoints, setupWorkdir, assertOutput, slugifyWorkdirName } from './bdd-runner'
 
 describe('readCheckpoints', () => {
   test('returns empty array when checkpoint dir does not exist', () => {

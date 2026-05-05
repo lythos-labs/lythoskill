@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'bun:test'
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { parseAgentMd, runAgentScenario } from '../src/agent-bdd'
-import type { AgentAdapter } from '../src/agents/types'
+import { parseAgentMd, runAgentScenario } from './agent-bdd'
+import type { AgentAdapter } from './agents/types'
 
 describe('parseAgentMd', () => {
   test('parses frontmatter fields (name, description, timeout)', () => {

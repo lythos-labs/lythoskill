@@ -1,7 +1,7 @@
 import { describe, test, expect, spyOn } from 'bun:test'
-import { useAgent } from '../src/agents'
-import { buildToolPrompt, buildClaudeCommand, extractJson, type SpawnCommand } from '../src/agents/claude'
-import { runCli } from '../src/bdd-runner'
+import { useAgent } from './agents'
+import { buildToolPrompt, buildClaudeCommand, extractJson, type SpawnCommand } from './agents/claude'
+import { runCli } from './bdd-runner'
 
 describe('runCli with injectable spawn', () => {
   test('uses mock spawn to verify command building', () => {

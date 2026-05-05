@@ -357,6 +357,8 @@ Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). Th
 
 8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator@0.9.18 bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
 
+9. **Test file organization**: Unit tests are co-located in `src/*.test.ts` next to source. CLI BDD tests live in `test/runner.ts` + `test/scenarios/`. Agent BDD tests use `test/scenarios/*.agent.md`. Pre-commit hook enforces 0 test failures on changed packages. Full conventions: [TESTING.md](./TESTING.md).
+
 ---
 
 ## Project Skills (Self-Contained)

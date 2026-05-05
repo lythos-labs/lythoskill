@@ -1,8 +1,12 @@
 // Agent BDD: NOT for CI — requires `claude` CLI and LLM inference
 // This file is intentionally excluded from CI test suites.
-// Run locally with: bun test packages/lythoskill-test-utils/test/bdd-runner.agent.test.ts
+# Agent BDD: bdd-runner tracer bullet
+# NOT for CI — requires `claude` CLI and LLM inference.
+# Run locally with: bun test packages/lythoskill-test-utils/src/sanitize.test.ts (unit-level)
+# Full Agent BDD format TBD per TESTING.md convention.
+// Run locally with: bun test packages/lythoskill-test-utils/src/bdd-runner.test.ts (check imports)
 import { describe, test, expect } from 'bun:test'
-import { runClaudeAgent, setupWorkdir } from '../src/bdd-runner'
+import { runClaudeAgent, setupWorkdir } from '../../src/bdd-runner'
 
 const hasClaude = !!Bun.which('claude')
 

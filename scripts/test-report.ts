@@ -56,7 +56,7 @@ async function runSuite(name: string, cmd: string[]) {
 async function main() {
   header();
 
-  await runSuite("test-utils", ["bun", "test", "packages/lythoskill-test-utils/test/"]);
+  await runSuite("test-utils", ["bun", "test", "packages/lythoskill-test-utils/src/bdd-runner.test.ts", "packages/lythoskill-test-utils/src/agent-bdd.test.ts", "packages/lythoskill-test-utils/src/judge.test.ts", "packages/lythoskill-test-utils/src/agents-claude.test.ts", "packages/lythoskill-test-utils/src/schema.test.ts"]);
   await runSuite("curator", ["bun", "test",
     "packages/lythoskill-curator/src/curator-core.test.ts",
     "packages/lythoskill-curator/src/feed-adapters.test.ts",

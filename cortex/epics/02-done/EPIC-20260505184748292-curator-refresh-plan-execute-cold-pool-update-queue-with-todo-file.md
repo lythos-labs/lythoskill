@@ -18,6 +18,7 @@ checklist_skipped_reason: agent session, no TTY
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-05 | Created |
+| done | 2026-05-05 | Done |
 
 ## 背景故事
 <!-- 填写需求来源:触发事件、问题描述、目标价值 -->

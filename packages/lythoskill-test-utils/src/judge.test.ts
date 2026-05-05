@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
-import { buildJudgePrompt, runLLMJudge } from '../src/judge'
-import type { AgentScenario } from '../src/agent-bdd'
-import type { AgentAdapter, AgentRunResult } from '../src/agents/types'
+import { buildJudgePrompt, runLLMJudge } from './judge'
+import type { AgentScenario } from './agent-bdd'
+import type { AgentAdapter, AgentRunResult } from './agents/types'
 
 function makeScenario(judge?: string): AgentScenario {
   return {

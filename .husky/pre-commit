@@ -21,3 +21,6 @@ fi
 # 3. Cortex governance: Epic-ADR coupling + lane guard + in-progress reminder (TypeScript)
 #    → delegates to packages/lythoskill-project-cortex/src/hooks/pre-commit.ts (T2+T3)
 bun packages/lythoskill-project-cortex/src/hooks/pre-commit.ts
+
+# 4. Test gate: run tests for changed packages, block if any fail ("测试必须 0 fail")
+bun scripts/pre-commit-test.ts || exit 1
