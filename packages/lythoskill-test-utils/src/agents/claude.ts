@@ -55,16 +55,12 @@ export function buildClaudeCommand(opts: {
 }): SpawnCommand {
   const promptFile = join(tmpdir(), `claude-prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`)
 
-  const cliFlags = [
-    '-p',
-    '--output-format', 'json',
-    '--permission-mode', 'bypassPermissions',
-    '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
-    '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
-  ].join(' ')
+  const allowed = opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS
+  const disallowed = opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS
 
-  // Shell redirect: claude reads prompt from file via stdin, bypasses Bun's stdin handling
-  const shellCmd = `claude ${cliFlags} < ${promptFile}`
+  // Shell redirect: claude reads prompt from file via stdin, bypasses Bun's stdin handling.
+  // Quote values containing spaces (e.g. "Bash(rm *)") to prevent shell word-splitting.
+  const shellCmd = `claude -p --output-format json --permission-mode bypassPermissions --allowedTools '${allowed}' --disallowedTools '${disallowed}' < ${promptFile}`
 
   return {
     cmd: 'sh',
