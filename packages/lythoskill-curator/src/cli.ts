@@ -14,7 +14,8 @@ import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSy
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
-import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord } from './curator-core'
+import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable } from './curator-core'
+import { createColdPoolFeedAdapter, createGitHubSearchAdapter, createLobeHubAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
 
 // ── Types ────────────────────────────────────────────────────
@@ -659,6 +660,60 @@ function writeAddition(poolPath: string, record: ReturnType<typeof buildAddition
   appendFileSync(file, JSON.stringify(record) + '\n')
 }
 
+async function runDiscover(argv: string[]) {
+  const poolIdx = argv.indexOf('--pool')
+  const poolPath = poolIdx >= 0 ? argv[poolIdx + 1] : `${process.env.HOME}/.agents/skill-repos`
+
+  // Build adapters: cold pool (always) + optional remote feeds
+  const feedArgIdx = argv.indexOf('--feeds')
+  const feedNames = feedArgIdx >= 0 ? (argv[feedArgIdx + 1] || '').split(',').map(s => s.trim()) : ['github']
+
+  const adapters = [createColdPoolFeedAdapter(poolPath)]
+  for (const name of feedNames) {
+    if (name === 'github') adapters.push(createGitHubSearchAdapter())
+    if (name === 'lobehub') adapters.push(createLobeHubAdapter())
+  }
+
+  console.log(`🔍 Discovering skills...\n`)
+
+  const allItems: { locator: string; name: string; description: string; source: string }[] = []
+  for (const adapter of adapters) {
+    const label = `${adapter.feed.label} (${adapter.feed.type})`
+    console.log(`   Fetching: ${label}...`)
+    const items = await adapter.discover()
+    console.log(`   └─ ${items.length} result(s)`)
+    for (const item of items) {
+      allItems.push({
+        locator: item.locator,
+        name: item.name,
+        description: (item.description || '').slice(0, 80),
+        source: item.source,
+      })
+    }
+  }
+
+  if (allItems.length === 0) {
+    console.log('\n📭 No skills discovered.')
+    return
+  }
+
+  console.log(`\n📋 ${allItems.length} skill(s) discovered:\n`)
+  console.log(formatMarkdownTable(allItems))
+
+  // Dedup hint — same name from multiple sources
+  const names = new Map<string, number>()
+  for (const item of allItems) names.set(item.name, (names.get(item.name) || 0) + 1)
+  const dupes = [...names.entries()].filter(([, c]) => c > 1)
+  if (dupes.length > 0) {
+    console.log(`\n⚠️  ${dupes.length} name(s) appear in multiple sources:`)
+    for (const [name, count] of dupes) {
+      console.log(`   - ${name} (${count} sources)`)
+    }
+  }
+
+  console.log(`\n💡 To add a skill: bunx @lythos/skill-curator add <locator> --pool ${poolPath} --reason "<why>"`)
+}
+
 export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
@@ -727,6 +782,7 @@ if (import.meta.main) {
     console.log('                         --reason <text>      Why this skill was added')
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
+    console.log('  discover              Discover skills from feeds (cold pool, GitHub, LobeHub)')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
@@ -737,7 +793,9 @@ if (import.meta.main) {
     process.exit(0)
   }
 
-  if (cmd === 'add') {
+  if (cmd === 'discover') {
+    runDiscover(args.slice(1))
+  } else if (cmd === 'add') {
     runAdd(args.slice(1))
   } else if (cmd === 'query') {
     runQuery(args.slice(1))
