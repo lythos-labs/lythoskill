@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/5 16:59:33
+> 自动生成于 2026/5/5 18:50:44
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 101 | 进行中: 0, 待验收: 0, 已完成: 76 |
-| Epics | 16 | 活跃: 0, 已完成: 13, 悬置: 1, 已归档: 2 |
+| Tasks | 104 | 进行中: 0, 待验收: 0, 已完成: 82 |
+| Epics | 17 | 活跃: 1, 已完成: 13, 悬置: 1, 已归档: 2 |
 | ADRs | 39 | 已接受: 29 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260505184748292**: Curator refresh plan/execute — cold pool update queue with TODO file
 
 ### 已完成
 
@@ -47,11 +47,8 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (2)
 
-- [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
-- [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
-- [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
 
@@ -63,7 +60,7 @@ _无_
 
 _无_
 
-### 已完成 (76)
+### 已完成 (82)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -110,6 +107,9 @@ _无_
 - ✅ ~~TASK-20260504004954526~~: First *.agent.md scenario — skills-introspection (Agent BDD tracer bullet)
 - ✅ ~~TASK-20260504005000534~~: Add/refresh/remove/prune Agent BDD scenarios (4 *.agent.md files)
 - ✅ ~~TASK-20260504012457126~~: fix deck refresh: traverse up to git root for monorepo skills
+- ✅ ~~TASK-20260504165202852~~: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
+- ✅ ~~TASK-20260504165203797~~: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
+- ✅ ~~TASK-20260504165204731~~: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 - ✅ ~~TASK-20260504170113207~~: Investigate and fix Agent BDD prune scenario timeout (exit 143)
 - ✅ ~~TASK-20260504170629577~~: Fix Agent BDD scenarios: parseAgentMd Given should support localhost paths (refresh + prune timeout)
 - ✅ ~~TASK-20260504170630080~~: Fix add Agent BDD scenario: investigate why deck link fails to sync skill-b into working set
@@ -141,6 +141,9 @@ _无_
 - ✅ ~~TASK-20260505015052748~~: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 - ✅ ~~TASK-20260505015054313~~: T4: Feed source abstraction — cold pool / GitHub / URL as source types
 - ✅ ~~TASK-20260505165424864~~: create
+- ✅ ~~TASK-20260505184757091~~: T1: buildRefreshPlan pure function + RefreshPlan/RefreshItem types in curator-core.ts
+- ✅ ~~TASK-20260505184757915~~: T2: refresh-plan + refresh-execute CLI commands in cli.ts
+- ✅ ~~TASK-20260505184800031~~: T3: unit tests for buildRefreshPlan + CLI BDD for refresh commands
 
 ### 悬置 (0)
 
