@@ -12,7 +12,7 @@ when_to_use: |
   skill-deck.toml, sync working set, initialize deck, what are
   these symlinks in .claude/skills/, silent blend, manage skill deck.
 allowed-tools:
-  - Bash(bunx @lythos/skill-deck *)
+  - Bash(bunx @lythos/skill-deck@{{PACKAGE_VERSION}} *)
 # ── deck governance metadata (consumed by lythoskill tooling, not by agent platforms) ──
 deck_niche: meta.governance.deck
 deck_dependencies:
@@ -35,40 +35,40 @@ This is deny-by-default: undeclared skills do not exist in the agent's view.
 cd /path/to/your-project
 
 # Reconcile working set to match declarations (the routine command)
-bunx @lythos/skill-deck link
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link
 # Specify a non-default deck file
-bunx @lythos/skill-deck link --deck ./path/to/deck.toml
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./path/to/deck.toml
 # Deck in subdirectory, working set anchored to current dir
-bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./decks/arena.toml --workdir .
 
 # Download a skill to cold pool and add to deck (one-shot)
-bunx @lythos/skill-deck add github.com/owner/repo/skill-name
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name
 
 # Add with explicit alias and section
-bunx @lythos/skill-deck add github.com/owner/repo/skill-name --alias tdd --type tool
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name --alias tdd --type tool
 
 # Pull latest versions of declared skills from upstream
-bunx @lythos/skill-deck refresh
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh
 # Refresh a single skill by alias or FQ path
-bunx @lythos/skill-deck refresh tdd
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh tdd
 
 # Remove a skill from deck and working set (cold pool untouched)
-bunx @lythos/skill-deck remove tdd
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} remove tdd
 
 # GC cold pool repos no longer referenced by any deck
-bunx @lythos/skill-deck prune
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} prune
 # Skip confirmation
-bunx @lythos/skill-deck prune --yes
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} prune --yes
 
 # Then re-sync working set
-bunx @lythos/skill-deck link
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link
 ```
 `link` is a **reconciler** that converges actual state to declared state:
 undeclared symlinks → removed; broken/circular symlinks → recreated;
 non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
 
 > **If a declared skill is not in the cold pool**, `link` reports `Skill not found`
-> and skips it. Add it first with `bunx @lythos/skill-deck add <locator>`
+> and skips it. Add it first with `bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add <locator>`
 > or place it manually in the cold pool.
 
 You never diagnose the working set manually. Just run `link`.
@@ -102,7 +102,7 @@ format. Ask the user whether to migrate before proceeding:
 
 ```
 ⚠️  This deck uses the deprecated string-array format. Run migrate?
-   bunx @lythos/skill-deck migrate-schema
+   bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema
 ```
 
 Do NOT silently migrate. The user may be maintaining backward compatibility.
@@ -118,7 +118,7 @@ cp ${CLAUDE_SKILL_DIR}/assets/skill-deck.toml.template ./skill-deck.toml
 # Or migrate existing unmanaged .claude/skills/
 bash ${CLAUDE_SKILL_DIR}/scripts/deck-migrate.sh
 ```
-Then run `bunx @lythos/skill-deck link` to sync.
+Then run `bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link` to sync.
 ## Diagnose (read-only)
 ```bash
 bash ${CLAUDE_SKILL_DIR}/scripts/deck-status.sh

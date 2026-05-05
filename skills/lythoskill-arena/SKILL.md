@@ -9,8 +9,8 @@ when_to_use: |
   Compare skills, A/B test skills, which skill is better, test deck  configuration, benchmark skill, skill evaluation, deck comparison,
   try before adopting, test play, Pareto analysis, skill synergy check,  does adding this skill improve my deck.
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena *)
-  - Bash(bunx @lythos/skill-deck link *)
+  - Bash(bunx @lythos/skill-arena@0.9.13 *)
+  - Bash(bunx @lythos/skill-deck@0.9.13 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -42,7 +42,7 @@ TASK-arena.md instructions, not a scoring script.
 ## Commands
 ### Mode 1: Single-Skill Comparison (controlled variable)
 ```bash
-bunx @lythos/skill-arena \
+bunx @lythos/skill-arena@0.9.13 \
   --task "Generate auth flow diagram" \  --skills "design-doc-mermaid,mermaid-tools" \  --criteria "syntax,context,token"
 ```
 
@@ -51,7 +51,7 @@ control skill (default: `project-scribe`, override with `--control`).
 
 ### Mode 2: Full-Deck Comparison (Pareto frontier)
 ```bash
-bunx @lythos/skill-arena \
+bunx @lythos/skill-arena@0.9.13 \
   --task "Generate auth flow diagram" \  --decks "./decks/minimal.toml,./decks/rich.toml,./decks/superpowers.toml" \  --criteria "quality,token,maintainability"
 ```
 
@@ -60,7 +60,7 @@ the Pareto frontier — non-dominated solutions, not a single winner.
 
 ### Visualize Results
 ```bash
-bunx @lythos/skill-arena viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.13 viz tmp/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
