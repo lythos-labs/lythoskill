@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/5 22:27:20
+> 自动生成于 2026/5/5 22:54:17
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 111 | 进行中: 0, 待验收: 0, 已完成: 88 |
 | Epics | 18 | 活跃: 0, 已完成: 15, 悬置: 1, 已归档: 2 |
-| ADRs | 40 | 已接受: 30 |
+| ADRs | 41 | 已接受: 31 |
 
 ---
 
@@ -224,6 +224,7 @@ _无_
 - ✅ **ADR-20260504172913972** (02-accepted): Agent BDD budget governance — time/token/retry limits as first-class constraints
 - ✅ **ADR-20260504200632939** (02-accepted): Structured judge schema — Zod-first with function-calling enforcement
 - ✅ **ADR-20260505221432740** (02-accepted): Standardize test file co-location across monorepo packages
+- ✅ **ADR-20260505225159725** (02-accepted): Criterion definition schema — from bare strings to structured scoring dimensions with rubrics
 
 ---
 
