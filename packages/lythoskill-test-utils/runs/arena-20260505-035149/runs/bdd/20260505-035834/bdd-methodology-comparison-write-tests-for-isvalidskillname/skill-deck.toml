@@ -1,0 +1,9 @@
+# BDD deck — includes bdd-lythos for BDD methodology
+[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "~/.agents/skill-repos"
+
+[tool.skills.bdd-lythos]
+path = "localhost/bdd-lythos"
+role = "Fork: fuses BDD methodology + Gherkin production, Bun-native, lythoskill-adapted"

@@ -1,0 +1,8 @@
+{
+  "verdict": "ERROR",
+  "reason": "Judge failed after 2 attempt(s): JSON Parse error: Unexpected EOF",
+  "criteria": [],
+  "raw_output": "",
+  "error": "JSON Parse error: Unexpected EOF",
+  "timestamp": "2026-05-04T19:58:34.193Z"
+}

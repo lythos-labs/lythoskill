@@ -1,0 +1,10 @@
+{
+  "verdict": "ERROR",
+  "reason": "Judge failed after 2 attempt(s): JSON Parse error: Unexpected EOF",
+  "criteria": [],
+  "raw_output": "",
+  "error": "JSON Parse error: Unexpected EOF",
+  "agent_stdout": "Done. Here's the summary:\n\n**29 tests, 0 failures** across 7 scenario categories.\n\n### Discovery\nExamined the lythoskill codebase (skill names in SKILL.md files, Zod schemas, deck link.ts resolver) and extracted the implicit naming convention: lowercase kebab-case with `[a-z][a-z0-9]*(-[a-z0-9]+)*`.\n\n### Formulation → `isValidSkillName.test.ts`\nBDD-style tests with `// Given / // When / // Then` annotations covering:\n- **7 valid**: basic kebab, single-letter, multi-segment, combo- prefix, digits, no hyphens, numeric segments\n- **5 empty/whitespace**: empty, spaces, leading/trailing whitespace\n- **4 hyphen placement**: leading, trailing, consecutive, lone hyphen\n- **3 uppercase**: PascalCase, ALL-CAPS, mixedCase\n- **2 leading digits**: starts with digit, purely numeric\n- **6 special chars**: underscores, dots, punctuation, @, emoji, CJK\n- **2 boundary**: long name, tabs-only\n\n### Automation → `isValidSkillName.ts`\nSingle regex: `^[a-z][a-z0-9]*(-[a-z0-9]+)*$` — validates the full convention in one pass.\n",
+  "agent_stderr": "",
+  "duration_ms": 283658
+}

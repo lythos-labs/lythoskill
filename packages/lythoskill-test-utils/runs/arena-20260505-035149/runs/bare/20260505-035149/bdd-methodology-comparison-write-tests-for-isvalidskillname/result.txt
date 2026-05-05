@@ -1,0 +1,45 @@
+bun test results: 29 pass / 0 fail / 42.00ms
+
+Coverage by scenario category:
+  Valid cases: 7 pass
+    - basic kebab-case name
+    - single letter name
+    - multiple hyphen-separated segments
+    - combo-prefixed name
+    - names with digits
+    - purely alphabetic (no hyphens)
+    - numeric segment
+
+  Invalid — empty/whitespace: 5 pass
+    - empty string
+    - whitespace-only
+    - internal spaces
+    - leading whitespace
+    - trailing whitespace
+
+  Invalid — hyphen placement: 4 pass
+    - leading hyphen
+    - trailing hyphen
+    - consecutive hyphens
+    - lone hyphen
+
+  Invalid — uppercase: 3 pass
+    - PascalCase
+    - ALL-CAPS
+    - mixedCase
+
+  Invalid — leading digits: 2 pass
+    - starts with digit
+    - purely numeric
+
+  Invalid — special characters: 6 pass
+    - underscores (snake_case)
+    - dots
+    - punctuation
+    - @ symbol
+    - emoji
+    - Chinese characters
+
+  Boundary: 2 pass
+    - long valid name
+    - tabs-only string

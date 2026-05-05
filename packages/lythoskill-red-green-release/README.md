@@ -45,7 +45,7 @@ Add to your `skill-deck.toml`:
 skills = ["lythoskill-red-green-release"]
 ```
 
-Then run `bunx @lythos/skill-deck@0.9.14 link` to activate.
+Then run `bunx @lythos/skill-deck@0.9.15 link` to activate.
 
 ## Skill Documentation
 

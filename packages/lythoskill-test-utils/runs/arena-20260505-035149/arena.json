@@ -1,0 +1,29 @@
+{
+  "id": "arena-20260505-035149",
+  "created_at": "2026-05-04T19:51:49.866Z",
+  "task": "---\nname: BDD methodology comparison — write tests for isValidSkillName\ndescription: Test whether bdd-lythos skill improves test quality using BDD Discovery → Formulation → Automation workflow.\ntimeou",
+  "mode": "decks",
+  "participants": [
+    {
+      "id": "bare",
+      "name": "bare",
+      "player": "claude",
+      "deck": "/Users/chariots/Downloads/lythoskill-main/playground/arena-bdd-test/decks/bare.toml",
+      "description": "claude-code × /Users/chariots/Downloads/lythoskill-main/playground/arena-bdd-test/decks/bare.toml"
+    },
+    {
+      "id": "bdd",
+      "name": "bdd",
+      "player": "claude",
+      "deck": "/Users/chariots/Downloads/lythoskill-main/playground/arena-bdd-test/decks/bdd.toml",
+      "description": "claude-code × /Users/chariots/Downloads/lythoskill-main/playground/arena-bdd-test/decks/bdd.toml"
+    }
+  ],
+  "criteria": [
+    "discovery",
+    "formulation",
+    "correctness",
+    "completeness"
+  ],
+  "status": "completed"
+}

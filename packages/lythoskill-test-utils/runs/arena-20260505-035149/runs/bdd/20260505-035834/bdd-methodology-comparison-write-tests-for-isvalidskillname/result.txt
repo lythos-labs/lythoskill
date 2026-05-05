@@ -1,0 +1,19 @@
+bun test v1.3.11 — isValidSkillName BDD test results
+
+  29 pass
+   0 fail
+  29 expect() calls
+  Ran 29 tests across 1 file. [35.00ms]
+
+PASS
+
+Test breakdown:
+  Valid cases:          7 (basic kebab, single letter, multi-segment, combo-prefix, digits, alpha-only, numeric segment)
+  Invalid empty/ws:     5 (empty, whitespace-only, internal spaces, leading ws, trailing ws)
+  Invalid hyphens:      4 (leading hyphen, trailing hyphen, consecutive hyphens, only hyphen)
+  Invalid uppercase:    3 (PascalCase, ALL-CAPS, mixed-case)
+  Invalid leading digit: 2 (starts with digit, purely numeric)
+  Invalid special chars: 6 (underscores, dots, punctuation, @, emoji, Chinese chars)
+  Boundary/defensive:   2 (long name, tab-only string)
+
+Implementation: /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/

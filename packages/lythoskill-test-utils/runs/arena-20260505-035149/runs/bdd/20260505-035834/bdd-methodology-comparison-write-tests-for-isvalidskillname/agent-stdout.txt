@@ -1,0 +1,11 @@
+All done. **29 pass, 0 fail** across 29 test cases.
+
+**BDD workflow completed:**
+
+1. **Discovery** — identified 7 categories of scenarios: valid kebab-case, empty/whitespace, hyphen placement, uppercase, leading digits, special characters (6 types), and boundary/defensive cases.
+
+2. **Formulation** — wrote `isValidSkillName.test.ts` with 29 `describe`/`test` blocks, each annotated with `// Given / // When / // Then` comments following the BDD convention.
+
+3. **Automation** — implemented `isValidSkillName.ts` with the regex `/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/` plus a `typeof` guard against non-string inputs.
+
+**Result:** `result.txt` written with full pass/fail summary.

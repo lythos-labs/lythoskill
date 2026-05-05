@@ -1,0 +1,5 @@
+# Bare deck — no BDD skill
+[deck]
+max_cards = 5
+working_set = ".claude/skills"
+cold_pool = "~/.agents/skill-repos"

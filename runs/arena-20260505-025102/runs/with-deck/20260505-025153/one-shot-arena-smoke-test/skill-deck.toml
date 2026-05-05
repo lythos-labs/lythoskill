@@ -1,0 +1,8 @@
+# With deck — includes lythoskill-deck for governance context
+[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "~/.agents/skill-repos"
+
+[tool.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
