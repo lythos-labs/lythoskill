@@ -13,6 +13,37 @@
 - **Mode 1**: Single-skill comparison (controlled variable — same helper skills, different test skill).
 - **Mode 2**: Full-deck comparison (Pareto frontier — no single winner, only optimal trade-offs).
 
+## Prerequisites
+
+Arena runs AI agents as subprocesses. You need at least one agent CLI installed:
+
+### Kimi CLI (recommended default)
+
+Kimi Code CLI is the default player for arena — it has reliable headless execution with eager tool loading (no deferred tool deadlock).
+
+```bash
+# Install via uv (recommended) — uv is Python's bunx equivalent
+uv tool install kimi-cli
+# Or run without installing:
+uvx kimi-cli --print -p "hello"
+
+# Authenticate
+kimi login
+# Or set API key:
+export KIMI_API_KEY=your_key
+```
+
+Docs: [https://github.com/MoonshotAI/kimi-cli](https://github.com/MoonshotAI/kimi-cli)
+
+### Claude CLI (secondary)
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude --version  # should be ≥ 2.1.128
+```
+
+Note: Claude `-p` mode has known issues with web tools in Bun.spawn (deferred tool deadlock). Kimi is the default for reliability.
+
 ## Install
 
 ```bash

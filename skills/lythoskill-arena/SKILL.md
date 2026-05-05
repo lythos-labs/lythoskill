@@ -39,6 +39,35 @@ flowchart TD
 writes metadata). All evaluation is agent-side: the judge is an agent following
 TASK-arena.md instructions, not a scoring script.
 
+## Player Setup
+
+Arena needs at least one AI agent CLI to spawn subprocesses. Players are
+swappable backends — the arena pipeline doesn't care which executes.
+
+| Player | CLI | Install | Headless reliability |
+|--------|-----|---------|---------------------|
+| **kimi** (default) | Kimi Code CLI | `uv tool install kimi-cli` or `uvx kimi-cli` | ✅ Eager tools, no deadlock |
+| **claude** | Claude Code CLI | `npm install -g @anthropic-ai/claude-code` | ⚠️ Known `-p` mode issues |
+
+```bash
+# Install Kimi (recommended — Python, uv is Python's bunx)
+uv tool install kimi-cli
+kimi login  # or export KIMI_API_KEY=...
+
+# Verify
+kimi --print -p "hello"  # should produce output
+```
+
+Player is specified per side in `arena.toml`:
+```toml
+[[side]]
+name = "my-test"
+player = "kimi"  # or "claude"
+deck = "./my-deck.toml"
+```
+
+If `player` is omitted, arena defaults to `kimi`.
+
 ## Commands
 ### Mode 1: Single-Skill Comparison (controlled variable)
 ```bash
