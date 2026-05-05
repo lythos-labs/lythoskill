@@ -962,6 +962,7 @@ if (import.meta.main) {
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
     console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
+    console.log('                         --dry-run           Show plan without executing')
     console.log('                         --reason <text>      Why this skill was added')
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('                         --branch <name>      Specific branch (default: default branch)')
