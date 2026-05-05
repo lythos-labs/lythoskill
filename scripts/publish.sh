@@ -49,9 +49,10 @@ fi
 echo "✅ Logged in as: $WHOAMI"
 echo ""
 
-# Publish order: zero-deps first, then deck (has dependencies)
+# Publish order: zero-deps first, then arena (depends on test-utils), deck last
 PACKAGES=(
   "packages/lythoskill-hello-world"
+  "packages/lythoskill-test-utils"
   "packages/lythoskill-project-cortex"
   "packages/lythoskill-curator"
   "packages/lythoskill-arena"
