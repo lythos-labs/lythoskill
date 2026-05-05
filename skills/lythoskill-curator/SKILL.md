@@ -13,6 +13,8 @@ when_to_use: |
   List all skills, what skills do I have, scan skill pool, skill index,  discover skills, update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
 allowed-tools:
   - Bash(bunx @lythos/skill-curator *)
+  - WebSearch
+  - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.curation.deck-discovery
 deck_managed_dirs:

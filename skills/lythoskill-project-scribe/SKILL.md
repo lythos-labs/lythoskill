@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.9.12
+version: 0.9.13
 type: standard
 description: |
   Session memory writer. Dumps what file exploration cannot recover —
