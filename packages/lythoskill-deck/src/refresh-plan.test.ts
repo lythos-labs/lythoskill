@@ -54,6 +54,15 @@ describe('detectGitRoot', () => {
     expect(result.type).toBe('localhost')
   })
 
+  test('git: directory with .git directly present', () => {
+    const dir = join('/tmp', 'refresh-test-git-' + Date.now())
+    mkdirSync(join(dir, '.git'), { recursive: true })
+    const result = detectGitRoot(dir, '/tmp')
+    expect(result.type).toBe('git')
+    expect(result.gitRoot).toBe(dir)
+    rmSync(dir, { recursive: true, force: true })
+  })
+
   test('not-git: directory without .git', () => {
     const dir = join('/tmp', 'refresh-test-no-git-' + Date.now())
     mkdirSync(dir, { recursive: true })
@@ -103,6 +112,17 @@ describe('buildRefreshPlan', () => {
     // Plan structure is what matters; type depends on actual filesystem
     expect(localhost).toBeDefined()
     expect(localhost!.path).toBe('localhost/skill-b')
+  })
+
+  test('derives coldPool from deck toml when not in opts', () => {
+    const plan = buildRefreshPlan(deckAliasDict, { workdir: '/custom/work' })
+    expect(plan.workdir).toBe('/custom/work')
+    expect(plan.coldPool).toBe('/custom/work/cold-pool')
+  })
+
+  test('explicit coldPool in opts overrides deck toml', () => {
+    const plan = buildRefreshPlan(deckAliasDict, { coldPool: '/explicit/pool' })
+    expect(plan.coldPool).toBe('/explicit/pool')
   })
 
   test('paths are resolved through config', () => {

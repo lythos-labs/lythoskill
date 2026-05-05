@@ -6,9 +6,10 @@
  */
 
 import { describe, it, expect, afterEach, spyOn } from 'bun:test'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { formatSize } from './prune.ts'
 
 let cleanup: string[] = []
 
@@ -37,6 +38,18 @@ function placeSkillInRepo(repoDir: string, skillName: string): string {
   writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: fixture\n---\n')
   return skillDir
 }
+
+describe('formatSize', () => {
+  it('formats bytes correctly at each boundary', () => {
+    expect(formatSize(0)).toBe('0B')
+    expect(formatSize(512)).toBe('512B')
+    expect(formatSize(1023)).toBe('1023B')
+    expect(formatSize(1024)).toBe('1.0KB')
+    expect(formatSize(1536)).toBe('1.5KB')
+    expect(formatSize(1048576)).toBe('1.0MB')
+    expect(formatSize(1073741824)).toBe('1.0GB')
+  })
+})
 
 describe('pruneDeck', () => {
   it('C15: prune with unreferenced repos deletes them when --yes is set', async () => {

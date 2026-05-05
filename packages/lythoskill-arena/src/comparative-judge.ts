@@ -53,7 +53,7 @@ export function computePareto(vectors: { participant_id: string; scores: Record<
 
 // ── Comparative Judge Prompt ──────────────────────────────────────────────
 
-function buildComparativePrompt(opts: {
+export function buildComparativePrompt(opts: {
   manifest: ArenaManifest
   verdicts: { participantId: string; verdict: unknown }[]
 }): string {
@@ -102,7 +102,7 @@ score: 1=poor, 3=acceptable, 5=excellent.
 Use the submit_scores tool to return your structured evaluation.`
 }
 
-function toScoreMatrix(
+export function toScoreMatrix(
   manifest: ArenaManifest,
   scores: { participant_id: string; criterion: string; weight: number; score: number; rationale: string }[]
 ): typeof ScoreCell._output[] {
@@ -119,7 +119,7 @@ interface NormalizedScoreCell {
   rationale: string
 }
 
-function normalizeComparativeOutput(parsed: Record<string, unknown>): Record<string, unknown> {
+export function normalizeComparativeOutput(parsed: Record<string, unknown>): Record<string, unknown> {
   const out = { ...parsed }
 
   // Detect pivot-table format: { participant: { criterion: { score, rationale } } }
