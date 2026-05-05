@@ -25,6 +25,9 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
 [tool.skills.lythoskill-coach]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-coach"
 
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→fix→regression-test"
