@@ -1,3 +1,6 @@
+import { writeFileSync, unlinkSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import type { AgentAdapter, AgentRunResult, ToolDefinition } from './types'
 import { readCheckpoints } from '../bdd-runner'
 
@@ -7,7 +10,8 @@ export interface SpawnCommand {
   cmd: string
   args: string[]
   cwd: string
-  stdin: string                     // unused (prompt is positional arg), kept for backward compat
+  stdin: string                     // prompt text (written to temp file for shell redirection)
+  promptFile: string                // temp file path for shell stdin redirection
   env: Record<string, string>
   timeoutMs: number
 }
@@ -36,10 +40,10 @@ export function buildCleanEnv(extra?: Record<string, string>): Record<string, st
 /**
  * Build the claude -p command specification. Pure — no spawn, no IO.
  *
- * Key design decisions (per report.md analysis, 2026-05-06):
- * - --output-format json → structured output, no TUI escape sequences
- * - --prompt-file <path> → avoids Bun stdin pipe bug on ARM64 (§2.1.1)
- * - env cleaned by caller → avoid nested-session detection (§2.2)
+ * Uses shell stdin redirection (sh -c "claude -p ... < promptfile") to avoid:
+ * - Bun ARM64 stdin pipe flush bug (§2.1.1)
+ * - Command-line length limits on long arena task prompts
+ * Prompt is written to a temp file, then fed via shell redirect.
  */
 export function buildClaudeCommand(opts: {
   brief: string
@@ -49,18 +53,25 @@ export function buildClaudeCommand(opts: {
   allowedTools?: string
   disallowedTools?: string
 }): SpawnCommand {
+  const promptFile = join(tmpdir(), `claude-prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`)
+
+  const cliFlags = [
+    '-p',
+    '--output-format', 'json',
+    '--permission-mode', 'bypassPermissions',
+    '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
+    '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
+  ].join(' ')
+
+  // Shell redirect: claude reads prompt from file via stdin, bypasses Bun's stdin handling
+  const shellCmd = `claude ${cliFlags} < ${promptFile}`
+
   return {
-    cmd: 'claude',
-    args: [
-      '-p',
-      '--output-format', 'json',
-      '--permission-mode', 'bypassPermissions',
-      '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
-      '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
-      opts.brief,  // prompt as positional argument (avoids Bun stdin pipe bug)
-    ],
+    cmd: 'sh',
+    args: ['-c', shellCmd],
     cwd: opts.cwd,
-    stdin: '',  // unused: prompt is positional arg, not stdin pipe
+    stdin: opts.brief,
+    promptFile,
     env: buildCleanEnv(opts.env),
     timeoutMs: opts.timeoutMs ?? 60000,
   }
@@ -104,11 +115,14 @@ const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 2000
 
 async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
+  // Write prompt to temp file for shell stdin redirection (< promptfile)
+  writeFileSync(cmd.promptFile, cmd.stdin || '', 'utf-8')
+
   const start = Date.now()
 
   const proc = Bun.spawn([cmd.cmd, ...cmd.args], {
     cwd: cmd.cwd,
-    stdin: 'ignore',  // prompt is positional arg
+    stdin: 'ignore',  // prompt comes from shell redirect
     stdout: 'pipe',
     stderr: 'pipe',
     env: cmd.env,
@@ -123,6 +137,9 @@ async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
   const rawStdout = await new Response(proc.stdout).text()
   const stderr = await new Response(proc.stderr).text()
   const code = proc.exitCode ?? 1
+
+  // Clean up prompt file
+  try { unlinkSync(cmd.promptFile) } catch {}
 
   // Parse JSON output from --output-format json
   let stdout = rawStdout

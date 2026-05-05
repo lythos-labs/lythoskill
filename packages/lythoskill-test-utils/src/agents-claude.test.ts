@@ -29,24 +29,27 @@ describe('runCli with injectable spawn', () => {
 })
 
 describe('buildClaudeCommand', () => {
-  test('produces correct CLI: claude -p --permission-mode bypassPermissions --allowedTools ...', () => {
+  test('produces shell command with redirect: claude -p --output-format json ... < promptfile', () => {
     const cmd = buildClaudeCommand({ brief: 'say ok', cwd: '/tmp' })
-    expect(cmd.cmd).toBe('claude')
-    expect(cmd.args).toContain('-p')
-    expect(cmd.args).toContain('--output-format')
-    expect(cmd.args).toContain('json')
-    expect(cmd.args).toContain('say ok')  // prompt is positional arg
-    expect(cmd.args).toContain('--permission-mode')
-    expect(cmd.args).toContain('bypassPermissions')
-    expect(cmd.args).toContain('--allowedTools')
-    expect(cmd.args).toContain('--disallowedTools')
+    expect(cmd.cmd).toBe('sh')
+    expect(cmd.args[0]).toBe('-c')
+    const shellCmd = cmd.args[1]
+    expect(shellCmd).toContain('claude')
+    expect(shellCmd).toContain('-p')
+    expect(shellCmd).toContain('--output-format')
+    expect(shellCmd).toContain('json')
+    expect(shellCmd).toContain('--permission-mode')
+    expect(shellCmd).toContain('bypassPermissions')
+    expect(shellCmd).toContain('--allowedTools')
+    expect(shellCmd).toContain('--disallowedTools')
+    expect(shellCmd).toContain('<')  // shell stdin redirect
+    expect(cmd.promptFile).toContain('claude-prompt-')
     expect(cmd.cwd).toBe('/tmp')
   })
 
-  test('brief text is passed as positional argument (not stdin)', () => {
+  test('brief text is stored in stdin field (written to promptFile at spawn time)', () => {
     const cmd = buildClaudeCommand({ brief: 'write hello world', cwd: '/tmp' })
-    expect(cmd.args).toContain('write hello world')
-    expect(cmd.stdin).toBe('')
+    expect(cmd.stdin).toBe('write hello world')
   })
 
   test('env always includes FORCE_COLOR=0', () => {
@@ -80,11 +83,12 @@ describe('buildClaudeCommand', () => {
     expect(typeof cmd.stdin).toBe('string')  // empty string, prompt is positional arg
     expect(typeof cmd.env).toBe('object')
     expect(typeof cmd.timeoutMs).toBe('number')
-    // Verify key invariants
-    expect(cmd.args).toContain('-p')
-    expect(cmd.args).toContain('--permission-mode')
-    expect(cmd.args.join(' ')).toContain('WebSearch')
-    expect(cmd.args.join(' ')).toContain('WebFetch')
+    // Verify key invariants (flags inside shell command string)
+    const shellCmd = cmd.args[1]
+    expect(shellCmd).toContain('-p')
+    expect(shellCmd).toContain('--permission-mode')
+    expect(shellCmd).toContain('WebSearch')
+    expect(shellCmd).toContain('WebFetch')
     expect(Object.keys(cmd.env).length).toBeGreaterThanOrEqual(1) // at least FORCE_COLOR
   })
 })
