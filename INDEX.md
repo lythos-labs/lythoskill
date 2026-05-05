@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/5 23:16:00
+> 自动生成于 2026/5/6 00:27:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 117 | 进行中: 0, 待验收: 0, 已完成: 94 |
-| Epics | 19 | 活跃: 0, 已完成: 16, 悬置: 1, 已归档: 2 |
+| Tasks | 124 | 进行中: 0, 待验收: 0, 已完成: 95 |
+| Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
 | ADRs | 41 | 已接受: 31 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
 
 ### 已完成
 
@@ -50,11 +50,17 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (9)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
 - [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
+- [ ] **TASK-20260506001644285**: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
+- [ ] **TASK-20260506001644316**: T3: Research and prototype AgentSdkAdapter — spawn() via @anthropic-ai/claude-agent-sdk query()
+- [ ] **TASK-20260506001644356**: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
+- [ ] **TASK-20260506001644390**: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
+- [ ] **TASK-20260506001644423**: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
+- [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 
 ### 进行中 (0)
 
@@ -64,7 +70,7 @@ _无_
 
 _无_
 
-### 已完成 (94)
+### 已完成 (95)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -160,6 +166,7 @@ _无_
 - ✅ ~~TASK-20260505230249992~~: T4: Clean up JudgeVerdict — remove scores field, keep criteria as binary pass/fail
 - ✅ ~~TASK-20260505230250040~~: T5: Update per-cell judge + arena runner for cleaned JudgeVerdict
 - ✅ ~~TASK-20260505230250079~~: T6: Add ArenaRunContext (git_ref, arena_toml, judge_model, runs_per_side) to ComparativeReport
+- ✅ ~~TASK-20260506001644250~~: T1: Fix buildClaudeCommand — clean CLAUDE_CODE_* env, prompt via file (not stdin), --output-format json, retry wrapper
 
 ### 悬置 (0)
 
