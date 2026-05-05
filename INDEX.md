@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/5 18:50:44
+> 自动生成于 2026/5/5 22:27:20
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 104 | 进行中: 0, 待验收: 0, 已完成: 82 |
-| Epics | 17 | 活跃: 1, 已完成: 13, 悬置: 1, 已归档: 2 |
-| ADRs | 39 | 已接受: 29 |
+| Tasks | 111 | 进行中: 0, 待验收: 0, 已完成: 88 |
+| Epics | 18 | 活跃: 0, 已完成: 15, 悬置: 1, 已归档: 2 |
+| ADRs | 40 | 已接受: 30 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260505184748292**: Curator refresh plan/execute — cold pool update queue with TODO file
+_无_
 
 ### 已完成
 
@@ -33,6 +33,8 @@
 - ✅ **EPIC-20260504231931835**: Extract intent/plan/execution from deck refresh + prune: pure plan generation + injectable workdir/coldPool/deckPath
 - ✅ **EPIC-20260504235551635**: Extract pure functions from test-utils low-coverage modules (bdd-runner, agents/claude): plan/execute separation for CLI helpers
 - ✅ **EPIC-20260505015029961**: Curator intent/plan/execute extraction + curator add (cold pool download, no install)
+- ✅ **EPIC-20260505184748292**: Curator refresh plan/execute — cold pool update queue with TODO file
+- ✅ **EPIC-20260505221500188**: Standardize test file organization — co-located unit tests, separate BDD runners
 
 ### 悬置
 
@@ -47,10 +49,11 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (3)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
+- [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
 
 ### 进行中 (0)
 
@@ -60,7 +63,7 @@ _无_
 
 _无_
 
-### 已完成 (82)
+### 已完成 (88)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -144,6 +147,12 @@ _无_
 - ✅ ~~TASK-20260505184757091~~: T1: buildRefreshPlan pure function + RefreshPlan/RefreshItem types in curator-core.ts
 - ✅ ~~TASK-20260505184757915~~: T2: refresh-plan + refresh-execute CLI commands in cli.ts
 - ✅ ~~TASK-20260505184800031~~: T3: unit tests for buildRefreshPlan + CLI BDD for refresh commands
+- ✅ ~~TASK-20260505221507624~~: Move test-utils unit tests from test/ to src/ (co-locate)
+- ✅ ~~TASK-20260505221510607~~: Rename bdd-runner.agent.test.ts to test/scenarios/bdd-runner.agent.md
+- ✅ ~~TASK-20260505221513429~~: Write TESTING.md — formalize test conventions for the monorepo
+- ✅ ~~TASK-20260505221520790~~: Write ADR-20260505221432740 — record rationale for co-location decision
+- ✅ ~~TASK-20260505221523973~~: Update CI workflow + test-report.ts paths for new test file locations
+- ✅ ~~TASK-20260505221527112~~: Update AGENTS.md to reference TESTING.md test conventions
 
 ### 悬置 (0)
 
@@ -214,6 +223,7 @@ _无_
 - 🤔 **ADR-20260504135256566** (01-proposed): cortex init ships trailer-driven hooks as the jira-simulation deliverable
 - ✅ **ADR-20260504172913972** (02-accepted): Agent BDD budget governance — time/token/retry limits as first-class constraints
 - ✅ **ADR-20260504200632939** (02-accepted): Structured judge schema — Zod-first with function-calling enforcement
+- ✅ **ADR-20260505221432740** (02-accepted): Standardize test file co-location across monorepo packages
 
 ---
 
