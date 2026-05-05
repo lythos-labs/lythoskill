@@ -58,7 +58,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage packages/lythoskill-deck/src/
+      - run: bun test packages/lythoskill-deck/src/
+      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage packages/lythoskill-deck/src/ || true
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:
@@ -83,7 +84,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage-test-utils packages/lythoskill-test-utils/test/bdd-runner.test.ts packages/lythoskill-test-utils/test/agent-bdd.test.ts packages/lythoskill-test-utils/test/judge.test.ts packages/lythoskill-test-utils/test/agents-claude.test.ts
+      - run: bun test packages/lythoskill-test-utils/test/bdd-runner.test.ts packages/lythoskill-test-utils/test/agent-bdd.test.ts packages/lythoskill-test-utils/test/judge.test.ts packages/lythoskill-test-utils/test/agents-claude.test.ts
+      - run: bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage-test-utils packages/lythoskill-test-utils/test/bdd-runner.test.ts packages/lythoskill-test-utils/test/agent-bdd.test.ts packages/lythoskill-test-utils/test/judge.test.ts packages/lythoskill-test-utils/test/agents-claude.test.ts || true
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:

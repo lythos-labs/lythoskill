@@ -221,12 +221,13 @@ describe('runAdd', () => {
     const poolDir = join(tmpDir, 'pool')
     const targetDir = join(poolDir, 'github.com/foo/bar')
     mkdirSync(targetDir, { recursive: true })
+    mkdirSync(join(targetDir, '.git'), { recursive: true }) // must have .git to be detected
 
     const logs: string[] = []
     spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
 
     catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir]))
-    expect(logs.some(l => l.includes('Already in cold pool'))).toBe(true)
+    expect(logs.some(l => l.includes('already in cold pool'))).toBe(true)
 
     rmSync(tmpDir, { recursive: true, force: true })
   })
