@@ -16,28 +16,28 @@ As your skill ecosystem grows (GitHub trending, marketplace downloads, agent rec
 ```bash
 bun add -d @lythos/skill-curator
 # or use directly
-bunx @lythos/skill-curator@0.9.17 <command>
+bunx @lythos/skill-curator@0.9.18 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Index your cold pool
-bunx @lythos/skill-curator@0.9.17 ~/.agents/skill-repos
+bunx @lythos/skill-curator@0.9.18 ~/.agents/skill-repos
 
 # Add a skill (with decision record)
-bunx @lythos/skill-curator@0.9.17 add github.com/foo/bar-skill \
+bunx @lythos/skill-curator@0.9.18 add github.com/foo/bar-skill \
   --pool ~/.agents/skill-repos \
   --reason "LobeHub trending, claims web scraping"
 
 # Fork an existing skill
-bunx @lythos/skill-curator@0.9.17 add github.com/you/better-scraper \
+bunx @lythos/skill-curator@0.9.18 add github.com/you/better-scraper \
   --pool ~/.agents/skill-repos \
   --forked-from github.com/foo/bar-skill \
   --reason "fork: fixed PDF extraction bug"
 
 # Query the catalog
-bunx @lythos/skill-curator@0.9.17 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
+bunx @lythos/skill-curator@0.9.18 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
 ```
 
 ## Commands
@@ -96,13 +96,14 @@ The agent-visible **Skill** layer documentation is here:
 MIT
 
 <!-- test-stats -->
-![pass](https://img.shields.io/badge/45_pass-0_fail-brightgreen) ![coverage](https://img.shields.io/badge/coverage-58%25-red)
+![pass](https://img.shields.io/badge/60_pass-0_fail-brightgreen) ![coverage](https://img.shields.io/badge/coverage-64%25-red)
 
 ```
 File | % Funcs | % Lines | Uncovered Line #s
 | --- | --- | --- |
-All files | 65.00 | 58.08 |
- src/cli.ts | 30.00 | 16.91 | 41-43,47-54,132-207,213-231,239-260,264-288,294-317,321-359,365-380,386-408,412-445,449-540,553-641,655-658,702-703,714-715,717-738,740-750
- src/curator-core.ts | 100.00 | 99.25 | 
+All files | 69.44 | 63.61 |
+ src/cli.ts | 25.00 | 14.14 | 42-44,48-55,133-208,214-232,240-261,265-289,295-318,322-360,366-381,387-409,413-446,450-541,554-642,656-659,663-716,722,726-754,758-807,856-857,868-869,871-903,905-921
+ src/curator-core.ts | 100.00 | 98.24 | 201-202
+ src/feed-adapters.ts | 83.33 | 78.46 | 61-66,99-106
 ```
 <!-- /test-stats -->

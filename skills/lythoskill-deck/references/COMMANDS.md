@@ -18,4 +18,5 @@ Options:
   --no-backup      Skip tar backup when removing non-symlink entries
   --alias <name>   Explicit alias for the skill (default: basename of path)
   --type <type>    Target section: innate | tool | combo (default: tool)
+  --dry-run        Show plan without executing (add, prune)
   --yes            Skip interactive confirmation (for prune)
