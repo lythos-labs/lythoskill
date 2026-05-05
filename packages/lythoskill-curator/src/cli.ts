@@ -10,7 +10,7 @@
  * not by this CLI. See ADR-20260424000744041.
  */
 
-import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync, appendFileSync, rmSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
@@ -824,27 +824,64 @@ export function runAdd(argv: string[]) {
 
   const plan = buildAddPlan(locator, poolPath)
 
-  if (existsSync(plan.targetPath)) {
-    console.log(`✅ Already in cold pool: ${plan.relPath}`)
-    console.log(`   Location: ${plan.targetPath}`)
+  // ── Checkpoint 1: Repo already in cold pool? ──────────────────────
+  const repoExists = existsSync(join(plan.repoPath, '.git'))
+  const repoDirExists = existsSync(plan.repoPath)
+
+  if (repoExists) {
+    // Repo is cloned. If this is a monorepo skill, verify its path.
+    if (plan.skillPath) {
+      if (existsSync(join(plan.repoPath, plan.skillPath, 'SKILL.md'))) {
+        console.log(`✅ Skill already in cold pool: ${plan.relPath}`)
+        console.log(`   Repo: ${plan.repoRoot}`)
+        console.log(`   Skill: ${plan.skillPath}`)
+        return
+      }
+      console.error(`❌ Repo exists (${plan.repoRoot}) but skill path not found:`)
+      console.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+      console.error(`\n💡 The repo structure may have changed. Check the actual layout:`)
+      console.error(`   ls ${plan.repoPath}/`)
+      process.exit(1)
+    }
+    console.log(`✅ Repo already in cold pool: ${plan.relPath}`)
     return
   }
 
+  if (repoDirExists) {
+    // Directory exists but no .git — partial clone residue. Clean up.
+    console.log(`🧹 Cleaning up partial clone: ${plan.repoPath}`)
+    rmSync(plan.repoPath, { recursive: true, force: true })
+  }
+
+  // ── Checkpoint 2: Clone repo root (not skill-specific URL) ────────
   const reason = getFlag(argv, '--reason') || ''
   const forkedFrom = getFlag(argv, '--forked-from')
   const fullClone = argv.includes('--full')
   const branch = getFlag(argv, '--branch')
-
-  // Shallow clone by default (fast, low risk). --full for complete history.
   const depthFlag = fullClone ? '' : '--depth 1'
   const branchFlag = branch ? `--branch ${branch}` : ''
-  console.log(`📦 Cloning: https://${plan.relPath}${fullClone ? '' : ' (--depth 1)'}`)
+
+  const cloneUrl = `https://${plan.repoRoot}.git`
+  console.log(`📦 Cloning: ${cloneUrl}${fullClone ? '' : ' (--depth 1)'}`)
+  if (plan.skillPath) {
+    console.log(`   Skill path inside repo: ${plan.skillPath}`)
+  }
+
   try {
-    mkdirSync(plan.targetPath, { recursive: true })
-    execSync(`git clone ${depthFlag} ${branchFlag} https://${plan.relPath}.git "${plan.targetPath}"`.replace(/\s+/g, ' ').trim(), {
+    mkdirSync(plan.repoPath, { recursive: true })
+    execSync(`git clone ${depthFlag} ${branchFlag} ${cloneUrl} "${plan.repoPath}"`.replace(/\s+/g, ' ').trim(), {
       stdio: 'inherit',
       timeout: 60000,
     })
+
+    // Verify the skill path exists within the cloned repo
+    if (plan.skillPath && !existsSync(join(plan.repoPath, plan.skillPath, 'SKILL.md'))) {
+      console.error(`❌ Cloned ${plan.repoRoot} but skill path not found:`)
+      console.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+      console.error(`\n💡 Check the actual repo structure:`)
+      try { console.error(execSync(`ls "${plan.repoPath}"`, { encoding: 'utf-8', timeout: 5000 }).trim()) } catch {}
+      process.exit(1)
+    }
 
     // Persist decision record
     const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
@@ -857,6 +894,12 @@ export function runAdd(argv: string[]) {
     console.log(`\n💡 To use this skill in a project, run:`)
     console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
   } catch (e: any) {
+    // Clean up empty directory left by failed clone
+    try {
+      if (existsSync(plan.repoPath) && readdirSync(plan.repoPath).length === 0) {
+        rmSync(plan.repoPath, { recursive: true, force: true })
+      }
+    } catch {}
     console.error(`❌ Failed to clone: ${e.message}`)
     process.exit(1)
   }

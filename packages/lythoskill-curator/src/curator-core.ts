@@ -150,23 +150,55 @@ export function buildCuratorPlan(poolPath: string): CuratorPlan {
 
 // ── Add plan (pure: compute target path from source) ────────────────────────
 
+export interface ParsedLocator {
+  host: string
+  owner: string
+  repo: string
+  skillPath: string | null     // subdirectory within repo (null = repo root)
+  repoRoot: string             // "github.com/owner/repo"
+  repoPath: string             // absolute cold pool path to repo root
+}
+
+/** Parse a locator into repo root + optional skill sub-path.
+ *  "github.com/owner/repo" → repoRoot, no skillPath
+ *  "github.com/owner/repo/skills/engineering/tdd" → repoRoot + skillPath */
+export function parseLocator(locator: string, coldPool: string): ParsedLocator | null {
+  const clean = locator.replace(/^https?:\/\//, '').replace(/\.git$/, '')
+  const parts = clean.split('/')
+  if (parts.length < 3) return null
+
+  const host = parts[0]
+  const owner = parts[1]
+  const repo = parts[2]
+  const repoRoot = `${host}/${owner}/${repo}`
+  const repoPath = join(coldPool, repoRoot)
+  const skillPath = parts.length > 3 ? parts.slice(3).join('/') : null
+
+  return { host, owner, repo, skillPath, repoRoot, repoPath }
+}
+
 export interface AddPlan {
-  feed: Feed                 // the feed that discovered this skill
-  targetPath: string         // where in cold pool
-  relPath: string            // relative to cold pool root
+  feed: Feed
+  repoRoot: string            // "github.com/owner/repo" — git clone target
+  repoPath: string            // absolute cold pool path to repo root
+  targetPath: string          // full path to skill dir (may be deeper than repoRoot)
+  relPath: string             // relative to cold pool root
+  skillPath: string | null    // sub-path within repo, null if skill is at repo root
 }
 
 /** Compute where a skill should land in the cold pool. Pure — no git clone. */
 export function buildAddPlan(locator: string, coldPool: string, feedType?: string): AddPlan {
   const type = feedType || (/^github\.com/.test(locator) ? 'github' : 'url') as Feed['type']
   const clean = locator.replace(/^https?:\/\//, '').replace(/\.git$/, '')
-  const targetPath = join(coldPool, clean)
-  const relPath = clean
+  const parsed = parseLocator(locator, coldPool)
 
   return {
     feed: { type, locator, label: locator },
-    targetPath,
-    relPath,
+    repoRoot: parsed?.repoRoot || clean,
+    repoPath: parsed?.repoPath || join(coldPool, clean),
+    targetPath: join(coldPool, clean),
+    relPath: clean,
+    skillPath: parsed?.skillPath || null,
   }
 }
 
