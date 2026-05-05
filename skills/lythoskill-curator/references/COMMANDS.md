@@ -11,6 +11,7 @@ Commands:
                          --reason <text>      Why this skill was added
                          --forked-from <loc>  Original skill if this is a fork
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
+  discover              Discover skills from feeds (cold pool, GitHub, LobeHub)
   audit                 Run predefined checks and output an audit report
   restore               Roll back to the most recent backup
 
