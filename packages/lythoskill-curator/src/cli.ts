@@ -15,7 +15,7 @@ import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable } from './curator-core'
-import { createColdPoolFeedAdapter, createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
+import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
 
 // ── Types ────────────────────────────────────────────────────
@@ -664,11 +664,12 @@ async function runDiscover(argv: string[]) {
   const poolIdx = argv.indexOf('--pool')
   const poolPath = poolIdx >= 0 ? argv[poolIdx + 1] : `${process.env.HOME}/.agents/skill-repos`
 
-  // Build adapters: cold pool (always) + optional remote feeds
+  // Cold pool is NOT a feed — it's the destination. discover only queries
+  // remote feeds for NEW candidates. Use `curator scan` to see what's local.
   const feedArgIdx = argv.indexOf('--feeds')
-  const feedNames = feedArgIdx >= 0 ? (argv[feedArgIdx + 1] || '').split(',').map(s => s.trim()) : ['github']
+  const feedNames = feedArgIdx >= 0 ? (argv[feedArgIdx + 1] || '').split(',').map(s => s.trim()) : ['github', 'agentskill']
 
-  const adapters = [createColdPoolFeedAdapter(poolPath)]
+  const adapters: ReturnType<typeof createGitHubSearchAdapter>[] = []
   for (const name of feedNames) {
     if (name === 'github') adapters.push(createGitHubSearchAdapter())
     if (name === 'lobehub') adapters.push(createLobeHubAdapter())
@@ -713,6 +714,7 @@ async function runDiscover(argv: string[]) {
   }
 
   console.log(`\n💡 To add a skill: bunx @lythos/skill-curator add <locator> --pool ${poolPath} --reason "<why>"`)
+  console.log(`\n📋 To see what's already in cold pool: bunx @lythos/skill-curator ${poolPath}`)
 }
 
 export function runAdd(argv: string[]) {
@@ -783,7 +785,7 @@ if (import.meta.main) {
     console.log('                         --reason <text>      Why this skill was added')
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
-    console.log('  discover              Discover skills from feeds (cold pool, GitHub, LobeHub)')
+    console.log('  discover              Discover new skills from remote feeds (GitHub, LobeHub, agentskill)')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
