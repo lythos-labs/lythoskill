@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/6 00:27:32
+> 自动生成于 2026/5/6 02:12:14
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 124 | 进行中: 0, 待验收: 0, 已完成: 95 |
 | Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
-| ADRs | 41 | 已接受: 31 |
+| ADRs | 42 | 已接受: 32 |
 
 ---
 
@@ -239,6 +239,7 @@ _无_
 - ✅ **ADR-20260504200632939** (02-accepted): Structured judge schema — Zod-first with function-calling enforcement
 - ✅ **ADR-20260505221432740** (02-accepted): Standardize test file co-location across monorepo packages
 - ✅ **ADR-20260505225159725** (02-accepted): Criterion definition schema — from bare strings to structured scoring dimensions with rubrics
+- ✅ **ADR-20260506021112492** (02-accepted): Kimi CLI as default AgentAdapter — Player abstraction validation and CWD isolation for deny-by-default
 
 ---
 
