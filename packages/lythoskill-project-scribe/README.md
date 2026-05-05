@@ -15,7 +15,7 @@ Add to your `skill-deck.toml`:
 skills = ["lythoskill-project-scribe"]
 ```
 
-Then run `bunx @lythos/skill-deck link` to activate.
+Then run `bunx @lythos/skill-deck@0.9.14 link` to activate.
 
 ## Skill Documentation
 

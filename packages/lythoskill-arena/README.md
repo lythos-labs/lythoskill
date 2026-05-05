@@ -18,26 +18,26 @@
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena <command>
+bunx @lythos/skill-arena@0.9.14 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Mode 1: Compare two skills on the same task
-bunx @lythos/skill-arena \
+bunx @lythos/skill-arena@0.9.14 \
   --task "Generate auth flow diagram" \
   --skills "design-doc-mermaid,mermaid-tools" \
   --criteria "syntax,context,token"
 
 # Mode 2: Compare full deck configurations
-bunx @lythos/skill-arena \
+bunx @lythos/skill-arena@0.9.14 \
   --task "Generate auth flow diagram" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
 
 # Visualize results
-bunx @lythos/skill-arena viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.14 viz tmp/arena-<id>/
 ```
 
 ## Commands
@@ -46,16 +46,16 @@ bunx @lythos/skill-arena viz tmp/arena-<id>/
 
 ```bash
 # Print execution plan without running
-bunx @lythos/skill-arena run --config arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.14 run --config arena.toml --dry-run
 
 # Execute with per-side runs_per_side and statistical aggregation
-bunx @lythos/skill-arena run --config arena.toml
+bunx @lythos/skill-arena@0.9.14 run --config arena.toml
 ```
 
 ### CLI-flag mode (backward compat)
 
 ```
-bunx @lythos/skill-arena run \
+bunx @lythos/skill-arena@0.9.14 run \
   --task ./TASK-arena.md \
   --players ./players/claude.toml \
   --decks ./decks/run-01.toml,./decks/run-02.toml \
@@ -65,13 +65,13 @@ bunx @lythos/skill-arena run \
 ### Scaffold mode (legacy, manual execution)
 
 ```
-bunx @lythos/skill-arena scaffold --task "..." --skills a,b
+bunx @lythos/skill-arena@0.9.14 scaffold --task "..." --skills a,b
 ```
 
 ### Viz
 
 ```bash
-bunx @lythos/skill-arena viz runs/arena-<id>/
+bunx @lythos/skill-arena@0.9.14 viz runs/arena-<id>/
 ```
 
 ## Skill Documentation
@@ -85,7 +85,7 @@ The agent-visible **Skill** layer documentation is here:
 Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
-Starter (this package) → npm publish → bunx @lythos/skill-arena ...
+Starter (this package) → npm publish → bunx @lythos/skill-arena@0.9.14 ...
 Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
 Output  (skills/<name>/)             → git commit → agent-visible skill
 ```

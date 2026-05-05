@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { join, basename } from 'node:path'
 import { findProjectRoot } from './util.js'
 import { align } from './align.js'
 import { build } from './build.js'
@@ -58,7 +58,8 @@ export async function bump(opts: BumpOpts) {
     console.log('   Real run would:')
     console.log(`   1. Set root package.json version → ${newVersion}`)
     console.log('   2. Run align(fix=true) — syncs packages/*/package.json (skips {{...}} templates)')
-    console.log('   3. Run build for each lythoskill-* package — re-renders skills/*/SKILL.md')
+    console.log('   3. Update bunx @version in packages/*/README.md')
+    console.log('   4. Run build for each lythoskill-* package — re-renders skills/*/SKILL.md')
     return
   }
 
@@ -71,7 +72,32 @@ export async function bump(opts: BumpOpts) {
   console.log('\n🔧 Aligning workspace packages (align --fix)...')
   await align(true)
 
-  // Step 3: rebuild skill outputs
+  // Step 3: update bunx @version in all markdown docs (npm-facing + repo root)
+  console.log('\n📝 Updating bunx @version in docs...')
+  const oldPattern = new RegExp(`(@lythos/[a-z-]+)@${currentVersion.replace(/\./g, '\\.')}`, 'g')
+  let docUpdated = 0
+  const docPaths: string[] = []
+  // packages/*/README.md
+  for (const name of pkgDirs) {
+    const p = join(packagesDir, name, 'README.md')
+    if (existsSync(p)) docPaths.push(p)
+  }
+  // root docs
+  for (const f of ['README.md', 'README.zh.md', 'AGENTS.md']) {
+    const p = join(root, f)
+    if (existsSync(p)) docPaths.push(p)
+  }
+  for (const docPath of docPaths) {
+    let content = readFileSync(docPath, 'utf-8')
+    const newContent = content.replace(oldPattern, `$1@${newVersion}`)
+    if (newContent !== content) {
+      writeFileSync(docPath, newContent)
+      docUpdated++
+    }
+  }
+  if (docUpdated > 0) console.log(`   Updated ${docUpdated} doc(s): @${currentVersion} → @${newVersion}`)
+
+  // Step 4: rebuild skill outputs
   console.log('\n🛠️  Rebuilding skills (build --all equivalent)...')
   let built = 0
   for (const name of pkgDirs) {
