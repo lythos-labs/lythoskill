@@ -56,9 +56,28 @@ Commands:
   probe                 Check status consistency (dir vs Status History)
 ```
 
+## Jira Without Jira
+
+Cortex is **Jira, but file-driven and git-native**. No server, no API, no sign-up. Just markdown files in your repo.
+
+| Jira | Cortex |
+|------|--------|
+| Issue tracker | `cortex/tasks/` — timestamp-ID .md files |
+| Epic | `cortex/epics/` — requirements + lane discipline |
+| Decision log | `cortex/adr/` — architecture decisions with status |
+| Confluence | `cortex/wiki/` — patterns, lessons, FAQ |
+| JQL / dashboard | `bunx @lythos/project-cortex list` / `stats` / `probe` |
+| Workflow automation | `.husky/post-commit` → `dispatch-trailers` |
+| Sprint board | `cortex/INDEX.md` — auto-generated overview |
+
+The key difference: Jira stores state in a database. Cortex stores state in **your git repo**. This means:
+- Branch, merge, and diff your project governance
+- CI/CD can read task status without API calls
+- No vendor lock-in — your data is literally `cat`-able
+
 ## Commit-Driven Governance
 
-Cortex state transitions are triggered by **git trailers** in commit messages. The `.husky/post-commit` hook parses trailers and auto-creates follow-up commits with the state changes.
+State transitions are triggered by **git trailers** in commit messages. `cortex init` installs a `.husky/post-commit` hook that calls `dispatch-trailers` — parses trailers and auto-creates follow-up commits.
 
 ```bash
 # Close a task from any status
@@ -77,7 +96,16 @@ git commit -m "feat(cortex): finish dual-lane implementation
 Epic: EPIC-20260503010218940 done"
 ```
 
-The `.husky/pre-commit` hook prints a soft reminder when you have in-progress tasks, so you don't forget to add a trailer.
+The `.husky/pre-commit` hook prints a soft reminder when you have in-progress tasks.
+
+### Hook Setup
+
+```bash
+# One-time: set up husky, then cortex init installs the hook
+bunx husky init
+bunx @lythos/project-cortex init
+# → copies post-commit template to .husky/
+```
 
 ## Epic Dual-Track
 

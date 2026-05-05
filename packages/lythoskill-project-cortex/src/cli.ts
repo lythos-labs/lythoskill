@@ -78,7 +78,7 @@ function hasFlag(args: string[], name: string): boolean {
   return args.indexOf(name) !== -1;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const config = loadConfig();
   const command = process.argv[2];
   const arg = process.argv[3];
