@@ -32,6 +32,12 @@ similarity but misses causal chains: "project-cortex produces structured ADRs;
 repomix-handoff consumes them — they form a producer-consumer pair." Only LLM reasoning
 discovers these patterns. So curator stays pure data, agent does inference.
 
+**Need recommendation or ranking?** Curator doesn't do that. Use Arena
+(`lythoskill-arena`) for controlled-variable comparison and scoring.
+Curator provides the data (catalog + decision history); Arena provides
+the evaluation (L3 buyer's review). Together they feed the agent's
+recommendation workflow: scan → query → arena → recommend → deck.
+
 ## Commands
 ### Index the cold pool
 ```bash
@@ -151,3 +157,4 @@ Read these **only when the specific topic arises**:
 | Build a recommendation from the index (agent workflow) | [references/recommendation-workflow.md](./references/recommendation-workflow.md) |
 | Identify skill combination patterns (pipeline, modality…) | [references/combination-patterns.md](./references/combination-patterns.md) |
 | Understand curator's design principles | [references/design-principles.md](./references/design-principles.md) |
+| See the full data flow and trust model | [references/architecture.md](./references/architecture.md) |
