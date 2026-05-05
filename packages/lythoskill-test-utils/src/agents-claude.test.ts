@@ -35,7 +35,7 @@ describe('buildClaudeCommand', () => {
     expect(cmd.args).toContain('-p')
     expect(cmd.args).toContain('--output-format')
     expect(cmd.args).toContain('json')
-    expect(cmd.args).toContain('--prompt-file')
+    expect(cmd.args).toContain('say ok')  // prompt is positional arg
     expect(cmd.args).toContain('--permission-mode')
     expect(cmd.args).toContain('bypassPermissions')
     expect(cmd.args).toContain('--allowedTools')
@@ -43,9 +43,10 @@ describe('buildClaudeCommand', () => {
     expect(cmd.cwd).toBe('/tmp')
   })
 
-  test('stdin contains the brief text', () => {
+  test('brief text is passed as positional argument (not stdin)', () => {
     const cmd = buildClaudeCommand({ brief: 'write hello world', cwd: '/tmp' })
-    expect(cmd.stdin).toBe('write hello world')
+    expect(cmd.args).toContain('write hello world')
+    expect(cmd.stdin).toBe('')
   })
 
   test('env always includes FORCE_COLOR=0', () => {
@@ -76,7 +77,7 @@ describe('buildClaudeCommand', () => {
     expect(Array.isArray(cmd.args)).toBe(true)
     expect(cmd.args.every(a => typeof a === 'string')).toBe(true)
     expect(typeof cmd.cwd).toBe('string')
-    expect(typeof cmd.stdin).toBe('string')
+    expect(typeof cmd.stdin).toBe('string')  // empty string, prompt is positional arg
     expect(typeof cmd.env).toBe('object')
     expect(typeof cmd.timeoutMs).toBe('number')
     // Verify key invariants

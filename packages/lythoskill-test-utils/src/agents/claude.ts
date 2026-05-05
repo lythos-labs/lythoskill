@@ -1,6 +1,3 @@
-import { writeFileSync, unlinkSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import type { AgentAdapter, AgentRunResult, ToolDefinition } from './types'
 import { readCheckpoints } from '../bdd-runner'
 
@@ -10,8 +7,7 @@ export interface SpawnCommand {
   cmd: string
   args: string[]
   cwd: string
-  stdin: string                     // prompt text (written to promptFile before spawn)
-  promptFile: string                // path to temp file, passed to --prompt-file
+  stdin: string                     // unused (prompt is positional arg), kept for backward compat
   env: Record<string, string>
   timeoutMs: number
 }
@@ -53,23 +49,18 @@ export function buildClaudeCommand(opts: {
   allowedTools?: string
   disallowedTools?: string
 }): SpawnCommand {
-  // Prompt goes to a temp file, passed via --prompt-file.
-  // This avoids the Bun ARM64 stdin pipe flush bug.
-  const promptFile = join(tmpdir(), `claude-prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`)
-
   return {
     cmd: 'claude',
     args: [
       '-p',
       '--output-format', 'json',
-      '--prompt-file', promptFile,
       '--permission-mode', 'bypassPermissions',
       '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
       '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
+      opts.brief,  // prompt as positional argument (avoids Bun stdin pipe bug)
     ],
     cwd: opts.cwd,
-    stdin: opts.brief,
-    promptFile,
+    stdin: '',  // unused: prompt is positional arg, not stdin pipe
     env: buildCleanEnv(opts.env),
     timeoutMs: opts.timeoutMs ?? 60000,
   }
@@ -113,14 +104,11 @@ const MAX_RETRIES = 3
 const RETRY_DELAY_MS = 2000
 
 async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
-  // Write prompt to temp file (avoids stdin pipe bug)
-  writeFileSync(cmd.promptFile, cmd.stdin || '', 'utf-8')
-
   const start = Date.now()
 
   const proc = Bun.spawn([cmd.cmd, ...cmd.args], {
     cwd: cmd.cwd,
-    stdin: 'ignore',  // no stdin pipe — prompt comes from --prompt-file
+    stdin: 'ignore',  // prompt is positional arg
     stdout: 'pipe',
     stderr: 'pipe',
     env: cmd.env,
@@ -135,9 +123,6 @@ async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
   const rawStdout = await new Response(proc.stdout).text()
   const stderr = await new Response(proc.stderr).text()
   const code = proc.exitCode ?? 1
-
-  // Clean up prompt file
-  try { unlinkSync(cmd.promptFile) } catch {}
 
   // Parse JSON output from --output-format json
   let stdout = rawStdout
