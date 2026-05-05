@@ -106,14 +106,15 @@ async function agentRun(args: string[]) {
   console.log(`🤖 agent-run: ${player} × ${deckPath}`)
   console.log(`📋 task: ${taskPath}`)
 
+  let agentWorkdir = ''
   const result = await runAgentScenario({
     scenarioPath: taskPath,
     agent,
     async setupWorkdir(_scenario, workdir) {
+      agentWorkdir = workdir
       mkdirSync(workdir, { recursive: true })
       writeFileSync(join(workdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
 
-      // Link skills via bunx (works both locally and when installed via bunx)
       const linkProc = Bun.spawn(
         ['bunx', '@lythos/skill-deck', 'link'],
         { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
@@ -123,13 +124,22 @@ async function agentRun(args: string[]) {
   })
 
   // Copy agent output to outDir
-  const agentOut = join(outDir, 'agent-stdout.txt')
-  writeFileSync(agentOut, result.agentResult.stdout, 'utf-8')
-  if (result.agentResult.stderr) {
-    writeFileSync(join(outDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
-  }
-  if (result.verdict) {
-    writeFileSync(join(outDir, 'judge-verdict.json'), JSON.stringify(result.verdict, null, 2) + '\n', 'utf-8')
+  writeFileSync(join(outDir, 'agent-stdout.txt'), result.agentResult.stdout, 'utf-8')
+  if (result.agentResult.stderr) writeFileSync(join(outDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
+  if (result.verdict) writeFileSync(join(outDir, 'judge-verdict.json'), JSON.stringify(result.verdict, null, 2) + '\n', 'utf-8')
+
+  // Copy agent-produced files from workdir (output.md, output.docx, etc.)
+  if (agentWorkdir) {
+    const { readdirSync, statSync, copyFileSync } = await import('node:fs')
+    try {
+      for (const entry of readdirSync(agentWorkdir)) {
+        if (entry.startsWith('.') || entry === 'skill-deck.toml' || entry === 'skill-deck.lock') continue
+        const src = join(agentWorkdir, entry)
+        try {
+          if (statSync(src).isFile()) copyFileSync(src, join(outDir, entry))
+        } catch {}
+      }
+    } catch {}
   }
 
   console.log(`\n✅ Agent complete (${result.agentResult.durationMs}ms)`)
