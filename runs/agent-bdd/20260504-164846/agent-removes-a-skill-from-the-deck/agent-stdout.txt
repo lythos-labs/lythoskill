@@ -1,9 +1,0 @@
-Done. Here's a summary of what was executed:
-
-1. **Created cold-pool skills** — `cold-pool/skill-a/SKILL.md` and `cold-pool/skill-b/SKILL.md` with minimal content.
-2. **Ran `./deck link`** — Synced the working set; both skills reported as not found (expected, since `skill-deck.toml` references GitHub paths).
-3. **Ran `./deck remove skill-a`** — Removed `skill-a` from `[tool.skills]` in `skill-deck.toml` (symlink was not present, so only the TOML entry was removed).
-4. **Ran `./deck link` again** — Only `skill-b` remains in the TOML; `skill-a` is gone.
-5. **Wrote checkpoint** — `_checkpoints/remove.jsonl` contains the exact JSON shape you specified.
-
-Final `skill-deck.toml` now only contains `skill-b`. The checkpoint is written.

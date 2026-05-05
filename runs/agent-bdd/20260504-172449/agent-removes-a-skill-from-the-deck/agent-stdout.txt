@@ -1,6 +1,0 @@
-All steps completed successfully. Final state verified:
-
-- `skill-deck.toml` no longer has `[tool.skills.skill-a]`, still has `[tool.skills.skill-b]`
-- `.claude/skills/skill-a` removed; `.claude/skills/skill-b` remains a symlink
-- `cold-pool/skill-a` untouched (cold pool intact)
-- Checkpoint written to `_checkpoints/remove.jsonl` with the exact requested shape

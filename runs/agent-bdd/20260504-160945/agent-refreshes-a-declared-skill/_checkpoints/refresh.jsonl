@@ -1,1 +1,0 @@
-{"step":"deck.refresh","tool":"Bash","args":["./deck refresh skill-a"],"final_state":{"result":"skipped-localhost"}}

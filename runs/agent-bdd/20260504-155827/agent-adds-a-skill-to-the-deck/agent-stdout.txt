@@ -1,6 +1,0 @@
-All four tasks are complete:
-
-1. **Created** `cold-pool/skill-b/SKILL.md` with `# skill-b\n`
-2. **Updated** `skill-deck.toml` with the new `[tool.skills.skill-b]` section
-3. **Ran** `./deck link` — it executed successfully and generated `skill-deck.lock` (skills reported as "not found" because `skill-a` is a fake GitHub path and `skill-b` is localhost; this is expected in this test fixture)
-4. **Wrote** `_checkpoints/add.jsonl` with the exact requested shape

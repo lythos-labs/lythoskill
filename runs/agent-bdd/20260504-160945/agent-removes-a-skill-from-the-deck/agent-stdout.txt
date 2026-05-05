@@ -1,9 +1,0 @@
-Done. Here's what happened:
-
-1. **Created cold pool skills** at `cold-pool/github.com/foo/bar/skill-a/SKILL.md` and `cold-pool/github.com/foo/bar/skill-b/SKILL.md` (nested structure matching the FQ paths in `skill-deck.toml`).
-2. **`./deck link`** — Linked both skills into `.claude/skills/` and generated `skill-deck.lock`.
-3. **`./deck remove skill-a`** — Removed the `skill-a` entry from `skill-deck.toml` and deleted its working-set symlink.
-4. **`./deck link` again** — Synced the working set; only `skill-b` remains linked.
-5. **Checkpoint written** to `_checkpoints/remove.jsonl` with the exact shape requested.
-
-Final state: `skill-deck.toml` declares only `skill-b`, `.claude/skills/` contains only the `skill-b` symlink, and the cold pool still has both `skill-a` and `skill-b` intact.

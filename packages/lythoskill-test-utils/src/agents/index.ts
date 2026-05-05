@@ -3,8 +3,8 @@ import { claudeAdapter } from './claude'
 import { kimiAdapter } from './kimi'
 
 const registry: Record<string, AgentAdapter> = {
+  kimi: kimiAdapter,    // default: headless --print works reliably (eager tools, no deadlock)
   claude: claudeAdapter,
-  kimi: kimiAdapter,
 }
 
 export function useAgent(name: string): AgentAdapter {

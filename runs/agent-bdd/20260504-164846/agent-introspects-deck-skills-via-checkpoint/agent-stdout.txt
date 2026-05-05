@@ -1,1 +1,0 @@
-Checkpoint written. Counted 2 skills under `[tool.skills]`: `skill-a` and `skill-b`.

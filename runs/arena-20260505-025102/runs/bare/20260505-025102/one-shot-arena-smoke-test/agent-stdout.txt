@@ -1,1 +1,0 @@
-Done. Created `greet.ts`, `greet.test.ts`, ran `bun test` — **2 pass, 0 fail** — and wrote the summary to `result.txt`.

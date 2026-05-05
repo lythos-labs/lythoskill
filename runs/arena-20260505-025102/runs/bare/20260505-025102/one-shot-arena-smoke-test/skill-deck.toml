@@ -1,5 +1,0 @@
-# Bare deck — no tool skills, base Claude only
-[deck]
-max_cards = 5
-working_set = ".claude/skills"
-cold_pool = "~/.agents/skill-repos"

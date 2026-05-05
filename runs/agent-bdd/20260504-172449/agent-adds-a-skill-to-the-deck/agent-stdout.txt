@@ -1,6 +1,0 @@
-All four steps complete:
-
-1. **`cold-pool/skill-b/SKILL.md`** created with `# skill-b\n`.
-2. **`skill-deck.toml`** updated with `[tool.skills.skill-b]` → `path = "localhost/skill-b"`.
-3. **`./deck link`** ran successfully — `.claude/skills/skill-b` is now a symlink to `cold-pool/skill-b`. (Note: `skill-a` was reported missing since `github.com/foo/bar/skill-a` is not installed, but that's unrelated to this scenario.)
-4. **`_checkpoints/add.jsonl`** written with the exact shape requested.

@@ -126,28 +126,17 @@ export async function runLLMJudge(
     try {
       let parsed: unknown
 
-      if (judge.invokeTool) {
-        // Function-calling path: adapter enforces schema at LLM level
-        parsed = await judge.invokeTool({
-          tool: JUDGE_TOOL,
-          prompt,
-          cwd: workdir,
-          timeoutMs: 60000,
-        })
-        raw = JSON.stringify(parsed)
-      } else {
-        // Fallback: prompt + JSON parse + Zod validate
-        const judgeResult = await judge.spawn({
-          cwd: workdir,
-          brief: `${prompt}\n\nUse the submit_verdict tool.`,
-          timeoutMs: 60000,
-        })
-        raw = judgeResult.stdout
-
-        const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-        const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
-        parsed = JSON.parse(jsonStr)
-      }
+      // Always use spawn — agent writes verdict JSON to stdout.
+      // invokeTool was a Claude-specific function-calling path, now deprecated.
+      const judgeResult = await judge.spawn({
+        cwd: workdir,
+        brief: `${prompt}\n\nReturn ONLY a JSON object with fields: verdict (PASS|FAIL|ERROR), reason (string), criteria (array of {name, passed, note}).`,
+        timeoutMs: 60000,
+      })
+      raw = judgeResult.stdout
+      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+      const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+      parsed = JSON.parse(jsonStr)
 
       // Normalize LLM output before Zod validation
       const normalized = normalizeVerdictJson(parsed as Record<string, unknown>)

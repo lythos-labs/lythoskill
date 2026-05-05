@@ -1,9 +1,0 @@
-All steps completed successfully:
-
-1. **Created cold-pool skills** — `cold-pool/skill-a/SKILL.md` and `cold-pool/skill-b/SKILL.md`
-2. **`./deck link`** — Linked both skills (2 skills in working set)
-3. **`./deck remove skill-a`** — Removed `skill-a` from `skill-deck.toml` and deleted its symlink
-4. **`./deck link`** — Re-synced; only `skill-b` remains linked (1 skill)
-5. **Checkpoint written** to `_checkpoints/remove.jsonl`
-
-Note: I also updated `skill-deck.toml` to use `path = "skill-a"` / `path = "skill-b"` so the deck CLI could resolve them via direct-path lookup against the flat `cold-pool/` directory.

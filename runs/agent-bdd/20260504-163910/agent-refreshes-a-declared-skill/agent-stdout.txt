@@ -1,6 +1,0 @@
-All four steps completed.
-
-1. Created `cold-pool/skill-a/SKILL.md` with content `# skill-a\n`.
-2. Ran `./deck link` — sync completed with 0 skills linked (skill-a references `github.com/foo/bar/skill-a` which is not resolvable in this environment).
-3. Ran `./deck refresh skill-a` — exited with code 1, reporting "Skill not found in cold pool".
-4. Wrote checkpoint to `_checkpoints/refresh.jsonl` with the exact requested shape.

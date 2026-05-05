@@ -1,1 +1,0 @@
-{"step":"deck.prune","tool":"Bash","args":["./deck prune --yes"],"final_state":{"pruned":1,"retained":["skill-a"]}}

@@ -1,8 +1,0 @@
-{
-  "verdict": null,
-  "reason": null,
-  "criteria": null,
-  "raw_output": "API Error: The server had an error while processing your request\n",
-  "error": "Failed to parse judge output as JSON: JSON Parse error: Unexpected identifier \"API\"",
-  "timestamp": "2026-05-04T09:32:59.112Z"
-}

@@ -1,1 +1,0 @@
-Counted 2 skills (`skill-a`, `skill-b`) under `[tool.skills]` and wrote the checkpoint to `_checkpoints/introspection.jsonl`.

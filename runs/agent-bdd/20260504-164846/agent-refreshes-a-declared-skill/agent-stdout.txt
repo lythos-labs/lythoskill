@@ -1,6 +1,0 @@
-Done. Here's what happened:
-
-1. **Created** `cold-pool/skill-a/SKILL.md` with content `# skill-a\n`.
-2. **Ran `./deck link`** — it reported `❌ Skill not found: github.com/foo/bar/skill-a` and synced 0 skills, because `skill-deck.toml` declares the skill at a GitHub path that doesn't exist in the cold pool.
-3. **Ran `./deck refresh skill-a`** — it exited with code 1 and reported `❌ skill-a / Skill not found in cold pool`.
-4. **Wrote checkpoint** to `_checkpoints/refresh.jsonl` with the exact shape you specified.

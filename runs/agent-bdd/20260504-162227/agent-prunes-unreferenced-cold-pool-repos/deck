@@ -1,2 +1,0 @@
-#!/usr/bin/env sh
-exec bun "../../../../packages/lythoskill-deck/src/cli.ts" "$@"

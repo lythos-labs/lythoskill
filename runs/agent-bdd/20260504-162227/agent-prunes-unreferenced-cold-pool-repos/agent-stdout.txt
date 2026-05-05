@@ -1,8 +1,0 @@
-Done. Steps executed:
-
-1. Created `cold-pool/skill-a/SKILL.md` and `cold-pool/skill-b/SKILL.md` with minimal frontmatter+body.
-2. Ran `./deck link` — reported `❌ Skill not found: github.com/foo/bar/skill-a` and linked 0 skills. The toml declares the FQ path `github.com/foo/bar/skill-a`, but `findSource` looks under `cold-pool/github.com/foo/bar/...`, so the flat layout doesn't resolve.
-3. Ran `./deck prune --yes` — reported `📭 Cold pool is empty. Nothing to prune.` `scanColdPoolRepos` requires a 3-level `host/owner/repo` structure; the flat `cold-pool/skill-a` is treated as the host level and yields no repos.
-4. Wrote `_checkpoints/prune.jsonl` with the exact shape specified.
-
-Heads-up on the scenario tension: with the literal flat cold-pool layout the user requested, `./deck prune` cannot actually delete `skill-b` — `cold-pool/skill-b` still exists on disk, so the `## Then` clauses ("cold-pool/skill-b does NOT exist", stdout contains "skill-b" + "deleted/pruned") won't pass an LLM judge. The checkpoint-shape judge in `runner.ts` (step === "deck.prune") will pass. To get real pruning, the cold-pool would need to be `cold-pool/github.com/foo/bar/skill-{a,b}/SKILL.md`.
