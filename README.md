@@ -522,6 +522,17 @@ Run everything locally:
 bun run test:all     # 12 cortex + 21 deck scenarios
 ```
 
+### Test Reports (per-commit)
+
+Capture full test output + coverage to a timestamped file:
+
+```bash
+bun scripts/test-report.ts
+# → test-results/<YYYYMMDD-HHMMSS>-<short-hash>.txt
+```
+
+CI uploads the report as an artifact on every push. [Latest →](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
+
 Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
 
 ---
