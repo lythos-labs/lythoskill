@@ -1,4 +1,3 @@
-import { zodToJsonSchema } from 'zod-to-json-schema'
 import { ComparativeReport, ScoreCell, ParetoEntry } from '@lythos/test-utils/schema'
 import type { AgentAdapter } from '@lythos/test-utils/agents'
 import type { ArenaManifest } from '@lythos/test-utils/schema'
@@ -101,12 +100,6 @@ weight: 0.25 for each cell (1 / num_criteria).
 score: 1=poor, 3=acceptable, 5=excellent.
 
 Use the submit_scores tool to return your structured evaluation.`
-}
-
-const SCORE_TOOL = {
-  name: 'submit_scores',
-  description: 'Submit per-participant scores for each criterion with rationales',
-  input_schema: zodToJsonSchema(ComparativeReport.pick({ score_matrix: true, key_findings: true, recommendations: true })) as Record<string, unknown>,
 }
 
 function toScoreMatrix(
@@ -240,21 +233,14 @@ export async function runComparativeJudge(opts: {
 
   for (let attempt = 0; attempt <= 2; attempt++) {
     try {
-      if (judge.invokeTool) {
-        parsed = await judge.invokeTool({
-          tool: SCORE_TOOL,
-          prompt,
-          cwd: workdir,
-          timeoutMs: 120000,
-        })
-        raw = JSON.stringify(parsed)
-      } else {
-        const result = await judge.spawn({ cwd: workdir, brief: prompt, timeoutMs: 120000 })
-        raw = result.stdout
-        const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-        const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
-        parsed = JSON.parse(jsonStr)
-      }
+      // Use spawn directly — prompt already includes Zod schema, invokeTool's
+      // redundant JSON Schema wrapper confuses the LLM.
+      const result = await judge.spawn({ cwd: workdir, brief: prompt, timeoutMs: 120000 })
+      raw = result.stdout
+      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+      const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+      if (!jsonStr) throw new Error('Empty LLM output')
+      parsed = JSON.parse(jsonStr)
 
       // Normalize LLM output before Zod validation
       const normalizedParsed = normalizeComparativeOutput(parsed as Record<string, unknown>)
@@ -297,15 +283,37 @@ export async function runComparativeJudge(opts: {
     }
   }
 
-  // All retries exhausted: return fallback report
-  const empty: typeof ComparativeReport._output = {
+  // All retries exhausted: build fallback report from per-cell verdicts
+  const scoreMatrix: typeof ScoreCell._output[] = []
+  for (const v of verdicts) {
+    const jv = v.verdict as Record<string, unknown> | null
+    const criteria = (Array.isArray(jv?.criteria) ? jv!.criteria : []) as { name?: string; passed?: boolean; note?: string }[]
+    for (const c of criteria) {
+      scoreMatrix.push(ScoreCell.parse({
+        participant_id: v.participantId,
+        criterion: c.name ?? 'unknown',
+        weight: 1 / (manifest.criteria.length || 1),
+        score: c.passed ? 5 : 1,
+        rationale: c.note ?? (c.passed ? 'PASS' : 'FAIL'),
+      }))
+    }
+  }
+  const participantScores = manifest.participants.map(p => {
+    const pScores: Record<string, number> = {}
+    for (const cell of scoreMatrix) {
+      if (cell.participant_id === p.id) pScores[cell.criterion] = cell.score
+    }
+    return { participant_id: p.id, scores: pScores }
+  })
+  const pareto = computePareto(participantScores)
+
+  return ComparativeReport.parse({
     arena_id: manifest.id,
     generated_at: new Date().toISOString(),
-    score_matrix: [],
+    score_matrix: scoreMatrix,
     weighted_totals: {},
-    pareto: [],
-    key_findings: [`Comparative judge failed after 3 attempts: ${lastError}`],
+    pareto,
+    key_findings: [`Comparative judge unavailable; scores derived from per-cell verdicts. Last error: ${lastError}`],
     recommendations: [],
-  }
-  return empty
+  })
 }

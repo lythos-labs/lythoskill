@@ -105,10 +105,19 @@ export async function runArenaFromToml(opts: {
       const result = await runAgentScenario({
         scenarioPath: taskAbs,
         agent,
-        setupWorkdir(_scenario: AgentScenario, workdir: string) {
+        async setupWorkdir(_scenario: AgentScenario, workdir: string) {
           mkdirSync(workdir, { recursive: true })
           const deckContent = readFileSync(cell.deck, 'utf-8')
           writeFileSync(join(workdir, 'skill-deck.toml'), deckContent)
+
+          // Link skills into .claude/skills/ so claude -p can discover them
+          const deckCli = resolve(import.meta.dir, '..', '..', 'lythoskill-deck', 'src', 'cli.ts')
+          const linkProc = Bun.spawn(['bun', 'run', deckCli, 'link'], {
+            cwd: workdir,
+            env: { ...process.env, HOME: process.env.HOME },
+          })
+          await linkProc.exited
+          log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
         },
         baseDir: join(artifactsDir, 'runs', cell.side),
       })
