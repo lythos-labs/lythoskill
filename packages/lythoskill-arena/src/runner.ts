@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { tmpdir } from 'node:os'
 import { runAgentScenario, type AgentScenario } from '@lythos/test-utils/agent-bdd'
 import { useAgent } from '@lythos/test-utils/agents'
 import { ArenaManifest, Player } from '@lythos/test-utils/schema'
@@ -119,7 +120,8 @@ export async function runArenaFromToml(opts: {
           await linkProc.exited
           log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
         },
-        baseDir: join(artifactsDir, 'runs', cell.side),
+        // Isolated CWD: /tmp/arena-<id>/<side>/ — no parent .claude/skills/ to walk up into
+        baseDir: join(tmpdir(), `arena-${arenaId}`, cell.side),
       })
 
       const v = (result.verdict ?? {
