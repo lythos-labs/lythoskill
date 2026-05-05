@@ -170,6 +170,68 @@ export function buildAddPlan(locator: string, coldPool: string, feedType?: strin
   }
 }
 
+// ── Refresh plan (pure: find git repos → check upstream behind count) ──────
+
+export interface RefreshItem {
+  locator: string
+  path: string
+  behind: number          // commits behind upstream (-1 = unknown/no remote)
+  status: 'pending' | 'done' | 'skip'
+}
+
+export interface RefreshPlan {
+  items: RefreshItem[]
+  generatedAt: string
+}
+
+/** Build a refresh plan by scanning the cold pool for git repos.
+ *  Pure — does not fetch or pull. Caller handles network IO. */
+export function buildRefreshPlan(poolPath: string): RefreshPlan {
+  const dirs = findSkillDirs(poolPath)
+  const seen = new Set<string>()
+  const items: RefreshItem[] = []
+
+  for (const dir of dirs) {
+    // Find the git root for this skill dir (walk up to cold pool root)
+    let gitRoot = dir
+    while (gitRoot.length > poolPath.length) {
+      if (existsSync(join(gitRoot, '.git'))) break
+      const parent = gitRoot.split('/').slice(0, -1).join('/')
+      if (parent === gitRoot || parent.length < poolPath.length) {
+        gitRoot = ''
+        break
+      }
+      gitRoot = parent
+    }
+
+    if (!gitRoot || seen.has(gitRoot)) continue
+    seen.add(gitRoot)
+
+    const locator = gitRoot.slice(poolPath.length + 1)
+    items.push({ locator, path: gitRoot, behind: -1, status: 'pending' })
+  }
+
+  return { items, generatedAt: new Date().toISOString() }
+}
+
+/** Format refresh plan as a markdown checklist (the TODO file). */
+export function formatRefreshPlan(plan: RefreshPlan): string {
+  const lines = [
+    `# Curator Refresh Plan — ${plan.generatedAt.slice(0, 10)}`,
+    '',
+    `Generated: ${plan.generatedAt}`,
+    `Total: ${plan.items.length} repo(s)`,
+    '',
+  ]
+  for (const item of plan.items) {
+    const check = item.status === 'done' ? 'x' : ' '
+    const behind = item.behind >= 0 ? ` (${item.behind} behind)` : item.behind === -1 ? ' (unchecked)' : ''
+    lines.push(`- [${check}] ${item.locator}${behind}`)
+  }
+  lines.push('', '<!-- refresh-plan -->')
+  return lines.join('\n')
+}
+
 // ── Skill addition record (cold pool decision history) ─────────────────────
 // Appended to {pool}/.lythoskill-curator/additions.jsonl on each curator add.
 // Tracks the full lifecycle: added → evaluated (arena) → forked → activated.

@@ -14,7 +14,7 @@ import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSy
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
-import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable } from './curator-core'
+import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
 
@@ -717,6 +717,97 @@ async function runDiscover(argv: string[]) {
   console.log(`\n📋 To see what's already in cold pool: bunx @lythos/skill-curator ${poolPath}`)
 }
 
+// ── refresh-plan + refresh-execute ────────────────────────────────
+
+function getPoolPath(argv: string[]): string {
+  return getFlag(argv, '--pool') || `${process.env.HOME}/.agents/skill-repos`
+}
+
+async function runRefreshPlan(argv: string[]) {
+  const poolPath = getPoolPath(argv)
+  const metaDir = join(poolPath, '.lythoskill-curator')
+  mkdirSync(metaDir, { recursive: true })
+
+  console.log(`🔍 Scanning cold pool for git repos...`)
+  const plan = buildRefreshPlan(poolPath)
+  console.log(`   Found ${plan.items.length} repo(s) in ${poolPath}`)
+
+  // Fetch remotes to check behind counts (network IO)
+  console.log(`\n📡 Checking upstreams...`)
+  for (const item of plan.items) {
+    try {
+      execSync(`git -C "${item.path}" remote update 2>/dev/null`, { timeout: 15000 })
+      const count = execSync(`git -C "${item.path}" rev-list HEAD...@{upstream} --count 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim()
+      item.behind = count ? parseInt(count) : 0
+    } catch {
+      item.behind = -1 // unreachable
+    }
+    const status = item.behind > 0 ? `${item.behind} behind` : item.behind === 0 ? 'up to date' : 'unreachable'
+    console.log(`   ${item.locator}: ${status}`)
+  }
+
+  // Write TODO file
+  const planPath = join(metaDir, 'refresh-plan.md')
+  writeFileSync(planPath, formatRefreshPlan(plan))
+  const pending = plan.items.filter(i => i.behind > 0).length
+  console.log(`\n📋 Refresh plan written: ${planPath}`)
+  console.log(`   ${pending} repo(s) behind, ${plan.items.length - pending} up to date`)
+  console.log(`\n💡 To execute: bunx @lythos/skill-curator refresh-execute --pool ${poolPath}`)
+}
+
+async function runRefreshExecute(argv: string[]) {
+  const poolPath = getPoolPath(argv)
+  const planPath = join(poolPath, '.lythoskill-curator', 'refresh-plan.md')
+
+  if (!existsSync(planPath)) {
+    console.error('No refresh plan found. Run refresh-plan first.')
+    process.exit(1)
+  }
+
+  const plan = buildRefreshPlan(poolPath)
+
+  // Check behind counts again (may have changed)
+  for (const item of plan.items) {
+    try {
+      const count = execSync(`git -C "${item.path}" rev-list HEAD...@{upstream} --count 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim()
+      item.behind = count ? parseInt(count) : 0
+    } catch {
+      item.behind = -1
+    }
+  }
+
+  const pending = plan.items.filter(i => i.behind > 0)
+  if (pending.length === 0) {
+    console.log('✅ All repos up to date.')
+    return
+  }
+
+  console.log(`📦 ${pending.length} repo(s) to pull:\n`)
+  for (const item of pending) {
+    console.log(`   ${item.locator} (${item.behind} behind)`)
+  }
+  console.log()
+
+  // Pull one by one, marking progress
+  for (const item of pending) {
+    try {
+      console.log(`🔄 Pulling: ${item.locator}...`)
+      execSync(`git -C "${item.path}" pull --ff-only`, { stdio: 'inherit', timeout: 30000 })
+      item.status = 'done'
+      console.log(`   ✅ Done\n`)
+    } catch {
+      item.status = 'skip'
+      console.log(`   ⚠️  Failed, skipped\n`)
+    }
+    // Rewrite plan after each pull (progress marker)
+    writeFileSync(planPath, formatRefreshPlan(plan))
+  }
+
+  const done = plan.items.filter(i => i.status === 'done').length
+  const skipped = plan.items.filter(i => i.status === 'skip').length
+  console.log(`🎉 Refresh complete: ${done} pulled, ${skipped} skipped`)
+}
+
 export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
@@ -780,6 +871,8 @@ if (import.meta.main) {
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
     console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
+    console.log('       lythoskill-curator refresh-plan [--pool <dir>]')
+    console.log('       lythoskill-curator refresh-execute [--pool <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
     console.log('       lythoskill-curator audit [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
@@ -791,8 +884,14 @@ if (import.meta.main) {
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('                         --branch <name>      Specific branch (default: default branch)')
     console.log('                         --full              Full clone (default: --depth 1 shallow)')
+    console.log('  refresh-plan          Scan cold pool for git repos, check upstreams, write TODO')
+    console.log('                         --pool <dir>        Cold pool path')
+    console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
+    console.log('                         --pool <dir>        Cold pool path')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
     console.log('  discover              Discover new skills from remote feeds (GitHub, LobeHub, agentskill)')
+    console.log('  refresh-plan          Scan cold pool git repos, check upstreams, write TODO file')
+    console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
@@ -803,7 +902,11 @@ if (import.meta.main) {
     process.exit(0)
   }
 
-  if (cmd === 'discover') {
+  if (cmd === 'refresh-plan') {
+    runRefreshPlan(args.slice(1))
+  } else if (cmd === 'refresh-execute') {
+    runRefreshExecute(args.slice(1))
+  } else if (cmd === 'discover') {
     runDiscover(args.slice(1))
   } else if (cmd === 'add') {
     runAdd(args.slice(1))

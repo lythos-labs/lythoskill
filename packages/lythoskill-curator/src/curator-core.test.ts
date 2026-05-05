@@ -6,6 +6,7 @@ import {
   inferSource, extractQuotedPhrases, parseFrontmatter,
   buildSkillMeta, formatMarkdownTable, buildCuratorPlan, buildAddPlan,
   buildAdditionRecord, scanColdPool,
+  buildRefreshPlan, formatRefreshPlan,
 } from './curator-core'
 
 describe('inferSource', () => {
@@ -226,5 +227,63 @@ describe('scanColdPool', () => {
     mkdirSync(join(poolDir, 'not-a-skill'), { recursive: true })
     mkdirSync(join(poolDir, 'also-not'), { recursive: true })
     expect(scanColdPool(poolDir)).toEqual([])
+  })
+})
+
+describe('buildRefreshPlan', () => {
+  let tmpDir: string
+  beforeAll(() => { tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-')) })
+  afterAll(() => { rmSync(tmpDir, { recursive: true, force: true }) })
+
+  test('returns empty plan for empty pool', () => {
+    const emptyDir = join(tmpDir, 'empty')
+    mkdirSync(emptyDir, { recursive: true })
+    const plan = buildRefreshPlan(emptyDir)
+    expect(plan.items).toEqual([])
+  })
+
+  test('finds git repos with SKILL.md in cold pool', () => {
+    const poolDir = join(tmpDir, 'pool')
+    const skillDir = join(poolDir, 'github.com/owner/repo')
+    mkdirSync(skillDir, { recursive: true })
+    // Create a fake git repo
+    mkdirSync(join(poolDir, 'github.com/owner/repo', '.git'), { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: test\n---\n# Body\n')
+
+    const plan = buildRefreshPlan(poolDir)
+    expect(plan.items).toHaveLength(1)
+    expect(plan.items[0].locator).toBe('github.com/owner/repo')
+    expect(plan.items[0].status).toBe('pending')
+    expect(plan.items[0].behind).toBe(-1) // not yet checked
+  })
+
+  test('deduplicates repos with multiple skills', () => {
+    const poolDir = join(tmpDir, 'multi-skill')
+    const repoDir = join(poolDir, 'github.com/owner/repo')
+    mkdirSync(join(repoDir, 'skills', 'skill-a'), { recursive: true })
+    mkdirSync(join(repoDir, 'skills', 'skill-b'), { recursive: true })
+    mkdirSync(join(repoDir, '.git'), { recursive: true })
+    writeFileSync(join(repoDir, 'skills', 'skill-a', 'SKILL.md'), '---\nname: a\n---\n# A\n')
+    writeFileSync(join(repoDir, 'skills', 'skill-b', 'SKILL.md'), '---\nname: b\n---\n# B\n')
+
+    const plan = buildRefreshPlan(poolDir)
+    expect(plan.items).toHaveLength(1) // same git repo
+  })
+})
+
+describe('formatRefreshPlan', () => {
+  test('formats plan as markdown checklist', () => {
+    const plan = {
+      items: [
+        { locator: 'github.com/foo/bar', path: '/tmp/pool/github.com/foo/bar', behind: 3, status: 'pending' as const },
+        { locator: 'github.com/baz/qux', path: '/tmp/pool/github.com/baz/qux', behind: 0, status: 'done' as const },
+      ],
+      generatedAt: '2026-05-05T00:00:00Z',
+    }
+    const md = formatRefreshPlan(plan)
+    expect(md).toContain('Curator Refresh Plan')
+    expect(md).toContain('- [ ] github.com/foo/bar (3 behind)')
+    expect(md).toContain('- [x] github.com/baz/qux')
+    expect(md).toContain('<!-- refresh-plan -->')
   })
 })
