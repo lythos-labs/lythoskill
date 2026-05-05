@@ -31,6 +31,7 @@ export function buildClaudeCommand(opts: {
     cmd: 'claude',
     args: [
       '-p',
+      '--output-format', 'text',
       '--permission-mode', 'bypassPermissions',
       '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
       '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,

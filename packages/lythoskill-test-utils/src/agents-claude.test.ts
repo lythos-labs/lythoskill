@@ -33,6 +33,8 @@ describe('buildClaudeCommand', () => {
     const cmd = buildClaudeCommand({ brief: 'say ok', cwd: '/tmp' })
     expect(cmd.cmd).toBe('claude')
     expect(cmd.args).toContain('-p')
+    expect(cmd.args).toContain('--output-format')
+    expect(cmd.args).toContain('text')
     expect(cmd.args).toContain('--permission-mode')
     expect(cmd.args).toContain('bypassPermissions')
     expect(cmd.args).toContain('--allowedTools')
