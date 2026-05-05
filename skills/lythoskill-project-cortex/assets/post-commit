@@ -1,0 +1,15 @@
+#!/bin/sh
+# post-commit — Trailer-driven cortex governance flow
+# Installed by: cortex init (ADR-20260504135256566)
+#
+# Parses Task:/ADR:/Epic:/Closes: trailers from the last commit message
+# and dispatches corresponding cortex CLI commands as a follow-up commit.
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+# The TypeScript dispatch logic lives in cortex's CLI.
+# Each dispatched command is printed as "🔁 cortex trailer dispatch: <verb> <id>"
+bunx @lythos/project-cortex dispatch-trailers
+
+# If you need to add project-specific post-commit steps (sync, notify, etc.),
+# append them below this line.

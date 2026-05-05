@@ -48,6 +48,8 @@ bunx @lythos/project-cortex@0.9.16 adr "Choose database"
 bunx @lythos/project-cortex@0.9.16 wiki "Your insight" --category pattern|faq|lesson
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex@0.9.16 init
+# Process commit trailers (used by post-commit hook)
+bunx @lythos/project-cortex@0.9.16 dispatch-trailers
 ```
 
 > **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID。
