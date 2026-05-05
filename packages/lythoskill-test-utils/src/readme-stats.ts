@@ -57,18 +57,28 @@ export function runAndParse(packageDir: string): TestStats | null {
   const fail = failMatch ? parseInt(failMatch[1]) : 0
   const total = totalMatch ? parseInt(totalMatch[1]) : 0
 
-  // Parse coverage table — extract from "File ... |" header to the closing "---" separator
+  // Parse coverage table — extract from "File ... |" header to the closing "---" separator.
+  // Compress wide terminal spacing for markdown readability.
   const lines = output.split('\n')
-  const tableLines: string[] = []
+  const rawLines: string[] = []
   let inTable = false
   for (const line of lines) {
     if (line.startsWith('File') && line.includes('| % Funcs')) { inTable = true }
     if (inTable) {
-      tableLines.push(line)
-      if (line.startsWith('---') && tableLines.length > 2) break // closing separator
+      if (line.startsWith('---') && rawLines.length > 1) break // closing separator — stop
+      rawLines.push(line)
     }
   }
-  const table = tableLines.join('\n')
+  // Normalize spacing, insert markdown table separator after header
+  const clean = rawLines
+    .filter(l => !/^-{3,}\|/.test(l)) // skip separator lines from terminal output
+    .map(l => l.replace(/\s{2,}/g, ' ').replace(/ \| /g, ' | '))
+  // Insert markdown separator after header (first line)
+  if (clean.length >= 1) {
+    const cols = clean[0].split('|').length - 1
+    clean.splice(1, 0, '|' + ' --- |'.repeat(cols))
+  }
+  const table = clean.join('\n')
 
   // Parse All files coverage row
   const allFilesMatch = output.match(/All files\s+\|\s+([\d.]+)\s+\|\s+([\d.]+)/)
