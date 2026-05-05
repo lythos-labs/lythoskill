@@ -32,7 +32,7 @@ playground/
 skill-deck.lock
 
 # Curator generated artifacts (cold pool index, regenerated at runtime)
-skills/.lythoskill-curator/
+.lythoskill-curator/
 
 # Temporary directories and files
 tmp/
