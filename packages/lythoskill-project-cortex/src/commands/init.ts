@@ -49,6 +49,25 @@ export function initWorkflow(config: WorkflowConfig): void {
     }
   }
 
+  // Install husky hooks (if husky is set up)
+  const huskyDir = '.husky'
+  if (existsSync(huskyDir)) {
+    const hookAssets = ['post-commit']
+    for (const hook of hookAssets) {
+      const dest = join(huskyDir, hook)
+      const src = join(ASSETS_DIR, hook)
+      if (existsSync(src) && !existsSync(dest)) {
+        copyFileSync(src, dest)
+        console.log(`🔗 ${hook} → ${dest}`)
+      }
+    }
+    console.log('\n💡 Hooks installed. The post-commit hook runs `bunx @lythos/project-cortex dispatch-trailers`')
+    console.log('   to auto-process trailers (Closes:/Task:/ADR:/Epic:) after each commit.')
+  } else {
+    console.log('\n💡 Tip: Set up husky to enable auto-trailer dispatch:')
+    console.log('   bunx husky init && echo "bunx @lythos/project-cortex dispatch-trailers" > .husky/post-commit')
+  }
+
   if (!existsSync(CONFIG_FILE)) {
     writeFileSync(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2));
     console.log(`\n📝 Created config: ${CONFIG_FILE}`);

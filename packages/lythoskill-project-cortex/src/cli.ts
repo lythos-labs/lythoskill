@@ -36,6 +36,7 @@ Commands:
   wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
   flow                  Show kanban CFD — count, avg age, WIP limits
+  dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 
 Task state machine:
   start <task-id>       Move task to in-progress
@@ -252,6 +253,18 @@ function main(): void {
       if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
       moveTask(arg, 'archived', config, { allowAny: true, note: 'Archived' });
       break;
+
+    case 'dispatch-trailers':
+      {
+        const { dispatchTrailers } = await import('./hooks/dispatch.js')
+        const { spawnSync } = await import('node:child_process')
+        const msg = spawnSync('git', ['log', '-1', '--format=%B', 'HEAD'], { encoding: 'utf-8' }).stdout || ''
+        const sha = spawnSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf-8' }).stdout?.trim() || ''
+        dispatchTrailers(msg, sha, {
+          cortexCli: ['bunx', '@lythos/project-cortex'],
+        })
+      }
+      break
 
     case '--help':
     case '-h':
