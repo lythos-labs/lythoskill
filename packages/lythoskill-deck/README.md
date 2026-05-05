@@ -157,6 +157,68 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 | `deck add` fails with 404 | Locator format wrong or repo doesn't exist | Format: `github.com/owner/repo/skill-name` (path to skill directory inside repo) |
 | `skill-deck.toml not found` | Running `link` outside project tree | Run from project root, or use `--deck ./path/to/skill-deck.toml` |
 
+## K8s-Style Reconciliation: Agent as Controller
+
+Deck follows Kubernetes' reconciliation model. The agent (Claude, Cursor, etc.) is the **controller manager** — it reads state, builds a plan, shows it to the user, then executes:
+
+```
+scan (observe state)  →  plan (compute diff)  →  confirm  →  execute  →  verify
+     ↑                                                              │
+     └──────────────────── reconciliation loop ─────────────────────┘
+```
+
+| K8s Concept | Deck Equivalent |
+|-------------|-----------------|
+| Desired state (YAML manifest) | `skill-deck.toml` |
+| Actual state (running pods) | Working set (`~/.claude/skills/`) |
+| Controller manager (reconcile loop) | Agent reads state → builds plan → user confirms |
+| `kubectl apply` | `deck link` |
+| Namespace (isolation) | Per-project deck file |
+| PersistentVolume | Cold pool (`~/.agents/skill-repos/`) |
+
+The loop doesn't run automatically (no daemon). The agent is the loop — it observes, plans, confirms, and executes on demand. This is K8s-style **declarative governance**: declare what you want, reconcile to match.
+
+## Multi-Agent POSSE Syndication
+
+Not "switching between agents" — **syndicating everywhere simultaneously**. Like IndieWeb's POSSE (Publish on your Own Site, Syndicate Elsewhere):
+
+```
+Cold Pool (~/.agents/skill-repos/)     ← canonical "own site"
+    ↓ deck link --workdir
+├── .claude/skills/                    ← syndicate to Claude Code
+├── .cursor/skills/                    ← syndicate to Cursor
+├── .codex/skills/                     ← syndicate to Codex
+└── .windsurf/skills/                  ← syndicate to Windsurf
+```
+
+One cold pool, one deck declaration, synced to every agent you use. Adding a new platform is updating a key-value registry — no code changes needed. See [multi-agent-posse-syndication](https://github.com/lythos-labs/lythoskill/blob/main/cortex/wiki/01-patterns/2026-05-05-multi-agent-posse-syndication.md).
+
+## Migration: For Existing Skill Users
+
+If you already have skills installed (in working set, globally, or mixed), deck respects your existing state:
+
+```
+1. SCAN    Agent surveys: what's in ~/.claude/skills/? What's global? What's mixed?
+           curator scan helps — indexes cold pool or existing working set.
+
+2. PLAN    Agent shows: "We found 12 skills. After migration:
+           - 2 → innate (deck infrastructure)
+           - 4 → tool section
+           - 3 → cold pool (already there, just link)
+           - 3 → backup only (unused, stale)
+           All 12 backed up to ~/.agents/lythos/backups/<date>.tar.gz"
+
+3. BACKUP  Always. `link` creates tar backups for non-symlink entries before removal.
+           Use `--no-backup` only if you're certain.
+
+4. EXECUTE deck link — creates symlinks, removes undeclared, leaves real files untouched.
+
+5. VERIFY  Agent checks: all declared skills resolve? Working set clean?
+           If unhappy: tar xf backup → rollback to pre-migration state.
+```
+
+**Key principle**: existing skill users aren't beginners. They have working setups. Migration is a conversation — scan, show the plan, confirm before acting. Backup is non-negotiable.
+
 ## Architecture: Intent / Plan / Execute
 
 Deck commands separate pure logic from IO:
