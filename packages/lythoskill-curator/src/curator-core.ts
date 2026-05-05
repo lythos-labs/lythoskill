@@ -244,6 +244,7 @@ export function buildSkillMeta(frontmatter: Record<string, unknown>, path: strin
   const name = str(frontmatter.name)
   const description = str(frontmatter.description)
   const type = (frontmatter.type as string) || 'standard'
+  const whenToUse = str(frontmatter.whenToUse ?? frontmatter.when_to_use)
 
   return {
     name,
@@ -252,9 +253,9 @@ export function buildSkillMeta(frontmatter: Record<string, unknown>, path: strin
     version: str(frontmatter.version) || 'unknown',
     source,
     author: str(frontmatter.author),
-    whenToUse: str(frontmatter.whenToUse),
+    whenToUse,
     allowedTools: arr(frontmatter['allowed-tools'] ?? frontmatter.allowedTools ?? []),
-    triggerPhrases: extractQuotedPhrases(description),
+    triggerPhrases: [...new Set([...extractQuotedPhrases(description), ...extractQuotedPhrases(whenToUse)])],
     niches: arr(frontmatter.niches ?? []),
     tags: arr(frontmatter.tags ?? []),
     userInvocable: frontmatter['user-invocable'] != null ? Boolean(frontmatter['user-invocable']) : null,

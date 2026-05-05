@@ -37,18 +37,6 @@ interface SkillMeta {
   deckSkillType: string | null; // combo | transient | fork | null
 }
 
-// ── Frontmatter Parser (fixed for multiline) ─────────────────
-
-function parseFrontmatter(text: string): { frontmatter: Record<string, any>; body: string } {
-  const match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
-  if (!match) return { frontmatter: {}, body: text };
-  try {
-    const frontmatter = YAML.parse(match[1]) || {};
-    return { frontmatter, body: match[2].trim() };
-  } catch {
-    return { frontmatter: {}, body: match[2].trim() };
-  }
-}
 
 function toString(val: any): string {
   if (typeof val === 'string') return val;
