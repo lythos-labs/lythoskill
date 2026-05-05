@@ -6,8 +6,6 @@ working_set = ".claude/skills"
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/tdd"
 
 [tool.skills.lythoskill-project-cortex]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
@@ -27,6 +25,6 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
 [tool.skills.lythoskill-coach]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-coach"
 
-[tool.skills.bdd-lythos]
-path = "localhost/bdd-lythos"
-role = "Fork: fuses BDD methodology + Gherkin production, Bun-native, lythoskill-adapted"
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→fix→regression-test"
