@@ -111,12 +111,11 @@ export async function runArenaFromToml(opts: {
           const deckContent = readFileSync(cell.deck, 'utf-8')
           writeFileSync(join(workdir, 'skill-deck.toml'), deckContent)
 
-          // Link skills into .claude/skills/ so claude -p can discover them
-          const deckCli = resolve(import.meta.dir, '..', '..', 'lythoskill-deck', 'src', 'cli.ts')
-          const linkProc = Bun.spawn(['bun', 'run', deckCli, 'link'], {
-            cwd: workdir,
-            env: { ...process.env, HOME: process.env.HOME },
-          })
+          // Link skills via bunx (works both locally and when installed via bunx)
+          const linkProc = Bun.spawn(
+            ['bunx', '@lythos/skill-deck', 'link'],
+            { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
+          )
           await linkProc.exited
           log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
         },

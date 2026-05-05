@@ -29,6 +29,7 @@ function printHelp(): void {
   console.log(`🎭 lythoskill-arena — Skill comparison runner
 
 Usage:
+  lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>]
   lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
   lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
@@ -53,6 +54,10 @@ Options:
   -p, --project <dir>    Project directory (default: .)
 
 Examples:
+  # Single agent run (simplest path)
+  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml
+  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml --player kimi --out ./output
+
   # Declarative mode (k8s-style)
   lythoskill-arena run --config ./arena.toml
   lythoskill-arena run --config ./arena.toml --dry-run
@@ -64,6 +69,74 @@ Examples:
   lythoskill-arena scaffold --task "Refactor auth module" --skills skill-a,skill-b
   lythoskill-arena viz runs/arena-20260504
 `)
+}
+
+// ── agent-run: single agent execution (simplest path) ────────────────────
+
+async function agentRun(args: string[]) {
+  const opts: Record<string, string | undefined> = {}
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--task' || args[i] === '-t') opts.task = args[++i]
+    else if (args[i] === '--deck' || args[i] === '-d') opts.deck = args[++i]
+    else if (args[i] === '--player' || args[i] === '-p') opts.player = args[++i]
+    else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
+  }
+
+  if (!opts.task || !opts.deck) {
+    console.error('❌ --task <path> and --deck <path> are required')
+    process.exit(1)
+  }
+
+  const { resolve, join } = await import('node:path')
+  const taskPath = resolve(opts.task)
+  const deckPath = resolve(opts.deck)
+  if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
+  if (!existsSync(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
+
+  const { useAgent } = await import('@lythos/test-utils/agents')
+  const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
+  const { resolvePlayer } = await import('./player')
+  const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs')
+
+  const player = resolvePlayer(opts.player ?? 'kimi')
+  const agent = useAgent(player)
+  const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), 'agent-run-output')
+  mkdirSync(outDir, { recursive: true })
+
+  console.log(`🤖 agent-run: ${player} × ${deckPath}`)
+  console.log(`📋 task: ${taskPath}`)
+
+  const result = await runAgentScenario({
+    scenarioPath: taskPath,
+    agent,
+    async setupWorkdir(_scenario, workdir) {
+      mkdirSync(workdir, { recursive: true })
+      writeFileSync(join(workdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
+
+      // Link skills via bunx (works both locally and when installed via bunx)
+      const linkProc = Bun.spawn(
+        ['bunx', '@lythos/skill-deck', 'link'],
+        { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
+      )
+      await linkProc.exited
+    },
+  })
+
+  // Copy agent output to outDir
+  const agentOut = join(outDir, 'agent-stdout.txt')
+  writeFileSync(agentOut, result.agentResult.stdout, 'utf-8')
+  if (result.agentResult.stderr) {
+    writeFileSync(join(outDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
+  }
+  if (result.verdict) {
+    writeFileSync(join(outDir, 'judge-verdict.json'), JSON.stringify(result.verdict, null, 2) + '\n', 'utf-8')
+  }
+
+  console.log(`\n✅ Agent complete (${result.agentResult.durationMs}ms)`)
+  console.log(`📁 Output: ${outDir}`)
+  if (result.verdict) {
+    console.log(`🏆 Verdict: ${result.verdict.verdict} — ${result.verdict.reason.slice(0, 120)}`)
+  }
 }
 
 function parseArgs(argv: string[]) {
@@ -644,7 +717,9 @@ if (import.meta.main) {
   const args = process.argv.slice(2)
   const cmd = args[0]
 
-  if (cmd === 'viz') {
+  if (cmd === 'agent-run') {
+    agentRun(args.slice(1))
+  } else if (cmd === 'viz') {
     runViz(args.slice(1))
   } else if (cmd === 'run') {
     runProgrammaticArena(args.slice(1))
