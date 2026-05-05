@@ -137,7 +137,7 @@ describe('addSkill', () => {
 
     try {
       const { addSkill } = await import('./add.ts')
-      await addSkill('github.com/owner/repo-b', { workdir: projectDir, deck: deckPath, as: 'foo' })
+      await addSkill('github.com/owner/repo-b', { workdir: projectDir, deck: deckPath, alias: 'foo' })
       expect(false).toBe(true) // should not reach here
     } catch (err: any) {
       expect(exitCode).toBe(1)

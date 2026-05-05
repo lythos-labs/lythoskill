@@ -43,10 +43,9 @@ bunx @lythos/skill-deck link --deck ./decks/arena.toml --workdir .
 
 # Download a skill to cold pool and add to deck (one-shot)
 bunx @lythos/skill-deck add github.com/owner/repo/skill-name
-# Or via Vercel skills.sh
-bunx @lythos/skill-deck add owner/repo --via skills.sh
+
 # Add with explicit alias and section
-bunx @lythos/skill-deck add github.com/owner/repo/skill-name --as tdd --type combo
+bunx @lythos/skill-deck add github.com/owner/repo/skill-name --alias tdd --type tool
 
 # Pull latest versions of declared skills from upstream
 bunx @lythos/skill-deck refresh

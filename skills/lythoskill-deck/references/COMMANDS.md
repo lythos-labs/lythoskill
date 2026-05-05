@@ -16,7 +16,6 @@ Options:
   --deck <path>    Specify skill-deck.toml path (default: find upward from cwd)
   --workdir <dir>  Specify working directory (default: cwd)
   --no-backup      Skip tar backup when removing non-symlink entries
-  --via <backend>  Download backend: git (default) | skills.sh
-  --as <alias>     Explicit alias for the skill (default: basename of path)
+  --alias <name>   Explicit alias for the skill (default: basename of path)
   --type <type>    Target section: innate | tool | combo (default: tool)
   --yes            Skip interactive confirmation (for prune)

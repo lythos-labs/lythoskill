@@ -244,7 +244,7 @@ for (const d of declared) {
 for (const [alias, types] of aliasToTypes) {
   if (types.length > 1) {
     errors.push(
-      `Alias collision: "${alias}" appears in [${types.join('], [')}]. Use --as to specify different aliases.`
+      `Alias collision: "${alias}" appears in [${types.join('], [')}]. Use --alias to specify different aliases.`
     );
   }
 }

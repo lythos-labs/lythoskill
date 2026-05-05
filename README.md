@@ -131,9 +131,6 @@ For monorepo skills (multiple skills in one repo), include the full path:
 # Monorepo: specify the skill path inside the repo
 bunx @lythos/skill-deck add github.com/owner/repo/skills/my-skill
 
-# Alternative: Vercel skills.sh
-bunx @lythos/skill-deck add owner/repo --via skills.sh
-
 # Alternative: manual clone
 git clone https://github.com/owner/repo.git \
   ~/.agents/skill-repos/github.com/owner/repo

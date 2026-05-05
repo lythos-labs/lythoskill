@@ -3,8 +3,8 @@
  * deck-add.ts — Skill acquisition command
  *
  * Downloads a skill to the cold pool, updates skill-deck.toml, and links.
- * Supports multiple backends (git clone, skills.sh) without locking users
- * into a single download method.
+ * Single backend: git clone. For feed-based discovery with decision tracking,
+ * use curator add instead.
  */
 
 import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync, readFileSync, readdirSync } from 'node:fs'
@@ -16,7 +16,6 @@ import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
 import { findDeckToml, expandHome } from './link.js'
 import { parseDeck } from './parse-deck.js'
 
-const CLAUDE_SKILLS_DIR = join(homedir(), '.claude', 'skills')
 
 interface ParsedLocator {
   host: string
@@ -76,7 +75,7 @@ function resolvePath(p: string): string {
   return resolve(p)
 }
 
-export async function addSkill(locator: string, options: { via?: string; deck?: string; workdir?: string; as?: string; type?: string }) {
+export async function addSkill(locator: string, options: { deck?: string; workdir?: string; alias?: string; type?: string }) {
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
   const deckPath = options.deck
     ? resolvePath(options.deck)
@@ -88,8 +87,6 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
     console.error(`   Expected: github.com/owner/repo[/skill] or owner/repo[/skill]`)
     process.exit(1)
   }
-
-  const backend = options.via || 'git'
 
   let coldPool = join(homedir(), '.agents', 'skill-repos')
   if (existsSync(deckPath)) {
@@ -117,47 +114,10 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
   const tmpRepo = join(tmpDir, 'repo')
 
   try {
-    let skillSourceDir: string
-
-    if (backend === 'skills.sh' || backend === 'vercel') {
-      const skillsShLocator = `${parsed.owner}/${parsed.repo}`
-      console.log(`📦 Downloading via skills.sh: ${skillsShLocator}`)
-
-      // Snapshot existing directories in ~/.claude/skills/
-      const beforeDirs = existsSync(CLAUDE_SKILLS_DIR)
-        ? new Set(readdirSync(CLAUDE_SKILLS_DIR, { withFileTypes: true })
-            .filter(e => e.isDirectory())
-            .map(e => e.name))
-        : new Set<string>()
-
-      execFileSync('npx', ['skills', 'add', skillsShLocator, '-g'], { cwd: tmpDir, stdio: 'inherit' })
-
-      // Detect the newly installed directory
-      const afterDirs = existsSync(CLAUDE_SKILLS_DIR)
-        ? readdirSync(CLAUDE_SKILLS_DIR, { withFileTypes: true })
-            .filter(e => e.isDirectory())
-            .map(e => e.name)
-        : []
-      const newDirs = afterDirs.filter(d => !beforeDirs.has(d))
-
-      if (newDirs.length === 0) {
-        console.error(`❌ skills.sh installed nothing new to ~/.claude/skills/`)
-        console.error(`   The skill may already be installed, or the install failed.`)
-        process.exit(1)
-      }
-      if (newDirs.length > 1) {
-        console.warn(`⚠️  Multiple new directories detected in ~/.claude/skills/`)
-        console.warn(`   Using the first one: ${newDirs[0]}`)
-      }
-      const installedName = newDirs[0]
-      skillSourceDir = join(CLAUDE_SKILLS_DIR, installedName)
-      console.log(`   Detected install: ${installedName}`)
-    } else {
-      const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
-      console.log(`📦 Cloning: ${gitUrl}`)
-      execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpRepo], { stdio: 'inherit' })
-      skillSourceDir = tmpRepo
-    }
+    const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
+    console.log(`📦 Cloning: ${gitUrl}`)
+    execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpRepo], { stdio: 'inherit' })
+    let skillSourceDir = tmpRepo
 
     if (!existsSync(skillSourceDir)) {
       console.error(`❌ Download failed: expected output not found at ${skillSourceDir}`)
@@ -175,7 +135,7 @@ export async function addSkill(locator: string, options: { via?: string; deck?: 
     }
 
     const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo
-    const alias = options.as || skillName
+    const alias = options.alias || skillName
     const skillType = (options.type || 'tool').toLowerCase()
 
     if (!['innate', 'tool', 'combo'].includes(skillType)) {

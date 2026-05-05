@@ -10,11 +10,11 @@
  * not by this CLI. See ADR-20260424000744041.
  */
 
-import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from 'node:fs'
 import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
-import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan } from './curator-core'
+import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord } from './curator-core'
 import { execSync } from 'node:child_process'
 
 // ── Types ────────────────────────────────────────────────────
@@ -657,15 +657,33 @@ function runAudit(argv: string[]) {
 
 // ── Add: download to cold pool only (no deck.toml, no link) ──
 
+/** Parse a named flag value: --flag <value> */
+function getFlag(argv: string[], flag: string): string | undefined {
+  const idx = argv.indexOf(flag)
+  return idx >= 0 && argv[idx + 1] ? argv[idx + 1] : undefined
+}
+
+/** Append a SkillAddition record to {pool}/.lythoskill-curator/additions.jsonl */
+function writeAddition(poolPath: string, record: ReturnType<typeof buildAdditionRecord>) {
+  const metaDir = join(poolPath, '.lythoskill-curator')
+  mkdirSync(metaDir, { recursive: true })
+  const file = join(metaDir, 'additions.jsonl')
+  appendFileSync(file, JSON.stringify(record) + '\n')
+}
+
 function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
-    console.error('Usage: lythoskill-curator add <github.com/owner/repo> [--pool <dir>]')
+    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]')
     process.exit(1)
   }
 
-  const poolIdx = argv.indexOf('--pool')
-  const poolPath = poolIdx >= 0 ? argv[poolIdx + 1] : `${process.env.HOME}/.agents/skill-repos`
+  const poolPath = getFlag(argv, '--pool')
+  if (!poolPath) {
+    console.error('Error: --pool <dir> is required.')
+    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir>')
+    process.exit(1)
+  }
 
   const plan = buildAddPlan(locator, poolPath)
 
@@ -675,6 +693,9 @@ function runAdd(argv: string[]) {
     return
   }
 
+  const reason = getFlag(argv, '--reason') || ''
+  const forkedFrom = getFlag(argv, '--forked-from')
+
   console.log(`📦 Cloning: https://${plan.relPath}`)
   try {
     mkdirSync(plan.targetPath, { recursive: true })
@@ -682,8 +703,15 @@ function runAdd(argv: string[]) {
       stdio: 'inherit',
       timeout: 60000,
     })
+
+    // Persist decision record
+    const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
+    writeAddition(poolPath, record)
+
     console.log(`✅ Skill added to cold pool: ${plan.relPath}`)
     console.log(`   Location: ${plan.targetPath}`)
+    if (forkedFrom) console.log(`   Forked from: ${forkedFrom}`)
+    if (reason) console.log(`   Reason: ${reason}`)
     console.log(`\n💡 To use this skill in a project, run:`)
     console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
   } catch (e: any) {
@@ -700,7 +728,7 @@ if (import.meta.main) {
 
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
-    console.log('       lythoskill-curator add <github.com/owner/repo> [--pool <dir>]')
+    console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
     console.log('       lythoskill-curator audit [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
@@ -708,6 +736,8 @@ if (import.meta.main) {
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
     console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
+    console.log('                         --reason <text>      Why this skill was added')
+    console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')

@@ -125,9 +125,6 @@ bunx @lythos/skill-deck link
 # Monorepo：指定仓库内的技能路径
 bunx @lythos/skill-deck add github.com/owner/repo/skills/my-skill
 
-# 替代方案：Vercel skills.sh
-bunx @lythos/skill-deck add owner/repo --via skills.sh
-
 # 替代方案：手动 clone
 git clone https://github.com/owner/repo.git \
   ~/.agents/skill-repos/github.com/owner/repo

@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 import {
   inferSource, extractQuotedPhrases, parseFrontmatter,
-  buildSkillMeta, formatMarkdownTable, buildCuratorPlan,
+  buildSkillMeta, formatMarkdownTable, buildCuratorPlan, buildAddPlan,
 } from './curator-core'
 
 describe('inferSource', () => {
@@ -109,11 +109,25 @@ describe('formatMarkdownTable', () => {
 })
 
 describe('buildCuratorPlan', () => {
-  test('creates plan with cold-pool source adapter', () => {
+  test('creates plan with cold pool and empty feeds', () => {
     const plan = buildCuratorPlan('/tmp/cold-pool')
-    expect(plan.sources).toHaveLength(1)
-    expect(plan.sources[0].source.type).toBe('cold-pool')
-    expect(plan.sources[0].source.locator).toBe('/tmp/cold-pool')
+    expect(plan.coldPool.path).toBe('/tmp/cold-pool')
+    expect(plan.feeds).toEqual([])
     expect(plan.skillDirs).toEqual([])
+  })
+})
+
+describe('buildAddPlan', () => {
+  test('computes target path from github locator', () => {
+    const plan = buildAddPlan('github.com/foo/bar', '/tmp/pool')
+    expect(plan.feed.type).toBe('github')
+    expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
+    expect(plan.relPath).toBe('github.com/foo/bar')
+  })
+
+  test('accepts explicit feedType override', () => {
+    const plan = buildAddPlan('https://example.com/skill.git', '/tmp/pool', 'url')
+    expect(plan.feed.type).toBe('url')
+    expect(plan.relPath).toBe('example.com/skill')
   })
 })

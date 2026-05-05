@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-02 | Source review of `add.ts:121-152` 暴露 5 处 bug |
+| accepted | 2026-05-05 | Accept — `curator add` is the proper cold pool acquisition path; deck add keeps git clone sugar only |
 
 ## Context
 

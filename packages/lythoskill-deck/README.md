@@ -68,7 +68,7 @@ expires = "2026-05-01"    # ISO date; warns at ≤14 days
 |---------|------|-------------|
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
-| `add` | `<locator> [--via <backend>] [--as <alias>] [--type <type>] [--deck <path>]` | Download skill to cold pool and append to skill-deck.toml. |
+| `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Git clone skill to cold pool and append to skill-deck.toml. |
 | `refresh` | `[<fq|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
 | `remove` | `<fq|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `prune` | `[--yes] [--deck <path>]` | GC cold pool repos no longer referenced. Interactive confirm (skip with `--yes`). |
@@ -79,8 +79,8 @@ expires = "2026-05-01"    # ISO date; warns at ≤14 days
 |------|-------------|---------|
 | `--deck <path>` | Path to skill-deck.toml | Find upward from cwd |
 | `--workdir <dir>` | Working directory | cwd |
-| `--via <backend>` | Download backend for `add`: `git` or `skills.sh` | `git` |
-| `--as <alias>` | Explicit alias for the skill (default: basename of path) | — |
+
+| `--alias <alias>` | Explicit alias for the skill (default: basename of path) | — |
 | `--type <type>` | Target section for `add`: `innate`, `tool`, or `combo` | `tool` |
 
 ### Safety guards

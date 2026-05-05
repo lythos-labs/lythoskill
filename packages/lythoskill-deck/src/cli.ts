@@ -14,14 +14,12 @@ const command = args[0]
 
 const deckFlagIdx = args.indexOf('--deck')
 const workdirFlagIdx = args.indexOf('--workdir')
-const viaFlagIdx = args.indexOf('--via')
-const asFlagIdx = args.indexOf('--as')
+const aliasFlagIdx = args.indexOf('--alias')
 const typeFlagIdx = args.indexOf('--type')
 
 const deckPath = deckFlagIdx >= 0 ? args[deckFlagIdx + 1] : undefined
 const workdir = workdirFlagIdx >= 0 ? args[workdirFlagIdx + 1] : undefined
-const via = viaFlagIdx >= 0 ? args[viaFlagIdx + 1] : undefined
-const as = asFlagIdx >= 0 ? args[asFlagIdx + 1] : undefined
+const alias = aliasFlagIdx >= 0 ? args[aliasFlagIdx + 1] : undefined
 const type = typeFlagIdx >= 0 ? args[typeFlagIdx + 1] : undefined
 const noBackup = args.includes('--no-backup')
 const yes = args.includes('--yes')
@@ -42,8 +40,8 @@ const HELP_CONFIG = {
     { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
     { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
     { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
-    { flag: '--via <backend>', description: 'Download backend: git (default) | skills.sh' },
-    { flag: '--as <alias>', description: 'Explicit alias for the skill (default: basename of path)' },
+
+    { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
     { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
     { flag: '--yes', description: 'Skip interactive confirmation (for prune)' },
   ],
@@ -63,7 +61,7 @@ switch (command) {
       console.error('❌ Missing locator. Usage: deck add <github.com/owner/repo[/skill]>')
       process.exit(1)
     }
-    await addSkill(locator, { via, deck: deckPath, workdir, as, type })
+    await addSkill(locator, { deck: deckPath, workdir, alias, type })
     break
   }
   case 'refresh': {

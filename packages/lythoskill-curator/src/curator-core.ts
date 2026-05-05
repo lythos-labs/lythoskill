@@ -1,14 +1,47 @@
 // ── Curator core: pure functions extracted from CLI ────────────────────────
-// Design: RSS feed manager for skills.
-// Sources (feeds) → items (skills) → index (REGISTRY.json + catalog.db)
-// Future: remote source adapters (LobeHub, agentskill.sh, GitHub) unite under same interface.
+// Architecture: Feed → Cold Pool → Working Set
+//
+//   Feeds (Layer -1)     Cold Pool (Layer 0)     Working Set (Layer 1)
+//   ────────────────     ───────────────────     ──────────────────────
+//   LobeHub trending     ~/.agents/skill-repos/   .claude/skills/
+//   GitHub search        ├── github.com/...       ├── deck -> cold pool
+//   agentskill.sh        ├── localhost/...        └── (deny-by-default)
+//   skills.sh            └── ...
+//   npm registry
+//
+//   FeedAdapter wraps heterogeneous upstream sources (REST, GraphQL, HTML scrape)
+//   into uniform FeedItem[]. The agent reviews candidates → curator add → cold pool.
+//   Cold pool is the local cache (like ~/.m2/repository). Feed is the remote mirror
+//   (like Maven Central / Nexus). Agent's superpower: wrapping disparate APIs into
+//   one interface — no need for every source to be a Maven repo.
+//
+// Future: remote feed adapters (LobeHub, agentskill.sh, GitHub) unite under FeedAdapter.
 
-// ── Source abstraction (forward-compatible: local + remote) ─────────────────
+// ── Layer -1: Feed — upstream discovery source ───────────────────────────────
 
-export interface SkillSource {
-  type: 'cold-pool' | 'github' | 'url' | 'marketplace' | 'lobehub' | 'npm'
-  locator: string           // path, URL, or org/repo
+export interface Feed {
+  type: 'github' | 'marketplace' | 'lobehub' | 'npm' | 'url'
+  locator: string           // URL, org/repo, or registry identifier
   label: string             // human-readable name
+}
+
+export interface FeedItem {
+  locator: string           // how to download (e.g. github.com/owner/repo)
+  name: string
+  description: string
+  source: string            // which feed discovered it (e.g. "lobehub")
+}
+
+export interface FeedAdapter {
+  readonly feed: Feed
+  /** Discover candidate skills from this feed. Pure planner: no mutation. */
+  discover(): Promise<FeedItem[]>
+}
+
+// ── Layer 0: Cold Pool — local skill cache ───────────────────────────────────
+
+export interface ColdPool {
+  path: string              // ~/.agents/skill-repos
 }
 
 export interface SkillItem {
@@ -18,12 +51,15 @@ export interface SkillItem {
   relPath: string           // relative to cold pool root
 }
 
-// ── Feed source adapter ────────────────────────────────────────────────────
-
-export interface SourceAdapter {
-  readonly source: SkillSource
-  /** Discover skill items from this source. Pure planner: no mutation. */
-  discover(): Promise<SkillItem[]>
+/** Scan the cold pool filesystem for skill directories. Synchronous — local IO. */
+export function scanColdPool(poolPath: string): SkillItem[] {
+  const dirs = findSkillDirs(poolPath)
+  return dirs.map(dir => ({
+    path: dir,
+    source: inferSource(dir),
+    name: basename(dir),
+    relPath: dir.slice(poolPath.length + 1),
+  }))
 }
 
 // ── Frontmatter parser ─────────────────────────────────────────────────────
@@ -96,57 +132,75 @@ export function findSkillDirs(root: string): string[] {
   return results
 }
 
-// ── Cold pool source (local filesystem adapter) ────────────────────────────
-
-export function createColdPoolSource(poolPath: string): SourceAdapter {
-  return {
-    source: { type: 'cold-pool', locator: poolPath, label: poolPath },
-    async discover(): Promise<SkillItem[]> {
-      const dirs = findSkillDirs(poolPath)
-      return dirs.map(dir => ({
-        path: dir,
-        source: inferSource(dir),
-        name: basename(dir),
-        relPath: dir.slice(poolPath.length + 1),
-      }))
-    },
-  }
-}
-
 // ── Plan: skill directory listing ──────────────────────────────────────────
 
 export interface CuratorPlan {
-  sources: SourceAdapter[]
+  coldPool: ColdPool
+  feeds: FeedAdapter[]
   skillDirs: string[]
 }
 
 export function buildCuratorPlan(poolPath: string): CuratorPlan {
   return {
-    sources: [createColdPoolSource(poolPath)],
-    skillDirs: [],  // populated by findSkillDirs (IO)
+    coldPool: { path: poolPath },
+    feeds: [],
+    skillDirs: [],
   }
 }
 
 // ── Add plan (pure: compute target path from source) ────────────────────────
 
 export interface AddPlan {
-  source: SkillSource
+  feed: Feed                 // the feed that discovered this skill
   targetPath: string         // where in cold pool
   relPath: string            // relative to cold pool root
 }
 
 /** Compute where a skill should land in the cold pool. Pure — no git clone. */
-export function buildAddPlan(locator: string, coldPool: string): AddPlan {
-  // locator format: github.com/owner/repo[/skill-path]
-  const source = /^github\.com/.test(locator) ? 'github' : 'url' as const
+export function buildAddPlan(locator: string, coldPool: string, feedType?: string): AddPlan {
+  const type = feedType || (/^github\.com/.test(locator) ? 'github' : 'url') as Feed['type']
   const clean = locator.replace(/^https?:\/\//, '').replace(/\.git$/, '')
   const targetPath = join(coldPool, clean)
   const relPath = clean
 
   return {
-    source: { type: source, locator, label: locator },
+    feed: { type, locator, label: locator },
     targetPath,
     relPath,
+  }
+}
+
+// ── Skill addition record (cold pool decision history) ─────────────────────
+// Appended to {pool}/.lythoskill-curator/additions.jsonl on each curator add.
+// Tracks the full lifecycle: added → evaluated (arena) → forked → activated.
+// Arena writes evaluation results; deck writes activation. Curator owns the log.
+
+export interface SkillAddition {
+  locator: string            // what was added (github.com/owner/repo)
+  feed: Feed                 // which feed discovered it
+  addedAt: string            // ISO timestamp
+  reason: string             // why it was added (agent reasoning or user intent)
+  forkedFrom: string | null  // original skill locator if this is a fork
+  arenaResult: {             // populated after arena evaluation (L3 buyer's review)
+    score: number
+    verdict: string
+    evaluatedAt: string
+  } | null
+  status: 'added' | 'evaluated' | 'forked' | 'activated'
+}
+
+/** Build a skill addition record. Pure — no IO. */
+export function buildAdditionRecord(
+  locator: string, feed: Feed, reason: string, forkedFrom?: string
+): SkillAddition {
+  return {
+    locator,
+    feed,
+    addedAt: new Date().toISOString(),
+    reason,
+    forkedFrom: forkedFrom || null,
+    arenaResult: null,
+    status: forkedFrom ? 'forked' : 'added',
   }
 }
 

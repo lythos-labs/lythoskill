@@ -1,15 +1,15 @@
 # @lythos/skill-curator
 
-> Read-only indexer for skill cold pools. Scans, extracts metadata, builds REGISTRY.json + catalog.db. Zero algorithmic recommendation — facts only.
+> Read-only indexer for skill cold pools. Scans, extracts metadata, builds REGISTRY.json + catalog.db. Tracks decision history (additions.jsonl). Zero algorithmic recommendation — facts only.
 
 ## Why
 
-As your skill ecosystem grows (GitHub trending, awesome lists, marketplace downloads), you lose track of what you have. `skill-curator` scans your cold pool, extracts YAML frontmatter from every SKILL.md, and produces structured indices:
+As your skill ecosystem grows (GitHub trending, marketplace downloads, agent recommendations), you lose track of what you have and **why** you have it. `skill-curator` solves both:
 
-- **REGISTRY.json**: Complete skill index with name, description, triggers, niche, managed dirs.
-- **catalog.db**: SQLite database for structured querying.
+- **REGISTRY.json + catalog.db**: Structured index of every skill in your cold pool
+- **additions.jsonl**: Decision history — which feed discovered each skill, why you added it, arena results, fork lineage
 
-**Zero algorithmic recommendation.** The CLI never says "use A instead of B." It says "A and B both exist, here are their attributes." The *agent* (reading SKILL.md + project context) combines index data with situational awareness to make informed recommendations.
+**Need recommendation or ranking?** Use [Arena](https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-arena). Curator provides the data; Arena provides the comparison. Together they feed the agent's recommendation workflow.
 
 ## Install
 
@@ -22,43 +22,74 @@ bunx @lythos/skill-curator <command>
 ## Quick Start
 
 ```bash
-# Index your cold pool (default: ~/.agents/skill-repos)
-bunx @lythos/skill-curator
+# Index your cold pool
+bunx @lythos/skill-curator ~/.agents/skill-repos
 
-# Query the catalog with SQL
-bunx @lythos/skill-curator query "SELECT name, description FROM skills WHERE niche LIKE '%documentation%'"
+# Add a skill (with decision record)
+bunx @lythos/skill-curator add github.com/foo/bar-skill \
+  --pool ~/.agents/skill-repos \
+  --reason "LobeHub trending, claims web scraping"
+
+# Fork an existing skill
+bunx @lythos/skill-curator add github.com/you/better-scraper \
+  --pool ~/.agents/skill-repos \
+  --forked-from github.com/foo/bar-skill \
+  --reason "fork: fixed PDF extraction bug"
+
+# Query the catalog
+bunx @lythos/skill-curator query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
 ```
 
 ## Commands
 
 ```
 Usage: lythoskill-curator [pool-path] [--output <dir>]
+       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]
        lythoskill-curator query <SQL> [--db <path>]
+       lythoskill-curator audit [--db <path>]
+       lythoskill-curator restore [--output <dir>]
 
 Commands:
   (no args)             Scan cold pool and build REGISTRY.json + catalog.db
-  query <SQL>           Query the catalog SQLite database
+  add <locator>         Download a skill to cold pool (no install, no deck.toml)
+                          --pool <dir>         Cold pool path (required)
+                          --reason <text>      Why this skill was added
+                          --forked-from <loc>  Original skill if this is a fork
+  query <SQL>           Query the catalog SQLite database (output: Markdown table)
+  audit                 Run predefined checks and output an audit report
+  restore               Roll back to the most recent backup
 
 Options:
   --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)
-  --db, -d <path>       Database path for query subcommand
+  --pool <dir>          Cold pool path for add (required)
+  --db, -d <path>       Database path for query/audit
 ```
-
-## Skill Documentation
-
-This package is the **Starter** layer (CLI implementation).  
-The agent-visible **Skill** layer documentation is here:  
-[packages/lythoskill-curator/skill/SKILL.md](../../packages/lythoskill-curator/skill/SKILL.md)
 
 ## Architecture
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
+Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem.
 
 ```
-Starter (this package) → npm publish → bunx @lythos/skill-curator ...
-Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
-Output  (skills/<name>/)             → git commit → agent-visible skill
+Feeds (LobeHub, GitHub, agentskill.sh)
+        │
+        ▼ curator add --pool --reason
+Cold Pool (~/.agents/skill-repos/)
+        │ curator scan
+        ▼
+Catalog (REGISTRY.json + catalog.db)  +  Decision History (additions.jsonl)
+        │                                          │
+        ▼                                          ▼
+Agent LLM reasoning ──── Arena test play ──── Deck governance
+(tiered recommendations)  (L3 buyer's review)  (deny-by-default)
 ```
+
+See [references/architecture.md](./skill/references/architecture.md) for the full data flow and three-layer trust model.
+
+## Skill Documentation
+
+This package is the **Starter** layer (CLI implementation).
+The agent-visible **Skill** layer documentation is here:
+[packages/lythoskill-curator/skill/SKILL.md](../../packages/lythoskill-curator/skill/SKILL.md)
 
 ## License
 
