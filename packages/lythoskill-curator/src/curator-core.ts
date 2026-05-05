@@ -78,7 +78,7 @@ export function parseFrontmatter(text: string): { frontmatter: Record<string, un
 export function inferSource(path: string): string {
   const parts = path.split('/')
   const ghIdx = parts.indexOf('github.com')
-  if (ghIdx >= 0 && ghIdx + 3 < parts.length) {
+  if (ghIdx >= 0 && ghIdx + 2 < parts.length) {
     return `github.com/${parts[ghIdx + 1]}/${parts[ghIdx + 2]}`
   }
   const localhostIdx = parts.indexOf('localhost')

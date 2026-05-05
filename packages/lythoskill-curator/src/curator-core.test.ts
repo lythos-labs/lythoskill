@@ -1,7 +1,11 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import {
   inferSource, extractQuotedPhrases, parseFrontmatter,
   buildSkillMeta, formatMarkdownTable, buildCuratorPlan, buildAddPlan,
+  buildAdditionRecord, scanColdPool,
 } from './curator-core'
 
 describe('inferSource', () => {
@@ -129,5 +133,98 @@ describe('buildAddPlan', () => {
     const plan = buildAddPlan('https://example.com/skill.git', '/tmp/pool', 'url')
     expect(plan.feed.type).toBe('url')
     expect(plan.relPath).toBe('example.com/skill')
+  })
+
+  test('strips https:// prefix from locator', () => {
+    const plan = buildAddPlan('https://github.com/foo/bar', '/tmp/pool')
+    expect(plan.relPath).toBe('github.com/foo/bar')
+    expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
+  })
+
+  test('strips .git suffix from locator', () => {
+    const plan = buildAddPlan('github.com/foo/bar.git', '/tmp/pool')
+    expect(plan.relPath).toBe('github.com/foo/bar')
+    expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
+  })
+
+  test('auto-detects url type for non-github locators', () => {
+    const plan = buildAddPlan('gitlab.com/foo/bar', '/tmp/pool')
+    expect(plan.feed.type).toBe('url')
+    expect(plan.relPath).toBe('gitlab.com/foo/bar')
+  })
+
+  test('accepts npm feedType', () => {
+    const plan = buildAddPlan('my-skill', '/tmp/pool', 'npm')
+    expect(plan.feed.type).toBe('npm')
+    expect(plan.relPath).toBe('my-skill')
+  })
+})
+
+describe('buildAdditionRecord', () => {
+  test('creates addition record with feed and reason', () => {
+    const feed = { type: 'github' as const, locator: 'github.com/foo/bar', label: 'GitHub' }
+    const record = buildAdditionRecord('github.com/foo/bar', feed, 'Looks promising for web scraping')
+    expect(record.locator).toBe('github.com/foo/bar')
+    expect(record.feed.type).toBe('github')
+    expect(record.reason).toBe('Looks promising for web scraping')
+    expect(record.status).toBe('added')
+    expect(record.addedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    expect(record.arenaResult).toBeNull()
+    expect(record.forkedFrom).toBeNull()
+  })
+
+  test('sets status to forked when forkedFrom is provided', () => {
+    const feed = { type: 'github' as const, locator: 'github.com/foo/bar', label: 'GH' }
+    const record = buildAdditionRecord('localhost/my-fix', feed, 'Fixed PDF bug', 'github.com/foo/bar')
+    expect(record.status).toBe('forked')
+    expect(record.forkedFrom).toBe('github.com/foo/bar')
+  })
+
+  test('defaults to added status without forkedFrom', () => {
+    const feed = { type: 'lobehub' as const, locator: 'https://lobehub.com/skill/123', label: 'LobeHub trending' }
+    const record = buildAdditionRecord('github.com/foo/bar', feed, 'Trending #3')
+    expect(record.status).toBe('added')
+    expect(record.forkedFrom).toBeNull()
+  })
+})
+
+describe('scanColdPool', () => {
+  let tmpDir: string
+
+  beforeAll(() => { tmpDir = mkdtempSync(join(tmpdir(), 'curator-scan-')) })
+  afterAll(() => { rmSync(tmpDir, { recursive: true, force: true }) })
+
+  test('returns empty array for empty pool', () => {
+    const emptyDir = join(tmpDir, 'empty')
+    mkdirSync(emptyDir, { recursive: true })
+    expect(scanColdPool(emptyDir)).toEqual([])
+  })
+
+  test('finds skill dirs in flat pool', () => {
+    const poolDir = join(tmpDir, 'flat-pool')
+    const skillDir = join(poolDir, 'my-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: my-skill\n---\n# Body\n')
+    const items = scanColdPool(poolDir)
+    expect(items).toHaveLength(1)
+    expect(items[0].name).toBe('my-skill')
+    expect(items[0].relPath).toBe('my-skill')
+  })
+
+  test('infers source from Go-mod style paths', () => {
+    const poolDir = join(tmpDir, 'go-mod-pool')
+    const skillDir = join(poolDir, 'github.com/owner/repo')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: test\n---\n# Body\n')
+    const items = scanColdPool(poolDir)
+    expect(items).toHaveLength(1)
+    expect(items[0].source).toBe('github.com/owner/repo')
+  })
+
+  test('skips directories without SKILL.md', () => {
+    const poolDir = join(tmpDir, 'skip-no-skill')
+    mkdirSync(join(poolDir, 'not-a-skill'), { recursive: true })
+    mkdirSync(join(poolDir, 'also-not'), { recursive: true })
+    expect(scanColdPool(poolDir)).toEqual([])
   })
 })

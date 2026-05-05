@@ -659,7 +659,7 @@ function writeAddition(poolPath: string, record: ReturnType<typeof buildAddition
   appendFileSync(file, JSON.stringify(record) + '\n')
 }
 
-function runAdd(argv: string[]) {
+export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
     console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]')

@@ -6,12 +6,12 @@
  * Run: bun test packages/lythoskill-curator/src/cli.test.ts
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll, beforeEach, spyOn } from 'bun:test'
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { inferSource, extractQuotedPhrases, scanSkill } from './cli.ts'
+import { inferSource, extractQuotedPhrases, scanSkill, runAdd } from './cli.ts'
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -169,5 +169,80 @@ describe('scanSkill', () => {
     const emptyDir = join(tmpDir, 'no-skill')
     mkdirSync(emptyDir, { recursive: true })
     expect(scanSkill(emptyDir)).toBeNull()
+  })
+})
+
+// ── curator add CLI BDD ────────────────────────────────────
+
+describe('runAdd', () => {
+  let exitCode: number | undefined
+  let exitErrors: string[]
+  let origExit: typeof process.exit
+
+  beforeAll(() => {
+    origExit = process.exit
+    process.exit = ((code?: number) => {
+      exitCode = code ?? 0
+      throw new Error(`EXIT:${code}`)
+    }) as typeof process.exit
+  })
+
+  afterAll(() => {
+    process.exit = origExit
+  })
+
+  beforeEach(() => {
+    exitCode = undefined
+    exitErrors = []
+    spyOn(console, 'error').mockImplementation((msg: string) => {
+      exitErrors.push(String(msg))
+    })
+  })
+
+  function catchExit(fn: () => void): number | undefined {
+    try { fn() } catch (e: any) { if (!String(e).includes('EXIT:')) throw e }
+    return exitCode
+  }
+
+  it('C1: rejects missing --pool', () => {
+    const code = catchExit(() => runAdd(['github.com/foo/bar']))
+    expect(code).toBe(1)
+    expect(exitErrors.some(e => e.includes('--pool'))).toBe(true)
+  })
+
+  it('C2: rejects missing locator', () => {
+    const code = catchExit(() => runAdd([]))
+    expect(code).toBe(1)
+    expect(exitErrors.some(e => e.includes('Usage'))).toBe(true)
+  })
+
+  it('C3: detects already-existing skill in cold pool', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-add-'))
+    const poolDir = join(tmpDir, 'pool')
+    const targetDir = join(poolDir, 'github.com/foo/bar')
+    mkdirSync(targetDir, { recursive: true })
+
+    const logs: string[] = []
+    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
+
+    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir]))
+    expect(logs.some(l => l.includes('Already in cold pool'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('C4: clone failure exits with error', () => {
+    const poolDir = mkdtempSync(join(tmpdir(), 'curator-add-'))
+    const errors: string[] = []
+    spyOn(console, 'error').mockImplementation((msg: string) => errors.push(String(msg)))
+
+    try {
+      runAdd(['github.com/nonexistent/repo', '--pool', poolDir])
+    } catch (_) {
+      // runAdd calls process.exit(1) after git clone failure → our mock throws EXIT
+    }
+
+    expect(errors.some(e => e.includes('Failed to clone'))).toBe(true)
+    rmSync(poolDir, { recursive: true, force: true })
   })
 })
