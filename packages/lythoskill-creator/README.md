@@ -17,26 +17,26 @@ This package is the Starter layer that scaffolds new projects and builds skills 
 ```bash
 bun add -d @lythos/skill-creator
 # or use directly
-bunx @lythos/skill-creator@0.9.15 <command>
+bunx @lythos/skill-creator@0.9.16 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Scaffold a new thin-skill monorepo
-bunx @lythos/skill-creator@0.9.15 init my-project
+bunx @lythos/skill-creator@0.9.16 init my-project
 
 # Add a new skill to an existing monorepo
 cd my-project
-bunx @lythos/skill-creator@0.9.15 add-skill my-new-skill
+bunx @lythos/skill-creator@0.9.16 add-skill my-new-skill
 
 # Build a skill (copies skill/ to skills/ with template substitution)
-bunx @lythos/skill-creator@0.9.15 build my-new-skill
+bunx @lythos/skill-creator@0.9.16 build my-new-skill
 
 # Audit an existing project against current conventions
-bunx @lythos/skill-creator@0.9.15 align
+bunx @lythos/skill-creator@0.9.16 align
 # Auto-fix drift where possible
-bunx @lythos/skill-creator@0.9.15 align --fix
+bunx @lythos/skill-creator@0.9.16 align --fix
 ```
 
 ## Commands
@@ -62,7 +62,7 @@ The agent-visible **Skill** layer documentation is here:
 Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
-Starter (this package) → npm publish → bunx @lythos/skill-creator@0.9.15 ...
+Starter (this package) → npm publish → bunx @lythos/skill-creator@0.9.16 ...
 Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
 Output  (skills/<name>/)             → git commit → agent-visible skill
 ```
