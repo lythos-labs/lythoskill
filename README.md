@@ -73,15 +73,29 @@ Managing a skill ecosystem across teams/projects/sources
 
 > 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
 
-**Prerequisite — Bun runtime** (needed for `bunx`):
+**Prerequisite — Bun runtime + Kimi CLI** (needed for `bunx` + agent execution):
 ```bash
-# Install Bun (one-time, macOS/Linux/WSL)
+# Bun (TypeScript runtime)
 curl -fsSL https://bun.sh/install | bash
-# Windows: powershell -c "irm bun.sh/install.ps1 | iex"
+
+# Kimi CLI (AI agent backend — Python, uv is Python's bunx)
+# uv tool install kimi-cli && kimi login
+# Docs: https://github.com/MoonshotAI/kimi-cli
+```
+
+**Prerequisites:**
+```bash
+# Bun — TypeScript runtime (macOS/Linux/WSL)
+curl -fsSL https://bun.sh/install | bash
+
+# Kimi CLI — AI agent backend (optional, needed for arena agent-run)
+# uv is Python's bunx equivalent
+uv tool install kimi-cli && kimi login
+# Docs: https://github.com/MoonshotAI/kimi-cli
 ```
 After install, restart your shell or run `source ~/.bashrc`.
 
-> **This tool requires Bun, not Node.** `bunx` is the correct runner. `npx` will fail unless Bun is also installed — the package shebang calls `env bun`. If you only have Node/npm, install Bun first.
+> **This tool requires Bun, not Node.** `bunx` is the correct runner.
 
 ```bash
 # 1. Add a skill (downloads to cold pool + updates deck + links)
