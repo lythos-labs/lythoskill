@@ -72,7 +72,7 @@ export function runAndParse(packageDir: string): TestStats | null {
   // Normalize spacing, insert markdown table separator after header
   const clean = rawLines
     .filter(l => !/^-{3,}\|/.test(l)) // skip separator lines from terminal output
-    .map(l => l.replace(/\s{2,}/g, ' ').replace(/ \| /g, ' | '))
+    .map(l => l.replace(/\s{2,}/g, ' '))
   // Insert markdown separator after header (first line)
   if (clean.length >= 1) {
     const cols = clean[0].split('|').length - 1
