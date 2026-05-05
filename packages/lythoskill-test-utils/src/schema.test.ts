@@ -2,6 +2,7 @@ import { describe, test, expect } from 'bun:test'
 import {
   JudgeVerdict, JudgeCriterion, CheckpointEntry, AgentScenario,
   ArenaManifest, ComparativeReport, Player, DeckConfig, Metrics,
+  CriterionDef, CriterionRubricLevel, CriteriaField,
 } from './schema'
 
 // ── JudgeVerdict ───────────────────────────────────────────────────────────
@@ -280,5 +281,100 @@ describe('Metrics', () => {
     const parsed = Metrics.parse(data)
     expect(parsed.budget.idle_timeout_ms).toBe(30000)
     expect(parsed.dag[0].status).toBe('ok')
+  })
+})
+
+// ── CriterionDef ────────────────────────────────────────────────────────────
+
+describe('CriterionDef', () => {
+  test('parses full structured criterion with rubric', () => {
+    const data = {
+      id: 'correctness',
+      label: '功能正确性',
+      description: '代码是否满足任务要求的功能行为',
+      persona: 'INTJ架构师',
+      weight: 33,
+      rubric: [
+        { score: 5, label: '优秀', description: '所有测试用例通过，边界条件和异常路径正确处理' },
+        { score: 3, label: '可接受', description: '主要功能正常，部分边界条件未处理' },
+        { score: 1, label: '不足', description: '核心功能有逻辑错误或不完整' },
+      ],
+    }
+    const parsed = CriterionDef.parse(data)
+    expect(parsed.id).toBe('correctness')
+    expect(parsed.persona).toBe('INTJ架构师')
+    expect(parsed.rubric).toHaveLength(3)
+    expect(parsed.rubric![0].score).toBe(5)
+  })
+
+  test('defaults for minimal fields', () => {
+    const data = { id: 'efficiency', label: '代码效率' }
+    const parsed = CriterionDef.parse(data)
+    expect(parsed.description).toBe('')
+    expect(parsed.weight).toBeUndefined()
+    expect(parsed.rubric).toBeUndefined()
+    expect(parsed.persona).toBeUndefined()
+  })
+
+  test('rejects invalid weight', () => {
+    const data = { id: 'x', label: 'X', weight: 150 }
+    const result = CriterionDef.safeParse(data)
+    expect(result.success).toBe(false)
+  })
+
+  test('rejects rubric score out of 1-5 range', () => {
+    const data = {
+      id: 'x', label: 'X',
+      rubric: [{ score: 0, label: 'bad', description: 'nope' }],
+    }
+    const result = CriterionDef.safeParse(data)
+    expect(result.success).toBe(false)
+  })
+})
+
+// ── CriterionRubricLevel ────────────────────────────────────────────────────
+
+describe('CriterionRubricLevel', () => {
+  test('parses valid rubric level', () => {
+    const parsed = CriterionRubricLevel.parse({ score: 4, label: '良好', description: '大部分正确' })
+    expect(parsed.score).toBe(4)
+  })
+
+  test('rejects score < 1', () => {
+    const result = CriterionRubricLevel.safeParse({ score: 0, label: 'x', description: 'x' })
+    expect(result.success).toBe(false)
+  })
+})
+
+// ── CriteriaField (union type, backward-compatible) ─────────────────────────
+
+describe('CriteriaField', () => {
+  test('bare string auto-upgrades to default CriterionDef', () => {
+    const result = CriteriaField.parse('correctness')
+    expect(result.id).toBe('correctness')
+    expect(result.label).toBe('correctness')
+    expect(result.description).toBe('')
+    expect(result.weight).toBeUndefined()
+  })
+
+  test('structured object passes through unchanged', () => {
+    const data = {
+      id: 'maintainability',
+      label: '可维护性',
+      description: '代码结构和命名质量',
+      persona: 'ENFP产品经理',
+      weight: 50,
+      rubric: [{ score: 3, label: 'OK', description: 'Readable enough' }],
+    }
+    const result = CriteriaField.parse(data)
+    expect(result.id).toBe('maintainability')
+    expect(result.persona).toBe('ENFP产品经理')
+    expect(result.weight).toBe(50)
+    expect(result.rubric).toHaveLength(1)
+  })
+
+  test('rejects non-string non-object input', () => {
+    const result = CriteriaField.safeParse(42)
+    expect(result.success).toBe(false)
   })
 })

@@ -57,10 +57,33 @@ export function buildComparativePrompt(opts: {
   manifest: ArenaManifest
   verdicts: { participantId: string; verdict: unknown }[]
 }): string {
-  const criteriaDesc = opts.manifest.criteria.join(', ')
   const participants = opts.manifest.participants
     .map(p => `- ${p.id}: ${p.name} (${p.description || 'no description'})`)
     .join('\n')
+
+  // Format criteria with rubric anchors when available (ADR-20260505225159725)
+  let criteriaBlock = ''
+  for (const c of opts.manifest.criteria) {
+    if (typeof c === 'string') {
+      criteriaBlock += `- ${c} (score 1-5, weight: 0.25)\n`
+    } else {
+      criteriaBlock += `## Criterion: ${c.label} (${c.id})\n`
+      if (c.persona) criteriaBlock += `Evaluator: ${c.persona}\n`
+      criteriaBlock += `Weight: ${c.weight ?? 25} (${c.weight ?? 25}%)\n`
+      criteriaBlock += `Description: ${c.description || 'No additional description.'}\n`
+      if (c.rubric && c.rubric.length > 0) {
+        criteriaBlock += 'Scoring rubric:\n'
+        for (const r of c.rubric) {
+          criteriaBlock += `  ${r.score} — ${r.label}: ${r.description}\n`
+        }
+      }
+      criteriaBlock += '\n'
+    }
+  }
+
+  const criteriaList = opts.manifest.criteria
+    .map(c => typeof c === 'string' ? c : `${c.label} (${c.id})`)
+    .join(', ')
 
   return `You are a comparative judge evaluating ${opts.manifest.participants.length} participants against shared criteria.
 
@@ -71,11 +94,11 @@ ${opts.manifest.task}
 ${participants}
 
 ## Criteria
-${criteriaDesc}
-
+${criteriaBlock}
 ## Your Job
 For each participant, score them 1-5 on each criterion. Provide a brief rationale.
 Score meanings: 1=poor, 3=acceptable, 5=excellent.
+Criteria in scope: ${criteriaList}
 
 ## Output Schema
 Your response must conform to this Zod schema:
@@ -96,7 +119,7 @@ z.object({
 })
 \`\`\`
 score_matrix is a FLAT ARRAY of objects — NOT nested by participant or criterion.
-weight: 0.25 for each cell (1 / num_criteria).
+weight: match the weight specified per criterion above.
 score: 1=poor, 3=acceptable, 5=excellent.
 
 Use the submit_scores tool to return your structured evaluation.`

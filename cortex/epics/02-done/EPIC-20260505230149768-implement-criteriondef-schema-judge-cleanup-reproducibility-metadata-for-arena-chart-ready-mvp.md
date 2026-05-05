@@ -18,6 +18,7 @@ checklist_skipped_reason: alignment confirmed, vision documented in ADR-20260505
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-05 | Created |
+| done | 2026-05-05 | Done |
 
 ## 背景故事
 

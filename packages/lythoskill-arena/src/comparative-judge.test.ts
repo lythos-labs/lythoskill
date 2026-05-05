@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 import { computePareto, buildComparativePrompt, toScoreMatrix, normalizeComparativeOutput } from './comparative-judge'
-import type { ArenaManifest } from '@lythos/test-utils/schema'
+import { ArenaManifest, CriterionDef, ComparativeReport } from '@lythos/test-utils/schema'
+import type { ArenaManifest as ArenaManifestType } from '@lythos/test-utils/schema'
 
 describe('computePareto', () => {
   test('single participant is always non-dominated', () => {
@@ -324,5 +325,122 @@ describe('normalizeComparativeOutput', () => {
     // Check the behavior for valid score_matrix entries: score=0 stays 0 (no clamp),
     // score=10 stays 10 (no clamp). Normalization doesn't add clamping to valid entries.
     // The clamping only happens in the pivot-table conversion path (Math.max(1, Math.min(5, ...))).
+  })
+})
+
+// ── Mock scenarios: realistic judge outputs (LLM-simulated) ────────────────
+
+const manifestWithRubrics: ArenaManifestType = {
+  id: 'arena-deep-research',
+  created_at: '2026-05-05T00:00:00Z',
+  task: 'Research the impact of Bun 1.3 on monorepo tooling and produce a 500-word brief',
+  mode: 'decks',
+  participants: [
+    { id: 'bare', name: 'Bare Claude', deck: 'decks/bare.toml', description: 'No skills' },
+    { id: 'deep', name: 'Deep Research', deck: 'decks/deep.toml', description: 'WebSearch + WebFetch skills' },
+  ],
+  criteria: [
+    {
+      id: 'accuracy', label: '信息准确性', persona: 'ISTJ测试员', weight: 40,
+      description: '引用是否可验证，版本号、日期、API 名称是否正确',
+      rubric: [
+        { score: 5, label: '全部可验证', description: '所有关键声明有可追溯来源，版本号和 API 名称与实际一致' },
+        { score: 3, label: '大部分正确', description: '核心结论可验证，但存在细节偏差' },
+        { score: 1, label: '无法验证', description: '关键声明无来源或与实际不符' },
+      ],
+    },
+    {
+      id: 'depth', label: '分析深度', persona: 'INTJ架构师', weight: 35,
+      description: '是否超越表面描述，提供 trade-off 分析和 ecosystem 影响评估',
+      rubric: [
+        { score: 5, label: '深度分析', description: '包含 trade-off 对比、ecosystem 连锁影响、时间线预测' },
+        { score: 3, label: '中等覆盖', description: '描述了变化但无深入 trade-off 分析' },
+        { score: 1, label: '表面描述', description: '仅重复已知信息，无分析视角' },
+      ],
+    },
+    {
+      id: 'clarity', label: '表达清晰度', persona: 'INFJ技术写作者', weight: 25,
+      description: '结构是否清晰，术语使用是否一致，非专家是否可理解',
+    },
+  ],
+  status: 'completed',
+}
+
+describe('buildComparativePrompt with structured criteria', () => {
+  test('injects rubric anchors into prompt', () => {
+    const prompt = buildComparativePrompt({ manifest: manifestWithRubrics, verdicts: [] })
+    expect(prompt).toContain('信息准确性')
+    expect(prompt).toContain('Evaluator: ISTJ测试员')
+    expect(prompt).toContain('Weight: 40')
+    expect(prompt).toContain('全部可验证')
+    expect(prompt).toContain('分析深度')
+    expect(prompt).toContain('Evaluator: INTJ架构师')
+  })
+
+  test('falls back to bare format for string criteria', () => {
+    const manifest: ArenaManifestType = {
+      id: 'test', created_at: '2026-01-01T00:00:00Z', task: 'test', mode: 'decks',
+      participants: [{ id: 'a', name: 'A', deck: 'd1' }, { id: 'b', name: 'B', deck: 'd2' }],
+      criteria: ['correctness', 'efficiency'],
+      status: 'completed',
+    }
+    const prompt = buildComparativePrompt({ manifest, verdicts: [] })
+    expect(prompt).toContain('- correctness')
+    expect(prompt).toContain('- efficiency')
+  })
+})
+
+// Simulate a realistic LLM judge output — the kind of JSON an actual Claude
+// comparative judge call would produce. Verify our normalization handles it.
+describe('full pipeline: mock LLM output → schema validation', () => {
+  test('clean score_matrix passes through ComparativeReport.parse', () => {
+    const cleanOutput = {
+      score_matrix: [
+        { participant_id: 'bare', criterion: 'accuracy', weight: 0.4, score: 3, rationale: 'Correct on Bun version but missed pnpm migration detail' },
+        { participant_id: 'bare', criterion: 'depth', weight: 0.35, score: 2, rationale: 'Surface-level description, no trade-off analysis' },
+        { participant_id: 'bare', criterion: 'clarity', weight: 0.25, score: 4, rationale: 'Well-structured but some jargon' },
+        { participant_id: 'deep', criterion: 'accuracy', weight: 0.4, score: 5, rationale: 'All claims verified against Bun GitHub releases and npm registry' },
+        { participant_id: 'deep', criterion: 'depth', weight: 0.35, score: 5, rationale: 'Compared Bun 1.3 with pnpm 9, analyzed ecosystem migration patterns' },
+        { participant_id: 'deep', criterion: 'clarity', weight: 0.25, score: 4, rationale: 'Clear structure, minor repetition in trade-off section' },
+      ],
+      key_findings: ['Deep Research produced verifiable, well-sourced analysis', 'Bare Claude lacked access to current version numbers'],
+      recommendations: [
+        { audience: 'skill user', recommendation: 'Deep Research skills are essential for technical research tasks' },
+        { audience: 'skill author', recommendation: 'Accuracy criterion highlights the importance of web access for up-to-date data' },
+      ],
+    }
+    const report = ComparativeReport.parse({
+      arena_id: 'test',
+      generated_at: new Date().toISOString(),
+      ...cleanOutput,
+    })
+    expect(report.score_matrix).toHaveLength(6)
+    const deepAccuracy = report.score_matrix.find(c => c.participant_id === 'deep' && c.criterion === 'accuracy')
+    expect(deepAccuracy!.score).toBe(5)
+  })
+
+  test('messy LLM output with field name variants gets normalized', () => {
+    // Simulates a messy Claude output — participantId instead of participant_id,
+    // reason instead of rationale, string score
+    const messyLLMOutput = {
+      participantId: 'bare',
+      reason: 'OK',
+      key_findings: ['found bugs'],
+      score_matrix: [
+        { participantId: 'bare', criterion: 'accuracy', weight: 50, score: '4', reason: 'decent' },
+        { participantId: 'deep', criterion: 'accuracy', weight: 50, score: '5', reason: 'excellent' },
+      ],
+      recommendations: [
+        { role: 'developer', text: 'Add more tests' },
+      ],
+    }
+    const normalized = normalizeComparativeOutput(messyLLMOutput as Record<string, unknown>)
+    const cells = normalized.score_matrix as any[]
+    expect(cells[0].participant_id).toBe('bare')
+    expect(cells[0].weight).toBe(0.5)
+    expect(cells[0].score).toBe(4)
+    expect(cells[0].rationale).toBe('decent')
+    const recs = normalized.recommendations as any[]
+    expect(recs[0].audience).toBe('developer')
   })
 })

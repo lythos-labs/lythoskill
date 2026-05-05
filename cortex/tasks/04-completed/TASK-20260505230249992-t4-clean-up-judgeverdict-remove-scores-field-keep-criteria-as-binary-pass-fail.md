@@ -1,4 +1,4 @@
-# TASK-20260505230249874: T1: Implement CriterionDef + CriteriaField Zod schema in test-utils/src/schema.ts
+# TASK-20260505230249992: T4: Clean up JudgeVerdict — remove scores field, keep criteria as binary pass/fail
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-05 | Created |
+| in-progress | 2026-05-05 | Started |
+| completed | 2026-05-05 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260505230249874)
+feat(scope): description (TASK-20260505230249992)
 
 - Detail 1
 - Detail 2
