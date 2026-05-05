@@ -1,0 +1,4 @@
+[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "~/.agents/skill-repos"

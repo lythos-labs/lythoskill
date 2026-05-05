@@ -125,7 +125,8 @@ async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
     stdin: 'ignore',  // prompt comes from shell redirect
     stdout: 'pipe',
     stderr: 'pipe',
-    env: cmd.env,
+    // env inherits from parent — essential for API key / auth resolution
+    // buildCleanEnv was stripping ANTHROPIC_API_KEY from the subset
   })
 
   const timeout = setTimeout(() => proc.kill(), cmd.timeoutMs)

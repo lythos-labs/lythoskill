@@ -220,7 +220,7 @@ function writeReport(dir: string, manifest: ArenaManifestType, report: unknown &
     `# Arena Report: ${manifest.id}`,
     '',
     `**Task**: ${manifest.task}`,
-    `**Criteria**: ${manifest.criteria.join(', ')}`,
+    `**Criteria**: ${manifest.criteria.map(c => typeof c === 'string' ? c : c.label).join(', ')}`,
     `**Date**: ${new Date().toISOString()}`,
     '',
     '## Score Matrix',

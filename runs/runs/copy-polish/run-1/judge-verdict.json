@@ -1,0 +1,8 @@
+{
+  "verdict": "ERROR",
+  "reason": "No verdict returned",
+  "criteria": [],
+  "agent_stdout": "",
+  "agent_stderr": "All retries exhausted",
+  "duration_ms": 0
+}
