@@ -32,7 +32,7 @@
 
 *No entries yet.*
 
-## 📖 Lessons (11)
+## 📖 Lessons (12)
 
 - **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)
 - **[2026-05-03]** [hermes-self-evolving-skill-field-notes](./03-lessons/2026-05-03-hermes-self-evolving-skill-field-notes.md)
@@ -45,6 +45,7 @@
 - **[2026-05-02]** [hermes-agent-skill-evolution-and-deck-governance](./03-lessons/2026-05-02-hermes-agent-skill-evolution-and-deck-governance.md)
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
+- **[0000-00-00]** [kimi-vs-claude-cli-headless-comparison](./03-lessons/kimi-vs-claude-cli-headless-comparison.md)
 
 ## 🗄️ Legacy (0)
 
