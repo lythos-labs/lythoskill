@@ -94,3 +94,16 @@ The agent-visible **Skill** layer documentation is here:
 ## License
 
 MIT
+
+<!-- test-stats -->
+![pass](https://img.shields.io/badge/45_pass-0_fail-brightgreen) ![coverage](https://img.shields.io/badge/coverage-58%25-red)
+
+```
+File                 | % Funcs | % Lines | Uncovered Line #s
+---------------------|---------|---------|-------------------
+All files            |   65.00 |   58.08 |
+ src/cli.ts          |   30.00 |   16.91 | 41-43,47-54,132-207,213-231,239-260,264-288,294-317,321-359,365-380,386-408,412-445,449-540,553-641,655-658,702-703,714-715,717-738,740-750
+ src/curator-core.ts |  100.00 |   99.25 | 
+---------------------|---------|---------|-------------------
+```
+<!-- /test-stats -->
