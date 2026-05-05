@@ -145,6 +145,22 @@ deck config     →  RefreshPlan       →  executeRefreshPlan
 - Trivial wrappers (over-abstraction)
 - One-shot scripts (testability not beneficial)
 
+### Skill activation guards
+
+The IO injection pattern only works if tests follow it. Two skills act as enforcement:
+
+| Skill | When to invoke | What it prevents |
+|-------|---------------|-----------------|
+| **TDD** | Writing new tests, refactoring existing tests, or touching any file under `test/` or `*.test.ts` | Tests that spy on low-level functions (`execSync`, `child_process`) instead of injecting through the IO interface |
+| **Diagnose** | Test failure, CI failure, non-zero exit code, or "all tests pass but exit 1" | Exploratory debugging — enforce reproduce→minimize→hypothesize→instrument→fix before jumping between sources |
+
+**TDD as a test-structure quality gate.** When you open a `*.test.ts` file, the first question is: "do these tests inject IO through the
+documented interface, or do they bypass it?" TDD's red-green-refactor loop forces this check before you write or modify any test. Do not trust existing tests blindly — a test that passes can still violate the architecture contract. Today's `refresh.test.ts` C12-C17 tests passed but used `spyOn(execSync)` to mock low-level git instead of injecting `RefreshIO.gitPull`. The TDD skill catches this during the "refactor" phase: test structure that doesn't match the IO injection table is itself a red flag.
+
+**Diagnose prevents thrashing.** Without it, the agent jumps between CI log grep → source code trace → test file scan → CI log again, burning tokens on symptom-chasing instead of root-cause isolation. The Diagnose loop forces a single hypothesis at a time, validated with a single instrument, before moving to the next.
+
+These two skills complement each other: TDD keeps test structure aligned with architecture, Diagnose catches runtime failures without losing the thread.
+
 Full pattern documentation: [cortex/wiki/01-patterns/intent-plan-execute-fractal-architecture-pattern.md](./cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
 
 ---

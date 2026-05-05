@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
-import { mkdirSync, writeFileSync, rmSync } from 'node:fs'
+import { mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveRefreshConfig, detectGitRoot, buildRefreshPlan } from './refresh-plan'
+import { resolveRefreshConfig, detectGitRoot, buildRefreshPlan, executeRefreshPlan, type RefreshPlan, type RefreshTarget } from './refresh-plan'
 
 const deckAliasDict = `[deck]
 max_cards = 10
@@ -114,5 +114,141 @@ describe('buildRefreshPlan', () => {
     expect(plan.deckPath).toBe('/custom/deck.toml')
     expect(plan.workdir).toBe('/custom/work')
     expect(plan.coldPool).toBe('/custom/pool')
+  })
+})
+
+// ── executeRefreshPlan (IO-injected plan execution) ────────────────
+
+function makeTarget(overrides: Partial<RefreshTarget> = {}): RefreshTarget {
+  return {
+    alias: 'skill-a',
+    path: 'github.com/owner/repo/skill-a',
+    sourcePath: '/pool/github.com/owner/repo/skill-a',
+    sourceRel: 'github.com/owner/repo/skill-a',
+    type: 'git',
+    gitRoot: '/pool/github.com/owner/repo/skill-a',
+    ...overrides,
+  }
+}
+
+function makePlan(targets: RefreshTarget[]): RefreshPlan {
+  return {
+    deckPath: '/tmp/deck.toml',
+    workdir: '/tmp',
+    coldPool: '/pool',
+    targets,
+    allDeclared: targets.map(t => ({ alias: t.alias, path: t.path, type: 'tool' as const })),
+  }
+}
+
+describe('executeRefreshPlan', () => {
+  test('git up-to-date: reports correctly, does not call linkDeck', () => {
+    const plan = makePlan([makeTarget()])
+    const logs: string[] = []
+    let linkCalled = false
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => ({ status: 'up-to-date', message: 'Already up to date.' }),
+      log: (msg) => logs.push(msg),
+      linkDeck: () => { linkCalled = true },
+    })
+
+    expect(results).toHaveLength(1)
+    expect(results[0].status).toBe('up-to-date')
+    expect(logs.some(l => l.includes('Up-to-date: 1'))).toBe(true)
+    expect(linkCalled).toBe(false)
+  })
+
+  test('git updated: triggers linkDeck', () => {
+    const plan = makePlan([makeTarget()])
+    let linkCalled = false
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => ({ status: 'updated', message: 'Fast-forward' }),
+      log: () => {},
+      linkDeck: () => { linkCalled = true },
+    })
+
+    expect(results[0].status).toBe('updated')
+    expect(linkCalled).toBe(true)
+  })
+
+  test('git failed: reports failed, does not call linkDeck', () => {
+    const plan = makePlan([makeTarget()])
+    let linkCalled = false
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => ({ status: 'failed', message: 'connection refused' }),
+      log: () => {},
+      linkDeck: () => { linkCalled = true },
+    })
+
+    expect(results[0].status).toBe('failed')
+    expect(linkCalled).toBe(false)
+  })
+
+  test('localhost: skipped with user-managed message', () => {
+    const plan = makePlan([makeTarget({ type: 'localhost', gitRoot: undefined })])
+
+    const results = executeRefreshPlan(plan, { log: () => {} })
+
+    expect(results[0].status).toBe('skipped')
+    expect(results[0].message).toContain('localhost')
+    expect(results[0].message).toContain('user-managed')
+  })
+
+  test('not-git: skipped with not-a-git-repository message', () => {
+    const plan = makePlan([makeTarget({ type: 'not-git', gitRoot: undefined })])
+
+    const results = executeRefreshPlan(plan, { log: () => {} })
+
+    expect(results[0].status).toBe('not-git')
+    expect(results[0].message).toContain('not a git repository')
+  })
+
+  test('missing: failed with not-found message', () => {
+    const plan = makePlan([makeTarget({ type: 'missing', gitRoot: undefined, sourcePath: '' })])
+
+    const results = executeRefreshPlan(plan, { log: () => {} })
+
+    expect(results[0].status).toBe('failed')
+    expect(results[0].message).toContain('not found')
+  })
+
+  test('multiple targets: counts each status', () => {
+    const logs: string[] = []
+    const plan = makePlan([
+      makeTarget({ alias: 'up', type: 'git', gitRoot: '/pool/a' }),
+      makeTarget({ alias: 'updated', type: 'git', gitRoot: '/pool/b' }),
+      makeTarget({ alias: 'local', type: 'localhost', gitRoot: undefined }),
+      makeTarget({ alias: 'nogit', type: 'not-git', gitRoot: undefined }),
+    ])
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: (dir) => {
+        if (dir === '/pool/b') return { status: 'updated', message: 'Fast-forward' }
+        return { status: 'up-to-date', message: 'Already up to date.' }
+      },
+      log: (msg) => logs.push(msg),
+    })
+
+    expect(results).toHaveLength(4)
+    expect(logs.some(l => l.includes('Updated: 1') && l.includes('Up-to-date: 1') && l.includes('Skipped: 2'))).toBe(true)
+  })
+
+  test('single target in plan ≠ allDeclared → reports "single skill" scope', () => {
+    const plan = makePlan([makeTarget()])
+    plan.allDeclared = [
+      { alias: 'skill-a', path: 'github.com/owner/repo/skill-a', type: 'tool' },
+      { alias: 'skill-b', path: 'github.com/owner/repo/skill-b', type: 'tool' },
+    ]
+    const logs: string[] = []
+
+    executeRefreshPlan(plan, {
+      gitPull: () => ({ status: 'up-to-date', message: 'ok' }),
+      log: (msg) => logs.push(msg),
+    })
+
+    expect(logs.some(l => l.includes('single skill'))).toBe(true)
   })
 })
