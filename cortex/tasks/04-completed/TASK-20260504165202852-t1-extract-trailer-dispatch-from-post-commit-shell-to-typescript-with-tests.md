@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-04 | Created |
+| completed | 2026-05-05 | probe: Status History fixed (file already in 04-completed/) |
 
 ## 背景与目标
 将 `.husky/post-commit` 中 `trailer_block()` 的解析+映射逻辑提取为纯函数 TypeScript 模块，使其可单元测试、可独立维护。
