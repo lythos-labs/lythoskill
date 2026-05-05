@@ -1,8 +1,10 @@
 import type { AgentAdapter } from './types'
 import { claudeAdapter } from './claude'
+import { kimiAdapter } from './kimi'
 
 const registry: Record<string, AgentAdapter> = {
   claude: claudeAdapter,
+  kimi: kimiAdapter,
 }
 
 export function useAgent(name: string): AgentAdapter {
@@ -14,4 +16,5 @@ export function useAgent(name: string): AgentAdapter {
 }
 
 export { claudeAdapter } from './claude'
+export { kimiAdapter } from './kimi'
 export type { AgentAdapter, AgentRunResult, CheckpointEntry, FsMutation, DeckConfig, SkillEntryLike } from './types'
