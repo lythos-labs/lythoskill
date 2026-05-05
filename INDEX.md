@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/5 22:54:17
+> 自动生成于 2026/5/5 23:16:00
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 111 | 进行中: 0, 待验收: 0, 已完成: 88 |
-| Epics | 18 | 活跃: 0, 已完成: 15, 悬置: 1, 已归档: 2 |
+| Tasks | 117 | 进行中: 0, 待验收: 0, 已完成: 94 |
+| Epics | 19 | 活跃: 0, 已完成: 16, 悬置: 1, 已归档: 2 |
 | ADRs | 41 | 已接受: 31 |
 
 ---
@@ -35,6 +35,7 @@ _无_
 - ✅ **EPIC-20260505015029961**: Curator intent/plan/execute extraction + curator add (cold pool download, no install)
 - ✅ **EPIC-20260505184748292**: Curator refresh plan/execute — cold pool update queue with TODO file
 - ✅ **EPIC-20260505221500188**: Standardize test file organization — co-located unit tests, separate BDD runners
+- ✅ **EPIC-20260505230149768**: Implement CriterionDef schema + judge cleanup + reproducibility metadata for arena chart-ready MVP
 
 ### 悬置
 
@@ -63,7 +64,7 @@ _无_
 
 _无_
 
-### 已完成 (88)
+### 已完成 (94)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -153,6 +154,12 @@ _无_
 - ✅ ~~TASK-20260505221520790~~: Write ADR-20260505221432740 — record rationale for co-location decision
 - ✅ ~~TASK-20260505221523973~~: Update CI workflow + test-report.ts paths for new test file locations
 - ✅ ~~TASK-20260505221527112~~: Update AGENTS.md to reference TESTING.md test conventions
+- ✅ ~~TASK-20260505230249874~~: T1: Implement CriterionDef + CriteriaField Zod schema in test-utils/src/schema.ts
+- ✅ ~~TASK-20260505230249921~~: T2: Inject rubric from CriterionDef into buildComparativePrompt
+- ✅ ~~TASK-20260505230249954~~: T3: Update ArenaManifest.criteria to CriteriaField union type (backward compat)
+- ✅ ~~TASK-20260505230249992~~: T4: Clean up JudgeVerdict — remove scores field, keep criteria as binary pass/fail
+- ✅ ~~TASK-20260505230250040~~: T5: Update per-cell judge + arena runner for cleaned JudgeVerdict
+- ✅ ~~TASK-20260505230250079~~: T6: Add ArenaRunContext (git_ref, arena_toml, judge_model, runs_per_side) to ComparativeReport
 
 ### 悬置 (0)
 
