@@ -822,7 +822,46 @@ export function runAdd(argv: string[]) {
     process.exit(1)
   }
 
+  const dryRun = argv.includes('--dry-run')
   const plan = buildAddPlan(locator, poolPath)
+
+  if (dryRun) {
+    console.log(`🔎 Dry-run: curator add ${locator}`)
+    console.log(`   Pool:   ${poolPath}`)
+    console.log(`   Repo:   ${plan.repoRoot}`)
+    if (plan.skillPath) console.log(`   Skill:  ${plan.skillPath}`)
+    console.log()
+
+    // Checkpoint 1: Repo status
+    if (existsSync(join(plan.repoPath, '.git'))) {
+      console.log(`📂 Repo status: already cloned`)
+      if (plan.skillPath) {
+        const skillMd = join(plan.repoPath, plan.skillPath, 'SKILL.md')
+        if (existsSync(skillMd)) {
+          console.log(`📄 Skill path:  valid — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+        } else {
+          console.log(`⚠️  Skill path:  NOT FOUND — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+          console.log(`\n💡 Check repo layout: ls ${plan.repoPath}/`)
+        }
+      }
+    } else if (existsSync(plan.repoPath)) {
+      console.log(`🧹 Repo status: partial clone residue (dir exists but no .git) — would auto-clean`)
+      console.log(`📦 Would clone: https://${plan.repoRoot}.git`)
+    } else {
+      console.log(`📂 Repo status: not in cold pool`)
+      console.log(`📦 Would clone: https://${plan.repoRoot}.git --depth 1`)
+    }
+
+    // Checkpoint 2: Addition record preview
+    const reason = getFlag(argv, '--reason') || '(none)'
+    const forkedFrom = getFlag(argv, '--forked-from')
+    console.log(`\n📝 Would write additions record:`)
+    console.log(`   reason:      ${reason}`)
+    console.log(`   forkedFrom:  ${forkedFrom || '(none)'}`)
+    console.log(`   status:      ${forkedFrom ? 'forked' : 'added'}`)
+    console.log(`\n💡 Remove --dry-run to execute.`)
+    return
+  }
 
   // ── Checkpoint 1: Repo already in cold pool? ──────────────────────
   const repoExists = existsSync(join(plan.repoPath, '.git'))

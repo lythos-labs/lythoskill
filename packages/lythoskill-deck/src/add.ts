@@ -75,7 +75,8 @@ function resolvePath(p: string): string {
   return resolve(p)
 }
 
-export async function addSkill(locator: string, options: { deck?: string; workdir?: string; alias?: string; type?: string }) {
+export async function addSkill(locator: string, options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean }) {
+  const dryRun = options.dryRun || false
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
   const deckPath = options.deck
     ? resolvePath(options.deck)
@@ -98,6 +99,37 @@ export async function addSkill(locator: string, options: { deck?: string; workdi
   }
 
   const targetDir = join(coldPool, parsed.host, parsed.owner, parsed.repo)
+
+  if (dryRun) {
+    const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo
+    const alias = options.alias || skillName
+    const skillType = (options.type || 'tool').toLowerCase()
+    const fqPath = parsed.skill
+      ? `${parsed.host}/${parsed.owner}/${parsed.repo}/${parsed.skill}`
+      : `${parsed.host}/${parsed.owner}/${parsed.repo}`
+
+    console.log(`🔎 Dry-run: deck add ${locator}`)
+    console.log(`   Cold pool:  ${coldPool}`)
+    console.log(`   Deck:       ${deckPath}`)
+    console.log()
+    console.log(`📂 Repo status: ${existsSync(join(targetDir, '.git')) ? 'already cloned' : existsSync(targetDir) ? 'dir exists (partial clone?)' : 'not in cold pool'}`)
+    if (!existsSync(join(targetDir, '.git'))) {
+      console.log(`📦 Would clone: https://${parsed.host}/${parsed.owner}/${parsed.repo}.git --depth 1`)
+    }
+    if (parsed.skill) {
+      const skillMd = join(targetDir, parsed.skill, 'SKILL.md')
+      if (existsSync(targetDir) && existsSync(skillMd)) {
+        console.log(`📄 Skill path:  valid — ${skillMd}`)
+      } else if (existsSync(targetDir)) {
+        console.log(`⚠️  Skill path:  NOT FOUND — check repo layout`)
+      }
+    }
+    console.log(`\n📝 Would add to skill-deck.toml:`)
+    console.log(`   [${skillType}.skills.${alias}]`)
+    console.log(`   path = "${fqPath}"`)
+    console.log(`\n💡 Remove --dry-run to execute.`)
+    return
+  }
 
   if (existsSync(targetDir)) {
     console.error(`❌ Already exists in cold pool: ${targetDir}`)

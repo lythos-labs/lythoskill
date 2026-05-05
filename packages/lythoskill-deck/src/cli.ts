@@ -23,6 +23,7 @@ const alias = aliasFlagIdx >= 0 ? args[aliasFlagIdx + 1] : undefined
 const type = typeFlagIdx >= 0 ? args[typeFlagIdx + 1] : undefined
 const noBackup = args.includes('--no-backup')
 const yes = args.includes('--yes')
+const dryRun = args.includes('--dry-run')
 
 const HELP_CONFIG = {
   binName: 'lythoskill-deck',
@@ -43,6 +44,7 @@ const HELP_CONFIG = {
 
     { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
     { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
+    { flag: '--dry-run', description: 'Show plan without executing (add, prune)' },
     { flag: '--yes', description: 'Skip interactive confirmation (for prune)' },
   ],
 }
@@ -61,7 +63,7 @@ switch (command) {
       console.error('❌ Missing locator. Usage: deck add <github.com/owner/repo[/skill]>')
       process.exit(1)
     }
-    await addSkill(locator, { deck: deckPath, workdir, alias, type })
+    await addSkill(locator, { deck: deckPath, workdir, alias, type, dryRun })
     break
   }
   case 'refresh': {
