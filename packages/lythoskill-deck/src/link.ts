@@ -80,38 +80,13 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
   }
 
   // 0.5 localhost skills: localhost/skill → cold_pool/<skill>
-  // If not found, create a placeholder SKILL.md so the user/agent can fill it in
   if (name.startsWith('localhost/')) {
     const skill = name.slice('localhost/'.length);
     if (skill) {
       const localPath = join(coldPool, skill);
       if (existsSync(join(localPath, "SKILL.md"))) return { path: localPath };
-      // Create placeholder
-      const now = new Date().toISOString().slice(0, 10);
-      const placeholder = [
-        '---',
-        `name: ${skill}`,
-        'description: TODO — add description',
-        'type: standard',
-        '---',
-        '',
-        `# ${skill}`,
-        '',
-        '> ⚠️ Placeholder — declared in skill-deck.toml but not yet implemented.',
-        '',
-        '## TODO',
-        '- [ ] Define what this skill does',
-        '- [ ] Add usage instructions',
-        '- [ ] Run `deck link` to activate',
-        '',
-        `Created: ${now}`,
-        '',
-      ].join('\n');
-      mkdirSync(localPath, { recursive: true });
-      writeFileSync(join(localPath, 'SKILL.md'), placeholder);
-      console.log(`📝 Created placeholder: localhost/${skill} → ${localPath}/SKILL.md`);
-      return { path: localPath };
     }
+    return { path: null };
   }
 
   // 1. 直接路径
@@ -242,8 +217,32 @@ for (const entry of parsedEntries) {
     continue;
   }
   if (!result.path) {
-    errors.push(`Skill not found: ${entry.path}`);
-    continue;
+    // For localhost skills, create a placeholder so the user can fill it in
+    if (entry.path.startsWith('localhost/')) {
+      const skill = entry.path.slice('localhost/'.length)
+      const localPath = join(COLD_POOL, skill)
+      if (!existsSync(join(localPath, 'SKILL.md'))) {
+        const now = new Date().toISOString().slice(0, 10)
+        const placeholder = [
+          '---', `name: ${skill}`, 'description: TODO — add description', 'type: standard', '---',
+          '', `# ${skill}`,
+          '', '> ⚠️ Placeholder — declared in skill-deck.toml but not yet implemented.',
+          '', '## TODO',
+          '- [ ] Define what this skill does',
+          '- [ ] Add usage instructions',
+          '- [ ] Run `deck link` to activate',
+          '', `Created: ${now}`, '',
+        ].join('\n')
+        mkdirSync(localPath, { recursive: true })
+        writeFileSync(join(localPath, 'SKILL.md'), placeholder)
+        console.log(`📝 Created placeholder: localhost/${skill} → ${localPath}/SKILL.md`)
+        result.path = localPath
+      }
+    }
+    if (!result.path) {
+      errors.push(`Skill not found: ${entry.path}`)
+      continue
+    }
   }
   declared.push({ name: entry.path, alias: entry.alias, type: entry.type, sourcePath: result.path });
 }
