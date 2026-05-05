@@ -54,7 +54,8 @@ for (const pkg of changedPackages) {
   }
 
   console.log(`\n🧪 ${pkg}`);
-  const result = await $`bun test ${testPath}`.cwd(ROOT).nothrow().quiet();
+  // Use shell for glob expansion (Bun.$ doesn't expand globs)
+  const result = await $`sh -c "bun test ${testPath}"`.cwd(ROOT).nothrow().quiet();
   const exitCode = result.exitCode;
 
   if (exitCode !== 0) {
