@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/5 02:04:02
+> 自动生成于 2026/5/5 16:59:33
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 99 | 进行中: 0, 待验收: 0, 已完成: 75 |
+| Tasks | 101 | 进行中: 0, 待验收: 0, 已完成: 76 |
 | Epics | 16 | 活跃: 0, 已完成: 13, 悬置: 1, 已归档: 2 |
-| ADRs | 39 | 已接受: 28 |
+| ADRs | 39 | 已接受: 29 |
 
 ---
 
@@ -47,12 +47,13 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (5)
 
 - [ ] **TASK-20260504165202852**: T1: Extract trailer dispatch from post-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165203797**: T2: Extract Epic-ADR coupling guard from pre-commit shell to TypeScript with tests
 - [ ] **TASK-20260504165204731**: T3: Extract lane guard (max-1-active per track) to TypeScript with tests
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
+- [ ] **TASK-20260505163912399**: create
 
 ### 进行中 (0)
 
@@ -62,7 +63,7 @@ _无_
 
 _无_
 
-### 已完成 (75)
+### 已完成 (76)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -139,6 +140,7 @@ _无_
 - ✅ ~~TASK-20260505015051145~~: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 - ✅ ~~TASK-20260505015052748~~: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 - ✅ ~~TASK-20260505015054313~~: T4: Feed source abstraction — cold pool / GitHub / URL as source types
+- ✅ ~~TASK-20260505165424864~~: create
 
 ### 悬置 (0)
 
@@ -193,7 +195,7 @@ _无_
 - ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
 - 🤔 **ADR-20260502012643244** (01-proposed): FQ-only locator — 删除 bare-name 与隐式策略 fallback
 - 🤔 **ADR-20260502012643344** (01-proposed): 项目自身 skill 通过 `localhost/<name>` symlink 自举，删除 `cold_pool="."` 特例
-- 🤔 **ADR-20260502012643444** (01-proposed): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
+- ✅ **ADR-20260502012643444** (02-accepted): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
 - 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
