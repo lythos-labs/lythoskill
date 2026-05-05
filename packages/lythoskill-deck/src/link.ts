@@ -79,12 +79,38 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
     if (existsSync(join(directPath, "SKILL.md"))) return { path: directPath };
   }
 
-  // 0.5 localhost skills: localhost/skill → cold_pool/skill
+  // 0.5 localhost skills: localhost/skill → cold_pool/<skill>
+  // If not found, create a placeholder SKILL.md so the user/agent can fill it in
   if (name.startsWith('localhost/')) {
     const skill = name.slice('localhost/'.length);
     if (skill) {
       const localPath = join(coldPool, skill);
       if (existsSync(join(localPath, "SKILL.md"))) return { path: localPath };
+      // Create placeholder
+      const now = new Date().toISOString().slice(0, 10);
+      const placeholder = [
+        '---',
+        `name: ${skill}`,
+        'description: TODO — add description',
+        'type: standard',
+        '---',
+        '',
+        `# ${skill}`,
+        '',
+        '> ⚠️ Placeholder — declared in skill-deck.toml but not yet implemented.',
+        '',
+        '## TODO',
+        '- [ ] Define what this skill does',
+        '- [ ] Add usage instructions',
+        '- [ ] Run `deck link` to activate',
+        '',
+        `Created: ${now}`,
+        '',
+      ].join('\n');
+      mkdirSync(localPath, { recursive: true });
+      writeFileSync(join(localPath, 'SKILL.md'), placeholder);
+      console.log(`📝 Created placeholder: localhost/${skill} → ${localPath}/SKILL.md`);
+      return { path: localPath };
     }
   }
 
