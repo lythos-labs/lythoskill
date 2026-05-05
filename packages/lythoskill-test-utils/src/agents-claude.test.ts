@@ -1,6 +1,6 @@
 import { describe, test, expect, spyOn } from 'bun:test'
 import { useAgent } from './agents'
-import { buildToolPrompt, buildClaudeCommand, extractJson, type SpawnCommand } from './agents/claude'
+import { buildToolPrompt, buildClaudeCommand, buildCleanEnv, extractJson, type SpawnCommand } from './agents/claude'
 import { runCli } from './bdd-runner'
 
 describe('runCli with injectable spawn', () => {
@@ -34,7 +34,8 @@ describe('buildClaudeCommand', () => {
     expect(cmd.cmd).toBe('claude')
     expect(cmd.args).toContain('-p')
     expect(cmd.args).toContain('--output-format')
-    expect(cmd.args).toContain('text')
+    expect(cmd.args).toContain('json')
+    expect(cmd.args).toContain('--prompt-file')
     expect(cmd.args).toContain('--permission-mode')
     expect(cmd.args).toContain('bypassPermissions')
     expect(cmd.args).toContain('--allowedTools')
@@ -84,6 +85,36 @@ describe('buildClaudeCommand', () => {
     expect(cmd.args.join(' ')).toContain('WebSearch')
     expect(cmd.args.join(' ')).toContain('WebFetch')
     expect(Object.keys(cmd.env).length).toBeGreaterThanOrEqual(1) // at least FORCE_COLOR
+  })
+})
+
+describe('buildCleanEnv', () => {
+  test('strips CLAUDECODE', () => {
+    const env = buildCleanEnv()
+    expect(env.CLAUDECODE).toBeUndefined()
+  })
+
+  test('strips CLAUDE_CODE_* prefixed vars', () => {
+    const env = buildCleanEnv()
+    expect(env.CLAUDE_CODE_ENTRYPOINT).toBeUndefined()
+    expect(env.CLAUDE_CODE_SESSION).toBeUndefined()
+    expect(env.CLAUDE_CODE_PARENT_SESSION).toBeUndefined()
+  })
+
+  test('preserves essential vars like PATH and HOME', () => {
+    const env = buildCleanEnv()
+    expect(env.PATH).toBeDefined()
+    expect(env.HOME).toBeDefined()
+  })
+
+  test('includes FORCE_COLOR=0 by default', () => {
+    const env = buildCleanEnv()
+    expect(env.FORCE_COLOR).toBe('0')
+  })
+
+  test('merges extra env vars', () => {
+    const env = buildCleanEnv({ DEBUG: '1' })
+    expect(env.DEBUG).toBe('1')
   })
 })
 

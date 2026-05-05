@@ -1,3 +1,6 @@
+import { writeFileSync, unlinkSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
 import type { AgentAdapter, AgentRunResult, ToolDefinition } from './types'
 import { readCheckpoints } from '../bdd-runner'
 
@@ -7,18 +10,41 @@ export interface SpawnCommand {
   cmd: string
   args: string[]
   cwd: string
-  stdin: string                     // text to pipe via stdin
+  stdin: string                     // prompt text (written to promptFile before spawn)
+  promptFile: string                // path to temp file, passed to --prompt-file
   env: Record<string, string>
   timeoutMs: number
 }
 
-/** Build the claude -p command specification. Pure — no spawn, no IO. */
 /** Default allowed tools for non-interactive agent execution. */
 export const DEFAULT_ALLOWED_TOOLS = 'Read,Write,Edit,Grep,Glob,WebSearch,WebFetch'
 
 /** Default disallowed: dangerous shell operations. */
 export const DEFAULT_DISALLOWED_TOOLS = 'Bash(rm *),Bash(sudo *),Bash(curl *),Bash(git push *)'
 
+/**
+ * Build a clean environment — strip all CLAUDE_CODE_* vars to prevent
+ * nested-session detection (report.md §2.2). Also strips CLAUDECODE.
+ */
+export function buildCleanEnv(extra?: Record<string, string>): Record<string, string> {
+  const env: Record<string, string> = {}
+  for (const [key, value] of Object.entries(process.env)) {
+    if (value === undefined) continue
+    if (key === 'CLAUDECODE') continue
+    if (key.startsWith('CLAUDE_CODE_')) continue
+    env[key] = value
+  }
+  return { ...env, FORCE_COLOR: '0', ...(extra ?? {}) }
+}
+
+/**
+ * Build the claude -p command specification. Pure — no spawn, no IO.
+ *
+ * Key design decisions (per report.md analysis, 2026-05-06):
+ * - --output-format json → structured output, no TUI escape sequences
+ * - --prompt-file <path> → avoids Bun stdin pipe bug on ARM64 (§2.1.1)
+ * - env cleaned by caller → avoid nested-session detection (§2.2)
+ */
 export function buildClaudeCommand(opts: {
   brief: string
   cwd: string
@@ -27,18 +53,24 @@ export function buildClaudeCommand(opts: {
   allowedTools?: string
   disallowedTools?: string
 }): SpawnCommand {
+  // Prompt goes to a temp file, passed via --prompt-file.
+  // This avoids the Bun ARM64 stdin pipe flush bug.
+  const promptFile = join(tmpdir(), `claude-prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`)
+
   return {
     cmd: 'claude',
     args: [
       '-p',
-      '--output-format', 'text',
+      '--output-format', 'json',
+      '--prompt-file', promptFile,
       '--permission-mode', 'bypassPermissions',
       '--allowedTools', opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS,
       '--disallowedTools', opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS,
     ],
     cwd: opts.cwd,
     stdin: opts.brief,
-    env: { FORCE_COLOR: '0', ...(opts.env ?? {}) },
+    promptFile,
+    env: buildCleanEnv(opts.env),
     timeoutMs: opts.timeoutMs ?? 60000,
   }
 }
@@ -69,7 +101,6 @@ export function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
 
 // ── JSON extraction (pure: parse LLM output without IO) ─────────────────
 
-/** Extract JSON from LLM stdout — handles markdown fences and raw output. Pure. */
 export function extractJson(raw: string): unknown {
   const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
   const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
@@ -78,13 +109,21 @@ export function extractJson(raw: string): unknown {
 
 // ── Executor: consume SpawnCommand + collect result ────────────────────────
 
+const MAX_RETRIES = 3
+const RETRY_DELAY_MS = 2000
+
 async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
+  // Write prompt to temp file (avoids stdin pipe bug)
+  writeFileSync(cmd.promptFile, cmd.stdin || '', 'utf-8')
+
   const start = Date.now()
 
   const proc = Bun.spawn([cmd.cmd, ...cmd.args], {
     cwd: cmd.cwd,
-    stdin: new TextEncoder().encode(cmd.stdin),
-    env: { ...process.env, ...cmd.env },
+    stdin: 'ignore',  // no stdin pipe — prompt comes from --prompt-file
+    stdout: 'pipe',
+    stderr: 'pipe',
+    env: cmd.env,
   })
 
   const timeout = setTimeout(() => proc.kill(), cmd.timeoutMs)
@@ -93,9 +132,21 @@ async function executeSpawnCommand(cmd: SpawnCommand): Promise<AgentRunResult> {
   clearTimeout(timeout)
 
   const durationMs = Date.now() - start
-  const stdout = await new Response(proc.stdout).text()
+  const rawStdout = await new Response(proc.stdout).text()
   const stderr = await new Response(proc.stderr).text()
   const code = proc.exitCode ?? 1
+
+  // Clean up prompt file
+  try { unlinkSync(cmd.promptFile) } catch {}
+
+  // Parse JSON output from --output-format json
+  let stdout = rawStdout
+  try {
+    const parsed = JSON.parse(rawStdout)
+    stdout = typeof parsed.result === 'string' ? parsed.result : rawStdout
+  } catch {
+    // If JSON parse fails, keep raw output
+  }
 
   const checkpoints = readCheckpoints(cmd.cwd)
 
@@ -113,7 +164,33 @@ export const claudeAdapter: AgentAdapter = {
     }
 
     const cmd = buildClaudeCommand(opts)
-    return executeSpawnCommand(cmd)
+
+    // Retry loop: deferred tool deadlock recovery (§3.1.3)
+    let lastError: Error | undefined
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const result = await executeSpawnCommand(cmd)
+        if (result.stdout.trim() || result.code === 0) return result
+        // Empty stdout → possible deferred tool deadlock, retry
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt))
+        }
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e))
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, RETRY_DELAY_MS * attempt))
+        }
+      }
+    }
+
+    // All retries exhausted — return last error as result
+    return {
+      stdout: '',
+      stderr: lastError?.message ?? 'All retries exhausted',
+      code: 1,
+      durationMs: 0,
+      checkpoints: [],
+    }
   },
 
   async invokeTool(opts): Promise<unknown> {
