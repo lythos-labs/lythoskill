@@ -15,7 +15,7 @@ import { join, basename } from 'node:path'
 import { Database } from 'bun:sqlite'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable } from './curator-core'
-import { createColdPoolFeedAdapter, createGitHubSearchAdapter, createLobeHubAdapter } from './feed-adapters'
+import { createColdPoolFeedAdapter, createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
 
 // ── Types ────────────────────────────────────────────────────
@@ -672,6 +672,7 @@ async function runDiscover(argv: string[]) {
   for (const name of feedNames) {
     if (name === 'github') adapters.push(createGitHubSearchAdapter())
     if (name === 'lobehub') adapters.push(createLobeHubAdapter())
+    if (name === 'agentskill') adapters.push(createAgentSkillShAdapter())
   }
 
   console.log(`🔍 Discovering skills...\n`)

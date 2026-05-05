@@ -65,11 +65,18 @@ describe('createLobeHubAdapter', () => {
   test('returns feed metadata', () => {
     const adapter = createLobeHubAdapter()
     expect(adapter.feed.type).toBe('lobehub')
+    expect(adapter.feed.label).toContain('LobeHub')
   })
 
-  test('returns empty on network error', async () => {
-    spyOn(globalThis, 'fetch').mockRejectedValue(new Error('network error'))
+  test('accepts custom query', () => {
+    const adapter = createLobeHubAdapter('web scraping')
+    expect(adapter.feed.locator).toContain('web scraping')
+  })
+
+  test('returns empty when market-cli is not installed', async () => {
+    // When @lobehub/market-cli is not installed, spawnSync returns non-zero
     const items = await createLobeHubAdapter().discover()
+    // In test environments without market-cli, this should return empty
     expect(items).toEqual([])
   })
 })
