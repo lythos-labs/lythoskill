@@ -148,11 +148,24 @@ If you are an AI agent reading this README:
    # Docs: https://github.com/MoonshotAI/kimi-cli
    ```
 
-> **This tool requires Bun, not Node.** `bunx` is the correct runner. `npx` will fail unless Bun is also installed.
+> **This tool requires Bun, not Node.** `bunx` is the correct runner.
+
+### 30-Second Trial (curl, zero install beyond prerequisites)
+
+```bash
+# Deck + prompt → agent executes → output. No files created in your project.
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "用中文写一段产品介绍，80字"
+
+# Try other built-in decks:
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- engineering "Write a PRD for user authentication"
+```
+
+Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
+
+### Install for Real Use
 
 ```bash
 # 1. Add a skill (downloads to cold pool + updates deck + links)
-#    Replace <owner>/<repo> with a real skill you want to use
 bunx @lythos/skill-deck@0.9.20 add <owner>/<repo>
 
 # 2. Agent sees the skill. Everything else is physically absent.
