@@ -66,7 +66,7 @@ echo "📁 Output: $OUT_DIR"
 mkdir -p "$OUT_DIR"
 
 # ── Run agent: deck + prompt → execute + judge ───────────────
-bunx @lythos/skill-arena@0.9.20 agent-run \
+bunx --prefer-offline @lythos/skill-arena@0.9.20 agent-run \
   --brief "$PROMPT" \
   --deck "$TMPDIR/deck.toml" \
   --out "$OUT_DIR"
