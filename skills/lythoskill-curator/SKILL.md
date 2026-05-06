@@ -1,6 +1,6 @@
 ---
 name: lythoskill-curator
-version: 0.9.20
+version: 0.9.21
 type: standard
 description: |
   Read-only indexer for skill cold pools. Scans all local skill
@@ -12,7 +12,7 @@ description: |
 when_to_use: |
   List all skills, what skills do I have, scan skill pool, skill index,  discover skills, update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
 allowed-tools:
-  - Bash(bunx @lythos/skill-curator@0.9.20 *)
+  - Bash(bunx @lythos/skill-curator@0.9.21 *)
   - WebSearch
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
@@ -44,14 +44,14 @@ recommendation workflow: scan → query → arena → recommend → deck.
 ### Index the cold pool
 ```bash
 # Scan and produce REGISTRY.json + catalog.db
-bunx @lythos/skill-curator@0.9.20 [POOL_PATH]
+bunx @lythos/skill-curator@0.9.21 [POOL_PATH]
 
 # Defaults:
 #   POOL_PATH = ~/.agents/skill-repos
 #   Output    = {POOL_PATH}/.lythoskill-curator/
 #
 # Custom output:
-bunx @lythos/skill-curator@0.9.20 ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
+bunx @lythos/skill-curator@0.9.21 ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
 ```
 Curator is a **reconciler** (K8s-style): no matter what state the index is in
 (stale, corrupted, missing), running `curator` converges it to a clean, current
@@ -60,21 +60,21 @@ index. Old index is automatically backed up before rebuild.
 ### Rollback (if rebuild produces bad data)
 ```bash
 # Restore the most recent backup
-bunx @lythos/skill-curator@0.9.20 restore
+bunx @lythos/skill-curator@0.9.21 restore
 # Custom output directory:
-bunx @lythos/skill-curator@0.9.20 restore --output ~/.agents/lythos/skill-curator/
+bunx @lythos/skill-curator@0.9.21 restore --output ~/.agents/lythos/skill-curator/
 ```
 
 ### Query the index
 ```bash
 # SQL query → Markdown table
-bunx @lythos/skill-curator@0.9.20 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
+bunx @lythos/skill-curator@0.9.21 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
 # Specify db path
-bunx @lythos/skill-curator@0.9.20 query --db ./catalog.db "SELECT * FROM catalog_meta"
+bunx @lythos/skill-curator@0.9.21 query --db ./catalog.db "SELECT * FROM catalog_meta"
 # Inspect table structure
-bunx @lythos/skill-curator@0.9.20 query "PRAGMA table_info(skills)"
+bunx @lythos/skill-curator@0.9.21 query "PRAGMA table_info(skills)"
 # Show schema when no query is provided
-bunx @lythos/skill-curator@0.9.20 query
+bunx @lythos/skill-curator@0.9.21 query
 ```
 
 Output is a formatted Markdown table — easy to read in chat or pipe to other tools.
@@ -82,9 +82,9 @@ Output is a formatted Markdown table — easy to read in chat or pipe to other t
 ### Audit the index
 ```bash
 # Run predefined checks and output a report
-bunx @lythos/skill-curator@0.9.20 audit
+bunx @lythos/skill-curator@0.9.21 audit
 # Specify db path
-bunx @lythos/skill-curator@0.9.20 audit --db ./catalog.db
+bunx @lythos/skill-curator@0.9.21 audit --db ./catalog.db
 ```
 
 Checks performed:
@@ -99,16 +99,16 @@ Report format: one Markdown table per check, plus a summary score out of 100.
 ### Typical queries
 ```bash
 # Same-niche skills (potential conflicts for deck)
-bunx @lythos/skill-curator@0.9.20 query "SELECT name, niches FROM skills WHERE niches LIKE '%report%'"
+bunx @lythos/skill-curator@0.9.21 query "SELECT name, niches FROM skills WHERE niches LIKE '%report%'"
 # Managed directory overlaps
-bunx @lythos/skill-curator@0.9.20 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
+bunx @lythos/skill-curator@0.9.21 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
 # Duplicate detection (same name, different sources)
-bunx @lythos/skill-curator@0.9.20 query \
+bunx @lythos/skill-curator@0.9.21 query \
   "SELECT name, path FROM skills WHERE name IN (SELECT name FROM skills GROUP BY name HAVING COUNT(*) > 1)"
 # Combo / transient / fork skills (localhost-first types)
-bunx @lythos/skill-curator@0.9.20 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
+bunx @lythos/skill-curator@0.9.21 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
 # Skills by deck governance type
-bunx @lythos/skill-curator@0.9.20 query "SELECT name, deck_skill_type, path FROM skills WHERE deck_skill_type = 'combo'"
+bunx @lythos/skill-curator@0.9.21 query "SELECT name, deck_skill_type, path FROM skills WHERE deck_skill_type = 'combo'"
 ```
 
 ## Curator + Deck Workflow
