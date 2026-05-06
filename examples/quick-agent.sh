@@ -57,12 +57,37 @@ case "$DECK_SPEC" in
     ;;
   *)
     echo "📥 Fetching deck: $DECK_RAW/${DECK_SPEC}.toml"
-    curl -fsSL "$DECK_RAW/${DECK_SPEC}.toml" -o "$TMPDIR/deck.toml" || {
-      echo "❌ Unknown deck: $DECK_SPEC"
-      echo "   Available: documents, engineering, governance, full-stack"
-      echo "   Or pass a URL: https://raw.githubusercontent.com/..."
-      exit 1
-    }
+    curl -fsSL --connect-timeout 10 --max-time 30 "$DECK_RAW/${DECK_SPEC}.toml" -o "$TMPDIR/deck.toml" 2>/dev/null || true
+    # Fallback: if GitHub raw is unreachable, generate deck from built-in template
+    if [ ! -s "$TMPDIR/deck.toml" ]; then
+      echo "⚠️  GitHub raw unreachable, using built-in template for '$DECK_SPEC'"
+      case "$DECK_SPEC" in
+        documents)
+          cat > "$TMPDIR/deck.toml" << 'TOML'
+[deck]
+max_cards = 10
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+TOML
+          ;;
+        engineering)
+          cat > "$TMPDIR/deck.toml" << 'TOML'
+[deck]
+max_cards = 10
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+TOML
+          ;;
+        *)
+          echo "❌ Unknown deck: $DECK_SPEC and no fallback template"
+          exit 1
+          ;;
+      esac
+    fi
     ;;
 esac
 
