@@ -23,6 +23,18 @@ function readCheckpoints(cwd: string): CheckpointEntry[] {
   }
 }
 
+// ── Known limitations ──────────────────────────────────────────────────────
+//
+// deepseek -p mode is chat-only (no tool execution).
+//   - Text tasks (hello world, copy, Q&A) → works, stdout captured correctly
+//   - File/shell/search tasks → fails silently (stdout empty, exit 0)
+//   - Root cause: -p uses chat completion API, not agent loop with tool calling
+//   - Fix: migrate to `deepseek serve --http` (REST API with full tool execution)
+//     Tracked in TASK-20260506193936311
+//   - Workaround: use kimi adapter for tasks requiring tool execution
+//
+// Full analysis: cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md
+//
 // ── DeepSeek TUI adapter ────────────────────────────────────────────────────
 //
 // DeepSeek TUI is a Rust-native terminal agent with headless one-shot mode.
