@@ -15,12 +15,14 @@ set -euo pipefail
 DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
 OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
+PLAYER="${LYTHOS_PLAYER:-kimi}"  # override via env: LYTHOS_PLAYER=deepseek bash quick-agent.sh ...
 
 if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
   echo "❌ Missing arguments."
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
   echo "  deck:  documents | design-studio | visual-explainer | engineering | governance | full-stack | URL | path.toml"
   echo "  prompt: your task description (wrap in quotes)"
+  echo "  Agent: set LYTHOS_PLAYER env (kimi|deepseek|claude), default: kimi"
   echo ""
   echo "Received: deck='$DECK_SPEC' prompt='$PROMPT'"
   exit 1
@@ -131,7 +133,8 @@ mkdir -p "$OUT_DIR"
 bunx --prefer-offline @lythos/skill-arena@0.9.22 agent-run \
   --brief "$PROMPT" \
   --deck "$TMPDIR/deck.toml" \
-  --out "$OUT_DIR"
+  --out "$OUT_DIR" \
+  --player "$PLAYER"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

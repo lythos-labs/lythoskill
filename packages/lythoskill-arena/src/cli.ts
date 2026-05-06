@@ -159,25 +159,37 @@ Evaluate whether the output is complete, accurate, and well-structured.
       mkdirSync(workdir, { recursive: true })
       writeFileSync(join(workdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
 
-      // ── Pre-flight: deck link ────────────────────────────────────
-      const linkProc = Bun.spawn(
-        ['bunx', '@lythos/skill-deck', 'link'],
-        { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
-      )
-      await linkProc.exited
-      const linkStderr = await new Response(linkProc.stderr).text()
-      const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
-      if (!linkResult.ok) {
-        console.error(`❌ ${linkResult.error}`)
-        process.exit(1)
+      // ── Pre-flight: deck link (skip if deck declares no skills) ──
+      const deckRaw = readFileSync(join(workdir, 'skill-deck.toml'), 'utf-8')
+      let deckParsed: Record<string, any> = {}
+      try { deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any> } catch {}
+      const hasSkills = parseDeckSkills(deckParsed).length > 0
+
+      if (hasSkills) {
+        // Prefer local dev CLI over bunx (bunx needs tempdir write, blocked by some sandboxes)
+        const { existsSync: es2 } = await import('node:fs')
+        const localDeckCli = join(import.meta.dir, '..', '..', 'lythoskill-deck', 'src', 'cli.ts')
+        const linkCmd = es2(localDeckCli)
+          ? ['bun', localDeckCli, 'link']
+          : ['bunx', '@lythos/skill-deck', 'link']
+        const linkProc = Bun.spawn(linkCmd,
+          { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
+        )
+        await linkProc.exited
+        const linkStderr = await new Response(linkProc.stderr).text()
+        const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
+        if (!linkResult.ok) {
+          console.error(`❌ ${linkResult.error}`)
+          process.exit(1)
+        }
+      } else {
+        console.log('ℹ️  No skills declared in deck — skipping link')
       }
 
-      // ── Pre-flight: skill existence check (pure logic, IO injected) ─
-      const { existsSync: es, readFileSync: rfs } = await import('node:fs')
+      // ── Pre-flight: skill existence check (reuses deckParsed from above) ─
+      const { existsSync: es } = await import('node:fs')
       const { homedir: hd } = await import('node:os')
       try {
-        const deckRaw = rfs(join(workdir, 'skill-deck.toml'), 'utf-8')
-        const deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any>
         const coldPoolDefault = join(hd(), '.agents', 'skill-repos')
         const coldPoolDir = resolveColdPoolDir(
           deckParsed?.deck?.cold_pool,
@@ -191,8 +203,7 @@ Evaluate whether the output is complete, accurate, and well-structured.
           console.warn(`⚠️  ${warning}`)
         }
       } catch (e) {
-        // TOML parse failures are non-fatal — the link step would have caught actual problems
-        console.warn('⚠️  Could not parse skill-deck.toml for pre-flight check:', e instanceof Error ? e.message : e)
+        console.warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
       }
     },
   })
