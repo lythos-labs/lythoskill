@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/6 02:12:14
+> 自动生成于 2026/5/6 10:32:58
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 124 | 进行中: 0, 待验收: 0, 已完成: 95 |
+| Tasks | 125 | 进行中: 0, 待验收: 0, 已完成: 95 |
 | Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
-| ADRs | 42 | 已接受: 32 |
+| ADRs | 43 | 已接受: 33 |
 
 ---
 
@@ -50,7 +50,7 @@
 
 ## 📄 Tasks
 
-### 待办 (9)
+### 待办 (10)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -61,6 +61,7 @@
 - [ ] **TASK-20260506001644390**: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
 - [ ] **TASK-20260506001644423**: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
 - [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
+- [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 
 ### 进行中 (0)
 
@@ -240,6 +241,7 @@ _无_
 - ✅ **ADR-20260505221432740** (02-accepted): Standardize test file co-location across monorepo packages
 - ✅ **ADR-20260505225159725** (02-accepted): Criterion definition schema — from bare strings to structured scoring dimensions with rubrics
 - ✅ **ADR-20260506021112492** (02-accepted): Kimi CLI as default AgentAdapter — Player abstraction validation and CWD isolation for deny-by-default
+- ✅ **ADR-20260506103209293** (02-accepted): Supersede combo-skill-as-orchestration-layer — combo is now a deck-level prompt, not a separate skill
 
 ---
 
