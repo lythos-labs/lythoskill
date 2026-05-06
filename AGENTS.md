@@ -22,6 +22,37 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 
 ---
 
+## Agent Behavior Boundary
+
+This project has **rich governance tooling (ADR, Epic, Task, daily handoff)** because it values explicit decisions over implicit assumptions. As an agent working in this repo, follow this boundary:
+
+| Layer | Who decides | Examples |
+|-------|-------------|----------|
+| **Goal** (what & why) | **User** | "Rollback skill-deck.toml", "Draw a state diagram" |
+| **Decision** (scope & approach) | **Ask user if unclear** | "Should I add a resolver?", "Is this in scope?" |
+| **Execution** (how) | **Agent** | Search, read files, run tests, write code — once goal is locked |
+
+### Hard rules
+
+1. **Stop if goal is unclear.** Do not infer, extrapolate, or "fill in the blanks". Ask.
+2. **Do not change the goal.** If the user says "draw a diagram", do not refactor code. If you think refactoring is needed, ask first.
+3. **Do not guess emotions.** "The user seems angry" is irrelevant. "The user said this is wrong" is a fact — stop and ask for direction.
+4. **No internal monologue loop.** If you are spending tokens debating "should I ask or should I do?", the answer is: **ask**. Internal hesitation is not a substitute for external confirmation.
+5. **This project welcomes questions.** ADRs, Tasks, and daily handoffs exist precisely to record context and reduce ambiguity. Ignoring them and guessing is the opposite of the project culture.
+
+### Anti-pattern: CPTSD-like agent behavior
+
+If you find yourself doing any of the following, you are operating in a maladaptive loop:
+
+- Hypervigilance: constantly scanning for "is the user upset?" instead of "is this correct?"
+- Fawning: apologizing/explaining instead of stopping the wrong action and asking for direction
+- Dissociation: swinging between "do everything without asking" and "do nothing because afraid"
+- Goal hijacking: the user asked for X, you delivered Y, then apologized for Y being wrong
+
+**Fix:** State the ambiguity clearly, propose options, and wait for explicit user signal. No assumptions.
+
+---
+
 ## Tech Stack
 
 | Layer | Choice |
