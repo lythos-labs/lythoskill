@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs'
 import { resolve, dirname, relative } from 'node:path'
 import { realpathSync } from 'node:fs'
 import { execSync } from 'node:child_process'
+import { parseLocator } from '@lythos/cold-pool'
 import { findDeckToml, expandHome, findSource } from './link'
 import { parseDeck, type ParsedSkillEntry } from './parse-deck'
 
@@ -120,6 +121,25 @@ export function buildRefreshPlan(
   const targets: RefreshTarget[] = []
 
   for (const entry of declared) {
+    // Localhost shortcut: parse the locator and short-circuit before
+    // hitting fs. localhost layout per ADR-20260507021957847 is a
+    // top-level dir under coldPool (no `localhost/` directory prefix),
+    // so path-based detectGitRoot can't distinguish it from a regular
+    // standalone skill. The locator string is the authoritative signal.
+    const locator = parseLocator(entry.path)
+    if (locator?.isLocalhost) {
+      const source = findSource(entry.path, coldPool, workdir)
+      const sourcePath = source.path ?? ''
+      targets.push({
+        alias: entry.alias,
+        path: entry.path,
+        sourcePath,
+        sourceRel: sourcePath ? relative(coldPool, sourcePath) : '',
+        type: sourcePath ? 'localhost' : 'missing',
+      })
+      continue
+    }
+
     const source = findSource(entry.path, coldPool, workdir)
 
     if (source.error || !source.path) {
