@@ -2,8 +2,8 @@
  * @lythos/cold-pool — Cold pool service layer.
  *
  * Resource layer: `ColdPool`
- * Plan layer:     `parseLocator`, `buildValidationPlan`, (future) `buildFetchPlan`
- * Execute layer:  `executeValidationPlan`, (future) `executeFetchPlan`, `gitPull`/`gitClone`
+ * Plan layer:     `parseLocator`, `buildValidationPlan`, `buildFetchPlan`
+ * Execute layer:  `executeValidationPlan`, `executeFetchPlan`, git IO primitives
  */
 export type {
   Locator,
@@ -26,3 +26,8 @@ export { inferSkillPath } from './infer-skill-path.js'
 
 export type { ValidationPlan, ValidationCheck, ValidationIO } from './validate-plan.js'
 export { buildValidationPlan, executeValidationPlan } from './validate-plan.js'
+
+export type { GitCloneOptions, GitPullResult, GitRootResult } from './git-io.js'
+export { gitClone, gitPull, detectGitRoot } from './git-io.js'
+
+export { buildFetchPlan, executeFetchPlan } from './fetch-plan.js'
