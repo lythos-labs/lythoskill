@@ -153,11 +153,11 @@ If you are an AI agent reading this README:
 ### 30-Second Trial (curl, zero install beyond prerequisites)
 
 ```bash
-# Deck + prompt → agent executes → output. No files created in your project.
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "用中文写一段产品介绍，80字"
+# Deck + prompt → agent executes + judge scores → output. No files touched in your project.
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Write a one-page product brief for a developer tool that helps AI agents avoid skill conflicts. Include a problem statement, solution summary, and target audience."
 
 # Try other built-in decks:
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- engineering "Write a PRD for user authentication"
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- engineering "Write a 3-paragraph PRD for adding OAuth2 support to a CLI tool"
 ```
 
 Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
