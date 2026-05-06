@@ -26,12 +26,12 @@ describe('buildFetchPlan', () => {
     expect(plan.alreadyExists).toBe(true)
   })
 
-  test('localhost locator gets empty cloneUrl', () => {
+  test('localhost locator gets empty cloneUrl + top-level dir', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('localhost/my-skill')!
     const plan = buildFetchPlan(pool, loc)
     expect(plan.cloneUrl).toBe('')
-    expect(plan.targetDir).toBe('/cold/localhost/my-skill')
+    expect(plan.targetDir).toBe('/cold/my-skill')
   })
 
   test('passes ref through', () => {

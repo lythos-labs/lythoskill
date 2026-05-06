@@ -31,19 +31,20 @@ describe('ColdPool.resolveDir — pure path computation', () => {
     expect(pool.resolveDir(loc)).toBe('/cold/github.com/anthropics/skills')
   })
 
-  test('localhost form', () => {
+  test('localhost form — top-level dir, no `localhost/` prefix', () => {
     const loc = parseLocator('localhost/my-skill')!
-    expect(pool.resolveDir(loc)).toBe('/cold/localhost/my-skill')
+    expect(pool.resolveDir(loc)).toBe('/cold/my-skill')
   })
 })
 
 describe('ColdPool — fs-backed read accessors', () => {
-  // Build a small fake cold pool on disk
+  // Build a small fake cold pool on disk. Localhost-style skills live
+  // as TOP-LEVEL dirs (with SKILL.md directly), per project convention.
   const root = mkdtempSync(join(tmpdir(), 'cold-pool-test-'))
   mkdirSync(join(root, 'github.com/owner/repo-a'), { recursive: true })
   mkdirSync(join(root, 'github.com/owner/repo-b'), { recursive: true })
-  mkdirSync(join(root, 'localhost/skill-x'), { recursive: true })
-  writeFileSync(join(root, 'localhost/skill-x/SKILL.md'), '# x')
+  mkdirSync(join(root, 'skill-x'), { recursive: true })
+  writeFileSync(join(root, 'skill-x/SKILL.md'), '# x')
   // Hidden dir should be skipped
   mkdirSync(join(root, '.git'), { recursive: true })
 
@@ -59,17 +60,17 @@ describe('ColdPool — fs-backed read accessors', () => {
     expect(pool.has(loc)).toBe(false)
   })
 
-  test('has() works for localhost form', () => {
+  test('has() works for localhost form (top-level dir convention)', () => {
     const loc = parseLocator('localhost/skill-x')!
     expect(pool.has(loc)).toBe(true)
   })
 
-  test('list() enumerates host/owner/repo + localhost entries, skips hidden', () => {
+  test('list() enumerates host/owner/repo + top-level localhost dirs, skips hidden', () => {
     const entries = pool.list().sort()
     expect(entries).toEqual([
       join(root, 'github.com/owner/repo-a'),
       join(root, 'github.com/owner/repo-b'),
-      join(root, 'localhost/skill-x'),
+      join(root, 'skill-x'),
     ].sort())
   })
 

@@ -67,7 +67,7 @@ describe('expandHome', () => {
 })
 
 describe('findSource', () => {
-  it('resolves fully-qualified host.tld/owner/repo/skill via cold-pool direct path', () => {
+  it('resolves FQ host.tld/owner/repo/skill via cold-pool direct path', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
     const expected = placeSkill(coldPool, 'github.com/lythos-labs/lythoskill/skills/lythoskill-deck')
@@ -75,34 +75,44 @@ describe('findSource', () => {
     expect(result.path).toBe(expected)
   })
 
-  it('resolves a direct cold-pool hit when name matches a top-level dir with SKILL.md', () => {
+  it('resolves FQ standalone host.tld/owner/repo (skill = null) via repo-root SKILL.md', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
-    const expected = placeSkill(coldPool, 'my-skill')
+    const expected = placeSkill(coldPool, 'github.com/owner/standalone')
+    const result = findSource('github.com/owner/standalone', coldPool, projectDir)
+    expect(result.path).toBe(expected)
+  })
+
+  it('resolves localhost/<name> via top-level dir convention', () => {
+    const coldPool = makeTmp()
+    const projectDir = makeTmp()
+    const expected = placeSkill(coldPool, 'my-local-skill')
+    const result = findSource('localhost/my-local-skill', coldPool, projectDir)
+    expect(result.path).toBe(expected)
+  })
+
+  it('rejects bare names with FQ-only error (per ADR-20260502012643244)', () => {
+    const coldPool = makeTmp()
+    const projectDir = makeTmp()
+    placeSkill(coldPool, 'my-skill') // even if a dir exists
     const result = findSource('my-skill', coldPool, projectDir)
-    expect(result.path).toBe(expected)
+    expect(result.path).toBeNull()
+    expect(result.error).toBeDefined()
+    expect(result.error).toContain('not FQ')
   })
 
-  it('resolves a monorepo layout (repo/skill → coldPool/repo/skill)', () => {
+  it('rejects shorthand owner/repo (no host) with FQ-only error', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
-    const expected = placeSkill(coldPool, 'mono-repo/skills/inner-skill')
-    const result = findSource('mono-repo/skills/inner-skill', coldPool, projectDir)
-    expect(result.path).toBe(expected)
+    const result = findSource('owner/repo', coldPool, projectDir)
+    expect(result.path).toBeNull()
+    expect(result.error).toBeDefined()
   })
 
-  it('falls back to projectDir/<name> for project-local skills', () => {
+  it('returns {path: null} when FQ locator is well-formed but path absent on disk', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
-    const expected = placeSkill(projectDir, 'skills/local-skill')
-    const result = findSource('skills/local-skill', coldPool, projectDir)
-    expect(result.path).toBe(expected)
-  })
-
-  it('returns {path: null} when no strategy resolves the name', () => {
-    const coldPool = makeTmp()
-    const projectDir = makeTmp()
-    const result = findSource('nonexistent-skill', coldPool, projectDir)
+    const result = findSource('github.com/owner/missing-repo/skill', coldPool, projectDir)
     expect(result.path).toBeNull()
     expect(result.error).toBeUndefined()
   })

@@ -17,6 +17,7 @@ import {
 import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
+import { ColdPool, parseLocator } from "@lythos/cold-pool";
 import {
   SkillDeckLockSchema,
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,
@@ -58,81 +59,43 @@ export interface FindSourceResult {
   error?: string;
 }
 
-export function findSource(name: string, coldPool: string, projectDir: string): FindSourceResult {
-  // 0. Fully-qualified path: host.tld/owner/repo/skill
-  //    → cold_pool/host.tld/owner/repo/skill
-  //    Also handles host.tld/owner/repo (standalone skill)
-  const fqMatch = name.match(/^[a-z0-9-]+\.[a-z0-9-]+\//);
-  if (fqMatch) {
-    const parts = name.split("/");
-    const host = parts[0];      // github.com
-    const owner = parts[1];     // lythos-labs
-    const repo = parts[2];      // lythoskill
-    const skill = parts.slice(3).join("/"); // lythoskill-deck
-
-    if (skill) {
-      const fqPath = join(coldPool, host, owner, repo, skill);
-      if (existsSync(join(fqPath, "SKILL.md"))) return { path: fqPath };
-    }
-    // fallback: standalone skill at repo root
-    const directPath = join(coldPool, host, owner, repo);
-    if (existsSync(join(directPath, "SKILL.md"))) return { path: directPath };
-  }
-
-  // 0.5 localhost skills: localhost/skill → cold_pool/<skill>
-  if (name.startsWith('localhost/')) {
-    const skill = name.slice('localhost/'.length);
-    if (skill) {
-      const localPath = join(coldPool, skill);
-      if (existsSync(join(localPath, "SKILL.md"))) return { path: localPath };
-    }
-    return { path: null };
-  }
-
-  // 1. 直接路径
-  const direct = resolve(coldPool, name);
-  if (existsSync(join(direct, "SKILL.md"))) return { path: direct };
-
-  // 2. Monorepo: repo/skill → cold_pool/repo/skill
-  if (name.includes("/")) {
-    const [repo, ...rest] = name.split("/");
-    const mono = join(coldPool, repo, rest.join("/"));
-    if (existsSync(join(mono, "SKILL.md"))) return { path: mono };
-  }
-
-  // 3. 项目本地: <project>/<name>
-  const local = resolve(projectDir, name);
-  if (existsSync(join(local, "SKILL.md"))) return { path: local };
-
-  // 4. 扁平扫描: cold_pool/<any-repo>/<name>
-  //    跳过隐藏目录（agent working set、git、配置等）和 node_modules，
-  //    避免把 .claude/skills/ 里的 symlink 误判为有效 cold-pool 源
-  const matches: string[] = [];
-  try {
-    for (const entry of readdirSync(coldPool, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      if (entry.name.startsWith('.')) continue;
-      if (entry.name === 'node_modules') continue;
-      const base = join(coldPool, entry.name);
-      for (const sub of [join(base, name)]) {
-        if (existsSync(join(sub, "SKILL.md"))) {
-          matches.push(sub);
-        }
-      }
-    }
-  } catch {}
-
-  if (matches.length === 1) {
-    return { path: matches[0] };
-  }
-  if (matches.length > 1) {
-    const candidates = matches.map(m => relative(coldPool, m)).join(', ');
+/**
+ * Resolve a deck-declared locator to its physical SKILL.md directory in
+ * the cold pool. Per ADR-20260502012643244, locators are FQ-only — bare
+ * names and shorthand `owner/repo` are rejected. Internally delegates to
+ * `@lythos/cold-pool` for parsing and pool path computation.
+ *
+ * `projectDir` is currently unused (legacy parameter from the deprecated
+ * project-local fallback strategy). Kept for caller compatibility; will
+ * be removed in 0.10.x cleanup.
+ */
+export function findSource(name: string, coldPool: string, _projectDir: string): FindSourceResult {
+  const locator = parseLocator(name);
+  if (!locator) {
     return {
       path: null,
-      error: `Ambiguous skill name "${name}": found ${matches.length} matches (${candidates}). Use fully-qualified name (e.g., github.com/owner/repo/${name})`,
+      error: `Locator "${name}" is not FQ. Expected: host.tld/owner/repo[/skill] or localhost/<name>. Bare names rejected per ADR-20260502012643244.`,
     };
   }
 
+  const pool = new ColdPool(coldPool);
+  const baseDir = pool.resolveDir(locator);
+
+  // localhost: baseDir is the skill dir itself
+  if (locator.isLocalhost) {
+    if (existsSync(join(baseDir, "SKILL.md"))) return { path: baseDir };
+    return { path: null };
+  }
+
+  // Remote with skill subpath: SKILL.md sits inside the subpath
+  if (locator.skill) {
+    const skillDir = join(baseDir, locator.skill);
+    if (existsSync(join(skillDir, "SKILL.md"))) return { path: skillDir };
+    return { path: null };
+  }
+
+  // Standalone repo: SKILL.md is at repo root
+  if (existsSync(join(baseDir, "SKILL.md"))) return { path: baseDir };
   return { path: null };
 }
 

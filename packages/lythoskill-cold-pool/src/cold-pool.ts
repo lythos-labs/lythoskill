@@ -21,10 +21,18 @@ export class ColdPool {
     this.path = coldPoolPath ?? DEFAULT_COLD_POOL_PATH
   }
 
-  /** Compute the cold-pool directory for a locator. No fs check. */
+  /**
+   * Compute the cold-pool directory for a locator. No fs check.
+   *
+   * For localhost skills, the convention (per existing prune-plan.ts and
+   * link.ts behavior) is that they live as **top-level** directories
+   * directly under coldPool — no `localhost/` directory prefix. The
+   * `localhost/` part of the locator is a "no remote" marker, not a
+   * directory layer.
+   */
   resolveDir(locator: Locator): string {
     if (locator.isLocalhost) {
-      return join(this.path, locator.host, locator.skill ?? '')
+      return join(this.path, locator.skill ?? '')
     }
     return join(this.path, locator.host, locator.owner!, locator.repo!)
   }
@@ -35,8 +43,15 @@ export class ColdPool {
   }
 
   /**
-   * Enumerate top-level cold-pool entries: standalone localhost-style
-   * dirs (host/skill) plus host/owner/repo triples.
+   * Enumerate top-level cold-pool entries.
+   *
+   * The cold pool contains a heterogeneous set of first-level dirs:
+   *   - localhost-style skills:  `<coldPool>/<name>/SKILL.md`
+   *   - host directories:        `<coldPool>/<host>/<owner>/<repo>/...`
+   *
+   * The first-level dir is identified as a localhost skill iff it
+   * contains a SKILL.md directly; otherwise it is treated as a host
+   * dir and walked one more level for owner/repo.
    */
   list(): string[] {
     if (!existsSync(this.path)) return []
@@ -46,12 +61,9 @@ export class ColdPool {
       if (!host.isDirectory() || host.name.startsWith('.')) continue
       const hostPath = join(this.path, host.name)
 
-      // host/skill (e.g. localhost/<name>): one extra level under host
-      if (host.name === 'localhost') {
-        for (const entry of readdirSync(hostPath, { withFileTypes: true })) {
-          if (!entry.isDirectory() || entry.name.startsWith('.')) continue
-          repos.push(join(hostPath, entry.name))
-        }
+      // localhost-style: top-level dir with SKILL.md
+      if (existsSync(join(hostPath, 'SKILL.md'))) {
+        repos.push(hostPath)
         continue
       }
 
