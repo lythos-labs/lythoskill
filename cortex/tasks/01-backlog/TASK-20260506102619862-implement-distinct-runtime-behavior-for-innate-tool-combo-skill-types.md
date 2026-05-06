@@ -14,19 +14,38 @@
 README 已诚实标注 "innate/tool/combo currently have identical runtime behavior"。2026-05-06 agent-review 建议明确区分语义。
 
 ## 需求详情
-- [ ] `innate`: 始终加载，agent 不可覆盖。可能实现为物理 symlink + lock 保护
-- [ ] `tool`: 当前默认行为。agent 可自行决定是否使用
-- [ ] `combo`: 命名组，toggle 一组 skill。实现为同时 add/remove 多个
-- [ ] `transient`: 已有 expires 字段，需要实际过期检查 + 自动清理
+- [ ] **`innate` = eager mode**: 初始化/compaction 阶段抢先加载常驻。meta-governance skill（deck, cortex, onboarding, scribe）。agent 不可移除
+- [ ] **`tool` = lazy mode**: 当前默认行为。agent 按需调用。capability skill（pdf, docx, web-search）
+- [ ] **`combo`**: 命名组，toggle 一组 skill。`deck combo enable/disable <name>`
+- [ ] **`transient`**: 已有 expires 字段，需要实际过期检查 + 自动清理
+
+### eager vs lazy 设计
+
+```
+Session start
+  → deck link 发现 innate skills
+  → 抢先 symlink + 初始化 (eager)
+  → agent 启动时 innate skills 已就位
+  
+Runtime
+  → agent 需要 tool skill
+  → 发现 skill-deck.toml 已声明
+  → 该 tool 已在 working set 中 (所有 skill 都 symlink)
+  → agent 读取 SKILL.md 并调用
+```
+
+**为什么不是物理隔离**: innate/tool 的区分不在 symlink 层（所有声明都 symlink），而在 agent 的行为语义：
+- innate 在 session 启动时由 deck hook 确保常驻
+- tool 由 agent 在运行时自主决定是否读取 SKILL.md
+- lock 文件中的 `type` 字段告知 agent 该 skill 的优先级
 
 ## 技术方案
 
-`deck link` reconciler (`link.ts`) 当前统一处理所有 section。方案：
-1. 不改 symlink 机制 — 所有 skill 都 symlink
-2. 在 lock 文件中标记 type (`skill-deck.lock` 已有 `type` 字段)
-3. Agent 端（未来）可以读取 lock 决定优先级
-4. `combo` 的 toggle 行为可通过 CLI 命令实现（`deck combo enable/disable`）
-5. `transient` 过期检查在 `link.ts` 加时间比较
+1. lock 文件已有 `type` 字段 → 标记 innate/tool/combo/transient
+2. `deck link` 对 innate 额外写 `.claude/skills/.innate` manifest 文件
+3. Agent 端读取 manifest 确定 eager skill 列表
+4. `combo` toggle 通过 `deck combo enable/disable <name>` CLI 实现
+5. `transient` 过期检查在 `link.ts` 加 `Date.now() > expires` 比较
 
 ## 验收标准
 - [ ] `innate` skill 在 lock 中标记为 `type: "innate"`
