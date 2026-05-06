@@ -109,7 +109,7 @@ async function agentRun(args: string[]) {
     taskPath = join(tmpDir, 'TASK.md')
     const briefTask = `---
 name: ad-hoc task
-description: ${opts.brief!.slice(0, 80)}
+description: ${opts.brief!.replace(/"/g, '\\"').slice(0, 80)}
 timeout: 120000
 ---
 
