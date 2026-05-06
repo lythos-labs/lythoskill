@@ -15,14 +15,33 @@ set -euo pipefail
 DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
 OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
-PLAYER="${LYTHOS_PLAYER:-kimi}"  # override via env: LYTHOS_PLAYER=deepseek bash quick-agent.sh ...
+# ── Player detection: explicit env > auto-detect > error ──────
+if [ -n "${LYTHOS_PLAYER:-}" ]; then
+  PLAYER="$LYTHOS_PLAYER"
+  if ! command -v "$PLAYER" &>/dev/null; then
+    echo "⚠️  LYTHOS_PLAYER=$PLAYER set but binary not found in PATH"
+  fi
+elif command -v kimi &>/dev/null; then
+  PLAYER="kimi"
+elif command -v deepseek &>/dev/null; then
+  PLAYER="deepseek"
+  echo "⚠️  Using deepseek: -p mode is text-only (no file/shell tools). Set LYTHOS_PLAYER=kimi if you have it."
+elif command -v claude &>/dev/null; then
+  PLAYER="claude"
+  echo "⚠️  Using claude: -p mode may hang on tool-heavy tasks. Set LYTHOS_PLAYER=kimi for best results."
+else
+  echo "❌ No agent player found in PATH."
+  echo "   Install one: uv tool install kimi-cli && kimi login"
+  echo "   Or set LYTHOS_PLAYER to a custom agent binary."
+  exit 1
+fi
 
 if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ] || [ -z "$(echo "$PROMPT" | xargs)" ]; then
   echo "❌ Missing arguments."
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
   echo "  deck:  documents | design-studio | visual-explainer | engineering | governance | full-stack | URL | path.toml"
   echo "  prompt: your task description (wrap in quotes)"
-  echo "  Agent: set LYTHOS_PLAYER env (kimi|deepseek|claude), default: kimi"
+  echo "  Agent: set LYTHOS_PLAYER env (kimi|deepseek|claude), auto-detected: $PLAYER"
   echo ""
   echo "Received: deck='$DECK_SPEC' prompt='$PROMPT'"
   exit 1

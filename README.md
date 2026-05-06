@@ -155,10 +155,10 @@ If you are an AI agent reading this README:
 ```bash
 # Deck + prompt → agent executes + judge scores → output.
 # No files touched in your project. Each run creates ./agent-output-<timestamp>/.
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
 ```
 
-Output lands in `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
+Output lands in `./agent-output-<timestamp>/`. The agent sees the deck's skills (PDF, DOCX), writes the file, and copies it to the output directory. `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
 
 ### Same Task, Different Decks — The Core Loop
 
@@ -167,17 +167,17 @@ One task. Three decks. Three different outcomes. **This is the lythoskill workfl
 Every run is isolated in `/tmp` — no skill cross-contamination, no deck collision. The agent sees *only* what its deck declares.
 
 ```bash
-# ─── Baseline: bare agent (no skills — CLI built-in web search only) ───
+# ─── Baseline: bare agent (no skills — raw markdown) ───
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- scout \
   "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
 
-# ─── Tool-enhanced: PDF + DOCX + web-search skills ───
+# ─── Tool-enhanced: PDF + DOCX skills → professional document output ───
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents \
-  "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+  "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
 
-# ─── Domain-enhanced: design taste + diagram skills ───
+# ─── Domain-enhanced: design taste + Mermaid diagrams ───
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- visual-explainer \
-  "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+  "Create a recipe for the perfect chocolate chip cookie with a Mermaid flowchart of the steps. Include ingredient ratios and the science behind each step."
 ```
 
 | Deck | What it provides | The experiment |
@@ -199,7 +199,7 @@ curl -fsSL ... | bash -s -- engineering "Research the current state of WebAssemb
 curl -fsSL ... | bash -s -- design-studio "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
 ```
 
-> **Read the diff.** Open `./agent-output-*/agent-stdout.txt` side by side. The difference between `scout` and `visual-explainer` output is the difference between "the model tried" and "the deck delivered."
+> **Read the diff.** Open `./agent-output-<timestamp>/` — with the `documents` deck you'll find `.docx` files, with `visual-explainer` Mermaid diagrams. The difference between `scout` and `visual-explainer` output is the difference between "the model tried" and "the deck delivered."
 
 See [`quick-agent.sh`](./examples/quick-agent.sh) for how deck isolation works under the hood. See [Arena](#arena-skill-comparison) for systematizing these comparisons.
 
