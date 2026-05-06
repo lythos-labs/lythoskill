@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/6 19:28:16
+> 自动生成于 2026/5/6 19:30:59
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 125 | 进行中: 1, 待验收: 0, 已完成: 95 |
+| Tasks | 125 | 进行中: 0, 待验收: 0, 已完成: 96 |
 | Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
 | ADRs | 43 | 已接受: 33 |
 
@@ -62,15 +62,15 @@
 - [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260506001644285**: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (95)
+### 已完成 (96)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -167,6 +167,7 @@ _无_
 - ✅ ~~TASK-20260505230250040~~: T5: Update per-cell judge + arena runner for cleaned JudgeVerdict
 - ✅ ~~TASK-20260505230250079~~: T6: Add ArenaRunContext (git_ref, arena_toml, judge_model, runs_per_side) to ComparativeReport
 - ✅ ~~TASK-20260506001644250~~: T1: Fix buildClaudeCommand — clean CLAUDE_CODE_* env, prompt via file (not stdin), --output-format json, retry wrapper
+- ✅ ~~TASK-20260506001644285~~: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
 
 ### 悬置 (0)
 

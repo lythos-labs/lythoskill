@@ -6,6 +6,7 @@
 |--------|------|------|
 | in-progress | 2026-05-06 | Implementation started |
 | in-progress | 2026-05-06 | Started |
+| completed | 2026-05-06 | Closed via trailer |
 
 ## 背景与目标
 
