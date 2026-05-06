@@ -164,16 +164,17 @@ Evaluate whether the output is complete, accurate, and well-structured.
   if (result.agentResult.stderr) writeFileSync(join(outDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
   if (result.verdict) writeFileSync(join(outDir, 'judge-verdict.json'), JSON.stringify(result.verdict, null, 2) + '\n', 'utf-8')
 
-  // Copy agent-produced files from workdir (output.md, output.docx, etc.)
+  // Copy all agent-produced files from workdir (output.md, output.docx, etc.)
+  // Skip .claude/ (symlink dir) and deck artifacts. Recursive so docx/pdf work.
   if (agentWorkdir) {
-    const { readdirSync, statSync, copyFileSync } = await import('node:fs')
+    const { cpSync, readdirSync } = await import('node:fs')
+    const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock'])
     try {
       for (const entry of readdirSync(agentWorkdir)) {
-        if (entry.startsWith('.') || entry === 'skill-deck.toml' || entry === 'skill-deck.lock') continue
+        if (skipSet.has(entry)) continue
         const src = join(agentWorkdir, entry)
-        try {
-          if (statSync(src).isFile()) copyFileSync(src, join(outDir, entry))
-        } catch {}
+        const dest = join(outDir, entry)
+        try { cpSync(src, dest, { recursive: true }) } catch {}
       }
     } catch {}
   }
