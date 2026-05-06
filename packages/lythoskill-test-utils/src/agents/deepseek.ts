@@ -1,8 +1,27 @@
-import { writeFileSync, unlinkSync } from 'node:fs'
+import { writeFileSync, unlinkSync, existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import type { AgentAdapter, AgentRunResult } from './types'
-import { readCheckpoints } from '../bdd-runner'
+import type { AgentAdapter, AgentRunResult, CheckpointEntry } from './types'
+
+// Inline checkpoint reading to avoid circular import: bdd-runner → agents/index.ts → deepseek.ts
+function readCheckpoints(cwd: string): CheckpointEntry[] {
+  const checkpointDir = join(cwd, '_checkpoints')
+  if (!existsSync(checkpointDir)) return []
+  try {
+    const files = readdirSync(checkpointDir).filter(f => f.endsWith('.jsonl'))
+    const entries: CheckpointEntry[] = []
+    for (const file of files) {
+      const lines = readFileSync(join(checkpointDir, file), 'utf-8').trim().split('\n')
+      for (const line of lines) {
+        if (!line.trim()) continue
+        try { entries.push(JSON.parse(line)) } catch {}
+      }
+    }
+    return entries
+  } catch {
+    return []
+  }
+}
 
 // ── DeepSeek TUI adapter ────────────────────────────────────────────────────
 //
@@ -10,9 +29,9 @@ import { readCheckpoints } from '../bdd-runner'
 // Key advantages: no Bun stdin pipe bug (not Node.js), 1M context,
 // $0.14/1M input, subagent system (agent_spawn, 8 roles), MIT licensed.
 //
-// One-shot mode: deepseek --yolo --model deepseek-v4-flash <prompt>
-//   --yolo → auto-approve all tools
-//   Prompt passed as positional argv (no shell, no stdin pipe)
+// One-shot mode: deepseek --approval-policy auto --model deepseek-v4-flash -p <prompt>
+//   --approval-policy auto → auto-approve all tools (v0.8.14+)
+//   -p prompt passed as argv (no shell, no stdin pipe)
 //   For prompts > 100KB, fall back to temp file
 //
 // Full analysis: cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md
@@ -51,7 +70,7 @@ async function spawnDeepSeek(opts: {
   const start = Date.now()
 
   const proc = Bun.spawn(
-    [DEEPSEEK_BIN, '--yolo', '--model', DEFAULT_MODEL, prompt],
+    [DEEPSEEK_BIN, '--approval-policy', 'auto', '--model', DEFAULT_MODEL, '-p', prompt],
     {
       cwd: opts.cwd,
       stdin: 'ignore',
