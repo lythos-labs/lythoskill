@@ -240,16 +240,27 @@ bunx @lythos/skill-deck@0.9.19 link
 | `[deck]` | `working_set` | No | `.claude/skills` | Directory where symlinks are created |
 | `[innate]` | `skills.<name>.path` | Yes* | — | Always loaded; agent cannot override |
 | `[tool]` | `skills.<name>.path` | Yes* | — | Available for agent to invoke |
-| `[combo]` | `<name>.skills` | Yes* | — | Named groups of skills to toggle together |
 | `[transient]` | `skills.<name>.path` | Yes* | — | Time-bounded skills (auto-expire) |
 
 \* Required when that section is used.
 
-**Sections explained** (note: `innate`/`tool`/`combo` currently have identical runtime behavior — the distinction is for future governance semantics):
-- **`[innate]`** — Governance skills every agent needs.
-- **`[tool]`** — Capability skills the agent may invoke.
-- **`[combo]`** — Named groups to toggle together.
-- **`[transient]`** — Skills with an expiry date.
+**Skill types:**
+
+| Type | Behavior | max_cards? |
+|------|----------|------------|
+| **`[innate]`** | Eager — loaded at session start, agent cannot remove | Yes |
+| **`[tool]`** | Lazy — agent invokes on demand (default) | Yes |
+| **`[transient]`** | Lazy + expiry — agent can try, auto-expires | Yes |
+
+**`[combo]`** is not a skill type — it's a meta-declaration. It does NOT count against `max_cards`:
+
+```toml
+[combo.report-generation]
+skills = ["web-search", "docx", "mermaid"]
+prompt = "Search for latest info, then generate professional document with diagrams"
+```
+
+Combo = named group + coordination prompt. Agent reads the prompt as natural-language instructions for how skills work together. If coordination is genuinely complex, fork a single skill instead.
 
 > **Other agent platforms?** Set `working_set = ".kimi/skills/"` or `.cursor/skills/` in `skill-deck.toml`.
 
