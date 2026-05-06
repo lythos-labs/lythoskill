@@ -67,11 +67,11 @@ describe('expandHome', () => {
 })
 
 describe('findSource', () => {
-  it('resolves fully-qualified host.tld/owner/repo/skill via cold-pool skills/ subdir', () => {
+  it('resolves fully-qualified host.tld/owner/repo/skill via cold-pool direct path', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
     const expected = placeSkill(coldPool, 'github.com/lythos-labs/lythoskill/skills/lythoskill-deck')
-    const result = findSource('github.com/lythos-labs/lythoskill/lythoskill-deck', coldPool, projectDir)
+    const result = findSource('github.com/lythos-labs/lythoskill/skills/lythoskill-deck', coldPool, projectDir)
     expect(result.path).toBe(expected)
   })
 
@@ -83,19 +83,19 @@ describe('findSource', () => {
     expect(result.path).toBe(expected)
   })
 
-  it('resolves a monorepo layout (repo/skill → coldPool/repo/skills/skill)', () => {
+  it('resolves a monorepo layout (repo/skill → coldPool/repo/skill)', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
     const expected = placeSkill(coldPool, 'mono-repo/skills/inner-skill')
-    const result = findSource('mono-repo/inner-skill', coldPool, projectDir)
+    const result = findSource('mono-repo/skills/inner-skill', coldPool, projectDir)
     expect(result.path).toBe(expected)
   })
 
-  it('falls back to projectDir/skills/<name> for project-local skills', () => {
+  it('falls back to projectDir/<name> for project-local skills', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
     const expected = placeSkill(projectDir, 'skills/local-skill')
-    const result = findSource('local-skill', coldPool, projectDir)
+    const result = findSource('skills/local-skill', coldPool, projectDir)
     expect(result.path).toBe(expected)
   })
 

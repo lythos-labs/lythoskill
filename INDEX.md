@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 00:18:35
+> 自动生成于 2026/5/7 02:07:20
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 126 | 进行中: 0, 待验收: 0, 已完成: 97 |
-| Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
-| ADRs | 44 | 已接受: 33 |
+| Tasks | 128 | 进行中: 0, 待验收: 0, 已完成: 99 |
+| Epics | 21 | 活跃: 0, 已完成: 17, 悬置: 2, 已归档: 2 |
+| ADRs | 45 | 已接受: 33 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
+_无_
 
 ### 已完成
 
@@ -36,10 +36,12 @@
 - ✅ **EPIC-20260505184748292**: Curator refresh plan/execute — cold pool update queue with TODO file
 - ✅ **EPIC-20260505221500188**: Standardize test file organization — co-located unit tests, separate BDD runners
 - ✅ **EPIC-20260505230149768**: Implement CriterionDef schema + judge cleanup + reproducibility metadata for arena chart-ready MVP
+- ✅ **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
 
 ### 悬置
 
 - ⏸️ **EPIC-20260429234732479**: Virtual evaluator swarm for multi-dimensional skill quality assessment
+- ⏸️ **EPIC-20260507012858669**: Real-world skill repo structure compatibility — pre-built deck validation for quick-start
 
 ### 已归档
 
@@ -55,12 +57,12 @@
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
 - [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
-- [ ] **TASK-20260506001644356**: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
 - [ ] **TASK-20260506001644390**: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
 - [ ] **TASK-20260506001644423**: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
 - [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 - [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
+- [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
 
 ### 进行中 (0)
 
@@ -70,7 +72,7 @@ _无_
 
 _无_
 
-### 已完成 (97)
+### 已完成 (99)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -169,6 +171,8 @@ _无_
 - ✅ ~~TASK-20260506001644250~~: T1: Fix buildClaudeCommand — clean CLAUDE_CODE_* env, prompt via file (not stdin), --output-format json, retry wrapper
 - ✅ ~~TASK-20260506001644285~~: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
 - ✅ ~~TASK-20260506001644316~~: T3: Extract AgentAdapter as standalone plugin lib + Claude SDK adapter
+- ✅ ~~TASK-20260506001644356~~: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
+- ✅ ~~TASK-20260507010453909~~: Remove implicit skills/ insertion from findSource() and align all deck paths to direct mapping
 
 ### 悬置 (0)
 
@@ -244,6 +248,7 @@ _无_
 - ✅ **ADR-20260506021112492** (02-accepted): Kimi CLI as default AgentAdapter — Player abstraction validation and CWD isolation for deny-by-default
 - ✅ **ADR-20260506103209293** (02-accepted): Supersede combo-skill-as-orchestration-layer — combo is now a deck-level prompt, not a separate skill
 - 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
+- 🤔 **ADR-20260507014124191** (01-proposed): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
 
 ---
 

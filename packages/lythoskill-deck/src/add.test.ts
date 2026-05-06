@@ -10,6 +10,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import * as childProcess from 'node:child_process'
+import { findSkillDir } from './add.ts'
 
 // Control homedir() return value for tests that need default cold_pool under tmpdir
 let mockHomeDir = '/tmp'
@@ -191,5 +192,67 @@ describe('addSkill', () => {
       errorSpy.mockRestore()
       execSpy.mockRestore()
     }
+  })
+})
+
+describe('findSkillDir', () => {
+  function makeRepo(): string {
+    const dir = mkdtempSync(join(tmpdir(), 'deck-findskill-'))
+    cleanup.push(dir)
+    return dir
+  }
+
+  function placeSkill(repo: string, relPath: string): string {
+    const skillDir = join(repo, relPath)
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '---\nname: fixture\n---\n')
+    return skillDir
+  }
+
+  it('returns repoPath for standalone skill (SKILL.md at repo root)', () => {
+    const repo = makeRepo()
+    writeFileSync(join(repo, 'SKILL.md'), '---\nname: standalone\n---\n')
+    expect(findSkillDir(repo, null)).toBe(repo)
+  })
+
+  it('returns skills/ subdir when single skill exists there', () => {
+    const repo = makeRepo()
+    const expected = placeSkill(repo, 'skills/my-skill')
+    expect(findSkillDir(repo, null)).toBe(expected)
+  })
+
+  it('returns flat root dir when single skill exists at repo root', () => {
+    const repo = makeRepo()
+    const expected = placeSkill(repo, 'my-skill')
+    expect(findSkillDir(repo, null)).toBe(expected)
+  })
+
+  it('returns null when multiple flat skills exist at repo root (ambiguous)', () => {
+    const repo = makeRepo()
+    placeSkill(repo, 'skill-a')
+    placeSkill(repo, 'skill-b')
+    expect(findSkillDir(repo, null)).toBeNull()
+  })
+
+  it('finds skill in skills/ subdir when skill name is provided', () => {
+    const repo = makeRepo()
+    const expected = placeSkill(repo, 'skills/my-skill')
+    expect(findSkillDir(repo, 'my-skill')).toBe(expected)
+  })
+
+  it('finds skill at repo root when skill name is provided (flat)', () => {
+    const repo = makeRepo()
+    const expected = placeSkill(repo, 'my-skill')
+    expect(findSkillDir(repo, 'my-skill')).toBe(expected)
+  })
+
+  it('returns null when skill name provided but not found anywhere', () => {
+    const repo = makeRepo()
+    expect(findSkillDir(repo, 'nonexistent')).toBeNull()
+  })
+
+  it('returns null when no SKILL.md exists anywhere in repo', () => {
+    const repo = makeRepo()
+    expect(findSkillDir(repo, null)).toBeNull()
   })
 })

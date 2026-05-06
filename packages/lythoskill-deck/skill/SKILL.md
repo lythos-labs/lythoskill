@@ -148,14 +148,18 @@ causing `EEXIST` errors on recreation. If writing custom working-set scripts, us
 `innate`/`tool`/`transient` are **skill-deck.toml section names**, not
 SKILL.md types. Using them as types causes silent skip.
 `combo` is a meta-declaration (skills + prompt), not a skill type.
-**Skill locators**: `skill-deck.toml` accepts two locator styles. The cold pool uses Go module-style layout (`host/owner/repo/skills/name`).
+**Skill locators**: `skill-deck.toml` accepts two locator styles. The FQ locator maps directly to the repository's internal directory structure — no implicit prefix is inserted.
 
 | Style | Example | Reliability |
 |-------|---------|-------------|
 | Bare name | `lythoskill-deck` | Fragile — only works if skill is at cold-pool root or wins the flat-scan lottery |
-| Fully-qualified | `github.com/lythos-labs/lythoskill/lythoskill-deck` | Reliable — deterministic path matching |
+| Fully-qualified | `github.com/lythos-labs/lythoskill/skills/lythoskill-deck` | Reliable — deterministic path matching |
+
+If a skill lives at `skills/pdf/` inside the `anthropics/skills` repo, the FQ locator must include the full internal path: `github.com/anthropics/skills/skills/pdf`. The deck does **not** auto-insert a `skills/` prefix.
 
 Bare names fail for monorepo skills because the flat-scan searches `readdirSync` order and is non-deterministic when multiple repos contain the same name. **Always use fully-qualified locators.**
+
+**Agent duty — verify before guessing**: When you encounter an unfamiliar skill repo and are unsure of its internal directory layout (e.g., whether the skill lives at repo root or under `skills/`), use web search to inspect the actual repository structure before writing the locator. Do not guess path segments. Tools like `ghproxy` can accelerate GitHub API access when direct requests time out.
 
 **deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
 to avoid collisions with the Agent Skills open standard or future platform extensions.

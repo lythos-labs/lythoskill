@@ -54,8 +54,12 @@ for (const pkg of changedPackages) {
   }
 
   console.log(`\n🧪 ${pkg}`);
-  // Use shell for glob expansion (Bun.$ doesn't expand globs)
-  const result = await $`sh -c "bun test ${testPath}"`.cwd(ROOT).nothrow().quiet();
+  // Run tests from inside the package so bun test does not walk up to
+  // a parent package.json and reinterpret cwd. See: bun test resolves
+  // package.json relative to the staged file paths and ends up scoped
+  // to the package, so the original `bun test packages/<pkg>/src/*.test.ts`
+  // form failed to match anything when invoked from repo root.
+  const result = await $`sh -c "cd packages/${pkg} && bun test src/*.test.ts"`.cwd(ROOT).nothrow().quiet();
   const exitCode = result.exitCode;
 
   if (exitCode !== 0) {

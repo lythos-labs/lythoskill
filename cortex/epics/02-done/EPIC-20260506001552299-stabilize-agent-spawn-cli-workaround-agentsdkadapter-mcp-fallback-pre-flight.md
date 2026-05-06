@@ -10,6 +10,9 @@ checklist_skipped_reason: report.md analysis confirmed ground truth issues, user
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-06 | Created |
+| suspended | 2026-05-06 | Suspended |
+| active | 2026-05-06 | Resumed |
+| done | 2026-05-06 | Done |
 
 ## 背景故事
 

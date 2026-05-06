@@ -53,6 +53,22 @@ bunx @lythos/skill-deck update
 # Reports: updated | up-to-date | skipped (localhost) | not-git (orphan)
 ```
 
+## Repo Structure Patterns
+
+Skill repositories organize their `SKILL.md` files in different ways. The locator you write in `skill-deck.toml` must match the **actual** structure — there is no auto-detection magic.
+
+| Pattern | Example Repo | Locator Example |
+|---------|-------------|-----------------|
+| **Standalone** | `github.com/garrytan/gstack` | `github.com/garrytan/gstack` |
+| **Flat (root-level)** | `github.com/daymade/claude-code-skills` | `github.com/daymade/claude-code-skills/skill-creator` |
+| **Monorepo (`skills/`)** | `github.com/anthropics/skills` | `github.com/anthropics/skills/skills/pdf` |
+| **Nested monorepo** | `github.com/mattpocock/skills` | `github.com/mattpocock/skills/skills/engineering/tdd` |
+| **Arbitrary subdir** | `github.com/Cocoon-AI/architecture-diagram-generator` | `github.com/Cocoon-AI/architecture-diagram-generator/architecture-diagram` |
+
+> **Rule**: The locator path after `repo/` is the exact relative path from repo root to the directory containing `SKILL.md`. No implicit prefix is inserted.
+>
+> When unsure of a repo's internal layout, use the GitHub API or web search to inspect the actual directory structure before writing the locator. See `cortex/wiki/03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md` for a survey of popular repositories.
+
 ## Troubleshooting by State
 
 | Symptom | Likely State | Fix |

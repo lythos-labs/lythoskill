@@ -60,8 +60,8 @@ export interface FindSourceResult {
 
 export function findSource(name: string, coldPool: string, projectDir: string): FindSourceResult {
   // 0. Fully-qualified path: host.tld/owner/repo/skill
-  //    → cold_pool/host.tld/owner/repo/skills/skill
-  //    Also handles host.tld/owner/repo (standalone skill without skills/ subdir)
+  //    → cold_pool/host.tld/owner/repo/skill
+  //    Also handles host.tld/owner/repo (standalone skill)
   const fqMatch = name.match(/^[a-z0-9-]+\.[a-z0-9-]+\//);
   if (fqMatch) {
     const parts = name.split("/");
@@ -71,7 +71,7 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
     const skill = parts.slice(3).join("/"); // lythoskill-deck
 
     if (skill) {
-      const fqPath = join(coldPool, host, owner, repo, "skills", skill);
+      const fqPath = join(coldPool, host, owner, repo, skill);
       if (existsSync(join(fqPath, "SKILL.md"))) return { path: fqPath };
     }
     // fallback: standalone skill at repo root
@@ -93,18 +93,18 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
   const direct = resolve(coldPool, name);
   if (existsSync(join(direct, "SKILL.md"))) return { path: direct };
 
-  // 2. Monorepo: repo/skill → cold_pool/repo/skills/skill
+  // 2. Monorepo: repo/skill → cold_pool/repo/skill
   if (name.includes("/")) {
     const [repo, ...rest] = name.split("/");
-    const mono = join(coldPool, repo, "skills", rest.join("/"));
+    const mono = join(coldPool, repo, rest.join("/"));
     if (existsSync(join(mono, "SKILL.md"))) return { path: mono };
   }
 
-  // 3. 项目本地: <project>/skills/<name>（build 输出目录，优先级高于扁平扫描）
-  const local = resolve(projectDir, "skills", name);
+  // 3. 项目本地: <project>/<name>
+  const local = resolve(projectDir, name);
   if (existsSync(join(local, "SKILL.md"))) return { path: local };
 
-  // 4. 扁平扫描: cold_pool/<any-repo>/<name> 或 <any-repo>/skills/<name>
+  // 4. 扁平扫描: cold_pool/<any-repo>/<name>
   //    跳过隐藏目录（agent working set、git、配置等）和 node_modules，
   //    避免把 .claude/skills/ 里的 symlink 误判为有效 cold-pool 源
   const matches: string[] = [];
@@ -114,7 +114,7 @@ export function findSource(name: string, coldPool: string, projectDir: string): 
       if (entry.name.startsWith('.')) continue;
       if (entry.name === 'node_modules') continue;
       const base = join(coldPool, entry.name);
-      for (const sub of [join(base, name), join(base, "skills", name)]) {
+      for (const sub of [join(base, name)]) {
         if (existsSync(join(sub, "SKILL.md"))) {
           matches.push(sub);
         }

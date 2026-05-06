@@ -63,7 +63,7 @@ describe('pruneDeck', () => {
     const repoB = placeRepo(coldPool, 'github.com', 'owner', 'repo-b')
     placeSkillInRepo(repoB, 'skill-b')
 
-    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo-a/skill-a"\n`
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo-a/skills/skill-a"\n`
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
@@ -84,7 +84,7 @@ describe('pruneDeck', () => {
     const repoA = placeRepo(coldPool, 'github.com', 'owner', 'repo-a')
     placeSkillInRepo(repoA, 'skill-a')
 
-    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo-a/skill-a"\n`
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.skill-a]\npath = "github.com/owner/repo-a/skills/skill-a"\n`
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 

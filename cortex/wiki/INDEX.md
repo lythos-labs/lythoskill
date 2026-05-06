@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (24)
+## 📚 Patterns (25)
 
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
@@ -28,13 +28,15 @@
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
 - **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
+- **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
 
 ## ❓ FAQ (0)
 
 *No entries yet.*
 
-## 📖 Lessons (14)
+## 📖 Lessons (15)
 
+- **[2026-05-07]** [real-world-skill-repo-structure-survey](./03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md)
 - **[2026-05-06]** [deepseek-tui-headless-programmatic-analysis](./03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md)
 - **[2026-05-06]** [agent-spawn-reliability-journey-kimi-player-cwd-isolation](./03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md)
 - **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)

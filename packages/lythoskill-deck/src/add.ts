@@ -49,7 +49,7 @@ function parseLocator(input: string): ParsedLocator | null {
   return { host, owner, repo, skill, raw: input }
 }
 
-function findSkillDir(repoPath: string, skill: string | null): string | null {
+export function findSkillDir(repoPath: string, skill: string | null): string | null {
   if (skill) {
     const inSkills = join(repoPath, 'skills', skill)
     if (existsSync(join(inSkills, 'SKILL.md'))) return inSkills
@@ -67,6 +67,15 @@ function findSkillDir(repoPath: string, skill: string | null): string | null {
       if (existsSync(join(candidate, 'SKILL.md'))) return candidate
     }
   }
+  // Flat structure: scan repo root for directories containing SKILL.md
+  try {
+    const rootEntries = readdirSync(repoPath, { withFileTypes: true })
+    const rootSkillDirs = rootEntries
+      .filter(e => e.isDirectory() && !e.name.startsWith('.'))
+      .map(e => join(repoPath, e.name))
+      .filter(p => existsSync(join(p, 'SKILL.md')))
+    if (rootSkillDirs.length === 1) return rootSkillDirs[0]
+  } catch {}
   return null
 }
 
