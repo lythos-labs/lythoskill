@@ -106,6 +106,13 @@ path = "github.com/SpillwaveSolutions/design-doc-mermaid"
 path = "github.com/anthropics/skills/skills/theme-factory"
 TOML
           ;;
+        scout)
+          cat > "$TMPDIR/deck.toml" << 'TOML'
+[deck]
+max_cards = 10
+# Scout — intentionally thin. Agent uses built-in web access to investigate.
+TOML
+          ;;
         *)
           echo "❌ Unknown deck: $DECK_SPEC and no fallback template"
           exit 1

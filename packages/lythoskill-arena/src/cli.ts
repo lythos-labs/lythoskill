@@ -9,6 +9,14 @@ import {
   existsSync, mkdirSync, writeFileSync, readFileSync,
 } from 'node:fs'
 import { join, resolve, basename } from 'node:path'
+import {
+  parseDeckSkills,
+  checkSkillExistence,
+  validateLinkResult,
+  buildCopyPlan,
+  resolveColdPoolDir,
+  formatSkillWarnings,
+} from './preflight'
 
 // ── 简单的 slugify ──────────────────────────────────────────
 function slugify(input: string): string {
@@ -151,15 +159,45 @@ Evaluate whether the output is complete, accurate, and well-structured.
       mkdirSync(workdir, { recursive: true })
       writeFileSync(join(workdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
 
+      // ── Pre-flight: deck link ────────────────────────────────────
       const linkProc = Bun.spawn(
         ['bunx', '@lythos/skill-deck', 'link'],
         { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
       )
       await linkProc.exited
+      const linkStderr = await new Response(linkProc.stderr).text()
+      const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
+      if (!linkResult.ok) {
+        console.error(`❌ ${linkResult.error}`)
+        process.exit(1)
+      }
+
+      // ── Pre-flight: skill existence check (pure logic, IO injected) ─
+      const { existsSync: es, readFileSync: rfs } = await import('node:fs')
+      const { homedir: hd } = await import('node:os')
+      try {
+        const deckRaw = rfs(join(workdir, 'skill-deck.toml'), 'utf-8')
+        const deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any>
+        const coldPoolDefault = join(hd(), '.agents', 'skill-repos')
+        const coldPoolDir = resolveColdPoolDir(
+          deckParsed?.deck?.cold_pool,
+          hd(),
+          coldPoolDefault
+        )
+
+        const skills = parseDeckSkills(deckParsed)
+        const checks = checkSkillExistence(skills, coldPoolDir, es)
+        for (const warning of formatSkillWarnings(checks)) {
+          console.warn(`⚠️  ${warning}`)
+        }
+      } catch (e) {
+        // TOML parse failures are non-fatal — the link step would have caught actual problems
+        console.warn('⚠️  Could not parse skill-deck.toml for pre-flight check:', e instanceof Error ? e.message : e)
+      }
     },
   })
 
-  // Copy agent output to outDir
+  // ── Copy agent output to outDir ──────────────────────────────────
   writeFileSync(join(outDir, 'agent-stdout.txt'), result.agentResult.stdout, 'utf-8')
   if (result.agentResult.stderr) writeFileSync(join(outDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
   if (result.verdict) writeFileSync(join(outDir, 'judge-verdict.json'), JSON.stringify(result.verdict, null, 2) + '\n', 'utf-8')
@@ -167,16 +205,31 @@ Evaluate whether the output is complete, accurate, and well-structured.
   // Copy all agent-produced files from workdir (output.md, output.docx, etc.)
   // Skip .claude/ (symlink dir) and deck artifacts. Recursive so docx/pdf work.
   if (agentWorkdir) {
-    const { cpSync, readdirSync } = await import('node:fs')
-    const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock'])
-    try {
-      for (const entry of readdirSync(agentWorkdir)) {
-        if (skipSet.has(entry)) continue
-        const src = join(agentWorkdir, entry)
-        const dest = join(outDir, entry)
-        try { cpSync(src, dest, { recursive: true }) } catch {}
+    const { cpSync, readdirSync, existsSync: es2 } = await import('node:fs')
+    if (!es2(agentWorkdir)) {
+      console.warn(`⚠️  Agent workdir vanished before copy: ${agentWorkdir}`)
+    } else {
+      const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock'])
+      try {
+        const entries = readdirSync(agentWorkdir)
+        const plan = buildCopyPlan(agentWorkdir, outDir, entries, skipSet)
+        for (const { src, dest, name } of plan) {
+          try {
+            cpSync(src, dest, { recursive: true })
+          } catch (e) {
+            console.warn(`⚠️  Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
+          }
+        }
+      } catch (e) {
+        console.warn(`⚠️  Failed to read agent workdir for copy: ${e instanceof Error ? e.message : e}`)
       }
-    } catch {}
+    }
+  }
+
+  // ── Post-flight: output validation ──────────────────────────────
+  if (!result.agentResult.stdout || result.agentResult.stdout.trim().length === 0) {
+    console.warn('⚠️  Agent produced empty stdout — the task may have failed silently.')
+    console.warn(`   Agent stderr: ${(result.agentResult.stderr || '(empty)').slice(0, 200)}`)
   }
 
   console.log(`\n✅ Agent complete (${result.agentResult.durationMs}ms)`)

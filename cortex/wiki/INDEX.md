@@ -33,8 +33,9 @@
 
 *No entries yet.*
 
-## 📖 Lessons (13)
+## 📖 Lessons (14)
 
+- **[2026-05-06]** [deepseek-tui-headless-programmatic-analysis](./03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md)
 - **[2026-05-06]** [agent-spawn-reliability-journey-kimi-player-cwd-isolation](./03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md)
 - **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)
 - **[2026-05-03]** [hermes-self-evolving-skill-field-notes](./03-lessons/2026-05-03-hermes-self-evolving-skill-field-notes.md)

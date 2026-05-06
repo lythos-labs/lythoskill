@@ -1,0 +1,9 @@
+[deck]
+max_cards = 10
+
+# Scout — investigate a shared tool/repo before deciding to adopt
+# Use when: someone shares a GitHub repo, tool, or skill on social media
+# Flow: curl | bash -s -- scout "https://github.com/..."  → agent investigates → report
+#
+# This deck is intentionally thin — the agent's built-in web access does the heavy
+# lifting. The deck exists so the workflow has a name and can be invoked in one line.

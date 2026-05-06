@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/6 10:32:58
+> 自动生成于 2026/5/6 19:28:16
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 125 | 进行中: 0, 待验收: 0, 已完成: 95 |
+| Tasks | 125 | 进行中: 1, 待验收: 0, 已完成: 95 |
 | Epics | 20 | 活跃: 1, 已完成: 16, 悬置: 1, 已归档: 2 |
 | ADRs | 43 | 已接受: 33 |
 
@@ -50,12 +50,11 @@
 
 ## 📄 Tasks
 
-### 待办 (10)
+### 待办 (9)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
 - [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
-- [ ] **TASK-20260506001644285**: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
 - [ ] **TASK-20260506001644316**: T3: Research and prototype AgentSdkAdapter — spawn() via @anthropic-ai/claude-agent-sdk query()
 - [ ] **TASK-20260506001644356**: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
 - [ ] **TASK-20260506001644390**: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
@@ -63,9 +62,9 @@
 - [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260506001644285**: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
 
 ### 待验收 (0)
 

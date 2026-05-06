@@ -34,6 +34,9 @@ skill-deck.lock
 # Curator generated artifacts (cold pool index, regenerated at runtime)
 .lythoskill-curator/
 
+# Arena agent output leftovers (must live under playground/)
+agent-output-*
+
 # Temporary directories and files
 tmp/
 .tmp/
