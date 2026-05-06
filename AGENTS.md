@@ -361,6 +361,58 @@ Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). Th
 
 ---
 
+## DeepSeek TUI Operational Notes
+
+> **You are running inside DeepSeek TUI.** This section documents how the host platform works when used programmatically (Bun.spawn, arena, agent-bdd). Knowing this avoids wasted troubleshooting.
+
+### Modes at a glance (v0.8.14)
+
+| Command | Tool execution | Use case |
+|---------|---------------|----------|
+| `deepseek -p "prompt"` | ❌ Chat only — outputs tool calls as text, never executes them | Pure text tasks (summarization, Q&A, hello world) |
+| `deepseek exec` | ❌ Same as `-p` — non-agent mode | Same |
+| `deepseek serve --http` | ✅ Full agent with tools + subagents | **Programmatic integration** (arena, agent-bdd, Bun.spawn) |
+| `deepseek run` | ✅ Interactive TUI | Human-in-the-loop sessions |
+
+**The `-p` trap**: `deepseek -p "Write Hello World to output.md"` will output a code block describing how to do it, but will NOT write the file. The model explicitly states "I cannot execute commands on your system." This is by design — one-shot prompts use the chat completion endpoint, not the agent loop.
+
+**The correct programmatic path**: `deepseek serve --http` starts an HTTP server (default port 7878) that exposes the full agent loop via a REST API:
+- `POST /v1/threads` — create a thread with workspace config
+- `POST /v1/threads/{id}/turns` — send a prompt, get a turn ID
+- `GET /v1/threads/{id}/events?since_seq=0` — SSE event stream (tool calls, deltas, completion)
+- `POST /v1/threads/{id}/turns/{id}/interrupt` — interrupt a running turn
+- The server executes tools natively — file writes, shell, web search, sub-agents all work
+
+### Auto-approve flag
+
+v0.8.14 uses `--approval-policy auto` (NOT `--yolo` — that flag does not exist yet).
+
+```
+deepseek --approval-policy auto --model deepseek-v4-flash ...
+```
+
+Valid values: `auto`, `on-request`, `untrusted`, `never`, `suggest`. `auto` = approve all, equivalent to Kimi `--afk`.
+
+### Adapter status
+
+The DeepSeek adapter at `packages/lythoskill-test-utils/src/agents/deepseek.ts` currently uses `-p` mode and is **text-only** — it cannot execute file operations, web search, or shell commands. For full agent capability, the adapter needs to be migrated to `serve --http` mode (see task TASK-20260506193936311).
+
+### Smoke test pattern
+
+When testing any new adapter, use the two-phase smoke test:
+1. **Hello World**: `deepseek -p "Reply with exactly 'OK'"` → verifies spawn pipe + auth
+2. **Self-report skills**: agent inspects `.claude/skills/` → verifies deck link + skill discovery
+
+Test scenarios live in `packages/lythoskill-deck/test/scenarios/*.agent.md`. The runner supports `--player` to select the agent backend:
+```bash
+bun packages/lythoskill-deck/test/runner.ts --agent --player deepseek
+bun packages/lythoskill-deck/test/runner.ts --agent --player kimi
+```
+
+Full analysis: `cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md`
+
+---
+
 ## Project Skills (Self-Contained)
 
 This repository contains its own built skills under `skills/`:

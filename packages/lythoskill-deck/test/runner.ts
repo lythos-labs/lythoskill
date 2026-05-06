@@ -376,6 +376,13 @@ function validateDeckCheckpoints(scenario: AgentScenario, checkpoints: Checkpoin
   const errors: string[] = []
 
   const nameLower = scenario.name.toLowerCase()
+  // Only validate deck-specific scenarios; skip generic/adapter smoke tests
+  const isDeckScenario =
+    nameLower.includes('deck') || nameLower.includes('introspection') ||
+    nameLower.includes('add') || nameLower.includes('refresh') ||
+    nameLower.includes('remove') || nameLower.includes('prune')
+  if (!isDeckScenario) return errors
+
   let expectedStep = 'deck.introspection'
   if (nameLower.includes('add')) expectedStep = 'deck.add'
   else if (nameLower.includes('refresh')) expectedStep = 'deck.refresh'
@@ -414,6 +421,9 @@ async function main(): Promise<void> {
 
   const runAgent = args.includes('--agent')
 
+  const playerIdx = args.indexOf('--player')
+  const player = playerIdx >= 0 ? args[playerIdx + 1] : 'claude'
+
   const scenarioDir = join(import.meta.dir, 'scenarios')
 
   // Load CLI BDD scenarios (.ts)
@@ -427,8 +437,8 @@ async function main(): Promise<void> {
 
   // Load Agent BDD scenarios (.agent.md) only when --agent
   const agentFiles = runAgent ? readdirSync(scenarioDir).filter(f => f.endsWith('.agent.md')) : []
-  if (runAgent && !Bun.which('claude')) {
-    console.warn('⚠️  claude not found in PATH, skipping Agent BDD scenarios')
+  if (runAgent && !Bun.which(player)) {
+    console.warn(`⚠️  ${player} not found in PATH, skipping Agent BDD scenarios`)
   }
 
   const now = new Date()
@@ -462,7 +472,7 @@ async function main(): Promise<void> {
     try {
       const result = await runAgentScenarioExt({
         scenarioPath,
-        agent: useAgent('claude'),
+        agent: useAgent(player),
         setupWorkdir: setupAgentWorkdir,
         baseDir: join(import.meta.dir, '..', '..', '..', 'runs', 'agent-bdd'),
       })
