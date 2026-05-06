@@ -1,124 +1,72 @@
 #!/usr/bin/env bash
-# quick-agent.sh — zero-setup agent execution
+# quick-agent.sh — fetch deck + prompt → agent output. Curl pipeline style.
 #
 # Usage:
 #   bash quick-agent.sh documents "Polish this article"
-#   bash quick-agent.sh engineering "Write a PRD for user auth"
-#   bash quick-agent.sh governance "Audit my skill-deck.toml"
+#   bash quick-agent.sh https://example.com/my-deck.toml "Write a PRD"
+#   bash quick-agent.sh ./local-deck.toml "Audit my config"
 #
-# Curl (no clone needed):
+# Curl (zero local files):
 #   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Polish this article"
 #
 # Prerequisites: bun, kimi (uv tool install kimi-cli && kimi login)
 set -euo pipefail
 
-DECK_NAME="${1:-}"
+DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
 OUT_DIR="${3:-./agent-output}"
 
-if [ -z "$DECK_NAME" ] || [ -z "$PROMPT" ]; then
+if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
   echo ""
-  echo "Built-in decks:"
-  echo "  documents   — PDF, DOCX, web-search"
-  echo "  engineering — TDD, PRD, diagrams"
-  echo "  governance  — deck, cortex, scribe, onboarding"
-  echo "  full-stack  — React, composition, TDD, diagrams"
-  echo ""
-  echo "Examples:"
-  echo "  bash quick-agent.sh documents 'Polish this article'"
-  echo "  bash quick-agent.sh engineering 'Write a PRD for user auth'"
+  echo "<deck> can be:"
+  echo "  documents   — built-in: PDF, DOCX, web-search"
+  echo "  engineering — built-in: TDD, PRD, diagrams"
+  echo "  governance  — built-in: deck, cortex, scribe, onboarding"
+  echo "  full-stack  — built-in: React, composition, TDD, diagrams"
+  echo "  https://... — raw deck URL (GitHub raw, gist, etc.)"
+  echo "  ./path.toml — local deck file"
   exit 1
 fi
 
 TMPDIR="$(mktemp -d)"
 trap "rm -rf $TMPDIR" EXIT
 
-# ── Generate deck.toml on the fly ──────────────────────────────
-case "$DECK_NAME" in
-  documents)
-    cat > "$TMPDIR/deck.toml" << 'TOML'
-[deck]
-max_cards = 10
+# ── Resolve deck: URL, built-in name, or local path ──────────
+DECK_RAW="https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks"
 
-[tool.skills.pdf]
-path = "github.com/anthropics/skills/skills/pdf"
-
-[tool.skills.docx]
-path = "github.com/anthropics/skills/skills/docx"
-
-[tool.skills.web-search]
-path = "localhost/web-search"
-TOML
+case "$DECK_SPEC" in
+  https://*|http://*)
+    echo "📥 Fetching deck: $DECK_SPEC"
+    curl -fsSL "$DECK_SPEC" -o "$TMPDIR/deck.toml"
     ;;
-  engineering)
-    cat > "$TMPDIR/deck.toml" << 'TOML'
-[deck]
-max_cards = 10
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.to-prd]
-path = "github.com/mattpocock/skills/skills/engineering/to-prd"
-
-[tool.skills.design-doc-mermaid]
-path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-TOML
-    ;;
-  governance)
-    cat > "$TMPDIR/deck.toml" << 'TOML'
-[deck]
-max_cards = 10
-
-[innate.skills.lythoskill-deck]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-
-[innate.skills.project-cortex]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
-
-[innate.skills.project-onboarding]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
-
-[innate.skills.project-scribe]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
-TOML
-    ;;
-  full-stack)
-    cat > "$TMPDIR/deck.toml" << 'TOML'
-[deck]
-max_cards = 15
-
-[tool.skills.react]
-path = "github.com/vercel-labs/agent-skills/skills/react-best-practices"
-
-[tool.skills.composition]
-path = "github.com/vercel-labs/agent-skills/skills/composition-patterns"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.pdf]
-path = "github.com/anthropics/skills/skills/pdf"
-
-[tool.skills.design-doc-mermaid]
-path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-TOML
+  ./*|/*|*.toml)
+    if [ -f "$DECK_SPEC" ]; then
+      cp "$DECK_SPEC" "$TMPDIR/deck.toml"
+      echo "📋 Local deck: $DECK_SPEC"
+    else
+      echo "❌ Deck file not found: $DECK_SPEC"
+      exit 1
+    fi
     ;;
   *)
-    echo "❌ Unknown deck: $DECK_NAME"
-    echo "   Available: documents, engineering, governance, full-stack"
-    exit 1
+    echo "📥 Fetching deck: $DECK_RAW/${DECK_SPEC}.toml"
+    curl -fsSL "$DECK_RAW/${DECK_SPEC}.toml" -o "$TMPDIR/deck.toml" || {
+      echo "❌ Unknown deck: $DECK_SPEC"
+      echo "   Available: documents, engineering, governance, full-stack"
+      echo "   Or pass a URL: https://raw.githubusercontent.com/..."
+      exit 1
+    }
     ;;
 esac
 
-echo "🚀 quick-agent: $DECK_NAME × '$PROMPT'"
+echo "🚀 quick-agent: $PROMPT"
 echo "📁 Output: $OUT_DIR"
 
 mkdir -p "$OUT_DIR"
 
-# ── Run agent ───────────────────────────────────────────────────
-bunx @lythos/skill-arena@0.9.19 agent-run \
+# ── Run agent: deck + prompt → execute + judge ───────────────
+bunx @lythos/skill-arena@0.9.20 agent-run \
   --brief "$PROMPT" \
   --deck "$TMPDIR/deck.toml" \
   --out "$OUT_DIR"
