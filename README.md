@@ -169,6 +169,21 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/m
 
 Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
 
+<details>
+<summary>🔧 Unstable GitHub connection?</summary>
+
+If `raw.githubusercontent.com` is slow or blocked, prefix the deck URL with a ghproxy:
+
+```bash
+# Built-in deck via proxy (use ghfast.top or gh-proxy.com)
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- \
+  "https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/documents.toml" \
+  "Write a recipe for the perfect chocolate chip cookie"
+```
+
+Any public GitHub raw URL works the same way — just prepend the proxy prefix.
+</details>
+
 ### Install for Real Use
 
 ```bash
@@ -619,6 +634,8 @@ Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/
 | `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@0.9.22 add <owner>/<repo>` or clone manually |
 | `bunx: command not found` | Bun not installed or shell not restarted | Run `source ~/.bashrc` or open a new terminal |
 | Symlink creation fails | Permissions or non-standard filesystem | Ensure `working_set` directory exists and is writable |
+| `quick-agent.sh` fails with `Deck fetch failed` | `raw.githubusercontent.com` unreachable | Prefix deck URL with `https://ghfast.top/` or `https://gh-proxy.com/` (see [network note](#quick-start)) |
+| `deck link` hangs or fails | `github.com` unreachable during skill clone | Clone skills manually to cold pool, or use a git proxy |
 
 ---
 
