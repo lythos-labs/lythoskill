@@ -27,7 +27,7 @@
 - [Quick Start](#quick-start)
 - [skill-deck.toml Reference](#skill-decktoml-reference)
 - [Real-World Example](#real-world-example-deck-governed-nextjs-project)
-- [Arena: Skill Comparison](#arena-skill-comparison)
+- [Arena: Systematize the Comparison](#arena-systematize-the-comparison)
 - [Cold Pool Convention](#cold-pool-convention)
 - [Ecosystem Tools](#ecosystem-tools)
 - [Architecture](#architecture)
@@ -153,28 +153,55 @@ If you are an AI agent reading this README:
 ### 30-Second Trial (curl, zero install beyond prerequisites)
 
 ```bash
-# Deck + prompt → agent executes + judge scores → output. No files touched in your project.
-# Each run creates ./agent-output-<timestamp>/ — no overwrites.
-
-# ── Pure text (fast, no web search) ──
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write Hello World in Python, JavaScript, Rust, Go, and Bash. Add a one-line comment per language explaining what makes it idiomatic."
-
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios, technique notes, and the science behind each step."
-
-# ── Web research (uses web-search skill) ──
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design. Include neighborhood walks and one underrated spot per day."
-
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- engineering "Research the current state of WebAssembly in 2026. Write a 3-paragraph summary covering browser support, language ecosystem, and one surprising use case."
-
-# ── Same task, different decks (compare results → feeds into Arena) ──
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
-
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- design-studio "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
-
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- visual-explainer "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+# Deck + prompt → agent executes + judge scores → output.
+# No files touched in your project. Each run creates ./agent-output-<timestamp>/.
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
 ```
 
-Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
+Output lands in `./agent-output-<timestamp>/`. The agent sees the deck's skills (PDF, DOCX), writes the file, and copies it to the output directory. `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
+
+### Same Task, Different Decks — The Core Loop
+
+One task. Three decks. Three different outcomes. **This is the lythoskill workflow: compare, don't guess.**
+
+Every run is isolated in `/tmp` — no skill cross-contamination, no deck collision. The agent sees *only* what its deck declares.
+
+```bash
+# ─── Baseline: bare agent (no skills — raw markdown) ───
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- scout \
+  "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+
+# ─── Tool-enhanced: PDF + DOCX skills → professional document output ───
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents \
+  "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
+
+# ─── Domain-enhanced: design taste + Mermaid diagrams ───
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- visual-explainer \
+  "Create a recipe for the perfect chocolate chip cookie with a Mermaid flowchart of the steps. Include ingredient ratios and the science behind each step."
+```
+
+| Deck | What it provides | The experiment |
+|------|-----------------|----------------|
+| `scout` | Nothing — agent's raw capability | **Baseline**: what does the model do with zero help? |
+| `documents` | PDF, DOCX, web-search | **Tool layer**: does format awareness change the output? |
+| `visual-explainer` | Mermaid diagrams, theme-factory | **Domain layer**: does design thinking lift a simple recipe? |
+
+**What you're seeing**: The same LLM, the same prompt — but different guardrails, different tools, different output quality. Deck governance makes this difference **visible and repeatable**.
+
+More decks and tasks:
+
+```bash
+# Web research tasks
+curl -fsSL ... | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design."
+curl -fsSL ... | bash -s -- engineering "Research the current state of WebAssembly in 2026. 3-paragraph summary."
+
+# Design-centric tasks (compare visual-explainer vs design-studio)
+curl -fsSL ... | bash -s -- design-studio "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+```
+
+> **Read the diff.** Open `./agent-output-<timestamp>/` — with the `documents` deck you'll find `.docx` files, with `visual-explainer` Mermaid diagrams. The difference between `scout` and `visual-explainer` output is the difference between "the model tried" and "the deck delivered."
+
+See [`quick-agent.sh`](./examples/quick-agent.sh) for how deck isolation works under the hood. See [Arena](#arena-skill-comparison) for systematizing these comparisons.
 
 <details>
 <summary>🔧 Unstable GitHub connection?</summary>
@@ -386,9 +413,11 @@ bunx @lythos/skill-deck@0.9.22 link
 
 ---
 
-## Arena: Skill Comparison
+## Arena: Systematize the Comparison
 
-Not sure which skill to use? Arena runs the same task under different skill configurations and scores the results. No guesswork.
+The curl one-liners above are the entry point. Arena turns that pattern into a **scientific instrument**: controlled variables, statistical aggregation, multi-criteria scoring, and a reproducible audit trail.
+
+**The same experiment, formalized**:
 
 | Question | How to test |
 |---|---|
