@@ -409,7 +409,20 @@ bun packages/lythoskill-deck/test/runner.ts --agent --player deepseek
 bun packages/lythoskill-deck/test/runner.ts --agent --player kimi
 ```
 
-Full analysis: `cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md`
+### Supporting References
+
+| When you need to… | Read |
+|--------------------|------|
+| Understand why DeepSeek TUI > Kimi/Claude for Bun.spawn | [`cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md`](./cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md) |
+| Compare all four agent CLI backends (DeepSeek/Kimi/Claude/OpenCode) | Same wiki entry — §8 scoring matrix |
+| Understand the Kimi adapter pattern (reference for new adapters) | [`cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md`](./cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md) |
+| See the AgentAdapter interface + player abstraction design | [`cortex/wiki/01-patterns/player-abstraction-agent-swappable-backend.md`](./cortex/wiki/01-patterns/player-abstraction-agent-swappable-backend.md) |
+| Learn the `.agent.md` format (Given/When/Then/Judge) | [`packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`](./packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md) — canonical example |
+| Write a new Agent BDD scenario | Copy an existing `.agent.md`, follow `## Given` / `## When` / `## Then` / `## Judge` sections |
+| Run Agent BDD scenarios locally | `bun packages/lythoskill-deck/test/runner.ts --agent --player <name>` |
+| Understand how `useAgent()` routes players to adapters | [`packages/lythoskill-test-utils/src/agents/index.ts`](./packages/lythoskill-test-utils/src/agents/index.ts) |
+| Debug adapter spawn issues (stdin pipe, env, timeout) | [`cortex/wiki/03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md`](./cortex/wiki/03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md) |
+| See TDD test patterns for pure functions (preflight example) | [`packages/lythoskill-arena/src/preflight.test.ts`](./packages/lythoskill-arena/src/preflight.test.ts) — 41 tests, 100% coverage |
 
 ---
 
