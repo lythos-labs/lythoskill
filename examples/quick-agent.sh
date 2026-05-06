@@ -17,7 +17,7 @@ PROMPT="${2:-}"
 OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
 PLAYER="${LYTHOS_PLAYER:-kimi}"  # override via env: LYTHOS_PLAYER=deepseek bash quick-agent.sh ...
 
-if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
+if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ] || [ -z "$(echo "$PROMPT" | xargs)" ]; then
   echo "❌ Missing arguments."
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
   echo "  deck:  documents | design-studio | visual-explainer | engineering | governance | full-stack | URL | path.toml"

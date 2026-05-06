@@ -96,8 +96,8 @@ async function agentRun(args: string[]) {
     console.error('❌ --deck <path> is required')
     process.exit(1)
   }
-  if (!opts.task && !opts.brief) {
-    console.error('❌ --task <path> or --brief "<prompt>" is required')
+  if (!opts.task && (!opts.brief || !opts.brief.trim())) {
+    console.error('❌ --task <path> or --brief "<prompt>" is required and cannot be empty')
     process.exit(1)
   }
 
