@@ -7,7 +7,7 @@
 #   bash quick-agent.sh ./local-deck.toml "Audit my config"
 #
 # Curl (zero local files):
-#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Polish this article"
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Polish this article"
 #
 # Prerequisites: bun, kimi (uv tool install kimi-cli && kimi login)
 set -euo pipefail
@@ -39,7 +39,7 @@ TMPDIR="$(mktemp -d)"
 trap "rm -rf $TMPDIR" EXIT
 
 # ── Resolve deck: URL, built-in name, or local path ──────────
-DECK_RAW="https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks"
+DECK_RAW="https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks"
 
 case "$DECK_SPEC" in
   https://*|http://*)

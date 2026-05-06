@@ -157,14 +157,14 @@ If you are an AI agent reading this README:
 # Each run creates ./agent-output-<timestamp>/ — no overwrites.
 
 # ── Pure text (fast, no web search) ──
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Write Hello World in Python, JavaScript, Rust, Go, and Bash. Add a one-line comment per language explaining what makes it idiomatic."
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write Hello World in Python, JavaScript, Rust, Go, and Bash. Add a one-line comment per language explaining what makes it idiomatic."
 
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios, technique notes, and the science behind each step."
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios, technique notes, and the science behind each step."
 
 # ── Web research (uses web-search skill) ──
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design. Include neighborhood walks and one underrated spot per day."
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design. Include neighborhood walks and one underrated spot per day."
 
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-agent.sh | bash -s -- engineering "Research the current state of WebAssembly in 2026. Write a 3-paragraph summary covering browser support, language ecosystem, and one surprising use case."
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- engineering "Research the current state of WebAssembly in 2026. Write a 3-paragraph summary covering browser support, language ecosystem, and one surprising use case."
 ```
 
 Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
@@ -187,19 +187,19 @@ Not sure which skills to pick? One command installs a scenario-tuned deck:
 
 ```bash
 # Default: document processing deck (PDF + DOCX + web search)
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash
 
 # Pick a different scene
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s engineering
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s full-stack
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s governance
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s engineering
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s full-stack
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s governance
 ```
 
 Or copy a deck manually and link:
 
 ```bash
 # Document processing: PDF + DOCX + web search
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/documents.toml > skill-deck.toml
 bunx @lythos/skill-deck@0.9.22 link
 ```
 
