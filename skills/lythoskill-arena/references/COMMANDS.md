@@ -2,6 +2,8 @@
 🎭 lythoskill-arena — Skill comparison runner
 
 Usage:
+  lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>]
+  lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>]
   lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
   lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
@@ -26,6 +28,10 @@ Options:
   -p, --project <dir>    Project directory (default: .)
 
 Examples:
+  # Single agent run (simplest path)
+  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml
+  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml --player kimi --out ./output
+
   # Declarative mode (k8s-style)
   lythoskill-arena run --config ./arena.toml
   lythoskill-arena run --config ./arena.toml --dry-run

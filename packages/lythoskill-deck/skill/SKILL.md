@@ -97,7 +97,7 @@ path = "github.com/owner/repo/skill-name"
 ```
 
 **Agent duty — detect and prompt**: If you see `skills = [...]` (string array)
-in any `[innate]`, `[tool]`, or `[combo]` section, the deck is in the deprecated
+in any `[innate]`, `[tool]`, or `[transient]` section, the deck is in the deprecated
 format. Ask the user whether to migrate before proceeding:
 
 ```
@@ -145,8 +145,9 @@ Reports skills in cold pool but not in deck, expiring transients, managed-dir ov
 symlinks) to detect entities. `existsSync` returns `false` for broken symlinks,
 causing `EEXIST` errors on recreation. If writing custom working-set scripts, use `lstatSync`.
 **SKILL.md type field**: Only `standard` or `flow` are valid (agent platform validation).
-`innate`/`tool`/`combo`/`transient` are **skill-deck.toml section names**, not
+`innate`/`tool`/`transient` are **skill-deck.toml section names**, not
 SKILL.md types. Using them as types causes silent skip.
+`combo` is a meta-declaration (skills + prompt), not a skill type.
 **Skill locators**: `skill-deck.toml` accepts two locator styles. The cold pool uses Go module-style layout (`host/owner/repo/skills/name`).
 
 | Style | Example | Reliability |
@@ -160,14 +161,12 @@ Bare names fail for monorepo skills because the flat-scan searches `readdirSync`
 to avoid collisions with the Agent Skills open standard or future platform extensions.
 **deck_skill_type**: Use the custom field `deck_skill_type` to declare a skill's
 intrinsic deck role — never overload the official `type` field. `type` is reserved for
-agent platform validation (`standard` or `flow` only); using `type: combo` causes Kimi
-CLI to silently skip the skill.
+agent platform validation (`standard` or `flow` only).
 
 | `deck_skill_type` | When to declare | Why |
 |-------------------|-----------------|-----|
-| `combo` | Skill carries `deck_delegates` routing logic | Combo is an architecture mode, not a deployment choice |
-| `transient` | Skill is a temporary workaround with `expires` | Signals "this skill expects to disappear as the ecosystem evolves" |
 | `fork` | Skill is a local adaptation of an upstream skill | Upstream's desc/behavior structurally conflicts with our arena-tested conclusions |
+| `transient` | Skill is a temporary workaround with `expires` | Signals "this skill expects to disappear as the ecosystem evolves" |
 
 `innate` / `tool` are **deck-level deployment choices** declared in `skill-deck.toml`
 sections, not single-card properties. The same skill can be `innate` in one deck and

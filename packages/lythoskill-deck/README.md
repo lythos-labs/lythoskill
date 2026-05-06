@@ -41,12 +41,14 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [tool.skills.gstack]
 path = "github.com/garrytan/gstack"
 
-[combo.skills.pdf]                  # Multi-skill bundles
-path = "github.com/anthropics/skills/skills/pdf"
+[transient.trial-skill]              # Trial skills with auto-expiry
+path = "./skills/experimental"
+expires = "2026-06-01"    # ISO date; warns at ≤14 days
 
-[transient.handoff]                 # Temporary skills with expiry
-path = "./skills/handoff" # Local path (not cold pool)
-expires = "2026-05-01"    # ISO date; warns at ≤14 days
+# combo is a meta-declaration, not a skill type (doesn't count against max_cards):
+[combo.report-generation]
+skills = ["web-search", "docx", "mermaid"]
+prompt = "Search for latest info, then generate professional document with diagrams"
 ```
 
 ### When to invoke
@@ -81,7 +83,7 @@ expires = "2026-05-01"    # ISO date; warns at ≤14 days
 | `--workdir <dir>` | Working directory | cwd |
 
 | `--alias <alias>` | Explicit alias for the skill (default: basename of path) | — |
-| `--type <type>` | Target section for `add`: `innate`, `tool`, or `combo` | `tool` |
+| `--type <type>` | Target section for `add`: `innate`, `tool`, or `transient` | `tool` |
 
 ### Safety guards
 
