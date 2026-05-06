@@ -14,6 +14,12 @@ set -euo pipefail
 
 DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
+
+# If prompt not provided as arg, read from stdin (supports pipe/heredoc)
+if [ -z "$PROMPT" ] && [ ! -t 0 ]; then
+  PROMPT=$(cat)
+fi
+
 OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
 
 if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
