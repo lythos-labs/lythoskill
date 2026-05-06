@@ -12,18 +12,23 @@ import { formatHelp } from './help.js'
 const args = process.argv.slice(2)
 const command = args[0]
 
-const deckFlagIdx = args.indexOf('--deck')
-const workdirFlagIdx = args.indexOf('--workdir')
-const aliasFlagIdx = args.indexOf('--alias')
-const typeFlagIdx = args.indexOf('--type')
+// Argument helpers — accept both `--flag value` and `--flag=value` forms.
+function flagValue(name: string): string | undefined {
+  const direct = args.find((a) => a.startsWith(name + '='))
+  if (direct) return direct.slice(name.length + 1)
+  const idx = args.indexOf(name)
+  return idx >= 0 ? args[idx + 1] : undefined
+}
 
-const deckPath = deckFlagIdx >= 0 ? args[deckFlagIdx + 1] : undefined
-const workdir = workdirFlagIdx >= 0 ? args[workdirFlagIdx + 1] : undefined
-const alias = aliasFlagIdx >= 0 ? args[aliasFlagIdx + 1] : undefined
-const type = typeFlagIdx >= 0 ? args[typeFlagIdx + 1] : undefined
+const deckPath = flagValue('--deck')
+const workdir = flagValue('--workdir')
+const alias = flagValue('--alias')
+const type = flagValue('--type')
+const format = flagValue('--format')
 const noBackup = args.includes('--no-backup')
 const yes = args.includes('--yes')
 const dryRun = args.includes('--dry-run')
+const remote = args.includes('--remote')
 
 const HELP_CONFIG = {
   binName: 'lythoskill-deck',
@@ -46,6 +51,8 @@ const HELP_CONFIG = {
     { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
     { flag: '--dry-run', description: 'Show plan without executing (add, prune)' },
     { flag: '--yes', description: 'Skip interactive confirmation (for prune)' },
+    { flag: '--remote', description: 'For validate: probe each FQ locator against api.github.com' },
+    { flag: '--format <text|json>', description: 'For validate: output format (default: text)' },
   ],
 }
 
@@ -77,7 +84,10 @@ switch (command) {
     break
   }
   case 'validate':
-    validateDeck(deckPath, workdir)
+    await validateDeck(deckPath, workdir, {
+      remote,
+      format: format === 'json' ? 'json' : 'text',
+    })
     break
   case 'remove': {
     const removeTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
