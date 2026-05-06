@@ -136,7 +136,7 @@ Evaluate whether the output is complete, accurate, and well-structured.
 
   const player = resolvePlayer(opts.player ?? 'kimi')
   const agent = useAgent(player)
-  const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), 'agent-run-output')
+  const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), `agent-output-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`)
   mkdirSync(outDir, { recursive: true })
 
   console.log(`🤖 agent-run: ${player} × ${deckPath}`)

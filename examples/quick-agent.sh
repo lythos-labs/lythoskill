@@ -14,7 +14,7 @@ set -euo pipefail
 
 DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
-OUT_DIR="${3:-./agent-output}"
+OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
 
 if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
