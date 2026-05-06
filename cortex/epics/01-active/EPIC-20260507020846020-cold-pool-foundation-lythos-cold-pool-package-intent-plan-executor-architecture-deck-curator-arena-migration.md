@@ -137,10 +137,10 @@ checklist_skipped_reason: rescoped from suspended EPIC-20260507012858669; archit
 
 | 任务 | TASK ID | 状态 | 描述 |
 |------|---------|------|------|
-| T1 | TASK-20260507021320323 | backlog | Scaffold `@lythos/cold-pool` 包(主题 A) |
-| T2 | TASK-20260507021320360 | backlog | 核心类型 + parseLocator 迁移(主题 B) |
-| T3 | TASK-20260507021320388 | backlog | Resolver 层 + GitHub Tree API client(主题 C) |
-| T4 | TASK-20260507021320416 | backlog | ColdPoolManager + GitExecutor(主题 D) |
+| T1 | TASK-20260507021320323 | ✅ completed | Scaffold `@lythos/cold-pool` 包(主题 A) |
+| T2 | TASK-20260507021320360 | ✅ completed | 核心类型 + parseLocator 迁移(主题 B) |
+| T3 | TASK-20260507021320388 | ✅ completed | Resolver 层 + GitHub Tree API client(主题 C) |
+| T4 | TASK-20260507021320416 | ✅ completed | ColdPool + git-io + Fetch plan/executor(主题 D) |
 | T5 | TASK-20260507021320442 | backlog | deck/src/add.ts 切到 cold-pool(主题 E) |
 | T6 | TASK-20260507021320467 | backlog | deck/src/link.ts 切到 cold-pool(主题 E) |
 | T7 | TASK-20260507021320492 | backlog | deck/src/refresh-plan.ts 切到 cold-pool(主题 E) |
