@@ -17,7 +17,7 @@ bun add @lythos/test-utils
 | `agent-bdd` | `@lythos/test-utils/agent-bdd` | `parseAgentMd`, `runAgentScenario` |
 | `judge` | `@lythos/test-utils/judge` | `buildJudgePrompt`, `runLLMJudge` (function-calling + Zod) |
 | `schema` | `@lythos/test-utils/schema` | 9 Zod schemas: `JudgeVerdict`, `CheckpointEntry`, `AgentScenario`, `ArenaManifest`, `ComparativeReport`, `Player`, `DeckConfig`, `Metrics` |
-| `agents` | `@lythos/test-utils/agents` | `useAgent(name)`, `AgentAdapter` interface, Claude adapter |
+| `agents` | `@lythos/test-utils/agents` | Re-export of `@lythos/agent-adapter` — `useAgent(name)`, `AgentAdapter` interface |
 | `bdd-runner` | `@lythos/test-utils/bdd-runner` | `runClaudeAgent`, `readCheckpoints`, `runCli`, `assertOutput`, `setupWorkdir` |
 | `sanitize` | `@lythos/test-utils/sanitize` | `createSanitizer` — replace absolute paths + redact secrets for portable artifacts |
 
@@ -117,19 +117,21 @@ deck config    →  RefreshPlan      →  executeRefreshPlan
 
 ## Agent Adapters
 
+> **Moved to `@lythos/agent-adapter`.** `@lythos/test-utils/agents` is preserved for backward compatibility — it re-exports from the canonical source.
+
 ```ts
+// Canonical import (recommended)
+import { useAgent } from '@lythos/agent-adapter'
+
+// Backward-compatible import
 import { useAgent } from '@lythos/test-utils/agents'
 
-const claude = useAgent('claude')     // spawns `claude -p`
-// Future: useAgent('kimi'), useAgent('cursor'), useAgent('gemini')
-
-// AgentAdapter interface:
-interface AgentAdapter {
-  name: string
-  spawn(opts: { cwd, brief, timeoutMs, idleTimeoutMs?, env? }): Promise<AgentRunResult>
-  invokeTool?(opts: { tool, prompt, cwd, timeoutMs }): Promise<unknown>
-}
+const claude = useAgent('claude')     // deprecated: `claude -p` CLI
+const kimi = useAgent('kimi')         // recommended: stable headless
+const sdk = useAgent('claude-sdk')    // requires `@lythos/agent-adapter-claude-sdk`
 ```
+
+See [`@lythos/agent-adapter`](https://www.npmjs.com/package/@lythos/agent-adapter) for the plugin architecture and custom adapter registration.
 
 ## Test Coverage
 

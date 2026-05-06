@@ -1,0 +1,23 @@
+{
+  "name": "@lythos/agent-adapter-claude-sdk",
+  "version": "0.9.22",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "claude-code",
+    "agent-adapter",
+    "anthropic",
+    "claude-agent-sdk"
+  ],
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.131",
+    "@lythos/agent-adapter": "workspace:*"
+  }
+}

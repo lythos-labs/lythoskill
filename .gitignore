@@ -22,6 +22,9 @@ dist/
 # GitHub access token (local-only, never commit)
 .github-token
 
+# Claude SDK credentials (local-only, never commit)
+.claude-sdk-key
+
 playground/
 .claude/
 

@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { runAgentScenario, type AgentScenario } from '@lythos/test-utils/agent-bdd'
 import { useAgent } from '@lythos/test-utils/agents'
+// Optional: register claude-sdk adapter if the package is installed
+try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
 import { ArenaManifest, Player } from '@lythos/test-utils/schema'
 import type { ArenaManifest as ArenaManifestType, JudgeVerdict } from '@lythos/test-utils/schema'
 import { runComparativeJudge } from './comparative-judge'

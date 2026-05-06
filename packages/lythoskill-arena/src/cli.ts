@@ -106,6 +106,8 @@ async function agentRun(args: string[]) {
   if (!existsSync(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
+  // Optional: register claude-sdk adapter if the package is installed
+  try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
   const { resolvePlayer } = await import('./player')
   const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs')
