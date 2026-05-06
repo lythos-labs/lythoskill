@@ -18,6 +18,24 @@
 **🤖 AI agent?** → [For Agents](#for-agents) — your 4-step checklist.  
 **🛠️ Developer?** → [Development](#development) — clone, install, contribute.
 
+<details>
+<summary>📋 Table of Contents</summary>
+
+- [Do I need this?](#do-i-need-this)
+- [What lythoskill Provides](#what-lythoskill-provides)
+- [For Agents](#for-agents)
+- [Quick Start](#quick-start)
+- [skill-deck.toml Reference](#skill-decktoml-reference)
+- [Real-World Example](#real-world-example-deck-governed-nextjs-project)
+- [Arena: Skill Comparison](#arena-skill-comparison)
+- [Cold Pool Convention](#cold-pool-convention)
+- [Ecosystem Tools](#ecosystem-tools)
+- [Architecture](#architecture)
+- [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
+
+</details>
+
 ---
 
 ## The Problem
@@ -46,8 +64,7 @@ Governance is only useful when complexity reaches a threshold.
 | 5–10, some conflicts | Growing | **Install lythoskill-deck** — declare which skills this project needs. |
 | 10+, you author skills | Ecosystem | Use **deck + creator** — thin-skill pattern for maintainable skills. |
 
-<details>
-<summary>Detailed decision tree (click to expand)</summary>
+**Decision tree:**
 
 ```
 10+, and you author your own skills
@@ -65,37 +82,73 @@ Managing a skill ecosystem across teams/projects/sources
 - Your skill set never changes across projects
 - Your skills are pure SKILL.md files with no build step
 - You are a solo developer with one skill and no release cycle
-</details>
 
 ---
+
+## What lythoskill Provides
+
+lythoskill serves two distinct audiences. You can use either independently.
+
+### Deck Governance — For Skill Users
+
+**The problem**: Your `.claude/skills/` is a zoo. 50+ skills from GitHub, skill hubs, and blog posts. Every time the agent starts, it scans everything — descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
+
+**The solution**: Declare which skills this project needs. Everything else disappears.
+
+| Without deck governance | With deck governance |
+|---|---|
+| Agent scans 50+ skills, picks randomly | Agent sees exactly what you declared |
+| Similar skills silently conflict | `deny-by-default`: undeclared = invisible |
+| Context window wasted on irrelevant descriptions | `max_cards` budget enforces focus |
+
+**Key principle**: lythoskill-deck is a declarative package manager *and* a governor. `deck add` downloads skills from GitHub into your cold pool, appends them to `skill-deck.toml`, and runs `link` — all in one shot. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
+
+### Thin Skill Pattern — For Skill Authors
+
+You are building a team-internal skill library or a public skill ecosystem. You need version control, CI, testing, and a clean separation between "development experience" and "agent-facing surface."
+
+```bash
+bunx @lythos/skill-creator@0.9.19 init my-skill
+cd my-skill
+bunx @lythos/skill-creator@0.9.19 build my-skill
+```
+
+**Three-Layer Separation**:
+
+```
+Starter (packages/<name>/)       → npm publish → implementation + CLI
+Skill   (packages/<name>/skill/) → build → SKILL.md + thin scripts
+Output  (skills/<name>/)         → committed to Git → agent-visible skill
+```
+
+## 🤖 For Agents
+
+If you are an AI agent reading this README:
+
+1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
+2. Run `bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>` to add a skill
+3. Run `bunx @lythos/skill-deck@0.9.19 link` to sync the working set
+4. Skills are now in `.claude/skills/` — read them and follow their instructions
 
 ## Quick Start
 
 > 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
 
-**Prerequisite — Bun runtime + Kimi CLI** (needed for `bunx` + agent execution):
-```bash
-# Bun (TypeScript runtime)
-curl -fsSL https://bun.sh/install | bash
+**Prerequisites** (replace `0.9.19` with the latest version from the npm badge above):
 
-# Kimi CLI (AI agent backend — Python, uv is Python's bunx)
-# uv tool install kimi-cli && kimi login
-# Docs: https://github.com/MoonshotAI/kimi-cli
-```
+1. **Bun** (required) — TypeScript runtime for `bunx`:
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   # After install: restart your shell or run `source ~/.bashrc`
+   ```
 
-**Prerequisites:**
-```bash
-# Bun — TypeScript runtime (macOS/Linux/WSL)
-curl -fsSL https://bun.sh/install | bash
+2. **Kimi CLI** (optional) — only needed for [Arena](#arena-skill-comparison):
+   ```bash
+   uv tool install kimi-cli && kimi login
+   # Docs: https://github.com/MoonshotAI/kimi-cli
+   ```
 
-# Kimi CLI — AI agent backend (optional, needed for arena agent-run)
-# uv is Python's bunx equivalent
-uv tool install kimi-cli && kimi login
-# Docs: https://github.com/MoonshotAI/kimi-cli
-```
-After install, restart your shell or run `source ~/.bashrc`.
-
-> **This tool requires Bun, not Node.** `bunx` is the correct runner.
+> **This tool requires Bun, not Node.** `bunx` is the correct runner. `npx` will fail unless Bun is also installed.
 
 ```bash
 # 1. Add a skill (downloads to cold pool + updates deck + links)
@@ -161,92 +214,44 @@ deck                 ← the CLI command (short for lythoskill-deck)
 link                 ← the subcommand that syncs working set to toml
 ```
 
-### For Agents
+### Managing Your Deck
 
-If you are an AI agent reading this:
-1. Check `bun --version` — if missing, install Bun first (see Quick Start above)
-2. Run `bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>` to add a skill
-3. Run `bunx @lythos/skill-deck@0.9.19 link` to sync the working set
-4. Skills are now in `.claude/skills/` — read them and follow their instructions
+**Remove a skill:** Delete its entry from `skill-deck.toml` and run:
+```bash
+bunx @lythos/skill-deck@0.9.19 link
+```
+
+**Update a skill:** Pull the latest code from its source and re-link:
+```bash
+cd ~/.agents/skill-repos/github.com/<owner>/<repo> && git pull
+bunx @lythos/skill-deck@0.9.19 link
+```
+
+`skill-deck.lock` tracks the resolved working set. Commit it to version control so teammates get the exact same skill links.
 
 ---
 
-## Two Value Propositions
+## skill-deck.toml Reference
 
-lythoskill serves two distinct audiences. You can use either independently.
+| Section | Key | Required | Default | Description |
+|---------|-----|----------|---------|-------------|
+| `[deck]` | `max_cards` | No | `10` | Max skills active in the working set |
+| `[deck]` | `cold_pool` | No | `~/.agents/skill-repos` | Root directory for cloned skill repos |
+| `[deck]` | `working_set` | No | `.claude/skills` | Directory where symlinks are created |
+| `[innate]` | `skills.<name>.path` | Yes* | — | Always loaded; agent cannot override |
+| `[tool]` | `skills.<name>.path` | Yes* | — | Available for agent to invoke |
+| `[combo]` | `<name>.skills` | Yes* | — | Named groups of skills to toggle together |
+| `[transient]` | `skills.<name>.path` | Yes* | — | Time-bounded skills (auto-expire) |
 
-### Deck Governance — For Every Skill User
+\* Required when that section is used.
 
-**The problem**: Your `.claude/skills/` is a zoo. 50+ skills from GitHub, skill hubs, and blog posts. Every time the agent starts, it scans everything — descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
+**Sections explained** (note: `innate`/`tool`/`combo` currently have identical runtime behavior — the distinction is for future governance semantics):
+- **`[innate]`** — Governance skills every agent needs.
+- **`[tool]`** — Capability skills the agent may invoke.
+- **`[combo]`** — Named groups to toggle together.
+- **`[transient]`** — Skills with an expiry date.
 
-**The solution**: Declare which skills this project needs. Everything else disappears.
-
-| Without deck governance | With deck governance |
-|---|---|
-| Agent scans 50+ skills, picks randomly | Agent sees exactly what you declared |
-| Similar skills silently conflict | `deny-by-default`: undeclared = invisible |
-| Context window wasted on irrelevant descriptions | `max_cards` budget enforces focus |
-
-**Multi-role decks**: A curator agent sees only curator skills. An arena agent sees only arena skills. A scribe agent sees only scribe skills. Each agent gets a tailored deck — no cross-contamination, no bloated context.
-
-**Key principle**: lythoskill-deck is a declarative package manager *and* a governor. `deck add` downloads skills from GitHub/skills.sh into your cold pool, appends them to `skill-deck.toml`, and runs `link` — all in one shot. `deck link` then reconciles the working set so only declared skills are visible. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
-
-**Declarative sync, like Kubernetes**: `deck link` doesn't just "create links" — it makes the working set match your `skill-deck.toml`. If you remove a skill from the toml and run `link` again, it disappears from `.claude/skills/`. No `unlink` command needed — just change the declaration and re-sync.
-
-For example, to start using a new skill manually:
-
-```bash
-# 1. Clone the skill repo to your cold pool (one-time setup)
-git clone https://github.com/lythos-labs/lythoskill.git \
-  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
-
-# 2. Create skill-deck.toml — copy this exact block:
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-
-[tool]
-skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
-EOF
-
-# 3. Sync — deck reconciles working set with declaration
-bunx @lythos/skill-deck@0.9.19 link
-# or: npx @lythos/skill-deck link
-```
-
-Or use `deck add` to automate steps 1–3 in one command. You can also use `skills.sh`, `bunx`, or any other method — deck doesn't care how skills got into the cold pool, only which ones are active.
-
-### Thin Skill Pattern — For Skill Ecosystem Developers
-
-You are building a team-internal skill library or a public skill ecosystem. You need version control, CI, testing, and a clean separation between "development experience" and "agent-facing surface."
-
-**lythoskill-creator provides the scaffolding**:
-
-```bash
-# Scaffold a skill with TypeScript, testing, and dependency management
-bunx @lythos/skill-creator@0.9.19 init my-skill
-cd my-skill
-
-# Develop in packages/my-skill/src/ (full dev experience: TypeScript, tests, npm deps)
-# Describe intent in packages/my-skill/skill/SKILL.md (agent reads this)
-
-# Build — generates thin output: SKILL.md + thin scripts for agents
-bunx @lythos/skill-creator@0.9.19 build my-skill
-```
-
-**The Three-Layer Separation**:
-
-```
-Starter (packages/<name>/)       → npm publish → implementation + CLI entry
-Skill   (packages/<name>/skill/) → lythoskill build → SKILL.md + thin scripts
-Output  (skills/<name>/)         → committed to Git → agent-visible skill
-```
-
-- **Starter**: Heavy logic, dependencies, CLI. Agents do not read this.
-- **Skill**: Intent description + thin routers. `bunx @lythos/<package> <command>`.
-- **Output**: Built artifact committed to Git. Platforms (Vercel, GitHub) consume directly.
-
-Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./cortex/wiki/01-patterns/thin-skill-pattern.md)
+> **Other agent platforms?** Set `working_set = ".kimi/skills/"` or `.cursor/skills/` in `skill-deck.toml`.
 
 ---
 
@@ -573,6 +578,16 @@ Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/
 | [cortex/adr/](./cortex/adr/) | Architecture Decision Records |
 | [skill-deck.toml](./skill-deck.toml) | This repo's active skill deck |
 | [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) | Reusable patterns and conventions |
+
+---
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>` or clone manually |
+| `bunx: command not found` | Bun not installed or shell not restarted | Run `source ~/.bashrc` or open a new terminal |
+| Symlink creation fails | Permissions or non-standard filesystem | Ensure `working_set` directory exists and is writable |
 
 ---
 
