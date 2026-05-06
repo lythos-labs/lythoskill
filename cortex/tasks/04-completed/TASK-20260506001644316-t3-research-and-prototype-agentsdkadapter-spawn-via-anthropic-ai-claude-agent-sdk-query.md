@@ -6,6 +6,7 @@
 |--------|------|------|
 | backlog | 2026-05-05 | Created |
 | scoped | 2026-05-06 | Scope expanded: extract AgentAdapter to lib first, then Claude SDK |
+| completed | 2026-05-06 | Closed via trailer |
 
 ## 背景
 
