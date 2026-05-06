@@ -16,7 +16,7 @@ README 已诚实标注 "innate/tool/combo currently have identical runtime behav
 ## 需求详情
 - [ ] **`innate` = eager mode**: 初始化/compaction 阶段抢先加载常驻。meta-governance skill（deck, cortex, onboarding, scribe）。agent 不可移除
 - [ ] **`tool` = lazy mode**: 当前默认行为。agent 按需调用。capability skill（pdf, docx, web-search）
-- [ ] **`combo`**: 命名组，toggle 一组 skill。`deck combo enable/disable <name>`
+- [ ] **`combo`**: 命名组 + 协调 prompt。`{ skills: [...], prompt: "how they work together" }`。agent 读 prompt 自行编排，不需要代码层。Schema 已支持 union type (SkillEntry | ComboEntry)
 - [ ] **`transient`**: 已有 expires 字段，需要实际过期检查 + 自动清理
 
 ### eager vs lazy 设计
