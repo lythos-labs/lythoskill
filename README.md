@@ -108,9 +108,9 @@ lythoskill serves two distinct audiences. You can use either independently.
 You are building a team-internal skill library or a public skill ecosystem. You need version control, CI, testing, and a clean separation between "development experience" and "agent-facing surface."
 
 ```bash
-bunx @lythos/skill-creator@0.9.19 init my-skill
+bunx @lythos/skill-creator@0.9.20 init my-skill
 cd my-skill
-bunx @lythos/skill-creator@0.9.19 build my-skill
+bunx @lythos/skill-creator@0.9.20 build my-skill
 ```
 
 **Three-Layer Separation**:
@@ -126,8 +126,8 @@ Output  (skills/<name>/)         → committed to Git → agent-visible skill
 If you are an AI agent reading this README:
 
 1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
-2. Run `bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>` to add a skill
-3. Run `bunx @lythos/skill-deck@0.9.19 link` to sync the working set
+2. Run `bunx @lythos/skill-deck@0.9.20 add <owner>/<repo>` to add a skill
+3. Run `bunx @lythos/skill-deck@0.9.20 link` to sync the working set
 4. Skills are now in `.claude/skills/` — read them and follow their instructions
 
 ## Quick Start
@@ -153,7 +153,7 @@ If you are an AI agent reading this README:
 ```bash
 # 1. Add a skill (downloads to cold pool + updates deck + links)
 #    Replace <owner>/<repo> with a real skill you want to use
-bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>
+bunx @lythos/skill-deck@0.9.20 add <owner>/<repo>
 
 # 2. Agent sees the skill. Everything else is physically absent.
 ls .claude/skills/
@@ -180,7 +180,7 @@ Or copy a deck manually and link:
 ```bash
 # Document processing: PDF + DOCX + web search
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
-bunx @lythos/skill-deck@0.9.19 link
+bunx @lythos/skill-deck@0.9.20 link
 ```
 
 | Deck | Skills | Scene |
@@ -196,7 +196,7 @@ For monorepo skills (multiple skills in one repo), include the full path:
 
 ```bash
 # Monorepo: specify the skill path inside the repo
-bunx @lythos/skill-deck@0.9.19 add github.com/owner/repo/skills/my-skill
+bunx @lythos/skill-deck@0.9.20 add github.com/owner/repo/skills/my-skill
 
 # Alternative: manual clone
 git clone https://github.com/owner/repo.git \
@@ -218,13 +218,13 @@ link                 ← the subcommand that syncs working set to toml
 
 **Remove a skill:** Delete its entry from `skill-deck.toml` and run:
 ```bash
-bunx @lythos/skill-deck@0.9.19 link
+bunx @lythos/skill-deck@0.9.20 link
 ```
 
 **Update a skill:** Pull the latest code from its source and re-link:
 ```bash
 cd ~/.agents/skill-repos/github.com/<owner>/<repo> && git pull
-bunx @lythos/skill-deck@0.9.19 link
+bunx @lythos/skill-deck@0.9.20 link
 ```
 
 `skill-deck.lock` tracks the resolved working set. Commit it to version control so teammates get the exact same skill links.
@@ -325,12 +325,12 @@ path = "github.com/SpillwaveSolutions/design-doc-mermaid"
 EOF
 
 # 4. Sync the deck
-bunx @lythos/skill-deck@0.9.19 link
+bunx @lythos/skill-deck@0.9.20 link
 ```
 
 **What the agent does**:
 1. Reads every SKILL.md in `.claude/skills/` to understand capability boundaries
-2. Creates a task via `bunx @lythos/project-cortex@0.9.19 task "Build Todo List page"`
+2. Creates a task via `bunx @lythos/project-cortex@0.9.20 task "Build Todo List page"`
 3. Absorbs best practices from multiple skills while coding:
    - **react-best-practices** → `useReducer`, `React.memo`, `useCallback`
    - **frontend-design** → zinc palette, `rounded-2xl`, dark mode
@@ -479,30 +479,30 @@ lythoskill sits **between** skill sources and agent platforms — it does not re
 
 ```bash
 # Deck governance (bunx only — requires Bun runtime)
-bunx @lythos/skill-deck@0.9.19 link                       # Sync toml -> working set
-bunx @lythos/skill-deck@0.9.19 add owner/repo             # Download skill + add to deck
-bunx @lythos/skill-deck@0.9.19 link --deck ./my-deck.toml
+bunx @lythos/skill-deck@0.9.20 link                       # Sync toml -> working set
+bunx @lythos/skill-deck@0.9.20 add owner/repo             # Download skill + add to deck
+bunx @lythos/skill-deck@0.9.20 link --deck ./my-deck.toml
 
 # Skill scaffolding
-bunx @lythos/skill-creator@0.9.19 init my-project
-bunx @lythos/skill-creator@0.9.19 build my-skill
+bunx @lythos/skill-creator@0.9.20 init my-project
+bunx @lythos/skill-creator@0.9.20 build my-skill
 
 # Project governance
-bunx @lythos/project-cortex@0.9.19 task "Fix auth flow"
-bunx @lythos/project-cortex@0.9.19 list
-bunx @lythos/project-cortex@0.9.19 index
+bunx @lythos/project-cortex@0.9.20 task "Fix auth flow"
+bunx @lythos/project-cortex@0.9.20 list
+bunx @lythos/project-cortex@0.9.20 index
 
 # Cold pool curation
-bunx @lythos/skill-curator@0.9.19 ~/.agents/skill-repos
+bunx @lythos/skill-curator@0.9.20 ~/.agents/skill-repos
 # → outputs ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
 
 # Arena single-skill comparison
-bunx @lythos/skill-arena@0.9.19 \
+bunx @lythos/skill-arena@0.9.20 \
   --task "Generate auth flow" \
   --skills "design-doc-mermaid,mermaid-tools"
 
 # Arena full deck comparison
-bunx @lythos/skill-arena@0.9.19 \
+bunx @lythos/skill-arena@0.9.20 \
   --task "Generate auth flow" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -596,7 +596,7 @@ Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@0.9.19 add <owner>/<repo>` or clone manually |
+| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@0.9.20 add <owner>/<repo>` or clone manually |
 | `bunx: command not found` | Bun not installed or shell not restarted | Run `source ~/.bashrc` or open a new terminal |
 | Symlink creation fails | Permissions or non-standard filesystem | Ensure `working_set` directory exists and is writable |
 
