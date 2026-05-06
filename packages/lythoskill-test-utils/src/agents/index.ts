@@ -1,10 +1,12 @@
 import type { AgentAdapter } from './types'
 import { claudeAdapter } from './claude'
 import { kimiAdapter } from './kimi'
+import { deepseekAdapter } from './deepseek'
 
 const registry: Record<string, AgentAdapter> = {
-  kimi: kimiAdapter,    // default: headless --print works reliably (eager tools, no deadlock)
+  kimi: kimiAdapter,       // default: headless --print works reliably (eager tools, no deadlock)
   claude: claudeAdapter,
+  deepseek: deepseekAdapter, // Rust-native, no Bun stdin bug, 1M context, subagent system
 }
 
 export function useAgent(name: string): AgentAdapter {
@@ -17,4 +19,5 @@ export function useAgent(name: string): AgentAdapter {
 
 export { claudeAdapter } from './claude'
 export { kimiAdapter } from './kimi'
+export { deepseekAdapter } from './deepseek'
 export type { AgentAdapter, AgentRunResult, CheckpointEntry, FsMutation, DeckConfig, SkillEntryLike } from './types'

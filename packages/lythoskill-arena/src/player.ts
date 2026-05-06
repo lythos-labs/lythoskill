@@ -15,6 +15,7 @@ const BUILTIN_PLAYERS: Record<string, string> = {
   'claude': 'claude',
   'claude-code': 'claude',
   'kimi': 'kimi',
+  'deepseek': 'deepseek',
   'cursor': 'cursor',
   'gemini': 'gemini',
 }
