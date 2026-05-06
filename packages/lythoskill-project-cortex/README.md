@@ -18,24 +18,24 @@ All documents use timestamp IDs (e.g., `TASK-20250420120000000`) — collision-f
 ```bash
 bun add -d @lythos/project-cortex
 # or use directly
-bunx @lythos/project-cortex@0.9.19 <command>
+bunx @lythos/project-cortex@0.9.20 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Initialize cortex directories
-bunx @lythos/project-cortex@0.9.19 init
+bunx @lythos/project-cortex@0.9.20 init
 
 # Create governance documents
-bunx @lythos/project-cortex@0.9.19 task "Fix login bug"
-bunx @lythos/project-cortex@0.9.19 epic "User auth system"
-bunx @lythos/project-cortex@0.9.19 adr "Choose database"
+bunx @lythos/project-cortex@0.9.20 task "Fix login bug"
+bunx @lythos/project-cortex@0.9.20 epic "User auth system"
+bunx @lythos/project-cortex@0.9.20 adr "Choose database"
 
 # Maintenance
-bunx @lythos/project-cortex@0.9.19 index   # Regenerate INDEX.md
-bunx @lythos/project-cortex@0.9.19 probe   # Check status consistency
-bunx @lythos/project-cortex@0.9.19 list    # List all tasks and epics
+bunx @lythos/project-cortex@0.9.20 index   # Regenerate INDEX.md
+bunx @lythos/project-cortex@0.9.20 probe   # Check status consistency
+bunx @lythos/project-cortex@0.9.20 list    # List all tasks and epics
 ```
 
 ## Commands
@@ -116,13 +116,13 @@ Epics use **dual-track lanes** to enforce focus:
 
 ```bash
 # Create a focused epic (will reject if main lane is full)
-bunx @lythos/project-cortex@0.9.19 epic "User auth system" --lane main
+bunx @lythos/project-cortex@0.9.20 epic "User auth system" --lane main
 
 # Override with reason (recorded in frontmatter)
-bunx @lythos/project-cortex@0.9.19 epic "Hotfix login" --lane main --override "security incident"
+bunx @lythos/project-cortex@0.9.20 epic "Hotfix login" --lane main --override "security incident"
 ```
 
-Run `bunx @lythos/project-cortex@0.9.19 probe` to check lane occupancy and catch drift.
+Run `bunx @lythos/project-cortex@0.9.20 probe` to check lane occupancy and catch drift.
 
 ## Skill Documentation
 
@@ -135,7 +135,7 @@ The agent-visible **Skill** layer documentation is here:
 Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
-Starter (this package) → npm publish → bunx @lythos/project-cortex@0.9.19 ...
+Starter (this package) → npm publish → bunx @lythos/project-cortex@0.9.20 ...
 Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
 Output  (skills/<name>/)             → git commit → agent-visible skill
 ```

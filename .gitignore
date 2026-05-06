@@ -42,3 +42,4 @@ conversation-boost.txt
 .husky/_
 test-results/*
 !test-results/README.md
+runs/
