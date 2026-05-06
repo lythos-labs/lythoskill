@@ -30,6 +30,7 @@ function printHelp(): void {
 
 Usage:
   lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>]
+  lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>]
   lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
   lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
@@ -77,21 +78,56 @@ async function agentRun(args: string[]) {
   const opts: Record<string, string | undefined> = {}
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' || args[i] === '-t') opts.task = args[++i]
+    else if (args[i] === '--brief' || args[i] === '-b') opts.brief = args[++i]
     else if (args[i] === '--deck' || args[i] === '-d') opts.deck = args[++i]
     else if (args[i] === '--player' || args[i] === '-p') opts.player = args[++i]
     else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
   }
 
-  if (!opts.task || !opts.deck) {
-    console.error('❌ --task <path> and --deck <path> are required')
+  if (!opts.deck) {
+    console.error('❌ --deck <path> is required')
+    process.exit(1)
+  }
+  if (!opts.task && !opts.brief) {
+    console.error('❌ --task <path> or --brief "<prompt>" is required')
     process.exit(1)
   }
 
   const { resolve, join } = await import('node:path')
-  const taskPath = resolve(opts.task)
   const deckPath = resolve(opts.deck)
-  if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
   if (!existsSync(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
+
+  // Resolve task: either from file, or create temp task from --brief
+  let taskPath: string
+  if (opts.task) {
+    taskPath = resolve(opts.task)
+    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
+  } else {
+    const { mkdtempSync, writeFileSync } = await import('node:fs')
+    const { tmpdir } = await import('node:os')
+    const tmpDir = mkdtempSync(join(tmpdir(), 'arena-brief-'))
+    taskPath = join(tmpDir, 'TASK.md')
+    const briefTask = `---
+name: ad-hoc task
+description: ${opts.brief!.slice(0, 80)}
+timeout: 120000
+---
+
+## Given
+- You are an AI agent with the skills declared in the deck
+
+## When
+${opts.brief}
+
+## Then
+- Write your output to output.md
+- The output should be complete and well-structured
+
+## Judge
+Evaluate whether the output is complete, accurate, and well-structured.
+`
+    writeFileSync(taskPath, briefTask, 'utf-8')
+  }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
