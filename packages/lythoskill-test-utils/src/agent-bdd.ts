@@ -124,7 +124,8 @@ export function parseAgentMd(content: string): AgentScenario {
 // ── runAgentScenario ───────────────────────────────────────────────────────
 
 export async function runAgentScenario(opts: {
-  scenarioPath: string
+  scenarioPath?: string
+  scenario?: AgentScenario
   agent: AgentAdapter
   setupWorkdir: (scenario: AgentScenario, workdir: string) => void | Promise<void>
   judgeAgent?: AgentAdapter
@@ -134,6 +135,7 @@ export async function runAgentScenario(opts: {
 }): Promise<AgentScenarioResult> {
   const {
     scenarioPath,
+    scenario: prebuilt,
     agent,
     setupWorkdir,
     judgeAgent,
@@ -142,8 +144,11 @@ export async function runAgentScenario(opts: {
     idleTimeoutMs,
   } = opts
 
-  const content = readFileSync(scenarioPath, 'utf-8')
-  const scenario = parseAgentMd(content)
+  if (!prebuilt && !scenarioPath) {
+    throw new Error('runAgentScenario: scenario or scenarioPath is required')
+  }
+
+  const scenario = prebuilt ?? parseAgentMd(readFileSync(scenarioPath!, 'utf-8'))
 
   const now = new Date()
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`

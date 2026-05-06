@@ -105,38 +105,6 @@ async function agentRun(args: string[]) {
   const deckPath = resolve(opts.deck)
   if (!existsSync(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
 
-  // Resolve task: either from file, or create temp task from --brief
-  let taskPath: string
-  if (opts.task) {
-    taskPath = resolve(opts.task)
-    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
-  } else {
-    const { mkdtempSync, writeFileSync } = await import('node:fs')
-    const { tmpdir } = await import('node:os')
-    const tmpDir = mkdtempSync(join(tmpdir(), 'arena-brief-'))
-    taskPath = join(tmpDir, 'TASK.md')
-    const briefTask = `---
-name: ad-hoc task
-description: ${opts.brief!.replace(/"/g, '\\"').slice(0, 80)}
-timeout: 120000
----
-
-## Given
-- You are an AI agent with the skills declared in the deck
-
-## When
-${opts.brief}
-
-## Then
-- Write your output to output.md
-- The output should be complete and well-structured
-
-## Judge
-Evaluate whether the output is complete, accurate, and well-structured.
-`
-    writeFileSync(taskPath, briefTask, 'utf-8')
-  }
-
   const { useAgent } = await import('@lythos/test-utils/agents')
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
   const { resolvePlayer } = await import('./player')
@@ -147,12 +115,31 @@ Evaluate whether the output is complete, accurate, and well-structured.
   const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), `agent-output-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`)
   mkdirSync(outDir, { recursive: true })
 
+  // Resolve task: --brief builds scenario directly, --task reads .agent.md file
+  const scenarioOpt: Record<string, unknown> = {}
+  if (opts.task) {
+    const taskPath = resolve(opts.task)
+    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
+    scenarioOpt.scenarioPath = taskPath
+  } else {
+    scenarioOpt.scenario = {
+      name: 'ad-hoc task',
+      description: opts.brief!.slice(0, 80),
+      timeout: 120000,
+      given: { deck: {} },
+      when: opts.brief!,
+      then: ['Write your output to output.md', 'The output should be complete and well-structured'],
+      judge: 'Evaluate whether the output is complete, accurate, and well-structured.',
+    }
+  }
+
   console.log(`🤖 agent-run: ${player} × ${deckPath}`)
-  console.log(`📋 task: ${taskPath}`)
+  if (opts.task) console.log(`📋 task: ${resolve(opts.task!)}`)
+  else console.log(`📋 brief: ${opts.brief!.slice(0, 60)}...`)
 
   let agentWorkdir = ''
   const result = await runAgentScenario({
-    scenarioPath: taskPath,
+    ...scenarioOpt,
     agent,
     async setupWorkdir(_scenario, workdir) {
       agentWorkdir = workdir

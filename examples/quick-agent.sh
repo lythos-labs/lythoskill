@@ -136,6 +136,28 @@ bunx --prefer-offline @lythos/skill-arena@0.9.22 agent-run \
   --out "$OUT_DIR" \
   --player "$PLAYER"
 
+# ── Self-check: deck link + skill visibility ──────────────────
+if [ "${LYTHOS_SELFCHECK:-1}" != "0" ]; then
+  echo ""
+  echo "🔍 Self-check: deck link + skill visibility..."
+  SELFCHECK_DIR="$OUT_DIR/self-check"
+  mkdir -p "$SELFCHECK_DIR"
+
+  bunx --prefer-offline @lythos/skill-arena@0.9.22 agent-run \
+    --brief "1. List the contents of .claude/skills/ directory (run ls -la or equivalent). 2. Report: how many skills are visible, their names, and whether they are symlinks. 3. If .claude/skills/ is empty or missing, state this clearly." \
+    --deck "$TMPDIR/deck.toml" \
+    --out "$SELFCHECK_DIR" \
+    --player "$PLAYER" || echo "⚠️  Self-check had issues (see $SELFCHECK_DIR/)"
+
+  if [ -f "$SELFCHECK_DIR/agent-stdout.txt" ]; then
+    echo ""
+    echo "📋 Skill visibility report:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    head -30 "$SELFCHECK_DIR/agent-stdout.txt"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  fi
+fi
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✅ Done. Files in $OUT_DIR:"
