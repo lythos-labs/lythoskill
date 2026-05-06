@@ -154,7 +154,7 @@ If you are an AI agent reading this README:
 
 ```bash
 # Deck + prompt → agent executes + judge scores → output. No files touched in your project.
-# Results land in ./agent-output/ — try any of these:
+# Results land in ./agent-output-<timestamp>/ — each run gets its own directory.
 
 # ── Pure text tasks (no web search needed, fast) ──
 
