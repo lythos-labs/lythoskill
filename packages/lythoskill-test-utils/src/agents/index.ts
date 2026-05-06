@@ -1,23 +1,23 @@
-import type { AgentAdapter } from './types'
-import { claudeAdapter } from './claude'
-import { kimiAdapter } from './kimi'
-import { deepseekAdapter } from './deepseek'
+// ── Agent adapter registry ──────────────────────────────────────────────────
+//
+// Canonical source: @lythos/agent-adapter
+// This file re-exports for backward compatibility.
+// New code should import from '@lythos/agent-adapter' directly.
 
-const registry: Record<string, AgentAdapter> = {
-  kimi: kimiAdapter,       // default: headless --print works reliably (eager tools, no deadlock)
-  claude: claudeAdapter,
-  deepseek: deepseekAdapter, // Rust-native, no Bun stdin bug, 1M context, subagent system
-}
+// Side-effect: registers all built-in adapters (kimi, claude, claude-cli, deepseek)
+import '@lythos/agent-adapter'
 
-export function useAgent(name: string): AgentAdapter {
-  const adapter = registry[name]
-  if (!adapter) {
-    throw new Error(`Unknown agent: "${name}". Available: ${Object.keys(registry).join(', ')}`)
-  }
-  return adapter
-}
+// Re-export from canonical source
+export { useAgent, registerAgent, listAgents } from '@lythos/agent-adapter'
+export type {
+  AgentAdapter,
+  AgentRunResult,
+  CheckpointEntry,
+  FsMutation,
+  ToolDefinition,
+} from '@lythos/agent-adapter'
 
+// Adapter instances (backward compat aliases)
 export { claudeAdapter } from './claude'
 export { kimiAdapter } from './kimi'
 export { deepseekAdapter } from './deepseek'
-export type { AgentAdapter, AgentRunResult, CheckpointEntry, FsMutation, DeckConfig, SkillEntryLike } from './types'

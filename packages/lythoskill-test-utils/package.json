@@ -29,6 +29,7 @@
     "intent-plan-execute"
   ],
   "dependencies": {
+    "@lythos/agent-adapter": "workspace:*",
     "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
   }
