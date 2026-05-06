@@ -49,7 +49,11 @@ case "$DECK_SPEC" in
       FETCH_URL=$(echo "$FETCH_URL" | sed 's|github\.com/|raw.githubusercontent.com/|; s|/blob/|/|')
     fi
     echo "📥 Fetching deck: $FETCH_URL"
-    curl -fsSL --connect-timeout 10 --max-time 30 "$FETCH_URL" -o "$TMPDIR/deck.toml"
+    HTTP_CODE=$(curl -sSL --connect-timeout 10 --max-time 30 -w "%{http_code}" -o "$TMPDIR/deck.toml" "$FETCH_URL")
+    if [ "$HTTP_CODE" != "200" ]; then
+      echo "❌ Deck fetch failed (HTTP $HTTP_CODE): $FETCH_URL"
+      exit 1
+    fi
     ;;
   ./*|/*|*.toml)
     if [ -f "$DECK_SPEC" ]; then
@@ -62,9 +66,11 @@ case "$DECK_SPEC" in
     ;;
   *)
     echo "📥 Fetching deck: $DECK_RAW/${DECK_SPEC}.toml"
-    curl -fsSL --connect-timeout 10 --max-time 30 "$DECK_RAW/${DECK_SPEC}.toml" -o "$TMPDIR/deck.toml" 2>/dev/null || true
-    # Fallback: if GitHub raw is unreachable, generate deck from built-in template
-    if [ ! -s "$TMPDIR/deck.toml" ]; then
+    HTTP_CODE=$(curl -sSL --connect-timeout 10 --max-time 30 -w "%{http_code}" -o "$TMPDIR/deck.toml" "$DECK_RAW/${DECK_SPEC}.toml" 2>/dev/null) || true
+    if [ "$HTTP_CODE" = "200" ] && [ -s "$TMPDIR/deck.toml" ]; then
+      : # fetched successfully
+    else
+      # Fallback: GitHub raw unreachable or 404 — use built-in template
       echo "⚠️  GitHub raw unreachable, using built-in template for '$DECK_SPEC'"
       case "$DECK_SPEC" in
         documents)
@@ -102,7 +108,7 @@ echo "📁 Output: $OUT_DIR"
 mkdir -p "$OUT_DIR"
 
 # ── Run agent: deck + prompt → execute + judge ───────────────
-bunx --prefer-offline @lythos/skill-arena@0.9.20 agent-run \
+bunx --prefer-offline @lythos/skill-arena@0.9.22 agent-run \
   --brief "$PROMPT" \
   --deck "$TMPDIR/deck.toml" \
   --out "$OUT_DIR"
