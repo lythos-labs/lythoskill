@@ -36,6 +36,11 @@ jobs:
         run: bun test packages/lythoskill-deck/src/
       - name: deck BDD
         run: bun packages/lythoskill-deck/test/runner.ts
+      - name: cold-pool unit
+        run: bun test packages/lythoskill-cold-pool/src/
+      - name: validate example decks
+        run: bun scripts/validate-example-decks.ts
+        continue-on-error: false
       - name: arena
         run: bun test packages/lythoskill-arena/src/
       - run: bun packages/lythoskill-creator/src/cli.ts align
