@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 02:07:20
+> 自动生成于 2026/5/7 02:35:09
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 128 | 进行中: 0, 待验收: 0, 已完成: 99 |
-| Epics | 21 | 活跃: 0, 已完成: 17, 悬置: 2, 已归档: 2 |
-| ADRs | 45 | 已接受: 33 |
+| Tasks | 138 | 进行中: 0, 待验收: 0, 已完成: 101 |
+| Epics | 22 | 活跃: 1, 已完成: 17, 悬置: 2, 已归档: 2 |
+| ADRs | 46 | 已接受: 33 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
 
 ### 已完成
 
@@ -52,7 +52,7 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (9)
+### 待办 (17)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -63,6 +63,14 @@ _无_
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 - [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
+- [ ] **TASK-20260507021320388**: T3: Resolver layer — GitHub Tree API client, validateRemote, inferSkillPath
+- [ ] **TASK-20260507021320416**: T4: ColdPoolManager + GitExecutor — single side-effect-holder for git operations
+- [ ] **TASK-20260507021320442**: T5: Migrate deck/src/add.ts to consume cold-pool ColdPoolManager
+- [ ] **TASK-20260507021320467**: T6: Migrate deck/src/link.ts to consume cold-pool
+- [ ] **TASK-20260507021320492**: T7: Migrate deck/src/refresh-plan.ts to consume cold-pool
+- [ ] **TASK-20260507021320516**: T8: deck validate command emitting ValidationReport per locator
+- [ ] **TASK-20260507021320542**: T9: examples/decks/*.toml CI validation step
+- [ ] **TASK-20260507021320567**: T12: Write ADR-20260507014124191 body — agent-friendly CLI error as decision tree
 
 ### 进行中 (0)
 
@@ -72,7 +80,7 @@ _无_
 
 _无_
 
-### 已完成 (99)
+### 已完成 (101)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -173,6 +181,8 @@ _无_
 - ✅ ~~TASK-20260506001644316~~: T3: Extract AgentAdapter as standalone plugin lib + Claude SDK adapter
 - ✅ ~~TASK-20260506001644356~~: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
 - ✅ ~~TASK-20260507010453909~~: Remove implicit skills/ insertion from findSource() and align all deck paths to direct mapping
+- ✅ ~~TASK-20260507021320323~~: T1: Scaffold @lythos/cold-pool package with monorepo lock-step config
+- ✅ ~~TASK-20260507021320360~~: T2: Core types — Locator, ValidationReport, FetchPlan, RefreshPlan, Executor + parseLocator migration
 
 ### 悬置 (0)
 
@@ -249,6 +259,7 @@ _无_
 - ✅ **ADR-20260506103209293** (02-accepted): Supersede combo-skill-as-orchestration-layer — combo is now a deck-level prompt, not a separate skill
 - 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
 - 🤔 **ADR-20260507014124191** (01-proposed): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
+- 🤔 **ADR-20260507021957847** (01-proposed): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
 
 ---
 
