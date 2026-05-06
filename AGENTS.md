@@ -5,7 +5,7 @@
 > Human contributors: see [README.md](./README.md) for a higher-level overview.
 
 > **⚠️ Before any release / auth / version work, read [Release & Auth Workflow](#release--auth-workflow).**
-> Auth state (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator@0.9.21 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`. Past agents corrupted the git remote URL by trying to "fix" auth and forced manual recovery — do not repeat this. This warning matters even mid-session after context compaction.
+> Auth state (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator@0.9.22 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`. Past agents corrupted the git remote URL by trying to "fix" auth and forced manual recovery — do not repeat this. This warning matters even mid-session after context compaction.
 
 ---
 
@@ -187,20 +187,20 @@ bun packages/lythoskill-project-cortex/src/cli.ts <command>
 
 ### Via bunx (as users would run after publishing)
 ```bash
-bunx @lythos/skill-creator@0.9.21 init <project-name>
-bunx @lythos/skill-creator@0.9.21 build <skill-name>
-bunx @lythos/skill-creator@0.9.21 build --all
-bunx @lythos/skill-creator@0.9.21 align            # audit conventions
-bunx @lythos/skill-creator@0.9.21 align --fix      # auto-apply
-bunx @lythos/skill-creator@0.9.21 bump <patch|minor|major|X.Y.Z> [--dry-run]
-bunx @lythos/skill-deck@0.9.21 link
-bunx @lythos/project-cortex@0.9.21 <command>
+bunx @lythos/skill-creator@0.9.22 init <project-name>
+bunx @lythos/skill-creator@0.9.22 build <skill-name>
+bunx @lythos/skill-creator@0.9.22 build --all
+bunx @lythos/skill-creator@0.9.22 align            # audit conventions
+bunx @lythos/skill-creator@0.9.22 align --fix      # auto-apply
+bunx @lythos/skill-creator@0.9.22 bump <patch|minor|major|X.Y.Z> [--dry-run]
+bunx @lythos/skill-deck@0.9.22 link
+bunx @lythos/project-cortex@0.9.22 <command>
 ```
 
 ### Release pipeline (full detail below)
 ```bash
-bunx @lythos/skill-creator@0.9.21 bump patch --dry-run   # preview
-bunx @lythos/skill-creator@0.9.21 bump patch             # bump root + all packages, rebuild skills
+bunx @lythos/skill-creator@0.9.22 bump patch --dry-run   # preview
+bunx @lythos/skill-creator@0.9.22 bump patch             # bump root + all packages, rebuild skills
 git diff && git commit -am "chore(release): vX.Y.Z"
 ./scripts/publish.sh                              # publish all packages, reads .npm-access
 ```
@@ -285,14 +285,14 @@ Every `packages/*/package.json` and the root `package.json` carry the **same** v
 
 ```bash
 # Preview
-bunx @lythos/skill-creator@0.9.21 bump patch --dry-run
-bunx @lythos/skill-creator@0.9.21 bump 1.0.0 --dry-run
+bunx @lythos/skill-creator@0.9.22 bump patch --dry-run
+bunx @lythos/skill-creator@0.9.22 bump 1.0.0 --dry-run
 
 # Real run
-bunx @lythos/skill-creator@0.9.21 bump patch       # 0.7.2 → 0.7.3
-bunx @lythos/skill-creator@0.9.21 bump minor       # 0.7.2 → 0.8.0
-bunx @lythos/skill-creator@0.9.21 bump major       # 0.7.2 → 1.0.0
-bunx @lythos/skill-creator@0.9.21 bump 1.2.3       # explicit X.Y.Z
+bunx @lythos/skill-creator@0.9.22 bump patch       # 0.7.2 → 0.7.3
+bunx @lythos/skill-creator@0.9.22 bump minor       # 0.7.2 → 0.8.0
+bunx @lythos/skill-creator@0.9.22 bump major       # 0.7.2 → 1.0.0
+bunx @lythos/skill-creator@0.9.22 bump 1.2.3       # explicit X.Y.Z
 ```
 
 The `bump` pipeline (see `packages/lythoskill-creator/src/bump.ts`):
@@ -355,7 +355,7 @@ Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). Th
 
 7. **tsconfig**: `moduleResolution` must be `"bundler"`, `types` includes `"bun-types"`, target `"esnext"`.
 
-8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator@0.9.21 bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
+8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator@0.9.22 bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
 
 9. **Test file organization**: Unit tests are co-located in `src/*.test.ts` next to source. CLI BDD tests live in `test/runner.ts` + `test/scenarios/`. Agent BDD tests use `test/scenarios/*.agent.md`. Pre-commit hook enforces 0 test failures on changed packages. Full conventions: [TESTING.md](./TESTING.md).
 
