@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 02:35:09
+> 自动生成于 2026/5/7 02:38:48
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 138 | 进行中: 0, 待验收: 0, 已完成: 101 |
+| Tasks | 138 | 进行中: 0, 待验收: 0, 已完成: 102 |
 | Epics | 22 | 活跃: 1, 已完成: 17, 悬置: 2, 已归档: 2 |
 | ADRs | 46 | 已接受: 33 |
 
@@ -52,7 +52,7 @@
 
 ## 📄 Tasks
 
-### 待办 (17)
+### 待办 (16)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -63,7 +63,6 @@
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 - [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
-- [ ] **TASK-20260507021320388**: T3: Resolver layer — GitHub Tree API client, validateRemote, inferSkillPath
 - [ ] **TASK-20260507021320416**: T4: ColdPoolManager + GitExecutor — single side-effect-holder for git operations
 - [ ] **TASK-20260507021320442**: T5: Migrate deck/src/add.ts to consume cold-pool ColdPoolManager
 - [ ] **TASK-20260507021320467**: T6: Migrate deck/src/link.ts to consume cold-pool
@@ -80,7 +79,7 @@ _无_
 
 _无_
 
-### 已完成 (101)
+### 已完成 (102)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -183,6 +182,7 @@ _无_
 - ✅ ~~TASK-20260507010453909~~: Remove implicit skills/ insertion from findSource() and align all deck paths to direct mapping
 - ✅ ~~TASK-20260507021320323~~: T1: Scaffold @lythos/cold-pool package with monorepo lock-step config
 - ✅ ~~TASK-20260507021320360~~: T2: Core types — Locator, ValidationReport, FetchPlan, RefreshPlan, Executor + parseLocator migration
+- ✅ ~~TASK-20260507021320388~~: T3: Resolver layer — GitHub Tree API client, validateRemote, inferSkillPath
 
 ### 悬置 (0)
 
