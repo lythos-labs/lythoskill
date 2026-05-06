@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-deck",
-  "version": "0.9.22",
+  "version": "0.9.23",
   "description": "Declarative skill deck governance — cold pool, working set, deny-by-default",
   "keywords": [
     "ai-agent",
