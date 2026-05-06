@@ -64,6 +64,7 @@
       },
       "dependencies": {
         "@iarna/toml": "^2.2.5",
+        "@lythos/cold-pool": "workspace:*",
         "yaml": "^2.8.3",
         "zod": "^4.3.6",
       },

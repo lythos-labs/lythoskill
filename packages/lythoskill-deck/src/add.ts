@@ -3,51 +3,30 @@
  * deck-add.ts — Skill acquisition command
  *
  * Downloads a skill to the cold pool, updates skill-deck.toml, and links.
- * Single backend: git clone. For feed-based discovery with decision tracking,
- * use curator add instead.
+ * Single backend: git clone (delegated to @lythos/cold-pool's executeFetchPlan).
+ * For feed-based discovery with decision tracking, use curator add instead.
  */
 
-import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync, readFileSync, readdirSync } from 'node:fs'
-import { mkdtempSync } from 'node:fs'
-import { tmpdir, homedir } from 'node:os'
-import { join, basename, dirname, resolve } from 'node:path'
-import { execFileSync } from 'node:child_process'
+import {
+  existsSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+  readFileSync,
+  readdirSync,
+} from 'node:fs'
+import { homedir } from 'node:os'
+import { dirname, join, basename, resolve } from 'node:path'
 import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
+import {
+  ColdPool,
+  buildFetchPlan,
+  executeFetchPlan,
+  parseLocator,
+  formatLocator,
+  type Locator,
+} from '@lythos/cold-pool'
 import { findDeckToml, expandHome } from './link.js'
-import { parseDeck } from './parse-deck.js'
-
-
-interface ParsedLocator {
-  host: string
-  owner: string
-  repo: string
-  skill: string | null
-  raw: string
-}
-
-function parseLocator(input: string): ParsedLocator | null {
-  // Format: host.tld/owner/repo/skill  or  host.tld/owner/repo
-  //         owner/repo/skill           or  owner/repo  (shorthand for github.com)
-  const parts = input.split('/').filter(Boolean)
-  if (parts.length < 2) return null
-
-  const hasHost = parts[0].includes('.')
-
-  if (hasHost) {
-    if (parts.length < 3) return null
-    const host = parts[0]
-    const owner = parts[1]
-    const repo = parts[2]
-    const skill = parts.length > 3 ? parts.slice(3).join('/') : null
-    return { host, owner, repo, skill, raw: input }
-  }
-
-  const host = 'github.com'
-  const owner = parts[0]
-  const repo = parts[1]
-  const skill = parts.length > 2 ? parts.slice(2).join('/') : null
-  return { host, owner, repo, skill, raw: input }
-}
 
 export function findSkillDir(repoPath: string, skill: string | null): string | null {
   if (skill) {
@@ -84,7 +63,34 @@ function resolvePath(p: string): string {
   return resolve(p)
 }
 
-export async function addSkill(locator: string, options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean }) {
+function resolveColdPoolPath(deckPath: string, workdir: string): string {
+  if (existsSync(deckPath)) {
+    try {
+      const deckRaw = readFileSync(deckPath, 'utf-8')
+      const deck = parseToml(deckRaw) as { deck?: { cold_pool?: string } }
+      return expandHome(deck.deck?.cold_pool || '~/.agents/skill-repos', workdir)
+    } catch { /* fall through to default */ }
+  }
+  return join(homedir(), '.agents', 'skill-repos')
+}
+
+function fqOf(loc: Locator): string {
+  return formatLocator(loc)
+}
+
+function exitInvalidLocator(locator: string): never {
+  console.error(`❌ Invalid locator: ${locator}`)
+  console.error(`   Expected FQ form (per ADR-20260502012643244):`)
+  console.error(`     host.tld/owner/repo[/skill]   — remote skill`)
+  console.error(`     localhost/<name>              — local-only skill`)
+  console.error(`   Bare names and shorthand 'owner/repo' are rejected.`)
+  process.exit(1)
+}
+
+export async function addSkill(
+  locator: string,
+  options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean },
+) {
   const dryRun = options.dryRun || false
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
   const deckPath = options.deck
@@ -92,44 +98,46 @@ export async function addSkill(locator: string, options: { deck?: string; workdi
     : findDeckToml(workdir) || join(workdir, 'skill-deck.toml')
 
   const parsed = parseLocator(locator)
-  if (!parsed) {
-    console.error(`❌ Invalid locator: ${locator}`)
-    console.error(`   Expected: github.com/owner/repo[/skill] or owner/repo[/skill]`)
+  if (!parsed) exitInvalidLocator(locator)
+
+  if (parsed.isLocalhost) {
+    console.error(`❌ deck add does not support localhost locators (no remote to clone).`)
+    console.error(`   For local skills, place SKILL.md in your cold pool manually then run "deck link".`)
     process.exit(1)
   }
 
-  let coldPool = join(homedir(), '.agents', 'skill-repos')
-  if (existsSync(deckPath)) {
-    try {
-      const deckRaw = readFileSync(deckPath, 'utf-8')
-      const deck = parseToml(deckRaw) as any
-      coldPool = expandHome(deck.deck?.cold_pool || '~/.agents/skill-repos', workdir)
-    } catch { /* use default */ }
+  const coldPoolPath = resolveColdPoolPath(deckPath, workdir)
+  const pool = new ColdPool(coldPoolPath)
+  const fetchPlan = buildFetchPlan(pool, parsed)
+  const fqPath = fqOf(parsed)
+  const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo!
+  const alias = options.alias || skillName
+  const skillType = (options.type || 'tool').toLowerCase()
+
+  if (!['innate', 'tool', 'combo'].includes(skillType)) {
+    console.error(`❌ Invalid type: ${skillType}. Must be innate, tool, or combo.`)
+    process.exit(1)
   }
 
-  const targetDir = join(coldPool, parsed.host, parsed.owner, parsed.repo)
-
   if (dryRun) {
-    const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo
-    const alias = options.alias || skillName
-    const skillType = (options.type || 'tool').toLowerCase()
-    const fqPath = parsed.skill
-      ? `${parsed.host}/${parsed.owner}/${parsed.repo}/${parsed.skill}`
-      : `${parsed.host}/${parsed.owner}/${parsed.repo}`
-
     console.log(`🔎 Dry-run: deck add ${locator}`)
-    console.log(`   Cold pool:  ${coldPool}`)
+    console.log(`   Cold pool:  ${coldPoolPath}`)
     console.log(`   Deck:       ${deckPath}`)
     console.log()
-    console.log(`📂 Repo status: ${existsSync(join(targetDir, '.git')) ? 'already cloned' : existsSync(targetDir) ? 'dir exists (partial clone?)' : 'not in cold pool'}`)
-    if (!existsSync(join(targetDir, '.git'))) {
-      console.log(`📦 Would clone: https://${parsed.host}/${parsed.owner}/${parsed.repo}.git --depth 1`)
+    const repoStatus = existsSync(join(fetchPlan.targetDir, '.git'))
+      ? 'already cloned'
+      : existsSync(fetchPlan.targetDir)
+        ? 'dir exists (partial clone?)'
+        : 'not in cold pool'
+    console.log(`📂 Repo status: ${repoStatus}`)
+    if (!existsSync(join(fetchPlan.targetDir, '.git'))) {
+      console.log(`📦 Would clone: ${fetchPlan.cloneUrl} --depth 1`)
     }
     if (parsed.skill) {
-      const skillMd = join(targetDir, parsed.skill, 'SKILL.md')
-      if (existsSync(targetDir) && existsSync(skillMd)) {
+      const skillMd = join(fetchPlan.targetDir, parsed.skill, 'SKILL.md')
+      if (existsSync(fetchPlan.targetDir) && existsSync(skillMd)) {
         console.log(`📄 Skill path:  valid — ${skillMd}`)
-      } else if (existsSync(targetDir)) {
+      } else if (existsSync(fetchPlan.targetDir)) {
         console.log(`⚠️  Skill path:  NOT FOUND — check repo layout`)
       }
     }
@@ -140,125 +148,100 @@ export async function addSkill(locator: string, options: { deck?: string; workdi
     return
   }
 
-  if (existsSync(targetDir)) {
-    console.error(`❌ Already exists in cold pool: ${targetDir}`)
-    console.error(`   To update: rm -rf ${targetDir} and re-run`)
+  if (fetchPlan.alreadyExists) {
+    console.error(`❌ Already exists in cold pool: ${fetchPlan.targetDir}`)
+    console.error(`   To update: rm -rf ${fetchPlan.targetDir} and re-run`)
     process.exit(1)
   }
 
-  if (!existsSync(coldPool)) {
-    console.log(`📁 Creating cold pool: ${coldPool}`)
-    mkdirSync(coldPool, { recursive: true })
+  if (!existsSync(coldPoolPath)) {
+    console.log(`📁 Creating cold pool: ${coldPoolPath}`)
+    mkdirSync(coldPoolPath, { recursive: true })
+  }
+  // git clone needs the parent of the target dir (e.g. host/owner/) to exist
+  mkdirSync(dirname(fetchPlan.targetDir), { recursive: true })
+
+  const fetchResult = executeFetchPlan(fetchPlan, {
+    log: (msg) => console.log(msg),
+  })
+
+  if (fetchResult.status === 'failed') {
+    rmSync(fetchPlan.targetDir, { recursive: true, force: true })
+    console.error(`❌ Failed to fetch: ${fetchResult.message ?? 'unknown error'}`)
+    process.exit(1)
   }
 
-  const tmpDir = mkdtempSync(join(tmpdir(), 'lythoskill-deck-add-'))
-  const tmpRepo = join(tmpDir, 'repo')
+  const skillDir = findSkillDir(fetchPlan.targetDir, parsed.skill)
+  if (!skillDir) {
+    console.error(`❌ No SKILL.md found in downloaded repo`)
+    console.error(`   Checked: ${fetchPlan.targetDir}`)
+    process.exit(1)
+  }
 
-  try {
-    const gitUrl = `https://${parsed.host}/${parsed.owner}/${parsed.repo}.git`
-    console.log(`📦 Cloning: ${gitUrl}`)
-    execFileSync('git', ['clone', '--depth', '1', gitUrl, tmpRepo], { stdio: 'inherit' })
-    let skillSourceDir = tmpRepo
+  console.log(`✅ Skill ready: ${skillName} (alias: ${alias})`)
+  console.log(`   Location: ${skillDir}`)
 
-    if (!existsSync(skillSourceDir)) {
-      console.error(`❌ Download failed: expected output not found at ${skillSourceDir}`)
+  // ── 写 deck.toml ────────────────────────────────────────────
+
+  if (existsSync(deckPath)) {
+    const deckRaw = readFileSync(deckPath, 'utf-8')
+    const deck = parseToml(deckRaw) as Record<string, any>
+
+    // Alias collision check across all sections
+    const allAliases = new Set<string>()
+    for (const section of ['innate', 'tool', 'combo'] as const) {
+      const skills = deck[section]?.skills
+      if (skills && typeof skills === 'object' && !Array.isArray(skills)) {
+        for (const key of Object.keys(skills)) allAliases.add(key)
+      } else if (Array.isArray(skills)) {
+        for (const name of skills) allAliases.add(name.split('/').pop() || name)
+      }
+    }
+    for (const key of Object.keys(deck.transient || {})) {
+      allAliases.add(key)
+    }
+    if (allAliases.has(alias)) {
+      console.error(`❌ Alias "${alias}" already exists in deck`)
       process.exit(1)
     }
 
-    mkdirSync(dirname(targetDir), { recursive: true })
-    renameSync(skillSourceDir, targetDir)
-
-    const skillDir = findSkillDir(targetDir, parsed.skill)
-    if (!skillDir) {
-      console.error(`❌ No SKILL.md found in downloaded repo`)
-      console.error(`   Checked: ${targetDir}`)
-      process.exit(1)
-    }
-
-    const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo
-    const alias = options.alias || skillName
-    const skillType = (options.type || 'tool').toLowerCase()
-
-    if (!['innate', 'tool', 'combo'].includes(skillType)) {
-      console.error(`❌ Invalid type: ${skillType}. Must be innate, tool, or combo.`)
-      process.exit(1)
-    }
-
-    const fqPath = parsed.skill
-      ? `${parsed.host}/${parsed.owner}/${parsed.repo}/${parsed.skill}`
-      : `${parsed.host}/${parsed.owner}/${parsed.repo}`
-
-    console.log(`✅ Skill ready: ${skillName} (alias: ${alias})`)
-    console.log(`   Location: ${skillDir}`)
-
-    // ── 写 deck.toml ────────────────────────────────────────────
-
-    if (existsSync(deckPath)) {
-      const deckRaw = readFileSync(deckPath, 'utf-8')
-      const deck = parseToml(deckRaw) as any
-
-      // Alias collision check across all sections
-      const allAliases = new Set<string>()
-      for (const section of ['innate', 'tool', 'combo'] as const) {
-        const skills = deck[section]?.skills
-        if (skills && typeof skills === 'object' && !Array.isArray(skills)) {
-          for (const key of Object.keys(skills)) allAliases.add(key)
-        } else if (Array.isArray(skills)) {
-          for (const name of skills) allAliases.add(name.split('/').pop() || name)
-        }
-      }
-      for (const key of Object.keys(deck.transient || {})) {
-        allAliases.add(key)
-      }
-      if (allAliases.has(alias)) {
-        console.error(`❌ Alias "${alias}" already exists in deck`)
-        process.exit(1)
-      }
-
-      // Auto-migrate old string-array format to dict
-      for (const section of ['innate', 'tool', 'combo'] as const) {
-        const sectionData = deck[section]
-        if (sectionData && Array.isArray(sectionData.skills)) {
-          const dict: Record<string, { path: string }> = {}
-          for (const name of sectionData.skills) {
-            const a = name.split('/').pop() || name
-            dict[a] = { path: name }
-          }
-          deck[section].skills = dict
-          console.log(`📝 Auto-migrated [${section}] from string-array to dict format`)
-        }
-      }
-
-      // Ensure target section exists and is dict format
-      if (!deck[skillType]) deck[skillType] = {}
-      if (!deck[skillType].skills) deck[skillType].skills = {}
-      if (Array.isArray(deck[skillType].skills)) {
+    // Auto-migrate old string-array format to dict
+    for (const section of ['innate', 'tool', 'combo'] as const) {
+      const sectionData = deck[section]
+      if (sectionData && Array.isArray(sectionData.skills)) {
         const dict: Record<string, { path: string }> = {}
-        for (const name of deck[skillType].skills) {
+        for (const name of sectionData.skills) {
           const a = name.split('/').pop() || name
           dict[a] = { path: name }
         }
-        deck[skillType].skills = dict
+        deck[section].skills = dict
+        console.log(`📝 Auto-migrated [${section}] from string-array to dict format`)
       }
-
-      deck[skillType].skills[alias] = { path: fqPath }
-      writeFileSync(deckPath, stringifyToml(deck))
-      console.log(`📝 Added "${alias}" to [${skillType}.skills] in ${deckPath}`)
-    } else {
-      const minimal: any = { deck: { max_cards: 10 } }
-      minimal[skillType] = { skills: { [alias]: { path: fqPath } } }
-      writeFileSync(deckPath, stringifyToml(minimal))
-      console.log(`📝 Created ${deckPath} with "${alias}"`)
     }
 
-    console.log('🔗 Running deck link...')
-    const { linkDeck } = await import('./link.js')
-    linkDeck(deckPath, workdir)
+    // Ensure target section exists and is dict format
+    if (!deck[skillType]) deck[skillType] = {}
+    if (!deck[skillType].skills) deck[skillType].skills = {}
+    if (Array.isArray(deck[skillType].skills)) {
+      const dict: Record<string, { path: string }> = {}
+      for (const name of deck[skillType].skills) {
+        const a = name.split('/').pop() || name
+        dict[a] = { path: name }
+      }
+      deck[skillType].skills = dict
+    }
 
-  } catch (err) {
-    console.error(`❌ Failed to add skill: ${err}`)
-    process.exit(1)
-  } finally {
-    rmSync(tmpDir, { recursive: true, force: true })
+    deck[skillType].skills[alias] = { path: fqPath }
+    writeFileSync(deckPath, stringifyToml(deck))
+    console.log(`📝 Added "${alias}" to [${skillType}.skills] in ${deckPath}`)
+  } else {
+    const minimal: Record<string, any> = { deck: { max_cards: 10 } }
+    minimal[skillType] = { skills: { [alias]: { path: fqPath } } }
+    writeFileSync(deckPath, stringifyToml(minimal))
+    console.log(`📝 Created ${deckPath} with "${alias}"`)
   }
+
+  console.log('🔗 Running deck link...')
+  const { linkDeck } = await import('./link.js')
+  linkDeck(deckPath, workdir)
 }
