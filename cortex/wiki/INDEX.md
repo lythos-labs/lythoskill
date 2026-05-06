@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (23)
+## 📚 Patterns (24)
 
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
@@ -27,13 +27,15 @@
 - **[2026-05-02]** [desc-preference-arena](./01-patterns/2026-05-02-desc-preference-arena.md)
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
+- **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
 
 ## ❓ FAQ (0)
 
 *No entries yet.*
 
-## 📖 Lessons (12)
+## 📖 Lessons (13)
 
+- **[2026-05-06]** [agent-spawn-reliability-journey-kimi-player-cwd-isolation](./03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md)
 - **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)
 - **[2026-05-03]** [hermes-self-evolving-skill-field-notes](./03-lessons/2026-05-03-hermes-self-evolving-skill-field-notes.md)
 - **[2026-05-03]** [hermes-deck-future-proposals](./03-lessons/2026-05-03-hermes-deck-future-proposals.md)

@@ -57,16 +57,13 @@ export const DeckConfig = z.object({
   working_set: z.string().optional(),
   innate: z.record(SkillEntry).optional(),
   tool: z.record(SkillEntry).optional(),
-  // combo: named skill groups with an optional coordination prompt.
-  // Backward-compat: SkillEntry format still accepted.
-  // New format: { skills: [...], prompt: "..." }
-  combo: z.record(z.union([
-    SkillEntry,
-    z.object({
-      skills: z.array(z.string()).describe('Skill names in this combo'),
-      prompt: z.string().optional().describe('How these skills coordinate — agent reads this as instructions'),
-    }),
-  ])).optional(),
+  // combo: meta-declaration, not a skill type. Named groups with coordination prompt.
+  // Does NOT count against max_cards — it's metadata about how skills work together.
+  // If coordination is complex enough to need logic, fork a single skill instead.
+  combo: z.record(z.object({
+    skills: z.array(z.string()).describe('Skill names in this combo'),
+    prompt: z.string().optional().describe('How these skills coordinate — agent reads this as instructions'),
+  })).optional(),
   transient: z.record(z.object({
     path: z.string().optional(),
     skills: z.array(z.string()).optional(),
