@@ -43,8 +43,13 @@ DECK_RAW="https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples
 
 case "$DECK_SPEC" in
   https://*|http://*)
-    echo "📥 Fetching deck: $DECK_SPEC"
-    curl -fsSL "$DECK_SPEC" -o "$TMPDIR/deck.toml"
+    # Auto-convert github.com/blob/... → raw.githubusercontent.com/...
+    FETCH_URL="$DECK_SPEC"
+    if echo "$FETCH_URL" | grep -q 'github\.com/.*/blob/'; then
+      FETCH_URL=$(echo "$FETCH_URL" | sed 's|github\.com/|raw.githubusercontent.com/|; s|/blob/|/|')
+    fi
+    echo "📥 Fetching deck: $FETCH_URL"
+    curl -fsSL --connect-timeout 10 --max-time 30 "$FETCH_URL" -o "$TMPDIR/deck.toml"
     ;;
   ./*|/*|*.toml)
     if [ -f "$DECK_SPEC" ]; then
