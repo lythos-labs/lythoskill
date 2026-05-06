@@ -165,6 +165,13 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/m
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design. Include neighborhood walks and one underrated spot per day."
 
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- engineering "Research the current state of WebAssembly in 2026. Write a 3-paragraph summary covering browser support, language ecosystem, and one surprising use case."
+
+# ── Same task, different decks (compare results → feeds into Arena) ──
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- design-studio "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
+
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- visual-explainer "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
 ```
 
 Output lands in `./agent-output/`. The agent gets a temporary deck (PDF + DOCX + web-search), does the work, produces output — your workspace is untouched. See [`quick-agent.sh`](./examples/quick-agent.sh) for how it works.
@@ -220,7 +227,9 @@ bunx @lythos/skill-deck@0.9.22 link
 
 | Deck | Skills | Scene |
 |------|--------|-------|
-| [documents](./examples/decks/documents.toml) | PDF, DOCX, web-search | Document processing |
+| [documents](./examples/decks/documents.toml) | PDF, DOCX | Document format tools — read/write office formats |
+| [design-studio](./examples/decks/design-studio.toml) | frontend-design, theme-factory, brand-guidelines | Design taste — kills AI slop fonts/colors, adds professional theming |
+| [visual-explainer](./examples/decks/visual-explainer.toml) | design-doc-mermaid, theme-factory | Diagrams + visuals — flowcharts, process diagrams, polished output |
 | [engineering](./examples/decks/engineering.toml) | TDD, to-PRD, design-doc-mermaid | Engineering workflow |
 | [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | Full-stack development |
 | [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | Project governance |

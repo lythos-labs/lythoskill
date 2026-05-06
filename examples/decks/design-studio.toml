@@ -1,0 +1,16 @@
+[deck]
+max_cards = 10
+
+# Design Studio — injects design taste, typography, and brand consistency
+# Use when: output needs to look professionally designed, not AI-generic
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+role = "Distinctive, non-generic aesthetic direction — no Inter/Roboto, no purple gradients"
+
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+role = "10 professional theme systems with curated color palettes and font pairings"
+
+[tool.skills.brand-guidelines]
+path = "github.com/anthropics/skills/skills/brand-guidelines"
+role = "Apply consistent brand color, typography, and design system across all output"

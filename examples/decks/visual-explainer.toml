@@ -1,0 +1,12 @@
+[deck]
+max_cards = 10
+
+# Visual Explainer — diagrams, flowcharts, and structured visuals
+# Use when: task involves processes, relationships, or systems that benefit from diagrams
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams, flowcharts, sequence diagrams, and ER diagrams from descriptions"
+
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+role = "Apply professional themes to diagram-heavy documents for polished output"

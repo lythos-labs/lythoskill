@@ -14,24 +14,15 @@ set -euo pipefail
 
 DECK_SPEC="${1:-}"
 PROMPT="${2:-}"
-
-# If prompt not provided as arg, read from stdin (supports pipe/heredoc)
-if [ -z "$PROMPT" ] && [ ! -t 0 ]; then
-  PROMPT=$(cat)
-fi
-
 OUT_DIR="${3:-./agent-output-$(date +%Y%m%d-%H%M%S)}"
 
 if [ -z "$DECK_SPEC" ] || [ -z "$PROMPT" ]; then
+  echo "❌ Missing arguments."
   echo "Usage: quick-agent.sh <deck> <prompt> [out-dir]"
+  echo "  deck:  documents | design-studio | visual-explainer | engineering | governance | full-stack | URL | path.toml"
+  echo "  prompt: your task description (wrap in quotes)"
   echo ""
-  echo "<deck> can be:"
-  echo "  documents   — built-in: PDF, DOCX, web-search"
-  echo "  engineering — built-in: TDD, PRD, diagrams"
-  echo "  governance  — built-in: deck, cortex, scribe, onboarding"
-  echo "  full-stack  — built-in: React, composition, TDD, diagrams"
-  echo "  https://... — raw deck URL (GitHub raw, gist, etc.)"
-  echo "  ./path.toml — local deck file"
+  echo "Received: deck='$DECK_SPEC' prompt='$PROMPT'"
   exit 1
 fi
 
@@ -91,6 +82,28 @@ max_cards = 10
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [tool.skills.design-doc-mermaid]
 path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+TOML
+          ;;
+        design-studio)
+          cat > "$TMPDIR/deck.toml" << 'TOML'
+[deck]
+max_cards = 10
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+[tool.skills.brand-guidelines]
+path = "github.com/anthropics/skills/skills/brand-guidelines"
+TOML
+          ;;
+        visual-explainer)
+          cat > "$TMPDIR/deck.toml" << 'TOML'
+[deck]
+max_cards = 10
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
 TOML
           ;;
         *)

@@ -1,7 +1,7 @@
 [deck]
 max_cards = 10
 
-# Document processing skills — widely available from the community
+# Document format tools — read/write office formats, no design intelligence
 [tool.skills.pdf]
 path = "github.com/anthropics/skills/skills/pdf"
 role = "Read and extract text from PDF files"
@@ -9,7 +9,3 @@ role = "Read and extract text from PDF files"
 [tool.skills.docx]
 path = "github.com/anthropics/skills/skills/docx"
 role = "Read and write Word documents"
-
-[tool.skills.web-search]
-path = "localhost/web-search"
-role = "Search the web for current information"
