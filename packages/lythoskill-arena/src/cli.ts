@@ -37,8 +37,8 @@ function printHelp(): void {
   console.log(`🎭 lythoskill-arena — Skill comparison runner
 
 Usage:
-  lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>]
-  lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>]
+  lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>] [--timeout <ms>]
+  lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>] [--timeout <ms>]
   lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
   lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
@@ -90,6 +90,7 @@ async function agentRun(args: string[]) {
     else if (args[i] === '--deck' || args[i] === '-d') opts.deck = args[++i]
     else if (args[i] === '--player' || args[i] === '-p') opts.player = args[++i]
     else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
+    else if (args[i] === '--timeout') opts.timeout = args[++i]
   }
 
   if (!opts.deck) {
@@ -127,7 +128,7 @@ async function agentRun(args: string[]) {
     scenarioOpt.scenario = {
       name: 'ad-hoc task',
       description: opts.brief!.slice(0, 80),
-      timeout: 120000,
+      timeout: Number(opts.timeout ?? 120000),
       given: { deck: {} },
       when: opts.brief!,
       then: ['Write your output to output.md', 'The output should be complete and well-structured'],
