@@ -145,7 +145,14 @@ if (!existsSync(DECK_PATH)) {
   process.exit(1);
 }
 
-const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
+// --workdir always wins. --deck (explicit) defaults to cwd: user expects
+// "work here" when pointing to a deck outside the current directory.
+// Default (no flags): deck file's directory (99% of cases = project root).
+const PROJECT_DIR = cliWorkdir
+  ? resolve(cliWorkdir)
+  : cliDeck
+    ? process.cwd()
+    : dirname(DECK_PATH);
 const deckRaw = readFileSync(DECK_PATH, "utf-8");
 const deckHash = hashContent(deckRaw);
 
@@ -545,6 +552,12 @@ try {
 // ── 报告 ────────────────────────────────────────────────────
 
 console.log("");
+console.log(`📋 deck:      ${DECK_PATH}`);
+console.log(`📁 working_set: ${resolvedWorkingSet}`);
+console.log(`🗄️  cold_pool:   ${COLD_POOL}`);
+if (!cliWorkdir && cliDeck && dirname(DECK_PATH) !== process.cwd()) {
+  console.log(`💡 working_set 相对于当前目录。若期望跟随 deck 文件位置，使用 --workdir <dir>`);
+}
 console.log(`✅ Sync complete: ${linkedSkills.length} skill(s) linked (max_cards: ${MAX_CARDS})`);
 console.log(`   lock: ${LOCK_PATH}`);
 if (dirOverlaps.length > 0) {
