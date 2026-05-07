@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 10:44:30
+> 自动生成于 2026/5/7 13:25:35
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 140 | 进行中: 0, 待验收: 0, 已完成: 111 |
+| Tasks | 142 | 进行中: 0, 待验收: 0, 已完成: 112 |
 | Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
-| ADRs | 46 | 已接受: 35 |
+| ADRs | 49 | 已接受: 35 |
 
 ---
 
@@ -53,7 +53,7 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (9)
+### 待办 (10)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -64,6 +64,7 @@ _无_
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
 - [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
+- [ ] **TASK-20260507112345999**: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
 
 ### 进行中 (0)
 
@@ -73,7 +74,7 @@ _无_
 
 _无_
 
-### 已完成 (111)
+### 已完成 (112)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -186,6 +187,7 @@ _无_
 - ✅ ~~TASK-20260507021320567~~: T12: Write ADR-20260507014124191 body — agent-friendly CLI error as decision tree
 - ✅ ~~TASK-20260507103221240~~: T10: Migrate curator/src/ to consume @lythos/cold-pool primitives
 - ✅ ~~TASK-20260507103221276~~: T11: Migrate arena/src/preflight.ts to consume @lythos/cold-pool primitives
+- ✅ ~~TASK-20260507130509142~~: deck add should not exit-fail when cold pool repo exists; should still write deck.toml + link if specific skill not yet declared
 
 ### 悬置 (0)
 
@@ -239,7 +241,7 @@ _无_
 - 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
 - ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
 - 🤔 **ADR-20260502012643244** (01-proposed): FQ-only locator — 删除 bare-name 与隐式策略 fallback
-- 🤔 **ADR-20260502012643344** (01-proposed): 项目自身 skill 通过 `localhost/<name>` symlink 自举，删除 `cold_pool="."` 特例
+- 🤔 **ADR-20260502012643344** (01-proposed): 项目自身 skill 通过 `localhost/me/<name>` symlink 自举，删除 `cold_pool="."` 特例
 - ✅ **ADR-20260502012643444** (02-accepted): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
 - 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
@@ -263,6 +265,9 @@ _无_
 - 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
 - ✅ **ADR-20260507014124191** (02-accepted): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
 - ✅ **ADR-20260507021957847** (02-accepted): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
+- 🤔 **ADR-20260507110332770** (01-proposed): Prune defaults to audit heredoc; never auto-rm cold pool entries
+- 🤔 **ADR-20260507110332805** (01-proposed): Refresh defaults to discover-only; --apply renders audit heredoc with hard-timeout git pull lines
+- 🤔 **ADR-20260507110332831** (01-proposed): Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command
 
 ---
 
