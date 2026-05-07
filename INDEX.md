@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 16:46:08
+> 自动生成于 2026/5/7 18:45:23
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 144 | 进行中: 0, 待验收: 1, 已完成: 112 |
+| Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 112 |
 | Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 50 | 已接受: 35 |
 
@@ -53,7 +53,7 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (11)
+### 待办 (12)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -66,6 +66,7 @@ _无_
 - [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
 - [ ] **TASK-20260507112345999**: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
 - [ ] **TASK-20260507163036174**: ${ID}: deck unit test failures — post FQ schema alignment
+- [ ] **TASK-20260507184440829**: Research skill quality gates — data source wall, validation rules, terminology unification
 
 ### 进行中 (0)
 

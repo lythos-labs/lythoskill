@@ -158,6 +158,11 @@ If you are an AI agent reading this README:
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
 ```
 
+```bash
+# 网络不稳定？GitHub raw 被墙或太慢时走 ghproxy 中转：
+curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
+```
+
 Output lands in `./agent-output-<timestamp>/`. The agent sees the deck's skills (PDF, DOCX), writes the file, and copies it to the output directory. `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
 
 ### Same Task, Different Decks — The Core Loop

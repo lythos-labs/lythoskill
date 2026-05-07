@@ -1,0 +1,27 @@
+topic: AI Agent Skills Ecosystem 2026
+items:
+  - name: Skill Hubs and Marketplaces
+    category: Infrastructure
+    description: Major platforms where agent skills are distributed, discovered, and monetized
+  - name: Protocols and Standards
+    category: Infrastructure
+    description: Technical standards and protocols enabling interoperability between agents and skills
+  - name: Agent Platforms and Runtimes
+    category: Consumers
+    description: Platforms and IDEs that consume skills to extend agent capabilities
+  - name: Publishing and Discovery Platforms
+    category: Infrastructure
+    description: Platforms and tools for authoring, publishing, and discovering agent skills
+  - name: Business Models and Monetization
+    category: Commercial
+    description: How skills are monetized, revenue models, and market economics
+  - name: Key Players and Competitive Landscape
+    category: Commercial
+    description: Major companies, startups, and open-source projects shaping the ecosystem
+  - name: Emerging Trends and Future Outlook
+    category: Trends
+    description: Key trends in 2025-2026 and predictions for the near future
+execution:
+  batch_size: 7
+  items_per_agent: 1
+  output_dir: ./ai_agent_skills_ecosystem/results

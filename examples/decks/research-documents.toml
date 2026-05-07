@@ -1,0 +1,25 @@
+[deck]
+max_cards = 10
+
+# Deep research + document output — research-backed professional reports.
+# Compare with plain "documents" deck: this adds evidence-gathering before writing.
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Preliminary research: generate structured research outline from a topic"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Deep research: launch independent agents for each outline item, gather evidence"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Summarize deep research results into structured markdown report"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Read and extract text from PDF files for research ingestion"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Write the final research report as a formatted Word document"
