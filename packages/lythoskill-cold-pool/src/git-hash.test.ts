@@ -1,83 +1,89 @@
-import { describe, it, expect } from 'bun:test'
-import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs'
-import { execFileSync } from 'node:child_process'
-import { tmpdir } from 'node:os'
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, type GitHashIO } from './git-hash.js'
+import { tmpdir } from 'node:os'
+import { simpleGit } from 'simple-git'
+import { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'
 
-describe('git-hash helpers', () => {
-  // Build a real git repo on disk so git commands work end-to-end.
-  const repoDir = mkdtempSync(join(tmpdir(), 'git-hash-test-'))
+let repoDir: string
 
-  // Init repo, commit a SKILL.md, commit a subdir skill
-  execFileSync('git', ['init'], { cwd: repoDir })
-  execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: repoDir })
-  execFileSync('git', ['config', 'user.name', 'Test'], { cwd: repoDir })
-
-  writeFileSync(join(repoDir, 'SKILL.md'), '# Root skill')
+beforeAll(async () => {
+  repoDir = mkdtempSync(join(tmpdir(), 'lythos-git-hash-test-'))
+  const git = simpleGit(repoDir)
+  await git.init(['--initial-branch=main'])
+  writeFileSync(join(repoDir, 'SKILL.md'), '# Test Skill\n')
   mkdirSync(join(repoDir, 'skills', 'pdf'), { recursive: true })
-  writeFileSync(join(repoDir, 'skills', 'pdf', 'SKILL.md'), '# PDF skill')
-  execFileSync('git', ['add', '.'], { cwd: repoDir })
-  execFileSync('git', ['commit', '-m', 'init'], { cwd: repoDir })
+  writeFileSync(join(repoDir, 'skills', 'pdf', 'SKILL.md'), '# PDF Skill\n> renders PDF\n')
+  await git.add('.')
+  await git.commit('initial')
+})
 
-  const headRef = execFileSync('git', ['-C', repoDir, 'rev-parse', 'HEAD'], { encoding: 'utf-8' }).trim()
+afterAll(() => {
+  rmSync(repoDir, { recursive: true, force: true })
+})
 
-  describe('getRepoHeadRef', () => {
-    it('returns the HEAD commit hash', () => {
-      const result = getRepoHeadRef(repoDir)
-      expect(result).toBe(headRef)
-      expect(result).toHaveLength(40)
-    })
-
-    it('uses injectable IO', () => {
-      const mockIO: GitHashIO = {
-        execGit: () => 'mock-ref-123',
-      }
-      expect(getRepoHeadRef(repoDir, mockIO)).toBe('mock-ref-123')
-    })
+describe('hashSkillMd (SHA-256)', () => {
+  it('computes SHA-256 of SKILL.md', () => {
+    const result = hashSkillMd(join(repoDir, 'SKILL.md'))
+    expect(result).toBeString()
+    expect(result.length).toBe(64)
   })
 
-  describe('getSkillBlobHash', () => {
-    it('returns git blob hash for root SKILL.md (empty subpath)', () => {
-      const hash = getSkillBlobHash(repoDir, '')
-      expect(hash).toHaveLength(40)
-      // Git blob hash of "# Root skill\n"
-      expect(hash).toMatch(/^[0-9a-f]{40}$/)
-    })
-
-    it('returns git blob hash for nested skill', () => {
-      const hash = getSkillBlobHash(repoDir, 'skills/pdf')
-      expect(hash).toHaveLength(40)
-      expect(hash).toMatch(/^[0-9a-f]{40}$/)
-    })
-
-    it('uses injectable IO', () => {
-      const mockIO: GitHashIO = {
-        execGit: () => 'mock-blob-hash',
-      }
-      expect(getSkillBlobHash(repoDir, 'skills/pdf', mockIO)).toBe('mock-blob-hash')
-    })
+  it('produces deterministic output', () => {
+    const a = hashSkillMd(join(repoDir, 'SKILL.md'))
+    const b = hashSkillMd(join(repoDir, 'SKILL.md'))
+    expect(a).toBe(b)
   })
 
-  describe('getSkillTreeHash', () => {
-    it('returns tree hash for a subdirectory', () => {
-      const hash = getSkillTreeHash(repoDir, 'skills/pdf')
-      expect(hash).toHaveLength(40)
-      expect(hash).toMatch(/^[0-9a-f]{40}$/)
-    })
+  it('produces different hash for different content', () => {
+    const root = hashSkillMd(join(repoDir, 'SKILL.md'))
+    const nested = hashSkillMd(join(repoDir, 'skills', 'pdf', 'SKILL.md'))
+    expect(root).not.toBe(nested)
+  })
+})
 
-    it('uses injectable IO', () => {
-      const mockIO: GitHashIO = {
-        execGit: () => '040000 tree abc1234\tskills/pdf',
-      }
-      expect(getSkillTreeHash(repoDir, 'skills/pdf', mockIO)).toBe('abc1234')
-    })
+describe('getRepoHeadRef', () => {
+  it('returns HEAD commit hash', async () => {
+    const head = await getRepoHeadRef(repoDir)
+    expect(head).toBeString()
+    expect(head.length).toBe(40)
+  })
 
-    it('throws on unparsable output', () => {
-      const badIO: GitHashIO = {
-        execGit: () => 'garbage',
-      }
-      expect(() => getSkillTreeHash(repoDir, 'skills/pdf', badIO)).toThrow('Could not parse tree hash')
-    })
+  it('matches simple-git log output', async () => {
+    const head = await getRepoHeadRef(repoDir)
+    const log = await simpleGit(repoDir).log()
+    expect(head).toBe(log.latest!.hash)
+  })
+})
+
+describe('getSkillBlobHash', () => {
+  it('hashes SKILL.md in repo root', async () => {
+    const hash = await getSkillBlobHash(repoDir, '')
+    expect(hash).toBeString()
+    expect(hash.length).toBe(40)
+  })
+
+  it('hashes SKILL.md in nested subpath', async () => {
+    const hash = await getSkillBlobHash(repoDir, 'skills/pdf')
+    expect(hash).toBeString()
+    expect(hash.length).toBe(40)
+  })
+
+  it('produces different blob hashes for different files', async () => {
+    const root = await getSkillBlobHash(repoDir, '')
+    const nested = await getSkillBlobHash(repoDir, 'skills/pdf')
+    expect(root).not.toBe(nested)
+  })
+})
+
+describe('getSkillTreeHash', () => {
+  it('returns tree hash for subdirectory', async () => {
+    const hash = await getSkillTreeHash(repoDir, 'skills/pdf')
+    expect(hash).toBeString()
+    expect(hash.length).toBe(40)
+  })
+
+  it('throws on bad path', async () => {
+    await expect(getSkillTreeHash(repoDir, 'nonexistent')).rejects.toThrow()
   })
 })

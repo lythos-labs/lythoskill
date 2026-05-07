@@ -33,6 +33,9 @@
     "url": "https://github.com/lythos-labs/lythoskill/issues"
   },
   "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-cold-pool#readme",
+  "dependencies": {
+    "simple-git": "^3.36.0"
+  },
   "engines": {
     "bun": ">=1.0.0"
   }

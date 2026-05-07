@@ -11,5 +11,5 @@
   "scripts": {
     "prepare": "husky",
     "test:all": "bun test packages/lythoskill-test-utils/src/ && bun test packages/lythoskill-cold-pool/src/ && bun test packages/lythoskill-curator/src/ && bun test packages/lythoskill-deck/src/ && bun test packages/lythoskill-arena/src/ && bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts"
-  }
+  },
 }

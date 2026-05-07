@@ -17,7 +17,7 @@ import {
 import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
-import { ColdPool, parseLocator, getRepoHeadRef, getSkillBlobHash } from "@lythos/cold-pool";
+import { ColdPool, parseLocator } from "@lythos/cold-pool";
 import {
   SkillDeckLockSchema,
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,

@@ -10,11 +10,11 @@
     },
     "packages/lythoskill-agent-adapter": {
       "name": "@lythos/agent-adapter",
-      "version": "0.9.23",
+      "version": "0.9.26",
     },
     "packages/lythoskill-agent-adapter-claude-sdk": {
       "name": "@lythos/agent-adapter-claude-sdk",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "dependencies": {
         "@anthropic-ai/claude-agent-sdk": "^0.2.131",
         "@lythos/agent-adapter": "workspace:*",
@@ -22,7 +22,7 @@
     },
     "packages/lythoskill-arena": {
       "name": "@lythos/skill-arena",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-arena": "src/cli.ts",
       },
@@ -38,18 +38,21 @@
     },
     "packages/lythoskill-cold-pool": {
       "name": "@lythos/cold-pool",
-      "version": "0.9.23",
+      "version": "0.9.26",
+      "dependencies": {
+        "simple-git": "^3.36.0",
+      },
     },
     "packages/lythoskill-creator": {
       "name": "@lythos/skill-creator",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-curator": {
       "name": "@lythos/skill-curator",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-curator": "src/cli.ts",
       },
@@ -60,7 +63,7 @@
     },
     "packages/lythoskill-deck": {
       "name": "@lythos/skill-deck",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-deck": "src/cli.ts",
       },
@@ -73,14 +76,14 @@
     },
     "packages/lythoskill-hello-world": {
       "name": "@lythos/hello-world",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-hello-world": "src/cli.ts",
       },
     },
     "packages/lythoskill-project-cortex": {
       "name": "@lythos/project-cortex",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "bin": {
         "lythoskill-project-cortex": "src/cli.ts",
       },
@@ -90,7 +93,7 @@
     },
     "packages/lythoskill-test-utils": {
       "name": "@lythos/test-utils",
-      "version": "0.9.23",
+      "version": "0.9.26",
       "dependencies": {
         "@lythos/agent-adapter": "workspace:*",
         "zod": "^4.4.3",
@@ -125,6 +128,10 @@
 
     "@iarna/toml": ["@iarna/toml@2.2.5", "", {}, "sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg=="],
 
+    "@kwsites/file-exists": ["@kwsites/file-exists@1.1.1", "", { "dependencies": { "debug": "^4.1.1" } }, "sha512-m9/5YGR18lIwxSFDwfE3oA7bWuq9kdau6ugN4H2rJeyhFQZcG9AgSHkQtSD15a8WvTgfz9aikZMrKPHvbpqFiw=="],
+
+    "@kwsites/promise-deferred": ["@kwsites/promise-deferred@1.1.1", "", {}, "sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw=="],
+
     "@lythos/agent-adapter": ["@lythos/agent-adapter@workspace:packages/lythoskill-agent-adapter"],
 
     "@lythos/agent-adapter-claude-sdk": ["@lythos/agent-adapter-claude-sdk@workspace:packages/lythoskill-agent-adapter-claude-sdk"],
@@ -146,6 +153,10 @@
     "@lythos/test-utils": ["@lythos/test-utils@workspace:packages/lythoskill-test-utils"],
 
     "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.29.0", "", { "dependencies": { "@hono/node-server": "^1.19.9", "ajv": "^8.17.1", "ajv-formats": "^3.0.1", "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "eventsource-parser": "^3.0.0", "express": "^5.2.1", "express-rate-limit": "^8.2.1", "hono": "^4.11.4", "jose": "^6.1.3", "json-schema-typed": "^8.0.2", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.25 || ^4.0", "zod-to-json-schema": "^3.25.1" }, "peerDependencies": { "@cfworker/json-schema": "^4.1.1" }, "optionalPeers": ["@cfworker/json-schema"] }, "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="],
+
+    "@simple-git/args-pathspec": ["@simple-git/args-pathspec@1.0.3", "", {}, "sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA=="],
+
+    "@simple-git/argv-parser": ["@simple-git/argv-parser@1.1.1", "", { "dependencies": { "@simple-git/args-pathspec": "^1.0.3" } }, "sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw=="],
 
     "accepts": ["accepts@2.0.0", "", { "dependencies": { "mime-types": "^3.0.0", "negotiator": "^1.0.0" } }, "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="],
 
@@ -310,6 +321,8 @@
     "side-channel-map": ["side-channel-map@1.0.1", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "get-intrinsic": "^1.2.5", "object-inspect": "^1.13.3" } }, "sha512-VCjCNfgMsby3tTdo02nbjtM/ewra6jPHmpThenkTYh8pG9ucZ/1P8So4u4FGBek/BjpOVsDCMoLA/iuBKIFXRA=="],
 
     "side-channel-weakmap": ["side-channel-weakmap@1.0.2", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "get-intrinsic": "^1.2.5", "object-inspect": "^1.13.3", "side-channel-map": "^1.0.1" } }, "sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A=="],
+
+    "simple-git": ["simple-git@3.36.0", "", { "dependencies": { "@kwsites/file-exists": "^1.1.1", "@kwsites/promise-deferred": "^1.1.1", "@simple-git/args-pathspec": "^1.0.3", "@simple-git/argv-parser": "^1.1.0", "debug": "^4.4.0" } }, "sha512-cGQjLjK8bxJw4QuYT7gxHw3/IouVESbhahSsHrX97MzCL1gu2u7oy38W6L2ZIGECEfIBG4BabsWDPjBxJENv9Q=="],
 
     "statuses": ["statuses@2.0.2", "", {}, "sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw=="],
 

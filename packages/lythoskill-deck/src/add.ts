@@ -258,7 +258,7 @@ export async function addSkill(
   // ── Metadata recording (content-level only; deck refs reconciled by link) ─
 
   try {
-    const headRef = getRepoHeadRef(fetchPlan.targetDir)
+    const headRef = await getRepoHeadRef(fetchPlan.targetDir)
     const skillSubpath = parsed.skill || ''
     const skillMdPath = join(skillDir, 'SKILL.md')
     const contentSha256 = hashSkillMd(skillMdPath)
