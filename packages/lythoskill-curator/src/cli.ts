@@ -17,6 +17,7 @@ import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
+import { gitClone } from '@lythos/cold-pool'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -908,9 +909,10 @@ export function runAdd(argv: string[]) {
 
   try {
     mkdirSync(plan.repoPath, { recursive: true })
-    execSync(`git clone ${depthFlag} ${branchFlag} ${cloneUrl} "${plan.repoPath}"`.replace(/\s+/g, ' ').trim(), {
+    gitClone(cloneUrl, plan.repoPath, {
+      depth: fullClone ? 0 : 1,
+      ref: branch,
       stdio: 'inherit',
-      timeout: 60000,
     })
 
     // Verify the skill path exists within the cloned repo

@@ -37,6 +37,7 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
+    "@lythos/cold-pool": "workspace:*",
     "yaml": "^2.8.3"
   }
 }

@@ -6,6 +6,8 @@
  * IO is injected via function parameters (e.g., existsFn, readdirFn).
  */
 
+import { ColdPool, parseLocator } from '@lythos/cold-pool'
+
 // ── Types ─────────────────────────────────────────────────────────────────
 
 /** A skill as declared in skill-deck.toml */
@@ -83,8 +85,11 @@ export function parseDeckSkills(
 /**
  * Check each declared skill against the cold pool filesystem.
  *
- * For skills with explicit paths: resolve `<coldPoolDir>/<path>/SKILL.md`
- * For skills without paths (array format): resolve `<coldPoolDir>/<name>/SKILL.md`
+ * Path resolution delegates to @lythos/cold-pool's `parseLocator` and
+ * `ColdPool.resolveDir` so localhost / FQ / standalone forms all map to
+ * the right physical layout (per ADR-20260507021957847). Non-FQ legacy
+ * names (e.g., bare `pdf`) fall back to `<coldPoolDir>/<name>/SKILL.md`.
+ *
  * Skills with HTTP/URL paths are skipped (not local).
  *
  * `existsFn` is the IO injection point — swap for real fs or mock.
@@ -94,11 +99,28 @@ export function checkSkillExistence(
   coldPoolDir: string,
   existsFn: (path: string) => boolean
 ): SkillCheck[] {
+  const pool = new ColdPool(coldPoolDir)
   return skills.map(skill => {
-    const resolvedName = skill.path && !skill.path.startsWith('http')
+    const candidatePath = skill.path && !skill.path.startsWith('http')
       ? skill.path
       : skill.name
-    const expectedPath = `${coldPoolDir}/${resolvedName}/SKILL.md`
+
+    let expectedPath: string
+    const locator = parseLocator(candidatePath)
+    if (!locator) {
+      // Legacy bare-name fallback. Per ADR-20260502012643244 this should
+      // be removed in 0.10.x once arena.toml authors switch to FQ.
+      expectedPath = `${coldPoolDir}/${candidatePath}/SKILL.md`
+    } else if (locator.isLocalhost) {
+      // localhost layout: top-level dir under coldPool, no `localhost/` prefix
+      expectedPath = `${pool.resolveDir(locator)}/SKILL.md`
+    } else if (locator.skill) {
+      expectedPath = `${pool.resolveDir(locator)}/${locator.skill}/SKILL.md`
+    } else {
+      // Standalone repo: SKILL.md at repo root
+      expectedPath = `${pool.resolveDir(locator)}/SKILL.md`
+    }
+
     return {
       name: skill.name,
       expectedPath,
