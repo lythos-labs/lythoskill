@@ -4,19 +4,22 @@ export default {
   name: 'remove deletes deck entry and symlink but not cold pool',
   given: {
     coldPool: {
-      'skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
-      'skill-b': {
-        frontmatter: { name: 'skill-b', type: 'standard', description: 'Skill B' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-b': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-b', type: 'standard', description: 'Skill B' },
       },
     },
-    workingSet: ['skill-a', 'skill-b'],
+    workingSet: {
+      'skill-a': 'github.com/lythos-labs/lythoskill-test-stubs/skill-a',
+      'skill-b': 'github.com/lythos-labs/lythoskill-test-stubs/skill-b',
+    },
     deck: {
       max_cards: 10,
       tool: {
-        'skill-a': { path: 'skill-a' },
-        'skill-b': { path: 'skill-b' },
+        'skill-a': { path: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a' },
+        'skill-b': { path: 'github.com/lythos-labs/lythoskill-test-stubs/skill-b' },
       },
     },
   },

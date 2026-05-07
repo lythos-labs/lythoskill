@@ -4,18 +4,18 @@ export default {
   name: 'hyphen alias creates correct symlink',
   given: {
     coldPool: {
-      'web-search': {
-        frontmatter: { name: 'web-search', type: 'standard', description: 'Web search skill' },
+      'github.com/lythos-labs/lythoskill-test-stubs/web-search': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/web-search', type: 'standard', description: 'Web search skill' },
       },
-      'design-doc-mermaid': {
-        frontmatter: { name: 'design-doc-mermaid', type: 'standard', description: 'Diagram skill' },
+      'github.com/lythos-labs/lythoskill-test-stubs/design-doc-mermaid': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/design-doc-mermaid', type: 'standard', description: 'Diagram skill' },
       },
     },
     deck: {
       max_cards: 10,
       tool: {
-        'web-search': { path: 'web-search' },
-        'design-doc-mermaid': { path: 'design-doc-mermaid' },
+        'web-search': { path: 'github.com/lythos-labs/lythoskill-test-stubs/web-search' },
+        'design-doc-mermaid': { path: 'github.com/lythos-labs/lythoskill-test-stubs/design-doc-mermaid' },
       },
     },
   },

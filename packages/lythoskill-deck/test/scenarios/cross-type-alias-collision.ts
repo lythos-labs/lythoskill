@@ -4,17 +4,17 @@ export default {
   name: 'cross-type alias collision is rejected',
   given: {
     coldPool: {
-      'skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
     },
     deck: {
       max_cards: 10,
       innate: {
-        'skill-a': { path: 'skill-a' },
+        'skill-a': { path: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a' },
       },
       tool: {
-        'skill-a': { path: 'skill-a' },
+        'skill-a': { path: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a' },
       },
     },
   },

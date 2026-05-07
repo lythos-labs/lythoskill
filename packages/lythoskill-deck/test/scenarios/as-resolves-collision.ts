@@ -5,17 +5,17 @@ export default {
   given: {
     coldPool: {
       'github.com/owner/repo-a/skills/skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
       'github.com/owner/repo-b/skills/skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A dup' },
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A dup' },
       },
     },
     deck: {
       max_cards: 10,
       tool: {
-        'skill-a-from-a': { path: 'github.com/owner/repo-a/skill-a' },
-        'skill-a-from-b': { path: 'github.com/owner/repo-b/skill-a' },
+        'skill-a-from-a': { path: 'github.com/owner/repo-a/skills/skill-a' },
+        'skill-a-from-b': { path: 'github.com/owner/repo-b/skills/skill-a' },
       },
     },
   },

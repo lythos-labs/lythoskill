@@ -5,16 +5,16 @@ export default {
   given: {
     coldPool: {
       'github.com/owner/repo-a/skills/skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
       'github.com/owner/repo-b/skills/skill-b': {
-        frontmatter: { name: 'skill-b', type: 'standard', description: 'Skill B' },
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-b', type: 'standard', description: 'Skill B' },
       },
     },
     deck: {
       max_cards: 10,
       tool: {
-        'skill-a': { path: 'github.com/owner/repo-a/skill-a' },
+        'skill-a': { path: 'github.com/owner/repo-a/skills/skill-a' },
       },
     },
   },

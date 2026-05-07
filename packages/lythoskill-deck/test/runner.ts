@@ -23,7 +23,7 @@ export interface Scenario {
   name: string
   given: {
     coldPool: Record<string, MockSkill>
-    workingSet?: string[] // 预先放置的 skill 名（从 coldPool 复制）
+    workingSet?: Record<string, string> // 预先放置的 symlinks: alias → coldPool 中的 FQ key
     preExistingDirs?: string[] // 预先在 working set 创建的真目录（vendor tree 等）
     deck: {
       max_cards?: number
@@ -142,35 +142,12 @@ function setupWorkdir(scenario: Scenario, workdir: string): void {
     createMockSkill(cpDir, name, skill)
   }
 
-  //  innate skills 如果在 coldPool 找不到，从本包 skill/ 复制到项目本地 skills/
-  const selfSkillDir = resolve(import.meta.dir, '..', 'skill')
-  for (const section of ['innate', 'tool', 'combo'] as const) {
-    const entries = scenario.given.deck[section] ?? []
-    const names = Array.isArray(entries) ? entries : Object.keys(entries)
-    for (const name of names) {
-      if (name === 'lythoskill-deck' && existsSync(selfSkillDir)) {
-        const localDir = join(workdir, 'skills', name)
-        mkdirSync(localDir, { recursive: true })
-        for (const entry of readdirSync(selfSkillDir, { withFileTypes: true, recursive: true })) {
-          const src = join(entry.parentPath, entry.name)
-          const rel = src.slice(selfSkillDir.length + 1)
-          const dst = join(localDir, rel)
-          if (entry.isDirectory()) {
-            mkdirSync(dst, { recursive: true })
-          } else {
-            writeFileSync(dst, readFileSync(src))
-          }
-        }
-      }
-    }
-  }
-
-  // 创建 working set（如果有预先放置的 skill）
-  if (scenario.given.workingSet?.length) {
+  // 创建 working set（如果有预先放置的 symlink，schema 是 alias → coldPool FQ-key 显式 map）
+  if (scenario.given.workingSet) {
     mkdirSync(wsDir, { recursive: true })
-    for (const name of scenario.given.workingSet) {
-      if (existsSync(join(cpDir, name))) {
-        symlinkSync(join(cpDir, name), join(wsDir, name))
+    for (const [alias, fqKey] of Object.entries(scenario.given.workingSet)) {
+      if (existsSync(join(cpDir, fqKey))) {
+        symlinkSync(join(cpDir, fqKey), join(wsDir, alias))
       }
     }
   }

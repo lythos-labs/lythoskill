@@ -4,14 +4,14 @@ export default {
   name: 'migrate-schema no-op on already-converted deck',
   given: {
     coldPool: {
-      'skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
     },
     deck: {
       max_cards: 10,
       tool: {
-        'skill-a': { path: 'skill-a' },
+        'skill-a': { path: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a' },
       },
     },
   },

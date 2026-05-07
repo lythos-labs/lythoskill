@@ -4,13 +4,13 @@ export default {
   name: 'migrate-schema dry-run does not modify file',
   given: {
     coldPool: {
-      'skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
     },
     deck: {
       max_cards: 10,
-      tool: ['skill-a'],
+      tool: ['github.com/lythos-labs/lythoskill-test-stubs/skill-a'],
     },
   },
   when: ['lythoskill-deck migrate-schema --dry-run', 'lythoskill-deck link'],

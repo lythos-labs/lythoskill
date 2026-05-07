@@ -4,13 +4,13 @@ export default {
   name: 'migrate-schema converts old deck and link no longer warns',
   given: {
     coldPool: {
-      'skill-a': {
-        frontmatter: { name: 'skill-a', type: 'standard', description: 'Skill A' },
+      'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
+        frontmatter: { name: 'github.com/lythos-labs/lythoskill-test-stubs/skill-a', type: 'standard', description: 'Skill A' },
       },
     },
     deck: {
       max_cards: 10,
-      tool: ['skill-a'],
+      tool: ['github.com/lythos-labs/lythoskill-test-stubs/skill-a'],
     },
   },
   when: ['lythoskill-deck migrate-schema', 'lythoskill-deck link'],
