@@ -140,7 +140,7 @@ declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconc
 
 **localhost 本质**: 仅是 `host` 段为字面 `localhost` 表示**无远程**(无 clone / 无 pull / 无 fetch),其他完全等同。`isLocalhost: true` 这个 flag 唯一作用是让 fetch / refresh / validate 跳过网络步骤。
 
-**推荐快速本地 skill convention**(非强制): `localhost/me/skills/<skill-name>`(`me` 默认 owner、`skills` 默认 repo)。例如 quick-start 想搓个临时 polish-text skill,直接 `mkdir ~/.agents/skill-repos/localhost/me/skills/polish-text/` 然后写 SKILL.md,deck.toml 引用 `localhost/me/skills/polish-text` 即可。当然 `localhost/<any-owner>/<any-repo>` 都合法,这只是一个对个人/快速场景的常用前缀建议。
+**推荐快速本地 skill convention**(非强制): `localhost/me/<skill-name>`(`me` 默认 owner,`<skill-name>` 直接当 repo,standalone 形态——SKILL.md 在 `<pool>/localhost/me/<skill-name>/SKILL.md`)。3 段,不引入 `skills/` 中间层。例如 quick-start 想搓个临时 polish-text skill,直接 `mkdir ~/.agents/skill-repos/localhost/me/polish-text/` 然后写 SKILL.md,deck.toml 引用 `localhost/me/polish-text` 即可。当然 `localhost/<any-owner>/<any-repo>` 都合法——若想本地自带 monorepo 风格,可以走 `localhost/me/skills/<skill-name>`(4 段)。
 
 **Legacy drift**: 历史上有两类 post-compaction 失忆 agent 的产物:
 - A: `<coldPool>/<x>/SKILL.md`(顶层 + SKILL.md)——agent 为让 bare-name `web-search` 解析过测试硬塞的
