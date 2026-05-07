@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (27)
+## 📚 Patterns (28)
 
+- **[2026-05-07]** [expected-coverage-gaps-intent-plan-execute-coverage-strategy](./01-patterns/2026-05-07-expected-coverage-gaps-intent-plan-execute-coverage-strategy.md)
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
 - **[2026-05-03]** [github-actions-bun-ci-cd-配置模式](./01-patterns/2026-05-03-github-actions-bun-ci-cd-配置模式.md)

@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 22:06:54
+> 自动生成于 2026/5/7 22:34:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 146 | 进行中: 1, 待验收: 1, 已完成: 113 |
+| Tasks | 148 | 进行中: 1, 待验收: 1, 已完成: 113 |
 | Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 51 | 已接受: 42 |
 
@@ -53,7 +53,7 @@
 
 ## 📄 Tasks
 
-### 待办 (11)
+### 待办 (13)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -66,6 +66,8 @@
 - [ ] **TASK-20260507112345999**: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
 - [ ] **TASK-20260507163036174**: ${ID}: deck unit test failures — post FQ schema alignment
 - [ ] **TASK-20260507184440829**: Research skill quality gates — data source wall, validation rules, terminology unification
+- [ ] **TASK-20260507223411867**: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
+- [ ] **TASK-20260507223411896**: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
 
 ### 进行中 (1)
 
