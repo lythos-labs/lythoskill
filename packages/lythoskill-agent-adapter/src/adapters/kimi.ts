@@ -5,11 +5,39 @@ import type { AgentAdapter, AgentRunResult } from '../types'
 import { readCheckpoints } from '../checkpoint'
 import { registerAgent } from '../registry'
 
-// ── Kimi CLI adapter ────────────────────────────────────────────────────────
-//
-// Kimi --print mode is headless by design (no deferred tool deadlock).
-// All tools eagerly loaded: SearchWeb, FetchURL, Shell, ReadFile, WriteFile, Agent.
-// Apache 2.0 open source.
+// ── Pure functions (testable without CLI) ────────────────────────────────────
+
+/** Build the kimi --print shell command. */
+export function buildKimiCommand(promptFile: string): string[] {
+  return ['sh', '-c', `kimi --print --afk --output-format stream-json < ${promptFile}`]
+}
+
+/**
+ * Parse kimi stream-json output into plain text.
+ * Each line is a JSON event; extracts text from assistant role messages.
+ * content can be string or array of content blocks.
+ */
+export function parseKimiStreamJson(raw: string): string {
+  const lines: string[] = []
+  for (const line of raw.split('\n')) {
+    if (!line.trim()) continue
+    try {
+      const event = JSON.parse(line)
+      if (event.role !== 'assistant') continue
+      const content = event.content
+      if (typeof content === 'string') {
+        lines.push(content)
+      } else if (Array.isArray(content)) {
+        for (const block of content) {
+          if (block.type === 'text' && block.text) lines.push(block.text)
+        }
+      }
+    } catch { /* skip malformed lines */ }
+  }
+  return lines.join('\n')
+}
+
+// ── Spawn wrapper (IO, tested via BDD / arena integration) ──────────────────
 
 async function spawnKimi(opts: {
   brief: string
@@ -21,17 +49,12 @@ async function spawnKimi(opts: {
 
   const start = Date.now()
 
-  // kimi --print --afk: auto-approve all tools, auto-dismiss questions
-  // Shell redirect (< file) avoids Bun stdin pipe issues; prompt length unlimited
-  const proc = Bun.spawn(
-    ['sh', '-c', `kimi --print --afk --output-format stream-json < ${promptFile}`],
-    {
-      cwd: opts.cwd,
-      stdin: 'ignore',
-      stdout: 'pipe',
-      stderr: 'pipe',
-    },
-  )
+  const proc = Bun.spawn(buildKimiCommand(promptFile), {
+    cwd: opts.cwd,
+    stdin: 'ignore',
+    stdout: 'pipe',
+    stderr: 'pipe',
+  })
 
   const timeout = setTimeout(() => proc.kill(), opts.timeoutMs ?? 60000)
   await proc.exited
@@ -44,27 +67,11 @@ async function spawnKimi(opts: {
   const stderr = await new Response(proc.stderr).text()
   const code = proc.exitCode ?? 1
 
-  // Kimi --output-format stream-json: each line is a JSON event.
-  // Extract text from assistant messages. content can be string or array of blocks.
-  let stdout = ''
+  let stdout: string
   try {
-    for (const line of rawStdout.split('\n')) {
-      if (!line.trim()) continue
-      try {
-        const event = JSON.parse(line)
-        if (event.role !== 'assistant') continue
-        const content = event.content
-        if (typeof content === 'string') {
-          stdout += content + '\n'
-        } else if (Array.isArray(content)) {
-          for (const block of content) {
-            if (block.type === 'text' && block.text) stdout += block.text + '\n'
-          }
-        }
-      } catch { /* skip malformed lines */ }
-    }
+    stdout = parseKimiStreamJson(rawStdout)
   } catch {
-    stdout = rawStdout // fallback to raw output
+    stdout = rawStdout
   }
 
   const checkpoints = readCheckpoints(opts.cwd)
