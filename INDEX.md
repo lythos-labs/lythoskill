@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 10:41:28
+> 自动生成于 2026/5/7 10:44:30
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 140 | 进行中: 0, 待验收: 0, 已完成: 111 |
-| Epics | 22 | 活跃: 1, 已完成: 17, 悬置: 2, 已归档: 2 |
-| ADRs | 46 | 已接受: 33 |
+| Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
+| ADRs | 46 | 已接受: 35 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
+_无_
 
 ### 已完成
 
@@ -37,6 +37,7 @@
 - ✅ **EPIC-20260505221500188**: Standardize test file organization — co-located unit tests, separate BDD runners
 - ✅ **EPIC-20260505230149768**: Implement CriterionDef schema + judge cleanup + reproducibility metadata for arena chart-ready MVP
 - ✅ **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
+- ✅ **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
 
 ### 悬置
 
@@ -260,8 +261,8 @@ _无_
 - ✅ **ADR-20260506021112492** (02-accepted): Kimi CLI as default AgentAdapter — Player abstraction validation and CWD isolation for deny-by-default
 - ✅ **ADR-20260506103209293** (02-accepted): Supersede combo-skill-as-orchestration-layer — combo is now a deck-level prompt, not a separate skill
 - 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
-- 🤔 **ADR-20260507014124191** (01-proposed): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
-- 🤔 **ADR-20260507021957847** (01-proposed): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
+- ✅ **ADR-20260507014124191** (02-accepted): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
+- ✅ **ADR-20260507021957847** (02-accepted): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
 
 ---
 
