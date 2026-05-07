@@ -43,14 +43,14 @@ describe('parseLocator — accepted forms', () => {
     expect(loc?.skill).toBe('architecture-diagram')
   })
 
-  test('localhost/<name>', () => {
-    const loc = parseLocator('localhost/my-skill')
+  test('localhost/<owner>/<repo> (canonical local skill, same shape as remote)', () => {
+    const loc = parseLocator('localhost/me/my-skill')
     expect(loc).toEqual({
-      raw: 'localhost/my-skill',
+      raw: 'localhost/me/my-skill',
       host: 'localhost',
-      owner: null,
-      repo: null,
-      skill: 'my-skill',
+      owner: 'me',
+      repo: 'my-skill',
+      skill: null,
       isLocalhost: true,
     })
   })
@@ -90,9 +90,24 @@ describe('parseLocator — rejected forms (per ADR-20260502012643244 FQ-only)', 
     expect(parseLocator('github.com/owner')).toBeNull()
   })
 
-  test('localhost with extra path segments', () => {
-    expect(parseLocator('localhost/my/skill')).toBeNull()
+  test('localhost with multi-segment path (skill subpath beyond owner/repo)', () => {
+    const loc = parseLocator('localhost/me/skills/my-skill')
+    expect(loc).toEqual({
+      raw: 'localhost/me/skills/my-skill',
+      host: 'localhost',
+      owner: 'me',
+      repo: 'skills',
+      skill: 'my-skill',
+      isLocalhost: true,
+    })
+  })
+
+  test('localhost alone (no owner/repo) is rejected', () => {
     expect(parseLocator('localhost')).toBeNull()
+  })
+
+  test('localhost/<name> (single name, missing repo) is rejected — that was the post-compaction agent invention', () => {
+    expect(parseLocator('localhost/my-skill')).toBeNull()
   })
 })
 
@@ -101,7 +116,8 @@ describe('formatLocator — round-trips', () => {
     'github.com/anthropics/skills/skills/pdf',
     'github.com/SpillwaveSolutions/design-doc-mermaid',
     'github.com/mattpocock/skills/skills/engineering/tdd',
-    'localhost/my-skill',
+    'localhost/me/my-skill',
+    'localhost/me/skills/inner-skill',
   ])('round-trip: %s', (raw) => {
     const parsed = parseLocator(raw)!
     expect(formatLocator(parsed)).toBe(raw)

@@ -30,7 +30,7 @@ describe('buildValidationPlan', () => {
   })
 
   test('honors custom checks', () => {
-    const plan = buildValidationPlan('localhost/x', { checks: ['syntax'] })
+    const plan = buildValidationPlan('localhost/me/x', { checks: ['syntax'] })
     expect(plan.checks).toEqual(['syntax'])
   })
 })
@@ -46,7 +46,7 @@ describe('executeValidationPlan — syntax phase', () => {
   })
 
   test('localhost short-circuits — no remote fetch', async () => {
-    const plan = buildValidationPlan('localhost/my-skill')
+    const plan = buildValidationPlan('localhost/me/my-skill')
     let fetched = false
     const io = ioWith(async () => {
       fetched = true

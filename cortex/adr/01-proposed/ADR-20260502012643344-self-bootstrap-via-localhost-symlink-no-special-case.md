@@ -1,4 +1,4 @@
-# ADR-20260502012643344: 项目自身 skill 通过 `localhost/<name>` symlink 自举，删除 `cold_pool="."` 特例
+# ADR-20260502012643344: 项目自身 skill 通过 `localhost/me/skills/<name>` symlink 自举，删除 `cold_pool="."` 特例
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-02 | 与 ADR-20260502012643244 (FQ-only) 联动 |
+| amended | 2026-05-07 | localhost 形态从 `localhost/<name>` 改为 `localhost/<owner>/<repo>[/skill]`,与远程 host uniform。详见下文 §2026-05-07 update |
 
 ## Context
 
@@ -38,25 +39,27 @@ deck.toml 的 `[deck]` 段允许 `cold_pool = "."`，并在该模式下保留策
 - **Pros**: 在统一字段下表达多源
 - **Cons**: 比 Option A 更复杂；引入解析顺序敏感性；不解决 ADR A 的核心目标（路径精确）
 
-### Option C: 项目自身 skill 通过 `localhost/<name>` symlink 出现在 library 中 — Selected
+### Option C: 项目自身 skill 通过 `localhost/me/skills/<name>` symlink 出现在 library 中 — Selected
 lythoskill 主仓库的 contributor 在 setup 时执行：
 
 ```bash
 # scripts/dev-bootstrap.sh
 LIBRARY="${LYTHOS_LIBRARY:-$HOME/.agents/skill-repos}"
-mkdir -p "$LIBRARY/localhost"
+mkdir -p "$LIBRARY/localhost/me/skills"
 for skill in skills/*/; do
   name=$(basename "$skill")
-  ln -sfn "$PWD/$skill" "$LIBRARY/localhost/$name"
+  ln -sfn "$PWD/$skill" "$LIBRARY/localhost/me/skills/$name"
 done
 ```
 
-deck.toml 中所有引用改为 `localhost/<name>` 形态：
+deck.toml 中所有引用改为 `localhost/me/skills/<name>` 形态：
 
 ```toml
-[innate]
-skills = ["localhost/lythoskill-deck"]
+[innate.skills.lythoskill-deck]
+path = "localhost/me/skills/lythoskill-deck"
 ```
+
+> **2026-05-07 update (amendment)**: 原 ADR 例子用 `$LIBRARY/localhost/$name`(深 2 层、缺 owner/repo 段)。该形态后被识别为 post-compaction 失忆 agent 的产物——FQ-only locator 要求**所有 host(含 localhost)用 uniform `<host>/<owner>/<repo>[/skill]` 形态**,无 special-case。`me/skills` 是推荐的本地 skill 默认 owner/repo 命名(`me` = 用户自己,`skills` = 默认 repo namespace),非强制——任意 `localhost/<owner>/<repo>` 都合法。修正 per user 2026-05-07: "localhost 也要 owner 和 repo 的"。
 
 外部用户的体验完全不变（git clone 到 library 后写 FQ 字符串）。lythoskill contributor 多一次 bootstrap 脚本执行——这个脚本本身已经存在或应该存在（用于 dev 环境初始化）。
 
@@ -66,8 +69,8 @@ skills = ["localhost/lythoskill-deck"]
 
 具体变更：
 
-1. 新增 `scripts/dev-bootstrap.sh`（或扩展现有），实现项目内 skill → `$LIBRARY/localhost/<name>` 的 symlink 创建
-2. 项目自身 deck.toml 改写所有引用为 `localhost/<name>`
+1. 新增 `scripts/dev-bootstrap.sh`（或扩展现有），实现项目内 skill → `$LIBRARY/localhost/me/skills/<name>` 的 symlink 创建
+2. 项目自身 deck.toml 改写所有引用为 `localhost/me/skills/<name>`
 3. README / CONTRIBUTING 增加一句「First-time contributors: run `./scripts/dev-bootstrap.sh`」
 4. 删除 link.ts 中策略 3（项目本地）相关代码——与 ADR A 同期落地
 

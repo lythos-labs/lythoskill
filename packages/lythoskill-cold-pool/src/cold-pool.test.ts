@@ -31,20 +31,21 @@ describe('ColdPool.resolveDir — pure path computation', () => {
     expect(pool.resolveDir(loc)).toBe('/cold/github.com/anthropics/skills')
   })
 
-  test('localhost form — top-level dir, no `localhost/` prefix', () => {
-    const loc = parseLocator('localhost/my-skill')!
-    expect(pool.resolveDir(loc)).toBe('/cold/my-skill')
+  test('localhost form — uniform <pool>/<host>/<owner>/<repo>, no special-case', () => {
+    const loc = parseLocator('localhost/me/my-skill')!
+    expect(pool.resolveDir(loc)).toBe('/cold/localhost/me/my-skill')
   })
 })
 
 describe('ColdPool — fs-backed read accessors', () => {
-  // Build a small fake cold pool on disk. Localhost-style skills live
-  // as TOP-LEVEL dirs (with SKILL.md directly), per project convention.
+  // Build a small fake cold pool on disk per the uniform layout:
+  // `<pool>/<host>/<owner>/<repo>/SKILL.md` for ALL hosts including localhost.
+  // "Directory layers = FQ locator segments."
   const root = mkdtempSync(join(tmpdir(), 'cold-pool-test-'))
   mkdirSync(join(root, 'github.com/owner/repo-a'), { recursive: true })
   mkdirSync(join(root, 'github.com/owner/repo-b'), { recursive: true })
-  mkdirSync(join(root, 'skill-x'), { recursive: true })
-  writeFileSync(join(root, 'skill-x/SKILL.md'), '# x')
+  mkdirSync(join(root, 'localhost/me/skill-x'), { recursive: true })
+  writeFileSync(join(root, 'localhost/me/skill-x/SKILL.md'), '# x')
   // Hidden dir should be skipped
   mkdirSync(join(root, '.git'), { recursive: true })
 
@@ -60,18 +61,37 @@ describe('ColdPool — fs-backed read accessors', () => {
     expect(pool.has(loc)).toBe(false)
   })
 
-  test('has() works for localhost form (top-level dir convention)', () => {
-    const loc = parseLocator('localhost/skill-x')!
+  test('has() works for localhost form (uniform <host>/<owner>/<repo>)', () => {
+    const loc = parseLocator('localhost/me/skill-x')!
     expect(pool.has(loc)).toBe(true)
   })
 
-  test('list() enumerates host/owner/repo + top-level localhost dirs, skips hidden', () => {
+  test('list() enumerates uniform host/owner/repo across all hosts, skips hidden', () => {
     const entries = pool.list().sort()
     expect(entries).toEqual([
       join(root, 'github.com/owner/repo-a'),
       join(root, 'github.com/owner/repo-b'),
-      join(root, 'skill-x'),
+      join(root, 'localhost/me/skill-x'),
     ].sort())
+  })
+
+  test('list() includes legacy drift entries (depth-2 SKILL.md, missing repo level) for cleanup awareness', () => {
+    const driftRoot = mkdtempSync(join(tmpdir(), 'cold-pool-drift-'))
+    mkdirSync(join(driftRoot, 'github.com/o/r'), { recursive: true })
+    mkdirSync(join(driftRoot, 'localhost/me/canonical'), { recursive: true })
+    // Legacy drift A: top-level dir with SKILL.md (post-compaction agent invention,
+    // bare-name "skill-a" hack)
+    mkdirSync(join(driftRoot, 'legacy-toplevel'), { recursive: true })
+    writeFileSync(join(driftRoot, 'legacy-toplevel/SKILL.md'), '# legacy A')
+    // Legacy drift B: <localhost>/<name>/SKILL.md (depth-2 missing repo level,
+    // earlier `localhost/<name>` form before owner/repo became required)
+    mkdirSync(join(driftRoot, 'localhost/legacy-name'), { recursive: true })
+    writeFileSync(join(driftRoot, 'localhost/legacy-name/SKILL.md'), '# legacy B')
+
+    const driftPool = new ColdPool(driftRoot)
+    const entries = driftPool.list().sort()
+    expect(entries).toContain(join(driftRoot, 'legacy-toplevel'))
+    expect(entries).toContain(join(driftRoot, 'localhost/legacy-name'))
   })
 
   test('list() returns [] when path does not exist', () => {

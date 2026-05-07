@@ -44,6 +44,19 @@ export function resolvePruneConfig(opts?: {
 
 // ── Cold pool scanner (pure: reads, no delete) ─────────────────────────────
 
+/**
+ * Scan cold pool for skill repos.
+ *
+ * Layout convention (per ADR-20260502012643344):
+ *   - `<coldPool>/localhost/<name>/SKILL.md`   — local skill
+ *   - `<coldPool>/<host>/<owner>/<repo>/...`   — remote skill
+ *
+ * Legacy drift detection: a top-level dir `<coldPool>/<x>/SKILL.md` (with
+ * SKILL.md directly, not under `localhost/`) is non-canonical state from
+ * older agents that bypassed FQ-only enforcement. We surface it here so
+ * prune's heredoc can list it as cleanup candidate; future writes should
+ * never produce this shape.
+ */
 export function scanColdPool(coldPool: string): string[] {
   const repos: string[] = []
   if (!existsSync(coldPool)) return repos
@@ -53,13 +66,22 @@ export function scanColdPool(coldPool: string): string[] {
       if (!host.isDirectory() || host.name.startsWith('.')) continue
       const hostPath = join(coldPool, host.name)
 
-      // Flat skill: cold-pool/skill-name/SKILL.md (localhost style)
+      // Localhost layout: <coldPool>/localhost/<name>/SKILL.md
+      if (host.name === 'localhost') {
+        for (const entry of readdirSync(hostPath, { withFileTypes: true })) {
+          if (!entry.isDirectory() || entry.name.startsWith('.')) continue
+          repos.push(join(hostPath, entry.name))
+        }
+        continue
+      }
+
+      // Legacy drift: top-level dir with SKILL.md (not canonical)
       if (existsSync(join(hostPath, 'SKILL.md'))) {
         repos.push(hostPath)
         continue
       }
 
-      // Nested: cold-pool/github.com/owner/repo/
+      // Nested: <coldPool>/<host>/<owner>/<repo>/
       for (const owner of readdirSync(hostPath, { withFileTypes: true })) {
         if (!owner.isDirectory() || owner.name.startsWith('.')) continue
         const ownerPath = join(hostPath, owner.name)

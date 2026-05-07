@@ -26,12 +26,12 @@ describe('buildFetchPlan', () => {
     expect(plan.alreadyExists).toBe(true)
   })
 
-  test('localhost locator gets empty cloneUrl + top-level dir', () => {
+  test('localhost locator gets empty cloneUrl + uniform <host>/<owner>/<repo> path', () => {
     const pool = new ColdPool('/cold')
-    const loc = parseLocator('localhost/my-skill')!
+    const loc = parseLocator('localhost/me/my-skill')!
     const plan = buildFetchPlan(pool, loc)
     expect(plan.cloneUrl).toBe('')
-    expect(plan.targetDir).toBe('/cold/my-skill')
+    expect(plan.targetDir).toBe('/cold/localhost/me/my-skill')
   })
 
   test('passes ref through', () => {
@@ -88,7 +88,7 @@ describe('executeFetchPlan', () => {
 
   test('localhost locator refuses to fetch', () => {
     const pool = new ColdPool('/cold')
-    const loc = parseLocator('localhost/x')!
+    const loc = parseLocator('localhost/me/x')!
     const plan = buildFetchPlan(pool, loc)
     let cloneCalls = 0
     const io: FetchIO = {

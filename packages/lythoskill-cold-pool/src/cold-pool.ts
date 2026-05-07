@@ -24,17 +24,13 @@ export class ColdPool {
   /**
    * Compute the cold-pool directory for a locator. No fs check.
    *
-   * For localhost skills, the convention (per existing prune-plan.ts and
-   * link.ts behavior) is that they live as **top-level** directories
-   * directly under coldPool — no `localhost/` directory prefix. The
-   * `localhost/` part of the locator is a "no remote" marker, not a
-   * directory layer.
+   * Layout invariant: `<pool>/<host>/<owner>/<repo>` for ALL locators
+   * including localhost. No special-case branching — "directory layers
+   * = FQ locator segments" (per user 2026-05-07). Skill subpath
+   * extends within the repo dir (resolveDir returns the repo dir).
    */
   resolveDir(locator: Locator): string {
-    if (locator.isLocalhost) {
-      return join(this.path, locator.skill ?? '')
-    }
-    return join(this.path, locator.host, locator.owner!, locator.repo!)
+    return join(this.path, locator.host, locator.owner, locator.repo)
   }
 
   /** Whether a locator's repo directory exists in the pool. */
@@ -43,15 +39,15 @@ export class ColdPool {
   }
 
   /**
-   * Enumerate top-level cold-pool entries.
+   * Enumerate cold-pool entries.
    *
-   * The cold pool contains a heterogeneous set of first-level dirs:
-   *   - localhost-style skills:  `<coldPool>/<name>/SKILL.md`
-   *   - host directories:        `<coldPool>/<host>/<owner>/<repo>/...`
+   * Uniform layout: `<pool>/<host>/<owner>/<repo>`. localhost is just
+   * another host. No localhost special-case.
    *
-   * The first-level dir is identified as a localhost skill iff it
-   * contains a SKILL.md directly; otherwise it is treated as a host
-   * dir and walked one more level for owner/repo.
+   * Legacy drift: `<pool>/<x>/SKILL.md` (depth 2 with SKILL.md) or
+   * `<pool>/localhost/<name>/SKILL.md` (depth 3 with SKILL.md, missing
+   * owner/repo) are non-canonical state from older agents that bypassed
+   * FQ-only enforcement. Surface them so prune can offer cleanup.
    */
   list(): string[] {
     if (!existsSync(this.path)) return []
@@ -61,16 +57,24 @@ export class ColdPool {
       if (!host.isDirectory() || host.name.startsWith('.')) continue
       const hostPath = join(this.path, host.name)
 
-      // localhost-style: top-level dir with SKILL.md
+      // Legacy drift: top-level dir with SKILL.md (not canonical 3-segment)
       if (existsSync(join(hostPath, 'SKILL.md'))) {
         repos.push(hostPath)
         continue
       }
 
-      // host/owner/repo
+      // Canonical: <host>/<owner>/<repo>
       for (const owner of readdirSync(hostPath, { withFileTypes: true })) {
         if (!owner.isDirectory() || owner.name.startsWith('.')) continue
         const ownerPath = join(hostPath, owner.name)
+
+        // Legacy drift: <host>/<x>/SKILL.md (depth 2 missing repo level —
+        // typically `localhost/<name>/SKILL.md` from older agents)
+        if (existsSync(join(ownerPath, 'SKILL.md'))) {
+          repos.push(ownerPath)
+          continue
+        }
+
         for (const repo of readdirSync(ownerPath, { withFileTypes: true })) {
           if (!repo.isDirectory() || repo.name.startsWith('.')) continue
           repos.push(join(ownerPath, repo.name))

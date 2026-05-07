@@ -8,16 +8,19 @@
 /**
  * Parsed FQ locator. Per ADR-20260502012643244, three forms only:
  *   - `host.tld/owner/repo[/skill]` (remote)
- *   - `host.tld/owner/repo` (standalone — repo root has SKILL.md, skill = null)
- *   - `localhost/<name>` (no remote origin — owner/repo are null)
+ *   - `host.tld/owner/repo` (remote standalone — repo root has SKILL.md, skill = null)
+ *   - `localhost/owner/repo[/skill]` (no remote — same shape, host literal `localhost`)
  *
- * Bare names and shorthand `owner/repo` are rejected by `parseLocator`.
+ * Bare names, shorthand `owner/repo`, and `localhost/<name>` (no owner/repo)
+ * are rejected by `parseLocator`. The locator is a path: appending to coldPool
+ * yields `<coldPool>/<host>/<owner>/<repo>[/skill]/SKILL.md`. The only thing
+ * `isLocalhost` controls is "no remote operations" (no clone, no pull, no fetch).
  */
 export interface Locator {
   readonly raw: string
   readonly host: string
-  readonly owner: string | null
-  readonly repo: string | null
+  readonly owner: string
+  readonly repo: string
   readonly skill: string | null
   readonly isLocalhost: boolean
 }

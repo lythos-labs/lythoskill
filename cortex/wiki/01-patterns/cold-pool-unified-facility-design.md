@@ -119,14 +119,34 @@ declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconc
 
 ```
 ~/.agents/skill-repos/
-├─ <host>/<owner>/<repo>/                   ← 远程 skill(标 host 三元)
-│   └─ [skill-subpath]/SKILL.md             ← skill-subpath 由 locator 第 4 段以后决定
-├─ <localhost-skill-name>/                  ← localhost skill(top-level 直接放)
-│   └─ SKILL.md
+├─ <host>/<owner>/<repo>/                   ← 远程 skill(host/owner/repo 三段统一)
+│   ├─ SKILL.md                             ← 形态 A: standalone — locator 无 skill 段
+│   │                                       │   (e.g. `github.com/garrytan/gstack`)
+│   │                                       │   **SKILL.md 必须在 repo 根**,否则解析失败
+│   └─ <skill-subpath>/SKILL.md             ← 形态 B: monorepo — locator 第 4 段以后是 skill 子路径
+│                                              (e.g. `github.com/anthropics/skills/skills/pdf`,
+│                                               skill="skills/pdf",SKILL.md 在 skills/pdf/ 下)
+├─ localhost/<owner>/<repo>/                ← 本地 skill,完全同 shape,只是 host=localhost(无远程)
+│   ├─ SKILL.md                             ← 形态 A standalone
+│   └─ <skill-subpath>/SKILL.md             ← 形态 B with skill subpath
 └─ ...
 ```
 
-**Localhost layout 关键点**: `localhost/<name>` 这个 locator 中的 `localhost/` 是 "no remote" 标记,**不是目录层**。skill 直接放 cold pool 顶层(per `prune-plan.ts:scanColdPool` 历史约定)。`ColdPool.resolveDir(locator)` 与该约定对齐;arena/preflight.ts 在 T11 也修齐了之前的本地 bug。
+**Layout 心智**(per user 2026-05-07): "**FQ locator 其实是 path,一层层进入就是 FQ locator 展开。就没有各种特殊情况了**"。无论 host 是 `github.com` 还是 `localhost`,布局完全一致——`<coldPool>/<host>/<owner>/<repo>[/skill]`。Code 路径 `ColdPool.resolveDir` / `ColdPool.list` 没有 localhost 分支判断。
+
+**两种 SKILL.md 位置**:
+- **A. Standalone**: locator 是 `<host>/<owner>/<repo>`(三段,无 skill 子路径),SKILL.md **必须**在 `<coldPool>/<host>/<owner>/<repo>/SKILL.md`(repo 根)。e.g. `github.com/garrytan/gstack` → `<cold>/github.com/garrytan/gstack/SKILL.md`。
+- **B. With skill subpath**: locator 是 `<host>/<owner>/<repo>/<skill...>`(四段或以上),SKILL.md 在 `<coldPool>/<host>/<owner>/<repo>/<skill...>/SKILL.md`。e.g. `github.com/anthropics/skills/skills/pdf` → `<cold>/github.com/anthropics/skills/skills/pdf/SKILL.md`(注意双 `skills/skills/` 是 anthropics 仓库自己叫 `skills` 又内含 `skills/` 子目录的真实形态,FQ-only 不去"修正"它)。
+
+**localhost 本质**: 仅是 `host` 段为字面 `localhost` 表示**无远程**(无 clone / 无 pull / 无 fetch),其他完全等同。`isLocalhost: true` 这个 flag 唯一作用是让 fetch / refresh / validate 跳过网络步骤。
+
+**推荐快速本地 skill convention**(非强制): `localhost/me/skills/<skill-name>`(`me` 默认 owner、`skills` 默认 repo)。例如 quick-start 想搓个临时 polish-text skill,直接 `mkdir ~/.agents/skill-repos/localhost/me/skills/polish-text/` 然后写 SKILL.md,deck.toml 引用 `localhost/me/skills/polish-text` 即可。当然 `localhost/<any-owner>/<any-repo>` 都合法,这只是一个对个人/快速场景的常用前缀建议。
+
+**Legacy drift**: 历史上有两类 post-compaction 失忆 agent 的产物:
+- A: `<coldPool>/<x>/SKILL.md`(顶层 + SKILL.md)——agent 为让 bare-name `web-search` 解析过测试硬塞的
+- B: `<coldPool>/localhost/<name>/SKILL.md`(深 2 层、缺 owner/repo)——更早的 `localhost/<name>` 形态遗留
+
+两类都被 `ColdPool.list()` 和 `prune-plan.ts:scanColdPool` 检出后纳入枚举(便于后续 prune heredoc 列为 cleanup 候选)。新代码生产永远走 `<host>/<owner>/<repo>` 三层。
 
 ---
 

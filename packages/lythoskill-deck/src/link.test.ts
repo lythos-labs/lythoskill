@@ -83,11 +83,11 @@ describe('findSource', () => {
     expect(result.path).toBe(expected)
   })
 
-  it('resolves localhost/<name> via top-level dir convention', () => {
+  it('resolves localhost/<owner>/<repo> via uniform <host>/<owner>/<repo> layout', () => {
     const coldPool = makeTmp()
     const projectDir = makeTmp()
-    const expected = placeSkill(coldPool, 'my-local-skill')
-    const result = findSource('localhost/my-local-skill', coldPool, projectDir)
+    const expected = placeSkill(coldPool, 'localhost/me/my-local-skill')
+    const result = findSource('localhost/me/my-local-skill', coldPool, projectDir)
     expect(result.path).toBe(expected)
   })
 
