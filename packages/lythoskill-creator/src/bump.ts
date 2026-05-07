@@ -74,7 +74,8 @@ export async function bump(opts: BumpOpts) {
 
   // Step 3: update bunx @version in all markdown docs (npm-facing + repo root)
   console.log('\n📝 Updating bunx @version in docs...')
-  const oldPattern = new RegExp(`(@lythos/[a-z-]+)@${currentVersion.replace(/\./g, '\\.')}`, 'g')
+  const escapedVersion = currentVersion.replace(/\\/g, '\\\\').replace(/\./g, '\\.')
+  const oldPattern = new RegExp(`(@lythos/[a-z-]+)@${escapedVersion}`, 'g')
   let docUpdated = 0
   const docPaths: string[] = []
   // packages/*/README.md

@@ -90,7 +90,7 @@ export function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
 // ── JSON extraction (pure: parse LLM output without IO) ─────────────────
 
 export function extractJson(raw: string): unknown {
-  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]{1,100000}?)\s*```/)
   const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
   return JSON.parse(jsonStr)
 }
