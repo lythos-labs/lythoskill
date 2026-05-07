@@ -1,262 +1,183 @@
-# Cold Pool Unified Facility — Design Draft
+---
+created: 2026-05-07
+updated: 2026-05-07
+category: pattern
+---
 
-> 综合 session 讨论的设计案，覆盖 deck path 深水区、cache 管理、agent-friendly error、版本锁定。
-> Date: 2026-05-07
-> Related: EPIC-20260507012858669, TASK-20260507011711797, ADR-20260507014124191
+# Cold Pool Unified Facility — Design
+
+> Architectural record of `@lythos/cold-pool` (extracted in `EPIC-20260507020846020`,
+> 2026-05-07). The package is the dedicated resource holder + plan/execute
+> primitives for the cold pool. deck/curator/arena are consumers.
+
+> Earlier draft of this doc (pre-T1) presented a 5-layer architecture and
+> framed Maven analogies broadly. This revision narrows Maven to one point
+> and replaces the 5 ad-hoc layers with the existing project-wide
+> intent/plan/execute pattern. See history for the original scoping draft.
 
 ---
 
-## 1. 问题域（深水区汇总）
+## 1. 问题域(原始触发)
 
-| # | 深水区 | 根因 | 当前症状 |
-|---|--------|------|----------|
-| 1 | **Path 反直觉** | 隐式 `skills/` 插入 + repo 边界不可见 | `skills/skills/skills`、agent 猜路径 |
-| 2 | **多包重复逻辑** | deck / curator / arena 各自解析 locator | 改 deck 坏 curator，打地鼠 |
-| 3 | **未 clone 无法验证** | 只有本地文件系统检查，无远程预检 | `deck add` 盲目 clone，失败才报错 |
-| 4 | **Agent CPTSD** | 错误信息是字符串，agent 无法自主修复 | "Skill not found" → agent 恐慌 |
-| 5 | **无版本锁定** | `skill-deck.lock` 只有 content_hash，无 git ref | 上游结构变了，本地无法回退 |
-| 6 | **Cache 无管理** | cold pool 是裸目录，无索引、无失效策略 | stale/orphan/diverged 无自动处理 |
-| 7 | **预组卡组脆弱** | quick start 的 example decks 未经验证 | 新用户第一次用就失败 |
-
----
-
-## 2. 架构分层（5 层）
-
-```
-┌─ E2E Validation Layer ───────────────────────┐
-│  真实 repo 兼容性矩阵（定期扫描高星仓库）      │
-│  Pre-built deck 冒烟测试                     │
-├─ Error / Plan Layer ─────────────────────────┤
-│  ValidationReport（结构化诊断，纯数据）        │
-│  Dry-run = 打印 Plan，不执行                  │
-├─ Resolver Layer (SSOT) ──────────────────────┤
-│  Locator 解析、远程存在性验证、结构推断        │
-├─ ColdPoolManager (Cache Layer) ──────────────┤
-│  缓存生命周期：get / fetch / refresh / prune  │
-├─ Curator Index Layer ────────────────────────┤
-│  SQLite catalog.db（元数据 + cache 状态索引）  │
-└─ Git Storage ────────────────────────────────┘
-   ~/.agents/skill-repos/（实际 repo 文件）
-```
+| # | 当前症状 | 根因 | 现状 |
+|---|---------|------|------|
+| 1 | Path 反直觉(`skills/skills/skills`、agent 猜路径) | 隐式 `skills/` 插入 + repo 边界不可见 | ✅ 修复(P0 + ADR-20260502012643244 FQ-only) |
+| 2 | 多包重复逻辑(deck / curator / arena 各自解析 locator) | 无 service 层 | ✅ 修复(`@lythos/cold-pool` 包) |
+| 3 | 未 clone 无法验证 | 只有本地 fs 检查 | ✅ 修复(GitHub Tree API + `executeValidationPlan`) |
+| 4 | Agent CPTSD(错误是字符串) | UX 给人不给 agent | ✅ 修复(ValidationReport,见 ADR-20260507014124191) |
+| 5 | 无版本锁定 | `skill-deck.lock` 无 `git_ref` | 📋 后续 epic |
+| 6 | Cache 无管理 | 裸目录,无索引 | 📋 后续 epic(metadata sidecar + 多 deck 安全 prune) |
+| 7 | 预组卡组脆弱(quick-start 失败) | example deck 未 CI 验证 | ✅ 修复(`scripts/validate-example-decks.ts`) |
 
 ---
 
-## 3. Resolver Layer（SSOT）
+## 2. 心智模型(锁定)
 
-### 3.1 职责
-- 唯一解析入口：所有包通过 resolver 处理 locator
-- 远程预检：GitHub API 验证 repo 存在性、Tree API 扫描结构
-- 结构推断：对未指定 skillPath 的 repo，推断可能的 skill 位置
+### 2.1 Intent / Plan / Execute(已有项目级 pattern)
 
-### 3.2 接口
+cold pool 不发明新的架构形态。它是 `cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md` 在 fetch / validate / reconcile 路径上的延伸。
 
-```typescript
-// 解析 locator → 结构化数据
-export function parseLocator(locator: string): ParsedLocator
-
-// 远程验证（不需要本地 clone）
-export async function validateRemote(locator: string): Promise<ValidationReport>
-
-// 扫描 repo 结构，推断 skill 路径
-export async function inferSkillPath(repoUrl: string): Promise<InferenceResult>
+```
+Intent (DSL)        →  Plan (pure data)         →  Execute (IO injection)
+skill-deck.toml     →  RefreshPlan / FetchPlan  →  executeRefreshPlan(plan, RefreshIO)
+                                                  executeFetchPlan(plan, FetchIO)
+deck add <fq>       →  ValidationReport         →  (no execute — Plan IS the report)
 ```
 
-### 3.3 覆盖的深水区
-- **#1 Path 反直觉**：resolver 输出精确路径，无隐式插入
-- **#2 多包重复逻辑**：一个 `parseLocator`，deck/curator/arena 共用
-- **#3 未 clone 无法验证**：`validateRemote` 在 fetch 前调用 GitHub API
-- **#7 预组卡组脆弱**：resolver 验证 example deck 中的每个 locator
+`buildXPlan` 是纯函数,可 dry-run、可单测。`executeXPlan(plan, io)` 持副作用,IO 注入让测试能用 mock,生产用真实 git/fetch。错误也是 plan layer 的一等数据(ValidationReport),不是异常控制流。
+
+### 2.2 Manager(资源持有者)与操作分离
+
+现有 pattern 没明说"谁持有 cold pool 这个资源"。本设计补一层:
+
+- `ColdPool` 类(`@lythos/cold-pool/src/cold-pool.ts`):**唯一持有者**——path 配置、未来的 metadata 索引、reconcile 入口
+- 操作层(`buildFetchPlan / buildValidationPlan` + IO 实现 `gitClone / gitPull / detectGitRoot / fetchRepoTree`):静态函数 + IO 注入
+
+不变量:**任何对 cold pool 的修改必须经过 ColdPool 类或 cold-pool 的导出 IO**。早晨 `skill-deck.toml` 被覆盖事件就是无 manager 时 raw 操作的典型故障(参见 ADR-20260507021957847 §背景)。
+
+### 2.3 Maven 借力(窄化)
+
+仅借用一点:**cold pool 对工作空间不可见**(`~/.agents/skill-repos/` 类比 `~/.m2/repository`)。**不引入 coordinate 系统**(go-module 风格的 FQ locator + git ref + remote URL 三元组已足够),不复制 effective POM / snapshot 政策。
+
+### 2.4 K8s reconciliation 心智(为后续 epic 留位)
+
+declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconciler 收敛。粒度边界:`skill-deck.lock` 是 working-set per-skill 粒度;cold-pool 的 reconciliation 是 repo+ref 粒度。**两者不混淆**,cold-pool 自存自己粒度的 desired state(本 epic 内 derived from deck declaration,后续 epic 迁到 cold-pool 自己的 manifest)。
 
 ---
 
-## 4. ColdPoolManager（Cache Layer）
+## 3. 实现拓扑
 
-### 4.1 职责
-- 缓存生命周期管理：把 cold pool 从"裸目录"提升为"结构化缓存"
-- 版本锁定：支持 git ref（branch/tag/commit）
-- 一致性维护：stale 检测、orphan 清理
-
-### 4.2 接口
-
-```typescript
-export interface ColdPoolManager {
-  // 读取缓存（纯读，不触发 IO）
-  get(locator: string, ref?: string): CacheEntry | null
-
-  // 填充缓存（clone + checkout ref）
-  fetch(locator: string, ref?: string): Promise<CacheEntry>
-
-  // 刷新缓存（git pull/fetch，更新 index）
-  refresh(locator: string): Promise<UpdateResult>
-
-  // 失效缓存（删除本地 clone + index 记录）
-  invalidate(locator: string): void
-
-  // 垃圾回收（扫描 unreferenced / orphan / diverged）
-  prune(): PrunePlan
-}
+```
+┌─ Consumer (deck / curator / arena) ──────────────┐
+│  deck add → buildFetchPlan + executeFetchPlan    │
+│  deck link → parseLocator + ColdPool.resolveDir  │
+│  deck refresh → gitPull (cold-pool exports)      │
+│  deck validate → buildValidationPlan + execute   │
+│  curator add → gitClone (cold-pool exports)      │
+│  arena preflight → parseLocator + resolveDir     │
+└──────────────────────────────────────────────────┘
+                       ↓ imports from
+┌─ @lythos/cold-pool ──────────────────────────────┐
+│                                                  │
+│  Resource layer:                                 │
+│    ColdPool (dedicated resource holder)          │
+│      .resolveDir(locator) → string               │
+│      .has(locator) → boolean                     │
+│      .list() → string[]                          │
+│                                                  │
+│  Plan layer (pure):                              │
+│    parseLocator (FQ-only per ADR-20260502012643244)│
+│    buildFetchPlan(pool, locator) → FetchPlan     │
+│    buildValidationPlan(input) → ValidationPlan   │
+│    inferSkillPath(treeEntries) → InferenceResult │
+│                                                  │
+│  Execute layer (IO injection):                   │
+│    executeFetchPlan(plan, FetchIO)               │
+│    executeValidationPlan(plan, ValidationIO)     │
+│    gitClone / gitPull / detectGitRoot            │
+│    fetchRepoTree (api.github.com, no auth)       │
+└──────────────────────────────────────────────────┘
 ```
 
-### 4.3 Cache Entry
-
-```typescript
-export interface CacheEntry {
-  locator: string
-  localPath: string
-  gitRef: string        // HEAD commit hash
-  gitRemote: string     // origin URL
-  clonedAt: string      // ISO timestamp
-  refreshedAt: string   // last pull/fetch
-  commitsBehind: number // git rev-list HEAD...origin/main --count
-  contentHash: string   // SKILL.md SHA256
-}
-```
-
-### 4.4 覆盖的深水区
-- **#5 无版本锁定**：`gitRef` 字段支持 `skill-deck.lock` 精确锁定
-- **#6 Cache 无管理**：`fetch/refresh/invalidate/prune` 统一生命周期
-- **#3 未 clone 验证**：`get` 返回 null → 触发 `fetch` → fetch 前 resolver 预检
+`@lythos/cold-pool` 没有 bin entry,纯库。consumers 通过 `"@lythos/cold-pool": "workspace:*"` 引入,bun 在子 package 的 `node_modules/@lythos/cold-pool` 创建 symlink。
 
 ---
 
-## 5. Curator Index Layer（Metadata + Cache Index）
+## 4. ValidationReport(plan-as-data 错误)
 
-### 5.1 原则
-- **不重建索引**：复用 curator 已有的 SQLite `catalog.db`
-- **扩展而非替换**：在现有 `skills` 表上加 cache 字段
+详见 `ADR-20260507014124191`。要点:
 
-### 5.2 Schema 扩展
-
-```sql
--- 现有字段（curator 已提供）
--- path, name, description, type, version, source, ...
-
--- 新增 cache 管理字段
-ALTER TABLE skills ADD COLUMN git_ref TEXT;
-ALTER TABLE skills ADD COLUMN git_remote TEXT;
-ALTER TABLE skills ADD COLUMN cloned_at TEXT;
-ALTER TABLE skills ADD COLUMN refreshed_at TEXT;
-ALTER TABLE skills ADD COLUMN commits_behind INTEGER DEFAULT 0;
-
--- catalog_meta 新增
-INSERT INTO catalog_meta (key, value) VALUES ('index_version', '2');
-```
-
-### 5.3 覆盖的深水区
-- **#6 Cache 无管理**：SQLite 索引让 `ColdPoolManager` 无需遍历文件系统
-- **#2 多包重复逻辑**：一个索引，deck/curator/arena 共用
+- 错误不是 string,是结构化数据
+- `phase: 'syntax' | 'repo-existence' | 'path-existence' | 'skill-md-existence'` 让 agent 知道问题落在哪一层
+- `findings.detectedPaths` 列出 cloned repo 中所有含 SKILL.md 的子目录(真实文件系统证据)
+- `suggestedFixes[].newLocator` 给出可直接 act 的修正,带 confidence(0..1)分数
+- 同一 ValidationReport 服务三个消费者:CLI human-text、agent JSON、CI exit code。渲染发生在 execute 层
 
 ---
 
-## 6. Error / Plan Layer（Agent-friendly Diagnostics）
+## 5. Cold-pool 物理布局约定
 
-### 6.1 原则
-- 错误不是字符串，是**纯数据结构**（Plan）
-- Dry-run = 打印 Plan，不执行
-- Agent 读取 Plan 后自主决策
-
-### 6.2 ValidationReport 结构
-
-```typescript
-export interface ValidationReport {
-  status: 'valid' | 'invalid' | 'ambiguous'
-  locator: string
-  phase: 'syntax' | 'repo-existence' | 'path-existence' | 'skill-md-existence'
-
-  findings: {
-    repoExists: boolean
-    repoIsPrivate?: boolean
-    similarRepos?: string[]
-    detectedPaths?: string[]      // Tree API 扫描到的含 SKILL.md 的目录
-    skillMdFound: boolean
-  }
-
-  suggestedFixes: Array<{
-    action: 'update-locator' | 'web-search' | 'prompt-user'
-    confidence: number            // 0-1
-    message: string
-    newLocator?: string
-  }>
-}
+```
+~/.agents/skill-repos/
+├─ <host>/<owner>/<repo>/                   ← 远程 skill(标 host 三元)
+│   └─ [skill-subpath]/SKILL.md             ← skill-subpath 由 locator 第 4 段以后决定
+├─ <localhost-skill-name>/                  ← localhost skill(top-level 直接放)
+│   └─ SKILL.md
+└─ ...
 ```
 
-### 6.3 覆盖的深水区
-- **#4 Agent CPTSD**：结构化诊断让 agent 知道"问题是什么、怎么修"
-- **#1 Path 反直觉**：`detectedPaths` 列出实际结构，建议正确 locator
-- **#7 预组卡组脆弱**：dry-run 在 CI 中对 example deck 做验证
+**Localhost layout 关键点**: `localhost/<name>` 这个 locator 中的 `localhost/` 是 "no remote" 标记,**不是目录层**。skill 直接放 cold pool 顶层(per `prune-plan.ts:scanColdPool` 历史约定)。`ColdPool.resolveDir(locator)` 与该约定对齐;arena/preflight.ts 在 T11 也修齐了之前的本地 bug。
 
 ---
 
-## 7. E2E Validation Layer
+## 6. 已实现 vs 后续
 
-### 7.1 真实 Repo 兼容性矩阵
+### ✅ 已实现(EPIC-20260507020846020 / T1-T11 + T12-T13)
 
-定期扫描高星 skill repo，验证 locator 解析：
+| 主题 | 落位 |
+|------|------|
+| 包脚手架 | `packages/lythoskill-cold-pool/` |
+| 核心类型 + parseLocator | `src/types.ts` + `src/parse-locator.ts` |
+| GitHub Tree API + ValidationReport | `src/github-tree.ts` + `src/validate-plan.ts` |
+| Resolver helpers | `src/infer-skill-path.ts` |
+| ColdPool resource holder | `src/cold-pool.ts` |
+| Git IO 原语 | `src/git-io.ts` |
+| Fetch plan/executor | `src/fetch-plan.ts` |
+| deck add/link/refresh 切换 | `packages/lythoskill-deck/src/{add,link,refresh,refresh-plan}.ts` |
+| `deck validate --remote --format=json` | `packages/lythoskill-deck/src/validate.ts` + cli.ts |
+| examples/decks/*.toml CI 验证 | `scripts/validate-example-decks.ts` + `.github/workflows/test.yml` |
+| curator git clone 切换 | `packages/lythoskill-curator/src/cli.ts:911` |
+| arena preflight 路径解析切换 | `packages/lythoskill-arena/src/preflight.ts:checkSkillExistence` |
+| ADR + Wiki 文档对齐 | `ADR-20260507014124191` + `ADR-20260507021957847` + 本 wiki |
 
-| Repo | 结构 | 验证状态 | 测试用例 |
-|------|------|----------|----------|
-| `anthropics/skills` | monorepo `skills/` | ✅ | `github.com/anthropics/skills/skills/pdf` |
-| `mattpocock/skills` | nested `skills/category/` | ✅ | `github.com/mattpocock/skills/skills/engineering/tdd` |
-| `daymade/claude-code-skills` | flat root | ✅ | `github.com/daymade/claude-code-skills/skill-creator` |
-| `Cocoon-AI/architecture-diagram-generator` | arbitrary subdir | ✅ | `github.com/Cocoon-AI/.../architecture-diagram` |
+### 📋 后续 epic 候选
 
-### 7.2 Pre-built Deck 冒烟测试
-
-每个 example deck 在 CI 中跑：
-```bash
-for deck in examples/decks/*.toml; do
-  deck validate --deck "$deck"
-done
-```
-
-### 7.3 覆盖的深水区
-- **#7 预组卡组脆弱**：CI 自动验证所有 example deck
-- **#1 Path 反直觉**：兼容性矩阵覆盖主流结构模式
-
----
-
-## 8. 依赖关系
-
-```
-E2E Validation
-      ↓ 使用
-Error/Plan Layer
-      ↓ 使用
-Resolver Layer
-      ↓ 使用
-ColdPoolManager
-      ↓ 读写
-Curator Index (catalog.db)
-      ↓ 管理
-Git Storage (cold pool dirs)
-```
+- **Cold-pool metadata sidecar + 多 deck 安全 prune (ref-counting)**:每个 cold-pool 条目带 `referencing-decks` 列表,`prune` 删除时检查无 deck 引用才动手。当前 `prune-plan.ts` 只查单 deck.toml,多 workspace 共享 cold-pool 时不安全(参见 ADR-20260507021957847 §6 ref-counting note)。
+- **`cold-pool reconcile` 命令**:k8s-style 完整收敛——读 desired state(skill-deck.lock + 增加 git_ref 字段) ↔ 扫 actual state(filesystem) ↔ 产 ReconcilePlan ↔ execute。`buildReconcilePlan` 接口已 scaffold,执行未实现。
+- **`@lythos/cold-pool` 公开 API 文档 + npm publish**:0.10.0 release 时同步把 cold-pool 推 npm,公开 API 文档化,允许第三方 deck 替代品也消费。
+- **curator/arena 进一步迁移**:目前 T10/T11 是 interface-level migration(只迁了 `git clone` / 路径解析)。curator 的 `git remote update` / `rev-list HEAD...@{upstream} --count` / `pull --ff-only` 这些 staleness 策略,未来若被多消费者复用,可以再抽到 cold-pool。
 
 ---
 
-## 9. 实施顺序（建议）
+## 7. 与现有代码的对接点(post-T11 现状)
 
-| 阶段 | 内容 | 覆盖深水区 |
-|------|------|-----------|
-| P0 | 去掉隐式 `skills/`（已完成 ✅） | #1 |
-| P0 | `findSkillDir` 支持 flat（已完成 ✅） | #1 |
-| P1 | 扩展 curator `catalog.db` schema（git_ref 等） | #5, #6 |
-| P1 | `skill-deck.lock` 加入 `git_ref` 字段 | #5 |
-| P2 | 提取共享 `parseLocator`（deck + curator 共用） | #2 |
-| P2 | `validateRemote` 远程预检（GitHub API） | #3, #4 |
-| P3 | `ColdPoolManager` 统一缓存生命周期 | #6 |
-| P3 | Agent-friendly `ValidationReport` 结构化错误 | #4 |
-| P4 | E2E 兼容性矩阵 CI 化 | #7 |
-| P4 | Pre-built deck 冒烟测试 | #7 |
+| 现有代码 | T1-T11 后状态 |
+|---------|---------------|
+| `deck/src/add.ts` | 无 inline `git clone`;通过 `executeFetchPlan` 消费 cold-pool |
+| `deck/src/link.ts` `findSource()` | 路径解析委托 `parseLocator` + `ColdPool.resolveDir`;5-strategy fallback 删除 |
+| `deck/src/refresh.ts` | 无本地 `gitPull`;import 自 cold-pool |
+| `deck/src/refresh-plan.ts` | localhost 检测改用 `parseLocator`(string-based,而非 path-based) |
+| `deck/src/validate.ts` | 暴露 `--remote --format=json`,产出 `DeckValidationReport`(每条目带 ValidationReport) |
+| `curator/src/cli.ts` `runAdd` | `git clone` 调用切到 cold-pool;`git remote update` 等 staleness 策略保留 |
+| `arena/src/preflight.ts` `checkSkillExistence` | 路径计算委托 cold-pool;localhost 修齐 |
+| `examples/decks/*.toml` | 7 个 deck 都在 CI 中通过 remote 验证 |
+| `skill-deck.lock` | 字段不变(working-set per-skill 粒度);cold-pool 自己的 desired state 留给后续 epic |
 
 ---
 
-## 10. 与现有代码的对接点
+## 8. 衍生 ADR & wiki
 
-| 现有代码 | 变更 |
-|---------|------|
-| `deck/src/link.ts` `findSource()` | 保留，但内部调用 `Resolver.parseLocator()` |
-| `deck/src/add.ts` `findSkillDir()` | 保留 flat 支持，内部调用 `ColdPoolManager.get()` |
-| `deck/src/refresh-plan.ts` | `buildRefreshPlan` 纯函数不变，`executeRefreshPlan` 改用 `ColdPoolManager.refresh()` |
-| `curator/src/cli.ts` `writeCatalogDb()` | 扩展 schema，加 git/cache 字段 |
-| `skill-deck.lock` | 加 `git_ref` 字段，向后兼容 |
-| `examples/decks/*.toml` | CI 验证，broken path 自动拦截 |
+- `ADR-20260507014124191`: Agent-friendly CLI error as decision tree —— ValidationReport 形态来源
+- `ADR-20260507021957847`: `@lythos/cold-pool` as dedicated resource-holder package + k8s reconciliation 心智 —— 包结构与粒度边界来源
+- `cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md`: 操作 pattern 来源
+- `cortex/wiki/03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md`: detectedPaths 推断的证据基础
