@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (28)
+## 📚 Patterns (29)
 
+- **[2026-05-07]** [graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx](./01-patterns/2026-05-07-graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx.md)
 - **[2026-05-07]** [expected-coverage-gaps-intent-plan-execute-coverage-strategy](./01-patterns/2026-05-07-expected-coverage-gaps-intent-plan-execute-coverage-strategy.md)
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
