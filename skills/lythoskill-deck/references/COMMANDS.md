@@ -13,10 +13,12 @@ Commands:
   migrate-schema [--dry-run]  Convert string-array deck.toml to alias-as-key dict
 
 Options:
-  --deck <path>    Specify skill-deck.toml path (default: find upward from cwd)
-  --workdir <dir>  Specify working directory (default: cwd)
-  --no-backup      Skip tar backup when removing non-symlink entries
-  --alias <name>   Explicit alias for the skill (default: basename of path)
-  --type <type>    Target section: innate | tool | combo (default: tool)
-  --dry-run        Show plan without executing (add, prune)
-  --yes            Skip interactive confirmation (for prune)
+  --deck <path>         Specify skill-deck.toml path (default: find upward from cwd)
+  --workdir <dir>       Specify working directory (default: cwd)
+  --no-backup           Skip tar backup when removing non-symlink entries
+  --alias <name>        Explicit alias for the skill (default: basename of path)
+  --type <type>         Target section: innate | tool | combo (default: tool)
+  --dry-run             Show plan without executing (add, prune)
+  --yes                 Skip interactive confirmation (for prune)
+  --remote              For validate: probe each FQ locator against api.github.com
+  --format <text|json>  For validate: output format (default: text)
