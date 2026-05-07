@@ -148,12 +148,6 @@ export async function addSkill(
     return
   }
 
-  if (fetchPlan.alreadyExists) {
-    console.error(`❌ Already exists in cold pool: ${fetchPlan.targetDir}`)
-    console.error(`   To update: rm -rf ${fetchPlan.targetDir} and re-run`)
-    process.exit(1)
-  }
-
   if (!existsSync(coldPoolPath)) {
     console.log(`📁 Creating cold pool: ${coldPoolPath}`)
     mkdirSync(coldPoolPath, { recursive: true })
@@ -161,6 +155,13 @@ export async function addSkill(
   // git clone needs the parent of the target dir (e.g. host/owner/) to exist
   mkdirSync(dirname(fetchPlan.targetDir), { recursive: true })
 
+  // Note: if cold pool already has the repo (fetchPlan.alreadyExists),
+  // executeFetchPlan returns status: 'already-present' and skips clone.
+  // We still want to write deck.toml + link this skill — critical for
+  // monorepo case (second `deck add` from same repo, e.g. anthropics/skills/pdf
+  // then anthropics/skills/docx). Used to early-exit here, which broke
+  // the monorepo workflow and triggered post-compaction agent CPTSD
+  // (see: 2026-05-07 morning skill-deck.toml overwrite incident).
   const fetchResult = executeFetchPlan(fetchPlan, {
     log: (msg) => console.log(msg),
   })
@@ -169,6 +170,13 @@ export async function addSkill(
     rmSync(fetchPlan.targetDir, { recursive: true, force: true })
     console.error(`❌ Failed to fetch: ${fetchResult.message ?? 'unknown error'}`)
     process.exit(1)
+  }
+
+  if (fetchResult.status === 'already-present') {
+    console.log(`✓ Repo already in cold pool — skipped clone.`)
+    console.log(`   To check for upstream updates without pulling:`)
+    console.log(`     bunx @lythos/skill-deck refresh ${parsed.host}/${parsed.owner}/${parsed.repo}`)
+    console.log(`   (per ADR-20260507110332805, refresh defaults to discover-only)`)
   }
 
   const skillDir = findSkillDir(fetchPlan.targetDir, parsed.skill)
