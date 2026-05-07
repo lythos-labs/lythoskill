@@ -1,6 +1,6 @@
 {
   "name": "lythoskill-workspace",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "private": true,
   "workspaces": [
     "packages/*"
