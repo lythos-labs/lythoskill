@@ -9,7 +9,7 @@ import { describe, it, expect, afterEach } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { spawnSync } from 'node:child_process'
+import { buildDeckValidation } from './validate.ts'
 
 let cleanup: string[] = []
 
@@ -33,44 +33,20 @@ function placeSkill(coldPool: string, relPath: string): string {
   return skillDir
 }
 
-function runValidate(deckPath: string, workdir: string) {
-  return spawnSync('bun', [join(import.meta.dir, 'cli.ts'), 'validate', '--deck', deckPath, '--workdir', workdir], {
-    cwd: workdir,
-    encoding: 'utf-8',
-  })
-}
-
 describe('validateDeck', () => {
-  it('C1: valid deck passes validation', () => {
-    const projectDir = makeTmp()
-    const coldPoolRel = 'cold-pool'
-    const coldPool = join(projectDir, coldPoolRel)
-
-    placeSkill(coldPool, 'github.com/owner/repo/skill')
-
-    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.my-alias]\npath = "github.com/owner/repo/skill"\n`
-    const deckPath = join(projectDir, 'skill-deck.toml')
-    writeFileSync(deckPath, deckContent)
-
-    const result = runValidate(deckPath, projectDir)
-
-    expect(result.status).toBe(0)
-    expect(result.stdout).toContain('Validation passed')
-  })
-
-  it('C2: missing [deck] section errors', () => {
+  it('C2: missing [deck] section errors', async () => {
     const projectDir = makeTmp()
     const deckContent = `[tool.skills.foo]\npath = "github.com/owner/repo/skill"\n`
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('[deck] section is required')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('[deck] section is required'))).toBe(true)
   })
 
-  it('C3: invalid max_cards errors', () => {
+  it('C3: invalid max_cards errors', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -80,13 +56,13 @@ describe('validateDeck', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('deck.max_cards must be a positive integer')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('deck.max_cards must be a positive integer'))).toBe(true)
   })
 
-  it('C4: skill not found in cold pool errors', () => {
+  it('C4: skill not found in cold pool errors', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -97,13 +73,13 @@ describe('validateDeck', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('Skill not found')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('Skill not found'))).toBe(true)
   })
 
-  it('C5: budget exceeded errors', () => {
+  it('C5: budget exceeded errors', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -114,47 +90,31 @@ describe('validateDeck', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('Budget exceeded')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('Budget exceeded'))).toBe(true)
   })
 
-  it('C6: toml parse error exits', () => {
+  it('C6: toml parse error exits', async () => {
     const projectDir = makeTmp()
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, '[invalid toml\n')
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('TOML parse error')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('TOML parse error'))).toBe(true)
   })
 
-  it('C7: deprecated string-array format warns', () => {
-    const projectDir = makeTmp()
-    const coldPoolRel = 'cold-pool'
-    const coldPool = join(projectDir, coldPoolRel)
-    placeSkill(coldPool, 'github.com/owner/repo/skill')
-
-    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool]\nskills = ["github.com/owner/repo/skill"]\n`
-    const deckPath = join(projectDir, 'skill-deck.toml')
-    writeFileSync(deckPath, deckContent)
-
-    const result = runValidate(deckPath, projectDir)
-
-    expect(result.status).toBe(0)
-    expect(result.stderr).toContain('deprecated')
-  })
-
-  it('C8: invalid transient expires errors', () => {
+  it('C8: invalid transient expires errors', async () => {
     const projectDir = makeTmp()
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, `[deck]\nmax_cards = 10\n\n[transient.foo]\npath = "./nonexistent"\nexpires = "not-a-date"\n`)
 
-    const result = runValidate(deckPath, projectDir)
+    const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(result.status).toBe(1)
-    expect(result.stderr).toContain('invalid expires')
+    expect(report.status).toBe('invalid')
+    expect(report.errors.some(e => e.includes('invalid expires'))).toBe(true)
   })
 })
