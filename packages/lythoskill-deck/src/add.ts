@@ -24,6 +24,8 @@ import {
   executeFetchPlan,
   parseLocator,
   formatLocator,
+  getRepoHeadRef,
+  getSkillBlobHash,
   type Locator,
 } from '@lythos/cold-pool'
 import { findDeckToml, expandHome } from './link.js'
@@ -252,4 +254,17 @@ export async function addSkill(
   console.log('🔗 Running deck link...')
   const { linkDeck } = await import('./link.js')
   linkDeck(deckPath, workdir)
+
+  // ── Metadata recording (content-level only; deck refs reconciled by link) ─
+
+  try {
+    const headRef = getRepoHeadRef(fetchPlan.targetDir)
+    const skillSubpath = parsed.skill || ''
+    const skillHash = getSkillBlobHash(fetchPlan.targetDir, skillSubpath)
+
+    pool.metadata.recordRepoRef(parsed.host, parsed.owner, parsed.repo, headRef)
+    pool.metadata.recordSkillHash(parsed.host, parsed.owner, parsed.repo, skillSubpath, skillHash, headRef)
+  } catch (e: any) {
+    console.warn(`⚠️  Metadata recording skipped: ${e.message}`)
+  }
 }

@@ -11,6 +11,9 @@ import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { findDeckToml, expandHome } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
+import { ColdPool } from "@lythos/cold-pool";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
   const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
@@ -85,6 +88,20 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     console.log(`  🗑️  Removed symlink: ${symlinkPath}`);
   } else {
     console.log(`  ⚠️  Symlink not found: ${symlinkPath}`);
+  }
+
+  // ── Metadata cleanup ────────────────────────────────────────
+
+  try {
+    const deck = parseToml(deckRaw) as any;
+    const coldPoolRaw = deck.deck?.cold_pool || '~/.agents/skill-repos';
+    const coldPoolPath = coldPoolRaw.startsWith('~/')
+      ? join(homedir(), coldPoolRaw.slice(2))
+      : resolve(PROJECT_DIR, coldPoolRaw);
+    const pool = new ColdPool(coldPoolPath);
+    pool.metadata.removeReference(match.path, DECK_PATH);
+  } catch (e: any) {
+    console.warn(`⚠️  Metadata cleanup skipped: ${e.message}`);
   }
 
   console.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/skill-deck prune' to GC unreferenced repos.`);

@@ -17,7 +17,7 @@ import {
 import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
-import { ColdPool, parseLocator } from "@lythos/cold-pool";
+import { ColdPool, parseLocator, getRepoHeadRef, getSkillBlobHash } from "@lythos/cold-pool";
 import {
   SkillDeckLockSchema,
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,
@@ -524,6 +524,18 @@ if (!parsed.success) {
 
 const LOCK_PATH = resolve(PROJECT_DIR, "skill-deck.lock");
 writeFileSync(LOCK_PATH, JSON.stringify(parsed.data, null, 2) + "\n");
+
+// ── Metadata reconcile ──────────────────────────────────────
+
+try {
+  const pool = new ColdPool(COLD_POOL);
+  const declaredSkills = parsedEntries
+    .filter(e => e.type !== 'transient')
+    .map(e => ({ locator: e.path, alias: e.alias }));
+  pool.metadata.reconcileDeckReferences(DECK_PATH, declaredSkills);
+} catch (e: any) {
+  console.warn(`⚠️  Metadata reconcile skipped: ${e.message}`);
+}
 
 // ── 报告 ────────────────────────────────────────────────────
 
