@@ -1,0 +1,29 @@
+# Engineering Deck (Codex)
+# TDD + PRD + architecture diagrams for Codex CLI.
+#
+# ⚠️  Codex #11314: symlinked skills not discovered. See documents.toml for workaround.
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/codex/engineering.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   codex exec "Write a PRD and implement with TDD"
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".agents/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+role = "Vertical-slice red-green-refactor discipline"
+
+[tool.skills.to-prd]
+path = "github.com/mattpocock/skills/skills/engineering/to-prd"
+role = "Convert ideas to structured PRD documents"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams from design docs"

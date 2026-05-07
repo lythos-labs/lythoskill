@@ -17,11 +17,21 @@ import { buildDeckValidation } from '../packages/lythoskill-deck/src/validate.ts
 
 const EXAMPLES_DIR = resolve(import.meta.dirname, '..', 'examples', 'decks')
 
+function findDeckFiles(dir: string): string[] {
+  const results: string[] = []
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name)
+    if (entry.isDirectory() && !entry.name.startsWith('.')) {
+      results.push(...findDeckFiles(full))
+    } else if (entry.name.endsWith('.toml')) {
+      results.push(full)
+    }
+  }
+  return results
+}
+
 async function main(): Promise<void> {
-  const decks = readdirSync(EXAMPLES_DIR)
-    .filter((f) => f.endsWith('.toml'))
-    .map((f) => join(EXAMPLES_DIR, f))
-    .sort()
+  const decks = findDeckFiles(EXAMPLES_DIR).sort()
 
   if (decks.length === 0) {
     console.error(`❌ No example decks found in ${EXAMPLES_DIR}`)
