@@ -1,19 +1,90 @@
-/**
- * ColdPool — dedicated resource holder.
- *
- * Owns the cold-pool path, exposes read-only accessors. Operations
- * (fetch, validate, reconcile) are external functions that take a
- * ColdPool and return Plan-shaped data, per the intent/plan/execute
- * pattern.
- */
 import { existsSync, readdirSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import type { Locator } from './types.js'
 import { MetadataDB } from './metadata-db.js'
 
 export const DEFAULT_COLD_POOL_PATH = process.env.LYTHOS_COLD_POOL
   ?? join(homedir(), '.agents/skill-repos')
+
+// ── DirEntry — pure, injectable fs entry ─────────────────────────────────────
+
+export interface DirEntry {
+  /** Path relative to cold-pool root (e.g. "github.com/owner/repo") */
+  relPath: string
+  isDirectory: boolean
+}
+
+// ── List plan: pure classification logic ────────────────────────────────────
+
+export interface ListPlanEntry {
+  path: string
+  kind: 'canonical' | 'legacy-depth2' | 'legacy-depth1'
+}
+
+export interface ListPlan {
+  entries: ListPlanEntry[]
+}
+
+/**
+ * Pure: given a cold-pool root path and a flat list of all fs entries
+ * (with relPath), classify every terminal repo directory.
+ *
+ * Canonical:  <pool>/<host>/<owner>/<repo>           (3 segments, no SKILL.md mid-tree)
+ * Legacy:     <pool>/<host>/SKILL.md                  (depth 1 — no owner/repo)
+ *             <pool>/<host>/<name>/SKILL.md            (depth 2 — no repo segment)
+ */
+export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPlan {
+  const plan: ListPlanEntry[] = []
+  const dirSet = new Set(allEntries.filter(e => e.isDirectory).map(e => e.relPath))
+
+  // Determine whether a dir is terminal (no child dirs)
+  function isTerminal(relPath: string): boolean {
+    const prefix = relPath + '/'
+    for (const d of dirSet) {
+      if (d.startsWith(prefix) && d !== relPath) return false
+    }
+    return true
+  }
+
+  // Check whether a dir directly contains SKILL.md
+  function hasSkillMd(dirRel: string): boolean {
+    return allEntries.some(e => e.relPath === `${dirRel}/SKILL.md` && !e.isDirectory)
+  }
+
+  // Walk only terminal dirs — they are the leaves (repo-level entries)
+  for (const d of dirSet) {
+    if (d.startsWith('.') || d.split('/').some(s => s.startsWith('.'))) continue
+    if (!isTerminal(d)) continue
+
+    const segments = d.split('/')
+
+    // Legacy depth-1: <host>/SKILL.md — terminal dir with SKILL.md, depth=1
+    if (segments.length === 1 && hasSkillMd(d)) {
+      plan.push({ path: join(rootPath, d), kind: 'legacy-depth1' })
+      continue
+    }
+
+    // Legacy depth-2: <host>/<name>/SKILL.md — terminal dir with SKILL.md, depth=2
+    if (segments.length === 2 && hasSkillMd(d)) {
+      plan.push({ path: join(rootPath, d), kind: 'legacy-depth2' })
+      continue
+    }
+
+    // Canonical: <host>/<owner>/<repo> — terminal dir at depth 3, no SKILL.md mid-tree
+    if (segments.length === 3) {
+      // Verify no SKILL.md at intermediate levels (depth 1 or 2)
+      const parent = segments.slice(0, 2).join('/')
+      if (!hasSkillMd(segments[0]) && !hasSkillMd(parent)) {
+        plan.push({ path: join(rootPath, d), kind: 'canonical' })
+      }
+    }
+  }
+
+  return { entries: plan }
+}
+
+// ── ColdPool ─────────────────────────────────────────────────────────────────
 
 export class ColdPool {
   readonly path: string
@@ -24,67 +95,38 @@ export class ColdPool {
     this.metadata = new MetadataDB(join(this.path, '.cold-pool-meta.db'))
   }
 
-  /**
-   * Compute the cold-pool directory for a locator. No fs check.
-   *
-   * Layout invariant: `<pool>/<host>/<owner>/<repo>` for ALL locators
-   * including localhost. No special-case branching — "directory layers
-   * = FQ locator segments" (per user 2026-05-07). Skill subpath
-   * extends within the repo dir (resolveDir returns the repo dir).
-   */
   resolveDir(locator: Locator): string {
     return join(this.path, locator.host, locator.owner, locator.repo)
   }
 
-  /** Whether a locator's repo directory exists in the pool. */
   has(locator: Locator): boolean {
     return existsSync(this.resolveDir(locator))
   }
 
-  /**
-   * Enumerate cold-pool entries.
-   *
-   * Uniform layout: `<pool>/<host>/<owner>/<repo>`. localhost is just
-   * another host. No localhost special-case.
-   *
-   * Legacy drift: `<pool>/<x>/SKILL.md` (depth 2 with SKILL.md) or
-   * `<pool>/localhost/<name>/SKILL.md` (depth 3 with SKILL.md, missing
-   * owner/repo) are non-canonical state from older agents that bypassed
-   * FQ-only enforcement. Surface them so prune can offer cleanup.
-   */
+  /** Enumerate cold-pool entries. Delegates classification to pure buildListPlan. */
   list(): string[] {
     if (!existsSync(this.path)) return []
-    const repos: string[] = []
 
-    for (const host of readdirSync(this.path, { withFileTypes: true })) {
-      if (!host.isDirectory() || host.name.startsWith('.')) continue
-      const hostPath = join(this.path, host.name)
-
-      // Legacy drift: top-level dir with SKILL.md (not canonical 3-segment)
-      if (existsSync(join(hostPath, 'SKILL.md'))) {
-        repos.push(hostPath)
-        continue
+    const poolPath = this.path
+    const allEntries: DirEntry[] = []
+    function collectRecursive(dir: string): void {
+      let dirents: ReturnType<typeof readdirSync>
+      try {
+        dirents = readdirSync(dir, { withFileTypes: true })
+      } catch {
+        return
       }
-
-      // Canonical: <host>/<owner>/<repo>
-      for (const owner of readdirSync(hostPath, { withFileTypes: true })) {
-        if (!owner.isDirectory() || owner.name.startsWith('.')) continue
-        const ownerPath = join(hostPath, owner.name)
-
-        // Legacy drift: <host>/<x>/SKILL.md (depth 2 missing repo level —
-        // typically `localhost/<name>/SKILL.md` from older agents)
-        if (existsSync(join(ownerPath, 'SKILL.md'))) {
-          repos.push(ownerPath)
-          continue
-        }
-
-        for (const repo of readdirSync(ownerPath, { withFileTypes: true })) {
-          if (!repo.isDirectory() || repo.name.startsWith('.')) continue
-          repos.push(join(ownerPath, repo.name))
+      for (const d of dirents) {
+        const rel = relative(poolPath, join(dir, d.name))
+        allEntries.push({ relPath: rel, isDirectory: d.isDirectory() })
+        if (d.isDirectory() && !d.name.startsWith('.')) {
+          collectRecursive(join(dir, d.name))
         }
       }
     }
+    collectRecursive(poolPath)
 
-    return repos
+    const plan = buildListPlan(poolPath, allEntries)
+    return plan.entries.map(e => e.path)
   }
 }
