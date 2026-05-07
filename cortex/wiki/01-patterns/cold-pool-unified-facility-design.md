@@ -152,8 +152,8 @@ declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconc
 
 ### 📋 后续 epic 候选
 
-- **Cold-pool metadata sidecar + 多 deck 安全 prune (ref-counting)**:每个 cold-pool 条目带 `referencing-decks` 列表,`prune` 删除时检查无 deck 引用才动手。当前 `prune-plan.ts` 只查单 deck.toml,多 workspace 共享 cold-pool 时不安全(参见 ADR-20260507021957847 §6 ref-counting note)。
-- **`cold-pool reconcile` 命令**:k8s-style 完整收敛——读 desired state(skill-deck.lock + 增加 git_ref 字段) ↔ 扫 actual state(filesystem) ↔ 产 ReconcilePlan ↔ execute。`buildReconcilePlan` 接口已 scaffold,执行未实现。
+- **Prune 改为审计-就绪 heredoc 生成器**:`deck prune` (和未来任何 cold-pool prune)**不再自动删除**。per user 2026-05-07 决定:prune 太危险,即使加 metadata ref-counting 也是错方向。新 UX 是渲染一个含 `rm -rf <path>` 行的 shell 脚本(每行配 locator + size 注释),用户审计后手工执行。删除 `--yes`、删除 interactive confirm。Cold-pool 的 executor 层不暴露 `rmRf` IO,只有 `gitClone` / `gitPull`(executor cannot delete)。
+- **`cold-pool reconcile` 命令**:k8s-style 完整收敛——读 desired state(skill-deck.lock + 增加 git_ref 字段) ↔ 扫 actual state(filesystem) ↔ 产 ReconcilePlan ↔ execute。`buildReconcilePlan` 接口已 scaffold,执行未实现。**注意:reconcile 中的"remove orphans"路径同样遵守 heredoc-only 规则,不直接删。**
 - **`@lythos/cold-pool` 公开 API 文档 + npm publish**:0.10.0 release 时同步把 cold-pool 推 npm,公开 API 文档化,允许第三方 deck 替代品也消费。
 - **curator/arena 进一步迁移**:目前 T10/T11 是 interface-level migration(只迁了 `git clone` / 路径解析)。curator 的 `git remote update` / `rev-list HEAD...@{upstream} --count` / `pull --ff-only` 这些 staleness 策略,未来若被多消费者复用,可以再抽到 cold-pool。
 
