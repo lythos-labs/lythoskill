@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 19:44:23
+> 自动生成于 2026/5/7 22:06:54
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 113 |
+| Tasks | 146 | 进行中: 1, 待验收: 1, 已完成: 113 |
 | Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 51 | 已接受: 42 |
 
@@ -67,9 +67,9 @@
 - [ ] **TASK-20260507163036174**: ${ID}: deck unit test failures — post FQ schema alignment
 - [ ] **TASK-20260507184440829**: Research skill quality gates — data source wall, validation rules, terminology unification
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260507220646324**: playground/blake3 — rebuild BLAKE3 hash from scratch (ProgramBench-style)
 
 ### 待验收 (1)
 
