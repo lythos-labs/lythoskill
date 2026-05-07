@@ -53,6 +53,7 @@ echo ""
 PACKAGES=(
   "packages/lythoskill-hello-world"
   "packages/lythoskill-test-utils"
+  "packages/lythoskill-cold-pool"
   "packages/lythoskill-project-cortex"
   "packages/lythoskill-curator"
   "packages/lythoskill-arena"
