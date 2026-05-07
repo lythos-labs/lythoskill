@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 22:36:04
+> 自动生成于 2026/5/7 22:39:35
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 149 | 进行中: 1, 待验收: 1, 已完成: 113 |
+| Tasks | 150 | 进行中: 1, 待验收: 1, 已完成: 113 |
 | Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 51 | 已接受: 42 |
 
@@ -53,7 +53,7 @@
 
 ## 📄 Tasks
 
-### 待办 (14)
+### 待办 (15)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -69,6 +69,7 @@
 - [ ] **TASK-20260507223411867**: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
 - [ ] **TASK-20260507223411896**: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
 - [ ] **TASK-20260507223550910**: Replace runClaudeAgent with useAgent() abstraction — default kimi, support claude-sdk/deepseek
+- [ ] **TASK-20260507223935542**: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
 
 ### 进行中 (1)
 
