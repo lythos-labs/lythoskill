@@ -2,6 +2,7 @@
  * Cold-pool metadata layer — SQLite-backed.
  *
  * Per ADR-20260507143241493: git-native hash, local-only trust, SQLite storage.
+ * Extends shared SqliteDb base for DRY SQLite wrappers + schema versioning.
  *
  * Three tables:
  *   repos        — per-repo HEAD ref tracking
@@ -9,9 +10,7 @@
  *   deck_refs    — cross-deck reference index
  */
 
-import { Database } from 'bun:sqlite'
-import { mkdirSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { SqliteDb } from './db-helpers.js'
 
 export interface RepoRef {
   host: string
@@ -37,32 +36,14 @@ export interface DeckReference {
   declaredAlias: string | null
 }
 
-export class MetadataDB {
-  private dbPath: string
-  private _db: Database | null = null
+const CURRENT_SCHEMA = 2
 
+export class MetadataDB extends SqliteDb {
   constructor(dbPath: string) {
-    this.dbPath = dbPath
+    super(dbPath)
   }
 
-  /** Lazy-open: first DB access triggers creation. Allows ColdPool
-   *  to be instantiated with read-only / non-existent paths (e.g. test
-   *  fixtures) without failing on construction. */
-  private get db(): Database {
-    if (this._db == null) {
-      try {
-        mkdirSync(dirname(this.dbPath), { recursive: true })
-      } catch {
-        // Parent dir may be read-only (e.g. test paths like /cold).
-        // SQLite { create: true } will fail below with a clearer error.
-      }
-      this._db = new Database(this.dbPath, { create: true })
-      this.initSchema()
-    }
-    return this._db
-  }
-
-  private initSchema(): void {
+  protected initSchema(): void {
     this.exec(`
       CREATE TABLE IF NOT EXISTS repos (
         host TEXT NOT NULL,
@@ -100,25 +81,15 @@ export class MetadataDB {
     this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_deck ON deck_refs(deck_path)`)
     this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_locator ON deck_refs(skill_locator)`)
     this.exec(`CREATE INDEX IF NOT EXISTS idx_skills_repo ON skills(host, owner, repo)`)
-  }
 
-  // ── Small db util wrappers (no ORM, just DRY) ────────────────
-
-  /** Execute a statement that returns no rows. Auto-finalize. */
-  private exec(sql: string, params?: Record<string, unknown>): void {
-    const stmt = this.db.query(sql)
-    stmt.run(params ?? {})
-    stmt.finalize()
-  }
-
-  /** Query zero or one row. */
-  private queryOne<T>(sql: string, params?: Record<string, unknown>): T | null {
-    return this.db.query(sql).get(params ?? {}) as T | null
-  }
-
-  /** Query many rows. */
-  private queryAll<T>(sql: string, params?: Record<string, unknown>): T[] {
-    return this.db.query(sql).all(params ?? {}) as T[]
+    // Schema migrations
+    this.migrateSchema(CURRENT_SCHEMA, [
+      { version: 1, sql: `CREATE TABLE IF NOT EXISTS _schema_version (version INTEGER NOT NULL)` },
+      {
+        version: 2,
+        sql: `ALTER TABLE skills ADD COLUMN git_blob_hash TEXT`,
+      },
+    ])
   }
 
   private now(): string {
@@ -227,10 +198,5 @@ export class MetadataDB {
       }
       insert.finalize()
     })()
-  }
-
-  close(): void {
-    this._db?.close()
-    this._db = null
   }
 }

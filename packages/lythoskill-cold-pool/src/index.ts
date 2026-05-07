@@ -19,6 +19,7 @@ export { parseLocator, formatLocator } from './parse-locator.js'
 export type { DirEntry, ListPlan, ListPlanEntry } from './cold-pool.js'
 export { ColdPool, DEFAULT_COLD_POOL_PATH, buildListPlan } from './cold-pool.js'
 
+export { SqliteDb } from './db-helpers.js'
 export type { RepoRef, SkillHash, DeckReference } from './metadata-db.js'
 export { MetadataDB } from './metadata-db.js'
 
