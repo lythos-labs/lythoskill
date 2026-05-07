@@ -45,13 +45,13 @@ describe('MetadataDB', () => {
 
   describe('skills', () => {
     it('records and retrieves a skill hash', () => {
-      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'e3b0c44', '9645fdb')
-      expect(db.getSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck')).toBe('e3b0c44')
+      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'sha256-e3b0c44', 'git-blob-e3b0c44', '9645fdb')
+      expect(db.getSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck')).toBe('sha256-e3b0c44')
     })
 
     it('handles standalone skill (empty subpath)', () => {
-      db.recordSkillHash('github.com', 'garrytan', 'gstack', '', 'abc1234', 'deadbeef')
-      expect(db.getSkillHash('github.com', 'garrytan', 'gstack', '')).toBe('abc1234')
+      db.recordSkillHash('github.com', 'garrytan', 'gstack', '', 'sha256-abc', 'git-blob-abc', 'deadbeef')
+      expect(db.getSkillHash('github.com', 'garrytan', 'gstack', '')).toBe('sha256-abc')
     })
 
     it('returns null for unknown skill', () => {
@@ -59,8 +59,8 @@ describe('MetadataDB', () => {
     })
 
     it('overwrites on duplicate key', () => {
-      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'oldhash', '9645fdb')
-      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'newhash', 'a1b2c3d')
+      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'oldhash', 'git-old', '9645fdb')
+      db.recordSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck', 'newhash', 'git-new', 'a1b2c3d')
       expect(db.getSkillHash('github.com', 'lythos-labs', 'lythoskill', 'skills/lythoskill-deck')).toBe('newhash')
     })
   })

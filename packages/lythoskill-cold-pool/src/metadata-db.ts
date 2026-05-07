@@ -80,7 +80,8 @@ export class MetadataDB {
         owner TEXT NOT NULL,
         repo TEXT NOT NULL,
         skill_subpath TEXT NOT NULL DEFAULT '',
-        content_git_hash TEXT,
+        content_sha256 TEXT,
+        git_blob_hash TEXT,
         head_ref_at_record TEXT,
         last_seen_at TEXT,
         PRIMARY KEY (host, owner, repo, skill_subpath)
@@ -149,19 +150,21 @@ export class MetadataDB {
     owner: string,
     repo: string,
     skillSubpath: string,
-    contentGitHash: string,
+    contentSha256: string,
+    gitBlobHash: string | null,
     headRefAtRecord: string,
   ): void {
     this.exec(
       `INSERT OR REPLACE INTO skills
-         (host, owner, repo, skill_subpath, content_git_hash, head_ref_at_record, last_seen_at)
-       VALUES ($host, $owner, $repo, $subpath, $hash, $headRef, $now)`,
+         (host, owner, repo, skill_subpath, content_sha256, git_blob_hash, head_ref_at_record, last_seen_at)
+       VALUES ($host, $owner, $repo, $subpath, $sha256, $blob, $headRef, $now)`,
       {
         $host: host,
         $owner: owner,
         $repo: repo,
         $subpath: skillSubpath,
-        $hash: contentGitHash,
+        $sha256: contentSha256,
+        $blob: gitBlobHash,
         $headRef: headRefAtRecord,
         $now: this.now(),
       },
@@ -169,12 +172,12 @@ export class MetadataDB {
   }
 
   getSkillHash(host: string, owner: string, repo: string, skillSubpath: string): string | null {
-    const row = this.queryOne<{ content_git_hash: string }>(
-      `SELECT content_git_hash FROM skills
+    const row = this.queryOne<{ content_sha256: string }>(
+      `SELECT content_sha256 FROM skills
        WHERE host = $host AND owner = $owner AND repo = $repo AND skill_subpath = $subpath`,
       { $host: host, $owner: owner, $repo: repo, $subpath: skillSubpath },
     )
-    return row?.content_git_hash ?? null
+    return row?.content_sha256 ?? null
   }
 
   // ── Deck References ──────────────────────────────────────────

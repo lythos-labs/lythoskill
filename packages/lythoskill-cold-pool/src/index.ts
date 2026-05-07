@@ -36,4 +36,4 @@ export { gitClone, gitPull, detectGitRoot } from './git-io.js'
 export { buildFetchPlan, executeFetchPlan } from './fetch-plan.js'
 
 export type { GitHashIO } from './git-hash.js'
-export { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash } from './git-hash.js'
+export { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'

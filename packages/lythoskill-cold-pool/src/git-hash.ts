@@ -6,6 +6,8 @@
  */
 
 import { execFileSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 
 export interface GitHashIO {
   /** Run a git command and return trimmed stdout. */
@@ -42,6 +44,17 @@ export function getRepoHeadRef(repoDir: string, io?: GitHashIO): string {
 export function getSkillBlobHash(repoDir: string, skillSubpath: string, io?: GitHashIO): string {
   const path = skillSubpath ? `${skillSubpath}/SKILL.md` : 'SKILL.md'
   return ioOrDefault(io).execGit(['-C', repoDir, 'hash-object', path], { cwd: repoDir })
+}
+
+/**
+ * Compute SHA-256 of a SKILL.md file.
+ *
+ * Independent of git — uses node:crypto directly.
+ * This is the canonical content_hash stored in skill-deck.lock
+ * and the metadata DB (repos table).
+ */
+export function hashSkillMd(skillMdPath: string): string {
+  return createHash('sha256').update(readFileSync(skillMdPath, 'utf-8')).digest('hex')
 }
 
 /**
