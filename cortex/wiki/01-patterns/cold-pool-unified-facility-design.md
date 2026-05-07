@@ -152,10 +152,11 @@ declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconc
 
 ### 📋 后续 epic 候选
 
-- **Prune 改为审计-就绪 heredoc 生成器**:`deck prune` (和未来任何 cold-pool prune)**不再自动删除**。per user 2026-05-07 决定:prune 太危险,即使加 metadata ref-counting 也是错方向。新 UX 是渲染一个含 `rm -rf <path>` 行的 shell 脚本(每行配 locator + size 注释),用户审计后手工执行。删除 `--yes`、删除 interactive confirm。Cold-pool 的 executor 层不暴露 `rmRf` IO,只有 `gitClone` / `gitPull`(executor cannot delete)。
-- **`cold-pool reconcile` 命令**:k8s-style 完整收敛——读 desired state(skill-deck.lock + 增加 git_ref 字段) ↔ 扫 actual state(filesystem) ↔ 产 ReconcilePlan ↔ execute。`buildReconcilePlan` 接口已 scaffold,执行未实现。**注意:reconcile 中的"remove orphans"路径同样遵守 heredoc-only 规则,不直接删。**
+- **Prune 改为审计-就绪 heredoc 生成器**:`deck prune` (和未来任何 cold-pool prune)**不再自动删除**。per user 2026-05-07 决定:prune 太危险,即使加 metadata ref-counting 也是错方向。新 UX 是渲染一个 shell 脚本——可执行的 `rm -rf <path>` 行(配 locator + size 注释)+ 注释掉的 `# kept: <path> — referenced by <deck-A>, <deck-B>` 行(扫到但被其他 deck 引用的,暴露"为啥不回收"以便 user sanity-check 边界检测本身)。删 `--yes`、删 interactive confirm。Cold-pool 的 executor 层不暴露 `rmRf` IO,只有 `gitClone` / `gitPull`(executor cannot delete)。
+- **Refresh 拆为 discover + apply 两步**:per user 2026-05-07,`deck refresh` 也是高风险——`git pull` 的网络 IO 历史上多次让 E2E 超时/exit。新默认行为是 **discover-only**:`git fetch` + `git rev-list HEAD...@{upstream} --count` 计算 behind 数,只报告不拉取。用户显式 `deck refresh --apply` 才渲染 `git -C <path> pull --ff-only` 行的 heredoc 让用户审计后手工跑。所有 `git pull` 必须带 hard timeout。具体形态参考 `~/.claude/projects/.../memory/feedback_refresh_is_plan_first.md`。
+- **`cold-pool reconcile` 命令**:k8s-style 完整收敛——读 desired state(skill-deck.lock + 增加 git_ref 字段) ↔ 扫 actual state(filesystem) ↔ 产 ReconcilePlan ↔ execute。`buildReconcilePlan` 接口已 scaffold,执行未实现。**注意:reconcile 中的"remove orphans"路径同样遵守 heredoc-only 规则,不直接删;"apply updates"路径遵守 refresh 的 apply-script 规则,不直接 pull。**
 - **`@lythos/cold-pool` 公开 API 文档 + npm publish**:0.10.0 release 时同步把 cold-pool 推 npm,公开 API 文档化,允许第三方 deck 替代品也消费。
-- **curator/arena 进一步迁移**:目前 T10/T11 是 interface-level migration(只迁了 `git clone` / 路径解析)。curator 的 `git remote update` / `rev-list HEAD...@{upstream} --count` / `pull --ff-only` 这些 staleness 策略,未来若被多消费者复用,可以再抽到 cold-pool。
+- **curator/arena 进一步迁移**:目前 T10/T11 是 interface-level migration(只迁了 `git clone` / 路径解析)。curator 的 `git remote update` / `rev-list HEAD...@{upstream} --count` / `pull --ff-only` 这些 staleness 策略,未来若被多消费者复用,可以再抽到 cold-pool。**注意 curator 已有 `refresh-plan` / `refresh-execute` 两步分离,正是 deck 该借鉴的形态。**
 
 ---
 
