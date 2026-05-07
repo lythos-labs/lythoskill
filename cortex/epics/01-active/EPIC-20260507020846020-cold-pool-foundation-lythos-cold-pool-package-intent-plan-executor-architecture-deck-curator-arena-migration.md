@@ -141,11 +141,11 @@ checklist_skipped_reason: rescoped from suspended EPIC-20260507012858669; archit
 | T2 | TASK-20260507021320360 | ✅ completed | 核心类型 + parseLocator 迁移(主题 B) |
 | T3 | TASK-20260507021320388 | ✅ completed | Resolver 层 + GitHub Tree API client(主题 C) |
 | T4 | TASK-20260507021320416 | ✅ completed | ColdPool + git-io + Fetch plan/executor(主题 D) |
-| T5 | TASK-20260507021320442 | backlog | deck/src/add.ts 切到 cold-pool(主题 E) |
-| T6 | TASK-20260507021320467 | backlog | deck/src/link.ts 切到 cold-pool(主题 E) |
-| T7 | TASK-20260507021320492 | backlog | deck/src/refresh-plan.ts 切到 cold-pool(主题 E) |
-| T8 | TASK-20260507021320516 | backlog | `deck validate` 命令 + ValidationReport 输出(主题 E) |
-| T9 | TASK-20260507021320542 | backlog | examples/decks/*.toml CI 验证(主题 F) |
+| T5 | TASK-20260507021320442 | ✅ completed | deck/src/add.ts 切到 cold-pool(主题 E) |
+| T6 | TASK-20260507021320467 | ✅ completed | deck/src/link.ts 切到 cold-pool + 修 localhost layout(主题 E) |
+| T7 | TASK-20260507021320492 | ✅ completed | deck/src/refresh{,-plan}.ts 切到 cold-pool(主题 E) |
+| T8 | TASK-20260507021320516 | ✅ completed | `deck validate --remote --format=json`(主题 E) |
+| T9 | TASK-20260507021320542 | ✅ completed | examples/decks/*.toml CI 验证(主题 F) |
 | T10 | (待创建) | stretch | curator/src/cli.ts 切到 cold-pool(主题 G) |
 | T11 | (待创建) | stretch | arena/src/preflight.ts 切到 cold-pool(主题 G) |
 | T12 | TASK-20260507021320567 | backlog | 写 ADR-20260507014124191 body(决策记录) |

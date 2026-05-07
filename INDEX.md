@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 03:02:54
+> 自动生成于 2026/5/7 10:38:00
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 138 | 进行中: 0, 待验收: 0, 已完成: 108 |
+| Tasks | 140 | 进行中: 0, 待验收: 0, 已完成: 110 |
 | Epics | 22 | 活跃: 1, 已完成: 17, 悬置: 2, 已归档: 2 |
 | ADRs | 46 | 已接受: 33 |
 
@@ -73,7 +73,7 @@ _无_
 
 _无_
 
-### 已完成 (108)
+### 已完成 (110)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -183,6 +183,8 @@ _无_
 - ✅ ~~TASK-20260507021320492~~: T7: Migrate deck/src/refresh-plan.ts to consume cold-pool
 - ✅ ~~TASK-20260507021320516~~: T8: deck validate command emitting ValidationReport per locator
 - ✅ ~~TASK-20260507021320542~~: T9: examples/decks/*.toml CI validation step
+- ✅ ~~TASK-20260507103221240~~: T10: Migrate curator/src/ to consume @lythos/cold-pool primitives
+- ✅ ~~TASK-20260507103221276~~: T11: Migrate arena/src/preflight.ts to consume @lythos/cold-pool primitives
 
 ### 悬置 (0)
 
