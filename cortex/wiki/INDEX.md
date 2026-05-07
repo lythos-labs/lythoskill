@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (26)
+## 📚 Patterns (27)
 
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
@@ -29,6 +29,7 @@
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
 - **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
 - **[0000-00-00]** [cold-pool-evolutionary-rationale](./01-patterns/cold-pool-evolutionary-rationale.md)
+- **[0000-00-00]** [cold-pool-cli-boundary](./01-patterns/cold-pool-cli-boundary.md)
 - **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
 
 ## ❓ FAQ (0)

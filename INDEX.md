@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 19:18:46
+> 自动生成于 2026/5/7 19:44:23
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 112 |
+| Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 113 |
 | Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 51 | 已接受: 42 |
 
@@ -53,12 +53,11 @@
 
 ## 📄 Tasks
 
-### 待办 (12)
+### 待办 (11)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
 - [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
-- [ ] **TASK-20260506001644390**: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
 - [ ] **TASK-20260506001644423**: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
 - [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 - [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
@@ -76,7 +75,7 @@ _无_
 
 - 🔍 **TASK-20260507143022480**: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
 
-### 已完成 (112)
+### 已完成 (113)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -176,6 +175,7 @@ _无_
 - ✅ ~~TASK-20260506001644285~~: T2: Update arena runner pre-flight — add deck link + skill existence check before agent spawn
 - ✅ ~~TASK-20260506001644316~~: T3: Extract AgentAdapter as standalone plugin lib + Claude SDK adapter
 - ✅ ~~TASK-20260506001644356~~: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
+- ✅ ~~TASK-20260506001644390~~: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
 - ✅ ~~TASK-20260507010453909~~: Remove implicit skills/ insertion from findSource() and align all deck paths to direct mapping
 - ✅ ~~TASK-20260507021320323~~: T1: Scaffold @lythos/cold-pool package with monorepo lock-step config
 - ✅ ~~TASK-20260507021320360~~: T2: Core types — Locator, ValidationReport, FetchPlan, RefreshPlan, Executor + parseLocator migration
