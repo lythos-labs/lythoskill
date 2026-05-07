@@ -1,6 +1,6 @@
 {
   "name": "@lythos/test-utils",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
@@ -29,7 +29,7 @@
     "intent-plan-execute"
   ],
   "dependencies": {
-    "@lythos/agent-adapter": "workspace:*",
+    "@lythos/agent-adapter": "^0.9.25",
     "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
   }

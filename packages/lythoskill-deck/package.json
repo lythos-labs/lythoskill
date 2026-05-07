@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-deck",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "Declarative skill deck governance — cold pool, working set, deny-by-default",
   "keywords": [
     "ai-agent",
@@ -26,7 +26,7 @@
   ],
   "dependencies": {
     "@iarna/toml": "^2.2.5",
-    "@lythos/cold-pool": "workspace:*",
+    "@lythos/cold-pool": "^0.9.25",
     "yaml": "^2.8.3",
     "zod": "^4.3.6"
   },

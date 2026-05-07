@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-arena",
-  "version": "0.9.24",
+  "version": "0.9.25",
   "description": "Skill Arena — benchmark skill effectiveness with controlled-variable comparison",
   "keywords": [
     "ai-agent",
@@ -37,12 +37,12 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@lythos/cold-pool": "workspace:*",
+    "@lythos/cold-pool": "^0.9.25",
     "@lythos/test-utils": "^0.9.1",
     "zod": "^3.24.0",
     "zod-to-json-schema": "^3.25.2"
   },
   "optionalDependencies": {
-    "@lythos/agent-adapter-claude-sdk": "workspace:*"
+    "@lythos/agent-adapter-claude-sdk": "^0.9.25"
   }
 }
