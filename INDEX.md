@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/7 16:29:16
+> 自动生成于 2026/5/7 16:46:08
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 112 |
+| Tasks | 144 | 进行中: 0, 待验收: 1, 已完成: 112 |
 | Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 50 | 已接受: 35 |
 
@@ -53,7 +53,7 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (12)
+### 待办 (11)
 
 - [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
 - [ ] **TASK-20260505163912399**: create
@@ -65,7 +65,6 @@ _无_
 - [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
 - [ ] **TASK-20260507112345999**: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
-- [ ] **TASK-20260507162813861**: --help
 - [ ] **TASK-20260507163036174**: ${ID}: deck unit test failures — post FQ schema alignment
 
 ### 进行中 (0)
