@@ -66,7 +66,7 @@ export function refreshDeck(cliDeckPath?: string, cliWorkdir?: string, target?: 
     linkDeck: () => {
       console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
       console.log('🔗 Running deck link...')
-      linkDeck(cliDeckPath, cliWorkdir)
+      await linkDeck(cliDeckPath, cliWorkdir)
     },
   })
 

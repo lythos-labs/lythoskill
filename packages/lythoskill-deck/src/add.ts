@@ -270,7 +270,7 @@ export async function addSkill(
 
   console.log('🔗 Running deck link...')
   const { linkDeck } = await import('./link.js')
-  linkDeck(deckPath, workdir, { mode: options.mode })
+  await linkDeck(deckPath, workdir, { mode: options.mode })
 
   // ── Metadata recording (content-level only; deck refs reconciled by link) ─
 

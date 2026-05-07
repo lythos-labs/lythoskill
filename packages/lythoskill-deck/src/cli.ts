@@ -64,7 +64,7 @@ switch (command) {
     console.log(formatHelp(HELP_CONFIG))
     process.exit(0)
   case 'link':
-    linkDeck(deckPath, workdir, { noBackup, mode })
+    await linkDeck(deckPath, workdir, { noBackup, mode })
     break
   case 'add': {
     const locator = args[1]

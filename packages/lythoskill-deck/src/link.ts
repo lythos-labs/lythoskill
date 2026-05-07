@@ -14,7 +14,7 @@ import {
   existsSync, mkdirSync, readFileSync, readdirSync,
   symlinkSync, cpSync, lstatSync, rmSync, statSync, writeFileSync,
 } from "node:fs";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
 import { homedir } from "node:os";
 import { ColdPool, parseLocator } from "@lythos/cold-pool";
@@ -125,14 +125,13 @@ const BACKUP_SIZE_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
 // ── 主流程 ──────────────────────────────────────────────────
 
-export function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot' }): void {
+export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot' }): Promise<void> {
 const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 
 // If --deck is a URL, fetch it first (discovered via quick-agent.sh dogfooding)
 let DECK_PATH: string
 if (cliDeck && (cliDeck.startsWith('http://') || cliDeck.startsWith('https://'))) {
-  // Auto-convert github.com/blob/... → raw.githubusercontent.com/...
   let url = cliDeck
   if (url.includes('github.com/') && url.includes('/blob/')) {
     url = url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/')
@@ -140,15 +139,16 @@ if (cliDeck && (cliDeck.startsWith('http://') || cliDeck.startsWith('https://'))
   const dest = resolve(process.cwd(), 'skill-deck.toml')
   console.log(`📥 Fetching deck: ${url}`)
   try {
-    const res = spawnSync('curl', ['-fsSL', '--connect-timeout', '10', '--max-time', '30', '-o', dest, url])
-    if (res.status !== 0) {
-      console.error(`❌ Failed to fetch deck (exit ${res.status}): ${url}`)
+    const res = await fetch(url, { signal: AbortSignal.timeout(30_000) })
+    if (!res.ok) {
+      console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}`)
       process.exit(1)
     }
+    writeFileSync(dest, await res.text())
     console.log(`   → saved to ${dest}`)
     DECK_PATH = dest
-  } catch {
-    console.error(`❌ Failed to fetch deck: ${url}`)
+  } catch (e: any) {
+    console.error(`❌ Failed to fetch deck: ${e.message || e}`)
     process.exit(1)
   }
 } else {
