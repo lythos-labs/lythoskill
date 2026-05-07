@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.9.26
+version: 0.9.27
 type: standard
 description: |
   Controlled-variable test play for skills and deck configurations.  Scaffolds isolated arena environments where subagents complete  the same task under different decks, then a judge agent scores outputs  across multiple dimensions. Supports single-skill A/B comparison
@@ -9,8 +9,8 @@ when_to_use: |
   Compare skills, A/B test skills, which skill is better, test deck  configuration, benchmark skill, skill evaluation, deck comparison,
   try before adopting, test play, Pareto analysis, skill synergy check,  does adding this skill improve my deck.
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.9.26 *)
-  - Bash(bunx @lythos/skill-deck@0.9.26 link *)
+  - Bash(bunx @lythos/skill-arena@0.9.27 *)
+  - Bash(bunx @lythos/skill-deck@0.9.27 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -71,7 +71,7 @@ If `player` is omitted, arena defaults to `kimi`.
 ## Commands
 ### Mode 1: Single-Skill Comparison (controlled variable)
 ```bash
-bunx @lythos/skill-arena@0.9.26 \
+bunx @lythos/skill-arena@0.9.27 \
   --task "Generate auth flow diagram" \  --skills "design-doc-mermaid,mermaid-tools" \  --criteria "syntax,context,token"
 ```
 
@@ -80,7 +80,7 @@ control skill (default: `project-scribe`, override with `--control`).
 
 ### Mode 2: Full-Deck Comparison (Pareto frontier)
 ```bash
-bunx @lythos/skill-arena@0.9.26 \
+bunx @lythos/skill-arena@0.9.27 \
   --task "Generate auth flow diagram" \  --decks "./decks/minimal.toml,./decks/rich.toml,./decks/superpowers.toml" \  --criteria "quality,token,maintainability"
 ```
 
@@ -89,7 +89,7 @@ the Pareto frontier — non-dominated solutions, not a single winner.
 
 ### Visualize Results
 ```bash
-bunx @lythos/skill-arena@0.9.26 viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.27 viz tmp/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.

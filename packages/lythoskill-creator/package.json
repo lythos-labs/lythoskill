@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-creator",
-  "version": "0.9.26",
+  "version": "0.9.27",
   "description": "lythoskill scaffolding tool — init and build thin-skill packages",
   "keywords": [
     "ai-agent",
