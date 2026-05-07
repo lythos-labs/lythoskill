@@ -129,7 +129,7 @@ describe('linkDeck reconciler', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    linkDeck(deckPath, projectDir, true)
+    linkDeck(deckPath, projectDir, { noBackup: true })
 
     const workingSet = join(projectDir, '.claude', 'skills')
     expect(existsSync(workingSet)).toBe(true)
@@ -167,7 +167,7 @@ describe('linkDeck reconciler', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    linkDeck(deckPath, projectDir, true)
+    linkDeck(deckPath, projectDir, { noBackup: true })
 
     const workingSet = join(projectDir, '.claude', 'skills')
     const symlinkPath = join(workingSet, 'my-alias')
@@ -204,7 +204,7 @@ describe('linkDeck reconciler', () => {
     const deckPath = join(projectDir, 'skill-deck.toml')
     writeFileSync(deckPath, deckContent)
 
-    linkDeck(deckPath, projectDir, true)
+    linkDeck(deckPath, projectDir, { noBackup: true })
 
     const lock1 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
     const symlinkPath = join(projectDir, '.claude', 'skills', 'my-alias')
@@ -212,7 +212,7 @@ describe('linkDeck reconciler', () => {
 
     await new Promise(r => setTimeout(r, 50))
 
-    linkDeck(deckPath, projectDir, true)
+    linkDeck(deckPath, projectDir, { noBackup: true })
 
     const lock2 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
     const target2 = readlinkSync(symlinkPath)
@@ -249,7 +249,7 @@ describe('linkDeck reconciler', () => {
     symlinkSync(skillADir, join(workingSet, 'skill-a'))
     symlinkSync(skillBDir, join(workingSet, 'skill-b'))
 
-    linkDeck(deckPath, projectDir, true)
+    linkDeck(deckPath, projectDir, { noBackup: true })
 
     // skill-a should remain
     expect(existsSync(join(workingSet, 'skill-a'))).toBe(true)
@@ -261,6 +261,28 @@ describe('linkDeck reconciler', () => {
     const lock = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
     expect(lock.skills).toHaveLength(1)
     expect(lock.skills[0].alias).toBe('skill-a')
+  })
+
+  it('snapshot mode: cp instead of symlink', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    placeSkill(coldPool, 'github.com/owner/repo-a')
+
+    const deckContent = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.my-alias]\npath = "github.com/owner/repo-a"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    linkDeck(deckPath, projectDir, { noBackup: true, mode: 'snapshot' })
+
+    const dest = join(projectDir, '.claude', 'skills', 'my-alias')
+    expect(existsSync(dest)).toBe(true)
+    // Snapshot: real directory, not a symlink
+    expect(lstatSync(dest).isDirectory()).toBe(true)
+    expect(lstatSync(dest).isSymbolicLink()).toBe(false)
+    // Verify content was copied
+    expect(existsSync(join(dest, 'SKILL.md'))).toBe(true)
   })
 
 })

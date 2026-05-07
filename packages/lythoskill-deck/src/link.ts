@@ -12,7 +12,7 @@ import YAML from "yaml";
 import { createHash } from "node:crypto";
 import {
   existsSync, mkdirSync, readFileSync, readdirSync,
-  symlinkSync, lstatSync, rmSync, statSync, writeFileSync,
+  symlinkSync, cpSync, lstatSync, rmSync, statSync, writeFileSync,
 } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative } from "node:path";
@@ -125,7 +125,8 @@ const BACKUP_SIZE_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
 // ── 主流程 ──────────────────────────────────────────────────
 
-export function linkDeck(cliDeckPath?: string, cliWorkdir?: string, noBackup?: boolean): void {
+export function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot' }): void {
+const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 const DECK_PATH = cliDeck
   ? resolve(cliDeck)
@@ -333,14 +334,14 @@ if (nonSymlinks.length > 0) {
     totalSize += calculateDirSize(join(WORKING_SET, e));
   }
 
-  if (!noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
+  if (!opts?.noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
     console.error(`❌ Found ${nonSymlinks.length} real directories in ${relative(PROJECT_DIR, WORKING_SET)} (> 100MB total).`);
     console.error(`   Manual review required: ${nonSymlinks.join(", ")}`);
     console.error(`   Use --no-backup to skip backup (removes without saving), or clean up manually.`);
     process.exit(1);
   }
 
-  if (!noBackup) {
+  if (!opts?.noBackup) {
     const bakName = `skills.bak.${formatBackupDate(new Date())}.tar.gz`;
     const bakPath = join(PROJECT_DIR, ".claude", bakName);
     mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
@@ -400,7 +401,11 @@ for (const item of declared) {
 
   try {
     mkdirSync(dirname(dest), { recursive: true });
-    symlinkSync(item.sourcePath, dest);
+    if (MODE === 'snapshot') {
+      cpSync(item.sourcePath, dest, { recursive: true });
+    } else {
+      symlinkSync(item.sourcePath, dest);
+    }
   } catch (err: any) {
     console.error(`❌ Link failed: ${item.alias}: ${err.message}`);
     continue;

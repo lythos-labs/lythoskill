@@ -29,6 +29,7 @@ const noBackup = args.includes('--no-backup')
 const yes = args.includes('--yes')
 const dryRun = args.includes('--dry-run')
 const remote = args.includes('--remote')
+const mode = flagValue('--mode') as 'symlink' | 'snapshot' | undefined
 
 const HELP_CONFIG = {
   binName: 'lythoskill-deck',
@@ -45,6 +46,7 @@ const HELP_CONFIG = {
   options: [
     { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
     { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
+    { flag: '--mode <symlink|snapshot>', description: 'Link mode: symlink (default) or snapshot (cp)' },
     { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
 
     { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
@@ -62,7 +64,7 @@ switch (command) {
     console.log(formatHelp(HELP_CONFIG))
     process.exit(0)
   case 'link':
-    linkDeck(deckPath, workdir, noBackup)
+    linkDeck(deckPath, workdir, { noBackup, mode })
     break
   case 'add': {
     const locator = args[1]
@@ -70,7 +72,7 @@ switch (command) {
       console.error('❌ Missing locator. Usage: deck add <github.com/owner/repo[/skill]>')
       process.exit(1)
     }
-    await addSkill(locator, { deck: deckPath, workdir, alias, type, dryRun })
+    await addSkill(locator, { deck: deckPath, workdir, alias, type, dryRun, mode })
     break
   }
   case 'refresh': {

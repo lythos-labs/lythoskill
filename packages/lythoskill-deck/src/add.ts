@@ -91,7 +91,7 @@ function exitInvalidLocator(locator: string): never {
 
 export async function addSkill(
   locator: string,
-  options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean },
+  options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean; mode?: 'symlink' | 'snapshot' },
 ) {
   const dryRun = options.dryRun || false
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
@@ -253,7 +253,7 @@ export async function addSkill(
 
   console.log('🔗 Running deck link...')
   const { linkDeck } = await import('./link.js')
-  linkDeck(deckPath, workdir)
+  linkDeck(deckPath, workdir, { mode: options.mode })
 
   // ── Metadata recording (content-level only; deck refs reconciled by link) ─
 
