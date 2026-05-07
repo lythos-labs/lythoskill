@@ -1,6 +1,6 @@
 {
   "name": "@lythos/test-utils",
-  "version": "0.9.28",
+  "version": "0.9.29",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
