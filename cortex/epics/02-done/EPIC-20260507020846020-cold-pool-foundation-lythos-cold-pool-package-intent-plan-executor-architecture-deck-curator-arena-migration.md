@@ -18,6 +18,7 @@ checklist_skipped_reason: rescoped from suspended EPIC-20260507012858669; archit
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-07 | Created — rescoped from suspended `EPIC-20260507012858669` (quick-start patches subsumed) |
+| done | 2026-05-07 | Done |
 
 ## 背景故事
 
