@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 14:26:43
+> 自动生成于 2026/5/7 15:05:11
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 142 | 进行中: 0, 待验收: 0, 已完成: 112 |
+| Tasks | 143 | 进行中: 0, 待验收: 1, 已完成: 112 |
 | Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
-| ADRs | 49 | 已接受: 35 |
+| ADRs | 50 | 已接受: 35 |
 
 ---
 
@@ -70,9 +70,9 @@ _无_
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260507143022480**: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
 
 ### 已完成 (112)
 
@@ -268,6 +268,7 @@ _无_
 - 🤔 **ADR-20260507110332770** (01-proposed): Prune defaults to audit heredoc; never auto-rm cold pool entries
 - 🤔 **ADR-20260507110332805** (01-proposed): Refresh defaults to discover-only; --apply renders audit heredoc with hard-timeout git pull lines
 - 🤔 **ADR-20260507110332831** (01-proposed): Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command
+- 🤔 **ADR-20260507143241493** (01-proposed): cold-pool metadata layer: git-native hash instead of custom SHA-256, SQLite-backed, local-only trust
 
 ---
 
