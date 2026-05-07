@@ -187,6 +187,22 @@ deck config     →  RefreshPlan       →  executeRefreshPlan
 - When a function mixes logic (filtering, classification, branching) with IO (spawn, fs, network)
 - When test coverage is low because IO can't run in CI
 - When the same logic needs different IO backends
+
+### Git-dependent tests in CI
+
+Tests that create real git repos (`simple-git`, `git commit`, etc.) must set local git identity before committing. CI runners lack `user.name` / `user.email` globally:
+
+```ts
+beforeAll(async () => {
+  const git = simpleGit(tmpDir)
+  await git.init(['--initial-branch=main'])
+  await git.addConfig('user.name', 'test')       // CI: no global identity
+  await git.addConfig('user.email', 'test@test.com')
+  // ... write files, git add, git commit
+})
+```
+
+**Pattern**: any test that calls `git commit` or `simpleGit().commit()` needs this. `git init` + `git add` alone don't require identity; only the commit step does.
 - When `--dry-run` would be useful to the user or agent
 
 ### When NOT to apply

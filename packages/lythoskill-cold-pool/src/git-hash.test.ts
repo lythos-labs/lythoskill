@@ -11,6 +11,9 @@ beforeAll(async () => {
   repoDir = mkdtempSync(join(tmpdir(), 'lythos-git-hash-test-'))
   const git = simpleGit(repoDir)
   await git.init(['--initial-branch=main'])
+  // CI runners often lack git identity; set local config so commit works.
+  await git.addConfig('user.name', 'test')
+  await git.addConfig('user.email', 'test@test.com')
   writeFileSync(join(repoDir, 'SKILL.md'), '# Test Skill\n')
   mkdirSync(join(repoDir, 'skills', 'pdf'), { recursive: true })
   writeFileSync(join(repoDir, 'skills', 'pdf', 'SKILL.md'), '# PDF Skill\n> renders PDF\n')
