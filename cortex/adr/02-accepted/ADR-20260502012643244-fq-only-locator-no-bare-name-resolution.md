@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-02 | 在 deck-add bug 调查后提出，当时参考了 ADR-20260501091724816 (cold_pool→library 提议，后被 rejected) 的精确路径思路 |
+| accepted | 2026-05-07 | Accepted |
 
 ## Context
 

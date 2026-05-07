@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-05-02 | 与 ADR-20260502012643244 (FQ-only) 联动 |
 | amended | 2026-05-07 | localhost 形态从 `localhost/<name>` 改为 `localhost/<owner>/<repo>[/skill]`,与远程 host uniform。详见下文 §2026-05-07 update |
+| accepted | 2026-05-07 | Accepted |
 
 ## Context
 

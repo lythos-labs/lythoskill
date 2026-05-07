@@ -30,7 +30,10 @@ if (stagedEpics.length > 0) {
     const epicId = extractEpicIdFromFilename(epicFile)
     if (!epicId) continue
 
-    const linked = findLinkedAdrs(epicId, { proposedAdrDir: `${ROOT}/cortex/adr/01-proposed` })
+    const linked = findLinkedAdrs(epicId, {
+      proposedAdrDir: `${ROOT}/cortex/adr/01-proposed`,
+      acceptedAdrDir: `${ROOT}/cortex/adr/02-accepted`,
+    })
     for (const adrId of linked) {
       console.log(`🔗 Auto-accepting ${adrId} (linked to ${epicId})`)
       spawnSync('bun', ['packages/lythoskill-project-cortex/src/cli.ts', 'adr', 'accept', adrId],

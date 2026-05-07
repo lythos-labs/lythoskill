@@ -4,6 +4,7 @@
  * Thin skill router — delegates to command modules.
  */
 
+import { readdirSync } from 'node:fs';
 import { loadConfig } from './config.js';
 import { initWorkflow } from './commands/init.js';
 import { createTask } from './commands/task.js';
@@ -16,6 +17,10 @@ import { showFlow } from './commands/flow.js';
 import { moveTask, moveAdr, moveEpic } from './commands/move.js';
 import { generateIndex, generateWikiIndex } from './generate-index.js';
 import { createWiki } from './commands/wiki.js';
+import {
+  findLinkedEpic,
+  checkEpicAdrCompletion,
+} from './lib/coupling.js';
 
 function printHelp(): void {
   console.log(`📋 lythoskill-project-cortex — Project management CLI
@@ -154,6 +159,26 @@ async function main(): Promise<void> {
         }
         if (arg === 'accept') {
           moveAdr(adrId, 'accepted', config, { note: 'Accepted' });
+
+          // Reverse coupling: check if linked epic's ADRs are all accepted
+          const acceptedDir = `${config.adrDir}/${config.adrSubdirs.accepted}`;
+          const allAcceptedAdrs = readdirSync(acceptedDir).filter(f => f.startsWith(adrId));
+          if (allAcceptedAdrs.length > 0) {
+            const adrPath = `${acceptedDir}/${allAcceptedAdrs[0]}`;
+            const epicId = findLinkedEpic(adrPath);
+            if (epicId) {
+              const status = checkEpicAdrCompletion(epicId, {
+                proposedAdrDir: `${config.adrDir}/${config.adrSubdirs.proposed}`,
+                acceptedAdrDir: acceptedDir,
+              });
+              if (status.allAccepted) {
+                console.log(`🔗 All ${status.total} ADR(s) linked to ${epicId} are now accepted.`);
+                console.log(`   Run: bunx @lythos/project-cortex epic done ${epicId}`);
+              } else if (status.proposedIds.length > 0) {
+                console.log(`🔗 Linked to ${epicId}: ${status.acceptedIds.length}/${status.total} ADRs accepted (${status.proposedIds.length} remaining: ${status.proposedIds.join(', ')})`);
+              }
+            }
+          }
         } else if (arg === 'reject') {
           moveAdr(adrId, 'rejected', config, { note: 'Rejected' });
         } else {

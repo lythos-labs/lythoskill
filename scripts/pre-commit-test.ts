@@ -38,28 +38,14 @@ if (changedPackages.size === 0) {
 // 2. Run tests per changed package
 let failed = 0;
 for (const pkg of changedPackages) {
-  // Check if src dir exists (some packages like test-utils)
   const pkgDir = join(ROOT, "packages", pkg);
   if (!existsSync(pkgDir)) continue;
 
-  // Find test files: first try src/*.test.ts, fall back to test/
-  const srcTestGlob = join("packages", pkg, "src", "*.test.ts");
   const hasSrcTests = existsSync(join(ROOT, "packages", pkg, "src"));
-  let testPath: string;
-
-  if (hasSrcTests) {
-    testPath = `packages/${pkg}/src/*.test.ts`;
-  } else {
-    continue; // no src dir, skip
-  }
+  if (!hasSrcTests) continue;
 
   console.log(`\n🧪 ${pkg}`);
-  // Run tests from inside the package so bun test does not walk up to
-  // a parent package.json and reinterpret cwd. See: bun test resolves
-  // package.json relative to the staged file paths and ends up scoped
-  // to the package, so the original `bun test packages/<pkg>/src/*.test.ts`
-  // form failed to match anything when invoked from repo root.
-  const result = await $`sh -c "cd packages/${pkg} && bun test src/*.test.ts"`.cwd(ROOT).nothrow().quiet();
+  const result = await $`sh -c "cd packages/${pkg} && bun test"`.cwd(ROOT).nothrow().quiet();
   const exitCode = result.exitCode;
 
   if (exitCode !== 0) {

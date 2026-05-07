@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/7 18:45:23
+> 自动生成于 2026/5/7 19:18:46
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 145 | 进行中: 0, 待验收: 1, 已完成: 112 |
-| Epics | 22 | 活跃: 0, 已完成: 18, 悬置: 2, 已归档: 2 |
-| ADRs | 50 | 已接受: 35 |
+| Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
+| ADRs | 51 | 已接受: 42 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
 
 ### 已完成
 
@@ -242,8 +242,8 @@ _无_
 - 🤔 **ADR-20260501160000000** (01-proposed): skill-deck.toml section semantics and innate skill re-attachment after context compaction
 - 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
 - ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
-- 🤔 **ADR-20260502012643244** (01-proposed): FQ-only locator — 删除 bare-name 与隐式策略 fallback
-- 🤔 **ADR-20260502012643344** (01-proposed): 项目自身 skill 通过 `localhost/me/<name>` symlink 自举，删除 `cold_pool="."` 特例
+- ✅ **ADR-20260502012643244** (02-accepted): FQ-only locator — 删除 bare-name 与隐式策略 fallback
+- ✅ **ADR-20260502012643344** (02-accepted): 项目自身 skill 通过 `localhost/me/<name>` symlink 自举，删除 `cold_pool="."` 特例
 - ✅ **ADR-20260502012643444** (02-accepted): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
 - 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
 - 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
@@ -267,10 +267,11 @@ _无_
 - 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
 - ✅ **ADR-20260507014124191** (02-accepted): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
 - ✅ **ADR-20260507021957847** (02-accepted): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
-- 🤔 **ADR-20260507110332770** (01-proposed): Prune defaults to audit heredoc; never auto-rm cold pool entries
-- 🤔 **ADR-20260507110332805** (01-proposed): Refresh defaults to discover-only; --apply renders audit heredoc with hard-timeout git pull lines
-- 🤔 **ADR-20260507110332831** (01-proposed): Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command
-- 🤔 **ADR-20260507143241493** (01-proposed): cold-pool metadata layer: git-native hash instead of custom SHA-256, SQLite-backed, local-only trust
+- ✅ **ADR-20260507110332770** (02-accepted): Prune defaults to audit heredoc; never auto-rm cold pool entries
+- ✅ **ADR-20260507110332805** (02-accepted): Refresh defaults to discover-only; --apply renders audit heredoc with hard-timeout git pull lines
+- ✅ **ADR-20260507110332831** (02-accepted): Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command
+- ✅ **ADR-20260507143241493** (02-accepted): cold-pool metadata layer: git-native hash instead of custom SHA-256, SQLite-backed, local-only trust
+- ✅ **ADR-20260507190157540** (02-accepted): Cold-pool project isolation: snapshot (default) vs sync dual-mode with guided intent switch
 
 ---
 

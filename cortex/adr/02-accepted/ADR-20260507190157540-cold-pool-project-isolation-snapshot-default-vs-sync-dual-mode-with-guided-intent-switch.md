@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-07 | Created from cold-pool + metadata layer architecture discussion |
+| accepted | 2026-05-07 | Accepted |
 
 ## 背景
 
@@ -90,6 +91,7 @@ deck freeze <name>          # symlink → snapshot（pin 当前版本）
 3. `deck prune` 的快照清理：snapshot 不再被任何 deck 引用时标记为可清理
 
 ## 相关
+- Epic: EPIC-20260507191713917 (cold-pool reconcile + dual-mode)
 - 关联 ADR: `ADR-20260507021957847` (ColdPool as dedicated resource holder)
 - 关联 ADR: `ADR-20260507143241493` (metadata layer — git-native hash + SQLite)
 - 关联 memory: `project_cold_pool_metadata_layer_research.md`
