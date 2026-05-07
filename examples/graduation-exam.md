@@ -1,55 +1,56 @@
-# Graduation Exam: Cookie Recipe with Radar Chart
+# Graduation Exam: Build a Deck, Run a Task
 
-> Send this to any AI agent and ask it to complete the task.
-> The agent should be able to figure out the setup from context.
+> **To the agent reading this:** Your job is to figure out which skills you need,
+> find them, install them, and produce the output. No one will tell you which
+> skills to pick. Use the lythoskill toolchain.
+
+## Goal
+
+Produce a professional `.docx` cookie recipe report with an embedded 5-dimension
+radar chart (Taste, Nutrition, Difficulty, Time, Cost). The document should include
+ingredient ratios with Baker's Percentages and scientific explanations.
 
 ## Prerequisites
 
 ```bash
-# 1. Install Bun (runtime)
-curl -fsSL https://bun.sh/install | bash
-
-# 2. Install kimi CLI (agent player)
-uv tool install kimi-cli && kimi login
-
-# 3. Clone skill repos to cold pool (one-time setup)
-mkdir -p ~/.agents/skill-repos/github.com/anthropics
-git clone https://github.com/anthropics/skills.git ~/.agents/skill-repos/github.com/anthropics/skills
-
-mkdir -p ~/.agents/skill-repos/github.com/SpillwaveSolutions
-git clone https://github.com/SpillwaveSolutions/design-doc-mermaid.git ~/.agents/skill-repos/github.com/SpillwaveSolutions/design-doc-mermaid
-
-mkdir -p ~/.agents/skill-repos/github.com/Weizhena
-git clone https://github.com/Weizhena/Deep-Research-skills.git ~/.agents/skill-repos/github.com/Weizhena/Deep-Research-skills
+curl -fsSL https://bun.sh/install | bash          # Bun runtime
+uv tool install kimi-cli && kimi login             # Agent player
 ```
 
-## Task
+## Your Job
 
-Run this exact command:
+1. **Discover** — search the web for skills that can help with: Word document
+   creation, charting/diagrams, research. Look at GitHub, skills.sh, agent-skill
+   directories, community collections.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- \
-  https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/recipe-report.toml \
-  "Create a professional cookie recipe report as a .docx file. The document MUST include:
-1. A title page with 'The Science of Perfect Chocolate Chip Cookies'
-2. Ingredient ratios as a formatted table with Baker Percentages
-3. Scientific explanation for each ingredient
-4. A 5-dimension radar chart (Taste, Nutrition, Difficulty, Time, Cost) embedded in the document
-5. Professional formatting with headings and page numbers"
-```
+2. **Install** — use `bunx @lythos/skill-deck@latest add <locator>` for each
+   skill you select. This clones to cold pool, builds skill-deck.toml, and links
+   to `.claude/skills/` — all in one command.
 
-If GitHub raw is blocked, use the ghproxy:
+3. **Run** — use arena to execute the task with your deck:
+   ```bash
+   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run \
+     --brief "<your task prompt>" \
+     --deck ./skill-deck.toml \
+     --out ./output
+   ```
 
-```bash
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- \
-  https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/recipe-report.toml \
-  "Create a professional cookie recipe report as a .docx file..."
-```
+4. **Verify** — check that the output .docx contains a radar chart and meets
+   the success criteria below.
 
 ## Success Criteria
 
-- [ ] No errors during execution
-- [ ] `cookie_recipe_report.docx` exists and is non-empty (should be 100KB+ with embedded image)
-- [ ] File contains a 5-dimensional radar/polar chart
-- [ ] Self-check reports 6 skills visible as symlinks
+- [ ] Skills were discovered and selected autonomously (not pre-chosen)
+- [ ] All `deck add` commands succeeded
+- [ ] `.claude/skills/` contains symlinks for each selected skill
+- [ ] Output .docx exists, is 100KB+ with embedded radar chart
 - [ ] Judge verdict: PASS
+
+## Hints
+
+- The lythoskill ecosystem has tools beyond `deck` — explore `curator` for
+  skill discovery and `arena` for comparing deck configurations.
+- If GitHub raw is blocked, use `https://ghfast.top/` as a proxy prefix.
+- You can install `@lythos/skill-curator` and `@lythos/skill-arena` the same
+  way as other packages: `bunx @lythos/skill-curator@latest` and
+  `bunx @lythos/skill-arena@latest`.
