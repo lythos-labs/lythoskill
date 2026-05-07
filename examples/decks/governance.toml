@@ -1,10 +1,16 @@
+# Governance Deck
+# lythoskill project governance — deck + cortex + scribe + onboarding.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/governance.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# lythoskill governance — project management + skill deck + memory
-[innate.skills.deck]
+[innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-role = "Declarative skill deck governance"
 
 [innate.skills.cortex]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"

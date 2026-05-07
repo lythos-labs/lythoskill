@@ -1,8 +1,17 @@
+# Research + Documents Deck
+# Deep research with evidence-gathering before writing. Compare with plain "documents" deck.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/research-documents.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Research the AI agent skills ecosystem and produce a .docx report" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Deep research + document output — research-backed professional reports.
-# Compare with plain "documents" deck: this adds evidence-gathering before writing.
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
 [tool.skills.research]
 path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"

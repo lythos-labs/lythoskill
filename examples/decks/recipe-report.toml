@@ -1,29 +1,26 @@
-[deck]
-max_cards = 10
+# Cookie Recipe Report Deck
+# Minimal skill set for producing a professional .docx with embedded radar chart.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/recipe-report.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run \
+#     --brief "Produce a professional .docx cookie recipe report with an embedded 5-dimension radar chart (Taste, Nutrition, Difficulty, Time, Cost). Include ingredient ratios with Baker's Percentages and scientific explanations." \
+#     --deck ./skill-deck.toml \
+#     --out ./output
 
-# Recipe report deck — docx + charting + research for professional food writing.
-# Graduation exam: produces .docx with embedded 5-d radar chart.
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
 [tool.skills.docx]
 path = "github.com/anthropics/skills/skills/docx"
-role = "Create and edit Word documents with formatting, tables, and embedded images"
-
-[tool.skills.pdf]
-path = "github.com/anthropics/skills/skills/pdf"
-role = "Read and extract text from PDF files"
-
-[tool.skills.design-doc-mermaid]
-path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-role = "Generate Mermaid diagrams — flowcharts, sequence diagrams, architecture"
 
 [tool.skills.research]
 path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
-role = "Generate structured research outline from a topic"
-
-[tool.skills.research-deep]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
-role = "Launch independent agents for each outline item, gather evidence"
 
 [tool.skills.research-report]
 path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
-role = "Summarize deep research results into structured report"

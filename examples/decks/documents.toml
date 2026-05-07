@@ -1,7 +1,18 @@
+# Document Format Deck
+# PDF + DOCX — read and write office formats with zero design overhead.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/documents.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Write a recipe as a .docx file" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Document format tools — read/write office formats, no design intelligence
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
 [tool.skills.pdf]
 path = "github.com/anthropics/skills/skills/pdf"
 role = "Read and extract text from PDF files"

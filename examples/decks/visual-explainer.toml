@@ -1,11 +1,21 @@
+# Visual Explainer Deck
+# Mermaid diagrams + theme factory for polished visual output.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/visual-explainer.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Explain system architecture with diagrams" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Visual Explainer — diagrams, flowcharts, and structured visuals
-# Use when: task involves processes, relationships, or systems that benefit from diagrams
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
 [tool.skills.design-doc-mermaid]
 path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-role = "Generate architecture diagrams, flowcharts, sequence diagrams, and ER diagrams from descriptions"
+role = "Generate architecture diagrams, flowcharts, sequence diagrams, ER diagrams from descriptions"
 
 [tool.skills.theme-factory]
 path = "github.com/anthropics/skills/skills/theme-factory"

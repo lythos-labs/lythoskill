@@ -1,7 +1,18 @@
+# Engineering Deck
+# TDD + PRD + architecture diagrams for disciplined development workflow.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/engineering.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Write a PRD and implement with TDD" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Engineering discipline skills — TDD + PRD workflow
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 role = "Vertical-slice red-green-refactor discipline"

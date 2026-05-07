@@ -1,8 +1,18 @@
+# Design Studio Deck
+# Frontend design taste + theme factory + brand guidelines. Kills AI slop.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/design-studio.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Design a landing page" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Design Studio — injects design taste, typography, and brand consistency
-# Use when: output needs to look professionally designed, not AI-generic
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
 [tool.skills.frontend-design]
 path = "github.com/anthropics/skills/skills/frontend-design"
 role = "Distinctive, non-generic aesthetic direction — no Inter/Roboto, no purple gradients"

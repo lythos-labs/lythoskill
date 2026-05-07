@@ -1,7 +1,18 @@
+# Full-Stack Deck
+# React best practices + component patterns + TDD + diagrams.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/full-stack.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Build a todo app with React and TDD" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Full-stack development — React + best practices + docs
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
 [tool.skills.react-best-practices]
 path = "github.com/vercel-labs/agent-skills/skills/react-best-practices"
 role = "React patterns: hooks, memo, performance"

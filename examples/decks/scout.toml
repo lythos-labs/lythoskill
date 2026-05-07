@@ -1,9 +1,14 @@
+# Scout Deck
+# Investigate a shared tool/repo before deciding to adopt. Intentionally thin —
+# the agent's built-in web access does the heavy lifting.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/scout.toml > skill-deck.toml
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run --brief "Investigate <repo-url>" --deck ./skill-deck.toml --out ./output
+
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
 
-# Scout — investigate a shared tool/repo before deciding to adopt
-# Use when: someone shares a GitHub repo, tool, or skill on social media
-# Flow: curl | bash -s -- scout "https://github.com/..."  → agent investigates → report
-#
-# This deck is intentionally thin — the agent's built-in web access does the heavy
-# lifting. The deck exists so the workflow has a name and can be invoked in one line.
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
