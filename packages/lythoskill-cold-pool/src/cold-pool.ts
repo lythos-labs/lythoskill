@@ -10,15 +10,18 @@ import { existsSync, readdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { Locator } from './types.js'
+import { MetadataDB } from './metadata-db.js'
 
 export const DEFAULT_COLD_POOL_PATH = process.env.LYTHOS_COLD_POOL
   ?? join(homedir(), '.agents/skill-repos')
 
 export class ColdPool {
   readonly path: string
+  readonly metadata: MetadataDB
 
   constructor(coldPoolPath?: string) {
     this.path = coldPoolPath ?? DEFAULT_COLD_POOL_PATH
+    this.metadata = new MetadataDB(join(this.path, '.cold-pool-meta.db'))
   }
 
   /**

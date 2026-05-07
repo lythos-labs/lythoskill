@@ -1,5 +1,5 @@
 [deck]
-max_cards = 10
+max_cards = 15
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
@@ -31,3 +31,18 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→fix→regression-test"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+
+[tool.skills.research-add-fields]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-add-fields"
+
+[tool.skills.research-add-items]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-add-items"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"

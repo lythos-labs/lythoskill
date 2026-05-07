@@ -18,6 +18,9 @@ export type {
 export { parseLocator, formatLocator } from './parse-locator.js'
 export { ColdPool, DEFAULT_COLD_POOL_PATH } from './cold-pool.js'
 
+export type { RepoRef, SkillHash, DeckReference } from './metadata-db.js'
+export { MetadataDB } from './metadata-db.js'
+
 export type { TreeEntry, TreeResponse, FetchFn } from './github-tree.js'
 export { fetchRepoTree } from './github-tree.js'
 

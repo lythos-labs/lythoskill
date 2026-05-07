@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { ColdPool, DEFAULT_COLD_POOL_PATH } from './cold-pool'
@@ -97,5 +97,24 @@ describe('ColdPool — fs-backed read accessors', () => {
   test('list() returns [] when path does not exist', () => {
     const empty = new ColdPool('/no/such/path')
     expect(empty.list()).toEqual([])
+  })
+})
+
+describe('ColdPool.metadata — MetadataDB integration', () => {
+  const root = mkdtempSync(join(tmpdir(), 'cold-pool-meta-test-'))
+  const pool = new ColdPool(root)
+
+  test('metadata is auto-created on first access (lazy-open)', () => {
+    expect(pool.metadata).toBeDefined()
+    // Lazy-open: DB file is NOT created until first method call.
+    expect(existsSync(join(root, '.cold-pool-meta.db'))).toBe(false)
+    // Trigger open with a no-op read.
+    pool.metadata.getRepoRef('github.com', 'nonexistent', 'repo')
+    expect(existsSync(join(root, '.cold-pool-meta.db'))).toBe(true)
+  })
+
+  test('metadata records survive round-trip', () => {
+    pool.metadata.recordRepoRef('github.com', 'lythos-labs', 'lythoskill', '9645fdb')
+    expect(pool.metadata.getRepoRef('github.com', 'lythos-labs', 'lythoskill')).toBe('9645fdb')
   })
 })
