@@ -1,0 +1,29 @@
+[deck]
+max_cards = 10
+
+# Recipe report deck — docx + charting + research for professional food writing.
+# Graduation exam: produces .docx with embedded 5-d radar chart.
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Create and edit Word documents with formatting, tables, and embedded images"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Read and extract text from PDF files"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate Mermaid diagrams — flowcharts, sequence diagrams, architecture"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Generate structured research outline from a topic"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Launch independent agents for each outline item, gather evidence"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Summarize deep research results into structured report"
