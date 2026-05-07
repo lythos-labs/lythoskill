@@ -16,9 +16,13 @@ import { resolve } from "node:path";
 import {
   buildValidationPlan,
   executeValidationPlan,
+  ColdPool,
+  hashSkillMd,
+  parseLocator,
   type ValidationReport,
 } from "@lythos/cold-pool";
 import { findDeckToml, expandHome, findSource } from "./link.js";
+import { join } from "node:path";
 import { parseDeck } from "./parse-deck.js";
 
 export interface ValidateOptions {
@@ -37,6 +41,10 @@ export interface DeckValidationReport {
     alias: string;
     localStatus: 'found' | 'missing' | 'parse-error';
     remote?: ValidationReport;
+    drift?: {
+      recordedSha256: string;
+      currentSha256: string;
+    };
   }>;
   budget: { declared: number; max_cards: number; within_budget: boolean };
 }
@@ -125,6 +133,8 @@ export async function buildDeckValidation(
     }
 
     let remote: ValidationReport | undefined;
+    let drift: { recordedSha256: string; currentSha256: string } | undefined;
+
     if (options.remote) {
       const plan = buildValidationPlan(entry.path);
       remote = await executeValidationPlan(plan);
@@ -135,12 +145,34 @@ export async function buildDeckValidation(
       errors.push(`Skill not found in cold pool: ${entry.path} (${entry.type})`);
     }
 
+    // ── Metadata drift check ──────────────────────────────────
+    if (localStatus === 'found' && result.path) {
+      try {
+        const pool = new ColdPool(COLD_POOL);
+        const locator = parseLocator(entry.path);
+        if (locator) {
+          const skillSubpath = locator.skill || '';
+          const recorded = pool.metadata.getSkillHash(locator.host, locator.owner, locator.repo, skillSubpath);
+          if (recorded) {
+            const current = hashSkillMd(join(result.path, 'SKILL.md'));
+            if (recorded !== current) {
+              drift = { recordedSha256: recorded, currentSha256: current };
+              warnings.push(`Content drift: ${entry.alias} — SKILL.md changed since last deck add/link`);
+            }
+          }
+        }
+      } catch {
+        // Drift check is best-effort
+      }
+    }
+
     entryReports.push({
       locator: entry.path,
       type: entry.type,
       alias: entry.alias,
       localStatus,
       remote,
+      drift,
     });
   }
 
@@ -197,6 +229,12 @@ function renderText(report: DeckValidationReport): void {
         const tag = fix.action === 'update-locator' && fix.newLocator ? `→ ${fix.newLocator}` : fix.action
         console.log(`     ${tag} (confidence: ${fix.confidence.toFixed(2)}) — ${fix.message}`)
       }
+    }
+    if (entry.drift) {
+      console.log(`🔀 ${entry.alias} — content drift detected`)
+      console.log(`     recorded: ${entry.drift.recordedSha256.slice(0, 16)}...`)
+      console.log(`     current:  ${entry.drift.currentSha256.slice(0, 16)}...`)
+      console.log(`     Run \`deck add ${entry.locator}\` to re-record metadata`)
     }
   }
 
