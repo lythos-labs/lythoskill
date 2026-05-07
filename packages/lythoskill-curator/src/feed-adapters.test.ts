@@ -73,10 +73,9 @@ describe('createLobeHubAdapter', () => {
     expect(adapter.feed.locator).toContain('web scraping')
   })
 
-  test('returns empty when market-cli is not installed', async () => {
-    // When @lobehub/market-cli is not installed, spawnSync returns non-zero
+  test.skipIf(!!process.env.CI)('returns empty when market-cli is not installed', async () => {
+    // npx spawnSync — network IO, not meaningful in CI.
     const items = await createLobeHubAdapter().discover()
-    // In test environments without market-cli, this should return empty
     expect(items).toEqual([])
   })
 })

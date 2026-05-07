@@ -93,7 +93,7 @@ export function createLobeHubAdapter(query?: string): FeedAdapter {
         const r = spawnSync('npx', [
           '-y', '@lobehub/market-cli', 'skills', 'search',
           '--q', q, '--format', 'json',
-        ], { encoding: 'utf-8', timeout: 30_000 })
+        ], { encoding: 'utf-8', timeout: 5_000 })
 
         if (r.status !== 0 || !r.stdout) return []
         const data = JSON.parse(r.stdout) as { items?: Array<{ identifier: string; meta?: { title?: string; description?: string }; author?: string }> }
