@@ -125,22 +125,20 @@ Compare *intended priorities* against *actual execution*:
 
 ## Verify Companion
 
-Before relying on a weekly for planning, verify its claims:
+Before relying on a weekly for planning, spot-check its claims against ground truth:
 
 ```bash
-bunx @lythos/skill-creator@{{PACKAGE_VERSION}} validate-weekly weekly/2026-W19.md
-```
-
-Or manually spot-check:
-```bash
-# Does the recorded epic status match reality?
+# Does the recorded epic/task status match reality?
 bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe
 
 # Does the git activity match the claimed period?
 git log --since="2026-05-01" --until="2026-05-07" --oneline
+
+# Do the referenced daily files exist?
+ls daily/2026-05-*.md
 ```
 
-Wrong facts in weekly = disaster for next agent. Validate before acting.
+Wrong facts in weekly = disaster for next agent. The agent owns this verification — there is no `validate-weekly` CLI; weekly is a pure skill that produces a doc, the agent uses cortex probe + git log + daily ls to reality-check what it just wrote.
 
 ## Gotchas
 
