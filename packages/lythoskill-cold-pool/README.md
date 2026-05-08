@@ -2,7 +2,7 @@
 
 Cold pool service layer for the lythoskill ecosystem.
 
-> Status: scaffold (0.9.x). Public API will stabilize at 0.10.0.
+> Status: 0.9.32 — public API. Reconciliation (reconcile plan) is functional; execute convergence WIP.
 
 ## What this is
 
@@ -16,12 +16,14 @@ deck / curator / arena consume it instead of running `git clone` themselves.
 Three layers, sharing the project's `intent → plan → execute` pattern
 (`cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md`):
 
-- **Resource layer** — `ColdPool` class holds path, metadata index, reconcile
-  entry. Read-only accessors.
+- **Resource layer** — `ColdPool` class holds path, metadata index (MetadataDB),
+  reconcile entry. Read-only accessors: `resolveDir()`, `has()`, `list()`.
 - **Plan layer** — `buildFetchPlan(coldPool, locator) → FetchPlan`,
-  `buildValidationPlan(coldPool, locator) → ValidationReport`. Pure data,
+  `buildValidationPlan(coldPool, locator) → ValidationReport`,
+  `buildReconcilePlan(coldPool, desired) → ReconcilePlan`. Pure data,
   no side effects, dry-run printable.
-- **Execute layer** — `executeFetchPlan(plan, io: FetchIO)`. IO is
+- **Execute layer** — `executeFetchPlan(plan, io: FetchIO)`,
+  `executeReconcilePlan(plan, io: ReconcileIO)`. IO is
   injectable; defaults to real git operations. Tests swap mocks.
 
 ## Locator
