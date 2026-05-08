@@ -11,14 +11,14 @@ Not every skill needs complex logic, dependencies, or build steps. The thinnest 
 ```bash
 bun add -d @lythos/hello-world
 # or use directly
-bunx @lythos/hello-world@0.9.34
+bunx @lythos/hello-world@0.9.35
 ```
 
 ## Quick Start
 
 ```bash
 # Sanity-check: does the thin-skill ecosystem work?
-bunx @lythos/hello-world@0.9.34
+bunx @lythos/hello-world@0.9.35
 # → ✅ Hello from lythoskill-hello-world! The thin-skill ecosystem works.
 
 # Use the SKILL.md as a template for your own skill
