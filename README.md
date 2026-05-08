@@ -325,7 +325,7 @@ bunx @lythos/skill-deck@latest link
 | [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | Full-stack development |
 | [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | Project governance |
 
-> `link` only activates skills already in your cold pool. Missing skills report "Skill not found" — add them with `deck add <path>` or clone manually.
+> `link` only activates skills already in your cold pool. Missing skills? Use `deck add <path>` — one command clones to cold pool, updates deck, and links.
 
 For monorepo skills (multiple skills in one repo), include the full path:
 
@@ -333,10 +333,10 @@ For monorepo skills (multiple skills in one repo), include the full path:
 # Monorepo: specify the skill path inside the repo
 bunx @lythos/skill-deck@latest add github.com/owner/repo/skills/my-skill
 
-# Alternative: manual clone
+# Advanced: manual clone (for specific branch/depth, then deck link)
 git clone https://github.com/owner/repo.git \
   ~/.agents/skill-repos/github.com/owner/repo
-# then edit skill-deck.toml and run `deck link`
+# deck add is recommended — it also records metadata for reconcile/refresh
 ```
 
 ### Naming cheat sheet
@@ -412,12 +412,10 @@ Here's how a subagent works under deck governance in practice.
 npx create-next-app@latest my-app --default --use-bun
 cd my-app
 
-# 2. Clone community skills to the cold pool (one-time global setup)
-git clone https://github.com/anthropics/skills.git \
-  ~/.agents/skill-repos/github.com/anthropics/skills
-
-git clone https://github.com/vercel-labs/agent-skills.git \
-  ~/.agents/skill-repos/github.com/vercel-labs/agent-skills
+# 2. Add community skills to the cold pool (deck add handles clone + deck.toml + link)
+bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/frontend-design
+bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/pdf
+bunx @lythos/skill-deck@latest add github.com/vercel-labs/agent-skills/skills/react-best-practices
 
 # 3. Agent self-assembles the deck by reading SKILL.md files
 #    and deciding which skills the project needs.
@@ -517,9 +515,10 @@ lythoskill uses a **Go module-style directory structure** for the cold pool, wit
 │   └── someone/
 │       └── standalone-skill/       ← Non-monorepo: repo root = skill
 │           └── SKILL.md
-└── localhost/                      ← Local skills without remote origin
-    └── my-experiment/
-        └── SKILL.md
+└── localhost/                      ← Local skills (uniform host/owner/repo)
+    └── me/                          ← Owner = you
+        └── my-experiment/
+            └── SKILL.md
 ```
 
 **Why `~/.agents/skill-repos` is recommended**:
@@ -527,20 +526,14 @@ lythoskill uses a **Go module-style directory structure** for the cold pool, wit
 - It is **structured** — `github.com/<owner>/<repo>` provides source traceability and prevents name collisions
 - It is **extensible** — supports GitHub, GitLab, self-hosted, and local experiments; the path *is* the provenance
 
-**Adding skills to the cold pool** — this is a one-time setup per skill source. You can do it manually, or ask your agent to run it:
+**Adding skills to the cold pool** — `deck add` handles clone + deck.toml + link in one command:
 
 ```bash
-# Install any skill repo into the cold pool
-git clone https://github.com/<owner>/<repo>.git \
-  ~/.agents/skill-repos/github.com/<owner>/<repo>
-
-# Real examples:
-git clone https://github.com/lythos-labs/lythoskill.git \
-  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
-
-git clone https://github.com/garrytan/gstack.git \
-  ~/.agents/skill-repos/github.com/garrytan/gstack
+bunx @lythos/skill-deck@latest add github.com/lythos-labs/lythoskill/skills/lythoskill-deck
+bunx @lythos/skill-deck@latest add github.com/mattpocock/skills/skills/engineering/tdd
 ```
+
+Manual clone is still possible if you need a specific branch or depth, but `deck add` is the recommended path — it also records metadata (HEAD ref, skill hash) for reconcile and refresh.
 
 After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.
 
@@ -596,7 +589,7 @@ Agent Platforms (Claude Code, Kimi, Codex)
         ↑
   skill-deck.toml  ← human declares desired state
         ↑
-   Cold Pool       ← user fills (git clone, skills.sh, etc.)
+   Cold Pool       ← user fills (deck add, or git clone for advanced cases)
         ↑
 Skill Sources (GitHub, Vercel, npm, internal repos)
 ```
@@ -733,11 +726,11 @@ Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` or clone manually |
+| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` |
 | `bunx: command not found` | Bun not installed or shell not restarted | Run `source ~/.bashrc` or open a new terminal |
 | Symlink creation fails | Permissions or non-standard filesystem | Ensure `working_set` directory exists and is writable |
 | `quick-agent.sh` fails with `Deck fetch failed` | `raw.githubusercontent.com` unreachable | Prefix deck URL with `https://ghfast.top/` or `https://gh-proxy.com/` (see [network note](#quick-start)) |
-| `deck link` hangs or fails | `github.com` unreachable during skill clone | Clone skills manually to cold pool, or use a git proxy |
+| `deck link` hangs or fails | `github.com` unreachable during skill clone | Use a git proxy: `git config --global url."https://ghfast.top/https://github.com/".insteadOf https://github.com/` |
 
 ---
 
