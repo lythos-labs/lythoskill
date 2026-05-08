@@ -5,7 +5,7 @@
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-07 | Created |
+| completed | 2026-05-07 | Closed by probe fix |
 
 ## 背景与目标
 
