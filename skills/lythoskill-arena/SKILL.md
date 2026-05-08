@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.9.37
+version: 0.9.38
 type: standard
 description: |
   Controlled-variable test play for skills and deck configurations.  Scaffolds isolated arena environments where subagents complete  the same task under different decks, then a judge agent scores outputs  across multiple dimensions. Supports single-skill A/B comparison
@@ -9,8 +9,8 @@ when_to_use: |
   Compare skills, A/B test skills, which skill is better, test deck  configuration, benchmark skill, skill evaluation, deck comparison,
   try before adopting, test play, Pareto analysis, skill synergy check,  does adding this skill improve my deck.
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.9.37 *)
-  - Bash(bunx @lythos/skill-deck@0.9.37 link *)
+  - Bash(bunx @lythos/skill-arena@0.9.38 *)
+  - Bash(bunx @lythos/skill-deck@0.9.38 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -76,14 +76,14 @@ The simplest path — one subagent, one deck, one task. Used by `examples/quick-
 
 ```bash
 # Task in a markdown file
-bunx @lythos/skill-arena@0.9.37 agent-run \
+bunx @lythos/skill-arena@0.9.38 agent-run \
   --task ./TASK.md \
   --deck ./skill-deck.toml \
   --player kimi \
   --out ./output
 
 # Inline brief (no TASK file needed)
-bunx @lythos/skill-arena@0.9.37 agent-run \
+bunx @lythos/skill-arena@0.9.38 agent-run \
   --brief "Investigate this repo and produce a deck plan" \
   --deck ./skill-deck.toml \
   --out ./output
@@ -94,8 +94,8 @@ bunx @lythos/skill-arena@0.9.37 agent-run \
 Use an `arena.toml` to declare task + sides + criteria — reproducible, version-controlled, dry-runnable.
 
 ```bash
-bunx @lythos/skill-arena@0.9.37 run --config ./arena.toml
-bunx @lythos/skill-arena@0.9.37 run --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.38 run --config ./arena.toml
+bunx @lythos/skill-arena@0.9.38 run --config ./arena.toml --dry-run
 ```
 
 `arena.toml` declares per-side player + deck + criteria; `run --config` orchestrates the whole comparison.
@@ -103,7 +103,7 @@ bunx @lythos/skill-arena@0.9.37 run --config ./arena.toml --dry-run
 ### CLI-flag mode (backward-compat)
 
 ```bash
-bunx @lythos/skill-arena@0.9.37 run \
+bunx @lythos/skill-arena@0.9.38 run \
   --task ./TASK-arena.md \
   --players ./players/claude.toml,./players/kimi.toml \
   --decks ./decks/A.toml,./decks/B.toml \
@@ -116,7 +116,7 @@ For controlled-variable comparison via per-skill or per-deck scaffolds. The CLI 
 
 #### Mode 1: Single-Skill Comparison
 ```bash
-bunx @lythos/skill-arena@0.9.37 scaffold \
+bunx @lythos/skill-arena@0.9.38 scaffold \
   --task "Generate auth flow diagram" \
   --skills "design-doc-mermaid,mermaid-tools" \
   --criteria "syntax,context,token"
@@ -126,7 +126,7 @@ Generates one deck per skill, each with the test skill + a shared control skill 
 
 #### Mode 2: Full-Deck Comparison (Pareto frontier)
 ```bash
-bunx @lythos/skill-arena@0.9.37 scaffold \
+bunx @lythos/skill-arena@0.9.38 scaffold \
   --task "Generate auth flow diagram" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -135,7 +135,7 @@ bunx @lythos/skill-arena@0.9.37 scaffold \
 ### Visualize results
 
 ```bash
-bunx @lythos/skill-arena@0.9.37 viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.38 viz tmp/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
