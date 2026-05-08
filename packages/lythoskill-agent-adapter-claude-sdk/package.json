@@ -1,6 +1,6 @@
 {
   "name": "@lythos/agent-adapter-claude-sdk",
-  "version": "0.9.30",
+  "version": "0.9.31",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {

@@ -63,7 +63,7 @@ export function refreshDeck(cliDeckPath?: string, cliWorkdir?: string, target?: 
   const results = executeRefreshPlan(plan, {
     gitPull,
     log: console.log,
-    linkDeck: () => {
+    linkDeck: async () => {
       console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
       console.log('🔗 Running deck link...')
       await linkDeck(cliDeckPath, cliWorkdir)
