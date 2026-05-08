@@ -153,6 +153,31 @@ Different agents look for skills in different directories. `skill-deck.toml` con
 
 > **If you are an agent**: verify where your platform scans for skills, then set `working_set` to that path before running `deck link`.
 
+### For OpenClaw
+
+OpenClaw loads skills from multiple locations, in priority order:
+
+| Priority | Location | Use case |
+|----------|----------|----------|
+| 1 | `<workspace>/skills` | Workspace-level override |
+| 2 | `<workspace>/.agents/skills` | **Project deck (recommended)** |
+| 3 | `~/.agents/skills` | Personal agent skills |
+| 4 | `~/.openclaw/skills` | Global managed skills |
+
+**Per-project deck** (most common):
+```toml
+[deck]
+working_set = ".agents/skills"
+```
+This matches OpenClaw's "project agent skills" path. Run `deck link` from your project root.
+
+**Global deck** (manage all OpenClaw skills centrally):
+```toml
+[deck]
+working_set = "~/.openclaw/skills"
+```
+Create this in your home directory. One global deck can syndicate to all projects via OpenClaw's fallback chain.
+
 ### Troubleshooting
 
 | Symptom | Cause | Fix |
