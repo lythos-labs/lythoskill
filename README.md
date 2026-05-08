@@ -189,7 +189,18 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-After `link`: `.claude/skills/` is populated, `skill-deck.lock` is generated. Edit `skill-deck.toml`, re-run `link` — the working set follows. Different project, different deck, same cold pool. No contamination.
+After `link`: `skill-deck.lock` is generated, working set is populated. Default location is `.claude/skills/` — change `working_set` in `skill-deck.toml` to match your agent:
+
+```toml
+[deck]
+working_set = ".claude/skills"   # Claude Code (also read by Cursor, Copilot)
+# working_set = ".agents/skills"   # Codex CLI, OpenClaw
+# working_set = ".cursor/skills"   # Cursor-native
+# working_set = ".github/skills"   # GitHub Copilot
+# working_set = ".windsurf/skills" # Windsurf
+```
+
+Edit `skill-deck.toml`, re-run `link` — the working set follows. Different project, different deck, different agent target, same cold pool. No contamination.
 
 | Pre-built deck | For |
 |----------------|-----|
