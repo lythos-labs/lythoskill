@@ -90,8 +90,15 @@ export function buildToolPrompt(tool: ToolDefinition, prompt: string): string {
 // ── JSON extraction (pure: parse LLM output without IO) ─────────────────
 
 export function extractJson(raw: string): unknown {
-  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]{1,100000}?)\s*```/)
-  const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
+  const fenceIdx = raw.indexOf('```')
+  let jsonStr: string
+  if (fenceIdx >= 0) {
+    const start = raw.indexOf('\n', fenceIdx) + 1
+    const end = raw.indexOf('```', start)
+    jsonStr = (end >= 0 ? raw.slice(start, end) : raw.slice(fenceIdx + 3)).trim()
+  } else {
+    jsonStr = raw.trim()
+  }
   return JSON.parse(jsonStr)
 }
 
