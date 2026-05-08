@@ -565,82 +565,13 @@ After that, declare the skill in your project's `skill-deck.toml` and run `deck 
 
 ## Architecture
 
-### Deck Governance Model
-
 ```
-Cold Pool (storage)          Declaration (intent)         Working Set (runtime)
-  ~/.agents/skill-repos/       skill-deck.toml              .claude/skills/
-  ├── github.com/.../            [deck]                       ├── web-search ->
-  └── localhost/.../             max_cards = 8                ├── docx ->
-                                 [tool]                       └── design-doc-mermaid ->
-                                   skills = ["web-search",
-                                             "docx",
-                                             "design-doc-mermaid"]
+Cold Pool (~/.agents/skill-repos/)  →  Declaration (skill-deck.toml)  →  Working Set (.claude/skills/)
 ```
 
-### Governance Layer Positioning
+lythoskill governs on top of the Agent Skills standard — like Kubernetes governs containers without defining the OCI spec. Full architecture: see [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) or generate docs with the [architecture-explainer](./examples/decks/architecture-explainer.toml) deck.
 
-```
-Agent Platforms (Claude Code, Kimi, Codex)
-        ↑  ← define SKILL.md standard
-   .claude/skills/  ← working set (deck manages)
-        ↑
-  lythoskill-deck  ← declarative governance (governance layer)
-        ↑
-  skill-deck.toml  ← human declares desired state
-        ↑
-   Cold Pool       ← user fills (deck add, or git clone for advanced cases)
-        ↑
-Skill Sources (GitHub, Vercel, npm, internal repos)
-```
-
-lythoskill sits **between** skill sources and agent platforms — it does not replace either. It prevents the mess that naturally accumulates when skills grow from 10 to 100+.
-
-**Analogy**: If you're familiar with Java/Maven, the mental model is similar:
-- `skill-deck.toml` ≈ `pom.xml` — declares what you need
-- `deck add` ≈ `mvn dependency:get` — downloads to local storage
-- cold pool ≈ `~/.m2/repository` — local cache of everything you've downloaded
-- `deck link` ≈ making dependencies available to the project — but with symlinks, not copies
-- `.claude/skills/` ≈ project's classpath — only what's declared is visible
-
----
-
-## Quick Reference
-
-```bash
-# Deck governance (bunx only — requires Bun runtime)
-bunx @lythos/skill-deck@latest link                       # Sync toml -> working set
-bunx @lythos/skill-deck@latest add github.com/owner/repo             # Download skill + add to deck
-bunx @lythos/skill-deck@latest link --deck ./my-deck.toml
-
-# Skill scaffolding
-bunx @lythos/skill-creator@latest init my-project
-bunx @lythos/skill-creator@latest build my-skill
-
-# Project governance
-bunx @lythos/project-cortex@latest task "Fix auth flow"
-bunx @lythos/project-cortex@latest list
-bunx @lythos/project-cortex@latest index
-
-# Cold pool curation
-bunx @lythos/skill-curator@latest ~/.agents/skill-repos
-# → outputs ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
-
-# Arena single-skill comparison
-bunx @lythos/skill-arena@latest \
-  --task "Generate auth flow" \
-  --skills "design-doc-mermaid,mermaid-tools"
-
-# Arena full deck comparison
-bunx @lythos/skill-arena@latest \
-  --task "Generate auth flow" \
-  --decks "./decks/minimal.toml,./decks/rich.toml" \
-  --criteria "quality,token,maintainability"
-```
-
----
-
-## Development
+## Development## Development
 
 > For contributors and developers working **inside this repo**.
 
@@ -669,31 +600,11 @@ All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and P
 
 ## Testing
 
-BDD scenarios in this repo are **LLM-readable contracts** — Given/When/Then in plain Markdown (or TypeScript), driven by a tiny custom runner. No Cucumber, no plugin layer, so an agent can author and read them without framework knowledge.
-
-| Category | In CI? | Where it lives |
-|----------|--------|----------------|
-| **Unit** | yes | (introduce as needed; Vitest / `bun:test` are fine) |
-| **CLI integration BDD** | yes | `packages/*/test/scenarios/` |
-| **Agent BDD** | **no** — relies on LLM inference, no LLM in CI | not yet authored; will use a `*.agent.md` suffix |
-
-Run everything locally:
-```bash
-bun run test:all     # 12 cortex + 21 deck scenarios
+```
+215 unit + CLI BDD tests in CI. Agent BDD (.agent.md) runs locally.
 ```
 
-### Test Reports (per-commit)
-
-Capture full test output + coverage to a timestamped file:
-
-```bash
-bun scripts/test-report.ts
-# → test-results/<YYYYMMDD-HHMMSS>-<short-hash>.txt
-```
-
-CI uploads the report as an artifact on every push. [Latest →](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
-
-Full scenario index: [`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md).
+[Test conventions](./packages/lythoskill-test-utils/SCENARIOS.md) · [CI dashboard](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 
 ---
 
