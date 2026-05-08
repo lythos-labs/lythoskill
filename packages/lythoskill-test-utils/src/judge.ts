@@ -134,9 +134,28 @@ export async function runLLMJudge(
         timeoutMs: 60000,
       })
       raw = judgeResult.stdout
-      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
-      const jsonStr = fenceMatch ? fenceMatch[1].trim() : raw.trim()
-      parsed = JSON.parse(jsonStr)
+	      let jsonStr: string
+	      const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)\s*```/)
+	      if (fenceMatch) {
+	        jsonStr = fenceMatch[1].trim()
+	      } else {
+	        // No code fence — try to extract structured verdict from markdown
+	        const verdictMatch = raw.match(/\*\*Verdict:\s*(PASS|FAIL|ERROR)\*\*/i)
+	          ?? raw.match(/Verdict:\s*(PASS|FAIL|ERROR)/i)
+	        const reasonMatch = raw.match(/\*\*Reason:\s*(.+?)\*\*/)
+	          ?? raw.match(/Reason:\s*(.+?)(?:\n|$)/)
+	        const confidenceMatch = raw.match(/confidence:?\s*(\d+)/i)
+	        if (verdictMatch) {
+	          jsonStr = JSON.stringify({
+	            verdict: verdictMatch[1].toUpperCase(),
+	            reason: reasonMatch?.[1] ?? raw.slice(0, 300),
+	            confidence: confidenceMatch ? parseInt(confidenceMatch[1]) / 100 : undefined,
+	          })
+	        } else {
+	          jsonStr = raw.trim()
+	        }
+	      }
+	      parsed = JSON.parse(jsonStr)
 
       // Normalize LLM output before Zod validation
       const normalized = normalizeVerdictJson(parsed as Record<string, unknown>)

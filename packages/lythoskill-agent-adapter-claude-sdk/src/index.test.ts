@@ -3,7 +3,7 @@ import { claudeSdkAdapter } from './index'
 
 describe('@lythos/agent-adapter-claude-sdk', () => {
   test('adapter has correct name', () => {
-    expect(claudeSdkAdapter.name).toBe('claude-sdk')
+    expect(claudeSdkAdapter.name).toBe('claude')
   })
 
   test('spawn throws clear error when auth is missing', async () => {
