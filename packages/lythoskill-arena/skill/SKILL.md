@@ -69,25 +69,71 @@ deck = "./my-deck.toml"
 If `player` is omitted, arena defaults to `kimi`.
 
 ## Commands
-### Mode 1: Single-Skill Comparison (controlled variable)
+
+### Primary: single agent run (`agent-run`)
+
+The simplest path — one subagent, one deck, one task. Used by `examples/quick-agent.sh` internally.
+
 ```bash
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} \
-  --task "Generate auth flow diagram" \  --skills "design-doc-mermaid,mermaid-tools" \  --criteria "syntax,context,token"
+# Task in a markdown file
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} agent-run \
+  --task ./TASK.md \
+  --deck ./skill-deck.toml \
+  --player kimi \
+  --out ./output
+
+# Inline brief (no TASK file needed)
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} agent-run \
+  --brief "Investigate this repo and produce a deck plan" \
+  --deck ./skill-deck.toml \
+  --out ./output
 ```
 
-Generates one deck per skill. Each deck contains the test skill + a shared
-control skill (default: `project-scribe`, override with `--control`).
+### Declarative: `run --config` (k8s-style)
 
-### Mode 2: Full-Deck Comparison (Pareto frontier)
+Use an `arena.toml` to declare task + sides + criteria — reproducible, version-controlled, dry-runnable.
+
 ```bash
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} \
-  --task "Generate auth flow diagram" \  --decks "./decks/minimal.toml,./decks/rich.toml,./decks/superpowers.toml" \  --criteria "quality,token,maintainability"
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} run --config ./arena.toml
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} run --config ./arena.toml --dry-run
 ```
 
-Uses provided deck files as-is. Judge outputs score vectors and identifies
-the Pareto frontier — non-dominated solutions, not a single winner.
+`arena.toml` declares per-side player + deck + criteria; `run --config` orchestrates the whole comparison.
 
-### Visualize Results
+### CLI-flag mode (backward-compat)
+
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} run \
+  --task ./TASK-arena.md \
+  --players ./players/claude.toml,./players/kimi.toml \
+  --decks ./decks/A.toml,./decks/B.toml \
+  --criteria coverage,relevance,token
+```
+
+### Legacy: `scaffold` (manual subagent execution)
+
+For controlled-variable comparison via per-skill or per-deck scaffolds. The CLI creates the directory + per-side decks; the agent dispatches subagents and judges.
+
+#### Mode 1: Single-Skill Comparison
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} scaffold \
+  --task "Generate auth flow diagram" \
+  --skills "design-doc-mermaid,mermaid-tools" \
+  --criteria "syntax,context,token"
+```
+
+Generates one deck per skill, each with the test skill + a shared control skill (default: `project-scribe`, override with `--control`).
+
+#### Mode 2: Full-Deck Comparison (Pareto frontier)
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} scaffold \
+  --task "Generate auth flow diagram" \
+  --decks "./decks/minimal.toml,./decks/rich.toml" \
+  --criteria "quality,token,maintainability"
+```
+
+### Visualize results
+
 ```bash
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} viz tmp/arena-<id>/
 ```
@@ -95,17 +141,26 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} viz tmp/arena-<id>/
 Renders ASCII bar charts and radar comparison from `report.md`.
 
 ### Parameters
-| Flag | Short | Required | Description |
-|------|-------|----------|-------------|
-| `--task` | `-t` | Yes | Task description for all subagents |
-| `--skills` | `-s` | Mode 1 | Comma-separated skills (2–5) |
-| `--decks` | | Mode 2 | Comma-separated deck toml paths (2–5) |
-| `--criteria` | `-c` | No | Evaluation dimensions (default: syntax,context,logic,token) |
-| `--control` | | No | Control skill for Mode 1 (default: project-scribe) |
-| `--dir` | `-d` | No | Parent directory for arena (default: tmp) |
-| `--project` | `-p` | No | Project root (default: .) |
 
-`--skills` and `--decks` are mutually exclusive.
+| Flag | Used by | Description |
+|------|---------|-------------|
+| `--task <path\|desc>` | agent-run, run, scaffold | Task description or path to TASK-arena.md |
+| `--brief "<prompt>"` | agent-run | Inline task brief (alternative to `--task` path) |
+| `--deck <path>` | agent-run | Deck for the single subagent |
+| `--config <path>` | run | Declarative arena.toml |
+| `--players <list>` | run (CLI mode) | Comma-separated player.toml paths |
+| `--decks <list>` | run, scaffold (Mode 2) | Comma-separated deck.toml paths |
+| `--skills <list>` | scaffold (Mode 1) | Comma-separated skill names (2–5) |
+| `--criteria <list>` | run, scaffold | Evaluation dimensions (default: syntax,context,logic,token) |
+| `--player <name>` | agent-run | Specific player (default: kimi) |
+| `--control <skill>` | scaffold (Mode 1) | Control skill (default: project-scribe) |
+| `--out <dir>` | agent-run, run | Output directory |
+| `--dir <dir>` | scaffold | Parent dir (default: tmp) |
+| `--project <dir>` | all | Project root (default: .) |
+| `--timeout <ms>` | agent-run | Subagent timeout |
+| `--dry-run` | run --config | Print plan without running |
+
+`--skills` and `--decks` are mutually exclusive in scaffold mode.
 
 ## Directory Structure (generated by CLI)
 ```
