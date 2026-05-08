@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 20:42:55
+> 自动生成于 2026/5/8 20:56:42
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 168 | 进行中: 0, 待验收: 0, 已完成: 142 |
+| Tasks | 168 | 进行中: 0, 待验收: 0, 已完成: 143 |
 | Epics | 26 | 活跃: 1, 已完成: 21, 悬置: 2, 已归档: 2 |
 | ADRs | 55 | 已接受: 46 |
 
@@ -56,9 +56,9 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260508204204714**: Isolate environment-dependent tests with guard/skip — LobeHub adapter, git-hash, clone tests fail in CI
+_无_
 
 ### 进行中 (0)
 
@@ -68,7 +68,7 @@ _无_
 
 _无_
 
-### 已完成 (142)
+### 已完成 (143)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -212,6 +212,7 @@ _无_
 - ✅ ~~TASK-20260508155102153~~: Fix judge parser markdown bold extraction (** → JSON parse error)
 - ✅ ~~TASK-20260508155132653~~: Document AGENTS.md bootloader pattern from playground
 - ✅ ~~TASK-20260508155133562~~: Generate deck INDEX.md — catalogue all example decks by use-case
+- ✅ ~~TASK-20260508204204714~~: Isolate environment-dependent tests with guard/skip — LobeHub adapter, git-hash, clone tests fail in CI
 
 ### 悬置 (0)
 

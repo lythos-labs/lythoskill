@@ -38,9 +38,10 @@
 - **[0000-00-00]** [cold-pool-cli-boundary](./01-patterns/cold-pool-cli-boundary.md)
 - **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
 
-## ❓ FAQ (0)
+## ❓ FAQ (2)
 
-*No entries yet.*
+- **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
+- **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
 ## 📖 Lessons (15)
 
