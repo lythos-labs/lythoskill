@@ -61,7 +61,7 @@ const HELP_CONFIG = {
     { name: 'prune', description: 'GC cold pool repos no longer referenced by any deck', args: '[--yes]' },
     { name: 'sync', description: 'Switch skill from snapshot (cp) to sync (symlink)', args: '<alias>' },
     { name: 'freeze', description: 'Switch skill from sync (symlink) to snapshot (cp), pinning current HEAD', args: '<alias>' },
-    { name: 'reconcile', description: 'Compare lock file (desired) vs cold pool (actual), report drift', args: '[--apply]' },
+    { name: 'reconcile', description: 'Compare lock file vs cold pool, report drift', args: '[--apply] [--yes]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
@@ -141,7 +141,7 @@ switch (command) {
   }
   case 'reconcile': {
     const apply = args.includes('--apply')
-    reconcileDeck(deckPath, workdir, apply)
+    await reconcileDeck(deckPath, workdir, apply, yes)
     break
   }
   case 'prune': {
