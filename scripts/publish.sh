@@ -56,6 +56,7 @@ PACKAGES=(
 	  "packages/lythoskill-agent-adapter-claude-sdk"
 	  "packages/lythoskill-agent-adapter-deepseek-serve"
   "packages/lythoskill-test-utils"
+  "packages/lythoskill-infra"
   "packages/lythoskill-cold-pool"
   "packages/lythoskill-project-cortex"
   "packages/lythoskill-curator"

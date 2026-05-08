@@ -10,11 +10,11 @@
     },
     "packages/lythoskill-agent-adapter": {
       "name": "@lythos/agent-adapter",
-      "version": "0.9.33",
+      "version": "0.9.36",
     },
     "packages/lythoskill-agent-adapter-claude-sdk": {
       "name": "@lythos/agent-adapter-claude-sdk",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "dependencies": {
         "@anthropic-ai/claude-agent-sdk": "^0.2.131",
         "@lythos/agent-adapter": "workspace:*",
@@ -22,14 +22,14 @@
     },
     "packages/lythoskill-agent-adapter-deepseek-serve": {
       "name": "@lythos/agent-adapter-deepseek-serve",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "dependencies": {
         "@lythos/agent-adapter": "^0.9.33",
       },
     },
     "packages/lythoskill-arena": {
       "name": "@lythos/skill-arena",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-arena": "src/cli.ts",
       },
@@ -45,21 +45,22 @@
     },
     "packages/lythoskill-cold-pool": {
       "name": "@lythos/cold-pool",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "dependencies": {
+        "@lythos/infra": "^0.9.36",
         "simple-git": "^3.36.0",
       },
     },
     "packages/lythoskill-creator": {
       "name": "@lythos/skill-creator",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-curator": {
       "name": "@lythos/skill-curator",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-curator": "src/cli.ts",
       },
@@ -70,7 +71,7 @@
     },
     "packages/lythoskill-deck": {
       "name": "@lythos/skill-deck",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-deck": "src/cli.ts",
       },
@@ -83,14 +84,18 @@
     },
     "packages/lythoskill-hello-world": {
       "name": "@lythos/hello-world",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-hello-world": "src/cli.ts",
       },
     },
+    "packages/lythoskill-infra": {
+      "name": "@lythos/infra",
+      "version": "0.9.36",
+    },
     "packages/lythoskill-project-cortex": {
       "name": "@lythos/project-cortex",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "bin": {
         "lythoskill-project-cortex": "src/cli.ts",
       },
@@ -100,7 +105,7 @@
     },
     "packages/lythoskill-test-utils": {
       "name": "@lythos/test-utils",
-      "version": "0.9.33",
+      "version": "0.9.36",
       "dependencies": {
         "@lythos/agent-adapter": "workspace:*",
         "zod": "^4.4.3",
@@ -148,6 +153,8 @@
     "@lythos/cold-pool": ["@lythos/cold-pool@workspace:packages/lythoskill-cold-pool"],
 
     "@lythos/hello-world": ["@lythos/hello-world@workspace:packages/lythoskill-hello-world"],
+
+    "@lythos/infra": ["@lythos/infra@workspace:packages/lythoskill-infra"],
 
     "@lythos/project-cortex": ["@lythos/project-cortex@workspace:packages/lythoskill-project-cortex"],
 

@@ -1,15 +1,14 @@
 {
-  "name": "@lythos/cold-pool",
+  "name": "@lythos/infra",
   "version": "0.9.36",
-  "description": "Cold pool service layer — dedicated resource holder for skill repositories with intent/plan/execute primitives. Single owner of git side-effects; consumed by deck/curator/arena.",
+  "description": "Runtime infrastructure base — SqliteDb, config fetch, shared helpers",
   "keywords": [
     "ai-agent",
     "skill",
     "claude-code",
     "agent-skills",
     "llm-tooling",
-    "lythoskill",
-    "cold-pool"
+    "lythoskill"
   ],
   "author": "lythos-labs",
   "license": "MIT",
@@ -27,17 +26,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lythos-labs/lythoskill.git",
-    "directory": "packages/lythoskill-cold-pool"
+    "directory": "packages/lythoskill-infra"
   },
   "bugs": {
     "url": "https://github.com/lythos-labs/lythoskill/issues"
   },
-  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-cold-pool#readme",
-  "dependencies": {
-    "@lythos/infra": "^0.9.36",
-    "simple-git": "^3.36.0"
-  },
-  "engines": {
-    "bun": ">=1.0.0"
-  }
+  "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-infra#readme"
 }
