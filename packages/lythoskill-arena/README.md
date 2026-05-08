@@ -137,15 +137,6 @@ arena.toml  →  ArenaToml (Zod)  →  ExecutionPlan (pure)  →  per-cell agent
 
 Built on `@lythos/test-utils` shared infrastructure.
 
-## Test Coverage
-
-| Layer | Count | CI | Notes |
-|-------|-------|----|-------|
-| Unit tests | 41 | ✅ | TOML parser, player resolution, Pareto, stats |
-| Agent BDD | — | ❌ | Requires `claude` CLI; run locally |
-
-Pareto frontier is a **deterministic algorithm** — never delegated to LLM. 8 unit tests cover dominance, cross-dominance, transitive chains, partial criteria, and empty scores.
-
 ## License
 
 MIT
