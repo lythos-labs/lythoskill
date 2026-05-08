@@ -395,6 +395,18 @@ The script is the single source of truth for what gets published. Packages not i
 
 **Skill-only packages** (no `package.json`, no `src/`, pure `SKILL.md` under `skill/`) are exempt — they are build targets, not publish targets.
 
+### Cortex task lifecycle (discipline)
+
+**Every task that produces a commit must close itself via git commit trailer.** The `.husky/post-commit` hook reads `Closes: TASK-xxx` and `Task: TASK-xxx review/done` trailers, then auto-moves the task in cortex.
+
+| Step | Action | Why |
+|------|--------|-----|
+| Start work | `cortex start TASK-xxx` or `TaskUpdate({ status: 'in_progress' })` | Marks task active; prevents duplicate work |
+| Finish work | Commit with `Closes: TASK-xxx` trailer | Post-commit hook auto-moves task to completed |
+| Manual close | `cortex complete TASK-xxx` | Fallback when trailer missed or task has no associated commit |
+
+**Do not leave tasks in `02-in-progress` after the work is done.** A stale in-progress list makes the next agent think work is unfinished. The `cortex probe` command catches these inconsistencies — run it before ending a session.
+
 ### Publish to npm
 
 ```bash
