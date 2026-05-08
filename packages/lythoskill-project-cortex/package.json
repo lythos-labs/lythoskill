@@ -21,6 +21,8 @@
   },
   "files": [
     "src",
+    "templates",
+    "assets",
     "README.md",
     "LICENSE"
   ],
