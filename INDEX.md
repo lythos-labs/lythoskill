@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 11:42:43
+> 自动生成于 2026/5/8 15:35:46
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 160 | 进行中: 1, 待验收: 0, 已完成: 134 |
+| Tasks | 160 | 进行中: 0, 待验收: 0, 已完成: 135 |
 | Epics | 24 | 活跃: 0, 已完成: 20, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
@@ -59,15 +59,15 @@ _无_
 
 _无_
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260507220646324**: playground/blake3 — rebuild BLAKE3 hash from scratch (ProgramBench-style)
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (134)
+### 已完成 (135)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -190,6 +190,7 @@ _无_
 - ✅ ~~TASK-20260507143022480~~: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
 - ✅ ~~TASK-20260507163036174~~: ${ID}: deck unit test failures — post FQ schema alignment
 - ✅ ~~TASK-20260507184440829~~: Research skill quality gates — data source wall, validation rules, terminology unification
+- ✅ ~~TASK-20260507220646324~~: playground/blake3 — rebuild BLAKE3 hash from scratch (ProgramBench-style)
 - ✅ ~~TASK-20260507223411867~~: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
 - ✅ ~~TASK-20260507223411896~~: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
 - ✅ ~~TASK-20260507223550910~~: Replace runClaudeAgent with useAgent() abstraction — default kimi, support claude-sdk/deepseek
