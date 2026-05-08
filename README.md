@@ -126,8 +126,8 @@ Output  (skills/<name>/)         → committed to Git → agent-visible skill
 If you are an AI agent reading this README:
 
 1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
-2. Run `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` to add a skill
-3. Run `bunx @lythos/skill-deck@latest link` to sync the working set
+2. Choose a [pre-built deck](./examples/decks/) or create your own `skill-deck.toml`
+3. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to link into `.claude/skills/`
 4. Skills are now in `.claude/skills/` — read them and follow their instructions
 
 ## Quick Start
@@ -164,6 +164,41 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lyth
 ```
 
 Output lands in `./agent-output-<timestamp>/`. The agent sees the deck's skills (PDF, DOCX), writes the file, and copies it to the output directory. `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
+
+### Set Up a Workspace — For Real Projects
+
+Not just trying — you want a persistent project with its own deck. The `--deck` can be a URL, a local file, or one of the [pre-built decks](./examples/decks/). `--workdir` defaults to cwd, so the working set lands right where you are.
+
+```bash
+mkdir my-project && cd my-project
+
+# From a URL:
+bunx @lythos/skill-deck@latest link --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/engineering.toml
+
+# From a local pre-built deck:
+bunx @lythos/skill-deck@latest link --deck ~/lythoskill/examples/decks/documents.toml
+
+# From scratch — create your own:
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+
+[tool.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+EOF
+bunx @lythos/skill-deck@latest link
+```
+
+After `link`: `.claude/skills/` is populated, `skill-deck.lock` is generated. Edit `skill-deck.toml`, re-run `link` — the working set follows. Different project, different deck, same cold pool. No contamination.
+
+| Pre-built deck | For |
+|----------------|-----|
+| `engineering.toml` | TDD, Git, Mermaid — everyday software work |
+| `documents.toml` | PDF, DOCX, web-search — content & research |
+| `design-studio.toml` | Design feedback, visual tools |
+| `full-stack.toml` | Frontend + backend + database |
+| `governance.toml` | Project management with ADR/Epic/Task |
+| `scout.toml` | Minimal — baseline for measuring deck impact |
 
 ### Same Task, Different Decks — The Core Loop
 
