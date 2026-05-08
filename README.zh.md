@@ -1,9 +1,8 @@
 # lythoskill
 
-> **治理你的 AI agent 技能。防止技能生态腐烂。**
+> **技能治理，不是技能集合。** 如果 addyosmani/agent-skills 和 mattpocock/skills 是 npm 包，lythoskill 就是 npm 本身——安装、策展、验证、收敛技能的平台层。
 >
-> **适用场景：** 你有 5+ 个技能、出现冲突、或想按项目控制技能。  
-> **不适用：** 只有 ≤3 个技能且无冲突 —— 手动放到 `.claude/skills/` 即可。
+> **完全由 AI agent 构建。** 零人类手写代码。12 个包，487+ 测试，外加治理体系本身——ADR、epic、task、wiki patterns——全部由 Claude Code、DeepSeek、Kimi 在人类指导下协作完成。我们用自己的治理工具管理构建了自己的项目。
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
@@ -11,7 +10,17 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
 [English](./README.md)
+
+| **如果你想要...** | **你需要** |
+|---|---|
+| TDD 技能 | → [mattpocock/skills](https://github.com/mattpocock/skills) |
+| 管理 5 个项目里的 50 个技能 | → **lythoskill** |
+| PDF 生成技能 | → [anthropics/skills](https://github.com/anthropics/skills) |
+| 知道哪个 PDF 技能真的能用 | → **lythoskill**（arena） |
+| 技能集合 | → [awesome-agent-skills](https://github.com/kodustech/awesome-agent-skills) |
+| 防止技能静默冲突 | → **lythoskill**（deny-by-default） |
 
 **👤 技能使用者？** → [快速开始](#快速开始) — 安装 Bun，跑一条命令，搞定。  
 **🤖 AI agent？** → [Agent 专用](#如果你是-ai-agent) — 四步清单。  
