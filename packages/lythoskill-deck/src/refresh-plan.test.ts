@@ -11,7 +11,7 @@ cold_pool = "./cold-pool"
 path = "github.com/foo/bar/skill-a"
 
 [tool.skills.skill-b]
-path = "localhost/skill-b"
+path = "localhost/me/skill-b"
 `
 
 describe('resolveRefreshConfig', () => {
@@ -111,7 +111,7 @@ describe('buildRefreshPlan', () => {
     // Without a real cold pool, source resolution may fail → 'missing'
     // Plan structure is what matters; type depends on actual filesystem
     expect(localhost).toBeDefined()
-    expect(localhost!.path).toBe('localhost/skill-b')
+    expect(localhost!.path).toBe('localhost/me/skill-b')
   })
 
   test('derives coldPool from deck toml when not in opts', () => {

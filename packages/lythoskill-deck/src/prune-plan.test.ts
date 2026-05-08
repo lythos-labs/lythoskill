@@ -10,7 +10,7 @@ cold_pool = "./cold-pool"
 path = "github.com/foo/bar/skill-a"
 
 [tool.skills.skill-b]
-path = "localhost/skill-b"
+path = "localhost/me/skill-b"
 `
 
 describe('resolvePruneConfig', () => {
@@ -82,7 +82,7 @@ describe('buildPrunePlan', () => {
   test('empty candidates when all repos declared', () => {
     const pool = join('/tmp', 'prune-all-declared-' + Date.now())
     mkdirSync(join(pool, 'github.com', 'foo', 'bar', 'skill-a'), { recursive: true })
-    mkdirSync(join(pool, 'localhost', 'skill-b'), { recursive: true })
+    mkdirSync(join(pool, 'localhost', 'me', 'skill-b'), { recursive: true })
 
     const plan = buildPrunePlan(deckToml, { coldPool: pool })
     expect(plan.candidates).toHaveLength(0)
