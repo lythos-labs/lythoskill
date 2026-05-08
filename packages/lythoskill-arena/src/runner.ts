@@ -109,10 +109,34 @@ export async function runArenaFromToml(opts: {
       const result = await runAgentScenario({
         scenarioPath: taskAbs,
         agent,
-        async setupWorkdir(_scenario: AgentScenario, workdir: string) {
+        async setupWorkdir(scenario: AgentScenario, workdir: string) {
           mkdirSync(workdir, { recursive: true })
           const deckContent = readFileSync(cell.deck, 'utf-8')
           writeFileSync(join(workdir, 'skill-deck.toml'), deckContent)
+
+          // Write AGENTS.md bootloader — agents read this on entry
+          writeFileSync(join(workdir, 'AGENTS.md'), [
+            '# Arena Test Environment',
+            '',
+            `**Side**: ${cell.side}`,
+            `**Player**: ${cell.player}`,
+            `**Run**: ${cell.run}`,
+            '',
+            '## Task',
+            '',
+            scenario.it ?? scenario.description ?? '(no task description)',
+            '',
+            '## How This Works',
+            '',
+            '- This is an isolated arena test directory. No parent `.claude/skills/` exists.',
+            '- Skills are configured in `skill-deck.toml` and symlinked by `deck link`.',
+            '- Complete the task above using the available skills.',
+            '- Output your work to this directory (or `output/` if specified).',
+            '',
+            '## Expected Output',
+            '',
+            'After completing the task, write a brief summary of what you did.',
+          ].join('\n'))
 
           // Link skills via bunx (works both locally and when installed via bunx)
           const linkProc = Bun.spawn(
