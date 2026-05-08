@@ -32,33 +32,42 @@ Instead of writing a long prompt, you write a markdown file. The agent reads it 
 ## Pattern
 
 ```
-playground/<task-name>/
-  deck.toml           ← skill selection (--deck <url> fetches this)
+<workspace>/
+  deck.toml           ← skill selection (fetched via --deck <url> or local)
   AGENTS.md           ← bootloader: agent reads this first
-  .claude/skills/     ← isolated working set (deck link --workdir .)
+  .claude/skills/     ← isolated working set
   output.*            ← agent writes here
 ```
 
-The agent flow:
-1. Agent enters directory
-2. Reads AGENTS.md (or CLAUDE.md for Claude-specific instructions)
-3. Sees: "your cwd's parent is the project. Skills are in `.claude/skills/`. Read `../cortex/` for context. Produce `output.md`."
-4. Navigates parent project, reads ADRs/wiki, uses skills
-5. Writes output to the directory
+The contract between AGENTS.md and the agent:
+
+1. **Location** — AGENTS.md tells the agent where it is and where the project context lives
+2. **Tools** — declares what skills are available (via deck.toml → working set)
+3. **Task** — describes what to produce and where to write it
+4. **Context** — points to relevant project files (docs, ADRs, wiki, source)
+5. **Constraints** — boundaries: what NOT to do, what NOT to modify
+
+The agent reads AGENTS.md at startup (alongside CLAUDE.md if present). The nearest AGENTS.md wins — nested directories can override.
 
 ## Relationship to Karpathy's Skills Practice
 
 Karpathy's approach (circulating on social media 2026): specify an instruction file that tells the agent how to operate. AGENTS.md is the standardized version — instead of ad-hoc prompts, a structured file that any compliant agent can read.
 
-## Working Example
+## Examples
 
-`playground/architecture-explainer/AGENTS.md` — Round 1 and Round 2 task prompts. Agent reads AGENTS.md, understands:
+The pattern is general — below is one concrete instance.
+
+### Example: Architecture Explainer
+
+`playground/architecture-explainer/` uses this pattern to produce project architecture docs. The AGENTS.md specifies:
 - Skills: mermaid, frontend-design, theme-factory, brand-guidelines, docx, pdf
 - Parent project: `..` = lythoskill monorepo
 - Context: `../cortex/wiki/01-patterns/`, `../cortex/adr/02-accepted/`
 - Output: `architecture.md` (Round 1), `architecture.docx` + `architecture.pdf` (Round 2)
 
 Result: 644-line architecture reference with 8 Mermaid diagrams, validated docx + PDF.
+
+Other use cases: code review checklist, CI incident response runbook, new-contributor onboarding walkthrough, multi-repo integration test scenario. Any task you can describe in markdown can be an AGENTS.md bootloader.
 
 ## Related Patterns
 
