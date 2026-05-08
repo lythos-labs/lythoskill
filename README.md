@@ -5,6 +5,7 @@
 > **Built entirely by AI agents.** Zero human-written code. 12 packages, 487+ tests, plus the governance layer itself — ADRs, epics, tasks, wiki patterns — all produced by Claude Code, DeepSeek, and Kimi collaborating under human direction. We dogfood our own governance tools to govern the project that built them.
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
+[![Tests](https://img.shields.io/badge/Tests-649%20pass-brightgreen)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -23,6 +24,7 @@
 | To stop skills silently conflicting | → **lythoskill** (deny-by-default) |
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
+[![Tests](https://img.shields.io/badge/Tests-649%20pass-brightgreen)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
