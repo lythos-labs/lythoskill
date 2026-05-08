@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 15:35:46
+> 自动生成于 2026/5/8 15:51:37
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 160 | 进行中: 0, 待验收: 0, 已完成: 135 |
-| Epics | 24 | 活跃: 0, 已完成: 20, 悬置: 2, 已归档: 2 |
+| Tasks | 168 | 进行中: 0, 待验收: 0, 已完成: 135 |
+| Epics | 25 | 活跃: 1, 已完成: 20, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260508155035411**: Deck reconcile convergence — plan-first to auto-apply
 
 ### 已完成
 
@@ -55,9 +55,16 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (8)
 
-_无_
+- [ ] **TASK-20260508155056768**: Implement deck reconcile --apply convergence
+- [ ] **TASK-20260508155058319**: Extract @lythos/infra runtime base package with SqliteDb
+- [ ] **TASK-20260508155059504**: Migrate curator catalog DB to inherit SqliteDb
+- [ ] **TASK-20260508155101016**: Arena agent-run full e2e with deepseek serve
+- [ ] **TASK-20260508155102153**: Fix judge parser markdown bold extraction (** → JSON parse error)
+- [ ] **TASK-20260508155131730**: Task from URL — cortex task from remote deck URL
+- [ ] **TASK-20260508155132653**: Document AGENTS.md bootloader pattern from playground
+- [ ] **TASK-20260508155133562**: Generate deck INDEX.md — catalogue all example decks by use-case
 
 ### 进行中 (0)
 
