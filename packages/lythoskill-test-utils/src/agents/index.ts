@@ -4,7 +4,7 @@
 // This file re-exports for backward compatibility.
 // New code should import from '@lythos/agent-adapter' directly.
 
-// Side-effect: registers all built-in adapters (kimi, claude, claude-cli, deepseek)
+// Side-effect: registers lightweight built-in adapters (kimi, claude-cli)
 import '@lythos/agent-adapter'
 
 // Re-export from canonical source
@@ -20,4 +20,3 @@ export type {
 // Adapter instances (backward compat aliases)
 export { claudeAdapter } from './claude'
 export { kimiAdapter } from './kimi'
-export { deepseekAdapter } from './deepseek'

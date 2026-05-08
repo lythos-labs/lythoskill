@@ -2,104 +2,57 @@
 
 Plugin architecture for agent backends. One interface, multiple implementations.
 
+**This package is the INTERFACE + REGISTRY + lightweight CLI adapters only.**
+Heavy adapters (daemon lifecycle, SSE parsing, PID management) live in independent packages:
+
+| Package | Player | Mechanism | Weight |
+|---------|--------|-----------|--------|
+| `@lythos/agent-adapter` | `kimi` | `kimi --print` | Light — pure CLI spawn |
+| `@lythos/agent-adapter` | ~~`claude`~~ | ~~`claude -p`~~ | Deprecated — deferred tool deadlock |
+| `@lythos/agent-adapter-claude-sdk` | `claude` | Anthropic Agent SDK | Heavy — SDK dep |
+| `@lythos/agent-adapter-deepseek-serve` | `deepseek` | `deepseek serve --http` thread API | Heavy — daemon, SSE, PID lock |
+
+Rule: if your adapter starts a long-running process, allocates ports, or parses SSE —
+create a new package. Keep this one thin.
+
 ## Install
 
 ```bash
 bun add @lythos/agent-adapter
 ```
 
-## Built-in Adapters
-
-Import the package once — adapters self-register on import:
+## Usage
 
 ```ts
-import '@lythos/agent-adapter' // side-effect: registers all built-in adapters
+import { useAgent } from '@lythos/agent-adapter'
+import '@lythos/agent-adapter'                  // lightweight adapters (kimi, claude-cli)
+import '@lythos/agent-adapter-claude-sdk'       // heavy: claude-sdk
+import '@lythos/agent-adapter-deepseek-serve'   // heavy: deepseek serve
 
-import { useAgent, listAgents } from '@lythos/agent-adapter'
-
-console.log(listAgents()) // ['kimi', 'claude', 'claude-cli', 'deepseek']
-
-const agent = useAgent('kimi')
-const result = await agent.spawn({
-  cwd: '/tmp',
-  brief: 'Write "hello" to output.txt',
-  timeoutMs: 60000,
-})
-
-console.log(result.stdout)
+const agent = useAgent('deepseek')
+const result = await agent.spawn({ cwd: '/tmp', brief: '...', timeoutMs: 60000 })
 ```
 
-| Adapter | Player name | Mechanism | Status |
-|---------|-------------|-----------|--------|
-| **Kimi** | `kimi` | `kimi --print --afk` | Stable |
-| **DeepSeek** | `deepseek` | `deepseek --approval-policy auto` | Text-only (no tool execution) |
-| **Claude CLI** | `claude`, `claude-cli` | `claude -p` | Deprecated — deferred tool deadlock |
-
 ## Custom Adapter
-
-Any code implementing `AgentAdapter` can register itself:
 
 ```ts
 import { registerAgent, type AgentAdapter } from '@lythos/agent-adapter'
 
-const hermesAdapter: AgentAdapter = {
-  name: 'hermes',
-  async spawn(opts) {
-    // Your spawn logic here
-    return { stdout, stderr, code, durationMs, checkpoints }
-  },
+const myAdapter: AgentAdapter = {
+  name: 'my-agent',
+  async spawn(opts) { /* ... */ return { stdout, stderr, code: 0, durationMs, checkpoints: [] } },
 }
-
-registerAgent('hermes', hermesAdapter)
-
-// Now useAgent('hermes') works everywhere
+registerAgent('my-agent', myAdapter)
 ```
 
 ## API
 
-### `useAgent(name: string): AgentAdapter`
-
-Look up a registered adapter by name. Throws if not found.
-
-### `registerAgent(name: string, adapter: AgentAdapter): void`
-
-Register a custom adapter. Idempotent — calling twice overwrites.
-
-### `listAgents(): string[]`
-
-List all registered agent names.
-
-### `readCheckpoints(cwd: string): CheckpointEntry[]`
-
-Read checkpoint JSONL files from `cwd/_checkpoints/`.
-
-## Interface
-
-```ts
-interface AgentAdapter {
-  name: string
-  spawn(opts: {
-    cwd: string
-    brief: string
-    timeoutMs: number
-    idleTimeoutMs?: number
-    env?: Record<string, string>
-    allowedTools?: string   // comma-separated, e.g. "Read,Write,Edit"
-    disallowedTools?: string
-  }): Promise<AgentRunResult>
-
-  invokeTool?(opts: {
-    tool: ToolDefinition
-    prompt: string
-    cwd: string
-    timeoutMs: number
-  }): Promise<unknown>
-}
-```
-
-## Zero Dependencies
-
-This package has **zero external dependencies**. It defines the contract — implementation packages bring their own deps (e.g. `@lythos/agent-adapter-claude-sdk` depends on `@anthropic-ai/claude-agent-sdk`).
+| Export | Description |
+|--------|------------|
+| `useAgent(name)` | Look up registered adapter |
+| `registerAgent(name, adapter)` | Register adapter (idempotent) |
+| `listAgents()` | List all registered names |
+| `readCheckpoints(cwd)` | Read JSONL from `_checkpoints/` |
 
 ## License
 

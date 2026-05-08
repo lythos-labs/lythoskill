@@ -459,9 +459,17 @@ deepseek --approval-policy auto --model deepseek-v4-flash ...
 
 Valid values: `auto`, `on-request`, `untrusted`, `never`, `suggest`. `auto` = approve all, equivalent to Kimi `--afk`.
 
-### Adapter status
+### Adapter architecture
 
-The DeepSeek adapter at `packages/lythoskill-test-utils/src/agents/deepseek.ts` currently uses `-p` mode and is **text-only** — it cannot execute file operations, web search, or shell commands. For full agent capability, the adapter needs to be migrated to `serve --http` mode (see task TASK-20260506193936311).
+Lightweight adapters (pure CLI spawn) live in `@lythos/agent-adapter`. Heavy adapters (daemon lifecycle, SSE, PID management) live in independent packages:
+
+| Package | Player | Mechanism |
+|---------|--------|-----------|
+| `@lythos/agent-adapter` | `kimi` | `kimi --print` |
+| `@lythos/agent-adapter-claude-sdk` | `claude` | Anthropic Agent SDK |
+| `@lythos/agent-adapter-deepseek-serve` | `deepseek` | `deepseek serve --http` thread API + daemon lifecycle |
+
+See `packages/lythoskill-agent-adapter/README.md` for the architecture contract. New adapter? Follow the table — heavy = new package.
 
 ### Smoke test pattern
 

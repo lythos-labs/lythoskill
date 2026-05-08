@@ -19,8 +19,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { spawn, type Subprocess } from 'bun'
-import type { AgentAdapter, AgentRunResult } from '../types'
-import { registerAgent } from '../registry'
+import type { AgentAdapter, AgentRunResult } from '@lythos/agent-adapter'
+import { registerAgent } from '@lythos/agent-adapter'
 
 // ── Config ──────────────────────────────────────────────────────────────────
 

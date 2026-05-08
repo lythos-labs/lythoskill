@@ -7,7 +7,6 @@ describe('@lythos/agent-adapter', () => {
     expect(agents).toContain('kimi')
     expect(agents).toContain('claude')
     expect(agents).toContain('claude-cli')
-    expect(agents).toContain('deepseek')
   })
 
   test('useAgent returns kimi adapter', () => {
@@ -35,12 +34,6 @@ describe('@lythos/agent-adapter', () => {
     registerAgent('mock', mockAdapter)
     expect(listAgents()).toContain('mock')
     expect(useAgent('mock').name).toBe('mock')
-  })
-
-  test('useAgent returns deepseek adapter', () => {
-    const adapter = useAgent('deepseek')
-    expect(adapter.name).toBe('deepseek')
-    expect(typeof adapter.spawn).toBe('function')
   })
 
   test('spawn throws clear error when binary is missing', async () => {

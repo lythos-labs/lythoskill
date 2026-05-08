@@ -3,6 +3,16 @@
 // Core contract: AgentAdapter interface + registerAgent() / useAgent() registry.
 // Each adapter self-registers on import. Third-party adapters use the same pattern.
 //
+// PACKAGE SCOPE: This package contains the INTERFACE + REGISTRY + LIGHTWEIGHT
+// adapters only. Lightweight = pure CLI spawn (Bun.spawn), no daemon, no SSE, no
+// persistent state. Heavy adapters live in independent packages:
+//
+//   @lythos/agent-adapter-claude-sdk       — Anthropic Agent SDK adapter
+//   @lythos/agent-adapter-deepseek-serve   — DeepSeek serve-mode adapter (daemon)
+//
+// If your adapter manages a long-running process, allocates ports, parses SSE,
+// or writes PID files — create a new package. Keep this one thin.
+//
 // Usage:
 //   import { useAgent } from '@lythos/agent-adapter'
 //   import '@lythos/agent-adapter'           // loads all built-in adapters
@@ -24,10 +34,9 @@ export { registerAgent, useAgent, listAgents } from './registry'
 // Checkpoint utility
 export { readCheckpoints } from './checkpoint'
 
-// Built-in adapters (side-effect: registerAgent on import)
+// Built-in adapters — lightweight CLI wrappers only.
+// Heavy adapters live in separate packages (see above).
 export { kimiAdapter } from './adapters/kimi'
-export { deepseekAdapter } from './adapters/deepseek'
-export { deepseekServeAdapter, ensureServeRunning } from './adapters/deepseek-serve'
 export {
   claudeCliAdapter,
   buildClaudeCommand,

@@ -52,6 +52,9 @@ echo ""
 # Publish order: zero-deps first, then arena (depends on test-utils), deck last
 PACKAGES=(
   "packages/lythoskill-hello-world"
+	  "packages/lythoskill-agent-adapter"
+	  "packages/lythoskill-agent-adapter-claude-sdk"
+	  "packages/lythoskill-agent-adapter-deepseek-serve"
   "packages/lythoskill-test-utils"
   "packages/lythoskill-cold-pool"
   "packages/lythoskill-project-cortex"

@@ -1,0 +1,22 @@
+{
+  "name": "@lythos/agent-adapter-deepseek-serve",
+  "version": "0.9.33",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "deepseek",
+    "agent-adapter",
+    "deepseek-tui",
+    "serve-mode"
+  ],
+  "dependencies": {
+    "@lythos/agent-adapter": "^0.9.33"
+  }
+}
