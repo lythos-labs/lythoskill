@@ -94,7 +94,7 @@ prompt = "Search for latest info, then generate professional document with diagr
 
 ### Safety guards
 
-`link` refuses to operate if `working_set` resolves to your home directory or root (`/`). It also only removes **symlinks** from the working set — real files or directories are skipped with a warning.
+`link` refuses to operate if `working_set` resolves to your home directory or root (`/`).
 
 **Snapshot mode** (`--mode snapshot` or `link --mode snapshot`): copies the source directory into the working set instead of symlinking. This is needed for agents that don't support symlinks (e.g. Codex #11314). Snapshots are pinned to the cold pool version at link time. Use `deck sync <alias>` to switch back to live symlink mode, or `deck freeze <alias>` to pin a symlink as a snapshot.
 
@@ -138,7 +138,7 @@ bunx @lythos/skill-deck@0.9.32 link
 | **Cold Pool** | All downloaded skills (`~/.agents/skill-repos/`). Agent cannot see here. |
 | **skill-deck.toml** | Declares desired state: "this project uses these skills." |
 | **`deck link`** | Reconciler. Makes the working set match the declaration. |
-| **Working Set** | Symlinks only. Default: `.claude/skills/` — where agents scan for skills. |
+| **Working Set** | Per-skill mode: symlink (live) or snapshot (pinned copy). Default: `.claude/skills/`. |
 | **deny-by-default** | Undeclared skills are physically absent from the working set. |
 
 ### Agent skill scan locations
@@ -222,7 +222,7 @@ If you already have skills installed (in working set, globally, or mixed), deck 
 3. BACKUP  Always. `link` creates tar backups for non-symlink entries before removal.
            Use `--no-backup` only if you're certain.
 
-4. EXECUTE deck link — creates symlinks, removes undeclared, leaves real files untouched.
+4. EXECUTE deck link — creates symlinks (default) or snapshots (--mode snapshot), removes undeclared entries.
 
 5. VERIFY  Agent checks: all declared skills resolve? Working set clean?
            If unhappy: tar xf backup → rollback to pre-migration state.
