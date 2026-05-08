@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-07 | Created after BDD scenario sweep (21/21 green); 11 unit tests pre-existing fail |
+| completed | 2026-05-08 | Closed via trailer |
 
 ## 背景与目标
 

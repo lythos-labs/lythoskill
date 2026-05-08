@@ -1,11 +1,12 @@
-# TASK-20260505191950708: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
+# TASK-20260507223411867: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-05 | Created |
+| backlog | 2026-05-07 | Created |
+| completed | 2026-05-08 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260505191950708)
+feat(scope): description (TASK-20260507223411867)
 
 - Detail 1
 - Detail 2

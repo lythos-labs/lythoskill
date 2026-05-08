@@ -1,11 +1,12 @@
-# TASK-20260507223935542: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
+# TASK-20260505015055286: T5: Unit tests for pure functions + CLI BDD for curator add
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-07 | Created |
+| backlog | 2026-05-04 | Created |
+| completed | 2026-05-08 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260507223935542)
+feat(scope): description (TASK-20260505015055286)
 
 - Detail 1
 - Detail 2

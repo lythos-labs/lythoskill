@@ -1,4 +1,4 @@
-# TASK-20260507223411896: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
+# TASK-20260507112345999: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-07 | Created |
+| completed | 2026-05-08 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260507223411896)
+feat(scope): description (TASK-20260507112345999)
 
 - Detail 1
 - Detail 2
