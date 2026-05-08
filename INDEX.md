@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 20:56:42
+> 自动生成于 2026/5/8 22:25:18
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 168 | 进行中: 0, 待验收: 0, 已完成: 143 |
-| Epics | 26 | 活跃: 1, 已完成: 21, 悬置: 2, 已归档: 2 |
+| Tasks | 171 | 进行中: 1, 待验收: 0, 已完成: 143 |
+| Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 55 | 已接受: 46 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260508201323933**: Project showcase — README, Vitepress, and public positioning for the governance layer
+- **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
 
 ### 已完成
 
@@ -41,6 +41,7 @@
 - ✅ **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
 - ✅ **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
 - ✅ **EPIC-20260508155035411**: Deck reconcile convergence — plan-first to auto-apply
+- ✅ **EPIC-20260508201323933**: Project showcase — README, Vitepress, and public positioning for the governance layer
 
 ### 悬置
 
@@ -56,13 +57,14 @@
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (2)
 
-_无_
+- [ ] **TASK-20260508222319692**: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
+- [ ] **TASK-20260508222319717**: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260508222319664**: T1 — SSOT test infrastructure (package.json scripts + root + CI test.yml)
 
 ### 待验收 (0)
 

@@ -16,6 +16,11 @@
     "access": "public"
   },
   "type": "module",
+  "scripts": {
+    "test": "bun test src/ --pass-with-no-tests",
+    "test:coverage": "bun test src/ --coverage --coverage-reporter=lcov --coverage-dir=coverage --pass-with-no-tests",
+    "test:watch": "bun test src/ --watch"
+  },
   "bin": {
     "lythoskill-deck": "src/cli.ts"
   },

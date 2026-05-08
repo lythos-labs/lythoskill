@@ -25,24 +25,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - name: test-utils
-        run: sh -c "cd packages/lythoskill-test-utils && bun test"
-      - name: agent-adapter
-        run: sh -c "cd packages/lythoskill-agent-adapter && bun test"
-      - name: agent-adapter-claude-sdk
-        run: sh -c "cd packages/lythoskill-agent-adapter-claude-sdk && bun test"
-      - name: curator
-        run: sh -c "cd packages/lythoskill-curator && bun test"
-      - name: cold-pool
-        run: sh -c "cd packages/lythoskill-cold-pool && bun test"
+      - name: All package unit tests
+        run: bun --filter='*' run test
       - name: cortex BDD
         run: bun packages/lythoskill-project-cortex/test/runner.ts
-      - name: deck unit
-        run: sh -c "cd packages/lythoskill-deck && bun test"
       - name: deck BDD
         run: bun packages/lythoskill-deck/test/runner.ts
-      - name: arena
-        run: sh -c "cd packages/lythoskill-arena && bun test"
       - name: validate example decks
         run: bun scripts/validate-example-decks.ts
       - run: bun packages/lythoskill-creator/src/cli.ts align
@@ -73,8 +61,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - run: sh -c "cd packages/lythoskill-deck && bun test"
-      - run: sh -c "cd packages/lythoskill-deck && bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage" || true
+      - run: bun --filter=@lythos/skill-deck run test
+      - run: bun --filter=@lythos/skill-deck run test:coverage || true
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:
@@ -99,8 +87,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - run: sh -c "cd packages/lythoskill-cold-pool && bun test"
-      - run: sh -c "cd packages/lythoskill-cold-pool && bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage" || true
+      - run: bun --filter=@lythos/cold-pool run test
+      - run: bun --filter=@lythos/cold-pool run test:coverage || true
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:
@@ -125,8 +113,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-
       - run: bun install --frozen-lockfile
-      - run: sh -c "cd packages/lythoskill-test-utils && bun test"
-      - run: sh -c "cd packages/lythoskill-test-utils && bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage" || true
+      - run: bun --filter=@lythos/test-utils run test
+      - run: bun --filter=@lythos/test-utils run test:coverage || true
       - uses: 70-10/bun-coverage-report-action@v1.0.3
         if: github.event_name == 'pull_request'
         with:
