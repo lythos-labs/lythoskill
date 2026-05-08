@@ -27,6 +27,7 @@ export { readCheckpoints } from './checkpoint'
 // Built-in adapters (side-effect: registerAgent on import)
 export { kimiAdapter } from './adapters/kimi'
 export { deepseekAdapter } from './adapters/deepseek'
+export { deepseekServeAdapter, ensureServeRunning } from './adapters/deepseek-serve'
 export {
   claudeCliAdapter,
   buildClaudeCommand,
