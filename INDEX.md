@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 20:01:37
+> 自动生成于 2026/5/8 20:13:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 167 | 进行中: 0, 待验收: 0, 已完成: 142 |
-| Epics | 25 | 活跃: 1, 已完成: 20, 悬置: 2, 已归档: 2 |
+| Epics | 25 | 活跃: 0, 已完成: 21, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260508155035411**: Deck reconcile convergence — plan-first to auto-apply
+_无_
 
 ### 已完成
 
@@ -40,6 +40,7 @@
 - ✅ **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
 - ✅ **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
 - ✅ **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
+- ✅ **EPIC-20260508155035411**: Deck reconcile convergence — plan-first to auto-apply
 
 ### 悬置
 

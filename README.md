@@ -1,9 +1,24 @@
 # lythoskill
 
-> **Govern your AI agent skills. Prevent skill ecosystem rot.**
->
-> **Use this when:** you have 5+ skills, see conflicts, or want per-project skill control.  
-> **Not when:** you have ≤3 skills and no conflicts — put them in `.claude/skills/` manually.
+> **Skill governance, not a skill collection.** If addyosmani/agent-skills and mattpocock/skills are npm packages, lythoskill is npm itself — the layer that installs, curates, validates, and reconciles them across projects and platforms.
+
+[![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
+[![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
+[![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
+[中文](./README.zh.md)
+
+| **If you want...** | **You need** |
+|---|---|
+| A skill for TDD | → [mattpocock/skills](https://github.com/mattpocock/skills) |
+| To manage 50 skills across 5 projects | → **lythoskill** |
+| A skill for PDF generation | → [anthropics/skills](https://github.com/anthropics/skills) |
+| To know WHICH PDF skill actually works | → **lythoskill** (arena) |
+| A skill collection | → [awesome-agent-skills](https://github.com/kodustech/awesome-agent-skills) |
+| To stop skills silently conflicting | → **lythoskill** (deny-by-default) |
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
