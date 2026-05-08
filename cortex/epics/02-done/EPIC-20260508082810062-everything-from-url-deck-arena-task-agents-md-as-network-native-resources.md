@@ -90,9 +90,9 @@ lane_override_reason: "UX-layer epic: URL-first experience across all CLI surfac
 ## 经验沉淀
 
 ## 归档条件
-- [ ] T1: resolveDeckPath 提取 + 单测
-- [ ] T2: 全命令 URL 化（validate, add, refresh, remove, prune, sync, freeze, reconcile）
-- [ ] T3: `deck validate <url>` 发现-评估-采用流程
-- [ ] T4: Task from URL — cortex task <url>
-- [ ] T5: AGENTS.md as network-native bootloader — 模式文档化 + 示例
-- [ ] T6: 预组 deck INDEX.md + 快捷指令
+- [x] T1: resolveDeckPath 提取（resolve-deck.ts: sync/async split）
+- [x] T2: 全命令 URL 化 — scope corrected: link + validate only（其余操作本地资源）
+- [x] T3: `deck validate <url>` — URL dispatch at CLI layer, fetch → validate → report
+- [x] ~~T4~~: merged into T5（AGENTS.md IS the task）
+- [x] T5: AGENTS.md bootloader — wiki documented + playground PoC + fact-checked cross-tool standard
+- [x] T6: 预组 deck INDEX.md — 11 decks catalogued by use case with raw URLs
