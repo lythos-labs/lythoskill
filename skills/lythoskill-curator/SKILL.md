@@ -57,6 +57,48 @@ Curator is a **reconciler** (K8s-style): no matter what state the index is in
 (stale, corrupted, missing), running `curator` converges it to a clean, current
 index. Old index is automatically backed up before rebuild.
 
+### Discover new skills from remote feeds
+```bash
+# Query remote feeds (GitHub topic search, agentskill.sh, etc.) for skill candidates
+bunx @lythos/skill-curator@0.9.37 discover
+
+# Filter by keyword
+bunx @lythos/skill-curator@0.9.37 discover --q "pdf"
+```
+
+Output is a Markdown table of candidates with locator, source, and dedup hints.
+Agent reviews → uses `curator add` to persist selected skills to the cold pool.
+
+### Add a skill to the cold pool
+```bash
+# Download a skill (git clone) into the cold pool — no install, no skill-deck.toml change
+bunx @lythos/skill-curator@0.9.37 add github.com/owner/repo --pool ~/.agents/skill-repos
+
+# Plan-first (no actual clone)
+bunx @lythos/skill-curator@0.9.37 add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
+
+# With provenance metadata
+bunx @lythos/skill-curator@0.9.37 add github.com/owner/repo --pool ~/.agents/skill-repos \
+  --reason "Found via agentskill.sh discovery" \
+  --branch main \
+  --forked-from github.com/upstream/repo
+```
+
+`add` clones into the cold pool with a decision record written to `additions.jsonl`.
+It does NOT modify `skill-deck.toml` — that's deck's job. Use `--dry-run` to preview the plan.
+
+### Refresh upstreams (plan-first)
+```bash
+# Step 1: scan cold pool, identify repos behind upstream, write TODO heredoc
+bunx @lythos/skill-curator@0.9.37 refresh-plan
+
+# Step 2: pull behind repos one by one, marking progress in plan
+bunx @lythos/skill-curator@0.9.37 refresh-execute
+```
+
+Per ADR-20260507110332805, refresh defaults to plan-first to prevent E2E timeouts.
+The plan is a heredoc with `git pull --ff-only` lines you can audit before executing.
+
 ### Rollback (if rebuild produces bad data)
 ```bash
 # Restore the most recent backup
