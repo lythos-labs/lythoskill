@@ -41,11 +41,11 @@ This is a pure **Skill** layer package — no Starter (npm package), no CLI, no 
 Add to your `skill-deck.toml`:
 
 ```toml
-[tool]
-skills = ["lythoskill-red-green-release"]
+[tool.skills.lythoskill-red-green-release]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release"
 ```
 
-Then run `bunx @lythos/skill-deck@0.9.15 link` to activate.
+Then run `bunx @lythos/skill-deck@latest link` to activate.
 
 ## Skill Documentation
 

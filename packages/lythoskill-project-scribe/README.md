@@ -11,11 +11,11 @@ This is a pure **Skill** layer package — no Starter (npm package), no CLI, no 
 Add to your `skill-deck.toml`:
 
 ```toml
-[tool]
-skills = ["lythoskill-project-scribe"]
+[tool.skills.lythoskill-project-scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
 ```
 
-Then run `bunx @lythos/skill-deck@0.9.15 link` to activate.
+Then run `bunx @lythos/skill-deck@latest link` to activate.
 
 ## Skill Documentation
 
