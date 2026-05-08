@@ -1,7 +1,7 @@
 <!-- AUTO-GENERATED -->
 lythoskill-deck -- Declarative skill deck governance — cold pool, working set, deny-by-default
 
-Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck prune [--yes] | lythoskill-deck migrate-schema [--dry-run]
+Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck prune [--yes] | lythoskill-deck sync <alias> | lythoskill-deck freeze <alias> | lythoskill-deck reconcile [--apply] | lythoskill-deck migrate-schema [--dry-run]
 
 Commands:
   link                        Sync working set with skill-deck.toml
@@ -10,6 +10,9 @@ Commands:
   validate [deck.toml]        Validate deck configuration
   remove <fq|alias>           Remove a skill from deck.toml and working set
   prune [--yes]               GC cold pool repos no longer referenced by any deck
+  sync <alias>                Switch skill from snapshot (cp) to sync (symlink)
+  freeze <alias>              Switch skill from sync (symlink) to snapshot (cp), pinning current HEAD
+  reconcile [--apply]         Compare lock file (desired) vs cold pool (actual), report drift
   migrate-schema [--dry-run]  Convert string-array deck.toml to alias-as-key dict
 
 Options:
