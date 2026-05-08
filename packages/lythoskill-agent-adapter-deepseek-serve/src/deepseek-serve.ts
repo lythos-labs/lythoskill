@@ -172,43 +172,37 @@ interface DeepSeekEvent {
 }
 
 async function collectThreadOutput(threadId: string, port: number, timeoutMs: number): Promise<string> {
+  // Wait for turn to appear (non-blocking, short poll)
   const deadline = Date.now() + timeoutMs
+  let lastSeq = 0
   let output = ''
+  let completed = false
 
   while (Date.now() < deadline) {
-    // Check if turn is complete
-    const threadRes = await fetch(
-      `http://127.0.0.1:${port}/v1/threads/${threadId}`,
+    // Get events since last checkpoint (incremental, not from 0 each time)
+    const eventsRes = await fetch(
+      `http://127.0.0.1:${port}/v1/threads/${threadId}/events?since_seq=${lastSeq}`,
       { signal: AbortSignal.timeout(3000) }
     ).catch(() => null)
-    if (!threadRes?.ok) { await new Promise(r => setTimeout(r, 2000)); continue }
 
-    const thread = await threadRes.json()
-    const turnId = thread.thread?.latest_turn_id ?? thread.latest_turn_id
-    if (!turnId) { await new Promise(r => setTimeout(r, 2000)); continue }
-
-    // Collect all events so far
-    const eventsRes = await fetch(
-      `http://127.0.0.1:${port}/v1/threads/${threadId}/events?since_seq=0`,
-      { signal: AbortSignal.timeout(5000) }
-    ).catch(() => null)
-    if (!eventsRes?.ok) { await new Promise(r => setTimeout(r, 2000)); continue }
-
-    const text = await eventsRes.text()
-    let completed = false
-    output = ''
-    for (const line of text.split('\n')) {
-      if (line.startsWith('data: ')) {
-        try {
-          const event: DeepSeekEvent = JSON.parse(line.slice(6))
-          if (event.payload?.delta) output += event.payload.delta
-          if (event.event === 'turn.completed') completed = true
-        } catch {}
+    if (eventsRes?.ok) {
+      const text = await eventsRes.text()
+      for (const line of text.split('\n')) {
+        if (line.startsWith('data: ')) {
+          try {
+            const event: DeepSeekEvent = JSON.parse(line.slice(6))
+            if (event.seq > lastSeq) lastSeq = event.seq
+            if (event.payload?.delta) output += event.payload.delta
+            if (event.event === 'turn.completed') completed = true
+          } catch {}
+        }
       }
     }
+
     if (completed && output) return output
 
-    await new Promise(r => setTimeout(r, 2000))
+    // Adaptive poll: shorter interval when events are flowing
+    await new Promise(r => setTimeout(r, 500))
   }
 
   return output || '(timeout)'
