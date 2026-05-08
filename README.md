@@ -202,6 +202,17 @@ working_set = ".claude/skills"   # Claude Code (also read by Cursor, Copilot)
 
 Edit `skill-deck.toml`, re-run `link` — the working set follows. Different project, different deck, different agent target, same cold pool. No contamination.
 
+Pre-built decks double as **shortcut commands** — drop one into `scripts/` and your project gets a capability in one line:
+
+```bash
+# Generate architecture docs for ANY project (like DeepWiki, but with your agent + skills):
+bunx @lythos/skill-deck@latest link --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/architecture-explainer.toml
+# Then: "Read this project and produce architecture.pdf with Mermaid diagrams."
+
+# Or as a scripts/ shortcut:
+# scripts/archdoc → bunx @lythos/skill-deck@latest link --deck <url> + agent prompt
+```
+
 | Pre-built deck | For |
 |----------------|-----|
 | `engineering.toml` | TDD, Git, Mermaid — everyday software work |
@@ -210,6 +221,8 @@ Edit `skill-deck.toml`, re-run `link` — the working set follows. Different pro
 | `full-stack.toml` | Frontend + backend + database |
 | `governance.toml` | Project management with ADR/Epic/Task |
 | `scout.toml` | Minimal — baseline for measuring deck impact |
+| `architecture-explainer.toml` | Mermaid diagrams + design taste — produce project architecture docs (like DeepWiki) |
+| `deep-research.toml` | Structured research pipeline: outline → parallel agents → report |
 
 ### Same Task, Different Decks — The Core Loop
 
