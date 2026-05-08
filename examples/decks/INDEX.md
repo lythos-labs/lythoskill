@@ -32,6 +32,15 @@
 |------|--------|-----|
 | [governance.toml](./governance.toml) | cortex, scribe, onboarding, lythoskill-deck | ADR + Epic + Task + handoff |
 
+### DeepSeek-Optimized
+
+DeepSeek TUI's native strengths: 8 subagent roles, eager web search, 1M context, RLM parallel queries. These decks encourage the agent to leverage subagent orchestration internally.
+
+| Deck | Skills | Optimized for |
+|------|--------|---------------|
+| [deepseek-research.toml](./deepseek-research.toml) | research, research-deep, research-report | Parallel subagent research with web search |
+| [deepseek-codebase.toml](./deepseek-codebase.toml) | tdd, to-prd, mermaid | Codebase exploration (explore→plan→implementer→verifier) |
+
 ## Codex Variants
 
 Codex variants use `working_set = ".agents/skills"` and recommend `--mode snapshot` (Codex #11314 symlink workaround is resolved in 0.9.32):

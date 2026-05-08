@@ -1,0 +1,35 @@
+# Codebase Exploration Deck (DeepSeek-optimized)
+#
+# Leverages DeepSeek TUI's:
+# - explore subagent: fast read-only code mapping
+# - plan subagent: analyze + design strategy
+# - review subagent: read-only audit with severity scoring
+# - LSP diagnostics after each edit (rust-analyzer, pyright, gopls...)
+# - 1M token context — read entire codebases
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/deepseek-codebase.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=deepseek bunx @lythos/skill-arena@latest agent-run \
+#     --brief "Explore this codebase: map architecture, find anti-patterns, suggest improvements" \
+#     --deck ./skill-deck.toml --out ./output --timeout 600
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+role = "Red-green-refactor — DeepSeek's implementer + verifier subagents pair naturally"
+
+[tool.skills.to-prd]
+path = "github.com/mattpocock/skills/skills/engineering/to-prd"
+role = "Convert exploration findings to structured PRD — plan subagent output"
+
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams from codebase exploration"

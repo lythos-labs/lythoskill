@@ -1,0 +1,34 @@
+# Deep Research Deck (DeepSeek-optimized)
+#
+# Leverages DeepSeek TUI's native strengths:
+# - 8 subagent roles (explore, plan, implementer, verifier...)
+# - Eager web search + fetch (no deferred deadlock like Claude)
+# - 1M token context window
+# - RLM parallel queries (1-16 flash model workers)
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/deepseek-research.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=deepseek bunx @lythos/skill-arena@latest agent-run \
+#     --brief "Research topic X: gather evidence from multiple sources, produce structured report" \
+#     --deck ./skill-deck.toml --out ./output --timeout 600
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Generate structured research outline — spawn subagents for parallel item investigation"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Launch independent parallel agents for each outline item — DeepSeek subagent native"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Synthesize deep research into structured report with source attribution"
