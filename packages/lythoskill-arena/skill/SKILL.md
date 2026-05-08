@@ -210,6 +210,7 @@ Read these **only when the specific topic arises**:
 
 | When you need to… | Read |
 |--------------------|------|
+| Look up arena.toml or player config schema (declarative mode, side.env, player tool_set) | [references/configuration-schemas.md](./references/configuration-schemas.md) |
 | Understand Pareto frontier scoring and MOO analysis | [references/pareto-analysis.md](./references/pareto-analysis.md) |
 | Map arena operations to card game test play | [references/test-play-model.md](./references/test-play-model.md) |
 | Detect deck synergy and emergent combos | [references/combo-and-synergy.md](./references/combo-and-synergy.md) |
