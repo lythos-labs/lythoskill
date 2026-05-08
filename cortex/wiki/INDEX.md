@@ -43,8 +43,9 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (15)
+## 📖 Lessons (16)
 
+- **[2026-05-08]** [feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product](./03-lessons/2026-05-08-feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product.md)
 - **[2026-05-07]** [real-world-skill-repo-structure-survey](./03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md)
 - **[2026-05-06]** [deepseek-tui-headless-programmatic-analysis](./03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md)
 - **[2026-05-06]** [agent-spawn-reliability-journey-kimi-player-cwd-isolation](./03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md)
