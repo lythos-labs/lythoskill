@@ -175,6 +175,12 @@ agent platform validation (`standard` or `flow` only).
 `innate` / `tool` are **deck-level deployment choices** declared in `skill-deck.toml`
 sections, not single-card properties. The same skill can be `innate` in one deck and
 `tool` in another.
+
+**Innate priority**: after context compaction or skill reload, read `innate` skills'
+full SKILL.md first (eager/hungry model). `tool` skills are lazy — read on trigger.
+This is an agent-side convention, not a CLI enforcement. The lock file's `type` field
+is your signal.
+
 **Standard compliance**: lythoskill-deck does not modify the Agent Skills standard.
 Every skill remains a directory with SKILL.md. Deck only controls which directories
 appear in `.claude/skills/`. Without deck, skills work normally via manual placement.
