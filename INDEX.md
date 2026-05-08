@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 22:34:54
+> 自动生成于 2026/5/8 22:40:49
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 171 | 进行中: 0, 待验收: 0, 已完成: 144 |
+| Tasks | 171 | 进行中: 1, 待验收: 0, 已完成: 144 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 55 | 已接受: 46 |
 
@@ -57,14 +57,13 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (1)
 
-- [ ] **TASK-20260508222319692**: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
 - [ ] **TASK-20260508222319717**: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260508222319692**: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
 
 ### 待验收 (0)
 

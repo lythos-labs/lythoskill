@@ -12,7 +12,8 @@
 [![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
-[中文](./README.zh.md)
+
+**🌐 Languages:** [中文](./README.zh.md)
 
 **👤 Skill user?** → [Quick Start](#quick-start) — install Bun, run one command, done.  
 **🤖 AI agent?** → [For Agents](#for-agents) — your 4-step checklist.  
