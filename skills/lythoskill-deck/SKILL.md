@@ -60,6 +60,27 @@ bunx @lythos/skill-deck@0.9.37 prune
 # Skip confirmation
 bunx @lythos/skill-deck@0.9.37 prune --yes
 
+# Validate deck configuration (TOML schema + locator structure)
+bunx @lythos/skill-deck@0.9.37 validate
+# Validate a specific deck file
+bunx @lythos/skill-deck@0.9.37 validate ./decks/my-deck.toml
+# Probe each FQ locator against GitHub (network)
+bunx @lythos/skill-deck@0.9.37 validate --remote
+
+# Per-skill mode switch — snapshot (cp, pinned) ↔ sync (symlink, follows upstream)
+bunx @lythos/skill-deck@0.9.37 sync <alias>     # snapshot → sync
+bunx @lythos/skill-deck@0.9.37 freeze <alias>   # sync → snapshot, pinning current HEAD
+
+# Reconcile lock file vs cold pool — k8s-style drift report
+bunx @lythos/skill-deck@0.9.37 reconcile
+# Apply convergence (downloads missing, refreshes behind, prunes orphans)
+bunx @lythos/skill-deck@0.9.37 reconcile --apply
+bunx @lythos/skill-deck@0.9.37 reconcile --apply --yes
+
+# Convert deprecated string-array deck.toml → alias-as-key dict
+bunx @lythos/skill-deck@0.9.37 migrate-schema
+bunx @lythos/skill-deck@0.9.37 migrate-schema --dry-run
+
 # Then re-sync working set
 bunx @lythos/skill-deck@0.9.37 link
 ```
