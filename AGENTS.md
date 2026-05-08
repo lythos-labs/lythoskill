@@ -507,11 +507,19 @@ This repository contains its own built skills under `skills/`:
 
 ## Deck Governance
 
-The `skill-deck.toml` file at repo root declares which skills are active. Sections: `innate` (always loaded), `tool` (available), `combo` (multi-skill combos), `transient` (time-bounded).
+The `skill-deck.toml` file declares which skills are active per project. Key config:
+- `working_set` — where skills are linked (`.claude/skills/` default; configure per agent)
+- `cold_pool` — where skills are downloaded (`~/.agents/skill-repos/` default)
+- `max_cards` — hard cap on total skills
+- Sections: `innate` (always loaded), `tool` (triggered), `combo` (multi-skill groups), `transient` (time-bounded)
 
-The `lythoskill-deck` tool reconciles the declared deck against the skills cold pool by creating symlinks (default) or snapshots (`--mode snapshot`) in `.claude/skills/` (the working set). It generates a `skill-deck.lock` file tracking the resolved state including per-skill mode.
+The `lythoskill-deck` tool reconciles the declared deck against the cold pool by creating symlinks (default) or snapshots (`--mode snapshot`) in the working set. It generates a `skill-deck.lock` file tracking the resolved state including per-skill mode (`"symlink" | "snapshot"`).
 
-Key principle: lythoskill-deck is a declarative package manager and governor. `deck add` git-clones skills into your cold pool, appends them to `skill-deck.toml`, and runs `link`. `deck link` reconciles the working set so only declared skills are visible. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
+**Pre-built decks** live in `examples/decks/` — `deck link --deck <url>` bootstraps a workspace in one command. See the project README for the full table.
+
+**Commands**: `link` | `add` | `refresh` | `remove` | `prune` | `validate --remote` | `sync <alias>` | `freeze <alias>` | `reconcile` | `migrate-schema`
+
+Key principle: declarative package manager + governor. `deck add` clones into cold pool and appends to deck. `deck link` reconciles the working set (deny-by-default). `deck sync`/`freeze` toggle per-skill between live symlink and pinned snapshot. `deck reconcile` detects drift between lock file and cold pool filesystem.
 
 ---
 
