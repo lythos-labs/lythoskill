@@ -196,6 +196,12 @@ Each verification run adds a new section. Allows tracking capability drift over 
 
 This means for **today**, `side.player = "kimi"` is sufficient for built-in platforms. Per-player `.toml` files are documentation/audit artifacts whose runtime integration is pending.
 
+### Authentication is NOT bundled
+
+A player reference resolves the **adapter** but not the **credential**. Each platform requires its own auth setup before `agent-run` can succeed. See [`@lythos/agent-adapter` README → Authentication & Runtime Setup](../../../lythoskill-agent-adapter/README.md#authentication--runtime-setup) for the per-player credential matrix and runtime gotchas (bunx ephemeral env, Bun.spawn module graph, optional adapter imports, etc.).
+
+In short: install the heavy adapter package + set the platform credential env var, BEFORE running. Errors surface at run time, not at startup.
+
 ---
 
 ## Schema Evolution Notes
