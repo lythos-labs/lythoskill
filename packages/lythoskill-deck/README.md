@@ -178,6 +178,38 @@ working_set = "~/.openclaw/skills"
 ```
 Create this in your home directory. One global deck can syndicate to all projects via OpenClaw's fallback chain.
 
+### For Hermes
+
+Hermes keeps skills in `~/.hermes/skills/` and supports scanning additional directories via `external_dirs` in `~/.hermes/config.yaml`. This makes Hermes + deck integration clean: deck manages the working set, Hermes reads it through `external_dirs`.
+
+**Recommended: project-level deck + external_dirs**
+
+```toml
+# skill-deck.toml
+[deck]
+working_set = ".hermes/skills"
+```
+
+```yaml
+# ~/.hermes/config.yaml
+skills:
+  external_dirs:
+    - /absolute/path/to/your/project/.hermes/skills
+```
+
+Run `deck link` from your project root. Hermes picks up the syndicated skills without touching its primary `~/.hermes/skills/` directory.
+
+**Alternative: direct mode (not recommended)**
+
+You can point deck directly at `~/.hermes/skills`:
+
+```toml
+[deck]
+working_set = "~/.hermes/skills"
+```
+
+Caution: deck's deny-by-default will remove any skills not declared in your deck, including Hermes' bundled skills. Only use this if your deck explicitly declares every skill you want Hermes to see.
+
 ### Troubleshooting
 
 | Symptom | Cause | Fix |
