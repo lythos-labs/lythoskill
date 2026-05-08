@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/8 20:13:13
+> 自动生成于 2026/5/8 20:42:55
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 167 | 进行中: 0, 待验收: 0, 已完成: 142 |
-| Epics | 25 | 活跃: 0, 已完成: 21, 悬置: 2, 已归档: 2 |
-| ADRs | 54 | 已接受: 45 |
+| Tasks | 168 | 进行中: 0, 待验收: 0, 已完成: 142 |
+| Epics | 26 | 活跃: 1, 已完成: 21, 悬置: 2, 已归档: 2 |
+| ADRs | 55 | 已接受: 46 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260508201323933**: Project showcase — README, Vitepress, and public positioning for the governance layer
 
 ### 已完成
 
@@ -56,9 +56,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (1)
 
-_无_
+- [ ] **TASK-20260508204204714**: Isolate environment-dependent tests with guard/skip — LobeHub adapter, git-hash, clone tests fail in CI
 
 ### 进行中 (0)
 
@@ -302,6 +302,7 @@ _无_
 - ✅ **ADR-20260508074057834** (02-accepted): Deck link working_set path resolution + absolute-path logging
 - ✅ **ADR-20260508075301691** (02-accepted): Deck link --deck accepts http/https URL
 - ✅ **ADR-20260508075913360** (02-accepted): Extract runtime infrastructure package (@lythos/infra)
+- ✅ **ADR-20260508204215712** (02-accepted): Environment-gated tests
 
 ---
 
