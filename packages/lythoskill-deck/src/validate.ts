@@ -13,6 +13,7 @@
 import { parse as parseToml } from "@iarna/toml";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 import {
   buildValidationPlan,
   executeValidationPlan,
@@ -55,9 +56,17 @@ export async function buildDeckValidation(
   options: ValidateOptions = {},
 ): Promise<DeckValidationReport> {
   const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : process.cwd();
-  const DECK_PATH = cliDeckPath
-    ? resolve(cliDeckPath)
-    : findDeckToml(PROJECT_DIR) || resolve(PROJECT_DIR, "skill-deck.toml");
+  let DECK_PATH: string
+  if (cliDeckPath && isUrl(cliDeckPath)) {
+    try {
+      DECK_PATH = await fetchDeckUrl(cliDeckPath)
+    } catch (e: any) {
+      return { status: 'invalid', deckPath: cliDeckPath, errors: [`Failed to fetch deck: ${e.message}`], warnings: [], entries: [], skills: [], max_cards: 0, constraints: { total_cards: 0, within_budget: true, transient_warnings: [], dir_overlaps: [] } }
+    }
+  } else {
+    const resolved = resolveDeckPathSync(cliDeckPath)
+    DECK_PATH = resolved.path
+  }
 
   if (!existsSync(DECK_PATH)) {
     return {

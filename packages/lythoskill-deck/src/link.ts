@@ -23,6 +23,7 @@ import {
   type SkillDeckLock, type LinkedSkill, type ConstraintReport,
 } from "./schema.js";
 import { parseDeck } from "./parse-deck.js";
+import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
 
@@ -129,33 +130,19 @@ export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?:
 const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 
-// If --deck is a URL, fetch it first (discovered via quick-agent.sh dogfooding)
-let DECK_PATH: string
-if (cliDeck && (cliDeck.startsWith('http://') || cliDeck.startsWith('https://'))) {
-  let url = cliDeck
-  if (url.includes('github.com/') && url.includes('/blob/')) {
-    url = url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/')
-  }
-  const dest = resolve(process.cwd(), 'skill-deck.toml')
-  console.log(`📥 Fetching deck: ${url}`)
-  try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(30_000) })
-    if (!res.ok) {
-      console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}`)
+  // URL deck: fetch first, then proceed as local
+  let DECK_PATH: string
+  if (cliDeck && isUrl(cliDeck)) {
+    try {
+      DECK_PATH = await fetchDeckUrl(cliDeck)
+    } catch (e: any) {
+      console.error(`❌ ${e.message}`)
       process.exit(1)
     }
-    writeFileSync(dest, await res.text())
-    console.log(`   → saved to ${dest}`)
-    DECK_PATH = dest
-  } catch (e: any) {
-    console.error(`❌ Failed to fetch deck: ${e.message || e}`)
-    process.exit(1)
+  } else {
+    DECK_PATH = resolveDeckPathSync(cliDeck).path
   }
-} else {
-  DECK_PATH = cliDeck
-    ? resolve(cliDeck)
-    : findDeckToml(process.cwd()) || resolve("skill-deck.toml");
-}
+
 
 if (!existsSync(DECK_PATH)) {
   console.error(`❌ skill-deck.toml not found in ${process.cwd()}`);
