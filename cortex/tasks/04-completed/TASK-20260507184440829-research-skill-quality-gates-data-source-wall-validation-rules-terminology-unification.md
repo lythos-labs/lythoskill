@@ -5,7 +5,7 @@
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-07 | Created from research-documents experiment audit |
+| completed | 2026-05-07 | Created from research-documents experiment audit |
 
 ## 背景与目标
 

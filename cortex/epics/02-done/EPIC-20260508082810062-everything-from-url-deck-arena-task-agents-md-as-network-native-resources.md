@@ -12,7 +12,7 @@ lane_override_reason: "UX-layer epic: URL-first experience across all CLI surfac
 
 | Status | Date | Note |
 |--------|------|------|
-| active | 2026-05-08 | Created; deck link + arena agent-run already support URL |
+| done | 2026-05-08 | Created; deck link + arena agent-run already support URL |
 
 ## 背景故事
 
