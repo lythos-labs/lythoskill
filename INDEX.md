@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 08:28:39
+> 自动生成于 2026/5/8 08:29:52
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 151 | 进行中: 1, 待验收: 1, 已完成: 113 |
+| Tasks | 151 | 进行中: 1, 待验收: 0, 已完成: 114 |
 | Epics | 24 | 活跃: 2, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
@@ -77,11 +77,11 @@
 
 - 🔄 **TASK-20260507220646324**: playground/blake3 — rebuild BLAKE3 hash from scratch (ProgramBench-style)
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260507143022480**: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
+_无_
 
-### 已完成 (113)
+### 已完成 (114)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -196,6 +196,7 @@
 - ✅ ~~TASK-20260507103221240~~: T10: Migrate curator/src/ to consume @lythos/cold-pool primitives
 - ✅ ~~TASK-20260507103221276~~: T11: Migrate arena/src/preflight.ts to consume @lythos/cold-pool primitives
 - ✅ ~~TASK-20260507130509142~~: deck add should not exit-fail when cold pool repo exists; should still write deck.toml + link if specific skill not yet declared
+- ✅ ~~TASK-20260507143022480~~: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
 
 ### 悬置 (0)
 

@@ -8,6 +8,7 @@
 | backlog | 2026-05-07 | Created |
 | in-progress | 2026-05-07 | MetadataDB schema + CRUD + git-hash helpers implemented |
 | review | 2026-05-07 | Deck integration complete (add/link/remove); ready for review |
+| completed | 2026-05-08 | Closed via trailer |
 
 ## 背景与目标
 
