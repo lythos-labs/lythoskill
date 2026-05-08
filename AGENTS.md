@@ -388,7 +388,22 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 ./scripts/publish.sh
 ```
 
-The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order (`hello-world → project-cortex → curator → arena → creator → deck`), and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
+The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order, and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
+
+### CI & Publish Gotchas
+
+These are the small details that cause CI failures or broken publishes. Most are one-line fixes that an agent can easily miss.
+
+| Gotcha | Symptom | Fix |
+|--------|---------|-----|
+| **New package, stale lockfile** | `bun install --frozen-lockfile` fails in CI | `bun install` then commit `bun.lock` |
+| **New package not in publish script** | Package missing from npm after release | Add to `scripts/publish.sh` PACKAGES array |
+| **`require()` in TypeScript source** | Pre-commit hook rejects with ESM-only ADR | Use `import` / `await import()` — never `require()` |
+| **SKILL.md edited, not rebuilt** | Skills directory stale, agent sees old instructions | `bunx @lythos/skill-creator@latest build` auto-runs in pre-commit when `skill/SKILL.md` changed |
+| **Wrong CWD for git commands** | `git add <file>` fails with "did not match" | Always `cd` to repo root first: `/Users/chariots/Downloads/lythoskill-main` |
+| **Skills branch push race** | `[remote rejected] skills → skills (cannot lock ref)` | `git pull --rebase` then `git push` (concurrent agent sessions share the skills branch) |
+| **New adapter, wrong package** | Heavy daemon code in base interface package | Lightweight CLI adapters → `@lythos/agent-adapter`. Daemon/SSE/port management → new `@lythos/agent-adapter-<name>` package |
+| **Test expects old adapter** | `listAgents()` no longer contains removed adapter | Update test expectations when removing adapters |
 
 ### Handoff (release-adjacent)
 
