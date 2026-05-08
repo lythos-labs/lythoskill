@@ -83,7 +83,7 @@ function parseTools(toolString: string | undefined): string[] | undefined {
 }
 
 const claudeSdkAdapter: AgentAdapter = {
-  name: 'claude-sdk',
+  name: 'claude',
 
   async spawn(opts): Promise<AgentRunResult> {
     checkAuth()
