@@ -1,6 +1,6 @@
 ---
 name: lythoskill-creator
-version: 0.9.37
+version: 0.9.38
 type: standard
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
@@ -34,7 +34,7 @@ A lythoskill project separates concerns into three layers:
 Scaffold a new lythoskill monorepo.
 
 ```bash
-bunx lythoskill-creator init <project-name>
+bunx @lythos/skill-creator@0.9.38 init <project-name>
 ```
 
 Creates a monorepo with a starter package and an example skill.
@@ -44,23 +44,23 @@ Creates a monorepo with a starter package and an example skill.
 Add a new skill to an existing lythoskill monorepo.
 
 ```bash
-bunx lythoskill-creator add-skill <skill-name>
+bunx @lythos/skill-creator@0.9.38 add-skill <skill-name>
 ```
 
-Creates starter package + skill layer under `packages/<skill-name>/`. Requires `package.json` and `pnpm-workspace.yaml` in the current directory (monorepo root). Skips existing files.
+Creates starter package + skill layer under `packages/<skill-name>/`. Requires `package.json` in the current directory (monorepo root). Skips existing files.
 
 ### build
 
 Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter, and enforces the unified version.
 
 ```bash
-bunx lythoskill-creator build <skill-name>
+bunx @lythos/skill-creator@0.9.38 build <skill-name>
 ```
 
 Build all skills at once (used by pre-commit):
 
 ```bash
-bunx lythoskill-creator build --all
+bunx @lythos/skill-creator@0.9.38 build --all
 ```
 
 ### align
@@ -69,12 +69,29 @@ Audit an existing project against current lythoskill conventions. Reports drift 
 
 ```bash
 # Audit only — reports what would change
-bunx lythoskill-creator align
+bunx @lythos/skill-creator@0.9.38 align
 
 # Auto-fix drift where possible
-bunx lythoskill-creator align --fix
+bunx @lythos/skill-creator@0.9.38 align --fix
 ```
 
-Checks for: outdated `package.json` scripts, missing `pnpm-workspace.yaml` entries, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
+Checks for: outdated `package.json` scripts, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
+
+### bump
+
+Lock-step version bump for the entire monorepo. Updates root `package.json` + every `packages/*/package.json` to the same version (per `project_lockstep_versioning` policy). Used before `npm publish` runs.
+
+```bash
+# Semver targets
+bunx @lythos/skill-creator@0.9.38 bump patch
+bunx @lythos/skill-creator@0.9.38 bump minor
+bunx @lythos/skill-creator@0.9.38 bump major
+
+# Explicit version (e.g. for major milestones)
+bunx @lythos/skill-creator@0.9.38 bump 1.0.0
+
+# Preview the bump without writing files
+bunx @lythos/skill-creator@0.9.38 bump 1.0.0 --dry-run
+```
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.
