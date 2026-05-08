@@ -1,0 +1,37 @@
+fields:
+  - name: "product_positioning"
+    description: "What problem does this curator solve? Who is the target user?"
+    detail_level: detailed
+  - name: "architecture"
+    description: "System architecture: components, data flow, storage, triggers"
+    detail_level: detailed
+  - name: "skill_scope"
+    description: "What skills does it curate? All skills, or a subset (agent-created only, hub-only, etc.)"
+    detail_level: moderate
+  - name: "discovery_mechanism"
+    description: "How are skills discovered and indexed?"
+    detail_level: detailed
+  - name: "lifecycle_management"
+    description: "How does it manage skill lifecycle states? Active, stale, archived, deprecated?"
+    detail_level: detailed
+  - name: "quality_assessment"
+    description: "How is skill quality evaluated? Telemetry, LLM review, manual rating, community voting?"
+    detail_level: detailed
+  - name: "write_vs_read"
+    description: "Does it modify skills (write) or only observe/index (read)? What operations are permitted?"
+    detail_level: moderate
+  - name: "automation_level"
+    description: "How autonomous is the curation? Manual trigger, scheduled, event-driven, fully automatic?"
+    detail_level: moderate
+  - name: "user_control"
+    description: "What control does the user have? Pin, override, configure thresholds, disable?"
+    detail_level: moderate
+  - name: "ecosystem_integration"
+    description: "How does it integrate with the broader ecosystem? Hub, marketplace, deck, arena?"
+    detail_level: detailed
+  - name: "trust_model"
+    description: "How is trust established? Author reputation, usage stats, manual verification, community?"
+    detail_level: moderate
+  - name: "telemetry"
+    description: "What data is collected? Views, uses, patches, timestamps, quality scores?"
+    detail_level: moderate
