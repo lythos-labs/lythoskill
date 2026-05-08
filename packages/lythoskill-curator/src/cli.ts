@@ -12,7 +12,7 @@
 
 import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync, appendFileSync, rmSync } from 'node:fs'
 import { join, basename } from 'node:path'
-import { Database } from 'bun:sqlite'
+import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
@@ -132,41 +132,7 @@ export function scanSkill(path: string): SkillMeta | null {
 // ── SQLite Catalog Writer ────────────────────────────────────
 
 function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
-  const db = new Database(dbPath, { create: true })
-  db.run(`
-    CREATE TABLE IF NOT EXISTS catalog_meta (
-      key TEXT PRIMARY KEY,
-      value TEXT
-    )
-  `)
-  db.run(`
-    CREATE TABLE IF NOT EXISTS skills (
-      path TEXT PRIMARY KEY,
-      description TEXT,
-      type TEXT,
-      version TEXT,
-      name TEXT NOT NULL,
-      niches TEXT,
-      managed_dirs TEXT,
-      trigger_phrases TEXT,
-      has_scripts INTEGER,
-      has_examples INTEGER,
-      body_preview TEXT,
-      source TEXT,
-      when_to_use TEXT,
-      allowed_tools TEXT,
-      author TEXT,
-      user_invocable INTEGER,
-      tags TEXT,
-      deck_dependencies TEXT,
-      deck_skill_type TEXT
-    )
-  `)
-  // Schema migration: add columns that may be missing from older indexes
-  try { db.run(`ALTER TABLE skills ADD COLUMN deck_skill_type TEXT`); } catch {}
-  db.run(`CREATE INDEX IF NOT EXISTS idx_skills_deck_skill_type ON skills(deck_skill_type)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type)`)
-  db.run(`CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(name)`)
+  const db = new CatalogDb(dbPath)
 
   const insert = db.query(`
     INSERT OR REPLACE INTO skills
@@ -385,7 +351,7 @@ function formatMarkdownTable(rows: Record<string, any>[]): string {
 
 // ── Query subcommand ─────────────────────────────────────────
 
-function printSchema(db: Database) {
+function printSchema(db: CatalogDb) {
   console.log('## catalog.db schema\n')
 
   const tables = db.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as { name: string }[]
@@ -479,7 +445,7 @@ function runQuery(argv: string[]) {
       console.error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
       process.exit(1)
     }
-    const db = new Database(dbPath, { readonly: true })
+    const db = new CatalogDb(dbPath)
     try {
       printSchema(db)
     } finally {
@@ -513,7 +479,7 @@ function runQuery(argv: string[]) {
     process.exit(1)
   }
 
-  const db = new Database(dbPath, { readonly: true })
+  const db = new CatalogDb(dbPath)
   try {
     // Show index freshness
     try {
@@ -567,7 +533,7 @@ function runAudit(argv: string[]) {
     process.exit(1)
   }
 
-  const db = new Database(dbPath, { readonly: true })
+  const db = new CatalogDb(dbPath)
   const checks: AuditCheck[] = []
 
   try {

@@ -37,7 +37,8 @@
     "bun": ">=1.0.0"
   },
   "dependencies": {
-    "@lythos/cold-pool": "^0.9.25",
+    "@lythos/cold-pool": "^0.9.36",
+    "@lythos/infra": "^0.9.36",
     "yaml": "^2.8.3"
   }
 }
