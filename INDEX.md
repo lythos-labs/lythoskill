@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/8 22:40:49
+> 自动生成于 2026/5/8 23:14:41
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 171 | 进行中: 1, 待验收: 0, 已完成: 144 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
-| ADRs | 55 | 已接受: 46 |
+| ADRs | 56 | 已接受: 47 |
 
 ---
 
@@ -306,6 +306,7 @@ _无_
 - ✅ **ADR-20260508075301691** (02-accepted): Deck link --deck accepts http/https URL
 - ✅ **ADR-20260508075913360** (02-accepted): Extract runtime infrastructure package (@lythos/infra)
 - ✅ **ADR-20260508204215712** (02-accepted): Environment-gated tests
+- ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
 
 ---
 
