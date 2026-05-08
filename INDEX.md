@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 09:31:57
+> 自动生成于 2026/5/8 11:42:43
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 155 | 进行中: 1, 待验收: 0, 已完成: 118 |
-| Epics | 24 | 活跃: 1, 已完成: 19, 悬置: 2, 已归档: 2 |
+| Tasks | 160 | 进行中: 1, 待验收: 0, 已完成: 134 |
+| Epics | 24 | 活跃: 0, 已完成: 20, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
+_无_
 
 ### 已完成
 
@@ -39,6 +39,7 @@
 - ✅ **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
 - ✅ **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
 - ✅ **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
+- ✅ **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
 
 ### 悬置
 
@@ -54,24 +55,9 @@
 
 ## 📄 Tasks
 
-### 待办 (16)
+### 待办 (0)
 
-- [ ] **TASK-20260505015055286**: T5: Unit tests for pure functions + CLI BDD for curator add
-- [ ] **TASK-20260505163912399**: create
-- [ ] **TASK-20260505191950708**: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
-- [ ] **TASK-20260506001644423**: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
-- [ ] **TASK-20260506001644451**: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
-- [ ] **TASK-20260506102619862**: Implement distinct runtime behavior for innate/tool/combo skill types
-- [ ] **TASK-20260506193936311**: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
-- [ ] **TASK-20260507011711797**: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
-- [ ] **TASK-20260507112345999**: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
-- [ ] **TASK-20260507163036174**: ${ID}: deck unit test failures — post FQ schema alignment
-- [ ] **TASK-20260507184440829**: Research skill quality gates — data source wall, validation rules, terminology unification
-- [ ] **TASK-20260507223411867**: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
-- [ ] **TASK-20260507223411896**: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
-- [ ] **TASK-20260507223550910**: Replace runClaudeAgent with useAgent() abstraction — default kimi, support claude-sdk/deepseek
-- [ ] **TASK-20260507223935542**: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
-- [ ] **TASK-20260507224228837**: Graduation exam: end-to-end agent BDD — empty dir → curator discover → cold-pool add → deck build → arena compare → judge verdict (recipe .docx)
+_无_
 
 ### 进行中 (1)
 
@@ -81,7 +67,7 @@
 
 _无_
 
-### 已完成 (118)
+### 已完成 (134)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -161,6 +147,8 @@ _无_
 - ✅ ~~TASK-20260505015051145~~: T2: Extract skill parsing from scanSkill: frontmatter → SkillMeta (pure, unit-testable)
 - ✅ ~~TASK-20260505015052748~~: T3: curator add — download skill to cold pool without installing (like deck add but cold-only)
 - ✅ ~~TASK-20260505015054313~~: T4: Feed source abstraction — cold pool / GitHub / URL as source types
+- ✅ ~~TASK-20260505015055286~~: T5: Unit tests for pure functions + CLI BDD for curator add
+- ✅ ~~TASK-20260505163912399~~: create
 - ✅ ~~TASK-20260505165424864~~: create
 - ✅ ~~TASK-20260505184757091~~: T1: buildRefreshPlan pure function + RefreshPlan/RefreshItem types in curator-core.ts
 - ✅ ~~TASK-20260505184757915~~: T2: refresh-plan + refresh-execute CLI commands in cli.ts
@@ -182,7 +170,9 @@ _无_
 - ✅ ~~TASK-20260506001644316~~: T3: Extract AgentAdapter as standalone plugin lib + Claude SDK adapter
 - ✅ ~~TASK-20260506001644356~~: T4: Create AgentSdkAdapter implementing AgentAdapter interface (spawn + invokeTool)
 - ✅ ~~TASK-20260506001644390~~: T5: Register AgentSdkAdapter in useAgent() routing, add claude-sdk player
+- ✅ ~~TASK-20260506001644423~~: T6: Arena copy-test re-run with fixed CLI spawn — verify non-empty agent output
 - ✅ ~~TASK-20260507010453909~~: Remove implicit skills/ insertion from findSource() and align all deck paths to direct mapping
+- ✅ ~~TASK-20260507011711797~~: Design unified skill-locator resolver: syntax parsing + existence validation + semantic path verification via GitHub API
 - ✅ ~~TASK-20260507021320323~~: T1: Scaffold @lythos/cold-pool package with monorepo lock-step config
 - ✅ ~~TASK-20260507021320360~~: T2: Core types — Locator, ValidationReport, FetchPlan, RefreshPlan, Executor + parseLocator migration
 - ✅ ~~TASK-20260507021320388~~: T3: Resolver layer — GitHub Tree API client, validateRemote, inferSkillPath
@@ -195,18 +185,30 @@ _无_
 - ✅ ~~TASK-20260507021320567~~: T12: Write ADR-20260507014124191 body — agent-friendly CLI error as decision tree
 - ✅ ~~TASK-20260507103221240~~: T10: Migrate curator/src/ to consume @lythos/cold-pool primitives
 - ✅ ~~TASK-20260507103221276~~: T11: Migrate arena/src/preflight.ts to consume @lythos/cold-pool primitives
+- ✅ ~~TASK-20260507112345999~~: Migrate deck BDD scenarios from bare-name fixtures to real lythos-labs/test-stubs FQ locators (BDD-test-stubs)
 - ✅ ~~TASK-20260507130509142~~: deck add should not exit-fail when cold pool repo exists; should still write deck.toml + link if specific skill not yet declared
 - ✅ ~~TASK-20260507143022480~~: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
+- ✅ ~~TASK-20260507163036174~~: ${ID}: deck unit test failures — post FQ schema alignment
+- ✅ ~~TASK-20260507184440829~~: Research skill quality gates — data source wall, validation rules, terminology unification
+- ✅ ~~TASK-20260507223411867~~: Add agent BDD scenarios for cold-pool status and cold-pool prune (post deck/cold-pool separation)
+- ✅ ~~TASK-20260507223411896~~: Update deck-refresh agent BDD to match new card-group-safe-update semantics (plan-first, post-pull validate)
+- ✅ ~~TASK-20260507223550910~~: Replace runClaudeAgent with useAgent() abstraction — default kimi, support claude-sdk/deepseek
+- ✅ ~~TASK-20260507224228837~~: Graduation exam: end-to-end agent BDD — empty dir → curator discover → cold-pool add → deck build → arena compare → judge verdict (recipe .docx)
 - ✅ ~~TASK-20260508093141381~~: buildReconcilePlan + executeReconcilePlan — cold-pool reconcile core pure function
 - ✅ ~~TASK-20260508093146024~~: deck sync/freeze CLI — snapshot↔symlink intent switching
 - ✅ ~~TASK-20260508093148414~~: deck reconcile CLI — user-facing command consuming cold-pool reconcile plan
 - ✅ ~~TASK-20260508093150634~~: snapshot storage + GC — cp location decision + orphan cleanup
+- ✅ ~~TASK-20260508112022533~~: T1: extract resolveDeckPath — shared URL/path resolution
+- ✅ ~~TASK-20260508112022568~~: T2: deck link + validate --deck <url> — URL-native CLI surfaces
+- ✅ ~~TASK-20260508112022596~~: T3: deck validate <url> as discover-before-adopt entry point
+- ✅ ~~TASK-20260508112022623~~: T5: AGENTS.md as network-native agent bootloader — wiki pattern + PoC
+- ✅ ~~TASK-20260508112022651~~: T6: pre-built deck INDEX.md — 11 decks catalogued by use case
 
 ### 悬置 (0)
 
 _无_
 
-### 终止 (19)
+### 终止 (24)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -227,6 +229,11 @@ _无_
 - 🛑 ~~TASK-20260503135205264~~: terminate
 - 🛑 ~~TASK-20260503135212184~~: --help
 - 🛑 ~~TASK-20260503152001333~~: Adopt alias-as-key dict schema for skill entries
+- 🛑 ~~TASK-20260505191950708~~: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
+- 🛑 ~~TASK-20260506001644451~~: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
+- 🛑 ~~TASK-20260506102619862~~: Implement distinct runtime behavior for innate/tool/combo skill types
+- 🛑 ~~TASK-20260506193936311~~: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
+- 🛑 ~~TASK-20260507223935542~~: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
 
 ---
 
