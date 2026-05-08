@@ -2,9 +2,10 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (31)
+## 📚 Patterns (32)
 
 - **[2026-05-08]** [agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends](./01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
+- **[2026-05-08]** [curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery](./01-patterns/2026-05-08-curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery.md)
 - **[2026-05-08]** [agents-md-as-network-native-agent-bootloader](./01-patterns/2026-05-08-agents-md-as-network-native-agent-bootloader.md)
 - **[2026-05-07]** [graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx](./01-patterns/2026-05-07-graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx.md)
 - **[2026-05-07]** [expected-coverage-gaps-intent-plan-execute-coverage-strategy](./01-patterns/2026-05-07-expected-coverage-gaps-intent-plan-execute-coverage-strategy.md)
