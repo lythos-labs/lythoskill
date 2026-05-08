@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 08:19:18
+> 自动生成于 2026/5/8 08:28:39
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 151 | 进行中: 1, 待验收: 1, 已完成: 113 |
-| Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
+| Epics | 24 | 活跃: 2, 已完成: 18, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
 ---
@@ -17,6 +17,7 @@
 ### 进行中
 
 - **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
+- **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
 
 ### 已完成
 
