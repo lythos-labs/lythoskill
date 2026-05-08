@@ -1,11 +1,12 @@
 # Engineering Deck (Codex)
 # TDD + PRD + architecture diagrams for Codex CLI.
 #
-# ⚠️  Codex #11314: symlinked skills not discovered. See documents.toml for workaround.
+# Codex #11314 (symlink bug): use snapshot mode for real directories.
+#   bunx @lythos/skill-deck@latest link --mode snapshot
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/codex/engineering.toml > skill-deck.toml
-#   bunx @lythos/skill-deck@latest link
+#   bunx @lythos/skill-deck@latest link --mode snapshot
 #   codex exec "Write a PRD and implement with TDD"
 
 [deck]

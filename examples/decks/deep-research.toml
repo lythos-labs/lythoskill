@@ -1,0 +1,31 @@
+# Deep Research Deck
+# Structured research pipeline: outline → parallel deep agents → report.
+# Compare with "documents" deck for tool-only research, or "research-documents"
+# for research + format output.
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/deep-research.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   LYTHOS_PLAYER=kimi bunx @lythos/skill-arena@latest agent-run \
+#     --brief "Research the current state of AI agent skill ecosystems in 2026" \
+#     --deck ./skill-deck.toml --out ./output
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Generate structured research outline from a topic — fields, objectives, research objects"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Launch independent parallel agents for each outline item, gather structured evidence"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Synthesize deep research results into structured markdown report with source attribution"

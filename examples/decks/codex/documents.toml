@@ -1,14 +1,14 @@
 # Document Format Deck (Codex)
 # PDF + DOCX for Codex CLI. Uses .agents/skills/ — Codex default scan path.
 #
-# ⚠️  Codex #11314: symlinked .agents/skills/ is not discovered.
-#     Workaround: use `deck link` to set up symlinks, then copy real dirs:
-#       cp -rL .agents/skills/ .agents/skills-real/
-#     Or wait for snapshot mode (ADR-20260507190157540) to land in 0.10.x.
+# Codex #11314 (symlink bug): use snapshot mode to get real directories.
+#   bunx @lythos/skill-deck@latest link --mode snapshot
+# Or freeze individual skills after linking:
+#   bunx @lythos/skill-deck@latest freeze <alias>
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/codex/documents.toml > skill-deck.toml
-#   bunx @lythos/skill-deck@latest link
+#   bunx @lythos/skill-deck@latest link --mode snapshot
 #   codex exec "Write a recipe as a .docx file"
 
 [deck]
