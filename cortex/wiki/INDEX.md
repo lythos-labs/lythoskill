@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (32)
+## 📚 Patterns (33)
 
 - **[2026-05-08]** [agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends](./01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - **[2026-05-08]** [curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery](./01-patterns/2026-05-08-curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery.md)
@@ -33,6 +33,7 @@
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
 - **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
+- **[0000-00-00]** [agents-md-bootloader-pattern](./01-patterns/agents-md-bootloader-pattern.md)
 - **[0000-00-00]** [cold-pool-evolutionary-rationale](./01-patterns/cold-pool-evolutionary-rationale.md)
 - **[0000-00-00]** [cold-pool-cli-boundary](./01-patterns/cold-pool-cli-boundary.md)
 - **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
