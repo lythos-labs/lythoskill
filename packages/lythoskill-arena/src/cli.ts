@@ -128,6 +128,7 @@ async function agentRun(args: string[]) {
   const { useAgent } = await import('@lythos/test-utils/agents')
   // Optional: register claude-sdk adapter if the package is installed
   try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
+  try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
   const { resolvePlayer } = await import('./player')
   const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs')
