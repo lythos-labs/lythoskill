@@ -67,8 +67,11 @@ Change the deck's `working_set` line (or the default `.claude/skills`) before li
 ```toml
 working_set = ".claude/skills"    # Claude Code (default)
 working_set = ".cursor/skills"    # Cursor
-working_set = ".agents/skills"    # OpenClaw, Codex CLI
-working_set = ".hermes/skills"    # Hermes (+ external_dirs in config.yaml)
+working_set = ".agents/skills"    # Codex CLI, OpenClaw, Windsurf
+# Hermes: set working_set above, then add to ~/.hermes/config.yaml:
+#   skills:
+#     external_dirs:
+#       - ~/.agents/skills
 ```
 
 See [deck README](../../packages/lythoskill-deck/README.md) for platform-specific onboarding guides.
