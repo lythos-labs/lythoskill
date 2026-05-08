@@ -382,6 +382,19 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 - `.husky/pre-commit` runs `build --all` whenever `packages/**/skill/**` files change, then auto-stages `skills/`. This is independent of `bump` and protects against drift in everyday edits.
 - Do not `--amend` a published commit. Do not `--no-verify`.
 
+### New package publish list (discipline)
+
+**Every new npm package under `packages/` must be added to `scripts/publish.sh` `PACKAGES` array before its first release.**
+
+The script is the single source of truth for what gets published. Packages not in the list are silently skipped — no error, just missing from npm. This has caused real incidents (see CI & Publish Gotchas below).
+
+| Check | Command |
+|-------|---------|
+| After scaffolding a new package | `grep "packages/lythoskill-<new>" scripts/publish.sh` must match |
+| After bump | Verify the new package appears in the publish log |
+
+**Skill-only packages** (no `package.json`, no `src/`, pure `SKILL.md` under `skill/`) are exempt — they are build targets, not publish targets.
+
 ### Publish to npm
 
 ```bash
