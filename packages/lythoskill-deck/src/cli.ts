@@ -9,6 +9,7 @@ import { removeSkill } from './remove.js'
 import { pruneDeck } from './prune.js'
 import { syncSkill, freezeSkill } from './sync-freeze.js'
 import { reconcileDeck } from './reconcile.js'
+import { resolveDeckPathSync, fetchDeckUrl, isUrl } from './resolve-deck.js'
 import { formatHelp } from './help.js'
 
 const args = process.argv.slice(2)
@@ -22,7 +23,22 @@ function flagValue(name: string): string | undefined {
   return idx >= 0 ? args[idx + 1] : undefined
 }
 
-const deckPath = flagValue('--deck')
+const cliDeck = flagValue('--deck')
+// URL deck: fetch first at the CLI dispatch layer, then pass local path to commands.
+// Commands stay sync; URL I/O is handled once here.
+let deckPath: string | undefined
+if (cliDeck && isUrl(cliDeck)) {
+  try {
+    deckPath = await fetchDeckUrl(cliDeck)
+  } catch (e: any) {
+    console.error(`❌ ${e.message}`)
+    process.exit(1)
+  }
+} else if (cliDeck) {
+  deckPath = resolveDeckPathSync(cliDeck).path
+} else {
+  deckPath = undefined
+}
 const workdir = flagValue('--workdir')
 const alias = flagValue('--alias')
 const type = flagValue('--type')
