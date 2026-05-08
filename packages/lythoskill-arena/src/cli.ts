@@ -103,8 +103,24 @@ async function agentRun(args: string[]) {
   }
 
   const { resolve, join } = await import('node:path')
-  const deckPath = resolve(opts.deck)
-  if (!existsSync(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
+  const { existsSync: deckExists, writeFileSync: deckWrite } = await import('node:fs')
+  let deckPath: string
+  if (opts.deck.startsWith('http://') || opts.deck.startsWith('https://')) {
+    let url = opts.deck
+    if (url.includes('github.com/') && url.includes('/blob/')) {
+      url = url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/')
+    }
+    const dest = resolve(process.cwd(), 'arena-deck.toml')
+    console.log(`📥 Fetching arena deck: ${url}`)
+    const res = await fetch(url, { signal: AbortSignal.timeout(30_000) })
+    if (!res.ok) { console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}`); process.exit(1) }
+    deckWrite(dest, await res.text())
+    console.log(`   → saved to ${dest}`)
+    deckPath = dest
+  } else {
+    deckPath = resolve(opts.deck)
+    if (!deckExists(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
+  }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
   // Optional: register claude-sdk adapter if the package is installed
