@@ -193,10 +193,25 @@ async function collectThreadOutput(threadId: string, port: number, timeoutMs: nu
             const event: DeepSeekEvent = JSON.parse(line.slice(6))
             if (event.seq > lastSeq) lastSeq = event.seq
             if (event.payload?.delta) output += event.payload.delta
-            if (event.event === 'turn.completed') completed = true
+            if (event.event === 'turn_completed' || event.event === 'turn.completed') completed = true
           } catch {}
         }
       }
+    }
+
+    // Fallback: check thread status directly if SSE didn't signal completion
+    if (!completed) {
+      try {
+        const thRes = await fetch(
+          `http://127.0.0.1:${port}/v1/threads/${threadId}`,
+          { signal: AbortSignal.timeout(3000) }
+        )
+        if (thRes.ok) {
+          const th = await thRes.json()
+          const turn = th.turns?.[0] ?? th.thread?.latest_turn
+          if (turn?.status === 'completed' && output) completed = true
+        }
+      } catch {}
     }
 
     if (completed && output) return output
