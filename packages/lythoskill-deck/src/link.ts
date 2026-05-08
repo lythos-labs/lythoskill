@@ -469,6 +469,7 @@ for (const item of declared) {
     type: item.type,
     source: sourceRel,
     dest: relative(PROJECT_DIR, dest),
+    mode: MODE,
     content_hash: contentHash,
     linked_at: new Date().toISOString(),
     ...(item.expires ? { expires: item.expires } : {}),

@@ -13,6 +13,7 @@ checklist_skipped_reason: Follow-up to EPIC-20260507020846020; ADRs accepted, im
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-07 | Created as follow-up to EPIC-20260507020846020 |
+| done | 2026-05-08 | Done |
 
 ## 背景故事
 
@@ -70,8 +71,8 @@ ColdPool manager 基础设施已交付（path + metadata + git IO + fetch/valida
 ## 经验沉淀
 
 ## 归档条件
-- [ ] `buildReconcilePlan` + `executeReconcilePlan` 实现 + 测试
-- [ ] `deck sync` / `deck freeze` CLI 命令
-- [ ] `deck reconcile` CLI 命令
-- [ ] snapshot 存储方案落地
-- [ ] ADR-20260507190157540 accepted
+- [x] `buildReconcilePlan` + `executeReconcilePlan` 实现 + 测试
+- [x] `deck sync` / `deck freeze` CLI 命令
+- [x] `deck reconcile` CLI 命令
+- [x] snapshot 存储方案落地
+- [x] ADR-20260507190157540 accepted

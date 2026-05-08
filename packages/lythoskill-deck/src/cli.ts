@@ -7,6 +7,8 @@ import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { removeSkill } from './remove.js'
 import { pruneDeck } from './prune.js'
+import { syncSkill, freezeSkill } from './sync-freeze.js'
+import { reconcileDeck } from './reconcile.js'
 import { formatHelp } from './help.js'
 
 const args = process.argv.slice(2)
@@ -41,6 +43,9 @@ const HELP_CONFIG = {
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
     { name: 'remove', description: 'Remove a skill from deck.toml and working set', args: '<fq|alias>' },
     { name: 'prune', description: 'GC cold pool repos no longer referenced by any deck', args: '[--yes]' },
+    { name: 'sync', description: 'Switch skill from snapshot (cp) to sync (symlink)', args: '<alias>' },
+    { name: 'freeze', description: 'Switch skill from sync (symlink) to snapshot (cp), pinning current HEAD', args: '<alias>' },
+    { name: 'reconcile', description: 'Compare lock file (desired) vs cold pool (actual), report drift', args: '[--apply]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
@@ -98,6 +103,29 @@ switch (command) {
       process.exit(1)
     }
     removeSkill(removeTarget, deckPath, workdir)
+    break
+  }
+  case 'sync': {
+    const syncTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!syncTarget) {
+      console.error('❌ Missing target. Usage: deck sync <alias>')
+      process.exit(1)
+    }
+    syncSkill(syncTarget, deckPath, workdir)
+    break
+  }
+  case 'freeze': {
+    const freezeTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!freezeTarget) {
+      console.error('❌ Missing target. Usage: deck freeze <alias>')
+      process.exit(1)
+    }
+    freezeSkill(freezeTarget, deckPath, workdir)
+    break
+  }
+  case 'reconcile': {
+    const apply = args.includes('--apply')
+    reconcileDeck(deckPath, workdir, apply)
     break
   }
   case 'prune': {

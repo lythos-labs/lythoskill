@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/8 08:29:52
+> 自动生成于 2026/5/8 09:31:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 151 | 进行中: 1, 待验收: 0, 已完成: 114 |
-| Epics | 24 | 活跃: 2, 已完成: 18, 悬置: 2, 已归档: 2 |
+| Tasks | 155 | 进行中: 1, 待验收: 0, 已完成: 118 |
+| Epics | 24 | 活跃: 1, 已完成: 19, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
 ---
@@ -16,7 +16,6 @@
 
 ### 进行中
 
-- **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
 - **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
 
 ### 已完成
@@ -39,6 +38,7 @@
 - ✅ **EPIC-20260505230149768**: Implement CriterionDef schema + judge cleanup + reproducibility metadata for arena chart-ready MVP
 - ✅ **EPIC-20260506001552299**: Stabilize agent spawn: CLI workaround + AgentSdkAdapter + MCP fallback + pre-flight
 - ✅ **EPIC-20260507020846020**: Cold pool foundation: @lythos/cold-pool package, intent/plan/executor architecture, deck/curator/arena migration
+- ✅ **EPIC-20260507191713917**: Cold-pool reconcile — k8s-style desired vs actual convergence with snapshot/sync dual-mode
 
 ### 悬置
 
@@ -81,7 +81,7 @@
 
 _无_
 
-### 已完成 (114)
+### 已完成 (118)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -197,6 +197,10 @@ _无_
 - ✅ ~~TASK-20260507103221276~~: T11: Migrate arena/src/preflight.ts to consume @lythos/cold-pool primitives
 - ✅ ~~TASK-20260507130509142~~: deck add should not exit-fail when cold pool repo exists; should still write deck.toml + link if specific skill not yet declared
 - ✅ ~~TASK-20260507143022480~~: cold-pool metadata layer: SQLite-backed per-repo HEAD ref + per-skill content hash + cross-deck reference index
+- ✅ ~~TASK-20260508093141381~~: buildReconcilePlan + executeReconcilePlan — cold-pool reconcile core pure function
+- ✅ ~~TASK-20260508093146024~~: deck sync/freeze CLI — snapshot↔symlink intent switching
+- ✅ ~~TASK-20260508093148414~~: deck reconcile CLI — user-facing command consuming cold-pool reconcile plan
+- ✅ ~~TASK-20260508093150634~~: snapshot storage + GC — cp location decision + orphan cleanup
 
 ### 悬置 (0)
 

@@ -38,3 +38,13 @@ export { gitClone, gitPull, detectGitRoot } from './git-io.js'
 export { buildFetchPlan, executeFetchPlan } from './fetch-plan.js'
 
 export { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'
+
+export type {
+  DesiredSkill,
+  ReconcileDesiredState,
+  ReconcileEntry,
+  ReconcilePlan,
+  ReconcileResult,
+  ReconcileIO,
+} from './reconcile-plan.js'
+export { buildReconcilePlan, executeReconcilePlan } from './reconcile-plan.js'

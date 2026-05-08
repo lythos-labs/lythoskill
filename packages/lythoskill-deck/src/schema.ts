@@ -8,6 +8,8 @@ export const LinkedSkillSchema = z.object({
   type: z.enum(["innate", "tool", "combo", "transient"]),
   source: z.string(),
   dest: z.string(),
+  /** Link mode: symlink (live, follows cold pool) or snapshot (pinned copy). */
+  mode: z.enum(["symlink", "snapshot"]).default("symlink"),
   content_hash: z.string().optional(),
   linked_at: z.string().datetime(),
   expires: z.string().optional(),
