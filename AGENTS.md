@@ -395,6 +395,19 @@ The script is the single source of truth for what gets published. Packages not i
 
 **Skill-only packages** (no `package.json`, no `src/`, pure `SKILL.md` under `skill/`) are exempt — they are build targets, not publish targets.
 
+### Content discipline
+
+**All content lives under `cortex/wiki/`. Do not create root-level content directories.**
+
+| Content type | Wiki path | Examples |
+|-------------|-----------|----------|
+| Research reports | `cortex/wiki/02-research/` | Curator comparison, ecosystem analysis |
+| Patterns | `cortex/wiki/01-patterns/` | Player-Deck separation, bootloader |
+| FAQs & Guides | `cortex/wiki/02-faq/` | In-action tour, player prerequisites |
+| Lessons learned | `cortex/wiki/03-lessons/` | Agent spawn reliability journey |
+
+**Never**: `research/`, `showcase/`, `guides/`, or any content-only directory at repo root. Site content (vitepress) is a build target sourced from wiki — do not maintain parallel content.
+
 ### Cortex task lifecycle (discipline)
 
 **Every task that produces a commit must close itself via git commit trailer.** The `.husky/post-commit` hook reads `Closes: TASK-xxx` and `Task: TASK-xxx review/done` trailers, then auto-moves the task in cortex.
