@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 22:25:18
+> 自动生成于 2026/5/8 22:34:54
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 171 | 进行中: 1, 待验收: 0, 已完成: 143 |
+| Tasks | 171 | 进行中: 0, 待验收: 0, 已完成: 144 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 55 | 已接受: 46 |
 
@@ -62,15 +62,15 @@
 - [ ] **TASK-20260508222319692**: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
 - [ ] **TASK-20260508222319717**: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260508222319664**: T1 — SSOT test infrastructure (package.json scripts + root + CI test.yml)
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (143)
+### 已完成 (144)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -215,6 +215,7 @@ _无_
 - ✅ ~~TASK-20260508155132653~~: Document AGENTS.md bootloader pattern from playground
 - ✅ ~~TASK-20260508155133562~~: Generate deck INDEX.md — catalogue all example decks by use-case
 - ✅ ~~TASK-20260508204204714~~: Isolate environment-dependent tests with guard/skip — LobeHub adapter, git-hash, clone tests fail in CI
+- ✅ ~~TASK-20260508222319664~~: T1 — SSOT test infrastructure (package.json scripts + root + CI test.yml)
 
 ### 悬置 (0)
 
