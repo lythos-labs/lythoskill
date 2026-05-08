@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-08 | Created from agent feedback — surprising behavior when --deck points to subdirectory |
+| accepted | 2026-05-08 | Accepted |
 
 ## 背景
 

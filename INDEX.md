@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/7 23:09:46
+> 自动生成于 2026/5/8 08:19:18
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 151 | 进行中: 1, 待验收: 1, 已完成: 113 |
 | Epics | 23 | 活跃: 1, 已完成: 18, 悬置: 2, 已归档: 2 |
-| ADRs | 51 | 已接受: 42 |
+| ADRs | 54 | 已接受: 45 |
 
 ---
 
@@ -277,6 +277,9 @@ _无_
 - ✅ **ADR-20260507110332831** (02-accepted): Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command
 - ✅ **ADR-20260507143241493** (02-accepted): cold-pool metadata layer: git-native hash instead of custom SHA-256, SQLite-backed, local-only trust
 - ✅ **ADR-20260507190157540** (02-accepted): Cold-pool project isolation: snapshot (default) vs sync dual-mode with guided intent switch
+- ✅ **ADR-20260508074057834** (02-accepted): Deck link working_set path resolution + absolute-path logging
+- ✅ **ADR-20260508075301691** (02-accepted): Deck link --deck accepts http/https URL
+- ✅ **ADR-20260508075913360** (02-accepted): Extract runtime infrastructure package (@lythos/infra)
 
 ---
 

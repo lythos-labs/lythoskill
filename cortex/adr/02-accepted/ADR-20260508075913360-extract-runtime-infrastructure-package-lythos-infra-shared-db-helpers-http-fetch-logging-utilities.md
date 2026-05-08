@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-08 | Created — SqliteDb in cold-pool, fetch in deck pointed to same pattern |
+| accepted | 2026-05-08 | Accepted |
 
 ## 背景
 

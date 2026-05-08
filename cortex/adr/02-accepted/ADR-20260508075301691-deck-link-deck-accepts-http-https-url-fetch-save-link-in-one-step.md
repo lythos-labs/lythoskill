@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-08 | Created — discovered during quick-agent workflow dogfooding |
+| accepted | 2026-05-08 | Accepted |
 
 ## 背景
 
