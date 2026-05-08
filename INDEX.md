@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 19:54:43
+> 自动生成于 2026/5/8 20:01:37
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 167 | 进行中: 0, 待验收: 0, 已完成: 141 |
+| Tasks | 167 | 进行中: 0, 待验收: 0, 已完成: 142 |
 | Epics | 25 | 活跃: 1, 已完成: 20, 悬置: 2, 已归档: 2 |
 | ADRs | 54 | 已接受: 45 |
 
@@ -55,9 +55,9 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260508155101016**: Arena agent-run full e2e with deepseek serve
+_无_
 
 ### 进行中 (0)
 
@@ -67,7 +67,7 @@ _无_
 
 _无_
 
-### 已完成 (141)
+### 已完成 (142)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -207,6 +207,7 @@ _无_
 - ✅ ~~TASK-20260508155056768~~: Implement deck reconcile --apply convergence
 - ✅ ~~TASK-20260508155058319~~: Extract @lythos/infra runtime base package with SqliteDb
 - ✅ ~~TASK-20260508155059504~~: Migrate curator catalog DB to inherit SqliteDb
+- ✅ ~~TASK-20260508155101016~~: Arena agent-run full e2e with deepseek serve
 - ✅ ~~TASK-20260508155102153~~: Fix judge parser markdown bold extraction (** → JSON parse error)
 - ✅ ~~TASK-20260508155132653~~: Document AGENTS.md bootloader pattern from playground
 - ✅ ~~TASK-20260508155133562~~: Generate deck INDEX.md — catalogue all example decks by use-case
