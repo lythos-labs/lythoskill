@@ -60,5 +60,20 @@ bunx @lythos/skill-deck@latest link --deck https://raw.githubusercontent.com/lyt
 bunx @lythos/skill-deck@latest validate --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/engineering.toml --remote
 ```
 
+## Cross-Platform `working_set`
+
+Change the deck's `working_set` line (or the default `.claude/skills`) before linking:
+
+```toml
+working_set = ".claude/skills"    # Claude Code (default)
+working_set = ".cursor/skills"    # Cursor
+working_set = ".agents/skills"    # OpenClaw, Codex CLI
+working_set = ".hermes/skills"    # Hermes (+ external_dirs in config.yaml)
+```
+
+See [deck README](../../packages/lythoskill-deck/README.md) for platform-specific onboarding guides.
+
+## Raw URLs
+
 All raw URLs follow the pattern:
 `https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/<name>.toml`
