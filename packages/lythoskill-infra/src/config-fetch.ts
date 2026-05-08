@@ -26,11 +26,12 @@ function hashUrl(url: string): string {
 
 function normalizeGitHubUrl(url: string): string {
   // Convert github.com/.../blob/... to raw.githubusercontent.com
-  if (url.includes('github.com/') && url.includes('/blob/')) {
-    return url
-      .replace('github.com/', 'raw.githubusercontent.com/')
-      .replace('/blob/', '/')
-  }
+  try {
+    const u = new URL(url)
+    if (u.hostname === 'github.com' && u.pathname.includes('/blob/')) {
+      return `https://raw.githubusercontent.com${u.pathname.replace('/blob/', '/')}`
+    }
+  } catch {}
   return url
 }
 

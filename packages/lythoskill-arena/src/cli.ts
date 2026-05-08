@@ -107,9 +107,12 @@ async function agentRun(args: string[]) {
   let deckPath: string
   if (opts.deck.startsWith('http://') || opts.deck.startsWith('https://')) {
     let url = opts.deck
-    if (url.includes('github.com/') && url.includes('/blob/')) {
-      url = url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/')
-    }
+    try {
+      const u = new URL(url)
+      if (u.hostname === 'github.com' && u.pathname.includes('/blob/')) {
+        url = `https://raw.githubusercontent.com${u.pathname.replace('/blob/', '/')}`
+      }
+    } catch { /* keep original url */ }
     const dest = resolve(process.cwd(), 'arena-deck.toml')
     console.log(`📥 Fetching arena deck: ${url}`)
     const res = await fetch(url, { signal: AbortSignal.timeout(30_000) })
