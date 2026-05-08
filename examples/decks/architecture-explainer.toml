@@ -1,0 +1,46 @@
+# Architecture Explainer Deck
+# Mermaid diagrams + design taste — produce polished architecture documentation.
+# Think "DeepWiki, but with your choice of agent and skills."
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/architecture-explainer.toml > deck.toml
+#   mkdir my-project && cd my-project
+#   bunx @lythos/skill-deck@latest link --deck ./deck.toml
+#
+# Then ask your agent: "Document the architecture of this project with Mermaid diagrams."
+# Output: architecture.md with embedded diagrams, cross-references, and design system.
+
+[deck]
+max_cards = 12
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+# ── Diagram generation ──
+[tool.skills.design-doc-mermaid]
+path = "github.com/SpillwaveSolutions/design-doc-mermaid"
+role = "Generate architecture diagrams, flowcharts, sequence diagrams, ER diagrams from descriptions"
+
+# ── Design taste (optional — remove for pure diagram output) ──
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+role = "Non-generic aesthetic direction"
+
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+role = "Curated color palettes and font pairings"
+
+[tool.skills.brand-guidelines]
+path = "github.com/anthropics/skills/skills/brand-guidelines"
+role = "Consistent brand styling across output"
+
+# ── Format output (optional — remove if you only want markdown) ──
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Write architecture report as Word document"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Produce print-ready PDF from the report"
