@@ -141,8 +141,8 @@ async function ensureServeRunning(): Promise<number> {
     stdin: 'ignore',
   })
 
-  // Wait for serve to be ready
-  for (let i = 0; i < 30; i++) {
+  // Wait for serve to be ready (up to 60s for CI/cold-start)
+  for (let i = 0; i < 120; i++) {
     try {
       const res = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1000) })
       if (res.ok) {
