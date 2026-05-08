@@ -1,0 +1,54 @@
+# Player Registry — verified agent platforms for lythoskill arena
+#
+# Status levels:
+#   tested      — We ran it. File ops, tools confirmed. Known limitations documented.
+#   theoretical — API/docs say it should work. Community verification welcome.
+#   blocked     — Known blocker prevents use (documented below).
+#
+# Auto-detection: run `bun packages/lythoskill-arena/src/cli.ts players detect`
+# to scan for installed CLIs and generate this file.
+
+[players.claude]
+status = "tested"
+adapter = "claude-sdk"
+method = "@anthropic-ai/claude-agent-sdk query()"
+notes = "Full agent mode. File ops, tools, subagents all confirmed working."
+tested_version = "2.1.133"
+tested_scenarios = ["skill-introspection (122ms, PASS)", "cookie-recipe .docx + radar chart (302ms, PASS)"]
+
+[players.kimi]
+status = "tested"
+adapter = "kimi-cli"
+method = "kimi --print (one-shot)"
+notes = "One-shot mode confirmed. File ops work. Scoring: 8.7 weighted in headless comparison."
+tested_version = "1.41.0"
+tested_scenarios = ["graduation exam cookie recipe .docx + radar chart (PASS)", "deep research AI agent ecosystem report (PASS)"]
+
+[players.deepseek]
+status = "tested"
+adapter = "deepseek-serve"
+method = "deepseek serve --http (thread API)"
+notes = """
+HTTP thread API confirmed working: create thread → send turns → SSE events.
+Full tool execution (file ops, shell, web search) confirmed via /v1/threads.
+One-shot `deepseek "prompt"` is text-only (no tool execution) — use serve mode.
+Serve requires PID lock file at ~/.agents/lythoskill/deepseek-serve.pid.
+"""
+tested_version = "0.8.14"
+tested_scenarios = ["serve health check (OK)", "thread create + turn with file write (PASS)"]
+known_issues = ["--yolo flag removed in 0.8.14; use auto_approve:true in thread config"]
+
+[players.codex]
+status = "theoretical"
+adapter = "codex-cli"
+method = "codex exec (presumed)"
+notes = """
+Not yet tested. Codex #11314 (symlink bug) is resolved via --mode snapshot in 0.9.32.
+Community verification welcome — open an issue with your results.
+"""
+
+[players.cursor]
+status = "theoretical"
+adapter = "cursor-cli"
+method = "cursor-agent (presumed)"
+notes = "Not yet tested. Cursor reads .cursor/skills/ — compatible with deck working_set. Community verification welcome."
