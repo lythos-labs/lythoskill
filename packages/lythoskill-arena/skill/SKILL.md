@@ -75,18 +75,11 @@ If `player` is omitted, arena defaults to `kimi`.
 The simplest path — one subagent, one deck, one task. Used by `examples/quick-agent.sh` internally.
 
 ```bash
-# Task in a markdown file
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} agent-run \
-  --task ./TASK.md \
-  --deck ./skill-deck.toml \
-  --player kimi \
-  --out ./output
-
-# Inline brief (no TASK file needed)
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} agent-run \
+# URL deck (auto-fetched) + inline brief — no local files needed
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} single \
+  --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
   --brief "Investigate this repo and produce a deck plan" \
-  --deck ./skill-deck.toml \
-  --out ./output
+  --player kimi
 ```
 
 ### Declarative: `run --config` (k8s-style)

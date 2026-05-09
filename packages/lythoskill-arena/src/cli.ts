@@ -74,7 +74,9 @@ Examples:
   lythoskill-arena vs --config ./arena.toml --dry-run
 
   # Legacy scaffolding
-  lythoskill-arena scaffold --task "Refactor auth module" --decks ./decks/a.toml,./decks/b.toml
+  # scaffold creates structure; decks via URL (auto-downloaded during link):
+  lythoskill-arena scaffold --task "Refactor auth module" \\
+    --decks https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml
   lythoskill-arena viz runs/arena-20260504
 `)
 }

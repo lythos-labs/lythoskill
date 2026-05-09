@@ -3,9 +3,9 @@ Arena operations map directly to card game deck-building test play:
 | Card game operation | Arena equivalent | Mode |
 |---------------------|-----------------|------|
 | **Pick a card**: A or B? | `run --config examples/arena/research-compare/arena.toml` | declarative |
-| **Add a card**: Does C improve my deck? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
-| **Cut a card**: Is D dead weight? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/minus-pdf.toml"` | deck-compare |
-| **Swap a card**: E instead of F? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/some-other.toml"` | deck-compare |
+| **Add a card**: Does C improve my deck? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
+| **Cut a card**: Is D dead weight? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/minus-pdf.toml"` | deck-compare |
+| **Swap a card**: E instead of F? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
 | **Deck duel**: lythos vs superpowers? | `--decks "lythos.toml,superpowers.toml"` | deck-compare |
 ## Key Distinction
 - **Single-card comparison** (Mode 1): "Which card is better in isolation?"

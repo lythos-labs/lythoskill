@@ -28,15 +28,19 @@ Options:
       --timeout <ms>     Subagent timeout (single only)
 
 Examples:
-  # Single-player deck test (exec shortcut)
-  lythoskill-arena single --task ./TASK.agent.md --deck ./deck.toml
-  lythoskill-arena single --brief "Generate auth flow diagram" --deck ./deck.toml --player kimi
+  # Single-player deck test (--deck accepts local paths and http/https URLs)
+  lythoskill-arena single \
+    --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
+    --brief "Generate auth flow diagram" --player kimi
 
   # Multi-side comparison (declarative)
+  curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/add-remove/arena.toml > arena.toml
   lythoskill-arena vs --config ./arena.toml
   lythoskill-arena vs --config ./arena.toml --dry-run
 
   # Legacy scaffolding
-  lythoskill-arena scaffold --task "Refactor auth module" --decks ./decks/a.toml,./decks/b.toml
+  # scaffold creates structure; decks via URL (auto-downloaded during link):
+  lythoskill-arena scaffold --task "Refactor auth module" \
+    --decks https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml
   lythoskill-arena viz runs/arena-20260504
 
