@@ -319,6 +319,7 @@ ${formatList(legacy, config.wikiSubdirs.legacy) || '*No entries yet.*'}
     console.log(`✅ Generated ${join(config.wikiDir, 'INDEX.md')}`);
   } catch {
     console.log('⚠️  Wiki directory not found');
+    console.log('   To initialize: bunx @lythos/project-cortex init');
   }
 }
 

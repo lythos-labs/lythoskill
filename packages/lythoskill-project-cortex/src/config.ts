@@ -44,6 +44,7 @@ export function loadConfig(): WorkflowConfig {
       return { ...DEFAULT_CONFIG, ...userConfig };
     } catch {
       console.warn(`⚠️  Config parse failed, using defaults: ${CONFIG_FILE}`);
+      console.warn(`   Check JSON syntax in ${CONFIG_FILE}, or delete the file to use defaults.`);
     }
   }
   return DEFAULT_CONFIG;
