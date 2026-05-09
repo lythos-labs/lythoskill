@@ -83,6 +83,32 @@ function hasFlag(args: string[], name: string): boolean {
   return args.indexOf(name) !== -1;
 }
 
+/**
+ * Validate a required TASK / EPIC / ADR id arg. If missing, emit a HATEOAS-style
+ * error (problem + Usage + concrete Example + pointer to `cortex list`) and exit.
+ *
+ * Optional `hint` is appended for cases where two transition verbs share an ID
+ * shape but differ in semantics (e.g. `done` requires review while `complete`
+ * accepts any status).
+ */
+function requireDocId(
+  arg: string | undefined,
+  command: string,
+  kind: 'TASK' | 'EPIC' | 'ADR',
+  hint?: string,
+): string {
+  if (arg) return arg;
+  const idLabel = `${kind}-ID`;
+  const exampleId = `${kind}-20260509121724330`;
+  console.error(`❌ ${idLabel} required for "${command}".
+
+   Usage:    bunx @lythos/project-cortex ${command} <${idLabel}>
+   Example:  bunx @lythos/project-cortex ${command} ${exampleId}
+
+   To list existing items:  bunx @lythos/project-cortex list${hint ? `\n\n   Note: ${hint}` : ''}`);
+  process.exit(1);
+}
+
 async function main(): Promise<void> {
   const config = loadConfig();
   const command = process.argv[2];
@@ -98,7 +124,14 @@ async function main(): Promise<void> {
     case 'task':
       // Disambiguate: `task <id> <verb>` is rare; current CLI keeps top-level verbs for tasks.
       if (!arg) {
-        console.error('❌ Please provide a task title');
+        console.error(`❌ Task title required.
+
+   Usage:    bunx @lythos/project-cortex task "<title>"
+   Example:  bunx @lythos/project-cortex task "Fix login redirect bug"
+
+   The title becomes the kebab-cased filename suffix; the new task lands
+   in cortex/tasks/01-backlog/. To list existing tasks:
+     bunx @lythos/project-cortex list`);
         process.exit(1);
       }
       createTask(arg, config);
@@ -106,16 +139,22 @@ async function main(): Promise<void> {
 
     case 'epic': {
       if (!arg) {
-        console.error('❌ Please provide an epic title or subcommand (done|suspend|resume)');
+        console.error(`❌ Epic title or subcommand required.
+
+   Create:    bunx @lythos/project-cortex epic "<title>" --lane main|emergency
+   Example:   bunx @lythos/project-cortex epic "User auth system" --lane main
+
+   Subcommands (state machine):
+     epic done <EPIC-ID>     Move epic to done
+     epic suspend <EPIC-ID>  Move epic to suspended
+     epic resume <EPIC-ID>   Move suspended epic back to active
+
+   To list existing epics:  bunx @lythos/project-cortex list`);
         process.exit(1);
       }
       // Subcommand form: `epic <verb> <EPIC-ID>`
       if (arg === 'done' || arg === 'suspend' || arg === 'resume') {
-        const epicId = restArgs[0];
-        if (!epicId) {
-          console.error(`❌ Please provide an epic ID for "epic ${arg}"`);
-          process.exit(1);
-        }
+        const epicId = requireDocId(restArgs[0], `epic ${arg}`, 'EPIC');
         if (arg === 'done') {
           moveEpic(epicId, 'done', config, { note: 'Done' });
         } else if (arg === 'suspend') {
@@ -140,7 +179,18 @@ async function main(): Promise<void> {
 
       // Fire-and-await the async create flow; map any rejection to a non-zero exit.
       createEpic(arg, config, { lane, override, skipChecklist }).catch(err => {
-        console.error('❌ Epic creation failed:', err instanceof Error ? err.message : err);
+        const errMsg = err instanceof Error ? err.message : String(err);
+        console.error(`❌ Epic creation failed: ${errMsg}
+
+   Common causes & fixes:
+     • Missing --lane: pass --lane main or --lane emergency
+     • Lane full (max 1 active per lane): close active epic first
+       (bunx @lythos/project-cortex epic done <EPIC-ID>) or pass
+       --override "<reason>" to bypass the guard
+     • Checklist required (interactive TTY): answer the 5 questions, or
+       pass --skip-checklist "<reason>" in non-interactive contexts
+
+   To see existing epics:    bunx @lythos/project-cortex list`);
         process.exit(1);
       });
       break;
@@ -148,15 +198,21 @@ async function main(): Promise<void> {
 
     case 'adr': {
       if (!arg) {
-        console.error('❌ Please provide an ADR title or subcommand (accept|reject|supersede)');
+        console.error(`❌ ADR title or subcommand required.
+
+   Create:    bunx @lythos/project-cortex adr "<title>"
+   Example:   bunx @lythos/project-cortex adr "Lock-step versioning across packages"
+
+   Subcommands (state machine):
+     adr accept <ADR-ID>                       Move ADR to accepted
+     adr reject <ADR-ID>                       Move ADR to rejected
+     adr supersede <ADR-ID> [--by <new-id>]    Move ADR to superseded
+
+   To list existing ADRs:  bunx @lythos/project-cortex list`);
         process.exit(1);
       }
       if (arg === 'accept' || arg === 'reject' || arg === 'supersede') {
-        const adrId = restArgs[0];
-        if (!adrId) {
-          console.error(`❌ Please provide an ADR ID for "adr ${arg}"`);
-          process.exit(1);
-        }
+        const adrId = requireDocId(restArgs[0], `adr ${arg}`, 'ADR');
         if (arg === 'accept') {
           moveAdr(adrId, 'accepted', config, { note: 'Accepted' });
 
@@ -215,7 +271,18 @@ async function main(): Promise<void> {
 
     case 'wiki':
       if (!arg) {
-        console.error('❌ Please provide a wiki title');
+        console.error(`❌ Wiki title required.
+
+   Usage:     bunx @lythos/project-cortex wiki "<title>" [--category pattern|faq|lesson]
+   Example:   bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
+
+   Categories (default: pattern):
+     pattern   Reusable solutions and conventions
+     faq       Common questions
+     lesson    Retrospectives and post-mortems
+
+   Index: cortex/wiki/INDEX.md is auto-regenerated. To rebuild manually:
+     bunx @lythos/project-cortex index wiki`);
         process.exit(1);
       }
       {
@@ -233,50 +300,47 @@ async function main(): Promise<void> {
       break;
 
     case 'start':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'in-progress', config, { note: 'Started' });
+      moveTask(requireDocId(arg, 'start', 'TASK'), 'in-progress', config, { note: 'Started' });
       break;
 
     case 'review':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'review', config, { note: 'Deliverables committed' });
+      moveTask(requireDocId(arg, 'review', 'TASK'), 'review', config, { note: 'Deliverables committed' });
       break;
 
     case 'done':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'completed', config, { note: 'Done' });
+      moveTask(
+        requireDocId(arg, 'done', 'TASK', "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'."),
+        'completed', config, { note: 'Done' },
+      );
       break;
 
     case 'complete':
       // Trailer-driven close: any status → completed, single Status History entry.
       // Distinct from `done` which strictly requires review → completed.
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'completed', config, { allowAny: true, note: 'Closed via trailer' });
+      moveTask(
+        requireDocId(arg, 'complete', 'TASK', "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed."),
+        'completed', config, { allowAny: true, note: 'Closed via trailer' },
+      );
       break;
 
     case 'suspend':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'suspended', config, { note: 'Blocked' });
+      moveTask(requireDocId(arg, 'suspend', 'TASK'), 'suspended', config, { note: 'Blocked' });
       break;
 
     case 'resume':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'in-progress', config, { note: 'Resumed' });
+      moveTask(requireDocId(arg, 'resume', 'TASK'), 'in-progress', config, { note: 'Resumed' });
       break;
 
     case 'reject':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'in-progress', config, { note: 'Re-work required' });
+      moveTask(requireDocId(arg, 'reject', 'TASK'), 'in-progress', config, { note: 'Re-work required' });
       break;
 
     case 'terminate':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'terminated', config, { allowAny: true, note: 'Terminated' });
+      moveTask(requireDocId(arg, 'terminate', 'TASK'), 'terminated', config, { allowAny: true, note: 'Terminated' });
       break;
 
     case 'archive':
-      if (!arg) { console.error('❌ Please provide a task ID'); process.exit(1); }
-      moveTask(arg, 'archived', config, { allowAny: true, note: 'Archived' });
+      moveTask(requireDocId(arg, 'archive', 'TASK'), 'archived', config, { allowAny: true, note: 'Archived' });
       break;
 
     case 'dispatch-trailers':

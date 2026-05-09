@@ -22,7 +22,18 @@ export function createWiki(title: string, config: WorkflowConfig, category: stri
 
   const subdir = subdirMap[category];
   if (!subdir) {
-    console.error(`❌ Unknown category: ${category}. Use: pattern, faq, or lesson`);
+    console.error(`❌ Unknown category: ${category}
+
+   Valid categories:
+     pattern   Reusable solutions and conventions
+     faq       Common questions
+     lesson    Retrospectives and post-mortems
+
+   Usage:    bunx @lythos/project-cortex wiki "<title>" --category pattern|faq|lesson
+   Example:  bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
+
+   Index regenerates automatically; to rebuild manually:
+     bunx @lythos/project-cortex index wiki`);
     process.exit(1);
   }
 

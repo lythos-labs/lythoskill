@@ -165,7 +165,18 @@ function moveDoc(
   const found = findDocFile(docId, config, kind);
 
   if (!found) {
-    console.error(`❌ ${kind.label} not found: ${docId}`);
+    const labelLower = kind.label.toLowerCase();
+    console.error(`❌ ${kind.label} not found: ${docId}
+
+   Searched all status subdirectories under ${kind.baseDir(config)}.
+   Common causes:
+     • Typo in ID — copy from \`bunx @lythos/project-cortex list\`
+     • ID without \`${kind.prefix}\` prefix — both forms are accepted
+       (e.g. ${kind.prefix}20260509121724330 and 20260509121724330)
+     • ${kind.label} already archived/terminated and ${labelLower} dirs differ
+       between repo checkouts
+
+   To list all ${labelLower}s by status:  bunx @lythos/project-cortex list`);
     process.exit(1);
   }
 
@@ -179,9 +190,19 @@ function moveDoc(
   const allowedTargets = kind.validTransitions[currentStatus] || [];
 
   if (!options.allowAny && !allowedTargets.includes(targetStatus)) {
-    console.error(`❌ Invalid transition: ${currentStatus} → ${targetStatus}`);
-    console.error(`   Allowed from ${currentStatus}: ${allowedTargets.join(', ') || 'none'}`);
-    console.error(`   Use --force to override (not recommended).`);
+    const labelLower = kind.label.toLowerCase();
+    const anyStatusVerbs = kind.label === 'Task'
+      ? "  • For any-status close use 'complete' (trailer-driven), 'terminate', or 'archive' (post-completed)\n"
+      : '';
+    console.error(`❌ Invalid transition for ${kind.label} ${docId}: ${currentStatus} → ${targetStatus}
+
+   Allowed targets from "${currentStatus}": ${allowedTargets.join(', ') || '(none — terminal status)'}
+
+   What you can do:
+${anyStatusVerbs}     • Move ${labelLower} through valid intermediate states first
+       (e.g. backlog → in-progress → review → completed)
+     • If the ${labelLower} truly needs to skip a step, use the corresponding
+       any-status verb (above) — there is no \`--force\` flag.`);
     process.exit(1);
   }
 
