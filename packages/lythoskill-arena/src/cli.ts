@@ -63,11 +63,13 @@ Options:
       --timeout <ms>     Subagent timeout (single only)
 
 Examples:
-  # Single-player deck test (exec shortcut)
-  lythoskill-arena single --task ./TASK.agent.md --deck ./deck.toml
-  lythoskill-arena single --brief "Generate auth flow diagram" --deck ./deck.toml --player kimi
+  # Single-player deck test (--deck accepts local paths and http/https URLs)
+  lythoskill-arena single \\
+    --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
+    --brief "Generate auth flow diagram" --player kimi
 
   # Multi-side comparison (declarative)
+  curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/add-remove/arena.toml > arena.toml
   lythoskill-arena vs --config ./arena.toml
   lythoskill-arena vs --config ./arena.toml --dry-run
 
@@ -91,16 +93,19 @@ async function singleRun(args: string[]) {
   }
 
   if (!opts.deck) {
-    console.error(`❌ --deck <path> is required.
-   Usage: lythoskill-arena single --deck ./deck.toml --task ./scenario.agent.md
-          lythoskill-arena single --deck ./deck.toml --brief "your task description"
-   Example decks: examples/decks/scout.toml, examples/decks/documents.toml`)
+    console.error(`❌ --deck <path|url> is required.
+   --deck accepts local paths and http/https URLs (auto-fetched).
+   Example: lythoskill-arena single \\
+              --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
+              --brief "your task"`)
     process.exit(1)
   }
   if (!opts.task && (!opts.brief || !opts.brief.trim())) {
-    console.error(`❌ --task <path> or --brief "<prompt>" is required.
-   Usage: lythoskill-arena single --deck ./deck.toml --task ./scenario.agent.md
-          lythoskill-arena single --deck ./deck.toml --brief "your task description"`)
+    console.error(`❌ --task <path> or --brief "<text>" is required.
+   --task reads a .agent.md scenario file; --brief takes inline text.
+   Example: lythoskill-arena single \\
+              --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
+              --brief "your task"`)
     process.exit(1)
   }
 
@@ -125,9 +130,9 @@ async function singleRun(args: string[]) {
   } else {
     deckPath = resolve(opts.deck)
     if (!deckExists(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}
-   Create one: examples/decks/scout.toml (minimal), examples/decks/documents.toml (documents)
-   Or fetch:   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml > deck.toml
-   Or create:  see https://github.com/lythos-labs/lythoskill/tree/main/examples/decks/`); process.exit(1) }
+   Make sure the path is correct, or use a URL:
+     --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
+   (URLs are auto-fetched — no local file needed)`); process.exit(1) }
   }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
@@ -148,9 +153,9 @@ async function singleRun(args: string[]) {
   if (opts.task) {
     const taskPath = resolve(opts.task)
     if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}
-   Create a .agent.md scenario or use --brief for inline tasks.
-   Format: frontmatter (name, description, timeout) + Given/When/Then/Judge sections.
-   Example: see playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
+   Use --brief for inline tasks, or point --task to an existing .agent.md file.
+   Format: name + description + Given/When/Then/Judge sections.
+   Example: lythoskill-arena single --brief "your task" --deck <url>`); process.exit(1) }
     scenarioOpt.scenarioPath = taskPath
     // Quick validation: check frontmatter presence
     const raw = readFileSync(taskPath, 'utf-8')
@@ -767,10 +772,9 @@ async function vsRun(argv: string[]) {
   console.error(`❌ --config <arena.toml> is required.
    Usage: lythoskill-arena vs --config ./arena.toml
           lythoskill-arena vs --config ./arena.toml --dry-run
-   Example configs:
-     examples/arena/research-compare/arena.toml   — two-side A/B
-     examples/arena/add-remove/arena.toml          — three-side Pareto
-   Create one: cp examples/arena/research-compare/arena.toml ./arena.toml`)
+   Fetch an example:
+     curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/add-remove/arena.toml > arena.toml
+   Then edit arena.toml and run: lythoskill-arena vs --config ./arena.toml`)
   process.exit(1)
 
   const result = await runArenaProgrammatic({
