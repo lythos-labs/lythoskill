@@ -8,11 +8,17 @@
  * Unlike the previous deck-level prune implementation (which only checked
  * ONE deck.toml), this version queries the cross-deck reference index,
  * preventing accidental deletion of repos still needed by other decks.
+ *
+ * Scanning approach: instead of ColdPool.list() (which uses buildListPlan
+ * with strict canonical depth classification), this scans the cold pool
+ * filesystem directly at host/owner/repo depth, matching how deck add
+ * resolves locators. This correctly handles repos with arbitrary internal
+ * structure (subdirs, non-terminal repos, etc.).
  */
 
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { ColdPool } from './cold-pool.js'
+import { ColdPool, DEFAULT_COLD_POOL_PATH } from './cold-pool.js'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -69,14 +75,13 @@ function defaultFormatSize(bytes: number): string {
 /**
  * Build a prune plan by comparing cold pool contents against the metadata DB.
  *
- * 1. Lists all repos in the cold pool (using ColdPool.list() with canonical
- *    classification — supports canonical, legacy-depth1, and legacy-depth2).
+ * 1. Scans cold pool for all repo directories (SKILL.md-driven, like add/link).
  * 2. Queries metadata DB for all active locators (state = added/linked/NULL).
  * 3. A repo is prunable if no active locator references it.
  */
 export function buildPrunePlan(coldPoolPath: string): PrunePlan {
   const pool = new ColdPool(coldPoolPath)
-  const allRepos = pool.list()
+  const allRepos = pool.findSkillDirectories()
   const activeLocators = pool.metadata.getAllActiveLocators()
   pool.metadata.close()
 
@@ -84,7 +89,7 @@ export function buildPrunePlan(coldPoolPath: string): PrunePlan {
   for (const repoPath of allRepos) {
     const repoRel = repoPath.slice(coldPoolPath.length + 1)
     // A repo matches if any active locator starts with its relative path
-    // (accounting for multi-skill repos like "github.com/owner/repo/subskill")
+    // (accounting for sub-skill locators like "host/owner/repo/subskill")
     const isReferenced = activeLocators.some(
       (loc) => loc === repoRel || loc.startsWith(repoRel + '/'),
     )

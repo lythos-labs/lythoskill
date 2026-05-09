@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join, relative } from 'node:path'
 import type { Locator } from './types.js'
@@ -28,17 +28,22 @@ export interface ListPlan {
 
 /**
  * Pure: given a cold-pool root path and a flat list of all fs entries
- * (with relPath), classify every terminal repo directory.
+ * (with relPath), classify every directory containing SKILL.md.
  *
- * Canonical:  <pool>/<host>/<owner>/<repo>           (3 segments, no SKILL.md mid-tree)
- * Legacy:     <pool>/<host>/SKILL.md                  (depth 1 — no owner/repo)
- *             <pool>/<host>/<name>/SKILL.md            (depth 2 — no repo segment)
+ * Walk ordering:
+ *   1. Terminal repos at depth 3+ (canonical — host/owner/repo)
+ *   2. Legacy depth-2 <host>/<name>/SKILL.md (monorepo roots)
+ *   3. Legacy depth-1 <host>/SKILL.md (flat repos)
+ *   4. Fallback: any other directory with SKILL.md at any depth
+ *
+ * SKILL.md presence is the single authoritative marker for a skill
+ * directory. Terminal-depth heuristics alone miss real-world layouts
+ * like monorepos with subdirs, multi-skill repos, and mixed-depth clones.
  */
 export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPlan {
   const plan: ListPlanEntry[] = []
   const dirSet = new Set(allEntries.filter(e => e.isDirectory).map(e => e.relPath))
 
-  // Determine whether a dir is terminal (no child dirs)
   function isTerminal(relPath: string): boolean {
     const prefix = relPath + '/'
     for (const d of dirSet) {
@@ -47,37 +52,39 @@ export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPla
     return true
   }
 
-  // Check whether a dir directly contains SKILL.md
   function hasSkillMd(dirRel: string): boolean {
     return allEntries.some(e => e.relPath === `${dirRel}/SKILL.md` && !e.isDirectory)
   }
 
-  // Walk only terminal dirs — they are the leaves (repo-level entries)
+  // Phase 1: Process terminal dirs (backward compat, but only WITH SKILL.md)
   for (const d of dirSet) {
     if (d.startsWith('.') || d.split('/').some(s => s.startsWith('.'))) continue
-    if (!isTerminal(d)) continue
+    if (!isTerminal(d) || !hasSkillMd(d)) continue
 
     const segments = d.split('/')
 
-    // Legacy depth-1: <host>/SKILL.md — terminal dir with SKILL.md, depth=1
-    if (segments.length === 1 && hasSkillMd(d)) {
-      plan.push({ path: join(rootPath, d), kind: 'legacy-depth1' })
-      continue
-    }
-
-    // Legacy depth-2: <host>/<name>/SKILL.md — terminal dir with SKILL.md, depth=2
-    if (segments.length === 2 && hasSkillMd(d)) {
+    if (segments.length >= 3) {
+      // Canonical or deeper: host/owner/repo[ /sub...]
+      plan.push({ path: join(rootPath, d), kind: 'canonical' })
+    } else if (segments.length === 2) {
       plan.push({ path: join(rootPath, d), kind: 'legacy-depth2' })
-      continue
+    } else if (segments.length === 1) {
+      plan.push({ path: join(rootPath, d), kind: 'legacy-depth1' })
     }
+  }
 
-    // Canonical: <host>/<owner>/<repo> — terminal dir at depth 3, no SKILL.md mid-tree
-    if (segments.length === 3) {
-      // Verify no SKILL.md at intermediate levels (depth 1 or 2)
-      const parent = segments.slice(0, 2).join('/')
-      if (!hasSkillMd(segments[0]) && !hasSkillMd(parent)) {
-        plan.push({ path: join(rootPath, d), kind: 'canonical' })
-      }
+  // Phase 2: Non-terminal dirs with SKILL.md (monorepo roots, multi-skill repos)
+  // These are missed by phase 1 because they have subdirectories.
+  for (const d of dirSet) {
+    if (d.startsWith('.') || d.split('/').some(s => s.startsWith('.'))) continue
+    if (isTerminal(d)) continue
+    if (!hasSkillMd(d)) continue
+
+    const segments = d.split('/')
+    const kind = segments.length >= 3 ? 'canonical' : segments.length === 2 ? 'legacy-depth2' : 'legacy-depth1'
+    // Deduplicate (phase 1 may have already added this path)
+    if (!plan.some(e => e.path === join(rootPath, d))) {
+      plan.push({ path: join(rootPath, d), kind })
     }
   }
 
@@ -101,6 +108,36 @@ export class ColdPool {
 
   has(locator: Locator): boolean {
     return existsSync(this.resolveDir(locator))
+  }
+
+  /**
+   * Find all skill directories by scanning for SKILL.md in the cold pool.
+   * Returns absolute paths.
+   *
+   * Both `list()` (and its underlying `buildListPlan()`) and this method now
+   * converge on SKILL.md presence as the authoritative marker. `list()`
+   * additionally classifies entries by canonical/legacy kind.
+   */
+  findSkillDirectories(): string[] {
+    const dirs: string[] = []
+    if (!existsSync(this.path)) return dirs
+
+    function walk(dir: string, push: (d: string) => void): void {
+      let dirents: ReturnType<typeof readdirSync>
+      try { dirents = readdirSync(dir, { withFileTypes: true }) } catch { return }
+      for (const d of dirents) {
+        if (!d.isDirectory() || d.name.startsWith('.')) continue
+        const sub = join(dir, d.name)
+        if (existsSync(join(sub, 'SKILL.md'))) {
+          push(sub)
+        } else {
+          walk(sub, push)
+        }
+      }
+    }
+
+    walk(this.path, (d) => dirs.push(d))
+    return dirs
   }
 
   /** Enumerate cold-pool entries. Delegates classification to pure buildListPlan. */

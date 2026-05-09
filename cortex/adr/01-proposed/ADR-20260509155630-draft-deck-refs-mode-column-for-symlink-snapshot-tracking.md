@@ -67,6 +67,7 @@ ADR-20260509144134332 在 deck_refs 表引入了 FSM（state = added/linked/remo
 2. FSM 已奠定了事务性 upsert 模式，加 mode 的边际成本低
 3. link.ts 的 `declaredSkills` 参数加 mode 是兼容的（扩展而非破坏）
 
-## 何时实施
-等到 cold-pool CLI 的 prune 和 reconcile 经过实际使用、发现有 mode 级别区分需求时。
-目前状态已满足 "不要误删还有 deck 在用的 repo" 的核心需求。
+## 实施状态（2026-05-09）
+**schema-first**: metadata-db 的 `deck_refs` 表已在 v6 迁移加了 `mode TEXT DEFAULT 'symlink'` 列。
+查询和更新方法暂未补全（`addReference`/`reconcileDeckReferences` 不带 mode 参数）。
+等实际使用中发现 mode 级别区分需求时再补全。

@@ -46,7 +46,9 @@ describe('ColdPool — fs-backed read accessors', () => {
   // "Directory layers = FQ locator segments."
   const root = mkdtempSync(join(tmpdir(), 'cold-pool-test-'))
   mkdirSync(join(root, 'github.com/owner/repo-a'), { recursive: true })
+  writeFileSync(join(root, 'github.com/owner/repo-a/SKILL.md'), '# a')
   mkdirSync(join(root, 'github.com/owner/repo-b'), { recursive: true })
+  writeFileSync(join(root, 'github.com/owner/repo-b/SKILL.md'), '# b')
   mkdirSync(join(root, 'localhost/me/skill-x'), { recursive: true })
   writeFileSync(join(root, 'localhost/me/skill-x/SKILL.md'), '# x')
   // Hidden dir should be skipped
@@ -111,6 +113,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
       dir('github.com'),
       dir('github.com/owner'),
       dir('github.com/owner/repo-a'),
+      file('github.com/owner/repo-a/SKILL.md'),
     ]
     const plan = buildListPlan(root, entries)
     expect(plan.entries).toEqual([
@@ -124,6 +127,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
       dir('github.com'),
       dir('github.com/owner'),
       dir('github.com/owner/repo-a'),
+      file('github.com/owner/repo-a/SKILL.md'),
       dir('github.com/owner/.DS_Store'),
     ]
     const plan = buildListPlan(root, entries)
@@ -160,6 +164,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
       dir('github.com'),
       dir('github.com/owner'),
       dir('github.com/owner/repo-a'),
+      file('github.com/owner/repo-a/SKILL.md'),
       dir('localhost'),
       dir('localhost/old-skill'),
       file('localhost/old-skill/SKILL.md'),
@@ -175,8 +180,11 @@ describe('buildListPlan — pure classification (no IO)', () => {
       dir('github.com'),
       dir('github.com/owner'),
       dir('github.com/owner/repo-a'),
+      file('github.com/owner/repo-a/SKILL.md'),
       dir('github.com/owner/repo-b'),
+      file('github.com/owner/repo-b/SKILL.md'),
       dir('github.com/owner/repo-c'),
+      file('github.com/owner/repo-c/SKILL.md'),
     ]
     const plan = buildListPlan(root, entries)
     expect(plan.entries).toHaveLength(3)
@@ -188,9 +196,11 @@ describe('buildListPlan — pure classification (no IO)', () => {
       dir('github.com'),
       dir('github.com/a'),
       dir('github.com/a/r1'),
+      file('github.com/a/r1/SKILL.md'),
       dir('gitlab.com'),
       dir('gitlab.com/b'),
       dir('gitlab.com/b/r2'),
+      file('gitlab.com/b/r2/SKILL.md'),
     ]
     const plan = buildListPlan(root, entries)
     expect(plan.entries).toHaveLength(2)

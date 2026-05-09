@@ -47,11 +47,12 @@ export interface DeckReference {
   deckPath: string
   declaredAlias: string | null
   state: DeckRefState | null
+  mode: string | null
   linkedAt: string | null
   removedAt: string | null
 }
 
-const CURRENT_SCHEMA = 5
+const CURRENT_SCHEMA = 6
 
 export class MetadataDB extends SqliteDb {
   constructor(dbPath: string) {
@@ -90,6 +91,7 @@ export class MetadataDB extends SqliteDb {
         deck_path TEXT NOT NULL,
         declared_alias TEXT,
         state TEXT NOT NULL DEFAULT 'linked',
+        mode TEXT DEFAULT 'symlink',
         linked_at TEXT,
         removed_at TEXT,
         PRIMARY KEY (skill_locator, deck_path)
@@ -119,6 +121,10 @@ export class MetadataDB extends SqliteDb {
       {
         version: 5,
         sql: `ALTER TABLE deck_refs ADD COLUMN removed_at TEXT`,
+      },
+      {
+        version: 6,
+        sql: `ALTER TABLE deck_refs ADD COLUMN mode TEXT DEFAULT 'symlink'`,
       },
     ])
   }
@@ -245,10 +251,11 @@ export class MetadataDB extends SqliteDb {
       deck_path: string
       declared_alias: string | null
       state: string | null
+      mode: string | null
       linked_at: string | null
       removed_at: string | null
     }>(
-      `SELECT skill_locator, deck_path, declared_alias, state, linked_at, removed_at
+      `SELECT skill_locator, deck_path, declared_alias, state, mode, linked_at, removed_at
        FROM deck_refs WHERE skill_locator = $locator`,
       { $locator: skillLocator },
     )
@@ -257,6 +264,7 @@ export class MetadataDB extends SqliteDb {
       deckPath: r.deck_path,
       declaredAlias: r.declared_alias,
       state: r.state as DeckRefState | null,
+      mode: r.mode,
       linkedAt: r.linked_at,
       removedAt: r.removed_at,
     }))
