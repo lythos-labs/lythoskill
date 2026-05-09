@@ -582,6 +582,10 @@ The `lythoskill-deck` tool reconciles the declared deck against the cold pool by
 
 Key principle: declarative package manager + governor. `deck add` clones into cold pool and appends to deck. `deck link` reconciles the working set (deny-by-default). `deck to-symlink`/`to-snapshot` toggle per-skill between symlink mode and snapshot (pinned) mode. For cold pool GC and drift reporting, use the `cold-pool` CLI (`bunx @lythos/cold-pool prune`, `bunx @lythos/cold-pool validate --lock <path>`).
 
+> **Baseline pattern — agents must read**: [`cortex/wiki/01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md`](./cortex/wiki/01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md)
+> covers the full decoupling design, FSM reference counting, prune/validate flow,
+> SKILL.md-based enumeration, and the deck_refs state machine.
+
 ---
 
 ## Project Governance (Cortex)
