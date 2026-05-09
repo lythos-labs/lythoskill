@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { runAgentScenario, type AgentScenario } from '@lythos/test-utils/agent-bdd'
@@ -57,7 +57,35 @@ export async function runArenaFromToml(opts: {
     if (configDir) return resolve(configDir, p)
     return resolve(p)
   }
-  const taskAbs = resolvePath(taskPath)
+  const resolveOrCreateTask = (): { path: string; cleanup?: () => void } => {
+    const candidate = resolvePath(taskPath)
+    if (existsSync(candidate)) return { path: candidate }
+    // taskPath is inline text — write temp scenario file
+    const tmp = join(tmpdir(), `arena-task-${stamp()}.agent.md`)
+    writeFileSync(tmp, `---
+name: arena task
+description: ${taskPath.slice(0, 80)}
+timeout: 120000
+---
+
+## Given
+- Working directory with an empty project
+- bun is available
+
+## When
+${taskPath}
+
+## Then
+- Complete the task above
+- Write a summary to output.md
+
+## Judge
+- completeness
+- correctness
+`)
+    return { path: tmp, cleanup: () => { try { rmSync(tmp) } catch {} } }
+  }
+  const { path: taskAbs, cleanup: taskCleanup } = resolveOrCreateTask()
   const resolvedToml: ArenaToml = {
     ...toml,
     side: toml.side.map(s => ({ ...s, deck: resolvePath(s.deck) })),
@@ -78,10 +106,13 @@ export async function runArenaFromToml(opts: {
   const resolved = resolveSides(resolvedToml)
 
   // Build manifest
+  const taskContent = existsSync(taskAbs)
+    ? readFileSync(taskAbs, 'utf-8').slice(0, 200)
+    : taskPath // inline description, not a file path
   const manifest = ArenaManifest.parse({
     id: arenaId,
     created_at: new Date().toISOString(),
-    task: readFileSync(taskAbs, 'utf-8').slice(0, 200),
+    task: taskContent,
     mode: 'decks',
     participants: [...new Map(resolved.map(r => [r.side.name, r])).values()].map(r => ({
       id: r.side.name,

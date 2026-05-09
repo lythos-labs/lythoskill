@@ -6,25 +6,31 @@
 # - minus-pdf.toml: base - PDF (only DOCX)
 #
 # Usage:
-#   bunx @lythos/skill-arena@latest run --config arena.toml
-#   bunx @lythos/skill-arena@latest run --config arena.toml --dry-run
+#   bunx @lythos/skill-arena@latest vs --config arena.toml
+#   bunx @lythos/skill-arena@latest vs --config arena.toml --dry-run
+#
+# The "player" field below is your AI agent backend.
+# Change to whatever you have installed locally:
+#   player = "kimi"    # Kimi Code CLI (default, recommended)
+#   player = "claude"  # Claude Code CLI (npm i -g @anthropic-ai/claude-code)
+#   player = "deepseek"   # DeepSeek TUI (pip install deepseek-tui)
 
 [arena]
-task = "Research the AI agent skills ecosystem and produce a structured .docx report"
+task = "./TASK.md"
 criteria = ["depth", "relevance", "structure", "token"]
 runs_per_side = 1
 
 [[side]]
 name = "base-documents"
-player = "claude"
+player = "kimi"
 deck = "../../decks/arena-add-remove/base.toml"
 
 [[side]]
 name = "plus-research"
-player = "claude"
+player = "kimi"
 deck = "../../decks/arena-add-remove/plus-research.toml"
 
 [[side]]
 name = "minus-pdf"
-player = "claude"
+player = "kimi"
 deck = "../../decks/arena-add-remove/minus-pdf.toml"

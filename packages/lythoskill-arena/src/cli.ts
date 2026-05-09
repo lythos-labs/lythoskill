@@ -152,6 +152,27 @@ async function singleRun(args: string[]) {
    Format: frontmatter (name, description, timeout) + Given/When/Then/Judge sections.
    Example: see playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
     scenarioOpt.scenarioPath = taskPath
+    // Quick validation: check frontmatter presence
+    const raw = readFileSync(taskPath, 'utf-8')
+    if (!raw.startsWith('---')) { console.error(`❌ Invalid .agent.md: missing frontmatter (must start with "---")
+   Correct format:
+   ---
+   name: my-scenario
+   description: what this tests
+   timeout: 120000
+   ---
+   ## Given
+   ...
+   ## When
+   ...
+   ## Then
+   ...
+   ## Judge
+   ...
+   Template: playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
+    if (!raw.includes('## When')) { console.error(`❌ Invalid .agent.md: missing "## When" section.
+   The ## When section defines what the agent should do.
+   See template: playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
   } else {
     scenarioOpt.scenario = {
       name: 'ad-hoc task',
