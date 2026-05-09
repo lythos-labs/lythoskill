@@ -4,7 +4,7 @@
  *
  * Commands:
  *   prune       Scan cold pool for unreferenced repos (uses metadata DB FSM)
- *   reconcile   Compare a lock file's desired state against cold pool
+ *   validate     Compare a lock file's desired state against cold pool
  */
 
 import { existsSync, readFileSync, rmSync } from 'node:fs'
@@ -30,7 +30,7 @@ Commands:
     --yes       Skip confirmation
     --dry-run   Report only, no deletion
 
-  reconcile [--lock <path>]
+  validate [--lock <path>]
     Read a skill-deck.lock file and compare its desired state against
     the cold pool. Plan-only (report drift). Use individual deck
     commands to converge.
@@ -108,13 +108,13 @@ async function main(): Promise<void> {
       break
     }
 
-    // ── reconcile ─────────────────────────────────────────────
-    case 'reconcile': {
+    // ── validate (plan-only, no --apply) ────────────────────────
+    case 'validate': {
       const lockIdx = args.indexOf('--lock')
       const lockPath = lockIdx >= 0 ? args[lockIdx + 1] : undefined
 
       if (!lockPath) {
-        console.error('❌ Missing --lock <path>. Usage: cold-pool reconcile --lock ./skill-deck.lock')
+        console.error('❌ Missing --lock <path>. Usage: cold-pool validate --lock ./skill-deck.lock')
         process.exit(1)
       }
 
@@ -137,7 +137,7 @@ async function main(): Promise<void> {
       }
 
       if (!existsSync(coldPoolPath)) {
-        console.log('📭 Cold pool does not exist. Nothing to reconcile.')
+        console.log('📭 Cold pool does not exist. Nothing to validate.')
         process.exit(0)
       }
 
@@ -176,7 +176,7 @@ async function main(): Promise<void> {
       pool.metadata.close()
 
       // Report
-      console.log(`\n📊 Reconcile Report`)
+      console.log(`\n📊 Validate Report`)
       console.log(`   Cold pool: ${coldPoolPath}`)
       console.log(`   Skills declared: ${lock.skills.length}`)
 
@@ -199,7 +199,7 @@ async function main(): Promise<void> {
         for (const e of extra) console.log(`      ${e}`)
       }
 
-      console.log(`\n💡 Plan-only. Use 'deck add <locator>' to restore missing, or 'cold-pool prune' to remove extras.`)
+      console.log(`\n💡 Use 'deck add <locator>' to restore missing, or 'cold-pool prune' to remove extras.`)
       break
     }
 
