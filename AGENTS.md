@@ -528,7 +528,7 @@ See `packages/lythoskill-agent-adapter/README.md` for the architecture contract.
 
 When testing any new adapter, use the two-phase smoke test:
 1. **Hello World**: `deepseek -p "Reply with exactly 'OK'"` → verifies spawn pipe + auth
-2. **Self-report skills**: agent inspects `.claude/skills/` → verifies deck link + skill discovery
+2. **Self-report skills**: agent inspects its `working_set` directory (default `.claude/skills/`; per-agent path configurable in `skill-deck.toml`) → verifies deck link + skill discovery
 
 Test scenarios live in `packages/lythoskill-deck/test/scenarios/*.agent.md`. The runner supports `--player` to select the agent backend:
 ```bash

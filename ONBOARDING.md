@@ -35,7 +35,7 @@ Top MCP Servers:
 - [ ] `/lythoskill-project-onboarding` — load session context from the latest `daily/YYYY-MM-DD.md` handoff. Run this at the start of every session before doing anything else.
 - [ ] `/lythoskill-project-scribe` — write the daily handoff at session end. Pairs with onboarding (CQRS read/write split).
 - [ ] `/lythoskill-project-cortex` — GTD-style task/epic/ADR governance. Use when creating tasks, epics, or architecture decisions.
-- [ ] `/lythoskill-deck` — sync `.claude/skills/` working set against `skill-deck.toml`. Run when skills feel cluttered or conflicting.
+- [ ] `/lythoskill-deck` — reconcile the `working_set` directory (default `.claude/skills/`; configurable in `skill-deck.toml` for `.agents/skills/`, `.cursor/skills/`, etc.) against `skill-deck.toml` declarations via `bunx @lythos/skill-deck link` (deny-by-default: undeclared skills are removed). Run when skills feel cluttered or conflicting. Note: `deck sync` / `deck freeze` are different — they swap individual skills between symlink and snapshot mode, not relink the whole working set.
 - [ ] `/lythoskill-coach` — review SKILL.md files against best practices. Run before publishing a skill.
 - [ ] `/lythoskill-arena` — A/B test skill descriptions with subagents. Use to validate that a skill description actually triggers.
 - [ ] `/lythoskill-curator` — read-only indexer for skill cold pools. Run to discover what skills exist locally.

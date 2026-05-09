@@ -41,7 +41,9 @@
 
 ## The Problem
 
-When two conflicting skills are both visible to your agent, outputs become unpredictable. **lythoskill-deck** solves this with **deny-by-default**: undeclared skills are **physically absent** from `.claude/skills/`. Not "disabled". Not "deprioritized". **Gone.**
+> 📍 **Path note for non-Claude users**: This README uses `.claude/skills/` as the running default in examples. Your path differs by agent — `.agents/skills/` (Codex CLI, OpenClaw), `.cursor/skills/`, `.kimi/skills/`, `.windsurf/skills/`, etc. Set `working_set` in `skill-deck.toml` ([table](#configure-working-set)) and substitute mentally throughout.
+
+When two conflicting skills are both visible to your agent, outputs become unpredictable. **lythoskill-deck** solves this with **deny-by-default**: undeclared skills are **physically absent** from your agent's working-set directory (`.claude/skills/` by default; configurable). Not "disabled". Not "deprioritized". **Gone.**
 
 ```toml
 [deck]
@@ -128,8 +130,8 @@ If you are an AI agent reading this README:
 
 1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
 2. Choose a [pre-built deck](./examples/decks/) or create your own `skill-deck.toml`
-3. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to link into `.claude/skills/`
-4. Skills are now in `.claude/skills/` — read them and follow their instructions
+3. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to link into your working set
+4. Skills are now in your `working_set` directory (default `.claude/skills/`; check `skill-deck.toml`'s `[deck] working_set` for your agent's path) — read them and follow their instructions
 
 ## Quick Start
 

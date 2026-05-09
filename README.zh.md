@@ -30,7 +30,9 @@
 
 ## 问题
 
-当两个冲突的技能同时对 agent 可见，输出变得不可预测。**lythoskill-deck** 用 **deny-by-default** 解决：未声明的技能从 `.claude/skills/` 中**物理消失**。不是"禁用"，不是"降权"。**彻底消失。**
+> 📍 **非 Claude 用户路径说明**:本文档以 `.claude/skills/` 作为示例默认值。你的路径因 agent 而异 —— `.agents/skills/`(Codex CLI / OpenClaw)、`.cursor/skills/`、`.kimi/skills/`、`.windsurf/skills/` 等。在 `skill-deck.toml` 里设 `working_set` 字段([表格](#configure-working-set)),阅读本文时心里替换即可。
+
+当两个冲突的技能同时对 agent 可见，输出变得不可预测。**lythoskill-deck** 用 **deny-by-default** 解决：未声明的技能从你 agent 的 working set 目录(默认 `.claude/skills/`,可配置)中**物理消失**。不是"禁用"，不是"降权"。**彻底消失。**
 
 ```toml
 [tool.skills.skill-name]
@@ -155,7 +157,7 @@ link                 ← 同步 toml 到 working set 的子命令
 1. 先检查 `bun --version`——如果没有，先安装 Bun（见上方快速开始）
 2. 运行 `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` 添加技能
 3. 运行 `bunx @lythos/skill-deck@latest link` 同步 working set
-4. 技能现在已在 `.claude/skills/` 中，你可以直接读取
+4. 技能现在已在你的 working set 目录中(默认 `.claude/skills/`;查 `skill-deck.toml` 的 `[deck] working_set` 看你 agent 的实际路径),你可以直接读取
 
 ---
 
