@@ -1,0 +1,30 @@
+# Arena: does adding research improve output? Is PDF dead weight?
+#
+# Three-way Pareto comparison:
+# - base.toml: documents baseline (PDF + DOCX)
+# - plus-research.toml: base + deep research pipeline
+# - minus-pdf.toml: base - PDF (only DOCX)
+#
+# Usage:
+#   bunx @lythos/skill-arena@latest run --config arena.toml
+#   bunx @lythos/skill-arena@latest run --config arena.toml --dry-run
+
+[arena]
+task = "Research the AI agent skills ecosystem and produce a structured .docx report"
+criteria = ["depth", "relevance", "structure", "token"]
+runs_per_side = 1
+
+[[side]]
+name = "base-documents"
+player = "claude"
+deck = "../../decks/arena-add-remove/base.toml"
+
+[[side]]
+name = "plus-research"
+player = "claude"
+deck = "../../decks/arena-add-remove/plus-research.toml"
+
+[[side]]
+name = "minus-pdf"
+player = "claude"
+deck = "../../decks/arena-add-remove/minus-pdf.toml"

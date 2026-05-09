@@ -318,9 +318,9 @@ bunx @lythos/skill-deck@latest link
 
 | 问题 | 测试方式 |
 |---|---|
-| A 还是 B？ | `--skills "A,B"` —— 单技能对比 |
-| C 能改善我的 deck 吗？ | `--decks "v1.toml,v1+C.toml"` —— 完整 deck 对比 |
-| D 是死重吗？ | `--decks "v1.toml,v1-D.toml"` —— 完整 deck 对比 |
+| A 还是 B？ | `run --config examples/arena/research-compare/arena.toml` —— 预置声明式配置 |
+| C 能改善我的 deck 吗？ | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/plus-research.toml"` —— 真实对比文件 |
+| D 是死重吗？ | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/minus-pdf.toml"` —— 真实对比文件 |
 
 **多维度评分**：裁判输出质量、token 效率、可维护性三个维度的分数。没有单一"赢家"——你根据自己的价值观选择。
 
@@ -467,12 +467,11 @@ bunx @lythos/skill-curator@latest ~/.agents/skill-repos
 # → 输出 ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
 
 # Arena 单技能对比
-bunx @lythos/skill-arena@latest \
-  --task "Generate auth flow" \
-  --skills "design-doc-mermaid,mermaid-tools"
+bunx @lythos/skill-arena@latest run \
+  --config examples/arena/research-compare/arena.toml
 
 # Arena 完整 deck 对比
-bunx @lythos/skill-arena@latest \
+bunx @lythos/skill-arena@latest run \
   --task "Generate auth flow" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"

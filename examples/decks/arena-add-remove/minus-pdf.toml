@@ -1,0 +1,15 @@
+# Arena: base minus PDF (is D dead weight?)
+# Removes PDF format skill from the documents baseline.
+# Compare with base.toml to see if PDF is actually needed when DOCX covers output.
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Read and write Word documents"

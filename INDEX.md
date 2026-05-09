@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/8 23:36:21
+> 自动生成于 2026/5/9 10:33:12
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 171 | 进行中: 0, 待验收: 0, 已完成: 146 |
+| Tasks | 172 | 进行中: 0, 待验收: 0, 已完成: 147 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 56 | 已接受: 47 |
 
@@ -69,7 +69,7 @@ _无_
 
 _无_
 
-### 已完成 (146)
+### 已完成 (147)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -217,6 +217,7 @@ _无_
 - ✅ ~~TASK-20260508222319664~~: T1 — SSOT test infrastructure (package.json scripts + root + CI test.yml)
 - ✅ ~~TASK-20260508222319692~~: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
 - ✅ ~~TASK-20260508222319717~~: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
+- ✅ ~~TASK-20260509101438298~~: Align arena doc surface to working onboarding paths — replace broken `--skills` bare-name examples
 
 ### 悬置 (0)
 

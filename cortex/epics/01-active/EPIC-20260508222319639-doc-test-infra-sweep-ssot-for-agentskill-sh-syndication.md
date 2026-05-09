@@ -5,44 +5,36 @@ checklist_skipped_reason: Continuation of showcase epic; tasks T1/T2/T3 break do
 ---
 # EPIC-20260508222319639: Doc + test infra sweep — SSOT for agentskill.sh syndication
 
-> **Epic 是什么**:1-3 周可结案的 outcome,有依赖、有顺序、要规划。
-> **Epic 不是什么**:配置漂移类小事(那是 task)、决策选型(那是 ADR)。
-> **Workflowy zoom-in 心智**:屏蔽其他 epic 的诱惑,聚焦本卡。
-> **双轨**:`lane: main`(当前迭代,最多 1)、`lane: emergency`(不可避免紧急,最多 1)。
-
-> Doc + test infra sweep — SSOT for agentskill.sh syndication
+> Doc + test infra sweep — SSOT for agentskill.sh syndication + arena CLI surface alignment
 
 ## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| active | 2026-05-08 | Created |
-
-## 背景故事
-<!-- 填写需求来源:触发事件、问题描述、目标价值 -->
-
-## 需求树
-
-### 主题A #backlog
-- **触发**:
-- **需求**:
-- **实现**:
-- **产出**:
-- **验证**:
-
-## 技术决策
-
-| ADR | 标题 | 状态 |
-|-----|------|------|
+| active | 2026-05-08 | Created; T1/T2/T3 completed, T2 items deferred, T4/T5 added 2026-05-09 |
 
 ## 关联任务
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
+| T1 — SSOT test infra | ✅ completed | `TASK-20260508222319664`: package.json scripts + root + CI test.yml |
+| T2 — Doc syndication blockers | ✅ completed | `TASK-20260508222319692`: (2 项延后→carry-over) |
+| T3 — Doc drift polish | ✅ completed | `TASK-20260508222319717`: root README dup heading + ad-hoc inaccuracies + ref-link orphans |
+| T4 — Curator simplification | ⏳ backlog | 删 feed-adapters.ts + discover CLI per ADR-20260508230803515 |
+| T5 — Arena doc + `--skills` deprecation + example decks | ✅ completed | `TASK-20260509101438298`: --skills deleted; examples/arena/ created; 6 doc files updated |
 
-## 经验沉淀
+## Deferred (from T2)
+- Multi-platform tagging in SKILL.md frontmatter
+- Scripts SSOT alignment (test-report.ts + validate-example-decks.ts → root npm scripts)
+
+## 技术决策
+
+| ADR | 标题 | 状态 |
+|-----|------|------|
+| ADR-20260502012643244 | FQ-only locator | accepted |
 
 ## 归档条件
-- [ ] 所有任务完成
-- [ ] 验证通过
+- [ ] T1 ✅ | T2 ✅ | T3 ✅
+- [ ] T4 — curator simplification
+- [ ] T5 — arena doc fix
+- [ ] T2 deferred resolved or spun off

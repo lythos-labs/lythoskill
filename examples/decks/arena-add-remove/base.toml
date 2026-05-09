@@ -1,0 +1,19 @@
+# Arena: base deck
+# Documents baseline: PDF + DOCX output formatting.
+# Compare with plus-research.toml (adds research) and minus-pdf.toml (removes PDF).
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Read and extract text from PDF files"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Read and write Word documents"

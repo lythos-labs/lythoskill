@@ -11,7 +11,7 @@ Agent finds 3 architecture skills in cold pool:
 - `design-doc-excalidraw` (hand-drawn style)
 
 ## Agent's Self-Initiated Flow
-1. Create arena: `bunx @lythos/skill-arena --task "..." --skills "mermaid,d2,excalidraw"`
+1. Create arena: `bunx @lythos/skill-arena scaffold --task "..." --decks "./decks/mermaid.toml,./decks/d2.toml,./decks/excalidraw.toml"`
 2. Read TASK-arena.md, dispatch subagents per deck
 3. Collect outputs to `runs/`
 4. Judge (agent itself) scores across criteria

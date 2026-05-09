@@ -1,0 +1,31 @@
+# Arena: base + research (does C improve my deck?)
+# Adds deep research pipeline on top of the documents baseline.
+# Compare with base.toml to see if research depth improves output quality.
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Preliminary research: generate structured research outline from a topic"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Deep research: launch independent agents for each outline item"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Summarize research results into structured markdown report"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+role = "Read and extract text from PDF files"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+role = "Read and write Word documents"

@@ -1,0 +1,24 @@
+# Arena: documents.toml vs research-documents.toml
+#
+# Does adding deep research skills improve your deck's output quality?
+# Controlled comparison: same task, same player, same document formatting —
+# only the research phase differs between sides.
+#
+# Usage:
+#   bunx @lythos/skill-arena@latest run --config arena.toml
+#   bunx @lythos/skill-arena@latest run --config arena.toml --dry-run
+
+[arena]
+task = "Research the AI agent skills ecosystem (how skills like deck, coach, arena compose) and produce a structured .docx report"
+criteria = ["depth", "relevance", "structure", "token"]
+runs_per_side = 1
+
+[[side]]
+name = "documents-only"
+player = "claude"
+deck = "../../decks/documents.toml"
+
+[[side]]
+name = "research-documents"
+player = "claude"
+deck = "../../decks/research-documents.toml"
