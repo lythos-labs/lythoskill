@@ -5,7 +5,7 @@
 > Human contributors: see [README.md](./README.md) for a higher-level overview.
 
 > **⚠️ Before any release / auth / version work, read [Release & Auth Workflow](#release--auth-workflow).**
-> Auth state (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator@0.9.39 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`. Past agents corrupted the git remote URL by trying to "fix" auth and forced manual recovery — do not repeat this. This warning matters even mid-session after context compaction.
+> Auth state (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator@0.9.40 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`. Past agents corrupted the git remote URL by trying to "fix" auth and forced manual recovery — do not repeat this. This warning matters even mid-session after context compaction.
 
 ---
 
@@ -253,20 +253,20 @@ bun packages/lythoskill-project-cortex/src/cli.ts <command>
 
 ### Via bunx (as users would run after publishing)
 ```bash
-bunx @lythos/skill-creator@0.9.39 init <project-name>
-bunx @lythos/skill-creator@0.9.39 build <skill-name>
-bunx @lythos/skill-creator@0.9.39 build --all
-bunx @lythos/skill-creator@0.9.39 align            # audit conventions
-bunx @lythos/skill-creator@0.9.39 align --fix      # auto-apply
-bunx @lythos/skill-creator@0.9.39 bump <patch|minor|major|X.Y.Z> [--dry-run]
-bunx @lythos/skill-deck@0.9.39 link
-bunx @lythos/project-cortex@0.9.39 <command>
+bunx @lythos/skill-creator@0.9.40 init <project-name>
+bunx @lythos/skill-creator@0.9.40 build <skill-name>
+bunx @lythos/skill-creator@0.9.40 build --all
+bunx @lythos/skill-creator@0.9.40 align            # audit conventions
+bunx @lythos/skill-creator@0.9.40 align --fix      # auto-apply
+bunx @lythos/skill-creator@0.9.40 bump <patch|minor|major|X.Y.Z> [--dry-run]
+bunx @lythos/skill-deck@0.9.40 link
+bunx @lythos/project-cortex@0.9.40 <command>
 ```
 
 ### Release pipeline (full detail below)
 ```bash
-bunx @lythos/skill-creator@0.9.39 bump patch --dry-run   # preview
-bunx @lythos/skill-creator@0.9.39 bump patch             # bump root + all packages, rebuild skills
+bunx @lythos/skill-creator@0.9.40 bump patch --dry-run   # preview
+bunx @lythos/skill-creator@0.9.40 bump patch             # bump root + all packages, rebuild skills
 git diff && git commit -am "chore(release): vX.Y.Z"
 ./scripts/publish.sh                              # publish all packages, reads .npm-access
 ```
@@ -351,14 +351,14 @@ Every `packages/*/package.json` and the root `package.json` carry the **same** v
 
 ```bash
 # Preview
-bunx @lythos/skill-creator@0.9.39 bump patch --dry-run
-bunx @lythos/skill-creator@0.9.39 bump 1.0.0 --dry-run
+bunx @lythos/skill-creator@0.9.40 bump patch --dry-run
+bunx @lythos/skill-creator@0.9.40 bump 1.0.0 --dry-run
 
 # Real run
-bunx @lythos/skill-creator@0.9.39 bump patch       # 0.7.2 → 0.7.3
-bunx @lythos/skill-creator@0.9.39 bump minor       # 0.7.2 → 0.8.0
-bunx @lythos/skill-creator@0.9.39 bump major       # 0.7.2 → 1.0.0
-bunx @lythos/skill-creator@0.9.39 bump 1.2.3       # explicit X.Y.Z
+bunx @lythos/skill-creator@0.9.40 bump patch       # 0.7.2 → 0.7.3
+bunx @lythos/skill-creator@0.9.40 bump minor       # 0.7.2 → 0.8.0
+bunx @lythos/skill-creator@0.9.40 bump major       # 0.7.2 → 1.0.0
+bunx @lythos/skill-creator@0.9.40 bump 1.2.3       # explicit X.Y.Z
 ```
 
 The `bump` pipeline (see `packages/lythoskill-creator/src/bump.ts`):
@@ -474,7 +474,7 @@ Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). Th
 
 7. **tsconfig**: `moduleResolution` must be `"bundler"`, `types` includes `"bun-types"`, target `"esnext"`.
 
-8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator@0.9.39 bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
+8. **Unified version policy**: All packages in `packages/` and root share a single version, bumped via `bunx @lythos/skill-creator@0.9.40 bump`. Source-of-truth and pipeline are documented in [Release & Auth Workflow](#release--auth-workflow) — read that section before changing any version.
 
 9. **Test file organization**: Unit tests are co-located in `src/*.test.ts` next to source. CLI BDD tests live in `test/runner.ts` + `test/scenarios/`. Agent BDD tests use `test/scenarios/*.agent.md`. Pre-commit hook enforces 0 test failures on changed packages. Full conventions: [TESTING.md](./TESTING.md).
 
@@ -716,6 +716,38 @@ When entering this project with no prior context, read in this exact order:
 **Memory bridge:** `daily/` is the project's cross-CLI journal — it travels with the repo and can be read by any agent (Claude, Cursor, Windsurf, Kimi, etc.) through the skill system.
 
 ---
+
+## Arena CLI（@lythos/skill-arena 0.10+）
+
+Arena 是整个项目最核心的 dogfooding 工具。我们自己每天都会用它。
+
+| 入口 | 心智模型 | 用途 |
+|------|---------|------|
+| `single` | 单人测卡组 / exec 快捷键 | `--deck <path> --task <scenario.agent.md>` 或 `--brief "<prompt>"` |
+| `single --player` | 快速切换 player | 默认 kimi，`--player claude` 切 Claude |
+| `vs` | 真实比赛 / A/B 对比 | `--config arena.toml`（多 side × 多 player 声明式） |
+| `scaffold` | 遗留：只产出目录结构 | `--decks` 创建 arena 骨架，手动跑 subagent |
+
+**两条原则**：
+1. `single` 是一个 **exec 快捷键** — 指定 deck + task，快速出结果。我们自己做设计时就是这样用的（比如跑设计 deck 看效果）。
+2. `vs` 只接受 `arena.toml` — 所有 side、player、deck 声明式定义。没有 CLI-flag 模式。
+
+**`single --task` 格式**：必须是 `.agent.md` 场景文件（frontmatter + Given/When/Then/Judge）。`--brief` 是 inline 替代。
+
+**rename 历史**：0.9.x 中曾叫 `agent-run` / `run --decks`。0.10.0 统一重命名。参见 `ADR-20260509104832428`。
+
+### CLI 错误信息 = HATEOAS 式自导航
+
+所有 CLI 错误信息遵循 **HATEOAS 原则**——报错时告诉 agent **"出了什么问题 + 下一步做什么"**。Agent 不需要额外推理就能修复。
+
+原则（`ADR-20260507014124191`）：
+- 错误信息包含三类信息：**问题在哪一阶段**、**检测到什么**、**可能的修复**
+- `--config` 未提供 → 给出用法 + 示例路径
+- Player 未找到 → 给出可用 player 列表 + 安装命令
+- 文件未找到 → 给出示例文件路径或创建命令
+- 命令不认识 → 列出可用命令 + `--help` 指引
+
+Agent 读取错误信息后应能立即执行修复，不需要猜测或回到人类。
 
 ## Safety & Boundaries
 

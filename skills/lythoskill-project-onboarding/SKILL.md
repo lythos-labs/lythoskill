@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-onboarding
-version: 0.9.39
+version: 0.9.40
 type: standard
 description: |
   Session context loader. Reads the latest daily handoff to restore

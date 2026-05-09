@@ -37,39 +37,39 @@ function printHelp(): void {
   console.log(`🎭 lythoskill-arena — Skill comparison runner
 
 Usage:
-  lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>] [--timeout <ms>]
-  lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>] [--timeout <ms>]
-  lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
+  lythoskill-arena single --task <path> --deck <path> [--player kimi] [--out <dir>] [--timeout <ms>]
+  lythoskill-arena single --brief "<prompt>" --deck <path> [--out <dir>] [--timeout <ms>]
+  lythoskill-arena vs --config arena.toml [--dry-run]
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
   lythoskill-arena viz <arena-dir>
 
 Commands:
-  run       Run arena programmatically (declarative arena.toml or CLI flags)
+  single    Single-player deck test (exec shortcut): test a deck with one player
+  vs        Multi-side comparison: run arena from declarative arena.toml
   scaffold  Create arena directory structure (legacy, manual subagent execution)
   viz       Visualize arena report (ASCII charts)
 
 Options:
-  -t, --task <path|desc> Task description or path to TASK-arena.md
-      --decks <list>     Comma-separated deck paths
-  -c, --criteria <list>  Evaluation criteria (default: syntax,context,logic,token)
-      --players <list>   Comma-separated player.toml paths (CLI run only)
-      --config <path>    Path to arena.toml (declarative mode, k8s-style)
-      --dry-run          Print execution plan without running (with --config)
-      --out <dir>        Output directory (run: defaults to runs/arena-<id>)
-  -d, --dir <dir>        Output directory (scaffold: defaults to tmp)
-  -p, --project <dir>    Project directory (default: .)
+  -t, --task <path|desc> Task description or path to TASK-arena.md / .agent.md
+      --deck <path>      Deck path (single only)
+      --brief "<text>"   Inline task description (single only, alternative to --task)
+      --player <name>    Agent player (single only, default: kimi)
+  -c, --criteria <list>  Evaluation criteria (scaffold only, default: syntax,context,logic,token)
+      --config <path>    Path to arena.toml (vs only)
+      --dry-run          Print execution plan without running (vs --config only)
+      --out <dir>        Output directory
+  -d, --dir <dir>        Parent dir (scaffold: defaults to tmp)
+  -p, --project <dir>    Project root (default: .)
+      --timeout <ms>     Subagent timeout (single only)
 
 Examples:
-  # Single agent run (simplest path)
-  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml
-  lythoskill-arena agent-run --task ./TASK.md --deck ./deck.toml --player kimi --out ./output
+  # Single-player deck test (exec shortcut)
+  lythoskill-arena single --task ./TASK.agent.md --deck ./deck.toml
+  lythoskill-arena single --brief "Generate auth flow diagram" --deck ./deck.toml --player kimi
 
-  # Declarative mode (k8s-style)
-  lythoskill-arena run --config ./arena.toml
-  lythoskill-arena run --config ./arena.toml --dry-run
-
-  # CLI-flag mode (backward compat)
-  lythoskill-arena run --task ./TASK-arena.md --players ./players/claude.toml --decks ./decks/run-01.toml,./decks/run-02.toml --criteria coverage,relevance
+  # Multi-side comparison (declarative)
+  lythoskill-arena vs --config ./arena.toml
+  lythoskill-arena vs --config ./arena.toml --dry-run
 
   # Legacy scaffolding
   lythoskill-arena scaffold --task "Refactor auth module" --decks ./decks/a.toml,./decks/b.toml
@@ -77,9 +77,9 @@ Examples:
 `)
 }
 
-// ── agent-run: single agent execution (simplest path) ────────────────────
+// ── single: single-player deck test (exec shortcut) ──────────────────────
 
-async function agentRun(args: string[]) {
+async function singleRun(args: string[]) {
   const opts: Record<string, string | undefined> = {}
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' || args[i] === '-t') opts.task = args[++i]
@@ -91,11 +91,16 @@ async function agentRun(args: string[]) {
   }
 
   if (!opts.deck) {
-    console.error('❌ --deck <path> is required')
+    console.error(`❌ --deck <path> is required.
+   Usage: lythoskill-arena single --deck ./deck.toml --task ./scenario.agent.md
+          lythoskill-arena single --deck ./deck.toml --brief "your task description"
+   Example decks: examples/decks/scout.toml, examples/decks/documents.toml`)
     process.exit(1)
   }
   if (!opts.task && (!opts.brief || !opts.brief.trim())) {
-    console.error('❌ --task <path> or --brief "<prompt>" is required and cannot be empty')
+    console.error(`❌ --task <path> or --brief "<prompt>" is required.
+   Usage: lythoskill-arena single --deck ./deck.toml --task ./scenario.agent.md
+          lythoskill-arena single --deck ./deck.toml --brief "your task description"`)
     process.exit(1)
   }
 
@@ -119,7 +124,10 @@ async function agentRun(args: string[]) {
     deckPath = dest
   } else {
     deckPath = resolve(opts.deck)
-    if (!deckExists(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}`); process.exit(1) }
+    if (!deckExists(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}
+   Create one: examples/decks/scout.toml (minimal), examples/decks/documents.toml (documents)
+   Or fetch:   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml > deck.toml
+   Or create:  see https://github.com/lythos-labs/lythoskill/tree/main/examples/decks/`); process.exit(1) }
   }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
@@ -139,7 +147,10 @@ async function agentRun(args: string[]) {
   const scenarioOpt: Record<string, unknown> = {}
   if (opts.task) {
     const taskPath = resolve(opts.task)
-    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}`); process.exit(1) }
+    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}
+   Create a .agent.md scenario or use --brief for inline tasks.
+   Format: frontmatter (name, description, timeout) + Given/When/Then/Judge sections.
+   Example: see playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
     scenarioOpt.scenarioPath = taskPath
   } else {
     scenarioOpt.scenario = {
@@ -693,7 +704,7 @@ function runViz(argv: string[]) {
 
 // ── Run: programmatic arena execution ───────────────────────
 
-async function runProgrammaticArena(argv: string[]) {
+async function vsRun(argv: string[]) {
   const { options } = parseArgs(argv)
   const { readFileSync } = await import('node:fs')
 
@@ -731,13 +742,15 @@ async function runProgrammaticArena(argv: string[]) {
     return
   }
 
-  // CLI-flag mode (backward compat)
-  if (!options.task || !options.decks) {
-    console.error('❌ --task <path> and --decks <list> are required for "run" (or use --config <arena.toml>)')
-    process.exit(1)
-  }
-
-  const { runArena: runArenaProgrammatic } = await import('./runner')
+  // --config was not provided
+  console.error(`❌ --config <arena.toml> is required.
+   Usage: lythoskill-arena vs --config ./arena.toml
+          lythoskill-arena vs --config ./arena.toml --dry-run
+   Example configs:
+     examples/arena/research-compare/arena.toml   — two-side A/B
+     examples/arena/add-remove/arena.toml          — three-side Pareto
+   Create one: cp examples/arena/research-compare/arena.toml ./arena.toml`)
+  process.exit(1)
 
   const result = await runArenaProgrammatic({
     taskPath: options.task,
@@ -758,18 +771,20 @@ if (import.meta.main) {
   const args = process.argv.slice(2)
   const cmd = args[0]
 
-  if (cmd === 'agent-run') {
-    agentRun(args.slice(1))
+  if (cmd === 'single') {
+    singleRun(args.slice(1))
   } else if (cmd === 'viz') {
     runViz(args.slice(1))
-  } else if (cmd === 'run') {
-    runProgrammaticArena(args.slice(1))
+  } else if (cmd === 'vs') {
+    vsRun(args.slice(1))
   } else if (cmd === 'scaffold' || !cmd || args[0]?.startsWith('-')) {
     // Legacy behavior: if no subcommand or starts with flags, treat as scaffold
     runArena(cmd === 'scaffold' ? args.slice(1) : args)
   } else {
-    console.error(`❌ Unknown command: ${cmd}`)
-    printHelp()
+    console.error(`❌ Unknown command: "${cmd}"
+   Available: single, vs, scaffold, viz
+   Usage: lythoskill-arena <command> [options]
+   Help:  lythoskill-arena --help`)
     process.exit(1)
   }
 }

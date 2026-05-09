@@ -318,9 +318,9 @@ bunx @lythos/skill-deck@latest link
 
 | 问题 | 测试方式 |
 |---|---|
-| A 还是 B？ | `run --config examples/arena/research-compare/arena.toml` —— 预置声明式配置 |
-| C 能改善我的 deck 吗？ | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/plus-research.toml"` —— 真实对比文件 |
-| D 是死重吗？ | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/minus-pdf.toml"` —— 真实对比文件 |
+| A 还是 B？ | `vs --config examples/arena/research-compare/arena.toml` —— 预置声明式配置 |
+| C 能改善我的 deck 吗？ | `vs --config examples/arena/add-remove/arena.toml` —— 预置声明式配置 |
+| D 是死重吗？ | `vs --config examples/arena/add-remove/arena.toml` —— 预置声明式配置 |
 
 **多维度评分**：裁判输出质量、token 效率、可维护性三个维度的分数。没有单一"赢家"——你根据自己的价值观选择。
 

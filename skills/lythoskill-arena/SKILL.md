@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.9.39
+version: 0.9.40
 type: standard
 description: |
   Controlled-variable test play for skills and deck configurations.  Scaffolds isolated arena environments where subagents complete  the same task under different decks, then a judge agent scores outputs  across multiple dimensions. Supports single-skill A/B comparison
@@ -9,8 +9,8 @@ when_to_use: |
   Compare skills, A/B test skills, which skill is better, test deck  configuration, benchmark skill, skill evaluation, deck comparison,
   try before adopting, test play, Pareto analysis, skill synergy check,  does adding this skill improve my deck.
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.9.39 *)
-  - Bash(bunx @lythos/skill-deck@0.9.39 link *)
+  - Bash(bunx @lythos/skill-arena@0.9.40 *)
+  - Bash(bunx @lythos/skill-deck@0.9.40 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -70,20 +70,20 @@ If `player` is omitted, arena defaults to `kimi`.
 
 ## Commands
 
-### Primary: single agent run (`agent-run`)
+### Primary: single agent run (`single`)
 
 The simplest path — one subagent, one deck, one task. Used by `examples/quick-agent.sh` internally.
 
 ```bash
 # Task in a markdown file
-bunx @lythos/skill-arena@0.9.39 agent-run \
+bunx @lythos/skill-arena@0.9.40 agent-run \
   --task ./TASK.md \
   --deck ./skill-deck.toml \
   --player kimi \
   --out ./output
 
 # Inline brief (no TASK file needed)
-bunx @lythos/skill-arena@0.9.39 agent-run \
+bunx @lythos/skill-arena@0.9.40 agent-run \
   --brief "Investigate this repo and produce a deck plan" \
   --deck ./skill-deck.toml \
   --out ./output
@@ -94,28 +94,25 @@ bunx @lythos/skill-arena@0.9.39 agent-run \
 Use an `arena.toml` to declare task + sides + criteria — reproducible, version-controlled, dry-runnable.
 
 ```bash
-bunx @lythos/skill-arena@0.9.39 run --config ./arena.toml
-bunx @lythos/skill-arena@0.9.39 run --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.40 run --config ./arena.toml
+bunx @lythos/skill-arena@0.9.40 run --config ./arena.toml --dry-run
 ```
 
 `arena.toml` declares per-side player + deck + criteria; `run --config` orchestrates the whole comparison.
 
-### CLI-flag mode (backward-compat)
+### Declarative mode (recommended)
 
 ```bash
-bunx @lythos/skill-arena@0.9.39 run \
-  --task ./TASK-arena.md \
-  --players ./players/claude.toml,./players/kimi.toml \
-  --decks ./decks/A.toml,./decks/B.toml \
-  --criteria coverage,relevance,token
+bunx @lythos/skill-arena@0.9.40 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.9.40 vs --config ./arena.toml --dry-run
 ```
 
-### Legacy: `scaffold` (manual subagent execution)
+### Legacy: `scaffold` (human-in-the-loop)
 
 For controlled-variable comparison via per-deck scaffolds. The CLI creates the directory + per-side decks; the agent dispatches subagents and judges.
 
 ```bash
-bunx @lythos/skill-arena@0.9.39 scaffold \
+bunx @lythos/skill-arena@0.9.40 scaffold \
   --task "Generate auth flow diagram" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -124,7 +121,7 @@ bunx @lythos/skill-arena@0.9.39 scaffold \
 ### Visualize results
 
 ```bash
-bunx @lythos/skill-arena@0.9.39 viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.40 viz tmp/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
@@ -133,19 +130,19 @@ Renders ASCII bar charts and radar comparison from `report.md`.
 
 | Flag | Used by | Description |
 |------|---------|-------------|
-| `--task <path\|desc>` | agent-run, run, scaffold | Task description or path to TASK-arena.md |
-| `--brief "<prompt>"` | agent-run | Inline task brief (alternative to `--task` path) |
-| `--deck <path>` | agent-run | Deck for the single subagent |
-| `--config <path>` | run | Declarative arena.toml |
+| `--task <path\|desc>` | single, vs, scaffold | Task description or path to TASK-arena.md |
+| `--brief "<prompt>"` | single | Inline task brief (alternative to `--task` path) |
+| `--deck <path>` | single | Deck for the single subagent |
+| `--config <path>` | vs | Declarative arena.toml |
 | `--players <list>` | run (CLI mode) | Comma-separated player.toml paths |
-| `--decks <list>` | run, scaffold | Comma-separated deck.toml paths |
-| `--criteria <list>` | run, scaffold | Evaluation dimensions (default: syntax,context,logic,token) |
-| `--player <name>` | agent-run | Specific player (default: kimi) |
-| `--out <dir>` | agent-run, run | Output directory |
+| `--decks <list>` | scaffold | Comma-separated deck.toml paths |
+| `--criteria <list>` | scaffold | Evaluation dimensions (default: syntax,context,logic,token) |
+| `--player <name>` | single | Specific player (default: kimi) |
+| `--out <dir>` | single, vs | Output directory |
 | `--dir <dir>` | scaffold | Parent dir (default: tmp) |
 | `--project <dir>` | all | Project root (default: .) |
-| `--timeout <ms>` | agent-run | Subagent timeout |
-| `--dry-run` | run --config | Print plan without running |
+| `--timeout <ms>` | single | Subagent timeout |
+| `--dry-run` | vs --config | Print plan without running |
 
 
 ## Directory Structure (generated by CLI)

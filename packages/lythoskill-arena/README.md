@@ -49,24 +49,23 @@ Note: Claude `-p` mode has known issues with web tools in Bun.spawn (deferred to
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena@0.9.39 <command>
+bunx @lythos/skill-arena@0.9.40 <command>
 ```
 
 ## Quick Start
 
 ```bash
-# Mode 1: Compare two decks on the same task (declarative)
-bunx @lythos/skill-arena@0.9.39 run \
+# Single: test a deck with one agent (exec shortcut)
+bunx @lythos/skill-arena@0.9.40 single \
+  --brief "Generate auth flow diagram" \
+  --deck ./examples/decks/documents.toml
+
+# Vs: compare multiple decks side by side (declarative)
+bunx @lythos/skill-arena@0.9.40 vs \
   --config examples/arena/research-compare/arena.toml
 
-# Mode 2: Compare full deck configurations via CLI flags
-bunx @lythos/skill-arena@0.9.39 run \
-  --task "Generate auth flow diagram" \
-  --decks "./decks/minimal.toml,./decks/rich.toml" \
-  --criteria "quality,token,maintainability"
-
 # Visualize results
-bunx @lythos/skill-arena@0.9.39 viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.40 viz tmp/arena-<id>/
 ```
 
 ## Commands
@@ -75,16 +74,16 @@ bunx @lythos/skill-arena@0.9.39 viz tmp/arena-<id>/
 
 ```bash
 # Print execution plan without running
-bunx @lythos/skill-arena@0.9.39 run --config arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.40 vs --config arena.toml --dry-run
 
 # Execute with per-side runs_per_side and statistical aggregation
-bunx @lythos/skill-arena@0.9.39 run --config arena.toml
+bunx @lythos/skill-arena@0.9.40 vs --config arena.toml
 ```
 
 ### CLI-flag mode (backward compat)
 
 ```
-bunx @lythos/skill-arena@0.9.39 run \
+bunx @lythos/skill-arena@0.9.40 run \
   --task ./TASK-arena.md \
   --players ./players/claude.toml \
   --decks ./decks/run-01.toml,./decks/run-02.toml \
@@ -94,13 +93,13 @@ bunx @lythos/skill-arena@0.9.39 run \
 ### Scaffold mode (legacy, manual execution)
 
 ```
-bunx @lythos/skill-arena@0.9.39 scaffold --task "..." --decks a.toml,b.toml
+bunx @lythos/skill-arena@0.9.40 scaffold --task "..." --decks a.toml,b.toml
 ```
 
 ### Viz
 
 ```bash
-bunx @lythos/skill-arena@0.9.39 viz runs/arena-<id>/
+bunx @lythos/skill-arena@0.9.40 viz runs/arena-<id>/
 ```
 
 ## Skill Documentation
@@ -114,7 +113,7 @@ The agent-visible **Skill** layer documentation is here:
 Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
-Starter (this package) → npm publish → bunx @lythos/skill-arena@0.9.39 ...
+Starter (this package) → npm publish → bunx @lythos/skill-arena@0.9.40 ...
 Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
 Output  (skills/<name>/)             → git commit → agent-visible skill
 ```
