@@ -749,6 +749,18 @@ Arena 是整个项目最核心的 dogfooding 工具。我们自己每天都会�
 
 Agent 读取错误信息后应能立即执行修复，不需要猜测或回到人类。
 
+### Fallback hints 必须配套 dormancy 测试
+
+任何 "失败 fallback" 提示（mirror / proxy / retry / degraded mode）都必须配套一个 **dormancy 属性测试**：在 happy path 上 grep stderr 中的 fallback 关键字，要求 0 匹配。
+
+例：v0.9.43 给 arena CLI 加了 `ghfast.top` 镜像兜底（受限网络下 URL fetch 失败时显示）。T9 playbook 的 S6 同时验证两件事：
+- end-to-end 工作（fetch + agent + verdict）
+- `grep -c -E 'ghfast|mirror|proxy|fallback'` 在 stderr 中返回 **0**
+
+为什么必须配套：positive coverage（hint 触发时显示）容易写、容易记；dormancy（hint 不该显示时静默）凭经验判断,容易漏。一旦 hint 漏到 happy path 上,用户会学会忽视它,真发生故障时 hint 反而失效。
+
+完整 pattern + 适用边界见 `cortex/wiki/01-patterns/2026-05-09-dormancy-property-test-for-fallback-hints.md`。
+
 ## Safety & Boundaries
 
 - **No filesystem escape**: All `fs` operations are relative to `process.cwd()` or the generated project root.

@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (33)
+## 📚 Patterns (34)
 
+- **[2026-05-09]** [dormancy-property-test-for-fallback-hints](./01-patterns/2026-05-09-dormancy-property-test-for-fallback-hints.md)
 - **[2026-05-08]** [agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends](./01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - **[2026-05-08]** [curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery](./01-patterns/2026-05-08-curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery.md)
 - **[2026-05-08]** [agents-md-as-network-native-agent-bootloader](./01-patterns/2026-05-08-agents-md-as-network-native-agent-bootloader.md)

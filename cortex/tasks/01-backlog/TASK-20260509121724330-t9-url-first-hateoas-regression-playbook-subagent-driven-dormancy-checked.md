@@ -85,6 +85,8 @@ playbook 同时适用于 T7 (project-cortex HATEOAS) 与 T8 (general catch clean
 - 2026-05-09: 新增 S8 dual-coverage 维度(URL-first ≠ URL-only);user feedback "如果你已经有的确可以用,help 里明确说明支持本地路径。但是如果你为了体验可以直接 url 感受 — 这样是最好的";cli.ts 三处 error/help 增加双例子(URL + 本地);106/106 tests pass
 - 2026-05-09: subagent (D1-D4) 全部 ✅ 验证 dual-coverage,4 个用户面 surface 都同时含 URL 和本地路径例子;附带发现: `single --task <bad path> --deck <URL>` 会先 fetch URL 再检查 task 文件存在性(浪费一次网络调用),建议未来重排为 args validation → fetch,但不阻塞 T9 完成
 - 2026-05-09: 突击修复上一条发现 — 把 `--task` 文件存在性 + frontmatter 校验提前到 URL fetch 之前(cli.ts: `singleRun` 早期 `let resolvedTaskPath` 块);URL/本地区分仍沿用 `startsWith('http://')` 简单判断;同时清理 2 处冗余的 `await import('node:fs')` / `await import('node:path')`(静态 import 已覆盖,且会让早期校验代码触发 TDZ);106/0 tests pass;手测 `--task /tmp/nonexistent.agent.md --deck https://...` 不再触发 `📥 Fetching`,直接输出 task-not-found
+- 2026-05-09: lock-step bump 0.9.43 → 0.9.44 publish 到 npm,4 commit push 到 origin/main(`5654a83` v0.9.43 catch-up · `086c129` feat(arena) · `f373ff4` docs(cortex) T9 · `0b03144` chore(release) v0.9.44)
+- 2026-05-09: subagent 隔离 worktree 跑 v0.9.44 全 8 场景(S1-S7 baseline + S8 早期 --task 校验), **All ✅**:bunx 正确解析 0.9.44(122 deps fresh-extracted);S2/S4/S8 dual-coverage(URL + 本地)同时存在;S6 dormancy(`ghfast|mirror|proxy|fallback`)0 匹配;S8 bad task path 不触发 `📥 Fetching`(0 匹配);S6 端到端 6882ms PASS
 
 ## 关联文件
 
