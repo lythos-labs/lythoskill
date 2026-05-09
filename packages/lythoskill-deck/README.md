@@ -9,7 +9,7 @@
 This package exposes a **CLI**. Invoke via:
 
 ```bash
-bunx @lythos/skill-deck@0.9.42 <command> [options]
+bunx @lythos/skill-deck@0.9.43 <command> [options]
 ```
 
 No installation required. `bunx` auto-downloads the package.
@@ -55,17 +55,17 @@ prompt = "Search for latest info, then generate professional document with diagr
 
 | Situation | Command |
 |-----------|---------|
-| Sync working set with `skill-deck.toml` | `bunx @lythos/skill-deck@0.9.42 link` |
-| Validate `skill-deck.toml` before committing | `bunx @lythos/skill-deck@0.9.42 validate` |
-| Download a skill to cold pool and add to deck | `bunx @lythos/skill-deck@0.9.42 add owner/repo` |
-| Pull latest versions of declared skills | `bunx @lythos/skill-deck@0.9.42 refresh` |
-| Refresh a single skill by alias | `bunx @lythos/skill-deck@0.9.42 refresh tdd` |
-| Remove a skill from deck and working set | `bunx @lythos/skill-deck@0.9.42 remove tdd` |
-| GC unreferenced repos from cold pool | `bunx @lythos/skill-deck@0.9.42 prune` |
-| Switch skill from snapshot to sync mode | `bunx @lythos/skill-deck@0.9.42 sync tdd` |
-| Switch skill from sync to snapshot mode | `bunx @lythos/skill-deck@0.9.42 freeze tdd` |
-| Check cold pool for drift vs lock file | `bunx @lythos/skill-deck@0.9.42 reconcile` |
-| Use a custom deck file or working dir | `bunx @lythos/skill-deck@0.9.42 link --deck ./my-deck.toml --workdir /path/to/project` |
+| Sync working set with `skill-deck.toml` | `bunx @lythos/skill-deck@0.9.43 link` |
+| Validate `skill-deck.toml` before committing | `bunx @lythos/skill-deck@0.9.43 validate` |
+| Download a skill to cold pool and add to deck | `bunx @lythos/skill-deck@0.9.43 add owner/repo` |
+| Pull latest versions of declared skills | `bunx @lythos/skill-deck@0.9.43 refresh` |
+| Refresh a single skill by alias | `bunx @lythos/skill-deck@0.9.43 refresh tdd` |
+| Remove a skill from deck and working set | `bunx @lythos/skill-deck@0.9.43 remove tdd` |
+| GC unreferenced repos from cold pool | `bunx @lythos/skill-deck@0.9.43 prune` |
+| Switch skill from snapshot to sync mode | `bunx @lythos/skill-deck@0.9.43 sync tdd` |
+| Switch skill from sync to snapshot mode | `bunx @lythos/skill-deck@0.9.43 freeze tdd` |
+| Check cold pool for drift vs lock file | `bunx @lythos/skill-deck@0.9.43 reconcile` |
+| Use a custom deck file or working dir | `bunx @lythos/skill-deck@0.9.43 link --deck ./my-deck.toml --workdir /path/to/project` |
 
 ### Commands
 
@@ -128,7 +128,7 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 EOF
 
 # 2. Link — creates symlinks in .claude/skills/
-bunx @lythos/skill-deck@0.9.42 link
+bunx @lythos/skill-deck@0.9.43 link
 ```
 
 ### Key Concepts
@@ -214,7 +214,7 @@ Caution: deck's deny-by-default will remove any skills not declared in your deck
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `❌ Skill not found: <name>` | Skill declared in deck but not in cold pool | `bunx @lythos/skill-deck@0.9.42 add github.com/owner/repo/skill` or clone manually into cold pool |
+| `❌ Skill not found: <name>` | Skill declared in deck but not in cold pool | `bunx @lythos/skill-deck@0.9.43 add github.com/owner/repo/skill` or clone manually into cold pool |
 | `link` skips entries with warnings | Real files/directories exist in working set (not symlinks) | Delete the real directories in `working_set` and re-run `link`. Never create directories manually there |
 | `refresh` reports "Not a git repository" | Skill was copied (not cloned) into cold pool | Re-clone with `git clone` or use `deck add` which clones by default |
 | `deck update` prints deprecation warning | `update` was renamed to `refresh` in v0.8+ | Use `deck refresh` instead |
