@@ -1,7 +1,7 @@
 <!-- AUTO-GENERATED -->
 lythoskill-deck -- Declarative skill deck governance — cold pool, working set, deny-by-default
 
-Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck prune [--yes] | lythoskill-deck sync <alias> | lythoskill-deck freeze <alias> | lythoskill-deck reconcile [--apply] [--yes] | lythoskill-deck migrate-schema [--dry-run]
+Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck prune [--yes] | lythoskill-deck to-symlink <alias> | lythoskill-deck to-snapshot <alias> | lythoskill-deck reconcile [--apply] [--yes] | lythoskill-deck migrate-schema [--dry-run]
 
 Commands:
   link                         Sync working set with skill-deck.toml
@@ -10,8 +10,8 @@ Commands:
   validate [deck.toml]         Validate deck configuration
   remove <fq|alias>            Remove a skill from deck.toml and working set
   prune [--yes]                GC cold pool repos no longer referenced by any deck
-  sync <alias>                 Switch skill from snapshot (cp) to sync (symlink)
-  freeze <alias>               Switch skill from sync (symlink) to snapshot (cp), pinning current HEAD
+  to-symlink <alias>           Switch a skill to symlink mode (live link, follows cold pool)
+  to-snapshot <alias>          Switch a skill to snapshot mode (pinned cp of current HEAD)
   reconcile [--apply] [--yes]  Compare lock file vs cold pool, report drift
   migrate-schema [--dry-run]   Convert string-array deck.toml to alias-as-key dict
 
