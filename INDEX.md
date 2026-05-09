@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/9 11:38:21
+> 自动生成于 2026/5/9 16:08:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 176 | 进行中: 0, 待验收: 0, 已完成: 147 |
+| Tasks | 178 | 进行中: 0, 待验收: 0, 已完成: 148 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
-| ADRs | 57 | 已接受: 47 |
+| ADRs | 58 | 已接受: 48 |
 
 ---
 
@@ -57,12 +57,13 @@
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (5)
 
 - [ ] **TASK-20260509104331469**: T6 — Arena e2e verification test plan: agent-run task + run --config + file output validation
 - [ ] **TASK-20260509113254423**: T4 — Curator simplification: delete discover CLI + feed-adapters.ts per ADR-20260508230803515
 - [ ] **TASK-20260509113255134**: T7 — project-cortex agent-friendly errors: add Usage + examples to all error paths
 - [ ] **TASK-20260509113256236**: T8 — General catch error cleanup: replace --skills style patterns across all CLI packages
+- [ ] **TASK-20260509121724330**: T9 — URL-first HATEOAS regression playbook (subagent-driven, dormancy-checked)
 
 ### 进行中 (0)
 
@@ -72,7 +73,7 @@ _无_
 
 _无_
 
-### 已完成 (147)
+### 已完成 (148)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -221,6 +222,7 @@ _无_
 - ✅ ~~TASK-20260508222319692~~: T2 — Doc syndication blockers (validate-weekly fictional, deck/cortex/arena/creator missing commands, scribe stale 0.9.15 + deprecated TOML, multi-platform tagging)
 - ✅ ~~TASK-20260508222319717~~: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
 - ✅ ~~TASK-20260509101438298~~: Align arena doc surface to working onboarding paths — replace broken `--skills` bare-name examples
+- ✅ ~~TASK-20260509155623694~~: Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs and avoid sync/link name collision
 
 ### 悬置 (0)
 
@@ -314,6 +316,7 @@ _无_
 - ✅ **ADR-20260508204215712** (02-accepted): Environment-gated tests
 - ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
 - 🤔 **ADR-20260509104832428** (01-proposed): Remove run --decks CLI-flag mode — keep only run --config arena.toml
+- ✅ **ADR-20260509144134332** (02-accepted): Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs
 
 ---
 

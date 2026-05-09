@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * deck sync/freeze — snapshot↔symlink intent switching per skill.
+ * deck to-symlink/to-snapshot — switch a skill's link mode in the working set.
  *
- * Per ADR-20260507190157540: snapshot = default safe (cp), sync = live (symlink).
- * These commands switch an individual skill between modes without re-linking all.
+ * Per ADR-20260507190157540: snapshot = default safe (cp, pinned), symlink = live (follows cold pool).
+ * Per ADR-20260509144134332: command verbs renamed from sync/freeze to to-symlink/to-snapshot
+ * to align with schema mode field and avoid collision with `deck link` (the reconcile primitive).
  */
 
 import { existsSync, readFileSync, writeFileSync, rmSync, symlinkSync, cpSync, lstatSync } from 'node:fs'
@@ -52,10 +53,10 @@ function getProjectAndDeck(cliDeckPath?: string, cliWorkdir?: string) {
 }
 
 /**
- * Switch a skill from snapshot (real dir) to sync (symlink).
- * The skill stays in a real directory if it's already not a symlink.
+ * Switch a skill to symlink mode (live link to cold pool source).
+ * No-op if the working set entry is already a symlink.
  */
-export function syncSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
+export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
   const { DECK_PATH, PROJECT_DIR, deckRaw, WORKING_SET, COLD_POOL } = getProjectAndDeck(cliDeckPath, cliWorkdir)
 
   const { entries: parsedEntries } = parseDeck(deckRaw)
@@ -81,7 +82,7 @@ export function syncSkill(target: string, cliDeckPath?: string, cliWorkdir?: str
   } catch {}
 
   if (currentMode === 'symlink') {
-    console.log(`⏭️  ${match.alias} is already in sync mode (symlink)`)
+    console.log(`⏭️  ${match.alias} is already in symlink mode`)
     return
   }
 
@@ -93,7 +94,7 @@ export function syncSkill(target: string, cliDeckPath?: string, cliWorkdir?: str
   // Remove snapshot, create symlink
   rmSync(dest, { recursive: true, force: true })
   symlinkSync(source.path, dest)
-  console.log(`🔄 ${match.alias}: snapshot → sync (symlink to ${relative(PROJECT_DIR, source.path)})`)
+  console.log(`🔄 ${match.alias}: snapshot → symlink (target: ${relative(PROJECT_DIR, source.path)})`)
 
   // Update lock
   const lock = readLock(PROJECT_DIR)
@@ -108,9 +109,10 @@ export function syncSkill(target: string, cliDeckPath?: string, cliWorkdir?: str
 }
 
 /**
- * Switch a skill from sync (symlink) to snapshot (real dir, pin current HEAD).
+ * Switch a skill to snapshot mode (pinned copy from cold pool source).
+ * No-op if the working set entry is already a real directory (not a symlink).
  */
-export function freezeSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
+export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
   const { DECK_PATH, PROJECT_DIR, deckRaw, WORKING_SET, COLD_POOL } = getProjectAndDeck(cliDeckPath, cliWorkdir)
 
   const { entries: parsedEntries } = parseDeck(deckRaw)
@@ -148,14 +150,14 @@ export function freezeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
   // Remove symlink, cp snapshot
   rmSync(dest, { recursive: true, force: true })
   cpSync(source.path, dest, { recursive: true })
-  console.log(`🧊 ${match.alias}: sync → snapshot (pinned copy from ${relative(PROJECT_DIR, source.path)})`)
+  console.log(`🧊 ${match.alias}: symlink → snapshot (pinned copy from ${relative(PROJECT_DIR, source.path)})`)
 
   // Record HEAD in metadata
   try {
     const loc = parseLocator(match.path)
     if (loc && !loc.isLocalhost) {
       const pool = new ColdPool(COLD_POOL)
-      // Best-effort: record a note that this is now frozen
+      // Best-effort: note that this is now pinned (snapshot mode)
       // The actual HEAD recording happens via git-hash async, but we note the intent
       console.log(`   📌 Pinned. Run 'deck link' to regenerate lock with updated content_hash.`)
     }

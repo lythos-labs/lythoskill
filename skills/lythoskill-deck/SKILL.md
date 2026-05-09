@@ -67,9 +67,9 @@ bunx @lythos/skill-deck@0.9.45 validate ./decks/my-deck.toml
 # Probe each FQ locator against GitHub (network)
 bunx @lythos/skill-deck@0.9.45 validate --remote
 
-# Per-skill mode switch — snapshot (cp, pinned) ↔ sync (symlink, follows upstream)
-bunx @lythos/skill-deck@0.9.45 sync <alias>     # snapshot → sync
-bunx @lythos/skill-deck@0.9.45 freeze <alias>   # sync → snapshot, pinning current HEAD
+# Per-skill mode switch — snapshot (cp, pinned) ↔ symlink (live, follows cold pool)
+bunx @lythos/skill-deck@0.9.45 to-symlink <alias>     # snapshot → symlink
+bunx @lythos/skill-deck@0.9.45 to-snapshot <alias>    # symlink → snapshot, pinning current HEAD
 
 # Reconcile lock file vs cold pool — k8s-style drift report
 bunx @lythos/skill-deck@0.9.45 reconcile

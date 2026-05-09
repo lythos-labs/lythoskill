@@ -7,7 +7,7 @@ import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { removeSkill } from './remove.js'
 import { pruneDeck } from './prune.js'
-import { syncSkill, freezeSkill } from './sync-freeze.js'
+import { toSymlinkSkill, toSnapshotSkill } from './to-symlink-snapshot.js'
 import { reconcileDeck } from './reconcile.js'
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from './resolve-deck.js'
 import { formatHelp } from './help.js'
@@ -59,8 +59,8 @@ const HELP_CONFIG = {
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
     { name: 'remove', description: 'Remove a skill from deck.toml and working set', args: '<fq|alias>' },
     { name: 'prune', description: 'GC cold pool repos no longer referenced by any deck', args: '[--yes]' },
-    { name: 'sync', description: 'Switch skill from snapshot (cp) to sync (symlink)', args: '<alias>' },
-    { name: 'freeze', description: 'Switch skill from sync (symlink) to snapshot (cp), pinning current HEAD', args: '<alias>' },
+    { name: 'to-symlink', description: 'Switch a skill to symlink mode (live link, follows cold pool)', args: '<alias>' },
+    { name: 'to-snapshot', description: 'Switch a skill to snapshot mode (pinned cp of current HEAD)', args: '<alias>' },
     { name: 'reconcile', description: 'Compare lock file vs cold pool, report drift', args: '[--apply] [--yes]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
@@ -121,22 +121,22 @@ switch (command) {
     removeSkill(removeTarget, deckPath, workdir)
     break
   }
-  case 'sync': {
-    const syncTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
-    if (!syncTarget) {
-      console.error('❌ Missing target. Usage: deck sync <alias>')
+  case 'to-symlink': {
+    const target = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!target) {
+      console.error('❌ Missing target. Usage: deck to-symlink <alias>')
       process.exit(1)
     }
-    syncSkill(syncTarget, deckPath, workdir)
+    toSymlinkSkill(target, deckPath, workdir)
     break
   }
-  case 'freeze': {
-    const freezeTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
-    if (!freezeTarget) {
-      console.error('❌ Missing target. Usage: deck freeze <alias>')
+  case 'to-snapshot': {
+    const target = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!target) {
+      console.error('❌ Missing target. Usage: deck to-snapshot <alias>')
       process.exit(1)
     }
-    freezeSkill(freezeTarget, deckPath, workdir)
+    toSnapshotSkill(target, deckPath, workdir)
     break
   }
   case 'reconcile': {

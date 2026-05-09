@@ -578,9 +578,9 @@ The `lythoskill-deck` tool reconciles the declared deck against the cold pool by
 
 **Pre-built decks** live in `examples/decks/` — `deck link --deck <url>` bootstraps a workspace in one command. See the project README for the full table.
 
-**Commands**: `link` | `add` | `refresh` | `remove` | `prune` | `validate --remote` | `sync <alias>` | `freeze <alias>` | `reconcile` | `migrate-schema`
+**Commands**: `link` | `add` | `refresh` | `remove` | `prune` | `validate --remote` | `to-symlink <alias>` | `to-snapshot <alias>` | `reconcile` | `migrate-schema`
 
-Key principle: declarative package manager + governor. `deck add` clones into cold pool and appends to deck. `deck link` reconciles the working set (deny-by-default). `deck sync`/`freeze` toggle per-skill between live symlink and pinned snapshot. `deck reconcile` detects drift between lock file and cold pool filesystem.
+Key principle: declarative package manager + governor. `deck add` clones into cold pool and appends to deck. `deck link` reconciles the working set (deny-by-default). `deck to-symlink`/`to-snapshot` toggle per-skill between symlink mode and snapshot (pinned) mode. `deck reconcile` detects drift between lock file and cold pool filesystem.
 
 ---
 

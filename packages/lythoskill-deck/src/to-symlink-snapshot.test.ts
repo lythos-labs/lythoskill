@@ -2,12 +2,12 @@ import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync, symlinkSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { syncSkill, freezeSkill } from './sync-freeze'
+import { toSymlinkSkill, toSnapshotSkill } from './to-symlink-snapshot'
 import { cpSync, lstatSync } from 'node:fs'
 
 // Build a minimal project with a cold pool, deck.toml, working set, and lock
 function setupProject(opts: { mode: 'snapshot' | 'symlink' }) {
-  const project = mkdtempSync(join(tmpdir(), 'sync-freeze-test-'))
+  const project = mkdtempSync(join(tmpdir(), 'to-symlink-snapshot-test-'))
   const coldPool = join(project, 'cold-pool')
   const workingSet = join(project, '.claude', 'skills')
 
@@ -67,7 +67,7 @@ path = "github.com/test-org/test-skill"
   return { project, coldPool, workingSet, skillDir, deckPath, dest }
 }
 
-describe('syncSkill — snapshot → symlink', () => {
+describe('toSymlinkSkill — snapshot → symlink', () => {
   test('switches real dir to symlink', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'snapshot' })
     const originalCwd = process.cwd
@@ -76,7 +76,7 @@ describe('syncSkill — snapshot → symlink', () => {
     try {
       process.cwd = () => project
       process.exit = (() => { throw new Error('exit') }) as any
-      syncSkill('test-skill', deckPath, project)
+      toSymlinkSkill('test-skill', deckPath, project)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
     } finally {
@@ -97,7 +97,7 @@ describe('syncSkill — snapshot → symlink', () => {
     try {
       process.cwd = () => project
       process.exit = (() => { throw new Error('exit') }) as any
-      syncSkill('test-skill', deckPath, project)
+      toSymlinkSkill('test-skill', deckPath, project)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
     } finally {
@@ -111,7 +111,7 @@ describe('syncSkill — snapshot → symlink', () => {
   })
 })
 
-describe('freezeSkill — symlink → snapshot', () => {
+describe('toSnapshotSkill — symlink → snapshot', () => {
   test('switches symlink to real dir', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'symlink' })
     const originalCwd = process.cwd
@@ -120,7 +120,7 @@ describe('freezeSkill — symlink → snapshot', () => {
     try {
       process.cwd = () => project
       process.exit = (() => { throw new Error('exit') }) as any
-      freezeSkill('test-skill', deckPath, project)
+      toSnapshotSkill('test-skill', deckPath, project)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
     } finally {
@@ -144,7 +144,7 @@ describe('freezeSkill — symlink → snapshot', () => {
     try {
       process.cwd = () => project
       process.exit = (() => { throw new Error('exit') }) as any
-      freezeSkill('test-skill', deckPath, project)
+      toSnapshotSkill('test-skill', deckPath, project)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
     } finally {

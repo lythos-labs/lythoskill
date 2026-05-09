@@ -62,8 +62,8 @@ prompt = "Search for latest info, then generate professional document with diagr
 | Refresh a single skill by alias | `bunx @lythos/skill-deck@0.9.45 refresh tdd` |
 | Remove a skill from deck and working set | `bunx @lythos/skill-deck@0.9.45 remove tdd` |
 | GC unreferenced repos from cold pool | `bunx @lythos/skill-deck@0.9.45 prune` |
-| Switch skill from snapshot to sync mode | `bunx @lythos/skill-deck@0.9.45 sync tdd` |
-| Switch skill from sync to snapshot mode | `bunx @lythos/skill-deck@0.9.45 freeze tdd` |
+| Switch skill to symlink mode (live) | `bunx @lythos/skill-deck@0.9.45 to-symlink tdd` |
+| Switch skill to snapshot mode (pinned) | `bunx @lythos/skill-deck@0.9.45 to-snapshot tdd` |
 | Check cold pool for drift vs lock file | `bunx @lythos/skill-deck@0.9.45 reconcile` |
 | Use a custom deck file or working dir | `bunx @lythos/skill-deck@0.9.45 link --deck ./my-deck.toml --workdir /path/to/project` |
 
@@ -77,8 +77,8 @@ prompt = "Search for latest info, then generate professional document with diagr
 | `refresh` | `[<fq\|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
 | `remove` | `<fq\|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `prune` | `[--yes] [--deck <path>]` | GC cold pool repos no longer referenced. Interactive confirm (skip with `--yes`). |
-| `sync` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch skill from snapshot (real dir) to sync (symlink) — live mode. |
-| `freeze` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch skill from sync (symlink) to snapshot (real dir) — pin current HEAD. |
+| `to-symlink` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to symlink mode (live link, follows cold pool) |
+| `to-snapshot` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to snapshot mode (pinned cp of current HEAD) |
 | `reconcile` | `[--apply] [--deck <path>] [--workdir <dir>]` | Compare lock vs cold pool, report drift (missing/behind/extra). Plan-first. |
 
 ### Options
@@ -96,7 +96,7 @@ prompt = "Search for latest info, then generate professional document with diagr
 
 `link` refuses to operate if `working_set` resolves to your home directory or root (`/`).
 
-**Snapshot mode** (`--mode snapshot` or `link --mode snapshot`): copies the source directory into the working set instead of symlinking. This is needed for agents that don't support symlinks (e.g. Codex #11314). Snapshots are pinned to the cold pool version at link time. Use `deck sync <alias>` to switch back to live symlink mode, or `deck freeze <alias>` to pin a symlink as a snapshot.
+**Snapshot mode** (`--mode snapshot` or `link --mode snapshot`): copies the source directory into the working set instead of symlinking. This is needed for agents that don't support symlinks (e.g. Codex #11314). Snapshots are pinned to the cold pool version at link time. Use `deck to-symlink <alias>` to switch back to symlink mode, or `deck to-snapshot <alias>` to pin a symlink as a snapshot.
 
 ### Exit codes
 
