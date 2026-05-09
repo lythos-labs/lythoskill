@@ -6,6 +6,23 @@
 |--------|------|------|
 | proposed | 2026-05-09 | Created |
 
+## 并发考虑（2026-05-09 补充）
+
+当前冷池和 metadata DB 所有操作都在**单进程/单 agent** 中进行，暂不需并发控制。
+但架构上已有两条天然防线：
+
+1. **SQLite 行锁 + WAL**：`reconcileDeckReferences` 事务性写入，多进程读不阻塞
+2. **git clone 自保护**：并发 clone 到同目录会 fail 而非 corrupt
+
+未来如果需要多 agent 并发（如两个 deck 同时声明同一 git clone），加一个冷池根目录
+的文件锁即可：
+
+```
+<coldPool>/.lock    ← fslock / flock 互斥
+```
+
+不依赖外部组件，成本极低。当前个人用户场景没必要预加。
+
 ## 背景
 
 Metadata DB（`.cold-pool-meta.db` v3–6）已有 schema version 跟踪表结构，
