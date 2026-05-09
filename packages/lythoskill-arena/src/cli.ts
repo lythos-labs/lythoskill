@@ -67,6 +67,8 @@ Examples:
   lythoskill-arena single \\
     --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
     --brief "Generate auth flow diagram" --player kimi
+  # If you already have a local deck file, point to it directly:
+  # lythoskill-arena single --deck ./examples/decks/scout.toml --brief "..."
 
   # Multi-side comparison (declarative)
   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/add-remove/arena.toml > arena.toml
@@ -97,21 +99,71 @@ async function singleRun(args: string[]) {
   if (!opts.deck) {
     console.error(`❌ --deck <path|url> is required.
    --deck accepts local paths and http/https URLs (auto-fetched).
-   Example: lythoskill-arena single \\
-              --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
-              --brief "your task"`)
+
+   Example (no local file needed — URL is auto-fetched):
+     lythoskill-arena single \\
+       --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
+       --brief "your task"
+
+   Or with a local deck file you already have:
+     lythoskill-arena single --deck ./examples/decks/scout.toml --brief "your task"`)
     process.exit(1)
   }
   if (!opts.task && (!opts.brief || !opts.brief.trim())) {
     console.error(`❌ --task <path> or --brief "<text>" is required.
    --task reads a .agent.md scenario file; --brief takes inline text.
-   Example: lythoskill-arena single \\
-              --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
-              --brief "your task"`)
+
+   Example (no local file needed — URL is auto-fetched):
+     lythoskill-arena single \\
+       --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \\
+       --brief "your task"
+
+   Or with a local deck file:
+     lythoskill-arena single --deck ./examples/decks/scout.toml --brief "your task"`)
     process.exit(1)
   }
 
-  const { resolve, join } = await import('node:path')
+  // Validate --task file early — before any URL fetch — so bad path fails fast without a wasted network call.
+  let resolvedTaskPath: string | undefined
+  if (opts.task) {
+    resolvedTaskPath = resolve(opts.task)
+    if (!existsSync(resolvedTaskPath)) {
+      console.error(`❌ Task file not found: ${resolvedTaskPath}
+   Use --brief for inline tasks, or point --task to an existing .agent.md file.
+   Format: name + description + Given/When/Then/Judge sections.
+
+   Example (URL):  lythoskill-arena single --brief "your task" --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
+   Or (local):     lythoskill-arena single --brief "your task" --deck ./examples/decks/scout.toml`)
+      process.exit(1)
+    }
+    const raw = readFileSync(resolvedTaskPath, 'utf-8')
+    if (!raw.startsWith('---')) {
+      console.error(`❌ Invalid .agent.md: missing frontmatter (must start with "---")
+   Correct format:
+   ---
+   name: my-scenario
+   description: what this tests
+   timeout: 120000
+   ---
+   ## Given
+   ...
+   ## When
+   ...
+   ## Then
+   ...
+   ## Judge
+   ...
+   Template: playground/arena-one-shot/TASK-arena.agent.md`)
+      process.exit(1)
+    }
+    if (!raw.includes('## When')) {
+      console.error(`❌ Invalid .agent.md: missing "## When" section.
+   The ## When section defines what the agent should do.
+   See template: playground/arena-one-shot/TASK-arena.agent.md`)
+      process.exit(1)
+    }
+  }
+
   const { existsSync: deckExists, writeFileSync: deckWrite } = await import('node:fs')
   let deckPath: string
   if (opts.deck.startsWith('http://') || opts.deck.startsWith('https://')) {
@@ -152,43 +204,16 @@ async function singleRun(args: string[]) {
   try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
   const { resolvePlayer } = await import('./player')
-  const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs')
 
   const player = resolvePlayer(opts.player ?? 'kimi')
   const agent = useAgent(player)
   const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), `agent-output-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`)
   mkdirSync(outDir, { recursive: true })
 
-  // Resolve task: --brief builds scenario directly, --task reads .agent.md file
+  // Resolve task: --brief builds scenario directly, --task uses pre-validated path
   const scenarioOpt: Record<string, unknown> = {}
-  if (opts.task) {
-    const taskPath = resolve(opts.task)
-    if (!existsSync(taskPath)) { console.error(`❌ Task file not found: ${taskPath}
-   Use --brief for inline tasks, or point --task to an existing .agent.md file.
-   Format: name + description + Given/When/Then/Judge sections.
-   Example: lythoskill-arena single --brief "your task" --deck <url>`); process.exit(1) }
-    scenarioOpt.scenarioPath = taskPath
-    // Quick validation: check frontmatter presence
-    const raw = readFileSync(taskPath, 'utf-8')
-    if (!raw.startsWith('---')) { console.error(`❌ Invalid .agent.md: missing frontmatter (must start with "---")
-   Correct format:
-   ---
-   name: my-scenario
-   description: what this tests
-   timeout: 120000
-   ---
-   ## Given
-   ...
-   ## When
-   ...
-   ## Then
-   ...
-   ## Judge
-   ...
-   Template: playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
-    if (!raw.includes('## When')) { console.error(`❌ Invalid .agent.md: missing "## When" section.
-   The ## When section defines what the agent should do.
-   See template: playground/arena-one-shot/TASK-arena.agent.md`); process.exit(1) }
+  if (resolvedTaskPath) {
+    scenarioOpt.scenarioPath = resolvedTaskPath
   } else {
     scenarioOpt.scenario = {
       name: 'ad-hoc task',
