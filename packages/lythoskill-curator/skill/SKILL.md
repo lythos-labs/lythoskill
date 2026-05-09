@@ -10,13 +10,13 @@ description: |
   Reconciler-style: any state → scan → converges to clean index.
   Auto-backs up old index before rebuild; rollback via `restore`.
 when_to_use: |
-  List all skills, what skills do I have, scan skill pool, skill index,  discover skills, update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
+  List all skills, what skills do I have, scan skill pool, skill index,update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
 allowed-tools:
   - Bash(bunx @lythos/skill-curator@{{PACKAGE_VERSION}} *)
   - WebSearch
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
-deck_niche: meta.curation.deck-discovery
+deck_niche: meta.curation
 deck_managed_dirs:
   - ~/.agents/lythos/skill-curator/
 ---
@@ -79,7 +79,7 @@ bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool 
 
 # With provenance metadata
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
-  --reason "Found via agentskill.sh discovery" \
+  --reason "Found via agentskill.sh" \
   --branch main \
   --forked-from github.com/upstream/repo
 ```

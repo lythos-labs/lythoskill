@@ -17,7 +17,10 @@
 //
 // Future: remote feed adapters (LobeHub, agentskill.sh, GitHub) unite under FeedAdapter.
 
-// ── Layer -1: Feed — upstream discovery source ───────────────────────────────
+// ── Feed metadata (for skill lineage tracking) ──────────────────────────
+// Curator used to have remote feed adapters (GitHub, LobeHub, agentskill.sh)
+// but ADR-20260508230803515 rejected the pattern: agent web fetch / MCP
+// beats hand-rolled feed adapters. Only the lineage metadata type remains.
 
 export interface Feed {
   type: 'github' | 'marketplace' | 'lobehub' | 'npm' | 'url'
@@ -30,12 +33,6 @@ export interface FeedItem {
   name: string
   description: string
   source: string            // which feed discovered it (e.g. "lobehub")
-}
-
-export interface FeedAdapter {
-  readonly feed: Feed
-  /** Discover candidate skills from this feed. Pure planner: no mutation. */
-  discover(): Promise<FeedItem[]>
 }
 
 // ── Layer 0: Cold Pool — local skill cache ───────────────────────────────────
@@ -136,14 +133,12 @@ export function findSkillDirs(root: string): string[] {
 
 export interface CuratorPlan {
   coldPool: ColdPool
-  feeds: FeedAdapter[]
   skillDirs: string[]
 }
 
 export function buildCuratorPlan(poolPath: string): CuratorPlan {
   return {
     coldPool: { path: poolPath },
-    feeds: [],
     skillDirs: [],
   }
 }

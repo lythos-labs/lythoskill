@@ -14,7 +14,7 @@ timeout: 600000
 
 ## When
 1. Create an empty working directory: `mkdir /tmp/graduation-exam && cd /tmp/graduation-exam`
-2. Run `bunx @lythos/skill-curator@latest discover` to search remote feeds for skills that can help with:
+2. Search for skills that can help with (using web search, MCP, or agentskill.sh):
    - Word document creation (docx)
    - Charting/diagrams (Mermaid, matplotlib, etc.)
    - Research / web search
@@ -33,7 +33,7 @@ timeout: 600000
    ```
 
 ## Then
-- curator discover returned results (at least 3 skills found)
+- Agent found at least 3 candidate skills
 - All `deck add` commands succeeded (no errors)
 - `skill-deck.toml` exists with the selected skills
 - `.claude/skills/` contains symlinks for each selected skill

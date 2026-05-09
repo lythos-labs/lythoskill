@@ -627,62 +627,6 @@ function writeAddition(poolPath: string, record: ReturnType<typeof buildAddition
   appendFileSync(file, JSON.stringify(record) + '\n')
 }
 
-async function runDiscover(argv: string[]) {
-  const poolIdx = argv.indexOf('--pool')
-  const poolPath = poolIdx >= 0 ? argv[poolIdx + 1] : `${process.env.HOME}/.agents/skill-repos`
-
-  // Cold pool is NOT a feed — it's the destination. discover only queries
-  // remote feeds for NEW candidates. Use `curator scan` to see what's local.
-  const feedArgIdx = argv.indexOf('--feeds')
-  const feedNames = feedArgIdx >= 0 ? (argv[feedArgIdx + 1] || '').split(',').map(s => s.trim()) : ['github', 'agentskill']
-
-  const adapters: ReturnType<typeof createGitHubSearchAdapter>[] = []
-  for (const name of feedNames) {
-    if (name === 'github') adapters.push(createGitHubSearchAdapter())
-    if (name === 'lobehub') adapters.push(createLobeHubAdapter())
-    if (name === 'agentskill') adapters.push(createAgentSkillShAdapter())
-  }
-
-  console.log(`🔍 Discovering skills...\n`)
-
-  const allItems: { locator: string; name: string; description: string; source: string }[] = []
-  for (const adapter of adapters) {
-    const label = `${adapter.feed.label} (${adapter.feed.type})`
-    console.log(`   Fetching: ${label}...`)
-    const items = await adapter.discover()
-    console.log(`   └─ ${items.length} result(s)`)
-    for (const item of items) {
-      allItems.push({
-        locator: item.locator,
-        name: item.name,
-        description: (item.description || '').slice(0, 80),
-        source: item.source,
-      })
-    }
-  }
-
-  if (allItems.length === 0) {
-    console.log('\n📭 No skills discovered.')
-    return
-  }
-
-  console.log(`\n📋 ${allItems.length} skill(s) discovered:\n`)
-  console.log(formatMarkdownTable(allItems))
-
-  // Dedup hint — same name from multiple sources
-  const names = new Map<string, number>()
-  for (const item of allItems) names.set(item.name, (names.get(item.name) || 0) + 1)
-  const dupes = [...names.entries()].filter(([, c]) => c > 1)
-  if (dupes.length > 0) {
-    console.log(`\n⚠️  ${dupes.length} name(s) appear in multiple sources:`)
-    for (const [name, count] of dupes) {
-      console.log(`   - ${name} (${count} sources)`)
-    }
-  }
-
-  console.log(`\n💡 To add a skill: bunx @lythos/skill-curator add <locator> --pool ${poolPath} --reason "<why>"`)
-  console.log(`\n📋 To see what's already in cold pool: bunx @lythos/skill-curator ${poolPath}`)
-}
 
 // ── refresh-plan + refresh-execute ────────────────────────────────
 
@@ -940,8 +884,7 @@ if (import.meta.main) {
     console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
     console.log('                         --pool <dir>        Cold pool path')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
-    console.log('  discover              Discover new skills from remote feeds (GitHub, LobeHub, agentskill)')
-    console.log('  refresh-plan          Scan cold pool git repos, check upstreams, write TODO file')
+      console.log('  refresh-plan          Scan cold pool git repos, check upstreams, write TODO file')
     console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
     console.log('  audit                 Run predefined checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
@@ -957,8 +900,6 @@ if (import.meta.main) {
     runRefreshPlan(args.slice(1))
   } else if (cmd === 'refresh-execute') {
     runRefreshExecute(args.slice(1))
-  } else if (cmd === 'discover') {
-    runDiscover(args.slice(1))
   } else if (cmd === 'add') {
     runAdd(args.slice(1))
   } else if (cmd === 'query') {

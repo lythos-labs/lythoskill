@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/9 10:33:12
+> 自动生成于 2026/5/9 11:33:17
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 172 | 进行中: 0, 待验收: 0, 已完成: 147 |
+| Tasks | 176 | 进行中: 0, 待验收: 0, 已完成: 147 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
-| ADRs | 56 | 已接受: 47 |
+| ADRs | 57 | 已接受: 47 |
 
 ---
 
@@ -57,9 +57,12 @@
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (4)
 
-_无_
+- [ ] **TASK-20260509104331469**: T6 — Arena e2e verification test plan: agent-run task + run --config + file output validation
+- [ ] **TASK-20260509113254423**: T4 — Curator simplification: delete discover CLI + feed-adapters.ts per ADR-20260508230803515
+- [ ] **TASK-20260509113255134**: T7 — project-cortex agent-friendly errors: add Usage + examples to all error paths
+- [ ] **TASK-20260509113256236**: T8 — General catch error cleanup: replace --skills style patterns across all CLI packages
 
 ### 进行中 (0)
 
@@ -310,6 +313,7 @@ _无_
 - ✅ **ADR-20260508075913360** (02-accepted): Extract runtime infrastructure package (@lythos/infra)
 - ✅ **ADR-20260508204215712** (02-accepted): Environment-gated tests
 - ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
+- 🤔 **ADR-20260509104832428** (01-proposed): Remove run --decks CLI-flag mode — keep only run --config arena.toml
 
 ---
 

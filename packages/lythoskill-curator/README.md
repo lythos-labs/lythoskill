@@ -7,7 +7,7 @@
 As your skill ecosystem grows (GitHub trending, marketplace downloads, agent recommendations), you lose track of what you have and **why** you have it. `skill-curator` solves both:
 
 - **REGISTRY.json + catalog.db**: Structured index of every skill in your cold pool
-- **additions.jsonl**: Decision history — which feed discovered each skill, why you added it, arena results, fork lineage
+- **additions.jsonl**: Decision history — why you added each skill, arena results, fork lineage
 
 **Need recommendation or ranking?** Use [Arena](https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-arena). Curator provides the data; Arena provides the comparison. Together they feed the agent's recommendation workflow.
 
@@ -104,6 +104,5 @@ File | % Funcs | % Lines | Uncovered Line #s
 All files | 69.44 | 63.61 |
  src/cli.ts | 25.00 | 14.14 | 42-44,48-55,133-208,214-232,240-261,265-289,295-318,322-360,366-381,387-409,413-446,450-541,554-642,656-659,663-716,722,726-754,758-807,856-857,868-869,871-903,905-921
  src/curator-core.ts | 100.00 | 98.24 | 201-202
- src/feed-adapters.ts | 83.33 | 78.46 | 61-66,99-106
-```
+ ```
 <!-- /test-stats -->

@@ -114,10 +114,9 @@ describe('formatMarkdownTable', () => {
 })
 
 describe('buildCuratorPlan', () => {
-  test('creates plan with cold pool and empty feeds', () => {
+  test('creates plan with cold pool path', () => {
     const plan = buildCuratorPlan('/tmp/cold-pool')
     expect(plan.coldPool.path).toBe('/tmp/cold-pool')
-    expect(plan.feeds).toEqual([])
     expect(plan.skillDirs).toEqual([])
   })
 })

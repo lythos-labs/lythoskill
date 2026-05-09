@@ -20,7 +20,6 @@ Commands:
   refresh-execute       Pull behind repos one by one, marking progress in plan
                          --pool <dir>        Cold pool path
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
-  discover              Discover new skills from remote feeds (GitHub, LobeHub, agentskill)
   refresh-plan          Scan cold pool git repos, check upstreams, write TODO file
   refresh-execute       Pull behind repos one by one, marking progress in plan
   audit                 Run predefined checks and output an audit report
