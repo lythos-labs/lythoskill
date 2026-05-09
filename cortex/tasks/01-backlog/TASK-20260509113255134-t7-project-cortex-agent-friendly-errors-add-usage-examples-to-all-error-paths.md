@@ -83,6 +83,13 @@ Example:  <带真实 ID/标题的具体示例>
 
 - 2026-05-09 ~13:30: 任务创建(stub)
 - 2026-05-09 ~16:00 (此次会话): 全文盘点完成,实际 17 🔴 + 2 🟡 + 4 ✅,改写假设 — 不再当作"全 cortex 大改"
+- 2026-05-09 ~17:00 (此次会话): 全修实施 commit `75883d3`:
+  - cli.ts 顶层 4 + 9 + 1 处 bare error 全部升到三段 HATEOAS
+  - 抽 `requireDocId` helper(line 86-117)
+  - move.ts:168 (not-found) 列出搜索路径 + 常见原因 + `cortex list` 提示
+  - **move.ts:182-184 修掉 `--force` 谎言** — 改为指向 `complete`/`terminate`/`archive` any-status 子命令,并明说 "there is no `--force` flag"
+  - wiki.ts:25 加 example + 三 category 解释 + index 重生成提示
+  - 6 surfaces 手测全 ✅,49/0 cortex tests pass
 
 ## 关联文件
 
