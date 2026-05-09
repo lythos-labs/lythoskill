@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/9 16:56:40
+> 自动生成于 2026/5/9 17:05:03
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 180 | 进行中: 0, 待验收: 0, 已完成: 150 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
-| ADRs | 58 | 已接受: 48 |
+| ADRs | 59 | 已接受: 48 |
 
 ---
 
@@ -319,6 +319,7 @@ _无_
 - ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
 - 🤔 **ADR-20260509104832428** (01-proposed): Remove run --decks CLI-flag mode — keep only run --config arena.toml
 - ✅ **ADR-20260509144134332** (02-accepted): Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs
+- 🤔 **ADR-20260509170343037** (01-proposed): Cold-pool metadata DB data fingerprint for integrity verification
 
 ---
 
