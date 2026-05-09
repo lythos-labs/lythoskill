@@ -74,8 +74,8 @@ prompt = "Search for latest info, then generate professional document with diagr
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
 | `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Git clone skill to cold pool and append to skill-deck.toml. |
-| `refresh` | `[<fq|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
-| `remove` | `<fq|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
+| `refresh` | `[<fq\|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
+| `remove` | `<fq\|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `prune` | `[--yes] [--deck <path>]` | GC cold pool repos no longer referenced. Interactive confirm (skip with `--yes`). |
 | `sync` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch skill from snapshot (real dir) to sync (symlink) — live mode. |
 | `freeze` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch skill from sync (symlink) to snapshot (real dir) — pin current HEAD. |
