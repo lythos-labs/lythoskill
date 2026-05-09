@@ -124,8 +124,17 @@ async function singleRun(args: string[]) {
     } catch { /* keep original url */ }
     const dest = resolve(process.cwd(), 'arena-deck.toml')
     console.log(`📥 Fetching arena deck: ${url}`)
-    const res = await fetch(url, { signal: AbortSignal.timeout(30_000) })
-    if (!res.ok) { console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}`); process.exit(1) }
+    let res: Response
+    try { res = await fetch(url, { signal: AbortSignal.timeout(30_000) }) } catch (e: any) {
+      console.error(`❌ Cannot reach ${url}
+   Network issue? Try a GitHub proxy mirror:
+     ${url.replace('https://raw.githubusercontent.com/', 'https://ghfast.top/https://raw.githubusercontent.com/')}
+   Or download manually and reference the local file.`)
+      process.exit(1)
+    }
+    if (!res.ok) { console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}
+   Try a GitHub proxy mirror:
+     ${url.replace('https://raw.githubusercontent.com/', 'https://ghfast.top/https://raw.githubusercontent.com/')}`); process.exit(1) }
     deckWrite(dest, await res.text())
     console.log(`   → saved to ${dest}`)
     deckPath = dest
