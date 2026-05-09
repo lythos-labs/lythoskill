@@ -1,6 +1,6 @@
 {
   "name": "@lythos/test-utils",
-  "version": "0.9.43",
+  "version": "0.9.44",
   "type": "module",
   "scripts": {
     "test": "bun test src/ --pass-with-no-tests",

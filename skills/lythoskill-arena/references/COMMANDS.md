@@ -32,6 +32,8 @@ Examples:
   lythoskill-arena single \
     --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
     --brief "Generate auth flow diagram" --player kimi
+  # If you already have a local deck file, point to it directly:
+  # lythoskill-arena single --deck ./examples/decks/scout.toml --brief "..."
 
   # Multi-side comparison (declarative)
   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/add-remove/arena.toml > arena.toml
