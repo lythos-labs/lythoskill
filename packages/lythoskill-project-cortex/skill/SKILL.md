@@ -94,6 +94,21 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} epic resume EPIC-xxx
 `probe` is a read-only consistency check. It compares each document's directory
 (source of truth) against its internal Status History table. Mismatches are
 flagged for human review — probe never auto-fixes.
+
+### Probe Validation Loop
+
+```mermaid
+flowchart TD
+    A[Run probe] --> B{Dir matches<br/>Status History?}
+    B -->|Yes| C[✅ All consistent]
+    B -->|No| D[⚠️ Mismatch found]
+    D --> E{Which is truth?}
+    E -->|Dir is correct| F[Update Status History<br/>manually or regenerate]
+    E -->|History is correct| G[cortex move to<br/>correct directory]
+    F --> A
+    G --> A
+```
+
 ## Directory Structure
 ```
 cortex/
@@ -234,14 +249,29 @@ Output when mismatches found:
 
 Directory location is the source of truth. Status History mirrors the directory.
 
-```
-backlog ──start──► in-progress ──deliver──► review ──accept──► completed ──archive──► archived
-    │                   │                      │
-    │                   └────block────► suspended
-    │                                          │
-    │                                          └──resolved──► in-progress
-    │
-    └────────────────────────────cancel────────────────────► terminated
+```mermaid
+stateDiagram-v2
+    [*] --> backlog : create
+    backlog --> in_progress : start
+    in_progress --> review : review
+    review --> completed : done
+    in_progress --> suspended : suspend
+    suspended --> in_progress : resume
+    review --> in_progress : reject
+    backlog --> terminated : terminate
+    in_progress --> terminated : terminate
+    review --> terminated : terminate
+    suspended --> terminated : terminate
+    completed --> archived : archive
+    completed --> [*]
+    terminated --> [*]
+    archived --> [*]
+
+    note right of review
+        done: review → completed only
+        complete: any → completed
+        (trailer-driven)
+    end note
 ```
 
 ### Transition Table
@@ -257,6 +287,35 @@ backlog ──start──► in-progress ──deliver──► review ──acc
 | any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} terminate TASK-xxx` |
 | completed | archived | User/System | Long-term storage | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} archive TASK-xxx` |
 | review | in-progress | User/System | Deliverables rejected, re-work required | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} reject TASK-xxx` |
+
+### ADR State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> proposed : create
+    proposed --> accepted : accept
+    proposed --> rejected : reject
+    proposed --> superseded : supersede
+    accepted --> superseded : supersede
+    rejected --> [*]
+    superseded --> [*]
+```
+
+### Epic State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> active : create
+    active --> done : done
+    active --> suspended : suspend
+    suspended --> active : resume
+    done --> archived : archive
+    active --> [*]
+    suspended --> [*]
+    done --> [*]
+    archived --> [*]
+```
+
 ## Commit Trailer Integration
 
 Cortex governance is **commit-driven** via git trailers parsed by `.husky/post-commit`:
@@ -276,6 +335,22 @@ Closes: TASK-20260503010227902"
 ```
 
 The post-commit hook auto-dispatches to `cortex` CLI and creates a follow-up commit with the state changes. Malformed trailers print warnings but do not block.
+
+```mermaid
+sequenceDiagram
+    participant A as Agent/User
+    participant G as Git Commit
+    participant H as post-commit Hook
+    participant C as cortex CLI
+
+    A->>G: git commit -m "feat: ...\n\nCloses: TASK-xxx"
+    G->>H: trigger hook
+    H->>C: dispatch-trailers
+    C->>C: parse trailers
+    C->>C: move TASK-xxx → completed
+    C->>G: git add + git commit
+    Note over C,G: Follow-up commit with<br/>state change appended
+```
 
 ## Epic Lane Discipline
 
@@ -366,3 +441,4 @@ Read these **only when the specific topic arises**:
 | Use Wiki for knowledge capture after task completion | [references/wiki-workflow.md](./references/wiki-workflow.md) |
 | See a complete end-to-end workflow example | [references/example-workflow.md](./references/example-workflow.md) |
 | Understand the milestone protocol in full detail | [references/milestone-protocol.md](./references/milestone-protocol.md) |
+| See complete state machine rules, valid transitions, and error guidance | [references/state-machines.md](./references/state-machines.md) |
