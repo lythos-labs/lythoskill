@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/9 16:08:13
+> 自动生成于 2026/5/9 16:31:49
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 178 | 进行中: 0, 待验收: 0, 已完成: 148 |
+| Tasks | 179 | 进行中: 0, 待验收: 0, 已完成: 149 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 58 | 已接受: 48 |
 
@@ -73,7 +73,7 @@ _无_
 
 _无_
 
-### 已完成 (148)
+### 已完成 (149)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -223,6 +223,7 @@ _无_
 - ✅ ~~TASK-20260508222319717~~: T3 — Doc drift polish (root README dup heading + ad-hoc inaccuracies + ref-link orphans)
 - ✅ ~~TASK-20260509101438298~~: Align arena doc surface to working onboarding paths — replace broken `--skills` bare-name examples
 - ✅ ~~TASK-20260509155623694~~: Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs and avoid sync/link name collision
+- ✅ ~~TASK-20260509163129782~~: Migrate prune/reconcile from deck to cold-pool with FSM reference counting
 
 ### 悬置 (0)
 
