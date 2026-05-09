@@ -2,15 +2,15 @@
 Arena operations map directly to card game deck-building test play:
 | Card game operation | Arena equivalent | Mode |
 |---------------------|-----------------|------|
-| **Pick a card**: A or B? | `--skills "A,B"` | Mode 1 |
-| **Add a card**: Does C improve my deck? | `--decks "v1.toml,v1+C.toml"` | Mode 2 |
-| **Cut a card**: Is D dead weight? | `--decks "v1.toml,v1-D.toml"` | Mode 2 |
-| **Swap a card**: E instead of F? | `--decks "v1.toml,v1-E+F.toml"` | Mode 2 |
-| **Deck duel**: lythos vs superpowers? | `--decks "lythos.toml,superpowers.toml"` | Mode 2 |
+| **Pick a card**: A or B? | `run --config examples/arena/research-compare/arena.toml` | declarative |
+| **Add a card**: Does C improve my deck? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
+| **Cut a card**: Is D dead weight? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/minus-pdf.toml"` | deck-compare |
+| **Swap a card**: E instead of F? | `--decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/some-other.toml"` | deck-compare |
+| **Deck duel**: lythos vs superpowers? | `--decks "lythos.toml,superpowers.toml"` | deck-compare |
 ## Key Distinction
 - **Single-card comparison** (Mode 1): "Which card is better in isolation?"
   Controlled variable — same helper skills, same task, different test skill.
-- **Full-deck comparison** (Mode 2): "What is the marginal effect of adding/
+- **Full-deck comparison** (deck-compare): "What is the marginal effect of adding/
   removing/swapping a card in the context of this specific deck?"
   This is what experienced card game players actually optimize for.
 The same skill can have completely different marginal value in different

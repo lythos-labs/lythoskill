@@ -5,7 +5,6 @@ Usage:
   lythoskill-arena agent-run --task <path> --deck <path> [--player kimi] [--out <dir>] [--timeout <ms>]
   lythoskill-arena agent-run --brief "<prompt>" --deck <path> [--out <dir>] [--timeout <ms>]
   lythoskill-arena run --task <path> --players <A.toml,B.toml> --decks <A.toml,B.toml> --criteria <c1,c2,...> [--out <dir>]
-  lythoskill-arena scaffold --task "<description>" --skills <skill1,skill2,...>
   lythoskill-arena scaffold --task "<description>" --decks <deck1,deck2,...>
   lythoskill-arena viz <arena-dir>
 
@@ -16,13 +15,11 @@ Commands:
 
 Options:
   -t, --task <path|desc> Task description or path to TASK-arena.md
-  -s, --skills <list>    Comma-separated skill names (scaffold only)
       --decks <list>     Comma-separated deck paths
   -c, --criteria <list>  Evaluation criteria (default: syntax,context,logic,token)
       --players <list>   Comma-separated player.toml paths (CLI run only)
       --config <path>    Path to arena.toml (declarative mode, k8s-style)
       --dry-run          Print execution plan without running (with --config)
-      --control <skill>  Control skill for comparison (scaffold only)
       --out <dir>        Output directory (run: defaults to runs/arena-<id>)
   -d, --dir <dir>        Output directory (scaffold: defaults to tmp)
   -p, --project <dir>    Project directory (default: .)
@@ -40,6 +37,6 @@ Examples:
   lythoskill-arena run --task ./TASK-arena.md --players ./players/claude.toml --decks ./decks/run-01.toml,./decks/run-02.toml --criteria coverage,relevance
 
   # Legacy scaffolding
-  lythoskill-arena scaffold --task "Refactor auth module" --skills skill-a,skill-b
+  lythoskill-arena scaffold --task "Refactor auth module" --decks ./decks/a.toml,./decks/b.toml
   lythoskill-arena viz runs/arena-20260504
 

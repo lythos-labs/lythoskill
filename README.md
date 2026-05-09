@@ -484,9 +484,9 @@ The curl one-liners above are the entry point. Arena turns that pattern into a *
 
 | Question | How to test |
 |---|---|
-| A or B? | `--skills "A,B"` — single-skill comparison |
-| Does C improve my deck? | `--decks "v1.toml,v1+C.toml"` — full deck comparison |
-| Is D dead weight? | `--decks "v1.toml,v1-D.toml"` — full deck comparison |
+| A or B? | `run --config examples/arena/research-compare/arena.toml` — pre-made declarative config |
+| Does C improve my deck? | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/plus-research.toml"` — real comparison files |
+| Is D dead weight? | `run --decks "./examples/decks/arena-add-remove/base.toml,./examples/decks/arena-add-remove/minus-pdf.toml"` — real comparison files |
 
 **Multi-dimensional scoring**: The judge outputs scores across quality, token efficiency, and maintainability. No single "winner" — you choose based on what you value.
 
