@@ -17,7 +17,7 @@ export class CatalogDb extends SqliteDb {
       )
     `)
 
-    // skills — indexed skill metadata
+    // skills — indexed skill metadata with FSM tracking
     this.exec(`
       CREATE TABLE IF NOT EXISTS skills (
         path TEXT PRIMARY KEY,
@@ -38,12 +38,17 @@ export class CatalogDb extends SqliteDb {
         user_invocable INTEGER,
         tags TEXT,
         deck_dependencies TEXT,
-        deck_skill_type TEXT
+        deck_skill_type TEXT,
+        content_hash TEXT,
+        status TEXT NOT NULL DEFAULT 'parsed',
+        indexed_at TEXT,
+        last_parsed_at TEXT,
+        parse_error TEXT
       )
     `)
 
     // Schema migrations
-    this.migrateSchema(1, [
+    this.migrateSchema(2, [
       {
         version: 1,
         sql: `
@@ -52,6 +57,16 @@ export class CatalogDb extends SqliteDb {
           CREATE INDEX IF NOT EXISTS idx_skills_deck_skill_type ON skills(deck_skill_type);
           CREATE INDEX IF NOT EXISTS idx_skills_type ON skills(type);
           CREATE INDEX IF NOT EXISTS idx_skills_name ON skills(name);
+        `,
+      },
+      {
+        version: 2,
+        sql: `
+          ALTER TABLE skills ADD COLUMN content_hash TEXT;
+          ALTER TABLE skills ADD COLUMN status TEXT NOT NULL DEFAULT 'parsed';
+          ALTER TABLE skills ADD COLUMN indexed_at TEXT;
+          ALTER TABLE skills ADD COLUMN last_parsed_at TEXT;
+          ALTER TABLE skills ADD COLUMN parse_error TEXT;
         `,
       },
     ])
@@ -78,13 +93,23 @@ export class CatalogDb extends SqliteDb {
       `INSERT OR REPLACE INTO skills
         (name, description, type, version, path, niches, managed_dirs, trigger_phrases,
          has_scripts, has_examples, body_preview, source, when_to_use, allowed_tools,
-         author, user_invocable, tags, deck_dependencies, deck_skill_type)
+         author, user_invocable, tags, deck_dependencies, deck_skill_type,
+         content_hash, status, indexed_at, last_parsed_at, parse_error)
        VALUES
         ($name, $description, $type, $version, $path, $niches, $managed_dirs, $trigger_phrases,
          $has_scripts, $has_examples, $body_preview, $source, $when_to_use, $allowed_tools,
-         $author, $user_invocable, $tags, $deck_dependencies, $deck_skill_type)`,
+         $author, $user_invocable, $tags, $deck_dependencies, $deck_skill_type,
+         $content_hash, $status, $indexed_at, $last_parsed_at, $parse_error)`,
       params,
     )
+  }
+
+  /** Get existing content_hash for a skill path. Returns null if not indexed. */
+  getContentHash(path: string): string | null {
+    return this.get<{ content_hash: string }>(
+      `SELECT content_hash FROM skills WHERE path = $path`,
+      { $path: path },
+    )?.content_hash ?? null
   }
 
   /** Write catalog metadata. */

@@ -12,9 +12,10 @@
 
 import { readdirSync, readFileSync, statSync, mkdirSync, writeFileSync, existsSync, appendFileSync, rmSync } from 'node:fs'
 import { join, basename } from 'node:path'
+import { createHash } from 'node:crypto'
 import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
-import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
+import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, findSkillDirs, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { execSync } from 'node:child_process'
 import { gitClone } from '@lythos/cold-pool'
@@ -37,6 +38,8 @@ interface SkillMeta {
   // lythoskill governance extensions
   deckDependencies: Record<string, any>;
   deckSkillType: string | null; // combo | transient | fork | null
+  // FSM tracking
+  contentHash: string;
 }
 
 
@@ -92,6 +95,7 @@ export function scanSkill(path: string): SkillMeta | null {
   const skillMdPath = join(path, 'SKILL.md');
   if (!statSync(skillMdPath, { throwIfNoEntry: false })) return null;
   const text = readFileSync(skillMdPath, 'utf-8');
+  const contentHash = createHash('sha256').update(text, 'utf-8').digest('hex');
   const { frontmatter: rawFm, body } = parseFrontmatter(text);
   const frontmatter = YAML.parse(rawFm._raw as string) || {};
 
@@ -126,25 +130,30 @@ export function scanSkill(path: string): SkillMeta | null {
     userInvocable: core.userInvocable,
     tags: core.tags,
     deckSkillType: core.deckSkillType,
+    contentHash,
   };
 }
 
-// ── SQLite Catalog Writer ────────────────────────────────────
+// ── SQLite Catalog Writer (FSM-aware) ─────────────────────────
 
-function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
+function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[], force?: boolean) {
   const db = new CatalogDb(dbPath)
-
-  const insert = db.query(`
-    INSERT OR REPLACE INTO skills
-      (name, description, type, version, path, niches, managed_dirs, trigger_phrases, has_scripts, has_examples, body_preview,
-       source, when_to_use, allowed_tools, author, user_invocable, tags, deck_dependencies, deck_skill_type)
-    VALUES
-      ($name, $description, $type, $version, $path, $niches, $managed_dirs, $trigger_phrases, $has_scripts, $has_examples, $body_preview,
-       $source, $when_to_use, $allowed_tools, $author, $user_invocable, $tags, $deck_dependencies, $deck_skill_type)
-  `)
+  const now = new Date().toISOString()
 
   for (const s of skills) {
-    insert.run({
+    // Hash check: skip if content unchanged (unless force)
+    if (!force) {
+      const currentHash = db.getContentHash(s.path)
+      if (currentHash === s.contentHash) {
+        // Still valid — update last_seen via catalog_meta
+        db.setMeta(`last_seen:${s.path}`, now)
+        continue
+      }
+    }
+
+    const isNew = db.getContentHash(s.path) === null
+
+    db.insertSkill({
       $name: s.name,
       $description: s.description,
       $type: s.type,
@@ -164,6 +173,11 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[]) {
       $tags: JSON.stringify(s.tags),
       $deck_dependencies: JSON.stringify(s.deckDependencies),
       $deck_skill_type: s.deckSkillType,
+      $content_hash: s.contentHash,
+      $status: 'parsed',
+      $indexed_at: isNew ? now : null,
+      $last_parsed_at: now,
+      $parse_error: null,
     })
   }
 
@@ -255,35 +269,6 @@ function restoreIndex(outputDir: string) {
     writeFileSync(dbPath, readFileSync(dbBak.path));
     console.log(`✅ Restored catalog.db from ${dbBak.name}`);
   }
-}
-
-// ── Skill Discovery ──────────────────────────────────────────
-
-function findSkillDirs(root: string): string[] {
-  const results: string[] = [];
-  const skip = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythoskill-curator', 'tmp', 'playground', 'dist', 'build']);
-
-  function walk(dir: string, depth: number) {
-    if (depth > 6) return; // safety limit
-    try {
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        if (!entry.isDirectory()) continue;
-        if (entry.name.startsWith('.')) continue;
-        if (skip.has(entry.name)) continue;
-
-        const full = join(dir, entry.name);
-        if (existsSync(join(full, 'SKILL.md'))) {
-          results.push(full);
-          // Don't recurse into skill dirs — skills don't nest
-          continue;
-        }
-        walk(full, depth + 1);
-      }
-    } catch {}
-  }
-
-  walk(root, 0);
-  return results;
 }
 
 export function runCurator(argv: string[]) {

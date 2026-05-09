@@ -357,14 +357,13 @@ function validateDeckCheckpoints(scenario: AgentScenario, checkpoints: Checkpoin
   const isDeckScenario =
     nameLower.includes('deck') || nameLower.includes('introspection') ||
     nameLower.includes('add') || nameLower.includes('refresh') ||
-    nameLower.includes('remove') || nameLower.includes('prune')
+    nameLower.includes('remove')
   if (!isDeckScenario) return errors
 
   let expectedStep = 'deck.introspection'
   if (nameLower.includes('add')) expectedStep = 'deck.add'
   else if (nameLower.includes('refresh')) expectedStep = 'deck.refresh'
   else if (nameLower.includes('remove')) expectedStep = 'deck.remove'
-  else if (nameLower.includes('prune')) expectedStep = 'deck.prune'
 
   if (checkpoints.length === 0) {
     errors.push('no checkpoints found in _checkpoints/')

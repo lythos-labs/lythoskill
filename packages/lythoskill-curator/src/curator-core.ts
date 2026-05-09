@@ -59,6 +59,8 @@ export function scanColdPool(poolPath: string): SkillItem[] {
   }))
 }
 
+// ── Skill directory finder (unified with cold-pool) ──────────────────────
+
 // ── Frontmatter parser ─────────────────────────────────────────────────────
 
 export function parseFrontmatter(text: string): { frontmatter: Record<string, unknown>; body: string } {
@@ -99,34 +101,20 @@ export function extractQuotedPhrases(text: string): string[] {
 
 // ── Skill directory finder ──────────────────────────────────────────────────
 
-import { readdirSync, existsSync } from 'node:fs'
 import { join, basename } from 'node:path'
+import { existsSync } from 'node:fs'
+import { ColdPool } from '@lythos/cold-pool'
 
-const SKIP_DIRS = new Set(['node_modules', '.git', '.claude', '.cortex', '.lythoskill-curator', 'tmp', 'playground', 'dist', 'build'])
-
+/**
+ * Find all skill directories by scanning for SKILL.md.
+ * Unified with @lythos/cold-pool's findSkillDirectories().
+ * Replaces two separate implementations that were diverging.
+ */
 export function findSkillDirs(root: string): string[] {
-  const results: string[] = []
-
-  function walk(dir: string, depth: number) {
-    if (depth > 6) return
-    try {
-      for (const entry of readdirSync(dir, { withFileTypes: true })) {
-        if (!entry.isDirectory()) continue
-        if (entry.name.startsWith('.')) continue
-        if (SKIP_DIRS.has(entry.name)) continue
-
-        const full = join(dir, entry.name)
-        if (existsSync(join(full, 'SKILL.md'))) {
-          results.push(full)
-          continue
-        }
-        walk(full, depth + 1)
-      }
-    } catch {}
-  }
-
-  walk(root, 0)
-  return results
+  const pool = new ColdPool(root)
+  const dirs = pool.findSkillDirectories()
+  pool.metadata.close()
+  return dirs
 }
 
 // ── Plan: skill directory listing ──────────────────────────────────────────
