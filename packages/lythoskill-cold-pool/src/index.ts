@@ -39,6 +39,9 @@ export { buildFetchPlan, executeFetchPlan } from './fetch-plan.js'
 
 export { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'
 
+export type { PruneCandidate, PrunePlan, PruneResult, PruneIO } from './prune-plan.js'
+export { buildPrunePlan, executePrunePlan } from './prune-plan.js'
+
 export type {
   DesiredSkill,
   ReconcileDesiredState,

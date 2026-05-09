@@ -61,10 +61,8 @@ prompt = "Search for latest info, then generate professional document with diagr
 | Pull latest versions of declared skills | `bunx @lythos/skill-deck@0.9.45 refresh` |
 | Refresh a single skill by alias | `bunx @lythos/skill-deck@0.9.45 refresh tdd` |
 | Remove a skill from deck and working set | `bunx @lythos/skill-deck@0.9.45 remove tdd` |
-| GC unreferenced repos from cold pool | `bunx @lythos/skill-deck@0.9.45 prune` |
 | Switch skill to symlink mode (live) | `bunx @lythos/skill-deck@0.9.45 to-symlink tdd` |
 | Switch skill to snapshot mode (pinned) | `bunx @lythos/skill-deck@0.9.45 to-snapshot tdd` |
-| Check cold pool for drift vs lock file | `bunx @lythos/skill-deck@0.9.45 reconcile` |
 | Use a custom deck file or working dir | `bunx @lythos/skill-deck@0.9.45 link --deck ./my-deck.toml --workdir /path/to/project` |
 
 ### Commands
@@ -76,10 +74,8 @@ prompt = "Search for latest info, then generate professional document with diagr
 | `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Git clone skill to cold pool and append to skill-deck.toml. |
 | `refresh` | `[<fq\|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
 | `remove` | `<fq\|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
-| `prune` | `[--yes] [--deck <path>]` | GC cold pool repos no longer referenced. Interactive confirm (skip with `--yes`). |
 | `to-symlink` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to symlink mode (live link, follows cold pool) |
 | `to-snapshot` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to snapshot mode (pinned cp of current HEAD) |
-| `reconcile` | `[--apply] [--deck <path>] [--workdir <dir>]` | Compare lock vs cold pool, report drift (missing/behind/extra). Plan-first. |
 
 ### Options
 

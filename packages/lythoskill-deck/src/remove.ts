@@ -104,5 +104,5 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     console.warn(`⚠️  Metadata cleanup skipped: ${e.message}`);
   }
 
-  console.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/skill-deck prune' to GC unreferenced repos.`);
+  console.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/cold-pool prune' to GC unreferenced repos.`);
 }

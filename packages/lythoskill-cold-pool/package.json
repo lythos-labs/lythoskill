@@ -24,6 +24,9 @@
   },
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "bin": {
+    "cold-pool": "src/cli.ts"
+  },
   "files": [
     "src",
     "README.md",

@@ -15,7 +15,7 @@
 - `catch {}` silent ignore（fs 边界错误，测了也是 mock，无业务意义）
 - 需要 >1GB 文件才能触发的分支（formatSize GB）
 - 依赖外部 network 的分支（git clone 真实失败、skills.sh backend）
-- 交互式 CLI 分支（prune confirm()）
+- 交互式 CLI 分支（prune/reconcile 已移到 @lythos/cold-pool CLI）
 - 仅为凑分支覆盖率而进行的微重构（降低可读性）
 
 ---
@@ -68,20 +68,9 @@ link.ts 是 deck 包最大文件（~540 行）， uncovered 行最多。主要�
 |----|------|-----------|--------|
 | 47–50 | legacy string-array `continue`（空 name） | 有意义但 trivial | ⬜ 低优先级 |
 
-## prune.ts — 80.43% lines
+## prune.ts / reconcile.ts — removed
 
-| 行 | 代码 | 未覆盖原因 | 是否追 |
-|----|------|-----------|--------|
-| 25–27 | `formatSize` GB 分支 | 需 >1GB 文件 | ❌ 不追 |
-| 74 | `calculateDirSize` catch | `catch {}` | ❌ 不追 |
-| 81–87 | `scanColdPoolRepos` catch | `catch {}` | ❌ 不追 |
-| 98–100 | empty cold pool | **已覆盖** (C17) | ✅ |
-| 118–122 | all-referenced no-op | **已覆盖** (C16) | ✅ |
-| 129–130 | failed > 0 exit(1) | 需构造删除失败（权限不足） | ❌ 不追 |
-| 167 | formatSize MB 分支 | 正常路径已覆盖 | ✅ |
-| 172–173 | 删除失败 catch | `catch {}` | ❌ 不追 |
-| 185–186 | formatSize 边界 | 正常路径已覆盖 | ✅ |
-
+prune 和 reconcile 命令已从 deck CLI 移除，迁移到 `@lythos/cold-pool` CLI。见 ADR-20260509144134332 FSM + ADR-202605091556237xx。
 ## refresh.ts — 88.97% lines
 
 | 行 | 代码 | 未覆盖原因 | 是否追 |

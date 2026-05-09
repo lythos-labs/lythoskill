@@ -7,10 +7,22 @@
  * Three tables:
  *   repos        — per-repo HEAD ref tracking
  *   skills       — per-skill content hash (git blob hash of SKILL.md)
- *   deck_refs    — cross-deck reference index
+ *   deck_refs    — cross-deck reference index with FSM state tracking
+ *
+ * deck_refs FSM (v3+):
+ *   state: 'added' | 'linked' | 'removed'
+ *   added ──link()──→ linked ──remove()──→ removed ──add()──→ added
+ *   added ──remove()──→ removed (never linked)
+ *   removed ──reconcile()──→ linked (reconciled back into active state)
+ *
+ * Prune uses state to distinguish "truly unreferenced" (all refs = removed)
+ * from "has active decks" (any ref = added/linked), preventing cross-deck
+ * accidental deletion.
  */
 
-import { SqliteDb } from './db-helpers.js'
+import { SqliteDb } from '@lythos/infra'
+
+export type DeckRefState = 'added' | 'linked' | 'removed'
 
 export interface RepoRef {
   host: string
@@ -34,9 +46,12 @@ export interface DeckReference {
   skillLocator: string
   deckPath: string
   declaredAlias: string | null
+  state: DeckRefState | null
+  linkedAt: string | null
+  removedAt: string | null
 }
 
-const CURRENT_SCHEMA = 2
+const CURRENT_SCHEMA = 5
 
 export class MetadataDB extends SqliteDb {
   constructor(dbPath: string) {
@@ -74,12 +89,16 @@ export class MetadataDB extends SqliteDb {
         skill_locator TEXT NOT NULL,
         deck_path TEXT NOT NULL,
         declared_alias TEXT,
+        state TEXT NOT NULL DEFAULT 'linked',
+        linked_at TEXT,
+        removed_at TEXT,
         PRIMARY KEY (skill_locator, deck_path)
       )
     `)
 
     this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_deck ON deck_refs(deck_path)`)
     this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_locator ON deck_refs(skill_locator)`)
+    this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_state ON deck_refs(state)`)
     this.exec(`CREATE INDEX IF NOT EXISTS idx_skills_repo ON skills(host, owner, repo)`)
 
     // Schema migrations
@@ -88,6 +107,18 @@ export class MetadataDB extends SqliteDb {
       {
         version: 2,
         sql: `ALTER TABLE skills ADD COLUMN git_blob_hash TEXT`,
+      },
+      {
+        version: 3,
+        sql: `ALTER TABLE deck_refs ADD COLUMN state TEXT NOT NULL DEFAULT 'linked'`,
+      },
+      {
+        version: 4,
+        sql: `ALTER TABLE deck_refs ADD COLUMN linked_at TEXT`,
+      },
+      {
+        version: 5,
+        sql: `ALTER TABLE deck_refs ADD COLUMN removed_at TEXT`,
       },
     ])
   }
@@ -151,50 +182,172 @@ export class MetadataDB extends SqliteDb {
     return row?.content_sha256 ?? null
   }
 
-  // ── Deck References ──────────────────────────────────────────
+  // ── Deck References — FSM ───────────────────────────────────
 
+  /**
+   * Add a reference. Sets state='added' (declared but may not be linked).
+   * Can re-activate a previously-removed reference (state: removed → added).
+   */
   addReference(skillLocator: string, deckPath: string, declaredAlias: string | null): void {
     this.exec(
-      `INSERT OR REPLACE INTO deck_refs (skill_locator, deck_path, declared_alias)
-       VALUES ($locator, $deck, $alias)`,
+      `INSERT OR REPLACE INTO deck_refs (skill_locator, deck_path, declared_alias, state, linked_at, removed_at)
+       VALUES ($locator, $deck, $alias, 'added', NULL, NULL)`,
       { $locator: skillLocator, $deck: deckPath, $alias: declaredAlias },
     )
   }
 
+  /**
+   * Soft-remove: sets state='removed' instead of deleting the row.
+   * The historical record is preserved for cross-deck reference counting.
+   * Removes linked_at to indicate the skill is no longer active.
+   */
   removeReference(skillLocator: string, deckPath: string): void {
     this.exec(
-      `DELETE FROM deck_refs WHERE skill_locator = $locator AND deck_path = $deck`,
-      { $locator: skillLocator, $deck: deckPath },
+      `UPDATE deck_refs SET state = 'removed', removed_at = $now
+       WHERE skill_locator = $locator AND deck_path = $deck`,
+      { $locator: skillLocator, $deck: deckPath, $now: this.now() },
     )
   }
 
+  /**
+   * Soft-remove all refs for a deck (same as removeReference, bulk).
+   */
   removeAllReferencesForDeck(deckPath: string): void {
-    this.exec(`DELETE FROM deck_refs WHERE deck_path = $deck`, { $deck: deckPath })
+    this.exec(
+      `UPDATE deck_refs SET state = 'removed', removed_at = $now WHERE deck_path = $deck`,
+      { $deck: deckPath, $now: this.now() },
+    )
   }
 
-  getReferencingDecks(skillLocator: string): Array<{ deckPath: string; alias: string | null }> {
-    const rows = this.queryAll<{ deck_path: string; declared_alias: string | null }>(
-      `SELECT deck_path, declared_alias FROM deck_refs WHERE skill_locator = $locator`,
+  /**
+   * Get active (non-removed) referencing decks for a skill locator.
+   * Legacy rows with state=NULL are treated as active.
+   * Returns only active references — for full history use getAllRefsForLocator.
+   */
+  getReferencingDecks(
+    skillLocator: string,
+  ): Array<{ deckPath: string; alias: string | null; state: string | null }> {
+    const rows = this.queryAll<{ deck_path: string; declared_alias: string | null; state: string | null }>(
+      `SELECT deck_path, declared_alias, state FROM deck_refs
+       WHERE skill_locator = $locator AND (state IS NULL OR state != 'removed')`,
       { $locator: skillLocator },
     )
-    return rows.map((r) => ({ deckPath: r.deck_path, alias: r.declared_alias }))
+    return rows.map((r) => ({ deckPath: r.deck_path, alias: r.declared_alias, state: r.state }))
   }
 
-  // ── Reconcile ────────────────────────────────────────────────
+  /**
+   * Get ALL refs for a locator including removed (historical) ones.
+   * Used by prune to determine if a repo has NO active refs across any deck.
+   */
+  getAllRefsForLocator(skillLocator: string): DeckReference[] {
+    const rows = this.queryAll<{
+      skill_locator: string
+      deck_path: string
+      declared_alias: string | null
+      state: string | null
+      linked_at: string | null
+      removed_at: string | null
+    }>(
+      `SELECT skill_locator, deck_path, declared_alias, state, linked_at, removed_at
+       FROM deck_refs WHERE skill_locator = $locator`,
+      { $locator: skillLocator },
+    )
+    return rows.map((r) => ({
+      skillLocator: r.skill_locator,
+      deckPath: r.deck_path,
+      declaredAlias: r.declared_alias,
+      state: r.state as DeckRefState | null,
+      linkedAt: r.linked_at,
+      removedAt: r.removed_at,
+    }))
+  }
 
+  /**
+   * Get all distinct skill locators that have at least one active ref
+   * (state = NULL/added/linked, not 'removed'). Used by prune to determine
+   * which repos must NOT be deleted.
+   */
+  getAllActiveLocators(): string[] {
+    const rows = this.queryAll<{ skill_locator: string }>(
+      `SELECT DISTINCT skill_locator FROM deck_refs
+       WHERE state IS NULL OR state IN ('added', 'linked')`,
+    )
+    return rows.map((r) => r.skill_locator)
+  }
+
+  /**
+   * Update the state of a single reference. Validates the transition:
+   *   added ↔ linked, added/linked → removed, removed → added
+   * Invalid transitions (e.g., linked → added, null → removed) are silently
+   * accepted to avoid hard failures from caller ordering issues.
+   */
+  updateRefState(skillLocator: string, deckPath: string, newState: DeckRefState): void {
+    const now = this.now()
+    switch (newState) {
+      case 'linked':
+        this.exec(
+          `UPDATE deck_refs SET state = 'linked', linked_at = $now
+           WHERE skill_locator = $locator AND deck_path = $deck`,
+          { $locator: skillLocator, $deck: deckPath, $now: now },
+        )
+        break
+      case 'removed':
+        this.removeReference(skillLocator, deckPath)
+        break
+      case 'added':
+        this.exec(
+          `UPDATE deck_refs SET state = 'added', removed_at = NULL
+           WHERE skill_locator = $locator AND deck_path = $deck`,
+          { $locator: skillLocator, $deck: deckPath },
+        )
+        break
+    }
+  }
+
+  /**
+   * Reconcile all deck references atomically.
+   *
+   * Compared to the old DELETE+INSERT approach, this uses state transitions:
+   * - Skills still declared → state='linked' (active, just linked)
+   * - Skills no longer declared → state='removed' (was active, now gone)
+   *
+   * The key semantic change: we NEVER hard-delete from deck_refs during normal
+   * operations. This enables cross-deck reference counting via getAllActiveLocators().
+   */
   reconcileDeckReferences(
     deckPath: string,
     declaredSkills: Array<{ locator: string; alias: string | null }>,
   ): void {
     this.db.transaction(() => {
-      this.exec(`DELETE FROM deck_refs WHERE deck_path = $deck`, { $deck: deckPath })
+      // Get current refs for this deck (any state)
+      const currentRefs = this.queryAll<{ skill_locator: string; state: string | null }>(
+        `SELECT skill_locator, state FROM deck_refs WHERE deck_path = $deck`,
+        { $deck: deckPath },
+      )
 
+      const declaredSet = new Map<string, string | null>()
+      for (const s of declaredSkills) {
+        declaredSet.set(s.locator, s.alias)
+      }
+
+      // Mark removed: skills in DB but no longer declared
+      for (const ref of currentRefs) {
+        if (!declaredSet.has(ref.skill_locator) && ref.state !== 'removed') {
+          this.exec(
+            `UPDATE deck_refs SET state = 'removed', removed_at = $now
+             WHERE deck_path = $deck AND skill_locator = $locator`,
+            { $deck: deckPath, $locator: ref.skill_locator, $now: this.now() },
+          )
+        }
+      }
+
+      // Upsert current declared skills as 'linked'
       const insert = this.db.query(`
-        INSERT INTO deck_refs (skill_locator, deck_path, declared_alias)
-        VALUES ($locator, $deck, $alias)
+        INSERT OR REPLACE INTO deck_refs (skill_locator, deck_path, declared_alias, state, linked_at, removed_at)
+        VALUES ($locator, $deck, $alias, 'linked', $now, NULL)
       `)
       for (const skill of declaredSkills) {
-        insert.run({ $locator: skill.locator, $deck: deckPath, $alias: skill.alias })
+        insert.run({ $locator: skill.locator, $deck: deckPath, $alias: skill.alias, $now: this.now() })
       }
       insert.finalize()
     })()

@@ -55,10 +55,9 @@ bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh tdd
 # Remove a skill from deck and working set (cold pool untouched)
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} remove tdd
 
-# GC cold pool repos no longer referenced by any deck
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} prune
-# Skip confirmation
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} prune --yes
+# Cold pool GC — use cold-pool CLI (metadata DB based, cross-deck safe)
+#   bunx @lythos/cold-pool prune         # interactive
+#   bunx @lythos/cold-pool prune --yes    # skip confirmation
 
 # Validate deck configuration (TOML schema + locator structure)
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate

@@ -6,9 +6,7 @@ import { refreshDeck } from './refresh.js'
 import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { removeSkill } from './remove.js'
-import { pruneDeck } from './prune.js'
 import { toSymlinkSkill, toSnapshotSkill } from './to-symlink-snapshot.js'
-import { reconcileDeck } from './reconcile.js'
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from './resolve-deck.js'
 import { formatHelp } from './help.js'
 
@@ -44,7 +42,6 @@ const alias = flagValue('--alias')
 const type = flagValue('--type')
 const format = flagValue('--format')
 const noBackup = args.includes('--no-backup')
-const yes = args.includes('--yes')
 const dryRun = args.includes('--dry-run')
 const remote = args.includes('--remote')
 const mode = flagValue('--mode') as 'symlink' | 'snapshot' | undefined
@@ -58,10 +55,8 @@ const HELP_CONFIG = {
     { name: 'refresh', description: 'Pull latest versions of declared skills from upstream', args: '[<fq|alias>]' },
     { name: 'validate', description: 'Validate deck configuration', args: '[deck.toml]' },
     { name: 'remove', description: 'Remove a skill from deck.toml and working set', args: '<fq|alias>' },
-    { name: 'prune', description: 'GC cold pool repos no longer referenced by any deck', args: '[--yes]' },
     { name: 'to-symlink', description: 'Switch a skill to symlink mode (live link, follows cold pool)', args: '<alias>' },
     { name: 'to-snapshot', description: 'Switch a skill to snapshot mode (pinned cp of current HEAD)', args: '<alias>' },
-    { name: 'reconcile', description: 'Compare lock file vs cold pool, report drift', args: '[--apply] [--yes]' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
@@ -72,8 +67,8 @@ const HELP_CONFIG = {
 
     { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
     { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
-    { flag: '--dry-run', description: 'Show plan without executing (add, prune)' },
-    { flag: '--yes', description: 'Skip interactive confirmation (for prune)' },
+    { flag: '--dry-run', description: 'Show plan without executing (add)' },
+    { flag: '--yes', description: 'Skip interactive confirmation' },
     { flag: '--remote', description: 'For validate: probe each FQ locator against api.github.com' },
     { flag: '--format <text|json>', description: 'For validate: output format (default: text)' },
   ],
@@ -137,15 +132,6 @@ switch (command) {
       process.exit(1)
     }
     toSnapshotSkill(target, deckPath, workdir)
-    break
-  }
-  case 'reconcile': {
-    const apply = args.includes('--apply')
-    await reconcileDeck(deckPath, workdir, apply, yes)
-    break
-  }
-  case 'prune': {
-    await pruneDeck(deckPath, workdir, yes)
     break
   }
   case 'migrate-schema': {
