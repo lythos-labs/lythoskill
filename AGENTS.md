@@ -338,6 +338,17 @@ Agent BDD tests (`*/*/test/runner.ts`) use LLM calls and are NOT run on pre-comm
 - After refactoring core packages (deck, cortex, arena, curator)
 - When a BDD scenario keeps failing and being patched ad-hoc — this is a **smoke signal** that the test expectation is stale, not the code. Fix the scenario, don't patch the runner.
 
+**CI Safety Rule**: if you touched any of these, you MUST run the cortex BDD before pushing:
+- `generate-index.ts` — INDEX.md generation
+- `id-guard.ts` — findDocById / ID matching
+- `commands/move.ts` — status directory transitions
+- `lib/trailer.ts` — commit trailer parsing
+
+```
+bun packages/lythoskill-project-cortex/test/runner.ts
+```
+These functions have different behavior in CI (CWD, file paths, synthetic BDD IDs) than in local dev. Local `bun test` passing does NOT guarantee CI passes for these files.
+
 If you find yourself fixing the same BDD test for the 3rd time, STOP. The issue is the test design, not the code. Rewrite the `.agent.md` scenario instead.
 
 ### QA Security Sweep (module audit)
