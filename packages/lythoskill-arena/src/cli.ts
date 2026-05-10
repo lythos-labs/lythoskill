@@ -54,11 +54,9 @@ Options:
       --deck <path>      Deck path (single only)
       --brief "<text>"   Inline task description (single only, alternative to --task)
       --player <name>    Agent player (single only, default: kimi)
-  -c, --criteria <list>  Evaluation criteria (scaffold only, default: syntax,context,logic,token)
       --config <path>    Path to arena.toml (vs only)
       --dry-run          Print execution plan without running (vs --config only)
       --out <dir>        Output directory
-  -d, --dir <dir>        Parent dir (scaffold: defaults to tmp)
   -p, --project <dir>    Project root (default: .)
       --timeout <ms>     Subagent timeout (single only)
 
@@ -338,8 +336,6 @@ function parseArgs(argv: string[]) {
 
   const options: Record<string, string | undefined> = {
     task: undefined,
-    decks: undefined,
-    criteria: 'syntax,context,logic,token',
     dir: 'tmp',
     project: '.',
     config: undefined,
@@ -352,11 +348,6 @@ function parseArgs(argv: string[]) {
     const arg = argv[i]
     if (arg === '--task' || arg === '-t') {
       options.task = argv[++i]
-    } else if (arg === '--decks') {
-      options.decks = argv[++i]
-    } else if (arg === '--criteria' || arg === '-c') {
-      options.criteria = argv[++i]
-      options.control = argv[++i]
     } else if (arg === '--dir' || arg === '-d') {
       options.dir = argv[++i]
     } else if (arg === '--project' || arg === '-p') {
