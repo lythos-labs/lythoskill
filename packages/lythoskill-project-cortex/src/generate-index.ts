@@ -30,8 +30,8 @@ interface AdrInfo {
   file: string;
 }
 
-// 时间戳 ID 正则: PREFIX- followed by 17 digits
-const TS_PATTERN = /\d{17}/;
+// 时间戳 ID 正则: PREFIX-17digits, must appear at filename start or after directory separator
+const TS_PATTERN = /(?:^|\/)(TASK|EPIC|ADR|WIKI)-\d{17}/;
 
 // 解析 Markdown 文件提取标题
 function extractTitle(content: string): string {
@@ -248,8 +248,8 @@ ${adrs.map(a => {
 *此文件由 generate-index.ts 自动生成*
 `;
 
-  writeFileSync('INDEX.md', content);
-  console.log('✅ Generated INDEX.md');
+  writeFileSync(join(config.tasksDir, '..', 'INDEX.md'), content);
+  console.log(`✅ Generated ${join(config.tasksDir, '..', 'INDEX.md')}`);
 }
 
 // 生成 Wiki 索引

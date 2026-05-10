@@ -2,6 +2,7 @@ import { existsSync, readFileSync, renameSync, writeFileSync, readdirSync } from
 import { join, basename } from 'node:path';
 import type { WorkflowConfig } from '../types.js';
 import { ensureDir } from '../lib/fs.js';
+import { findDocById } from '../id-guard.js';
 import { generateIndex, generateWikiIndex } from '../generate-index.js';
 
 // ---------------------------------------------------------------------------
@@ -110,11 +111,10 @@ function findDocFile(
     const dir = join(baseDir, subdirName);
     if (!existsSync(dir)) continue;
 
-    const entries = readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory() && entry.name.endsWith('.md') && entry.name.includes(searchId)) {
-        return { path: join(dir, entry.name), status };
-      }
+    // Use findDocById for exact prefix matching (CWE-1104: substring collision)
+    const found = findDocById(dir, searchId)
+    if (found) {
+      return { path: found, status }
     }
   }
   return null;
