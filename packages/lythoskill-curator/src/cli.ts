@@ -17,9 +17,8 @@ import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, findSkillDirs, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
-import { execFileSync } from 'node:child_process'
 import { gitClone } from '@lythos/cold-pool'
-import { validateInColdPool, isReadOnlyQuery, safeGit } from './guard.js'
+import { validateInColdPool, isReadOnlyQuery, safeGit, safeRmSync } from './guard.js'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -695,7 +694,7 @@ async function runRefreshExecute(argv: string[]) {
   // Check behind counts again (may have changed)
   for (const item of plan.items) {
     try {
-      const count = execSync(`git -C "${item.path}" rev-list HEAD...@{upstream} --count 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim()
+      const count = safeGit(["-C", item.path, "rev-list", "HEAD...@{upstream}", "--count"], { timeout: 5000 })
       item.behind = count ? parseInt(count) : 0
     } catch {
       item.behind = -1
@@ -865,7 +864,7 @@ export function runAdd(argv: string[]) {
     // Clean up empty directory left by failed clone
     try {
       if (existsSync(plan.repoPath) && readdirSync(plan.repoPath).length === 0) {
-        rmSync(plan.repoPath, { recursive: true, force: true })
+        safeRmSync(plan.repoPath, poolPath)
       }
     } catch {}
     console.error(`❌ Failed to clone: ${e.message}`)
