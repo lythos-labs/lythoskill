@@ -1,6 +1,6 @@
 ---
 name: lythoskill-creator
-version: 0.9.47
+version: 0.9.48
 type: standard
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
@@ -34,7 +34,7 @@ A lythoskill project separates concerns into three layers:
 Scaffold a new lythoskill monorepo.
 
 ```bash
-bunx @lythos/skill-creator@0.9.47 init <project-name>
+bunx @lythos/skill-creator@0.9.48 init <project-name>
 ```
 
 Creates a monorepo with a starter package and an example skill.
@@ -44,7 +44,7 @@ Creates a monorepo with a starter package and an example skill.
 Add a new skill to an existing lythoskill monorepo.
 
 ```bash
-bunx @lythos/skill-creator@0.9.47 add-skill <skill-name>
+bunx @lythos/skill-creator@0.9.48 add-skill <skill-name>
 ```
 
 Creates starter package + skill layer under `packages/<skill-name>/`. Requires `package.json` in the current directory (monorepo root). Skips existing files.
@@ -54,13 +54,13 @@ Creates starter package + skill layer under `packages/<skill-name>/`. Requires `
 Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter, and enforces the unified version.
 
 ```bash
-bunx @lythos/skill-creator@0.9.47 build <skill-name>
+bunx @lythos/skill-creator@0.9.48 build <skill-name>
 ```
 
 Build all skills at once (used by pre-commit):
 
 ```bash
-bunx @lythos/skill-creator@0.9.47 build --all
+bunx @lythos/skill-creator@0.9.48 build --all
 ```
 
 ### align
@@ -69,10 +69,10 @@ Audit an existing project against current lythoskill conventions. Reports drift 
 
 ```bash
 # Audit only — reports what would change
-bunx @lythos/skill-creator@0.9.47 align
+bunx @lythos/skill-creator@0.9.48 align
 
 # Auto-fix drift where possible
-bunx @lythos/skill-creator@0.9.47 align --fix
+bunx @lythos/skill-creator@0.9.48 align --fix
 ```
 
 Checks for: outdated `package.json` scripts, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
@@ -83,15 +83,15 @@ Lock-step version bump for the entire monorepo. Updates root `package.json` + ev
 
 ```bash
 # Semver targets
-bunx @lythos/skill-creator@0.9.47 bump patch
-bunx @lythos/skill-creator@0.9.47 bump minor
-bunx @lythos/skill-creator@0.9.47 bump major
+bunx @lythos/skill-creator@0.9.48 bump patch
+bunx @lythos/skill-creator@0.9.48 bump minor
+bunx @lythos/skill-creator@0.9.48 bump major
 
 # Explicit version (e.g. for major milestones)
-bunx @lythos/skill-creator@0.9.47 bump 1.0.0
+bunx @lythos/skill-creator@0.9.48 bump 1.0.0
 
 # Preview the bump without writing files
-bunx @lythos/skill-creator@0.9.47 bump 1.0.0 --dry-run
+bunx @lythos/skill-creator@0.9.48 bump 1.0.0 --dry-run
 ```
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.
