@@ -17,8 +17,9 @@ import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, findSkillDirs, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
 import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { gitClone } from '@lythos/cold-pool'
+import { validateInColdPool, isReadOnlyQuery, safeGit } from './guard.js'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -505,6 +506,11 @@ function runQuery(argv: string[]) {
       }
     } catch {}
 
+    if (!isReadOnlyQuery(sql)) {
+      console.error('❌ Query rejected: only SELECT and PRAGMA statements are allowed.')
+      console.error('   Use curator scan/audit for write operations.')
+      process.exit(1)
+    }
     const rows = db.query(sql).all() as Record<string, any>[]
     console.log(formatMarkdownTable(rows))
   } catch (e: any) {
@@ -656,8 +662,8 @@ async function runRefreshPlan(argv: string[]) {
   console.log(`\n📡 Checking upstreams...`)
   for (const item of plan.items) {
     try {
-      execSync(`git -C "${item.path}" remote update 2>/dev/null`, { timeout: 15000 })
-      const count = execSync(`git -C "${item.path}" rev-list HEAD...@{upstream} --count 2>/dev/null`, { encoding: 'utf-8', timeout: 5000 }).trim()
+      safeGit(["-C", item.path, "remote", "update"], { timeout: 15000 })
+      const count = safeGit(["-C", item.path, "rev-list", "HEAD...@{upstream}", "--count"], { timeout: 5000 })
       item.behind = count ? parseInt(count) : 0
     } catch {
       item.behind = -1 // unreachable
@@ -712,7 +718,7 @@ async function runRefreshExecute(argv: string[]) {
   for (const item of pending) {
     try {
       console.log(`🔄 Pulling: ${item.locator}...`)
-      execSync(`git -C "${item.path}" pull --ff-only`, { stdio: 'inherit', timeout: 30000 })
+      safeGit(["-C", item.path, "pull", "--ff-only"], { stdio: 'inherit', timeout: 30000 })
       item.status = 'done'
       console.log(`   ✅ Done\n`)
     } catch {
@@ -808,8 +814,10 @@ export function runAdd(argv: string[]) {
 
   if (repoDirExists) {
     // Directory exists but no .git — partial clone residue. Clean up.
-    console.log(`🧹 Cleaning up partial clone: ${plan.repoPath}`)
-    rmSync(plan.repoPath, { recursive: true, force: true })
+    // Validate path stays within cold pool before rmSync (CWE-22)
+    const safePath = validateInColdPool(plan.repoPath, poolPath)
+    console.log(`🧹 Cleaning up partial clone: ${safePath}`)
+    rmSync(safePath, { recursive: true, force: true })
   }
 
   // ── Checkpoint 2: Clone repo root (not skill-specific URL) ────────
@@ -839,7 +847,7 @@ export function runAdd(argv: string[]) {
       console.error(`❌ Cloned ${plan.repoRoot} but skill path not found:`)
       console.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
       console.error(`\n💡 Check the actual repo structure:`)
-      try { console.error(execSync(`ls "${plan.repoPath}"`, { encoding: 'utf-8', timeout: 5000 }).trim()) } catch {}
+      try { console.error(safeGit(["-C", plan.repoPath, "ls-files"], { timeout: 5000 })) } catch {}
       process.exit(1)
     }
 
