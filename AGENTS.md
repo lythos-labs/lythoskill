@@ -329,7 +329,16 @@ For ADR acceptance: `ADR: ADR-xxx accept`
 
 ### Pre-commit gate
 
-Husky runs in order: ADR check → skill rebuild → cortex governance → **test gate**. The test gate runs tests for changed packages and blocks if any fail. Always run `bun test` on the package you're touching before committing.
+Husky runs in order: ADR check → path safety → skill rebuild → cortex governance → **test gate**. Always run `bun test` on the package you're touching before committing.
+
+### BDD tests — expensive, don't whack-a-mole
+
+Agent BDD tests (`*/*/test/runner.ts`) use LLM calls and are NOT run on pre-commit. Run them intentionally:
+- Before major releases or architecture changes
+- After refactoring core packages (deck, cortex, arena, curator)
+- When a BDD scenario keeps failing and being patched ad-hoc — this is a **smoke signal** that the test expectation is stale, not the code. Fix the scenario, don't patch the runner.
+
+If you find yourself fixing the same BDD test for the 3rd time, STOP. The issue is the test design, not the code. Rewrite the `.agent.md` scenario instead.
 
 ### QA Security Sweep (module audit)
 
