@@ -13,7 +13,7 @@ import { findDeckToml, expandHome } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
 import { ColdPool } from "@lythos/cold-pool";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { validateAlias } from "./path-guard.js";
 
 export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
   const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
@@ -53,6 +53,13 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   const section = match.type;
   const alias = match.alias;
+
+  // Validate alias before using as path component (CWE-22)
+  try { validateAlias(alias) } catch (e: any) {
+    console.error(`❌ Invalid alias in deck.toml: ${e.message}`)
+    console.error(`   Fix skill-deck.toml before re-running.`)
+    process.exit(1)
+  }
 
   if (deck[section]?.skills) {
     if (Array.isArray(deck[section].skills)) {
@@ -106,3 +113,4 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   console.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/cold-pool prune' to GC unreferenced repos.`);
 }
+

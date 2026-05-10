@@ -44,6 +44,14 @@ export function resolveDeckPathSync(cliArg?: string): ResolvedDeck {
 export async function fetchDeckUrl(url: string): Promise<string> {
   const normalized = normalizeUrl(url)
   const dest = resolve(process.cwd(), 'skill-deck.toml')
+  if (existsSync(dest)) {
+    throw new Error(
+      `Refusing to overwrite existing ${dest}.\n` +
+      `  A skill-deck.toml already exists in this directory.\n` +
+      `  To use a remote deck, run from an empty directory or specify a different --deck path.\n` +
+      `  To keep your existing deck, use a local file: deck link --deck ./skill-deck.toml`
+    )
+  }
   console.log(`📥 Fetching deck: ${normalized}`)
   const res = await fetch(normalized, { signal: AbortSignal.timeout(30_000) })
   if (!res.ok) {

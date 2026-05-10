@@ -24,6 +24,7 @@ import {
 } from "./schema.js";
 import { parseDeck } from "./parse-deck.js";
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
+import { safeResolveInDir } from "./path-guard.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
 
@@ -203,7 +204,13 @@ for (const entry of parsedEntries) {
     // For localhost skills, create a placeholder so the user can fill it in
     if (entry.path.startsWith('localhost/')) {
       const skill = entry.path.slice('localhost/'.length)
-      const localPath = join(COLD_POOL, skill)
+      let localPath: string
+      try {
+        localPath = safeResolveInDir(COLD_POOL, skill)
+      } catch (e: any) {
+        errors.push(`Invalid localhost path "${entry.path}": ${e.message}`)
+        continue
+      }
       if (!existsSync(join(localPath, 'SKILL.md'))) {
         const now = new Date().toISOString().slice(0, 10)
         const placeholder = [
@@ -366,8 +373,8 @@ if (nonSymlinks.length > 0) {
     mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
 
     const tarArgs = [
-      "czf", bakPath,
-      ...nonSymlinks.map(e => relative(PROJECT_DIR, join(WORKING_SET, e))),
+      "czf", bakPath, "--",
+      ...nonSymlinks.map(e => "./" + relative(PROJECT_DIR, join(WORKING_SET, e))),
     ];
     try {
       execFileSync("tar", tarArgs, {

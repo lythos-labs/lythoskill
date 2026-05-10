@@ -11,6 +11,9 @@
   "scripts": {
     "prepare": "husky",
     "test": "bun --filter='*' run test",
+    "test:report": "bun scripts/test-report.ts",
+    "test:report:bdd": "bun scripts/test-report.ts --bdd",
+    "test:report:full": "bun scripts/test-report.ts --all",
     "test:bdd": "bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts",
     "test:all": "bun run test && bun run test:bdd"
   }

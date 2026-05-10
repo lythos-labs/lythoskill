@@ -16,6 +16,7 @@ import { ColdPool, parseLocator } from '@lythos/cold-pool'
 import { findSource } from './link.js'
 import { parse as parseToml } from '@iarna/toml'
 import type { SkillDeckLock } from './schema.js'
+import { validateAlias } from './path-guard.js'
 
 function readLock(projectDir: string): SkillDeckLock | null {
   const lockPath = join(projectDir, 'skill-deck.lock')
@@ -63,6 +64,11 @@ export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?
   const match = parsedEntries.find(e => e.alias === target || e.path === target)
   if (!match) {
     console.error(`❌ Skill not found in deck: ${target}`)
+    process.exit(1)
+  }
+
+  try { validateAlias(match.alias) } catch (e: any) {
+    console.error(`❌ Invalid alias in deck.toml: ${e.message}`)
     process.exit(1)
   }
 
@@ -119,6 +125,11 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
   const match = parsedEntries.find(e => e.alias === target || e.path === target)
   if (!match) {
     console.error(`❌ Skill not found in deck: ${target}`)
+    process.exit(1)
+  }
+
+  try { validateAlias(match.alias) } catch (e: any) {
+    console.error(`❌ Invalid alias in deck.toml: ${e.message}`)
     process.exit(1)
   }
 

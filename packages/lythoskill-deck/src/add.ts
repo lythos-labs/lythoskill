@@ -29,6 +29,7 @@ import {
   type Locator,
 } from '@lythos/cold-pool'
 import { findDeckToml, expandHome } from './link.js'
+import { validateAlias } from './path-guard.js'
 
 export function findSkillDir(repoPath: string, skill: string | null): string | null {
   if (skill) {
@@ -113,7 +114,13 @@ export async function addSkill(
   const fetchPlan = buildFetchPlan(pool, parsed)
   const fqPath = fqOf(parsed)
   const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo!
-  const alias = options.alias || skillName
+  const rawAlias = options.alias || skillName
+  try { validateAlias(rawAlias) } catch (e: any) {
+    console.error(`❌ Invalid alias: ${e.message}`)
+    console.error('   Aliases may only contain letters, numbers, hyphens, and underscores.')
+    process.exit(1)
+  }
+  const alias = rawAlias
   const skillType = (options.type || 'tool').toLowerCase()
 
   if (!['innate', 'tool', 'combo'].includes(skillType)) {

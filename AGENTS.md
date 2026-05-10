@@ -262,6 +262,13 @@ The QA deck lives at `playground/qa-audit-2026-05-10/skill-deck.toml` with 7 sec
 
 Key principle: findings → tasks → fixes → verify. Don't just find — act and track. Use `Closes: TASK-xxx` trailer when committing fixes.
 
+**When findings reveal a systemic pattern** (same bug class across files, e.g. path traversal), don't whack-a-mole each instance. Instead:
+1. Research best practices (web-search for OWASP/CWE guidance)
+2. Write a centralized guard module that becomes the single source of truth
+3. Apply the guard at all affected call sites
+4. The guard IS the documentation — future agents read it and learn the correct pattern
+5. Husky pre-commit catches new code that bypasses the guard
+
 ### Full Submit (收尾提交 / "submit" / "全提交")
 
 **Trigger words**: "submit", "全提交", "收尾", "提交吧", "push", "发版", "publish"

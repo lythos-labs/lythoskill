@@ -22,5 +22,8 @@ fi
 #    → delegates to packages/lythoskill-project-cortex/src/hooks/pre-commit.ts (T2+T3)
 bun packages/lythoskill-project-cortex/src/hooks/pre-commit.ts
 
-# 4. Test gate: run tests for changed packages, block if any fail ("测试必须 0 fail")
+# 4. Path safety: prevent path traversal via unsanitized aliases (CWE-22, ADR-202605102330)
+bun scripts/check-path-safety.ts || exit 1
+
+# 5. Test gate: run tests for changed packages, block if any fail ("测试必须 0 fail")
 bun scripts/pre-commit-test.ts || exit 1
