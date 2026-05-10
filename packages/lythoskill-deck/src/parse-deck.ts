@@ -19,7 +19,12 @@ export interface ParsedDeck {
 }
 
 export function parseDeck(raw: string): ParsedDeck {
-  const parsed = parseToml(raw) as any;
+  let parsed: any;
+  try {
+    parsed = parseToml(raw) as any;
+  } catch (e: any) {
+    return { entries: [], deprecated: false, errors: [`TOML parse error: ${e.message}`] };
+  }
   const entries: ParsedSkillEntry[] = [];
   const errors: string[] = [];
   let deprecated = false;

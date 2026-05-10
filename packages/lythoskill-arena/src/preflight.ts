@@ -6,6 +6,7 @@
  * IO is injected via function parameters (e.g., existsFn, readdirFn).
  */
 
+import { join } from 'node:path'
 import { ColdPool, parseLocator } from '@lythos/cold-pool'
 
 // ── Types ─────────────────────────────────────────────────────────────────
@@ -170,8 +171,8 @@ export function buildCopyPlan(
   for (const name of entries) {
     if (skipSet.has(name)) continue
     plan.push({
-      src: `${workdir}/${name}`,
-      dest: `${outDir}/${name}`,
+      src: join(workdir, name),
+      dest: join(outDir, name),
       name,
     })
   }
