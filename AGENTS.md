@@ -122,6 +122,23 @@ lythoskill/
 
 ---
 
+## Current Focus
+
+> **This section changes with each session.** Read `daily/YYYY-MM-DD.md` (latest) for full context.
+> The handoff file tells you: what was just done, what epics/tasks are active, what decisions are pending.
+
+**Active epic**: `EPIC-20260508222319639` — Doc + test infra sweep (T1-T6 ✅, T7-T9 ✅, all tasks completed 2026-05-10).
+
+**Recent decisions** (see `cortex/adr/` for full text):
+- Cold-pool is the sole holder of git side-effects (ADR-20260507021957847)
+- Curator stays local cold-pool only, no remote feed adapters (ADR-20260508230803515)
+- `deck sync` renamed to `deck link` + `to-symlink`/`to-snapshot` (ADR-20260509144134332)
+- DB data fingerprint for skill content tracking (ADR-20260509170343037, proposed)
+
+**When resuming work**: check `cortex/INDEX.md` for task status, then `daily/` for the latest session notes.
+
+---
+
 ## Architecture: Thin Skill Pattern (Three-Layer Separation)
 
 ```
@@ -228,6 +245,116 @@ documented interface, or do they bypass it?" TDD's red-green-refactor loop force
 These two skills complement each other: TDD keeps test structure aligned with architecture, Diagnose catches runtime failures without losing the thread.
 
 Full pattern documentation: [cortex/wiki/01-patterns/intent-plan-execute-fractal-architecture-pattern.md](./cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
+
+### QA Security Sweep (module audit workflow)
+
+When the user asks to audit/sweep/check a module, or when you want to assess code quality before committing large changes, follow this 5-phase loop:
+
+```
+Phase 1 — 安检 (detect):   arena single --deck qa-deck --brief "audit <module>" → findings.jsonl
+Phase 2 — 确认 (review):    read findings, filter false positives, confirm real issues
+Phase 3 — 登记 (register):  cortex task for each confirmed finding (P1 → fix now, P2 → backlog)
+Phase 4 — 修复 (fix):       fix P1 + easy P2 items, run tests to verify
+Phase 5 — 验证 (verify):    re-run tests (bun test) to confirm no regressions
+```
+
+The QA deck lives at `playground/qa-audit-2026-05-10/skill-deck.toml` with 7 security/audit skills (codeql, semgrep, security-advisor, differential-review, agentic-actions-auditor, code-maturity, entry-point-analyzer). Combo workflow instructions at `COMBO.md` in the same directory.
+
+Key principle: findings → tasks → fixes → verify. Don't just find — act and track. Use `Closes: TASK-xxx` trailer when committing fixes.
+
+### Full Submit (收尾提交 / "submit" / "全提交")
+
+**Trigger words**: "submit", "全提交", "收尾", "提交吧", "push", "发版", "publish"
+
+When the user says one of these, run the full pipeline:
+
+```
+1. README sync     — if CLI surface changed, update affected packages/*/README.md
+2. Test gate        — bun test for changed packages (pre-commit already enforces this)
+3. Commit           — descriptive message + Closes: TASK-xxx trailer if task exists
+4. Scribe daily     — write daily/YYYY-MM-DD.md (session handoff)
+5. Commit daily     — commit the daily file
+6. Push             — git push
+7. (if release)     — bunx @lythos/skill-creator bump → scripts/publish.sh
+```
+
+**Step checklist** (check each before proceeding to next):
+
+- [ ] `bun test` — all tests pass
+- [ ] `git diff --stat` — review what changed, ensure no stray files
+- [ ] `git diff --cached --name-only | grep README` — README updated if CLI changed
+- [ ] `git commit -m "..."` — with trailer if task exists
+- [ ] `bun packages/lythoskill-project-scribe/src/cli.ts daily` — write handoff
+- [ ] `git add daily/ && git commit -m "docs(daily): session closeout"` — commit daily
+- [ ] `git push`
+
+**Release add-on** (only when user says "发版" / "publish" / "release"):
+- [ ] `bunx @lythos/skill-creator bump` — lock-step version bump (never hand-edit)
+- [ ] `scripts/publish.sh` — npm publish all packages
+
+---
+
+## Recurring Workflows
+
+These are the patterns you'll use most often. Internalize these before reading the deep reference sections below.
+
+### Task lifecycle (cortex)
+
+```
+创建:  cortex task "title"           → TASK-xxx in 01-backlog
+开始:  mv to 02-in-progress          → 开始工作
+审查:  mv to 03-review               → 等待确认
+完成:  mv to 04-completed            → 归档
+```
+
+**Always use CLI**, never hand-create files: `bun packages/lythoskill-project-cortex/src/cli.ts task "title"`
+
+### Commit trailers (husky post-commit)
+
+When committing a fix for a task, write the trailer:
+```
+Closes: TASK-xxx
+```
+Husky post-commit hook auto-creates follow-up commits (task status update + index regeneration).
+
+For review: `Task: TASK-xxx review`
+For ADR acceptance: `ADR: ADR-xxx accept`
+
+### Pre-commit gate
+
+Husky runs in order: ADR check → skill rebuild → cortex governance → **test gate**. The test gate runs tests for changed packages and blocks if any fail. Always run `bun test` on the package you're touching before committing.
+
+### QA Security Sweep (module audit)
+
+```
+安检:   arena single --deck qa-deck --brief "audit <module>"
+确认:   读 findings, 过滤误报
+登记:   cortex task for 每个真实发现
+修复:   修 P1 + 容易的 P2
+验证:   bun test 确认无回归
+```
+
+QA deck: `examples/decks/qa-sweep.toml` (7 skills: codeql, semgrep, security-advisor, etc.) — combo workflow at `examples/decks/qa-sweep-COMBO.md`
+
+### Session handoff
+
+When ending a session or approaching context limit:
+1. Commit all changes with meaningful message
+2. Run `bun packages/lythoskill-project-scribe/src/cli.ts daily` to write `daily/YYYY-MM-DD.md`
+3. Commit the daily file
+4. Push
+
+The daily file top section = ground truth (overwrite, not append). Next agent reads it first after CLAUDE.md/AGENTS.md.
+
+Full checklist: see [Session Handoff Checklist](#session-handoff-checklist) below.
+
+### Before claiming "done"
+
+- [ ] Tests pass: `bun test packages/<name>/src/`
+- [ ] TypeScript compiles (Bun handles this at test time)
+- [ ] If CLI surface changed: update package README
+- [ ] If new package: add to `scripts/publish.sh` PACKAGES array
+- [ ] Commit with `Closes: TASK-xxx` trailer if task exists
 
 ---
 
@@ -588,44 +715,13 @@ Key principle: declarative package manager + governor. `deck add` clones into co
 
 ---
 
-## Project Governance (Cortex)
+## Project Governance (Cortex Reference)
 
-Project documentation lives in `cortex/`:
+> **Quick patterns → see [Recurring Workflows](#recurring-workflows) above.** This section is the detailed reference.
 
-```
-cortex/
-├── INDEX.md           <- Start here for self-described structure
-├── adr/
-│   ├── 01-proposed/   <- Pending decisions
-│   ├── 02-accepted/   <- Accepted decisions
-│   ├── 03-rejected/   <- Rejected decisions
-│   └── 04-superseded/ <- Superseded decisions
-├── epics/
-│   ├── 01-active/     <- Active epics
-│   ├── 02-done/       <- Completed epics
-│   ├── 03-suspended/  <- Suspended epics
-│   └── 04-archived/   <- Archived epics
-├── tasks/
-│   ├── 01-backlog/    <- Pending tasks
-│   ├── 02-in-progress/<- Active tasks
-│   ├── 03-review/     <- Pending acceptance
-│   ├── 04-completed/  <- Normal completion
-│   ├── 05-suspended/  <- Blocked (recoverable)
-│   ├── 06-terminated/ <- Cancelled (abnormal end)
-│   └── 07-archived/   <- Final archive
-└── wiki/
-    ├── 01-patterns/   <- Reusable solutions
-    ├── 02-faq/        <- Common questions
-    └── 03-lessons/    <- Retrospectives
-```
+Status directories: `01-backlog/` → `02-in-progress/` → `03-review/` → `04-completed/` (normal flow). Also `05-suspended/`, `06-terminated/`, `07-archived/`. Filenames: `TASK-yyyyMMddHHmmssSSS-<slug>.md`. Always use CLI, never hand-create files.
 
-Status directories use numeric prefixes for ordering (`01-`, `02-`, etc.). Document filenames use timestamp IDs: `ADR-yyyyMMddHHmmssSSS-<slug>.md`.
-
-All governance documents include a machine-parseable **Status History** table.
-
-**Always use CLI commands to create governance documents** — do not create ADR/Epic/Task files manually. The CLI handles template alignment and correct timestamp IDs.
-
-### Cortex Lifecycle Integration
+### Cortex Trailer Syntax
 
 Cortex governance is **commit-driven** via git trailers in commit messages. The `post-commit` hook parses trailers and auto-creates follow-up commits with state changes.
 

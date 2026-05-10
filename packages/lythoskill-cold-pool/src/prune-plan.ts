@@ -54,6 +54,7 @@ function calculateDirSize(dir: string): number {
   try {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, entry.name)
+      if (entry.isSymbolicLink()) continue
       if (entry.isDirectory()) {
         total += calculateDirSize(p)
       } else if (entry.isFile()) {

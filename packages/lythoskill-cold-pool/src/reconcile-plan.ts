@@ -35,7 +35,7 @@ export interface ReconcileEntry {
 export interface ReconcilePlan {
   /** Skills whose repo dir doesn't exist in the cold pool. */
   missing: ReconcileEntry[]
-  /** Skills whose repo exists but git HEAD doesn't match the metadata record. */
+  /** Skills whose repo was previously fetched (metadata record exists) but HEAD hasn't been verified against upstream. The async executor must git-fetch to determine if they're actually behind. */
   behind: ReconcileEntry[]
   /** Repos in the cold pool not referenced by any skill in the desired state. */
   extra: ReconcileEntry[]

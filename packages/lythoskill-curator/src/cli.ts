@@ -187,6 +187,15 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[], f
   meta.run({ $key: 'total_skills', $value: String(skills.length) })
   meta.run({ $key: 'pool_path', $value: poolPath })
 
+  // Prune stale entries — paths in DB that are no longer in the cold pool
+  const currentPaths = new Set(skills.map(s => s.path))
+  const dbPaths = db.all<{ path: string }>(`SELECT path FROM skills`)
+  for (const row of dbPaths) {
+    if (!currentPaths.has(row.path)) {
+      db.run(`DELETE FROM skills WHERE path = $path`, { $path: row.path })
+    }
+  }
+
   db.close()
 }
 
@@ -277,22 +286,37 @@ export function runCurator(argv: string[]) {
   const skillDirs = findSkillDirs(poolPath);
 
   const skills: SkillMeta[] = [];
-  for (const path of skillDirs) { try { const s = scanSkill(path); if (s) skills.push(s); } catch {} }
+  const skipped: string[] = [];
+  for (const path of skillDirs) {
+    try { const s = scanSkill(path); if (s) skills.push(s); else skipped.push(path); }
+    catch { skipped.push(path); }
+  }
 
   console.log(`🧠 Skill Curator — Indexed ${skills.length} skills`);
+  if (skipped.length > 0) {
+    console.log(`⚠️  Skipped ${skipped.length} skill(s) with unreadable or missing frontmatter:`);
+    for (const p of skipped.slice(0, 5)) console.log(`   ${p}`);
+    if (skipped.length > 5) console.log(`   ... and ${skipped.length - 5} more`);
+    console.log('   Run "curator audit" for diagnostics.');
+  }
 
   const byType: Record<string, SkillMeta[]> = {};
   const byManagedDir: Record<string, string[]> = {};
+  const byNiche: Record<string, string[]> = {};
   const byDeckSkillType: Record<string, SkillMeta[]> = {};
   for (const s of skills) {
     byType[s.type] = byType[s.type] || []; byType[s.type].push(s);
     s.managedDirs.forEach(d => { byManagedDir[d] = byManagedDir[d] || []; byManagedDir[d].push(s.name); });
+    s.niches.forEach(n => { byNiche[n] = byNiche[n] || []; byNiche[n].push(s.name); });
     if (s.deckSkillType) {
       byDeckSkillType[s.deckSkillType] = byDeckSkillType[s.deckSkillType] || [];
       byDeckSkillType[s.deckSkillType].push(s);
     }
   }
   console.log(`\n📊 Types: ${Object.entries(byType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+  if (Object.keys(byNiche).length > 0) {
+    console.log(`\n🏷️  Niches: ${Object.entries(byNiche).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+  }
   if (Object.keys(byDeckSkillType).length > 0) {
     console.log(`\n🔖 Deck skill types: ${Object.entries(byDeckSkillType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
   }
@@ -305,7 +329,7 @@ export function runCurator(argv: string[]) {
   backupIndex(outputDir);
 
   const outPath = join(outputDir, 'REGISTRY.json');
-  writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir, byDeckSkillType } }, null, 2));
+  writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir, byNiche, byDeckSkillType } }, null, 2));
   console.log(`\n💾 Registry: ${outPath}`);
 
   const dbPath = join(outputDir, 'catalog.db');

@@ -13,6 +13,15 @@ when_to_use: |
   project management, track requirements, delegate to subagent,
   task status, project index, what needs to be done, backlog,
   milestone, project governance, generate index, probe status.
+
+  ALSO trigger when:
+  - About to commit and need to write a trailer (Closes: TASK-xxx, Task: TASK-xxx review, ADR: ADR-xxx accept)
+  - Just finished a task and need to move it to review/completed
+  - Need to check active tasks/epics before starting new work
+  - See a TASK-xxx or EPIC-xxx reference and need context
+  - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
+  - Doing session handoff or writing daily notes
+  - husky post-commit trailer processing (Closes:/Task:/ADR: trailers auto-create follow-up commits)
 allowed-tools:
   - Bash(bunx @lythos/project-cortex@{{PACKAGE_VERSION}} *)
 ---

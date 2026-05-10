@@ -27,6 +27,11 @@
 | [visual-explainer.toml](./visual-explainer.toml) | mermaid, theme-factory | Mermaid diagrams + polished output |
 | [architecture-explainer.toml](./architecture-explainer.toml) | mermaid, frontend-design, theme-factory, brand-guidelines, docx, pdf | Project architecture docs (DeepWiki-like) |
 
+### QA & Audit
+| Deck | Skills | Use |
+|------|--------|-----|
+| [qa-sweep.toml](./qa-sweep.toml) | codeql, semgrep, security-advisor, differential-review, agentic-actions-auditor, code-maturity, entry-point-analyzer | 5-phase security sweep — see [COMBO.md](./qa-sweep-COMBO.md) |
+
 ### Project Governance
 | Deck | Skills | Use |
 |------|--------|-----|

@@ -20,9 +20,10 @@ export function buildFetchPlan(
   opts?: { ref?: string },
 ): FetchPlan {
   const targetDir = pool.resolveDir(locator)
+  const protocol = process.env.LYTHOS_GIT_PROTOCOL || 'https'
   const cloneUrl = locator.isLocalhost
     ? ''
-    : `https://${locator.host}/${locator.owner}/${locator.repo}.git`
+    : `${protocol}://${locator.host}/${locator.owner}/${locator.repo}.git`
 
   return {
     locator,

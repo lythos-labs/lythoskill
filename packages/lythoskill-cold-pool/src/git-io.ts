@@ -7,7 +7,7 @@
  * side-effects. Direct `execFileSync('git', ...)` calls in other
  * packages are an anti-pattern (controller bypassing service to DAO).
  */
-import { execFileSync, execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
@@ -18,6 +18,8 @@ export interface GitCloneOptions {
   ref?: string
   /** stdio mode for the spawned git process. Default 'pipe' (capture). */
   stdio?: 'pipe' | 'inherit' | 'ignore'
+  /** Timeout in ms for clone + checkout. Default 120000 (2 min). */
+  timeout?: number
 }
 
 export function gitClone(url: string, dir: string, opts?: GitCloneOptions): void {
@@ -27,10 +29,11 @@ export function gitClone(url: string, dir: string, opts?: GitCloneOptions): void
     args.push('--depth', String(depth))
   }
   args.push(url, dir)
-  execFileSync('git', args, { stdio: opts?.stdio ?? 'pipe' })
+  const timeout = opts?.timeout ?? 120_000
+  execFileSync('git', args, { stdio: opts?.stdio ?? 'pipe', timeout })
 
   if (opts?.ref && opts.ref !== 'HEAD') {
-    execFileSync('git', ['checkout', opts.ref], { cwd: dir, stdio: opts?.stdio ?? 'pipe' })
+    execFileSync('git', ['checkout', opts.ref], { cwd: dir, stdio: opts?.stdio ?? 'pipe', timeout })
   }
 }
 
@@ -41,7 +44,7 @@ export interface GitPullResult {
 
 export function gitPull(dir: string, timeoutMs: number = 30000): GitPullResult {
   try {
-    const output = execSync('git pull', {
+    const output = execFileSync('git', ['pull'], {
       cwd: dir,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],

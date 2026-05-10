@@ -53,10 +53,13 @@ export abstract class SqliteDb {
 
     for (const m of migrations.sort((a, b) => a.version - b.version)) {
       if (m.version > dbVersion) {
-        try {
-          this.db.query(m.sql).run()
-        } catch {
-          // Migration may fail if column already exists — fine for idempotent ADD COLUMN.
+        // Bun's db.query() only executes one statement; split on ; so multi-statement migrations work.
+        for (const stmt of m.sql.split(';').map(s => s.trim()).filter(Boolean)) {
+          try {
+            const s = this.db.query(stmt)
+            s.run()
+            s.finalize()
+          } catch { /* column/index may already exist — prepare or run may fail */ }
         }
         dbVersion = m.version
       }

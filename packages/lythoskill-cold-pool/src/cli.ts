@@ -13,6 +13,7 @@ import { join } from 'node:path'
 import { ColdPool, DEFAULT_COLD_POOL_PATH } from './cold-pool.js'
 import { buildPrunePlan, executePrunePlan } from './prune-plan.js'
 import { parseLocator } from './parse-locator.js'
+import type { ReconcileDesiredState } from './reconcile-plan.js'
 
 const CMD = 'cold-pool'
 
@@ -111,12 +112,7 @@ async function main(): Promise<void> {
     // ── validate (plan-only, no --apply) ────────────────────────
     case 'validate': {
       const lockIdx = args.indexOf('--lock')
-      const lockPath = lockIdx >= 0 ? args[lockIdx + 1] : undefined
-
-      if (!lockPath) {
-        console.error('❌ Missing --lock <path>. Usage: cold-pool validate --lock ./skill-deck.lock')
-        process.exit(1)
-      }
+      const lockPath = lockIdx >= 0 ? args[lockIdx + 1] : './skill-deck.lock'
 
       if (!existsSync(lockPath)) {
         console.error(`❌ Lock file not found: ${lockPath}`)
@@ -128,11 +124,21 @@ async function main(): Promise<void> {
         lock = JSON.parse(readFileSync(lockPath, 'utf-8'))
       } catch (e: any) {
         console.error(`❌ Failed to parse lock file: ${e.message}`)
+        console.error('')
+        console.error('This usually means the lock file is corrupt or was written by an older version.')
+        console.error('To fix:')
+        console.error('  deck link          # regenerate the lock file')
+        console.error('  cold-pool validate # retry after lock is rebuilt')
         process.exit(1)
       }
 
       if (!lock.skills || !Array.isArray(lock.skills)) {
-        console.error('❌ Lock file has no "skills" array. Run deck link first.')
+        console.error('❌ Lock file has no "skills" array.')
+        console.error('')
+        console.error('The lock file is missing the expected structure. This can happen after a')
+        console.error('schema migration or if the file was manually edited.')
+        console.error('To fix:')
+        console.error('  deck link    # regenerate with current schema')
         process.exit(1)
       }
 
@@ -165,9 +171,15 @@ async function main(): Promise<void> {
       const declaredSources = new Set(lock.skills.map((s: any) => s.source))
       for (const repoPath of allRepos) {
         const repoRel = repoPath.slice(coldPoolPath.length + 1)
-        const isReferenced = [...declaredSources].some(
-          (src) => src === repoRel || src.startsWith(repoRel + '/'),
-        )
+        // Compare as (host, owner, repo) tuple to avoid prefix collisions
+        const repoParts = repoRel.split('/')
+        const isReferenced = [...declaredSources].some((src) => {
+          const srcParts = src.split('/')
+          if (repoParts.length >= 3 && srcParts.length >= 3) {
+            return repoParts[0] === srcParts[0] && repoParts[1] === srcParts[1] && repoParts[2] === srcParts[2]
+          }
+          return src === repoRel
+        })
         if (!isReferenced) {
           extra.push(repoRel)
         }
@@ -212,5 +224,12 @@ async function main(): Promise<void> {
 
 main().catch((e: Error) => {
   console.error(`❌ ${e.message}`)
+  console.error('')
+  console.error('If this is a configuration issue:')
+  console.error('  cold-pool validate --lock ./skill-deck.lock   # check lock consistency')
+  console.error('If you suspect a bug:')
+  console.error('  cold-pool prune --dry-run                      # safe diagnostic, no deletes')
+  console.error('For full help:')
+  console.error('  cold-pool --help')
   process.exit(1)
 })

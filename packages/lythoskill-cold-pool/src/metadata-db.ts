@@ -326,6 +326,7 @@ export class MetadataDB extends SqliteDb {
     deckPath: string,
     declaredSkills: Array<{ locator: string; alias: string | null }>,
   ): void {
+    const now = this.now()
     this.db.transaction(() => {
       // Get current refs for this deck (any state)
       const currentRefs = this.queryAll<{ skill_locator: string; state: string | null }>(
@@ -344,7 +345,7 @@ export class MetadataDB extends SqliteDb {
           this.exec(
             `UPDATE deck_refs SET state = 'removed', removed_at = $now
              WHERE deck_path = $deck AND skill_locator = $locator`,
-            { $deck: deckPath, $locator: ref.skill_locator, $now: this.now() },
+            { $deck: deckPath, $locator: ref.skill_locator, $now: now },
           )
         }
       }
@@ -355,7 +356,7 @@ export class MetadataDB extends SqliteDb {
         VALUES ($locator, $deck, $alias, 'linked', $now, NULL)
       `)
       for (const skill of declaredSkills) {
-        insert.run({ $locator: skill.locator, $deck: deckPath, $alias: skill.alias, $now: this.now() })
+        insert.run({ $locator: skill.locator, $deck: deckPath, $alias: skill.alias, $now: now })
       }
       insert.finalize()
     })()

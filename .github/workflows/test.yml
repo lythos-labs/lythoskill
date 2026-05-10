@@ -63,7 +63,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun --filter=@lythos/skill-deck run test
       - run: bun --filter=@lythos/skill-deck run test:coverage || true
-      - uses: 70-10/bun-coverage-report-action@v1.0.3
+      - uses: 70-10/bun-coverage-report-action@6173866ce2a31456a726ff3f4c91f230bd94a9e9 # v1.0.3
         if: github.event_name == 'pull_request'
         with:
           lcov-path: packages/lythoskill-deck/coverage/lcov.info
@@ -89,7 +89,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun --filter=@lythos/cold-pool run test
       - run: bun --filter=@lythos/cold-pool run test:coverage || true
-      - uses: 70-10/bun-coverage-report-action@v1.0.3
+      - uses: 70-10/bun-coverage-report-action@6173866ce2a31456a726ff3f4c91f230bd94a9e9 # v1.0.3
         if: github.event_name == 'pull_request'
         with:
           lcov-path: packages/lythoskill-cold-pool/coverage/lcov.info
@@ -115,7 +115,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun --filter=@lythos/test-utils run test
       - run: bun --filter=@lythos/test-utils run test:coverage || true
-      - uses: 70-10/bun-coverage-report-action@v1.0.3
+      - uses: 70-10/bun-coverage-report-action@6173866ce2a31456a726ff3f4c91f230bd94a9e9 # v1.0.3
         if: github.event_name == 'pull_request'
         with:
           lcov-path: packages/lythoskill-test-utils/coverage/lcov.info

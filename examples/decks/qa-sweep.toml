@@ -1,0 +1,25 @@
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[tool.skills.security-advisor]
+path = "github.com/dani-z/security-advisor/source/skills/security-advisor"
+
+[tool.skills.agentic-actions-auditor]
+path = "github.com/trailofbits/skills/plugins/agentic-actions-auditor/skills/agentic-actions-auditor"
+
+[tool.skills.codeql]
+path = "github.com/trailofbits/skills/plugins/static-analysis/skills/codeql"
+
+[tool.skills.semgrep]
+path = "github.com/trailofbits/skills/plugins/static-analysis/skills/semgrep"
+
+[tool.skills.code-maturity]
+path = "github.com/trailofbits/skills/plugins/building-secure-contracts/skills/code-maturity-assessor"
+
+[tool.skills.differential-review]
+path = "github.com/trailofbits/skills/plugins/differential-review/skills/differential-review"
+
+[tool.skills.entry-point-analyzer]
+path = "github.com/trailofbits/skills/plugins/entry-point-analyzer/skills/entry-point-analyzer"

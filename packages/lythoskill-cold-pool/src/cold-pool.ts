@@ -43,6 +43,10 @@ export interface ListPlan {
 export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPlan {
   const plan: ListPlanEntry[] = []
   const dirSet = new Set(allEntries.filter(e => e.isDirectory).map(e => e.relPath))
+  // Pre-compute: O(1) lookup for "does this dir have a SKILL.md?"
+  const skillMdPaths = new Set(
+    allEntries.filter(e => !e.isDirectory && e.relPath.endsWith('/SKILL.md')).map(e => e.relPath)
+  )
 
   function isTerminal(relPath: string): boolean {
     const prefix = relPath + '/'
@@ -53,7 +57,7 @@ export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPla
   }
 
   function hasSkillMd(dirRel: string): boolean {
-    return allEntries.some(e => e.relPath === `${dirRel}/SKILL.md` && !e.isDirectory)
+    return skillMdPaths.has(`${dirRel}/SKILL.md`)
   }
 
   // Phase 1: Process terminal dirs (backward compat, but only WITH SKILL.md)

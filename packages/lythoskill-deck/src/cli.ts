@@ -29,7 +29,12 @@ if (cliDeck && isUrl(cliDeck)) {
   try {
     deckPath = await fetchDeckUrl(cliDeck)
   } catch (e: any) {
-    console.error(`❌ ${e.message}`)
+    console.error(`❌ Failed to fetch deck from URL: ${e.message}`)
+    console.error('')
+    console.error('The deck URL may be unreachable or require authentication.')
+    console.error('To fix:')
+    console.error('  - Verify the URL is correct and publicly accessible')
+    console.error('  - Use a local deck file instead: deck <command> --deck ./skill-deck.toml')
     process.exit(1)
   }
 } else if (cliDeck) {

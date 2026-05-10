@@ -100,7 +100,19 @@ export async function executeValidationPlan(
     io?.fetch,
   )
 
-  io?.log?.(`tree fetch: ${tree.status} (http ${tree.httpStatus})`)
+  io?.log?.(`tree fetch: ${tree.status} (http ${tree.httpStatus})${tree.truncated ? ' ⚠️ truncated (incomplete)' : ''}`)
+
+  if (tree.truncated && tree.status === 'ok') {
+    return {
+      status: 'incomplete',
+      items: [],
+      fixes: [{
+        action: 'retry-later',
+        confidence: 0.9,
+        message: 'GitHub Tree API returned truncated result (>7MB or >100k entries). Skill discovery may be incomplete — retry with non-recursive paging.',
+      }],
+    }
+  }
 
   if (tree.status === 'not-found') {
     fixes.push({
