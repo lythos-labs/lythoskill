@@ -248,8 +248,8 @@ ${adrs.map(a => {
 *此文件由 generate-index.ts 自动生成*
 `;
 
-  writeFileSync(join(config.tasksDir, '..', 'INDEX.md'), content);
-  console.log(`✅ Generated ${join(config.tasksDir, '..', 'INDEX.md')}`);
+  writeFileSync('INDEX.md', content);
+  console.log('✅ Generated INDEX.md');
 }
 
 // 生成 Wiki 索引
