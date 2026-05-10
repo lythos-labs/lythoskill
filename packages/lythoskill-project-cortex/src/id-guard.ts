@@ -95,24 +95,36 @@ export function findDocById(
   idPrefix: string,
 ): string | null {
   const parsed = parseId(idPrefix)
-  if (!parsed) return null
 
-  // Build the exact prefix to match: "TASK-20260510233000000"
-  const exactPrefix = `${parsed.prefix}-${parsed.timestamp}`
+  // Real 17-digit IDs: strict prefix match with boundary check
+  if (parsed) {
+    const exactPrefix = `${parsed.prefix}-${parsed.timestamp}`
+    try {
+      const entries = readdirSync(dir)
+      for (const entry of entries) {
+        if (entry.startsWith(exactPrefix) && (
+          entry[exactPrefix.length] === '-' || entry[exactPrefix.length] === '.'
+        )) {
+          return join(dir, entry)
+        }
+      }
+    } catch { /* dir doesn't exist */ }
+    return null
+  }
 
+  // Synthetic IDs (e.g. BDD test fixtures like "TASK-TEST-001"):
+  // Use startsWith for safety — prevents TASK-xxx matching TASK-xxxxx
+  // unlike the old includes() which matched any substring
   try {
     const entries = readdirSync(dir)
     for (const entry of entries) {
-      // Must start with exact prefix followed by '-' or '.'
-      if (entry.startsWith(exactPrefix) && (
-        entry[exactPrefix.length] === '-' || entry[exactPrefix.length] === '.'
+      if (entry.startsWith(idPrefix) && (
+        entry[idPrefix.length] === '-' || entry[idPrefix.length] === '.'
       )) {
         return join(dir, entry)
       }
     }
-  } catch {
-    // Directory doesn't exist — no match
-  }
+  } catch { /* dir doesn't exist */ }
   return null
 }
 
