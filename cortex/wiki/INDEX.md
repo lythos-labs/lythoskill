@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (37)
+## 📚 Patterns (38)
 
+- **[2026-05-11]** [skills-discovery-vs-governance-complementary-architecture](./01-patterns/2026-05-11-skills-discovery-vs-governance-complementary-architecture.md)
 - **[2026-05-10]** [side-deck-pattern-specialized-task-decks-for-arena-single](./01-patterns/2026-05-10-side-deck-pattern-specialized-task-decks-for-arena-single.md)
 - **[2026-05-10]** [cold-pool-metadata-filesystem-ground-truth](./01-patterns/2026-05-10-cold-pool-metadata-filesystem-ground-truth.md)
 - **[2026-05-09]** [cold-pool-architecture-deck-decoupling-with-fsm-reference-counting](./01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md)
