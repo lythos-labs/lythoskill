@@ -501,6 +501,21 @@ The curl one-liners above are the entry point. Arena turns that pattern into a *
 
 See [SKILL.md](skills/lythoskill-arena/SKILL.md) for full arena workflow documentation.
 
+### QA Audit (`arena single`)
+
+Run a security/pattern audit on any package with the qa-sweep deck:
+
+```bash
+bunx @lythos/skill-arena@latest single \
+  --deck examples/decks/qa-sweep.toml \
+  --brief "Audit packages/<name>/src/ for: empty catch, swallowed errors, || true, sed -i, uncaptured stderr, bare joins" \
+  --out playground/qa-sweep-$(date +%Y-%m-%d)
+```
+
+Produces `findings.jsonl` (machine-readable, one finding per line) + `report.md` (human summary).
+Findings map to cortex tasks; large-scope fixes invoke `lythoskill-red-green-release` heredoc.
+See [`examples/decks/qa-sweep-COMBO.md`](./examples/decks/qa-sweep-COMBO.md) for the full find→task→fix→verify loop.
+
 ---
 
 ## Cold Pool Convention
