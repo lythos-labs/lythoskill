@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.9.49
+version: 0.9.50
 type: standard
 description: |
   Stateless one-shot skill execution and controlled-variable comparison.
@@ -20,8 +20,8 @@ when_to_use: |
   ALSO trigger when user says "test this skill", "try this deck",
   "compare A vs B", "audit this package", "sweep for bugs".
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.9.49 *)
-  - Bash(bunx @lythos/skill-deck@0.9.49 link *)
+  - Bash(bunx @lythos/skill-arena@0.9.50 *)
+  - Bash(bunx @lythos/skill-deck@0.9.50 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -123,7 +123,7 @@ The simplest path — one subagent, one deck, one task. Used by `examples/quick-
 
 ```bash
 # URL deck (auto-fetched) + inline brief — no local files needed
-bunx @lythos/skill-arena@0.9.49 single \
+bunx @lythos/skill-arena@0.9.50 single \
   --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
   --brief "Investigate this repo and produce a deck plan" \
   --player kimi
@@ -134,8 +134,8 @@ bunx @lythos/skill-arena@0.9.49 single \
 Use an `arena.toml` to declare task + sides + criteria — reproducible, version-controlled, dry-runnable.
 
 ```bash
-bunx @lythos/skill-arena@0.9.49 run --config ./arena.toml
-bunx @lythos/skill-arena@0.9.49 run --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.50 run --config ./arena.toml
+bunx @lythos/skill-arena@0.9.50 run --config ./arena.toml --dry-run
 ```
 
 `arena.toml` declares per-side player + deck + criteria; `run --config` orchestrates the whole comparison.
@@ -143,8 +143,8 @@ bunx @lythos/skill-arena@0.9.49 run --config ./arena.toml --dry-run
 ### Declarative mode (recommended)
 
 ```bash
-bunx @lythos/skill-arena@0.9.49 vs --config ./arena.toml
-bunx @lythos/skill-arena@0.9.49 vs --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.9.50 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.9.50 vs --config ./arena.toml --dry-run
 ```
 
 ### Legacy: `scaffold` (human-in-the-loop)
@@ -152,7 +152,7 @@ bunx @lythos/skill-arena@0.9.49 vs --config ./arena.toml --dry-run
 For controlled-variable comparison via per-deck scaffolds. The CLI creates the directory + per-side decks; the agent dispatches subagents and judges.
 
 ```bash
-bunx @lythos/skill-arena@0.9.49 scaffold \
+bunx @lythos/skill-arena@0.9.50 scaffold \
   --task "Generate auth flow diagram" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -161,7 +161,7 @@ bunx @lythos/skill-arena@0.9.49 scaffold \
 ### Visualize results
 
 ```bash
-bunx @lythos/skill-arena@0.9.49 viz tmp/arena-<id>/
+bunx @lythos/skill-arena@0.9.50 viz tmp/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
