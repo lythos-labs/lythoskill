@@ -1,15 +1,14 @@
 ---
-lane: main
+lane: emergency
 checklist_completed: false
 checklist_skipped_reason: "Non-interactive — findings from arena single scan, 35 items in findings.jsonl"
-lane_override_reason: "New qa-sweep audit findings — distinct from doc-test-infra epic"
 ---
 # EPIC-20260511235648324: QA sweep: empty catch hardening across core packages
 
 > **Epic 是什么**:1-3 周可结案的 outcome,有依赖、有顺序、要规划。
 > **Epic 不是什么**:配置漂移类小事(那是 task)、决策选型(那是 ADR)。
 > **Workflowy zoom-in 心智**:屏蔽其他 epic 的诱惑,聚焦本卡。
-> **双轨**:`lane: main`(当前迭代,最多 1)、`lane: emergency`(不可避免紧急,最多 1)。
+> **双轨**:`lane: emergency`(当前迭代,最多 1)、`lane: emergency`(不可避免紧急,最多 1)。
 
 > QA sweep: empty catch hardening across core packages
 
