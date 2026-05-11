@@ -4,11 +4,12 @@ version: 0.10.1
 type: standard
 description: |
   Register tasks BEFORE fixing bugs. Close epics when work is done.
+  Always use CLI for state transitions — never mv files by hand.
+  CLI moves update Status History; manual mv causes probe mismatches.
   Never leave state drift for the next agent to discover via git log.
-  GTD-style governance: ADR, Epic, Task, Wiki with CLI automation.
-  Numeric-prefixed directories enforce workflow order. Timestamp IDs
-  prevent collision. probe detects stale backlog and epic drift.
-  Trailer dispatch (Closes:/Task:/ADR:) auto-closes tasks on commit.
+  GTD-style governance: ADR, Epic, Task, Wiki. Numeric-prefixed
+  directories enforce workflow order. Timestamp IDs prevent collision.
+  probe detects stale backlog, epic drift, and history mismatches.
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
@@ -35,6 +36,7 @@ when_to_use: |
   - Session ending, writing handoff — run `cortex list` and close stale epics, don't leave them for next agent
   - Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
   - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
+  - ABSOLUTELY FORBIDDEN: mv/cp/rename task or epic files by hand. ALWAYS use CLI: `cortex start/done/complete/suspend <id>`. Manual moves skip Status History update and create probe noise.
 allowed-tools:
   - Bash(bunx @lythos/project-cortex@0.10.1 *)
 ---
