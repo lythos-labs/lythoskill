@@ -299,7 +299,12 @@ export async function addSkill(
       deck[skillType].skills = dict
     }
 
-    deck[skillType].skills[alias] = { path: fqPath }
+    const entry: Record<string, string> = { path: fqPath }
+    if (parsed.host === 'github.com') {
+      const skillRel = parsed.skill ? `/${parsed.skill}` : ''
+      entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/HEAD${skillRel}/SKILL.md`
+    }
+    deck[skillType].skills[alias] = entry
     writeFileSync(deckPath, stringifyToml(deck))
     console.log(`📝 Added "${alias}" to [${skillType}.skills] in ${deckPath}`)
   } else {

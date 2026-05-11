@@ -3,23 +3,34 @@ max_cards = 10
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
+# QA Security Sweep Deck — 7 security audit skills
+# Usage: arena single --deck qa-sweep.toml --brief "audit <target>"
+# Combo workflow: see qa-sweep-COMBO.md
+
 [tool.skills.security-advisor]
 path = "github.com/dani-z/security-advisor/source/skills/security-advisor"
+source = "https://github.com/dani-z/security-advisor/blob/HEAD/source/skills/security-advisor/SKILL.md"
 
 [tool.skills.agentic-actions-auditor]
 path = "github.com/trailofbits/skills/plugins/agentic-actions-auditor/skills/agentic-actions-auditor"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/agentic-actions-auditor/skills/agentic-actions-auditor/SKILL.md"
 
 [tool.skills.codeql]
 path = "github.com/trailofbits/skills/plugins/static-analysis/skills/codeql"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/static-analysis/skills/codeql/SKILL.md"
 
 [tool.skills.semgrep]
 path = "github.com/trailofbits/skills/plugins/static-analysis/skills/semgrep"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/static-analysis/skills/semgrep/SKILL.md"
 
 [tool.skills.code-maturity]
 path = "github.com/trailofbits/skills/plugins/building-secure-contracts/skills/code-maturity-assessor"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/building-secure-contracts/skills/code-maturity-assessor/SKILL.md"
 
 [tool.skills.differential-review]
 path = "github.com/trailofbits/skills/plugins/differential-review/skills/differential-review"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/differential-review/skills/differential-review/SKILL.md"
 
 [tool.skills.entry-point-analyzer]
 path = "github.com/trailofbits/skills/plugins/entry-point-analyzer/skills/entry-point-analyzer"
+source = "https://github.com/trailofbits/skills/blob/HEAD/plugins/entry-point-analyzer/skills/entry-point-analyzer/SKILL.md"
