@@ -27,6 +27,13 @@ when_to_use: |
   - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
   - Doing session handoff or writing daily notes
   - husky post-commit trailer processing (Closes:/Task:/ADR: trailers auto-create follow-up commits)
+
+  CRITICAL — trigger proactively, do NOT wait for user to ask:
+  - Finished a batch of fixes and pushed — verify tasks moved, epic status matches reality
+  - User says "确认epic/task都正常流转" or "还在途的epic是什么" — probe for state drift
+  - Session ending, writing handoff — run `cortex list` and close stale epics, don't leave them for next agent
+  - Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
+  - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
 allowed-tools:
   - Bash(bunx @lythos/project-cortex@0.10.1 *)
 ---
