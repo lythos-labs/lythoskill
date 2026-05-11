@@ -320,7 +320,8 @@ export async function addSkill(
     const entry: Record<string, string> = { path: fqPath }
     if (parsed.host === 'github.com') {
       const skillRel = parsed.skill ? `/${parsed.skill}` : ''
-      entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/HEAD${skillRel}/SKILL.md`
+      const blobRef = parsed.ref || 'HEAD'
+      entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/${blobRef}${skillRel}/SKILL.md`
     }
     deck[skillType].skills[alias] = entry
     writeFileSync(deckPath, stringifyToml(deck))
