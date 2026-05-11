@@ -50,12 +50,16 @@ export function executeFetchPlan(plan: FetchPlan, io?: FetchIO): FetchResult {
 
   if (exists(plan.targetDir)) {
     if (plan.ref) {
-      try {
-        log(`🔄 checking out ${plan.ref} in ${plan.targetDir}`)
-        execFileSync('git', ['-C', plan.targetDir, 'fetch', '--depth', '1', 'origin', plan.ref], { stdio: 'pipe' })
-        execFileSync('git', ['-C', plan.targetDir, 'checkout', plan.ref], { stdio: 'pipe' })
-      } catch {
-        log(`⚠️  Could not checkout ${plan.ref} — using current HEAD`)
+      if (plan.ref.startsWith('-')) {
+        log(`⚠️  Ref "${plan.ref}" starts with dash — refusing to avoid git option injection`)
+      } else {
+        try {
+          log(`🔄 checking out ${plan.ref} in ${plan.targetDir}`)
+          execFileSync('git', ['-C', plan.targetDir, 'fetch', '--depth', '1', 'origin', plan.ref], { stdio: 'pipe' })
+          execFileSync('git', ['-C', plan.targetDir, 'checkout', plan.ref], { stdio: 'pipe' })
+        } catch {
+          log(`⚠️  Could not checkout ${plan.ref} — using current HEAD`)
+        }
       }
     }
     log(`✓ already present: ${plan.targetDir}`)

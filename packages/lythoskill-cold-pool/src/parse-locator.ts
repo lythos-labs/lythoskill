@@ -31,9 +31,15 @@ export function parseLocator(input: string): Locator | null {
   if (hashIdx >= 0) {
     pathPart = trimmed.slice(0, hashIdx)
     ref = trimmed.slice(hashIdx + 1) || null
+    // Reject refs that look like git option injection or path traversal
+    if (ref && (ref.startsWith('-') || ref.includes('..'))) {
+      return null
+    }
   }
 
-  const parts = pathPart.split('/').filter(Boolean)
+  const parts = pathPart.split('/')
+  // Reject empty segments (double slashes) and path traversal
+  if (parts.some(p => p === '' || p === '..' || p === '.')) return null
   // Need at least host/owner/repo (3 segments) for any FQ form
   if (parts.length < 3) return null
 

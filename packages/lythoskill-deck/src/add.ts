@@ -320,8 +320,13 @@ export async function addSkill(
     const entry: Record<string, string> = { path: fqPath }
     if (parsed.host === 'github.com') {
       const skillRel = parsed.skill ? `/${parsed.skill}` : ''
-      const blobRef = parsed.ref || 'HEAD'
-      entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/${blobRef}${skillRel}/SKILL.md`
+      const rawRef = parsed.ref || 'HEAD'
+      // Reject refs that could inject into URL (query, fragment, auth)
+      if (/[?#@]/.test(rawRef)) {
+        console.warn(`⚠️  Ref "${rawRef}" contains URL-special characters — source URL skipped`)
+      } else {
+        entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/${rawRef}${skillRel}/SKILL.md`
+      }
     }
     deck[skillType].skills[alias] = entry
     writeFileSync(deckPath, stringifyToml(deck))
