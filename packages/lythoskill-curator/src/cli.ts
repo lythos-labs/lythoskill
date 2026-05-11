@@ -505,7 +505,9 @@ function runQuery(argv: string[]) {
         }
         console.error('')
       }
-    } catch {}
+    } catch {
+      // DB query for index freshness failed — non-fatal, index may be stale
+    }
 
     if (!isReadOnlyQuery(sql)) {
       console.error('❌ Query rejected: only SELECT and PRAGMA statements are allowed.')
@@ -870,7 +872,9 @@ export function runAdd(argv: string[]) {
       if (existsSync(plan.repoPath) && readdirSync(plan.repoPath).length === 0) {
         safeRmSync(plan.repoPath, poolPath)
       }
-    } catch {}
+    } catch {
+      // cleanup is best-effort — non-critical if it fails
+    }
     console.error(`❌ Failed to clone: ${e.message}`)
     process.exit(1)
   }

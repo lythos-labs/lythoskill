@@ -50,6 +50,7 @@ export function dispatchTrailers(msg: string, sha: string, opts: DispatchOptions
     : `chore(cortex): ${successes.length} trailer dispatches`
   const body = ['', 'Dispatches:', ...successes.map(s => `  - ${s}`), '', `Triggered by: ${sha}`].join('\n')
 
-  spawnSync('git', ['commit', '--no-verify', '-m', `${subject}\n${body}`], { stdio: 'inherit' })
+  const r = spawnSync('git', ['commit', '--no-verify', '-m', `${subject}\n${body}`], { stdio: 'inherit' })
+  if (r.status !== 0) console.warn(`dispatch: git commit failed (exit ${r.status})`)
   return 0
 }

@@ -43,12 +43,14 @@ if (stagedEpics.length > 0) {
     })
     for (const adrId of linked) {
       console.log(`🔗 Auto-accepting ${adrId} (linked to ${epicId})`)
-      spawnSync('bun', ['packages/lythoskill-project-cortex/src/cli.ts', 'adr', 'accept', adrId],
+      const rAccept = spawnSync('bun', ['packages/lythoskill-project-cortex/src/cli.ts', 'adr', 'accept', adrId],
         { stdio: 'inherit' })
+      if (rAccept.status !== 0) console.warn(`pre-commit: ADR auto-accept failed for ${adrId}`)
     }
   }
   // Stage any ADR moves
-  spawnSync('git', ['add', 'cortex/adr/', 'cortex/INDEX.md', 'cortex/wiki/INDEX.md'])
+  const rAdd = spawnSync('git', ['add', 'cortex/adr/', 'cortex/INDEX.md', 'cortex/wiki/INDEX.md'])
+  if (rAdd.status !== 0) console.warn(`pre-commit: git add failed for ADR staging`)
 }
 
 // ── 2. Lane guard (warn, non-blocking) ─────────────────────────────────
