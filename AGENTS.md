@@ -80,6 +80,8 @@ When the thought "I should just do it, the user is already angry" appears, that 
 
 **Test SSOT.** The canonical test runner is `bun --filter='*' run test` (per-package `test` scripts in `package.json`). `scripts/test-report.ts` is a snapshot supplement, not a replacement — it must produce the same counts. If the two diverge, the script is wrong. Unit tests live in `src/*.test.ts` (co-located). CLI BDD lives in `test/runner.ts`. Agent BDD (`.agent.md`) is manual-only. Real counts are in CI logs, not README badges. Wiki: [`2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md`](./cortex/wiki/02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md).
 
+**sed is a red flag.** If you find yourself about to use `sed`, `awk`, or any regex-based inline file transformation, stop. You are in `red-green-release` territory — generate a heredoc patch that shows the complete target state of the file, not a fragile step-by-step rewrite. Same principle as `|| true`: imperative transforms on the current state are brittle; declarative target states are reviewable and idempotent. See [`cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md`](./cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md).
+
 ---
 
 ## Tech Stack
