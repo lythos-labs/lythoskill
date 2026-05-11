@@ -5,7 +5,7 @@
 > **Built by AI agents working under human direction.** Agent Skills ecosystem governance: version-bump, install, curate, validate, and reconcile skills across projects and multi-agent platforms (Claude Code, Codex CLI, DeepSeek, Kimi, Cursor, Windsurf, Copilot). Dogfooded — we govern this project with its own tools.
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
-[![Tests](https://img.shields.io/badge/Tests-649%20pass-brightgreen)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
+[![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
