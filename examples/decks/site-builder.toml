@@ -1,0 +1,34 @@
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+# Site Builder Deck — documentation site design + narrative + UX
+# Discovered via: find-skills (skills.sh) → curator query → quality verify → deck add
+# Workflow: find-skills (discover) → frontend-design (taste) → theme-factory (theme)
+#           → vitepress (build) → brand-guidelines (brand) → librarian (nav)
+
+[tool.skills.find-skills]
+path = "github.com/vercel-labs/skills/skills/find-skills"
+
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+
+[tool.skills.brand-guidelines]
+path = "github.com/anthropics/skills/skills/brand-guidelines"
+
+[tool.skills.vitepress]
+path = "github.com/antfu/skills/skills/vitepress"
+
+[tool.skills.web-design-guidelines]
+path = "github.com/antfu/skills/skills/web-design-guidelines"
+
+[tool.skills.mermaid]
+path = "github.com/anthropics/skills/skills/mermaid"
+
+# TODO: add when available in cold pool
+# [tool.skills.librarian]
+# path = "localhost/librarian"
