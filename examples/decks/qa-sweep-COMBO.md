@@ -27,6 +27,18 @@ Phase 3: differential-review
 Phase 4: agentic-actions-auditor
   - Audit .github/workflows/ for AI agent CI/CD risks
 
+Phase 5: task + fix
+  - For each finding: create a cortex task (bunx @lythos/project-cortex task "...")
+  - Small-scope fixes: extract util / normalize interface → fix site-by-site with type checker
+  - Large-scope restructures: invoke lythoskill-red-green-release heredoc (declarative target state)
+  - sed -i is never the answer — survey with grep/sed (read-only), fix with proper tools
+  - Each task commit references the finding via Closes: TASK-xxx trailer
+
+Phase 6: verify
+  - Re-run qa-sweep on changed files — confirm findings are resolved
+  - Self-review the fix commits — was the abstraction the right one, or did it just move the problem?
+  - If new patterns emerged from the fix, they become new tasks → back to Phase 5
+
 ## Output format — JSONL append-only
 
 Write EVERY finding IMMEDIATELY to `findings.jsonl` as you discover it. Do NOT wait until the end.
@@ -37,3 +49,5 @@ Each line:
 ```
 
 After ALL findings, write a summary to `report.md`.
+
+After Phase 5, append resolved status to each finding and reference the fix commit.
