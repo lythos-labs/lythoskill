@@ -298,7 +298,7 @@ export function probeStatus(config: WorkflowConfig): void {
           staleBacklog.push(`${id} (${days}d old)`)
         }
       }
-    } catch {}
+    } catch (err: any) { console.warn(`probe: staleness check error: ${err.message ?? err}`) }
   }
 
   const activeEpicDir = join(config.epicsDir, config.epicSubdirs.active)
@@ -316,7 +316,7 @@ export function probeStatus(config: WorkflowConfig): void {
           driftedEpics.push(`${id} (${days}d old)`)
         }
       }
-    } catch {}
+    } catch (err: any) { console.warn(`probe: staleness check error: ${err.message ?? err}`) }
   }
 
   if (staleBacklog.length > 0) {
