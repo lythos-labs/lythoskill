@@ -81,12 +81,50 @@ function fqOf(loc: Locator): string {
   return formatLocator(loc)
 }
 
+/**
+ * Normalize skills.sh syntax to FQ locator (UX sugar — internal rep stays git-only).
+ *
+ *   owner/repo@skill            → github.com/owner/repo (skillFilter handled by discovery)
+ *   owner/repo/subpath          → github.com/owner/repo/subpath
+ *   github:owner/repo           → github.com/owner/repo
+ *   owner/repo                  → github.com/owner/repo
+ */
+function normalizeSkillsSh(input: string): string {
+  // Already an FQ locator: host.tld/owner/repo[/...] — pass through
+  if (input.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return input
+
+  // github: prefix
+  const ghPrefix = input.match(/^github:(.+)$/)
+  if (ghPrefix) return `github.com/${ghPrefix[1]}`
+
+  // owner/repo@skill shorthand
+  const atMatch = input.match(/^([^/]+)\/([^/@]+)@(.+)$/)
+  if (atMatch && !input.includes(':') && !input.startsWith('.')) {
+    const [, owner, repo, skill] = atMatch
+    return `github.com/${owner}/${repo}/skills/${skill}`
+  }
+
+  // owner/repo[/subpath] shorthand (no dot in first segment → not a hostname)
+  const shortMatch = input.match(/^([^/.]+)\/([^/]+)(?:\/(.+?))?\/?$/)
+  if (shortMatch && !input.includes(':') && !input.startsWith('.')) {
+    const [, owner, repo, subpath] = shortMatch
+    return subpath
+      ? `github.com/${owner}/${repo}/${subpath}`
+      : `github.com/${owner}/${repo}`
+  }
+
+  return input
+}
+
 function exitInvalidLocator(locator: string): never {
   console.error(`❌ Invalid locator: ${locator}`)
-  console.error(`   Expected FQ form (per ADR-20260502012643244):`)
-  console.error(`     host.tld/owner/repo[/skill]   — remote skill`)
-  console.error(`     localhost/<name>              — local-only skill`)
-  console.error(`   Bare names and shorthand 'owner/repo' are rejected.`)
+  console.error(`   Accepted formats:`)
+  console.error(`     github.com/owner/repo[/skill]   — FQ locator`)
+  console.error(`     owner/repo                      — GitHub shorthand`)
+  console.error(`     owner/repo@skill                — skills.sh syntax`)
+  console.error(`     owner/repo/subpath              — subdirectory`)
+  console.error(`     github:owner/repo               — explicit GitHub prefix`)
+  console.error(`     localhost/<name>                — local-only skill`)
   process.exit(1)
 }
 
@@ -100,8 +138,9 @@ export async function addSkill(
     ? resolvePath(options.deck)
     : findDeckToml(workdir) || join(workdir, 'skill-deck.toml')
 
-  const parsed = parseLocator(locator)
-  if (!parsed) exitInvalidLocator(locator)
+  const normalized = normalizeSkillsSh(locator)
+  const parsed = parseLocator(normalized)
+  if (!parsed) exitInvalidLocator(normalized)
 
   if (parsed.isLocalhost) {
     console.error(`❌ deck add does not support localhost locators (no remote to clone).`)
