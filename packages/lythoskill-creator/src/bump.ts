@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { join, basename } from 'node:path'
 import { findProjectRoot } from './util.js'
 import { align } from './align.js'
@@ -58,8 +59,9 @@ export async function bump(opts: BumpOpts) {
     console.log('   Real run would:')
     console.log(`   1. Set root package.json version → ${newVersion}`)
     console.log('   2. Run align(fix=true) — syncs packages/*/package.json (skips {{...}} templates)')
-    console.log('   3. Update bunx @version in packages/*/README.md')
-    console.log('   4. Run build for each lythoskill-* package — re-renders skills/*/SKILL.md')
+    console.log('   3. Run bun install — regenerate bun.lock with new workspace versions')
+    console.log('   4. Update bunx @version in packages/*/README.md')
+    console.log('   5. Run build for each lythoskill-* package — re-renders skills/*/SKILL.md')
     return
   }
 
@@ -72,7 +74,11 @@ export async function bump(opts: BumpOpts) {
   console.log('\n🔧 Aligning workspace packages (align --fix)...')
   await align(true)
 
-  // Step 3: update bunx @version in all markdown docs (npm-facing + repo root)
+  // Step 3: regenerate lockfile so CI --frozen-lockfile doesn't reject the bump commit
+  console.log('\n🔒 Regenerating lockfile (bun install)...')
+  execFileSync('bun', ['install'], { cwd: root, stdio: 'inherit' })
+
+  // Step 4: update bunx @version in all markdown docs (npm-facing + repo root)
   console.log('\n📝 Updating bunx @version in docs...')
   const escapedVersion = currentVersion.replace(/\\/g, '\\\\').replace(/\./g, '\\.')
   const oldPattern = new RegExp(`(@lythos/[a-z-]+)@${escapedVersion}`, 'g')
@@ -98,7 +104,7 @@ export async function bump(opts: BumpOpts) {
   }
   if (docUpdated > 0) console.log(`   Updated ${docUpdated} doc(s): @${currentVersion} → @${newVersion}`)
 
-  // Step 4: rebuild skill outputs
+  // Step 5: rebuild skill outputs
   console.log('\n🛠️  Rebuilding skills (build --all equivalent)...')
   let built = 0
   for (const name of pkgDirs) {
