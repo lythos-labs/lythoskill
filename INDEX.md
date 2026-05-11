@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/12 00:30:29
+> 自动生成于 2026/5/12 00:52:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 200 | 进行中: 0, 待验收: 0, 已完成: 167 |
+| Tasks | 199 | 进行中: 0, 待验收: 0, 已完成: 170 |
 | Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
 | ADRs | 64 | 已接受: 49 |
 
@@ -57,16 +57,12 @@
 
 ## 📄 Tasks
 
-### 待办 (8)
+### 待办 (4)
 
 - [ ] **TASK-20260510234339990**: P2 sweep — 4 packages: remaining code quality fixes (TOML parse, path join, renameSync guard, locale, etc.)
 - [ ] **TASK-20260511091105701**: replace regex-based SQL check with real parser (node-sql-parser) — LLM hand-roll tendency anti-pattern
 - [ ] **TASK-20260511093956018**: deck add: multi-skill discovery warning when repo contains multiple skills — list all, ask user to pick or add all
 - [ ] **TASK-20260511095504433**: parseLocator #ref support — branch/tag/commit suffix compatible with skills.sh parseFragmentRef
-- [ ] **TASK-20260512000201440**: arena: narrow 4 medium catch/log patterns — URL parse, skill check, file copy, workdir copy (cli.ts:174,284,309,313)
-- [ ] **TASK-20260512000201473**: deck: return error indicators from metadata operations (link.ts, add.ts, remove.ts)
-- [ ] **TASK-20260512000201505**: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
-- [ ] **TASK-20260512000201534**: cortex: fix 5 medium patterns — dispatch, ADR accept, git add, config parse, coupling
 
 ### 进行中 (0)
 
@@ -76,7 +72,7 @@ _无_
 
 _无_
 
-### 已完成 (167)
+### 已完成 (170)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -245,6 +241,9 @@ _无_
 - ✅ ~~TASK-20260511235909866~~: cortex: pre-commit git() helper ignores spawnSync exit code and stderr (pre-commit.ts:16)
 - ✅ ~~TASK-20260511235909913~~: deck: refresh-plan bare catch swallows execSync git failure — misclassifies timeout/signal as not-git (refresh-plan.ts:81)
 - ✅ ~~TASK-20260512000201440~~: arena: narrow 4 medium catch/log patterns (cli.ts:174,284,309,313)
+- ✅ ~~TASK-20260512000201473~~: deck: return error indicators from metadata operations (link.ts, add.ts, remove.ts)
+- ✅ ~~TASK-20260512000201505~~: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
+- ✅ ~~TASK-20260512000201534~~: cortex: fix 5 medium patterns — dispatch, ADR accept, git add, config parse, coupling
 
 ### 悬置 (0)
 
