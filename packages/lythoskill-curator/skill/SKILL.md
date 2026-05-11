@@ -3,14 +3,20 @@ name: lythoskill-curator
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Read-only indexer for skill cold pools. Scans all local skill
-  directories, extracts SKILL.md frontmatter, and produces
-  REGISTRY.json + catalog.db for structured querying. Does not
-  install, modify, or recommend skills — only surfaces what exists.
-  Reconciler-style: any state → scan → converges to clean index.
-  Auto-backs up old index before rebuild; rollback via `restore`.
+  Skill discovery engine. Scans your local cold pool (~/.agents/skill-repos),
+  indexes all SKILL.md frontmatter into REGISTRY.json + catalog.db, and lets you
+  query by type, niche, source, or keyword. The CLI is a dumb indexer — YOU are
+  the smart agent who combines curator data with web search, deep research, and
+  project context to make recommendations. Reconciler-style: any filesystem state
+  → scan → converges to clean index. Auto-backs up old index; rollback via `restore`.
 when_to_use: |
-  List all skills, what skills do I have, scan skill pool, skill index,update skill index, search skills, find a skill for X,  recommend a deck, catalog skills, explore cold pool.
+  Find a skill for X, search skills, what skills do I have, list all skills,
+  catalog skills, explore cold pool, scan skill pool, skill index, update index,
+  recommend a deck, is there a skill for Y, discover skills, cold pool query,
+  skill lookup, what's available, curator query, curator scan, curator audit.
+  ALSO trigger when user wants to do a task and you need to find the right skill:
+  web-search for candidates → curator check if already in cold pool →
+  curator query for similar skills by niche → recommend with confidence.
 allowed-tools:
   - Bash(bunx @lythos/skill-curator@{{PACKAGE_VERSION}} *)
   - WebSearch
@@ -22,23 +28,39 @@ deck_managed_dirs:
 ---
 
 # Skill Curator
-> Read-only observer. Scans cold pools, indexes frontmatter, outputs structured data.
-> Think of it as a librarian — catalogs every book on the shelf but never decides what you should read.
-## Why Separate Indexing from Recommendation
-Curator CLI produces **facts** (what skills exist, their metadata, their niches).
-Recommendation requires **project context** (tech stack, team habits, current phase)
-that only the agent + conversation can provide.
+> Smart agent, dumb tool. Curator indexes what exists — YOU decide what's good.
+> The CLI catalogs every skill on the shelf. The agent (that's you) does the thinking.
 
-Hardcoding recommendations as keyword-matching (TF-IDF, domain boost) captures surface
-similarity but misses causal chains: "project-cortex produces structured ADRs;
-repomix-handoff consumes them — they form a producer-consumer pair." Only LLM reasoning
-discovers these patterns. So curator stays pure data, agent does inference.
+## How Recommendation Actually Works
 
-**Need recommendation or ranking?** Curator doesn't do that. Use Arena
-(`lythoskill-arena`) for controlled-variable comparison and scoring.
-Curator provides the data (catalog + decision history); Arena provides
-the evaluation (L3 buyer's review). Together they feed the agent's
-recommendation workflow: scan → query → arena → recommend → deck.
+Curator CLI is intentionally dumb — it produces **facts** (what skills exist, their
+metadata, their niches). The **agent** combines these facts with project context,
+web search, and deep research to make real recommendations.
+
+**The full discovery workflow (agent does all of this):**
+```
+1. WebSearch for skill candidates            ← agent superpower
+2. curator query "SELECT * FROM skills       ← check what's already in cold pool
+   WHERE name LIKE '%security%'"
+3. curator query "SELECT * FROM skills       ← find similar skills by niche
+   WHERE niches LIKE '%audit%'"
+4. Arena single --deck qa-sweep.toml         ← test before adopting
+5. Deck add <locator>                        ← add to project deck
+```
+
+**Why not hardcode recommendations in the CLI?** Keyword-matching (TF-IDF, domain boost)
+captures surface similarity but misses causal chains: "project-cortex produces structured
+ADRs; repomix-handoff consumes them — they form a producer-consumer pair." Only LLM
+reasoning discovers these patterns. The CLI provides the data; the agent does inference.
+
+**Three-layer trust model (all agent-side):**
+```
+L1 卖家秀: skill's own description           ← what the skill claims
+L2 Big V:   curator index (REGISTRY.json)    ← unified schema, queryable
+L3 买家秀: arena evaluation + your judgment  ← real testing, real recommendation
+```
+
+Curator gives you L2. You bring L3.
 
 ## Commands
 ### Index the cold pool
@@ -192,6 +214,23 @@ SELECT name, json_extract(niches, '$[0]') AS primary_niche FROM skills;
 **deck_skill_type**: This is a lythoskill custom frontmatter field (`deck_` prefix),
 not an Agent Skills standard field. It indexes `combo`, `transient`, and `fork`
 skills for curator filtering. Skills without it return `NULL` in queries.
+## Cold Pool CLI (sister tool)
+
+Curator indexes the cold pool. To manage the cold pool itself, use `cold-pool` CLI:
+
+```bash
+# Check cold pool health
+bunx @lythos/cold-pool validate --lock ./skill-deck.lock
+
+# Prune unreferenced repos (heredoc audit first — never auto-delete)
+bunx @lythos/cold-pool prune
+
+# Add skills to cold pool (use this, then curator scan to re-index)
+bunx @lythos/skill-curator add github.com/owner/repo
+```
+
+Full pipeline: `cold-pool add` → `curator scan` → `curator query` → `deck add`
+
 ## Supporting References
 Read these **only when the specific topic arises**:
 | When you need to… | Read |
