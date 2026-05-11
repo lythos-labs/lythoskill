@@ -10,6 +10,7 @@
  * `executeFetchPlan` will refuse to clone (status: 'failed').
  */
 import { existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import type { ColdPool } from './cold-pool.js'
 import type { Locator, FetchPlan, FetchResult, FetchIO } from './types.js'
 import { gitClone } from './git-io.js'
@@ -48,6 +49,15 @@ export function executeFetchPlan(plan: FetchPlan, io?: FetchIO): FetchResult {
   }
 
   if (exists(plan.targetDir)) {
+    if (plan.ref) {
+      try {
+        log(`🔄 checking out ${plan.ref} in ${plan.targetDir}`)
+        execFileSync('git', ['-C', plan.targetDir, 'fetch', '--depth', '1', 'origin', plan.ref], { stdio: 'pipe' })
+        execFileSync('git', ['-C', plan.targetDir, 'checkout', plan.ref], { stdio: 'pipe' })
+      } catch {
+        log(`⚠️  Could not checkout ${plan.ref} — using current HEAD`)
+      }
+    }
     log(`✓ already present: ${plan.targetDir}`)
     return {
       status: 'already-present',
