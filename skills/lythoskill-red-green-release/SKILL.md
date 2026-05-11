@@ -1,6 +1,6 @@
 ---
 name: lythoskill-red-green-release
-version: 0.9.47
+version: 0.9.48
 type: standard
 description: |
   User-acceptance-driven release workflow using heredoc patch files.  Each iteration produces a timestamped pr-<timestamp>-<desc>.sh that  self-archives after execution. No tag without explicit user LGTM.  Supports rollback via archived backups.
