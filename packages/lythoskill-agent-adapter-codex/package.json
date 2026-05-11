@@ -1,0 +1,27 @@
+{
+  "name": "@lythos/agent-adapter-codex",
+  "version": "0.9.48",
+  "type": "module",
+  "scripts": {
+    "test": "bun test src/ --pass-with-no-tests",
+    "test:coverage": "bun test src/ --coverage --coverage-reporter=lcov --coverage-dir=coverage --pass-with-no-tests",
+    "test:watch": "bun test src/ --watch"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "codex",
+    "openai",
+    "agent-adapter",
+    "codex-cli"
+  ],
+  "dependencies": {
+    "@lythos/agent-adapter": "^0.9.48"
+  }
+}

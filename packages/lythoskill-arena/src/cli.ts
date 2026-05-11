@@ -200,6 +200,7 @@ async function singleRun(args: string[]) {
   // Optional: register claude-sdk adapter if the package is installed
   try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
   try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
+  try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
   const { runAgentScenario } = await import('@lythos/test-utils/agent-bdd')
   const { resolvePlayer } = await import('./player')
 
