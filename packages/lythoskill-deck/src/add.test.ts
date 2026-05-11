@@ -333,12 +333,14 @@ describe('normalizeSkillsSh', () => {
     expect(normalizeSkillsSh('astronomer/agents')).toBe('github.com/astronomer/agents')
   })
 
-  // owner/repo@skill syntax
-  it('normalizes owner/repo@skill', () => {
+  // owner/repo@skill syntax — normalizes to repo level, discovery at runtime
+  it('normalizes owner/repo@skill to repo-level locator', () => {
     expect(normalizeSkillsSh('vercel-labs/skills@find-skills'))
-      .toBe('github.com/vercel-labs/skills/skills/find-skills')
+      .toBe('github.com/vercel-labs/skills')
     expect(normalizeSkillsSh('mattpocock/skills@tdd'))
-      .toBe('github.com/mattpocock/skills/skills/tdd')
+      .toBe('github.com/mattpocock/skills')
+    expect(normalizeSkillsSh('google-gemini/gemini-cli@code-reviewer'))
+      .toBe('github.com/google-gemini/gemini-cli')
   })
 
   // owner/repo/subpath syntax

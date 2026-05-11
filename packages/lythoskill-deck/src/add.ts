@@ -100,11 +100,14 @@ export function normalizeSkillsSh(input: string): string {
   const ghPrefix = input.match(/^github:(.+)$/)
   if (ghPrefix) return `github.com/${ghPrefix[1]}`
 
-  // owner/repo@skill shorthand
+  // owner/repo@skill shorthand — normalizes to repo-level locator.
+  // Skill discovery at runtime (scanSkill → name match) because the
+  // actual path within the repo is unknown until after clone.
+  // e.g. gemini-cli has skills at .gemini/skills/, not skills/.
   const atMatch = input.match(/^([^/]+)\/([^/@]+)@(.+)$/)
   if (atMatch && !input.includes(':') && !input.startsWith('.')) {
-    const [, owner, repo, skill] = atMatch
-    return `github.com/${owner}/${repo}/skills/${skill}`
+    const [, owner, repo] = atMatch
+    return `github.com/${owner}/${repo}`
   }
 
   // owner/repo[/subpath] shorthand (no dot in first segment → not a hostname)
