@@ -1,6 +1,31 @@
 #!/bin/sh
 # Pre-commit: ADR compliance + auto-rebuild skills + cortex governance (TypeScript)
 
+# 0. Guard-script sensitivity check — warn when modifying meta-layer guards
+STAGED_GUARDS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(\.husky/|scripts/pre-commit-|scripts/test-report|scripts/check-path-safety|scripts/adr-check)' || true)
+
+if [ -n "$STAGED_GUARDS" ]; then
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  ⚠️  GUARD-SCRIPT MODIFICATION DETECTED                     ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Bugs in these files cascade silently — the guard itself    ║"
+  echo "║  fails and you won't know until the next incident.          ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Changed:                                                   ║"
+  for f in $STAGED_GUARDS; do
+    printf "║    - %-54s ║\n" "$f"
+  done
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Before committing, QA the change:                          ║"
+  echo "║    arena single --deck examples/decks/qa-sweep.toml         ║"
+  echo "║    --brief 'verify <guard> catches deliberate failure'      ║"
+  echo "║  See: AGENTS.md → Guard-script sensitivity                  ║"
+  echo "║  Wiki: git-provenance-over-design-assumption-lesson.md      ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+fi
+
 # 1. ADR governance checks (fast — fail early if violated)
 if [ -f scripts/adr-check.sh ]; then
   bash scripts/adr-check.sh || exit 1

@@ -70,6 +70,10 @@ When the thought "I should just do it, the user is already angry" appears, that 
 
 **Fix:** State the ambiguity clearly, propose options, and wait for explicit user signal. No assumptions. Internal hesitation is not a substitute for external confirmation.
 
+**Git provenance over design assumption.** When you see code that looks wrong, don't assume "it was designed this way." Use `git log --oneline -5 <file>` + `git show <hash>` to trace its origin. This repo's small-granularity commits make this a 5-second operation. A 1-line diff with a clear commit message tells you more than an hour of guessing. See [`cortex/wiki/02-research/2026-05-11-git-provenance-over-design-assumption-lesson.md`](./cortex/wiki/02-research/2026-05-11-git-provenance-over-design-assumption-lesson.md) for the full case study.
+
+**Guard-script sensitivity.** Files in `.husky/`, `scripts/pre-commit-*.ts`, `scripts/test-report.ts`, `scripts/check-path-safety.ts`, and `scripts/adr-check.sh` are meta-layer guards — bugs here cascade silently. When modifying any of these, the pre-commit hook will print a warning and ask you to confirm you've QA'd the change. QA means: run a negative test — deliberately break something and verify the guard catches it. Use `arena single --deck examples/decks/qa-sweep.toml` or any side-deck from `examples/decks/` to audit guard changes without polluting the main workspace. See [`cortex/wiki/02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md`](./cortex/wiki/02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md) for what happens when guards rot silently.
+
 ---
 
 ## Tech Stack
