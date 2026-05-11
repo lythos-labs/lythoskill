@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/10 21:26:01
+> 自动生成于 2026/5/12 00:07:21
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 184 | 进行中: 0, 待验收: 0, 已完成: 159 |
-| Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
-| ADRs | 59 | 已接受: 48 |
+| Tasks | 200 | 进行中: 0, 待验收: 0, 已完成: 160 |
+| Epics | 28 | 活跃: 2, 已完成: 22, 悬置: 2, 已归档: 2 |
+| ADRs | 63 | 已接受: 48 |
 
 ---
 
@@ -17,6 +17,7 @@
 ### 进行中
 
 - **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
+- **EPIC-20260511235648324**: QA sweep: empty catch hardening across core packages
 
 ### 已完成
 
@@ -57,9 +58,23 @@
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (15)
 
-_无_
+- [ ] **TASK-20260510234339990**: P2 sweep — 4 packages: remaining code quality fixes (TOML parse, path join, renameSync guard, locale, etc.)
+- [ ] **TASK-20260511091105701**: replace regex-based SQL check with real parser (node-sql-parser) — LLM hand-roll tendency anti-pattern
+- [ ] **TASK-20260511093956018**: deck add: multi-skill discovery warning when repo contains multiple skills — list all, ask user to pick or add all
+- [ ] **TASK-20260511095504433**: parseLocator #ref support — branch/tag/commit suffix compatible with skills.sh parseFragmentRef
+- [ ] **TASK-20260511235909747**: cold-pool: walk() bare catch silently drops entire subtree on readdir failure (cold-pool.ts:131)
+- [ ] **TASK-20260511235909780**: cold-pool: collectRecursive() bare catch silently drops subtree (cold-pool.ts:157)
+- [ ] **TASK-20260511235909808**: cold-pool: calculateDirSize() empty catch returns 0 masking permission errors (prune-plan.ts:64)
+- [ ] **TASK-20260511235909835**: cortex: post-commit git() helper ignores spawnSync exit code and stderr (post-commit.ts:16)
+- [ ] **TASK-20260511235909866**: cortex: pre-commit git() helper ignores spawnSync exit code and stderr (pre-commit.ts:16)
+- [ ] **TASK-20260511235909913**: deck: refresh-plan bare catch swallows execSync git failure — misclassifies timeout/signal as not-git (refresh-plan.ts:81)
+- [ ] **TASK-20260512000201440**: arena: narrow 4 medium catch/log patterns (cli.ts:174,284,309,313)
+- [ ] **TASK-20260512000201440**: arena: narrow 4 medium catch/log patterns — URL parse, skill check, file copy, workdir copy (cli.ts:174,284,309,313)
+- [ ] **TASK-20260512000201473**: deck: return error indicators from metadata operations (link.ts, add.ts, remove.ts)
+- [ ] **TASK-20260512000201505**: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
+- [ ] **TASK-20260512000201534**: cortex: fix 5 medium patterns — dispatch, ADR accept, git add, config parse, coupling
 
 ### 进行中 (0)
 
@@ -69,7 +84,7 @@ _无_
 
 _无_
 
-### 已完成 (159)
+### 已完成 (160)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -230,6 +245,7 @@ _无_
 - ✅ ~~TASK-20260510202837850~~: cold-pool P2 reliability — git timeout, symlink loop, truncated tree, prefix matching, cloneUrl protocol
 - ✅ ~~TASK-20260510202837878~~: cold-pool P2 maintainability — dedup prune, O(N^2) hasSkillMd, behind semantics, untyped lock, timestamp consistency, type drift, locator guards
 - ✅ ~~TASK-20260510202837906~~: CI supply-chain — pin third-party GitHub Action SHA
+- ✅ ~~TASK-20260511235656113~~: cold-pool: fetch-plan git checkout failure silently returns wrong status
 
 ### 悬置 (0)
 
@@ -325,6 +341,10 @@ _无_
 - 🤔 **ADR-20260509104832428** (01-proposed): Remove run --decks CLI-flag mode — keep only run --config arena.toml
 - ✅ **ADR-20260509144134332** (02-accepted): Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs
 - 🤔 **ADR-20260509170343037** (01-proposed): Cold-pool metadata DB data fingerprint for integrity verification
+- 🤔 **ADR-20260510233000000** (01-proposed): Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
+- 🤔 **ADR-20260511000000000** (01-proposed): Deck skill sources — git-only FQ locators vs hub/marketplace integration
+- 🤔 **ADR-20260511093900000** (01-proposed): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
+- 🤔 **ADR-20260511210000000** (01-proposed): Consolidate curator output to `~/.agents/lythoskill/curator/`
 
 ---
 
