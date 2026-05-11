@@ -9,10 +9,7 @@ describe('buildCodexCommand', () => {
     expect(cmd).toContain('--json')
     expect(cmd).toContain('--ephemeral')
     expect(cmd).toContain('--skip-git-repo-check')
-    expect(cmd).toContain('--ask-for-approval')
-    expect(cmd).toContain('never')
-    expect(cmd).toContain('--sandbox')
-    expect(cmd).toContain('workspace-write')
+    expect(cmd).toContain('--dangerously-bypass-approvals-and-sandbox')
     expect(cmd).toContain('-')
   })
 

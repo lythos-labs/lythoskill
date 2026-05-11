@@ -21,8 +21,7 @@ import { registerAgent } from '@lythos/agent-adapter'
 export function buildCodexCommand(): string[] {
   return [
     'codex', 'exec',
-    '--ask-for-approval', 'never',
-    '--sandbox', 'workspace-write',
+    '--dangerously-bypass-approvals-and-sandbox',
     '--json',
     '--ephemeral',
     '--skip-git-repo-check',
