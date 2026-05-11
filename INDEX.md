@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/12 00:52:31
+> 自动生成于 2026/5/12 01:15:06
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 199 | 进行中: 0, 待验收: 0, 已完成: 170 |
-| Epics | 27 | 活跃: 1, 已完成: 22, 悬置: 2, 已归档: 2 |
+| Tasks | 200 | 进行中: 0, 待验收: 0, 已完成: 171 |
+| Epics | 28 | 活跃: 0, 已完成: 24, 悬置: 2, 已归档: 2 |
 | ADRs | 64 | 已接受: 49 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
+_无_
 
 ### 已完成
 
@@ -42,6 +42,8 @@
 - ✅ **EPIC-20260508082810062**: Everything-from-URL: deck, arena, task, agents.md as network-native resources
 - ✅ **EPIC-20260508155035411**: Deck reconcile convergence — plan-first to auto-apply
 - ✅ **EPIC-20260508201323933**: Project showcase — README, Vitepress, and public positioning for the governance layer
+- ✅ **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
+- ✅ **EPIC-20260511235648324**: QA sweep: empty catch hardening across core packages
 
 ### 悬置
 
@@ -72,7 +74,7 @@ _无_
 
 _无_
 
-### 已完成 (170)
+### 已完成 (171)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -240,6 +242,7 @@ _无_
 - ✅ ~~TASK-20260511235909835~~: cortex: post-commit git() helper ignores spawnSync exit code and stderr (post-commit.ts:16)
 - ✅ ~~TASK-20260511235909866~~: cortex: pre-commit git() helper ignores spawnSync exit code and stderr (pre-commit.ts:16)
 - ✅ ~~TASK-20260511235909913~~: deck: refresh-plan bare catch swallows execSync git failure — misclassifies timeout/signal as not-git (refresh-plan.ts:81)
+- ✅ ~~TASK-20260512000000001~~: test-probe
 - ✅ ~~TASK-20260512000201440~~: arena: narrow 4 medium catch/log patterns (cli.ts:174,284,309,313)
 - ✅ ~~TASK-20260512000201473~~: deck: return error indicators from metadata operations (link.ts, add.ts, remove.ts)
 - ✅ ~~TASK-20260512000201505~~: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
