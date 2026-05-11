@@ -277,10 +277,68 @@ export function probeStatus(config: WorkflowConfig): void {
     }
   }
 
+  // ── Staleness check: backlog bloat & epic drift ──────────────────
+  const now = Date.now()
+  const THREE_DAYS = 3 * 24 * 60 * 60 * 1000
+  const staleBacklog: string[] = []
+  const driftedEpics: string[] = []
+
+  const backlogDir = join(config.tasksDir, config.taskSubdirs.backlog)
+  const backlogFiles = scanDir(backlogDir, 'TASK-')
+  for (const f of backlogFiles) {
+    try {
+      const stat = readFileSync(f, 'utf-8')
+      const createdMatch = stat.match(/\|\s*backlog\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/)
+      const dateStr = createdMatch ? createdMatch[1] : null
+      if (dateStr) {
+        const age = now - new Date(dateStr).getTime()
+        if (age > THREE_DAYS) {
+          const id = basename(f).match(/^(TASK-\d+)/)?.[1] ?? basename(f)
+          const days = Math.floor(age / (24 * 60 * 60 * 1000))
+          staleBacklog.push(`${id} (${days}d old)`)
+        }
+      }
+    } catch {}
+  }
+
+  const activeEpicDir = join(config.epicsDir, config.epicSubdirs.active)
+  const activeEpicFiles = scanDir(activeEpicDir, 'EPIC-')
+  for (const f of activeEpicFiles) {
+    try {
+      const content = readFileSync(f, 'utf-8')
+      const statusMatch = content.match(/\|\s*active\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/)
+      const dateStr = statusMatch ? statusMatch[1] : null
+      if (dateStr) {
+        const age = now - new Date(dateStr).getTime()
+        if (age > THREE_DAYS) {
+          const id = basename(f).match(/^(EPIC-\d+)/)?.[1] ?? basename(f)
+          const days = Math.floor(age / (24 * 60 * 60 * 1000))
+          driftedEpics.push(`${id} (${days}d old)`)
+        }
+      }
+    } catch {}
+  }
+
+  if (staleBacklog.length > 0) {
+    console.log('\n📦 Backlog staleness:')
+    for (const s of staleBacklog) {
+      console.log(`     ⚠️  ${s} — may be state drift. Check: git log --oneline -- cortex/tasks/01-backlog/${s.replace(/ .*/, '')}*`)
+    }
+    console.log('     💡 If work is done, close the task. If deferred, suspend it.')
+  }
+
+  if (driftedEpics.length > 0) {
+    console.log('\n📋 Epic drift:')
+    for (const e of driftedEpics) {
+      console.log(`     ⚠️  ${e} — may have all tasks done. Check: cortex list | grep ${e.replace(/ .*/, '')}`)
+    }
+    console.log('     💡 If all tasks completed, close the epic: cortex epic done <id>')
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0) {
     console.log('✅ All clear! No inconsistencies found.');
   } else {
     if (allIssues.length > 0) {
