@@ -18,6 +18,11 @@ when_to_use: |
   - About to commit and need to write a trailer (Closes: TASK-xxx, Task: TASK-xxx review, ADR: ADR-xxx accept)
   - Just finished a task and need to move it to review/completed
   - Need to check active tasks/epics before starting new work
+  - Found a bug or vulnerability — register it as a task BEFORE fixing
+  - Discovered a systemic issue that needs an ADR
+  - QA sweep found findings that need tracking
+  - Need to register a lesson learned or pitfall
+  - User says "登记" / "记录一下" / "记下来" / "别忘了"
   - See a TASK-xxx or EPIC-xxx reference and need context
   - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
   - Doing session handoff or writing daily notes

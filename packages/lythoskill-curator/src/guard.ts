@@ -11,6 +11,27 @@
 import { execFileSync } from "node:child_process"
 import { existsSync, rmSync } from "node:fs"
 import { resolve, isAbsolute } from "node:path"
+import { Parser } from "node-sql-parser"
+
+// ── SQL safety ─────────────────────────────────────────────
+
+const sqlParser = new Parser()
+const READONLY_TYPES = new Set(["select", "use", "set", "show", "desc", "describe"])
+
+/** Check if a SQL query is read-only — uses a real SQL parser, not regex. */
+export function isReadOnlyQuery(sql: string): boolean {
+  try {
+    const ast = sqlParser.astify(sql.trim())
+    if (Array.isArray(ast)) {
+      return ast.every((stmt: any) => READONLY_TYPES.has(stmt.type))
+    }
+    return READONLY_TYPES.has((ast as any).type)
+  } catch {
+    return false
+  }
+}
+
+// ── Git safety ──────────────────────────────────────────────
 
 /**
  * Run a git command safely — uses execFileSync with array args,
@@ -24,6 +45,8 @@ export function safeGit(args: string[], opts?: { cwd?: string; timeout?: number;
     stdio: opts?.stdio ?? "pipe",
   }).trim()
 }
+
+// ── Path safety ─────────────────────────────────────────────
 
 /**
  * Validate a path stays within the cold pool.
@@ -52,16 +75,6 @@ export function validateInColdPool(targetPath: string, poolPath: string): string
 }
 
 /**
- * Check if a SQL query is read-only (SELECT/PRAGMA only).
- * The query command should refuse destructive statements.
- */
-const DESTRUCTIVE_SQL = /\b(DELETE|DROP|INSERT|UPDATE|ALTER|CREATE|REPLACE|TRUNCATE)\b/i
-
-export function isReadOnlyQuery(sql: string): boolean {
-  return !DESTRUCTIVE_SQL.test(sql)
-}
-
-/**
  * Safe rmSync — only deletes paths within an allowed root.
  * All curator commands that call rmSync MUST use this wrapper.
  */
@@ -69,5 +82,3 @@ export function safeRmSync(targetPath: string, rootPath: string, opts?: { recurs
   const safePath = validateInColdPool(targetPath, rootPath)
   rmSync(safePath, { recursive: opts?.recursive ?? true, force: opts?.force ?? true })
 }
-
-export { DESTRUCTIVE_SQL }

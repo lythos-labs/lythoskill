@@ -44,6 +44,7 @@
   "dependencies": {
     "@lythos/cold-pool": "^0.9.36",
     "@lythos/infra": "^0.9.36",
+    "node-sql-parser": "^5.4.0",
     "yaml": "^2.8.3"
   }
 }

@@ -62,6 +62,10 @@ L3 买家秀: arena evaluation + your judgment  ← real testing, real recommend
 
 Curator gives you L2. You bring L3.
 
+**This is thin skill pattern at the architecture level**: stable layer in npm/CLI
+(git, filesystem, SQLite) — intelligence layer in agent (search, evaluate, recommend).
+External discovery and integration belong to the agent, not the tool.
+
 ## Commands
 ### Index the cold pool
 ```bash

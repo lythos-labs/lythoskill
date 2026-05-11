@@ -1,13 +1,10 @@
 {
   "name": "lythoskill-workspace",
   "version": "0.9.48",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "devDependencies": {
     "husky": "^9.1.7"
   },
+  "private": true,
   "scripts": {
     "prepare": "husky",
     "test": "bun --filter='*' run test",
@@ -16,5 +13,8 @@
     "test:report:full": "bun scripts/test-report.ts --all",
     "test:bdd": "bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts",
     "test:all": "bun run test && bun run test:bdd"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }
