@@ -18,8 +18,9 @@ if [ -n "$STAGED_GUARDS" ]; then
   done
   echo "╠══════════════════════════════════════════════════════════════╣"
   echo "║  Before committing, QA the change:                          ║"
-  echo "║    arena single --deck examples/decks/qa-sweep.toml         ║"
-  echo "║    --brief 'verify <guard> catches deliberate failure'      ║"
+  echo "║    bunx @lythos/skill-arena@latest single                   ║"
+  echo "║      --deck examples/decks/qa-sweep.toml                    ║"
+  echo "║      --brief 'QA: verify <guard> catches deliberate fail'   ║"
   echo "║  See: AGENTS.md → Guard-script sensitivity                  ║"
   echo "║  Wiki: git-provenance-over-design-assumption-lesson.md      ║"
   echo "╚══════════════════════════════════════════════════════════════╝"
