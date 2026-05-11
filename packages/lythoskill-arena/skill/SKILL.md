@@ -8,7 +8,7 @@ description: |
   no install, no working-set pollution, no deck overwrite. `vs` mode
   runs declarative arena.toml for reproducible multi-deck comparison
   with Pareto frontier analysis. Always restores your parent deck after.
-  First run: arena checks which players are available (kimi/codex/claude)
+  First run: arena checks which players are available (kimi/codex/deepseek/claude)
   and records your preference. Subagent-friendly: can resume interrupted
   arena runs from saved state.
 when_to_use: |
@@ -54,26 +54,28 @@ TASK-arena.md instructions, not a scoring script.
 
 Arena auto-detects available players. On first run, it:
 
-1. Checks `which kimi`, `which codex`, `which claude` (in that order)
-2. Records available players to `~/.agents/arena/players.json`
+1. Checks `which kimi`, `which codex`, `which deepseek` (CLI-wrapped players), then checks `ANTHROPIC_API_KEY` for Claude (SDK — no CLI binary needed)
+2. Records available players to `~/.agents/lythoskill/arena/players.json`
+   (same `~/.agents/` namespace as cold pool + curator — user agent config in one place)
 3. Defaults to `kimi` if available (proven headless reliability)
 4. If no players found, guides installation
 
 ```bash
 # Supported players (install at least one):
-uv tool install kimi-cli       # kimi (recommended — most reliable headless)
-npm i -g @openai/codex          # codex (codex exec --json)
-npm install -g @anthropic-ai/claude-code  # claude (SDK mode preferred over -p)
+uv tool install kimi-cli                    # kimi (recommended — most reliable headless)
+npm i -g @openai/codex                      # codex (codex exec --json)
+# deepseek: bundled with DeepSeek desktop app or pip install deepseek-cli
+# claude: uses Anthropic SDK (API key), no CLI binary required
 ```
 
 ### Player priority
 
-| Player | Priority | Headless reliability | When to use |
-|--------|----------|---------------------|-------------|
-| **kimi** (default) | 1st | ✅ Eager tools, no deadlock | Best cost/reliability ratio. `--print --afk` is first-class headless. |
-| **codex** | 2nd | ✅ New adapter | If you already have `codex` installed and configured. |
-| **deepseek** | 3rd | ⚠️ TUI native | `deepseek serve --http` daemon mode. If `which deepseek` succeeds, you're using it. |
-| **claude** | 4th | ⚠️ SDK mode preferred | Avoid `claude -p` (known Bun.spawn deadlock). Use SDK adapter instead. |
+| Player | Priority | Headless mode | When to use |
+|--------|----------|---------------|-------------|
+| **kimi** (default) | 1st | `--print --afk` | Best cost/reliability ratio. Eager tools, no deadlock. |
+| **codex** | 2nd | `codex exec --json` | If you already have codex installed. New adapter, early feedback. |
+| **deepseek** | 3rd | `deepseek serve --http` | Daemon mode for headless use. If `which deepseek` succeeds. |
+| **claude** | 4th | SDK (`claude-sdk` adapter) | Uses Anthropic SDK directly — no shell spawn, no deadlock. Needs API key only. |
 
 If `player` is omitted, arena tries kimi → codex → deepseek → claude.
 
@@ -85,12 +87,11 @@ Each player needs its own auth. Don't hardcode these — when setting up a new p
 | Player | Auth setup (run once) | Verify |
 |--------|----------------------|--------|
 | **kimi** | `kimi login` or `export KIMI_API_KEY=...` | `kimi --print -p "hello"` |
-| **codex** | `codex login` or `export OPENAI_API_KEY=...` | `codex exec --json "hello"` |
-| **deepseek** | `deepseek login` or `export DEEPSEEK_API_KEY=...` | `deepseek serve --http --port 0 --health` |
-| **claude** | `claude login` or `export ANTHROPIC_API_KEY=...` | `claude -p "hello"` |
+| **codex** | `codex login` or `export OPENAI_API_KEY=...` | `which codex && codex --version` |
+| **deepseek** | `deepseek login` or `export DEEPSEEK_API_KEY=...` | `which deepseek && deepseek --version` |
+| **claude** | `export ANTHROPIC_API_KEY=...` (or `claude login` for OAuth) | `echo $ANTHROPIC_API_KEY` (SDK reads this directly, no CLI binary needed) |
 
-If `which <player>` fails, guide the user to install first (web-search for latest
-install command — packages and tool names change between versions).
+For CLI-wrapped players (kimi/codex/deepseek): if `which <player>` fails, guide the user to install first. For Claude (SDK): only the API key matters — web-search for latest key setup.
 
 ## Working Directory & Lock Files
 

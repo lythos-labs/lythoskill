@@ -24,7 +24,7 @@ allowed-tools:
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.curation
 deck_managed_dirs:
-  - ~/.agents/lythos/skill-curator/
+  - ~/.agents/lythoskill/curator/
 ---
 
 # Skill Curator
@@ -74,10 +74,10 @@ bunx @lythos/skill-curator@{{PACKAGE_VERSION}} [POOL_PATH]
 
 # Defaults:
 #   POOL_PATH = ~/.agents/skill-repos
-#   Output    = {POOL_PATH}/.lythoskill-curator/
+#   Output    = ~/.agents/lythoskill/curator/   (personal environment scan)
 #
-# Custom output:
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} ~/.agents/skill-repos --output ~/.agents/lythos/skill-curator/
+# Custom output (e.g. per-pool isolation):
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} ~/.agents/skill-repos --output /tmp/my-index/
 ```
 Curator is a **reconciler** (K8s-style): no matter what state the index is in
 (stale, corrupted, missing), running `curator` converges it to a clean, current
@@ -130,7 +130,7 @@ The plan is a heredoc with `git pull --ff-only` lines you can audit before execu
 # Restore the most recent backup
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore
 # Custom output directory:
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore --output ~/.agents/lythos/skill-curator/
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore --output ~/.agents/lythoskill/curator/
 ```
 
 ### Query the index

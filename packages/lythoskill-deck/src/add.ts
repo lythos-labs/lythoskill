@@ -65,6 +65,7 @@ export function findSkillDir(repoPath: string, skill: string | null): string | n
 function findSkillByName(repoPath: string, name: string): string | null {
   try {
     const entries = readdirSync(repoPath, { withFileTypes: true, recursive: true })
+    // First pass: match by frontmatter name:
     for (const e of entries) {
       if (!e.isFile() || e.name !== 'SKILL.md') continue
       const dir = e.parentPath ?? dirname(join(repoPath, e.name))
@@ -73,6 +74,12 @@ function findSkillByName(repoPath: string, name: string): string | null {
         const fmMatch = content.match(/^---\s*\nname:\s*(.+)$/m)
         if (fmMatch && fmMatch[1].trim() === name) return dir
       } catch {}
+    }
+    // Second pass: fall back to directory name (skills.sh convention — dir name ≠ frontmatter name)
+    for (const e of entries) {
+      if (!e.isFile() || e.name !== 'SKILL.md') continue
+      const dir = e.parentPath ?? dirname(join(repoPath, e.name))
+      if (basename(dir) === name) return dir
     }
   } catch {}
   return null
@@ -134,9 +141,17 @@ export function normalizeSkillsSh(input: string): NormalizedLocator {
   // Already an FQ locator
   if (base.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return { fq: input }
 
-  // github: prefix
+  // github: prefix — extract @skill from remainder before building FQ
   const ghPrefix = base.match(/^github:(.+)$/)
-  if (ghPrefix) return { fq: `github.com/${ghPrefix[1]}${ref}` }
+  if (ghPrefix) {
+    const rest = ghPrefix[1]
+    const atInGh = rest.match(/^([^/]+)\/([^/@]+)@(.+)$/)
+    if (atInGh) {
+      const [, owner, repo, skill] = atInGh
+      return { fq: `github.com/${owner}/${repo}${ref}`, skillFilter: skill }
+    }
+    return { fq: `github.com/${rest}${ref}` }
+  }
 
   // owner/repo@skill — clone repo-level, discover exact path at runtime
   const atMatch = base.match(/^([^/]+)\/([^/@]+)@(.+)$/)

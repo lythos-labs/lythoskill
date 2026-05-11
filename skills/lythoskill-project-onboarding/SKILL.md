@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-onboarding
-version: 0.9.48
+version: 0.9.51
 type: standard
 description: |
   Session context loader. Reads the latest daily handoff to restore
@@ -47,12 +47,18 @@ handoff is stale — flag it and rely on real-time git output.
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:
 ```bash
-cat skill-deck.toml          # What skills are active
-cat cortex/INDEX.md           # Project governance state
-git log --oneline -10         # Recent changes
-ls cortex/tasks/01-backlog/   # Pending work
-ls cortex/tasks/02-in-progress/  # Active work
+cat skill-deck.toml               # What skills are active
+cat cortex/INDEX.md               # Project governance state
+git log --oneline -10             # Recent changes
+ls -lt cortex/adr/02-accepted/ | head -10   # Recent decisions
+ls -lt cortex/wiki/02-research/ | head -10  # Recent research
+ls cortex/epics/01-active/        # Active epics
+ls cortex/tasks/01-backlog/       # Pending work
+ls cortex/tasks/02-in-progress/   # Active work
 ```
+**If the project has cortex**, the `ls -lt` on adr/, wiki/, epics/, tasks/ directories
+tells you what happened recently without reading every file — timestamps reveal
+the most recent decisions, research, and active work at a glance.
 ## Freshness Decision Table
 | Condition | Verdict | Action |
 |-----------|---------|--------|

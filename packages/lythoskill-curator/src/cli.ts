@@ -214,10 +214,10 @@ function parseCuratorArgs(argv: string[]) {
     }
   }
 
-  // Default: place index inside the cold pool (proximity principle)
-  // e.g. ~/.agents/skill-repos/.lythoskill-curator/
+  // Default: personal environment scan, not cold pool metadata
+  // ADR-20260511210000000 consolidates curator output to ~/.agents/lythoskill/curator/
   if (!outputDir) {
-    outputDir = `${poolPath}/.lythoskill-curator`;
+    outputDir = `${process.env.HOME}/.agents/lythoskill/curator`;
   }
 
   return { poolPath, outputDir };
@@ -414,7 +414,8 @@ function resolveDbPath(argv: string[]): string | undefined {
   // Fallback: common locations
   const candidates = [
     `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,
-    `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,
+    `${process.env.HOME}/.agents/lythoskill/curator/catalog.db`,
+    `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,  // legacy (pre-0.9.51)
   ]
   for (const c of candidates) {
     if (existsSync(c)) { return c }
@@ -472,6 +473,7 @@ function runQuery(argv: string[]) {
       console.error('  Searched default locations:')
       console.error('    ./catalog.db')
       console.error('    ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
+      console.error('    ~/.agents/lythoskill/curator/catalog.db')
       console.error('    ~/.agents/lythos/skill-curator/catalog.db')
     }
     console.error('')
@@ -541,6 +543,7 @@ function runAudit(argv: string[]) {
     console.error('Searched:')
     console.error('  ./catalog.db')
     console.error('  ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
+    console.error('  ~/.agents/lythoskill/curator/catalog.db')
     console.error('  ~/.agents/lythos/skill-curator/catalog.db')
     console.error('')
     console.error('Run `lythoskill-curator` first to build the index.')
@@ -633,9 +636,10 @@ function getFlag(argv: string[], flag: string): string | undefined {
   return idx >= 0 && argv[idx + 1] ? argv[idx + 1] : undefined
 }
 
-/** Append a SkillAddition record to {pool}/.lythoskill-curator/additions.jsonl */
-function writeAddition(poolPath: string, record: ReturnType<typeof buildAdditionRecord>) {
-  const metaDir = join(poolPath, '.lythoskill-curator')
+/** Append a SkillAddition record to ~/.agents/lythoskill/curator/additions.jsonl */
+function writeAddition(_poolPath: string, record: ReturnType<typeof buildAdditionRecord>) {
+  // ADR-20260511210000000: consolidated to ~/.agents/lythoskill/curator/
+  const metaDir = join(`${process.env.HOME}/.agents/lythoskill/curator`)
   mkdirSync(metaDir, { recursive: true })
   const file = join(metaDir, 'additions.jsonl')
   appendFileSync(file, JSON.stringify(record) + '\n')
