@@ -78,10 +78,34 @@ of actual results. Agents reading the report would conclude no tests ran.
 
 ### 2. pre-commit-test.ts: dead exit gate
 
-**Root cause**: same `|| true` pattern. The gate that was supposed to block
-commits on test failure never triggered.
+**Root cause provenance**: `|| true` was introduced in `56260eb` (2026-05-07),
+commit: `fix: CodeQL high-severity alerts + pre-commit-test no-test-files edge case`.
+
+The diff was:
+```diff
+-  const result = await $`sh -c "cd packages/${pkg} && bun test"`.cwd(ROOT).nothrow().quiet();
++  const result = await $`sh -c "cd packages/${pkg} && bun test 2>&1 || true"`.cwd(ROOT).nothrow().quiet();
+```
+
+**Intent was legitimate**: the `creator` package has no `.test.ts` files. Bun test
+exits 1 in that case, which the pre-commit gate treated as a test failure. The
+agent correctly identified the edge case but used an over-broad tool (`|| true`)
+that silenced *all* non-zero exits — not just the "no test files" case.
+
+**Impact**: from 2026-05-07 to 2026-05-11 (4 days), the pre-commit test gate
+never actually blocked any commit. Any test failure committed during that window
+would have passed the gate silently.
+
+This is the classic "locally correct, globally wrong" fix — solves the
+immediate edge case but with a tool too blunt for the job. The correct fix
+(in `9583e44`) parses `N fail` from stdout directly, distinguishing "no test
+files" (0 fail) from "real failure" (N > 0 fail) without needing exit codes.
 
 **Fix**: removed `|| true`, parsed fail count from stdout directly.
+
+**Pattern**: when suppressing exit codes to handle a known non-error case,
+always replace the exit-code gate with a content-based gate (parse stdout).
+"Swallow all" (`|| true`) is never the right answer in a guard context.
 
 ### 3. README: stale "649 pass" badge
 
@@ -126,3 +150,32 @@ Pre-commit used yet another code path with dead error handling.
 
 Both fix commits (`9d2834f` bump + lockfile, `9583e44` test infra) passed
 all 4 CI jobs after push. The dynamic CI badge now reflects reality.
+
+## Pattern: "Locally Correct, Globally Wrong" Gate Fix
+
+The `|| true` bug exemplifies a recurring failure mode in agent-authored
+guard code:
+
+1. **Agent encounters a legitimate edge case** — `bun test` exits 1 when
+   no test files found, which is not a failure
+2. **Agent reaches for the most general suppression tool** — `|| true`
+   swallows ALL non-zero exits, not just the "no test files" case
+3. **The exit-code check becomes dead code** — since `|| true` always
+   succeeds, `exitCode !== 0` never fires
+4. **Real failures pass silently** — for days/weeks until someone notices
+
+The fix principle: **when suppressing exit codes to handle a known non-error
+case, replace the exit-code gate with a content-based gate.** Parse stdout
+for the specific signal (`N fail`, `0 test files`, etc.) instead of relying
+on the exit code after suppression.
+
+This applies beyond test gates — any `|| true`, `try/catch` swallowing,
+or `.nothrow()` on a subprocess in a guard/validation context should pair
+with content-based validation of stdout.
+
+### Detection Heuristic
+
+A dormant `|| true` in a guard script can be detected by a negative
+property test: run the guard with a deliberately broken test and verify
+it blocks the commit. The current codebase lacks such meta-tests.
+
