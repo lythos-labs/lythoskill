@@ -61,6 +61,23 @@ export function findSkillDir(repoPath: string, skill: string | null): string | n
   return null
 }
 
+/** Find a skill directory by name within a cloned repo (for @skill syntax). */
+function findSkillByName(repoPath: string, name: string): string | null {
+  try {
+    const entries = readdirSync(repoPath, { withFileTypes: true, recursive: true })
+    for (const e of entries) {
+      if (!e.isFile() || e.name !== 'SKILL.md') continue
+      const dir = e.parentPath ?? dirname(join(repoPath, e.name))
+      try {
+        const content = readFileSync(join(dir, 'SKILL.md'), 'utf-8')
+        const fmMatch = content.match(/^---\s*\nname:\s*(.+)$/m)
+        if (fmMatch && fmMatch[1].trim() === name) return dir
+      } catch {}
+    }
+  } catch {}
+  return null
+}
+
 function resolvePath(p: string): string {
   if (p.startsWith('~/')) return join(homedir(), p.slice(2))
   return resolve(p)
@@ -89,12 +106,16 @@ function fqOf(loc: Locator): string {
  *   github:owner/repo           → github.com/owner/repo
  *   owner/repo                  → github.com/owner/repo
  */
-export function normalizeSkillsSh(input: string): string {
-  // localhost: always pass through (parseLocator handles multi-segment validation)
-  if (input.startsWith('localhost/')) return input
+export interface NormalizedLocator {
+  fq: string        // FQ locator for clone + parseLocator
+  skillFilter?: string  // from @skill suffix — match by name after clone
+}
 
-  // Extract #ref suffix (branch/tag/commit) — compatible with skills.sh parseFragmentRef.
-  // #ref comes before @skill: owner/repo#main@skill-name → ref=main, skill=skill-name
+export function normalizeSkillsSh(input: string): NormalizedLocator {
+  // localhost: always pass through
+  if (input.startsWith('localhost/')) return { fq: input }
+
+  // Extract #ref suffix
   let ref = ''
   let base = input
   const hashIdx = input.indexOf('#')
@@ -106,38 +127,36 @@ export function normalizeSkillsSh(input: string): string {
       ref = `#${afterHash.slice(0, atInRef)}`
       base = `${base}@${afterHash.slice(atInRef + 1)}`
     } else {
-      ref = input.slice(hashIdx) // includes '#'
+      ref = input.slice(hashIdx)
     }
   }
 
-  // Already an FQ locator: host.tld/owner/repo[/...] — pass through with ref
-  if (base.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return input
+  // Already an FQ locator
+  if (base.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return { fq: input }
 
   // github: prefix
   const ghPrefix = base.match(/^github:(.+)$/)
-  if (ghPrefix) return `github.com/${ghPrefix[1]}${ref}`
+  if (ghPrefix) return { fq: `github.com/${ghPrefix[1]}${ref}` }
 
-  // owner/repo@skill shorthand — normalizes to repo-level locator.
-  // Skill discovery at runtime (scanSkill → name match) because the
-  // actual path within the repo is unknown until after clone.
-  // e.g. gemini-cli has skills at .gemini/skills/, not skills/.
+  // owner/repo@skill — clone repo-level, discover exact path at runtime
   const atMatch = base.match(/^([^/]+)\/([^/@]+)@(.+)$/)
   if (atMatch && !base.includes(':') && !base.startsWith('.')) {
-    const [, owner, repo] = atMatch
-    return `github.com/${owner}/${repo}${ref}`
+    const [, owner, repo, skill] = atMatch
+    return { fq: `github.com/${owner}/${repo}${ref}`, skillFilter: skill }
   }
 
-  // owner/repo[/subpath] shorthand (no dot in first segment → not a hostname)
+  // owner/repo[/subpath]
   const shortMatch = base.match(/^([^/.]+)\/([^/]+)(?:\/(.+?))?\/?$/)
   if (shortMatch && !base.includes(':') && !base.startsWith('.')) {
     const [, owner, repo, subpath] = shortMatch
-    const fq = subpath
-      ? `github.com/${owner}/${repo}/${subpath}`
-      : `github.com/${owner}/${repo}`
-    return `${fq}${ref}`
+    return {
+      fq: subpath
+        ? `github.com/${owner}/${repo}/${subpath}${ref}`
+        : `github.com/${owner}/${repo}${ref}`,
+    }
   }
 
-  return input
+  return { fq: input }
 }
 
 function exitInvalidLocator(locator: string): never {
@@ -165,9 +184,9 @@ export async function addSkill(
     ? resolvePath(options.deck)
     : findDeckToml(workdir) || join(workdir, 'skill-deck.toml')
 
-  const normalized = normalizeSkillsSh(locator)
-  const parsed = parseLocator(normalized)
-  if (!parsed) exitInvalidLocator(normalized)
+  const { fq, skillFilter } = normalizeSkillsSh(locator)
+  let parsed = parseLocator(fq)
+  if (!parsed) exitInvalidLocator(fq)
 
   if (parsed.isLocalhost) {
     console.error(`❌ deck add does not support localhost locators (no remote to clone).`)
@@ -178,15 +197,13 @@ export async function addSkill(
   const coldPoolPath = resolveColdPoolPath(deckPath, workdir)
   const pool = new ColdPool(coldPoolPath)
   const fetchPlan = buildFetchPlan(pool, parsed)
-  const fqPath = fqOf(parsed)
   const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo!
-  const rawAlias = options.alias || skillName
+  let rawAlias = options.alias || skillName
   try { validateAlias(rawAlias) } catch (e: any) {
     console.error(`❌ Invalid alias: ${e.message}`)
     console.error('   Aliases may only contain letters, numbers, hyphens, and underscores.')
     process.exit(1)
   }
-  const alias = rawAlias
   const skillType = (options.type || 'tool').toLowerCase()
 
   if (!['innate', 'tool', 'combo'].includes(skillType)) {
@@ -194,6 +211,7 @@ export async function addSkill(
     process.exit(1)
   }
 
+  const fqPathBefore = fqOf(parsed) // pre-discovery — may be repo-level for @skill
   if (dryRun) {
     console.log(`🔎 Dry-run: deck add ${locator}`)
     console.log(`   Cold pool:  ${coldPoolPath}`)
@@ -218,7 +236,7 @@ export async function addSkill(
     }
     console.log(`\n📝 Would add to skill-deck.toml:`)
     console.log(`   [${skillType}.skills.${alias}]`)
-    console.log(`   path = "${fqPath}"`)
+    console.log(`   path = "${fqPathBefore}"`)
     console.log(`\n💡 Remove --dry-run to execute.`)
     return
   }
@@ -254,7 +272,16 @@ export async function addSkill(
     console.log(`   (per ADR-20260507110332805, refresh defaults to discover-only)`)
   }
 
-  const skillDir = findSkillDir(fetchPlan.targetDir, parsed.skill)
+  const skillDir = findSkillDir(fetchPlan.targetDir, parsed.skill || null)
+    ?? (skillFilter ? findSkillByName(fetchPlan.targetDir, skillFilter) : null)
+  if (skillDir && skillFilter) {
+    // If discovered by name, update skill path and alias
+    const relPath = skillDir.slice(fetchPlan.targetDir.length + 1)
+    parsed = { ...parsed, skill: relPath }
+    if (!options.alias) rawAlias = basename(relPath)  // use discovered dir name as alias
+  }
+  const fqPath = fqOf(parsed)  // may be updated after @skill discovery
+  const alias = rawAlias       // finalized after potential @skill override
   if (!skillDir) {
     console.error(`❌ No SKILL.md found in downloaded repo`)
     console.error(`   Checked: ${fetchPlan.targetDir}`)
