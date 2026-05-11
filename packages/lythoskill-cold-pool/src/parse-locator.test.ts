@@ -11,6 +11,7 @@ describe('parseLocator — accepted forms', () => {
       repo: 'skills',
       skill: 'skills/pdf',
       isLocalhost: false,
+      ref: null,
     })
   })
 
@@ -35,6 +36,7 @@ describe('parseLocator — accepted forms', () => {
       repo: 'design-doc-mermaid',
       skill: null,
       isLocalhost: false,
+      ref: null,
     })
   })
 
@@ -52,6 +54,7 @@ describe('parseLocator — accepted forms', () => {
       repo: 'my-skill',
       skill: null,
       isLocalhost: true,
+      ref: null,
     })
   })
 
@@ -99,6 +102,7 @@ describe('parseLocator — rejected forms (per ADR-20260502012643244 FQ-only)', 
       repo: 'skills',
       skill: 'my-skill',
       isLocalhost: true,
+      ref: null,
     })
   })
 
