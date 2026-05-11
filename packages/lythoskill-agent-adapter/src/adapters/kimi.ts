@@ -7,9 +7,9 @@ import { registerAgent } from '../registry'
 
 // ── Pure functions (testable without CLI) ────────────────────────────────────
 
-/** Build the kimi --print shell command. */
-export function buildKimiCommand(promptFile: string): string[] {
-  return ['sh', '-c', `kimi --print --afk --output-format stream-json < ${promptFile}`]
+/** Build kimi --print command args (no shell wrapper — safe from injection). */
+export function buildKimiCommand(): string[] {
+  return ['kimi', '--print', '--afk', '--output-format', 'stream-json']
 }
 
 /**
@@ -49,9 +49,9 @@ async function spawnKimi(opts: {
 
   const start = Date.now()
 
-  const proc = Bun.spawn(buildKimiCommand(promptFile), {
+  const proc = Bun.spawn(buildKimiCommand(), {
     cwd: opts.cwd,
-    stdin: 'ignore',
+    stdin: Bun.file(promptFile),
     stdout: 'pipe',
     stderr: 'pipe',
   })

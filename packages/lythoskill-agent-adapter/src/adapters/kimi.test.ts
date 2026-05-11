@@ -2,17 +2,19 @@ import { describe, expect, it } from 'bun:test'
 import { buildKimiCommand, parseKimiStreamJson } from './kimi'
 
 describe('buildKimiCommand', () => {
-  it('builds shell command with prompt file', () => {
-    const cmd = buildKimiCommand('/tmp/prompt.txt')
-    expect(cmd[0]).toBe('sh')
-    expect(cmd[1]).toBe('-c')
-    expect(cmd[2]).toContain('kimi --print --afk --output-format stream-json')
-    expect(cmd[2]).toContain('/tmp/prompt.txt')
+  it('builds kimi CLI args without shell wrapper', () => {
+    const cmd = buildKimiCommand()
+    expect(cmd[0]).toBe('kimi')
+    expect(cmd).toContain('--print')
+    expect(cmd).toContain('--afk')
+    expect(cmd).toContain('--output-format')
+    expect(cmd).toContain('stream-json')
   })
 
-  it('includes stdin redirect from prompt file', () => {
-    const cmd = buildKimiCommand('/tmp/my-prompt.txt')
-    expect(cmd[2]).toContain('< /tmp/my-prompt.txt')
+  it('does not use shell or redirect (injection-safe)', () => {
+    const cmd = buildKimiCommand()
+    expect(cmd).not.toContain('sh')
+    expect(cmd).not.toContain('-c')
   })
 })
 
