@@ -3,11 +3,12 @@ name: project-cortex
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  GTD-style project governance with ADR, Epic, Task, and Wiki.
-  Numeric-prefixed directories (01-backlog, 02-in-progress, etc.)
-  ensure GTD workflow ordering. Timestamp IDs avoid collision without
-  a central database. CLI creates documents, generates indexes, and
-  probes for status inconsistencies.
+  Register tasks BEFORE fixing bugs. Close epics when work is done.
+  Never leave state drift for the next agent to discover via git log.
+  GTD-style governance: ADR, Epic, Task, Wiki with CLI automation.
+  Numeric-prefixed directories enforce workflow order. Timestamp IDs
+  prevent collision. probe detects stale backlog and epic drift.
+  Trailer dispatch (Closes:/Task:/ADR:) auto-closes tasks on commit.
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
