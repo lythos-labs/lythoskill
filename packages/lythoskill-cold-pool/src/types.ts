@@ -22,6 +22,7 @@ export interface Locator {
   readonly owner: string
   readonly repo: string
   readonly skill: string | null
+  readonly ref: string | null          // optional branch/tag/commit (#ref suffix)
   readonly isLocalhost: boolean
 }
 

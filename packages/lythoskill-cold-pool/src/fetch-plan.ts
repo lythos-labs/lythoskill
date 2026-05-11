@@ -29,7 +29,7 @@ export function buildFetchPlan(
     locator,
     cloneUrl,
     targetDir,
-    ref: opts?.ref,
+    ref: opts?.ref ?? locator.ref,  // explicit opts override locator's #ref
     alreadyExists: existsSync(targetDir),
   }
 }

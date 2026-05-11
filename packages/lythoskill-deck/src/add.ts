@@ -93,30 +93,48 @@ export function normalizeSkillsSh(input: string): string {
   // localhost: always pass through (parseLocator handles multi-segment validation)
   if (input.startsWith('localhost/')) return input
 
-  // Already an FQ locator: host.tld/owner/repo[/...] — pass through
-  if (input.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return input
+  // Extract #ref suffix (branch/tag/commit) — compatible with skills.sh parseFragmentRef.
+  // #ref comes before @skill: owner/repo#main@skill-name → ref=main, skill=skill-name
+  let ref = ''
+  let base = input
+  const hashIdx = input.indexOf('#')
+  if (hashIdx >= 0) {
+    base = input.slice(0, hashIdx)
+    const afterHash = input.slice(hashIdx + 1)
+    const atInRef = afterHash.indexOf('@')
+    if (atInRef >= 0) {
+      ref = `#${afterHash.slice(0, atInRef)}`
+      base = `${base}@${afterHash.slice(atInRef + 1)}`
+    } else {
+      ref = input.slice(hashIdx) // includes '#'
+    }
+  }
+
+  // Already an FQ locator: host.tld/owner/repo[/...] — pass through with ref
+  if (base.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return input
 
   // github: prefix
-  const ghPrefix = input.match(/^github:(.+)$/)
-  if (ghPrefix) return `github.com/${ghPrefix[1]}`
+  const ghPrefix = base.match(/^github:(.+)$/)
+  if (ghPrefix) return `github.com/${ghPrefix[1]}${ref}`
 
   // owner/repo@skill shorthand — normalizes to repo-level locator.
   // Skill discovery at runtime (scanSkill → name match) because the
   // actual path within the repo is unknown until after clone.
   // e.g. gemini-cli has skills at .gemini/skills/, not skills/.
-  const atMatch = input.match(/^([^/]+)\/([^/@]+)@(.+)$/)
-  if (atMatch && !input.includes(':') && !input.startsWith('.')) {
+  const atMatch = base.match(/^([^/]+)\/([^/@]+)@(.+)$/)
+  if (atMatch && !base.includes(':') && !base.startsWith('.')) {
     const [, owner, repo] = atMatch
-    return `github.com/${owner}/${repo}`
+    return `github.com/${owner}/${repo}${ref}`
   }
 
   // owner/repo[/subpath] shorthand (no dot in first segment → not a hostname)
-  const shortMatch = input.match(/^([^/.]+)\/([^/]+)(?:\/(.+?))?\/?$/)
-  if (shortMatch && !input.includes(':') && !input.startsWith('.')) {
+  const shortMatch = base.match(/^([^/.]+)\/([^/]+)(?:\/(.+?))?\/?$/)
+  if (shortMatch && !base.includes(':') && !base.startsWith('.')) {
     const [, owner, repo, subpath] = shortMatch
-    return subpath
+    const fq = subpath
       ? `github.com/${owner}/${repo}/${subpath}`
       : `github.com/${owner}/${repo}`
+    return `${fq}${ref}`
   }
 
   return input

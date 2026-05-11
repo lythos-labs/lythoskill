@@ -354,4 +354,30 @@ describe('normalizeSkillsSh', () => {
     expect(normalizeSkillsSh('github:vercel-labs/agent-skills'))
       .toBe('github.com/vercel-labs/agent-skills')
   })
+
+  // #ref suffix (branch/tag/commit) — compatible with skills.sh parseFragmentRef
+  it('preserves #ref with FQ locator', () => {
+    expect(normalizeSkillsSh('github.com/vercel-labs/skills#main'))
+      .toBe('github.com/vercel-labs/skills#main')
+  })
+
+  it('preserves #ref with owner/repo shorthand', () => {
+    expect(normalizeSkillsSh('vercel-labs/skills#v2.0'))
+      .toBe('github.com/vercel-labs/skills#v2.0')
+  })
+
+  it('preserves #ref with @skill syntax', () => {
+    expect(normalizeSkillsSh('vercel-labs/skills#main@find-skills'))
+      .toBe('github.com/vercel-labs/skills#main')
+  })
+
+  it('preserves #ref with subpath', () => {
+    expect(normalizeSkillsSh('anthropics/skills/skills/frontend-design#abc1234'))
+      .toBe('github.com/anthropics/skills/skills/frontend-design#abc1234')
+  })
+
+  it('preserves #ref with github: prefix', () => {
+    expect(normalizeSkillsSh('github:vercel-labs/agent-skills#dev'))
+      .toBe('github.com/vercel-labs/agent-skills#dev')
+  })
 })
