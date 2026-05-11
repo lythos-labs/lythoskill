@@ -90,6 +90,9 @@ function fqOf(loc: Locator): string {
  *   owner/repo                  → github.com/owner/repo
  */
 function normalizeSkillsSh(input: string): string {
+  // localhost: always pass through (parseLocator handles multi-segment validation)
+  if (input.startsWith('localhost/')) return input
+
   // Already an FQ locator: host.tld/owner/repo[/...] — pass through
   if (input.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\/.+\/.+/)) return input
 
