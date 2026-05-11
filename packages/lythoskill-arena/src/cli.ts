@@ -171,7 +171,9 @@ async function singleRun(args: string[]) {
       if (u.hostname === 'github.com' && u.pathname.includes('/blob/')) {
         url = `https://raw.githubusercontent.com${u.pathname.replace('/blob/', '/')}`
       }
-    } catch { /* keep original url */ }
+    } catch (e: any) {
+      if (e.code !== 'ERR_INVALID_URL') console.debug(`deck URL parse skipped (not a URL): ${url}`)
+    }
     const dest = resolve(process.cwd(), 'arena-deck.toml')
     console.log(`📥 Fetching arena deck: ${url}`)
     let res: Response

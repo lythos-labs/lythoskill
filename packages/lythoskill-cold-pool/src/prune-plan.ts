@@ -61,7 +61,9 @@ function calculateDirSize(dir: string): number {
         total += statSync(p).size
       }
     }
-  } catch {}
+  } catch (e: any) {
+    if (e.code !== 'ENOENT') console.warn(`calculateDirSize: failed for ${dir}: ${e.message}`)
+  }
   return total
 }
 

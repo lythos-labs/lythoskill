@@ -26,7 +26,8 @@ function scanDirForEpic(dir: string, epicId: string): string[] {
   let entries: string[] = []
   try {
     entries = readdirSync(dir)
-  } catch {
+  } catch (e: any) {
+    if (e.code !== 'ENOENT') console.warn(`scanDirForEpic: readdir failed for ${dir}: ${e.message}`)
     return found
   }
   for (const entry of entries) {
@@ -54,7 +55,8 @@ export function findLinkedEpic(adrPath: string): string | null {
     const content = readFileSync(adrPath, 'utf-8')
     const m = content.match(/(?:关联 )?Epic:\s*(EPIC-\d+)/)
     return m ? m[1] : null
-  } catch {
+  } catch (e: any) {
+    if (e.code !== 'ENOENT') console.warn(`findLinkedEpic: readFile failed for ${adrPath}: ${e.message}`)
     return null
   }
 }

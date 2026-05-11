@@ -128,7 +128,10 @@ export class ColdPool {
 
     function walk(dir: string, push: (d: string) => void): void {
       let dirents: ReturnType<typeof readdirSync>
-      try { dirents = readdirSync(dir, { withFileTypes: true }) } catch { return }
+      try { dirents = readdirSync(dir, { withFileTypes: true }) } catch (e: any) {
+        if (e.code !== 'ENOENT') console.warn(`walk: readdir failed for ${dir}: ${e.message}`)
+        return
+      }
       for (const d of dirents) {
         if (!d.isDirectory() || d.name.startsWith('.')) continue
         const sub = join(dir, d.name)
@@ -154,7 +157,8 @@ export class ColdPool {
       let dirents: ReturnType<typeof readdirSync>
       try {
         dirents = readdirSync(dir, { withFileTypes: true })
-      } catch {
+      } catch (e: any) {
+        if (e.code !== 'ENOENT') console.warn(`collectRecursive: readdir failed for ${dir}: ${e.message}`)
         return
       }
       for (const d of dirents) {

@@ -12,16 +12,23 @@ import { listActiveEpics, countByLane } from '../lib/lane.js'
 import { loadConfig } from '../config.js'
 import { scanFiles } from '../lib/fs.js'
 
-function git(args: string[]): string {
+function git(args: string[]): { ok: boolean; stdout: string; stderr: string } {
   const r = spawnSync('git', args, { encoding: 'utf-8' })
-  return (r.stdout || '').trim()
+  return { ok: r.status === 0, stdout: (r.stdout || '').trim(), stderr: (r.stderr || '').trim() }
 }
 
-const ROOT = git(['rev-parse', '--show-toplevel'])
+const gRoot = git(['rev-parse', '--show-toplevel'])
+if (!gRoot.ok) {
+  console.error(`pre-commit: git rev-parse failed: ${gRoot.stderr}`)
+  process.exit(1)
+}
+const ROOT = gRoot.stdout
 
 // ── 1. Epic-ADR coupling guard ──────────────────────────────────────────
 
-const stagedEpics = git(['diff', '--cached', '--name-only', '--diff-filter=A'])
+const gDiff = git(['diff', '--cached', '--name-only', '--diff-filter=A'])
+if (!gDiff.ok) console.warn(`pre-commit: git diff failed: ${gDiff.stderr}`)
+const stagedEpics = gDiff.stdout
   .split('\n')
   .filter(f => f.startsWith('cortex/epics/01-active/EPIC-'))
 

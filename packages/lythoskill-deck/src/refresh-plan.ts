@@ -78,7 +78,12 @@ export function detectGitRoot(skillDir: string, coldPool: string): { gitRoot?: s
         (resolvedRoot === resolvedPool || resolvedRoot.startsWith(resolvedPool + '/'))) {
       return { gitRoot: out, type: 'git' }
     }
-  } catch {}
+  } catch (e: any) {
+    // git rev-parse fails for non-git dirs (expected) — log unexpected failures
+    if (!e.message?.includes('not a git repository')) {
+      console.warn(`detectGitRoot: git rev-parse failed for ${skillDir}: ${e.message}`)
+    }
+  }
 
   return { type: 'not-git' }
 }

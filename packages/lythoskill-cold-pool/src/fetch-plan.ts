@@ -57,8 +57,8 @@ export function executeFetchPlan(plan: FetchPlan, io?: FetchIO): FetchResult {
           log(`🔄 checking out ${plan.ref} in ${plan.targetDir}`)
           execFileSync('git', ['-C', plan.targetDir, 'fetch', '--depth', '1', 'origin', plan.ref], { stdio: 'pipe' })
           execFileSync('git', ['-C', plan.targetDir, 'checkout', plan.ref], { stdio: 'pipe' })
-        } catch {
-          log(`⚠️  Could not checkout ${plan.ref} — using current HEAD`)
+        } catch (e: any) {
+          log(`⚠️  Could not checkout ${plan.ref}: ${e.message} — using current HEAD`)
         }
       }
     }
