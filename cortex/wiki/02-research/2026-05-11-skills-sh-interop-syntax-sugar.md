@@ -63,6 +63,24 @@ Both systems have:
 | Lock file | `.skill-lock.json` v3 | `skill-deck.lock` |
 | Governance | None (install = active) | deny-by-default + reconcile + restore |
 
+## Pattern Reference: Hono's Adapter Model
+
+Same principle as Hono's platform adapters: normalize at the boundary, simplify internally.
+
+```
+Hono:   Node req  ─┐
+        Deno req  ─┼─ adapter → Context → (routing/middleware 不感知平台)
+        CF Worker ─┘
+
+Deck:   skills.sh syntax ─┐
+        github: prefix   ─┼─ normalizeSkillsSh → FQ locator → (parseLocator/clone 不感知来源)
+        FQ locator       ─┘
+```
+
+The router is powerful because diverse inputs converge to one internal representation.
+Deck's locator parsing follows the same architecture: boundary normalization, internal single
+canonical form.
+
 ## Sources
 
 - [vercel-labs/skills source-parser.ts](https://github.com/vercel-labs/skills/blob/main/src/source-parser.ts)
