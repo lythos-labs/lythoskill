@@ -27,6 +27,32 @@ if [ -n "$STAGED_GUARDS" ]; then
   echo ""
 fi
 
+# 0.5. Cortex file renames — must use CLI, not manual mv
+STAGED_CORTEX_RENAMES=$(git diff --cached --name-status --diff-filter=R | grep -E '^R.*cortex/(tasks|epics)/' || true)
+
+if [ -n "$STAGED_CORTEX_RENAMES" ]; then
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  ❌ MANUAL CORTEX FILE RENAME DETECTED                      ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Never mv/rename task or epic files by hand.                ║"
+  echo "║  Use CLI — it updates Status History AND directory:         ║"
+  echo "║    cortex start TASK-xxx                                    ║"
+  echo "║    cortex done TASK-xxx                                     ║"
+  echo "║    cortex complete TASK-xxx                                 ║"
+  echo "║    cortex epic done EPIC-xxx                                ║"
+  echo "║  Manual moves create probe noise and state drift.           ║"
+  echo "╠══════════════════════════════════════════════════════════════╣"
+  echo "║  Changed:                                                   ║"
+  for f in $(echo "$STAGED_CORTEX_RENAMES" | awk '{print $2 " → " $3}'); do
+    printf "║    %-54s ║\n" "$f"
+  done
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "To fix: git reset HEAD <file> — then use cortex CLI to move it."
+  exit 1
+fi
+
 # 1. ADR governance checks (fast — fail early if violated)
 if [ -f scripts/adr-check.sh ]; then
   bash scripts/adr-check.sh || exit 1
