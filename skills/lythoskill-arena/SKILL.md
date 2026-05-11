@@ -68,13 +68,29 @@ npm install -g @anthropic-ai/claude-code  # claude (SDK mode preferred over -p)
 
 ### Player priority
 
-| Player | Priority | Headless reliability | Notes |
-|--------|----------|---------------------|-------|
-| **kimi** (default) | 1st | ✅ Eager tools, no deadlock | `--print --afk` designed for headless |
-| **codex** | 2nd | ✅ New adapter | `codex exec --json` (smoke test first) |
-| **claude** | 3rd | ⚠️ SDK mode preferred | Avoid `claude -p` (Bun.spawn issues) |
+| Player | Priority | Headless reliability | When to use |
+|--------|----------|---------------------|-------------|
+| **kimi** (default) | 1st | ✅ Eager tools, no deadlock | Best cost/reliability ratio. `--print --afk` is first-class headless. |
+| **codex** | 2nd | ✅ New adapter | If you already have `codex` installed and configured. |
+| **deepseek** | 3rd | ⚠️ TUI native | `deepseek serve --http` daemon mode. If `which deepseek` succeeds, you're using it. |
+| **claude** | 4th | ⚠️ SDK mode preferred | Avoid `claude -p` (known Bun.spawn deadlock). Use SDK adapter instead. |
 
-If `player` is omitted, arena tries kimi → codex → claude.
+If `player` is omitted, arena tries kimi → codex → deepseek → claude.
+
+### Player API key setup
+
+Each player needs its own auth. Don't hardcode these — when setting up a new player,
+**web-search the latest install + auth instructions** (they change between versions):
+
+| Player | Auth setup (run once) | Verify |
+|--------|----------------------|--------|
+| **kimi** | `kimi login` or `export KIMI_API_KEY=...` | `kimi --print -p "hello"` |
+| **codex** | `codex login` or `export OPENAI_API_KEY=...` | `codex exec --json "hello"` |
+| **deepseek** | `deepseek login` or `export DEEPSEEK_API_KEY=...` | `deepseek serve --http --port 0 --health` |
+| **claude** | `claude login` or `export ANTHROPIC_API_KEY=...` | `claude -p "hello"` |
+
+If `which <player>` fails, guide the user to install first (web-search for latest
+install command — packages and tool names change between versions).
 
 ## Working Directory & Lock Files
 
