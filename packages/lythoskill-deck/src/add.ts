@@ -125,12 +125,15 @@ export function normalizeSkillsSh(input: string): string {
 function exitInvalidLocator(locator: string): never {
   console.error(`❌ Invalid locator: ${locator}`)
   console.error(`   Accepted formats:`)
-  console.error(`     github.com/owner/repo[/skill]   — FQ locator`)
+  console.error(`     github.com/owner/repo[/skill]   — FQ locator (cold pool path, NOT a browser URL)`)
   console.error(`     owner/repo                      — GitHub shorthand`)
   console.error(`     owner/repo@skill                — skills.sh syntax`)
   console.error(`     owner/repo/subpath              — subdirectory`)
   console.error(`     github:owner/repo               — explicit GitHub prefix`)
   console.error(`     localhost/<name>                — local-only skill`)
+  console.error(``)
+  console.error(`   Note: FQ locators look like URLs but map to cold pool paths:`)
+  console.error(`     github.com/o/r/skills/s → ~/.agents/skill-repos/github.com/o/r/skills/s/SKILL.md`)
   process.exit(1)
 }
 
@@ -242,6 +245,9 @@ export async function addSkill(
 
   console.log(`✅ Skill ready: ${skillName} (alias: ${alias})`)
   console.log(`   Location: ${skillDir}`)
+  if (parsed.host === 'github.com') {
+    console.log(`   Source:   https://github.com/${parsed.owner}/${parsed.repo}`)
+  }
 
   // ── 写 deck.toml ────────────────────────────────────────────
 
