@@ -3,11 +3,22 @@ name: lythoskill-arena
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Controlled-variable test play for skills and deck configurations.  Scaffolds isolated arena environments where subagents complete  the same task under different decks, then a judge agent scores outputs  across multiple dimensions. Supports single-skill A/B comparison
-  and full-deck Pareto frontier analysis.
+  Stateless one-shot skill execution and controlled-variable comparison.
+  `single` mode runs any deck against any task with zero local state —
+  no install, no working-set pollution, no deck overwrite. `vs` mode
+  runs declarative arena.toml for reproducible multi-deck comparison
+  with Pareto frontier analysis. Always restores your parent deck after.
+  First run: arena checks which players are available (kimi/codex/claude)
+  and records your preference. Subagent-friendly: can resume interrupted
+  arena runs from saved state.
 when_to_use: |
-  Compare skills, A/B test skills, which skill is better, test deck  configuration, benchmark skill, skill evaluation, deck comparison,
-  try before adopting, test play, Pareto analysis, skill synergy check,  does adding this skill improve my deck.
+  TEST a skill before adopting, COMPARE two decks, AUDIT a module with QA deck,
+  BENCHMARK skill performance, run one-shot task with remote deck, try before
+  you buy, which skill is better, does adding this skill improve my deck,
+  arena single, arena vs, arena compare, test play, Pareto analysis,
+  skill synergy check, security sweep, module audit, quick experiment.
+  ALSO trigger when user says "test this skill", "try this deck",
+  "compare A vs B", "audit this package", "sweep for bugs".
 allowed-tools:
   - Bash(bunx @lythos/skill-arena@{{PACKAGE_VERSION}} *)
   - Bash(bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link *)
@@ -39,34 +50,54 @@ flowchart TD
 writes metadata). All evaluation is agent-side: the judge is an agent following
 TASK-arena.md instructions, not a scoring script.
 
-## Player Setup
+## Player Discovery (first run)
 
-Arena needs at least one AI agent CLI to spawn subprocesses. Players are
-swappable backends — the arena pipeline doesn't care which executes.
+Arena auto-detects available players. On first run, it:
 
-| Player | CLI | Install | Headless reliability |
-|--------|-----|---------|---------------------|
-| **kimi** (default) | Kimi Code CLI | `uv tool install kimi-cli` or `uvx kimi-cli` | ✅ Eager tools, no deadlock |
-| **claude** | Claude Code CLI | `npm install -g @anthropic-ai/claude-code` | ⚠️ Known `-p` mode issues |
+1. Checks `which kimi`, `which codex`, `which claude` (in that order)
+2. Records available players to `~/.agents/arena/players.json`
+3. Defaults to `kimi` if available (proven headless reliability)
+4. If no players found, guides installation
 
 ```bash
-# Install Kimi (recommended — Python, uv is Python's bunx)
-uv tool install kimi-cli
-kimi login  # or export KIMI_API_KEY=...
-
-# Verify
-kimi --print -p "hello"  # should produce output
+# Supported players (install at least one):
+uv tool install kimi-cli       # kimi (recommended — most reliable headless)
+npm i -g @openai/codex          # codex (codex exec --json)
+npm install -g @anthropic-ai/claude-code  # claude (SDK mode preferred over -p)
 ```
 
-Player is specified per side in `arena.toml`:
-```toml
-[[side]]
-name = "my-test"
-player = "kimi"  # or "claude"
-deck = "./my-deck.toml"
+### Player priority
+
+| Player | Priority | Headless reliability | Notes |
+|--------|----------|---------------------|-------|
+| **kimi** (default) | 1st | ✅ Eager tools, no deadlock | `--print --afk` designed for headless |
+| **codex** | 2nd | ✅ New adapter | `codex exec --json` (smoke test first) |
+| **claude** | 3rd | ⚠️ SDK mode preferred | Avoid `claude -p` (Bun.spawn issues) |
+
+If `player` is omitted, arena tries kimi → codex → claude.
+
+## Working Directory & Lock Files
+
+Arena creates an **isolated workdir** for each run — your project's working set
+is never touched. The arena workdir lives at:
+
+```
+tmp/arena-<timestamp>-<slug>/    ← isolated workdir (gitignored)
+  skill-deck.toml                ← copy of the arena deck
+  skill-deck.lock                ← lock file (ONLY in arena workdir)
+  .claude/skills/                ← working set (ONLY in arena workdir)
 ```
 
-If `player` is omitted, arena defaults to `kimi`.
+**Important**: `skill-deck.lock` is created in the arena workdir, NOT your
+project root. If you see a lock file in your project root after running arena,
+something went wrong — the arena didn't use an isolated workdir. Check the
+`--out` flag points to a tmp directory.
+
+After each subagent runs, arena restores your parent deck:
+```bash
+deck link --deck ./skill-deck.toml   # restore YOUR deck (not the arena deck)
+```
+This is mandatory — forgetting leaves you on the stripped arena deck.
 
 ## Commands
 
