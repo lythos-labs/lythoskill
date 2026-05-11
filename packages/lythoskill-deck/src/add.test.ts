@@ -10,7 +10,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import * as childProcess from 'node:child_process'
-import { findSkillDir } from './add.ts'
+import { findSkillDir, normalizeSkillsSh } from './add.ts'
 
 // Control homedir() return value for tests that need default cold_pool under tmpdir
 let mockHomeDir = '/tmp'
@@ -254,5 +254,102 @@ describe('findSkillDir', () => {
   it('returns null when no SKILL.md exists anywhere in repo', () => {
     const repo = makeRepo()
     expect(findSkillDir(repo, null)).toBeNull()
+  })
+})
+
+// ── skills.sh syntax sugar — top skills parse validation ────────
+
+describe('normalizeSkillsSh', () => {
+  // FQ locators — must pass through unchanged
+  it('passes FQ github.com locators through', () => {
+    expect(normalizeSkillsSh('github.com/anthropics/skills/skills/frontend-design'))
+      .toBe('github.com/anthropics/skills/skills/frontend-design')
+    expect(normalizeSkillsSh('github.com/vercel-labs/agent-skills'))
+      .toBe('github.com/vercel-labs/agent-skills')
+  })
+
+  it('passes localhost locators through', () => {
+    expect(normalizeSkillsSh('localhost/me/skill-a')).toBe('localhost/me/skill-a')
+  })
+
+  // skills.sh top skill owner/repo formats
+  it('normalizes vercel-labs/skills', () => {
+    expect(normalizeSkillsSh('vercel-labs/skills')).toBe('github.com/vercel-labs/skills')
+  })
+
+  it('normalizes vercel-labs/agent-skills', () => {
+    expect(normalizeSkillsSh('vercel-labs/agent-skills')).toBe('github.com/vercel-labs/agent-skills')
+  })
+
+  it('normalizes anthropics/skills', () => {
+    expect(normalizeSkillsSh('anthropics/skills')).toBe('github.com/anthropics/skills')
+  })
+
+  it('normalizes obra/superpowers', () => {
+    expect(normalizeSkillsSh('obra/superpowers')).toBe('github.com/obra/superpowers')
+  })
+
+  it('normalizes browser-use/browser-use', () => {
+    expect(normalizeSkillsSh('browser-use/browser-use')).toBe('github.com/browser-use/browser-use')
+  })
+
+  it('normalizes firecrawl/cli', () => {
+    expect(normalizeSkillsSh('firecrawl/cli')).toBe('github.com/firecrawl/cli')
+  })
+
+  it('normalizes apify/agent-skills', () => {
+    expect(normalizeSkillsSh('apify/agent-skills')).toBe('github.com/apify/agent-skills')
+  })
+
+  it('normalizes squirrelscan/skills', () => {
+    expect(normalizeSkillsSh('squirrelscan/skills')).toBe('github.com/squirrelscan/skills')
+  })
+
+  it('normalizes getsentry/sentry-for-ai', () => {
+    expect(normalizeSkillsSh('getsentry/sentry-for-ai')).toBe('github.com/getsentry/sentry-for-ai')
+  })
+
+  it('normalizes coderabbitai/skills', () => {
+    expect(normalizeSkillsSh('coderabbitai/skills')).toBe('github.com/coderabbitai/skills')
+  })
+
+  it('normalizes openai/skills', () => {
+    expect(normalizeSkillsSh('openai/skills')).toBe('github.com/openai/skills')
+  })
+
+  it('normalizes google-gemini/gemini-cli', () => {
+    expect(normalizeSkillsSh('google-gemini/gemini-cli')).toBe('github.com/google-gemini/gemini-cli')
+  })
+
+  it('normalizes coreyhaines31/marketingskills', () => {
+    expect(normalizeSkillsSh('coreyhaines31/marketingskills')).toBe('github.com/coreyhaines31/marketingskills')
+  })
+
+  it('normalizes jimliu/baoyu-skills', () => {
+    expect(normalizeSkillsSh('jimliu/baoyu-skills')).toBe('github.com/jimliu/baoyu-skills')
+  })
+
+  it('normalizes astronmer/agents', () => {
+    expect(normalizeSkillsSh('astronomer/agents')).toBe('github.com/astronomer/agents')
+  })
+
+  // owner/repo@skill syntax
+  it('normalizes owner/repo@skill', () => {
+    expect(normalizeSkillsSh('vercel-labs/skills@find-skills'))
+      .toBe('github.com/vercel-labs/skills/skills/find-skills')
+    expect(normalizeSkillsSh('mattpocock/skills@tdd'))
+      .toBe('github.com/mattpocock/skills/skills/tdd')
+  })
+
+  // owner/repo/subpath syntax
+  it('normalizes owner/repo/subpath', () => {
+    expect(normalizeSkillsSh('anthropics/skills/skills/frontend-design'))
+      .toBe('github.com/anthropics/skills/skills/frontend-design')
+  })
+
+  // github: prefix
+  it('normalizes github:owner/repo', () => {
+    expect(normalizeSkillsSh('github:vercel-labs/agent-skills'))
+      .toBe('github.com/vercel-labs/agent-skills')
   })
 })

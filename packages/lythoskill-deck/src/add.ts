@@ -89,7 +89,7 @@ function fqOf(loc: Locator): string {
  *   github:owner/repo           → github.com/owner/repo
  *   owner/repo                  → github.com/owner/repo
  */
-function normalizeSkillsSh(input: string): string {
+export function normalizeSkillsSh(input: string): string {
   // localhost: always pass through (parseLocator handles multi-segment validation)
   if (input.startsWith('localhost/')) return input
 
