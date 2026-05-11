@@ -12,6 +12,7 @@ checklist_skipped_reason: Continuation of showcase epic; tasks T1/T2/T3 break do
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-08 | Created; T1/T2/T3 completed, T2 items deferred, T4/T5 added 2026-05-09 |
+| done | 2026-05-11 | Done |
 
 ## 关联任务
 
