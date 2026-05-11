@@ -18,6 +18,7 @@
  * `#ref` suffix (branch/tag/commit) is compatible with skills.sh's
  * `parseFragmentRef`. The ref is passed to gitClone for checkout.
  */
+import { validateGitHubOwner, validateGitHubRepo, validateSkillSegment } from './github-naming.js'
 import type { Locator } from './types.js'
 
 export function parseLocator(input: string): Locator | null {
@@ -47,12 +48,33 @@ export function parseLocator(input: string): Locator | null {
   const isLocalhost = parts[0] === 'localhost'
   if (!isLocalhost && !parts[0].includes('.')) return null
 
+  const owner = parts[1]
+  const repo = parts[2]
+  const skill = parts.length > 3 ? parts.slice(3).join('/') : null
+
+  // Validate naming conventions for remote locators (GitHub rules).
+  // localhost gets relaxed validation — local filesystem, not GitHub.
+  if (!isLocalhost) {
+    const ownerCheck = validateGitHubOwner(owner)
+    if (!ownerCheck.valid) return null
+
+    const repoCheck = validateGitHubRepo(repo)
+    if (!repoCheck.valid) return null
+
+    if (skill) {
+      for (const segment of skill.split('/')) {
+        const segCheck = validateSkillSegment(segment)
+        if (!segCheck.valid) return null
+      }
+    }
+  }
+
   return {
     raw: input,
     host: parts[0],
-    owner: parts[1],
-    repo: parts[2],
-    skill: parts.length > 3 ? parts.slice(3).join('/') : null,
+    owner,
+    repo,
+    skill,
     ref,
     isLocalhost,
   }
