@@ -32,6 +32,11 @@
 |------|--------|-----|
 | [qa-sweep.toml](./qa-sweep.toml) | codeql, semgrep, security-advisor, differential-review, agentic-actions-auditor, code-maturity, entry-point-analyzer | 5-phase security sweep — see [COMBO.md](./qa-sweep-COMBO.md) |
 
+### Documentation & Site
+| Deck | Skills | Use |
+|------|--------|-----|
+| [site-builder.toml](./site-builder.toml) | find-skills, frontend-design, theme-factory, brand-guidelines, vitepress, web-design-guidelines, mermaid | Build documentation site with design taste + VitePress |
+
 ### Project Governance
 | Deck | Skills | Use |
 |------|--------|-----|

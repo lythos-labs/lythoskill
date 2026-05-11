@@ -2,7 +2,23 @@
 
 ![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen) ![CI](https://img.shields.io/badge/CI-71%20unit%20%2B%2021%20CLI%20BDD-brightgreen) ![Agent BDD](https://img.shields.io/badge/Agent%20BDD-5%20local-blue) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2)
 
-> Declarative skill deck governance. Reconcile declared skills against your cold pool via symlinks — deny-by-default, max-cards budgeting, transient expiry.
+> Declarative skill deck governance. Declare skills, sync working set via symlinks — deny-by-default, max-cards budgeting, transient expiry. **Compatible with skills.sh syntax.**
+
+## Quick Start
+
+```bash
+# Add a skill from skills.sh (owner/repo syntax — no conversion needed)
+bunx @lythos/skill-deck@0.9.48 add vercel-labs/agent-skills
+
+# Or with @skill filter (same as npx skills add):
+bunx @lythos/skill-deck@0.9.48 add mattpocock/skills@tdd
+
+# Or FQ locator:
+bunx @lythos/skill-deck@0.9.48 add github.com/anthropics/skills/skills/frontend-design
+
+# Sync working set (deny-by-default):
+bunx @lythos/skill-deck@0.9.48 link
+```
 
 ## For AI Agents
 
@@ -22,6 +38,7 @@ max_cards = 10
 
 [tool.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+source = "https://github.com/lythos-labs/lythoskill/blob/HEAD/skills/lythoskill-deck/SKILL.md"
 ```
 
 ### skill-deck.toml (full reference)
@@ -34,6 +51,7 @@ cold_pool = "~/.agents/skill-repos" # Where skills are downloaded
 
 [innate.skills.lythoskill-deck]     # Always-loaded skills
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+source = "https://github.com/lythos-labs/lythoskill/blob/HEAD/skills/lythoskill-deck/SKILL.md"
 
 [tool.skills.tdd]                   # Auto-triggered skills
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -71,7 +89,7 @@ prompt = "Search for latest info, then generate professional document with diagr
 |---------|------|-------------|
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
-| `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Git clone skill to cold pool and append to skill-deck.toml. |
+| `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Add skill to cold pool + deck.toml. Accepts skills.sh syntax (owner/repo, owner/repo@skill, github:owner/repo) and FQ locators. |
 | `refresh` | `[<fq\|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
 | `remove` | `<fq\|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `to-symlink` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to symlink mode (live link, follows cold pool) |
@@ -121,6 +139,7 @@ max_cards = 10
 
 [tool.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+source = "https://github.com/lythos-labs/lythoskill/blob/HEAD/skills/lythoskill-deck/SKILL.md"
 EOF
 
 # 2. Link — creates symlinks in .claude/skills/
