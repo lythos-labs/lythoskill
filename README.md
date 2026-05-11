@@ -2,7 +2,7 @@
 
 > **Skill governance, not a skill collection.** If addyosmani/agent-skills and mattpocock/skills are npm packages, lythoskill is npm itself — the layer that installs, curates, validates, and reconciles them across projects and platforms.
 >
-> **Built entirely by AI agents.** Zero human-written code. 12 packages, 487+ tests, plus the governance layer itself — ADRs, epics, tasks, wiki patterns — all produced by Claude Code, DeepSeek, and Kimi collaborating under human direction. We dogfood our own governance tools to govern the project that built them.
+> **Built by AI agents working under human direction.** Agent Skills ecosystem governance: version-bump, install, curate, validate, and reconcile skills across projects and multi-agent platforms (Claude Code, Codex CLI, DeepSeek, Kimi, Cursor, Windsurf, Copilot). Dogfooded — we govern this project with its own tools.
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![Tests](https://img.shields.io/badge/Tests-649%20pass-brightgreen)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
@@ -131,13 +131,19 @@ If you are an AI agent reading this README:
 1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
 2. Choose a [pre-built deck](./examples/decks/) or create your own `skill-deck.toml`
 3. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to link into your working set
-4. Skills are now in your `working_set` directory (default `.claude/skills/`; check `skill-deck.toml`'s `[deck] working_set` for your agent's path) — read them and follow their instructions
+4. Skills are now in your `working_set` directory — check `skill-deck.toml`'s `[deck] working_set` for your agent's path:
+   - `.claude/skills/` — Claude Code (default)
+   - `.agents/skills/` — Codex CLI, OpenClaw
+   - `.cursor/skills/` — Cursor
+   - `.kimi/skills/` — Kimi
+   - `.windsurf/skills/` — Windsurf
+   - `.github/skills/` — GitHub Copilot
 
 ## Quick Start
 
 > 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
 
-**Prerequisites** (replace `0.9.19` with the latest version from the npm badge above):
+**Prerequisites**:
 
 1. **Bun** (required) — TypeScript runtime for `bunx`:
    ```bash
@@ -145,10 +151,12 @@ If you are an AI agent reading this README:
    # After install: restart your shell or run `source ~/.bashrc`
    ```
 
-2. **Kimi CLI** (optional) — only needed for [Arena](#arena-skill-comparison):
+2. **A player CLI** (optional) — for [Arena](#arena-skill-comparison). Install at least one:
    ```bash
-   uv tool install kimi-cli && kimi login
-   # Docs: https://github.com/MoonshotAI/kimi-cli
+   uv tool install kimi-cli && kimi login        # kimi (recommended)
+   npm i -g @openai/codex && codex login         # codex
+   # deepseek: bundled with DeepSeek desktop app
+   # claude: SDK mode (ANTHROPIC_API_KEY), no CLI binary required
    ```
 
 > **This tool requires Bun, not Node.** `bunx` is the correct runner.
@@ -196,7 +204,7 @@ After `link`: `skill-deck.lock` is generated, working set is populated. Default 
 
 ```toml
 [deck]
-working_set = ".claude/skills"   # Claude Code (also read by Cursor, Copilot)
+working_set = ".claude/skills"   # Claude Code
 # working_set = ".agents/skills"   # Codex CLI, OpenClaw
 # working_set = ".cursor/skills"   # Cursor-native
 # working_set = ".github/skills"   # GitHub Copilot
@@ -574,7 +582,7 @@ Cold Pool (~/.agents/skill-repos/)  →  Declaration (skill-deck.toml)  →  Wor
 
 lythoskill governs on top of the Agent Skills standard — like Kubernetes governs containers without defining the OCI spec. Full architecture: see [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) or generate docs with the [architecture-explainer](./examples/decks/architecture-explainer.toml) deck.
 
-## Development## Development
+## Development
 
 > For contributors and developers working **inside this repo**.
 
@@ -604,7 +612,7 @@ All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and P
 ## Testing
 
 ```
-215 unit + CLI BDD tests in CI. Agent BDD (.agent.md) runs locally.
+649 tests pass in CI (unit + CLI BDD). Agent BDD (.agent.md) runs locally.
 ```
 
 [Test conventions](./packages/lythoskill-test-utils/SCENARIOS.md) · [CI dashboard](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
