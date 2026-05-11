@@ -100,16 +100,18 @@ async function runSuite(label: string, pkgDir: string, filter?: string) {
   lines.push(`${sep}`);
 
   const proc = Bun.spawn(
-    ["sh", "-c", `cd ${pkgDir} && ${cmd} 2>&1 || true`],
+    ["sh", "-c", `cd ${pkgDir} && ${cmd} 2>&1`],
     { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] },
   );
   const out = await new Response(proc.stdout).text();
   const exitCode = await proc.exited;
 
   lines.push(out);
-  if (exitCode !== 0) {
-    const failMatch = out.match(/(\d+) fail/);
-    const passMatch = out.match(/(\d+) pass/);
+
+  // Always parse pass/fail counts — bun test always prints "N pass" / "N fail"
+  const failMatch = out.match(/(\d+) fail/);
+  const passMatch = out.match(/(\d+) pass/);
+  if (failMatch || passMatch) {
     const fails = failMatch ? parseInt(failMatch[1]) : 0;
     const passes = passMatch ? parseInt(passMatch[1]) : 0;
     totalFailures += fails;
@@ -117,9 +119,12 @@ async function runSuite(label: string, pkgDir: string, filter?: string) {
     if (fails > 0) {
       lines.push(`  ❌ ${fails} fail(s)`);
     }
-    if (out.includes("0 test files matching")) {
-      lines.push("  ℹ️  no test files");
-    }
+  }
+  if (exitCode !== 0) {
+    lines.push(`  ⚠️  exit=${exitCode}`);
+  }
+  if (out.includes("0 test files matching")) {
+    lines.push("  ℹ️  no test files");
   }
   lines.push("");
 }

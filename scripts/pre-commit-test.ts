@@ -42,7 +42,8 @@ for (const pkg of changedPackages) {
   if (!existsSync(pkgDir)) continue;
 
   console.log(`\n🧪 ${pkg}`);
-  const result = await $`sh -c "cd packages/${pkg} && bun test 2>&1 || true"`.cwd(ROOT).nothrow().quiet();
+  // `.nothrow()` already prevents exception on non-zero exit; no `|| true` needed
+  const result = await $`sh -c "cd packages/${pkg} && bun test 2>&1"`.cwd(ROOT).nothrow().quiet();
   const stdout = result.stdout.toString();
 
   // bun test exits 1 when 0 test files found — not a failure
@@ -51,12 +52,17 @@ for (const pkg of changedPackages) {
     continue;
   }
 
-  const exitCode = result.exitCode;
-  if (exitCode !== 0) {
-    console.error(`❌ ${pkg}: tests failed (exit ${exitCode})`);
+  // Parse actual test results from bun test output
+  const failMatch = stdout.match(/(\d+) fail/);
+  const fails = failMatch ? parseInt(failMatch[1]) : 0;
+
+  if (fails > 0) {
+    console.error(`❌ ${pkg}: ${fails} fail(s)`);
     failed++;
   } else {
-    console.log(`✅ ${pkg}: 0 fail`);
+    const passMatch = stdout.match(/(\d+) pass/);
+    const passes = passMatch ? parseInt(passMatch[1]) : 0;
+    console.log(`✅ ${pkg}: ${passes} pass, 0 fail`);
   }
 }
 
