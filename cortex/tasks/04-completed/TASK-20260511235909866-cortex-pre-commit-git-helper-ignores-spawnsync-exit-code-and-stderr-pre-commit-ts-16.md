@@ -1,4 +1,4 @@
-# TASK-20260511235909747: cold-pool: walk() bare catch silently drops entire subtree on readdir failure (cold-pool.ts:131)
+# TASK-20260511235909866: cortex: pre-commit git() helper ignores spawnSync exit code and stderr (pre-commit.ts:16)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,12 +6,13 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-11 | Created |
+| completed | 2026-05-11 | Closed via trailer |
 
 ## 背景与目标
 
-QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/cold-pool.ts:131` — cold-pool: walk() bare catch silently drops entire subtree (cold-pool.ts:131)
+QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts:16` — cortex: pre-commit git() helper ignores spawnSync exit code (pre-commit.ts:16)
 
-**Source**: `packages/lythoskill-cold-pool/src/cold-pool.ts:131`
+**Source**: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts:16`
 
 ## 需求详情
 - [ ] Narrow catch to expected error types (ENOENT etc.)
@@ -20,7 +21,7 @@ QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/co
 
 ## 技术方案
 
-Distinguish ENOENT (skip) from EACCES/EIO (log + collect partial). Return { entries, errors } struct.
+Same as post-commit.ts:16 — return { ok, stdout, stderr }, check r.status. Pre-commit silent failures could allow commits that violate coupling rules.
 
 ## 验收标准
 - [ ] Error handling distinguishes expected from unexpected failures
@@ -28,7 +29,7 @@ Distinguish ENOENT (skip) from EACCES/EIO (log + collect partial). Return { entr
 - [ ] `bun test` passes (0 fail)
 
 ## 关联文件
-- 修改: `packages/lythoskill-cold-pool/src/cold-pool.ts`
+- 修改: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts`
 - 参考: playground/qa-sweep-2026-05-11/findings.jsonl
 - Epic: EPIC-20260511235648324
 

@@ -1,4 +1,4 @@
-# TASK-20260511235909866: cortex: pre-commit git() helper ignores spawnSync exit code and stderr (pre-commit.ts:16)
+# TASK-20260511235909913: deck: refresh-plan bare catch swallows execSync git failure — misclassifies timeout/signal as not-git (refresh-plan.ts:81)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,12 +6,13 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-11 | Created |
+| completed | 2026-05-11 | Closed via trailer |
 
 ## 背景与目标
 
-QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts:16` — cortex: pre-commit git() helper ignores spawnSync exit code (pre-commit.ts:16)
+QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-deck/src/refresh-plan.ts:81` — deck: refresh-plan bare catch swallows execSync git failure (refresh-plan.ts:81)
 
-**Source**: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts:16`
+**Source**: `packages/lythoskill-deck/src/refresh-plan.ts:81`
 
 ## 需求详情
 - [ ] Narrow catch to expected error types (ENOENT etc.)
@@ -20,7 +21,7 @@ QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-project-cortex/s
 
 ## 技术方案
 
-Same as post-commit.ts:16 — return { ok, stdout, stderr }, check r.status. Pre-commit silent failures could allow commits that violate coupling rules.
+Log error via injected log fn. Return structured result. Currently timeout/signal all map to not-git, not just not-a-repo.
 
 ## 验收标准
 - [ ] Error handling distinguishes expected from unexpected failures
@@ -28,7 +29,7 @@ Same as post-commit.ts:16 — return { ok, stdout, stderr }, check r.status. Pre
 - [ ] `bun test` passes (0 fail)
 
 ## 关联文件
-- 修改: `packages/lythoskill-project-cortex/src/hooks/pre-commit.ts`
+- 修改: `packages/lythoskill-deck/src/refresh-plan.ts`
 - 参考: playground/qa-sweep-2026-05-11/findings.jsonl
 - Epic: EPIC-20260511235648324
 

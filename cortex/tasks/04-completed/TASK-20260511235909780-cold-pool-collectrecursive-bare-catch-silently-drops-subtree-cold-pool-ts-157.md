@@ -1,4 +1,4 @@
-# TASK-20260511235909913: deck: refresh-plan bare catch swallows execSync git failure — misclassifies timeout/signal as not-git (refresh-plan.ts:81)
+# TASK-20260511235909780: cold-pool: collectRecursive() bare catch silently drops subtree (cold-pool.ts:157)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,12 +6,13 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-11 | Created |
+| completed | 2026-05-11 | Closed via trailer |
 
 ## 背景与目标
 
-QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-deck/src/refresh-plan.ts:81` — deck: refresh-plan bare catch swallows execSync git failure (refresh-plan.ts:81)
+QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/cold-pool.ts:157` — cold-pool: collectRecursive() bare catch silently drops subtree (cold-pool.ts:157)
 
-**Source**: `packages/lythoskill-deck/src/refresh-plan.ts:81`
+**Source**: `packages/lythoskill-cold-pool/src/cold-pool.ts:157`
 
 ## 需求详情
 - [ ] Narrow catch to expected error types (ENOENT etc.)
@@ -20,7 +21,7 @@ QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-deck/src/refresh
 
 ## 技术方案
 
-Log error via injected log fn. Return structured result. Currently timeout/signal all map to not-git, not just not-a-repo.
+Same as line 131 — distinguish ENOENT from real errors. Return partial results with error indicator.
 
 ## 验收标准
 - [ ] Error handling distinguishes expected from unexpected failures
@@ -28,7 +29,7 @@ Log error via injected log fn. Return structured result. Currently timeout/signa
 - [ ] `bun test` passes (0 fail)
 
 ## 关联文件
-- 修改: `packages/lythoskill-deck/src/refresh-plan.ts`
+- 修改: `packages/lythoskill-cold-pool/src/cold-pool.ts`
 - 参考: playground/qa-sweep-2026-05-11/findings.jsonl
 - Epic: EPIC-20260511235648324
 

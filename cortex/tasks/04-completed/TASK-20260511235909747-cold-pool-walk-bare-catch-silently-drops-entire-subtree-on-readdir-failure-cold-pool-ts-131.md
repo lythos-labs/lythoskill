@@ -1,4 +1,4 @@
-# TASK-20260511235909808: cold-pool: calculateDirSize() empty catch returns 0 masking permission errors (prune-plan.ts:64)
+# TASK-20260511235909747: cold-pool: walk() bare catch silently drops entire subtree on readdir failure (cold-pool.ts:131)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,12 +6,13 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-11 | Created |
+| completed | 2026-05-11 | Closed via trailer |
 
 ## 背景与目标
 
-QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/prune-plan.ts:64` — cold-pool: calculateDirSize() empty catch returns 0 masking permission errors (prune-plan.ts:64)
+QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/cold-pool.ts:131` — cold-pool: walk() bare catch silently drops entire subtree (cold-pool.ts:131)
 
-**Source**: `packages/lythoskill-cold-pool/src/prune-plan.ts:64`
+**Source**: `packages/lythoskill-cold-pool/src/cold-pool.ts:131`
 
 ## 需求详情
 - [ ] Narrow catch to expected error types (ENOENT etc.)
@@ -20,7 +21,7 @@ QA sweep (EPIC-20260511235648324) finding: `packages/lythoskill-cold-pool/src/pr
 
 ## 技术方案
 
-Distinguish ENOENT (return 0 OK) from EACCES (return -1 or throw). 0 from permission error → incorrect prune.
+Distinguish ENOENT (skip) from EACCES/EIO (log + collect partial). Return { entries, errors } struct.
 
 ## 验收标准
 - [ ] Error handling distinguishes expected from unexpected failures
@@ -28,7 +29,7 @@ Distinguish ENOENT (return 0 OK) from EACCES (return -1 or throw). 0 from permis
 - [ ] `bun test` passes (0 fail)
 
 ## 关联文件
-- 修改: `packages/lythoskill-cold-pool/src/prune-plan.ts`
+- 修改: `packages/lythoskill-cold-pool/src/cold-pool.ts`
 - 参考: playground/qa-sweep-2026-05-11/findings.jsonl
 - Epic: EPIC-20260511235648324
 
