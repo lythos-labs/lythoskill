@@ -82,6 +82,29 @@ When the thought "I should just do it, the user is already angry" appears, that 
 
 **sed: detector, not scalpel.** `sed` and `grep` are for surveying — find occurrences, confirm the landscape, build a list. `sed -i` is a file-level `|| true`: one silent mismatch is undetectable corruption. When qa-sweep or manual inspection surfaces a recurring anti-pattern, the safe workflow is: survey with grep/sed (read-only) → design the right abstraction (extract a util, normalize an interface) → fix each call site one by one with the type checker watching → verify with `bun --filter='*' run test`. If the change is too large for site-by-site repair (whole-file rewrite, cross-cutting restructure), invoke `lythoskill-red-green-release` — show the target state via heredoc, don't describe the transformation. See [`cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md`](./cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md).
 
+**Project hot spots & work patterns** (distilled from `git log -60` + qa-sweep audit):
+
+| Hot file | Risk | Why |
+|----------|------|-----|
+| `deck/src/add.ts` | Parsing creep | Each feature (syntax sugar, @skill, #ref, source URL) adds a parse path. Test every variant — 32 known locator forms. |
+| `cold-pool/src/fetch-plan.ts` | Git side-effects | `execFileSync('git', ...)` — array args prevent injection, but exit codes need checking. |
+| `cortex/hooks/*.ts` | Silent governance failure | git() helpers, spawnSync — must check exit codes. Hooks failing silently = trailers not dispatching, ADRs not auto-accepting. |
+| `.husky/` | Guard cascade | Bugs in hooks affect every commit. All hook changes trigger the guard-script warning — QA with `arena single --deck examples/decks/qa-sweep.toml`. |
+| `AGENTS.md` | Compaction amnesia | Most-changed doc. After compaction, re-read the Release & Auth Workflow section before any release/git/npm command. |
+| Release pipeline | Lockfile drift | bump → `bun install` → commit → push → `publish.sh`. Never hand-edit version numbers. See [Release & Auth Workflow](./AGENTS.md#release--auth-workflow). |
+
+Recurring work types (last 60 commits):
+
+| Type | Frequency | Pattern |
+|------|-----------|---------|
+| Security hardening | 13 | Waves: P0/P1 sweep → P2 sweep → QA audit → repeat. Path traversal, injection, empty catch. |
+| Deck add/locator | 10 | Incremental: each new shorthand adds normalize→parse→validate chain. |
+| Infra/CI | 8 | Meta-layer: bump lockfile, test counters, hook gates, semgrep pre-push. |
+| Agent adapters | 6 | Template: build command array, spawn, parse output, return `AgentResult`. Low-risk but needs `execFileSync` not `execSync`. |
+| Release | 5 | Mechanical: `bunx @lythos/skill-creator@latest bump` → commit → `./scripts/publish.sh`. |
+
+When touching a hot file, run its full test suite (unit + CLI BDD if it has a `test/runner.ts`). When touching a hook or guard script, the pre-commit warning will fire — don't ignore it.
+
 ---
 
 ## Tech Stack
