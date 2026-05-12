@@ -11,7 +11,7 @@
 import { existsSync as _existsSync, writeFileSync as _writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fetchWithProxy } from '@lythos/infra'
-import { mirrorUrls } from '../../lythoskill-cold-pool/src/mirror.js'
+import { mirrorUrls } from '@lythos/cold-pool'
 import { findDeckToml } from './link.js'
 
 export interface FetchDeckIO {

@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (38)
+## 📚 Patterns (39)
 
+- **[2026-05-12]** [workspace-protocol-in-source-concrete-version-at-publish](./01-patterns/2026-05-12-workspace-protocol-in-source-concrete-version-at-publish.md)
 - **[2026-05-11]** [skills-discovery-vs-governance-complementary-architecture](./01-patterns/2026-05-11-skills-discovery-vs-governance-complementary-architecture.md)
 - **[2026-05-10]** [side-deck-pattern-specialized-task-decks-for-arena-single](./01-patterns/2026-05-10-side-deck-pattern-specialized-task-decks-for-arena-single.md)
 - **[2026-05-10]** [cold-pool-metadata-filesystem-ground-truth](./01-patterns/2026-05-10-cold-pool-metadata-filesystem-ground-truth.md)
@@ -48,8 +49,9 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (16)
+## 📖 Lessons (17)
 
+- **[2026-05-12]** [whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite](./03-lessons/2026-05-12-whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite.md)
 - **[2026-05-08]** [feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product](./03-lessons/2026-05-08-feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product.md)
 - **[2026-05-07]** [real-world-skill-repo-structure-survey](./03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md)
 - **[2026-05-06]** [deepseek-tui-headless-programmatic-analysis](./03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md)
