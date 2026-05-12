@@ -44,6 +44,8 @@ checklist_skipped_reason: agent non-interactive session
 | TASK-20260513033254695 | backlog | Restore refresh apply-mode (plan-first guardrail) — implementation regressed from documented design |
 | TASK-20260513033256305 | backlog | Wire probeConnectivity into plan→apply boundary for deck add/refresh — env probe insertion point |
 | TASK-20260513033455974 | backlog | Restore CLI subcommand `--help` per ADR-20260423182606313 — cortex/refresh treat `--help` as positional arg |
+| TASK-20260513035226597 | backlog | Evaluate `bun publish` vs `npm publish` + rewrite (Bun ≥1.3 may auto-rewrite workspace:*; verify via dry-run before any switch) |
+| TASK-20260513035228296 | backlog | CI E2E publish-validation gate — spawn clean `bunx <pkg>@<new-version>` after publish to catch workspace:* and other manifest bugs |
 
 ## 经验沉淀
 
