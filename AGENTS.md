@@ -93,6 +93,8 @@ When the thought "I should just do it, the user is already angry" appears, that 
 | 治理 / task / epic | `governance.toml` | `arena single --deck examples/decks/governance.toml --brief "..."` |
 | 体验 / 测试 UX | `scout.toml` | `arena single --deck examples/decks/scout.toml --brief "..."` |
 
+**Never guess skill paths — verify with real repo structure.** When writing a deck.toml that references external skills, you MUST verify the actual directory layout of the target repo. Do NOT assume skills live under `skills/`. Options in priority order: (1) clone the repo and `ls` the structure, (2) use `curator discover` to scan the cold pool, (3) check the repo's GitHub tree via web. The Vercel skills case (dir name ≠ frontmatter name, 4/7 mismatch) and this project's own wiki research (`2026-05-11-deck-add-variant-coverage.md`, 32 locator forms) exist specifically because repo layouts vary. Guessing paths is the `|| true` of deck authoring — silent failure with no error message.
+
 **Project hot spots & work patterns** (distilled from `git log -60` + qa-sweep audit):
 
 | Hot file | Risk | Why |
