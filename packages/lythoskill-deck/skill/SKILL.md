@@ -3,14 +3,24 @@ name: lythoskill-deck
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Declarative skill deck governance. Syncs .claude/skills/ working set
-  to match skill-deck.toml declarations via symlinks. Undeclared skills
-  are physically removed (deny-by-default), eliminating silent conflicts
-  and context pollution from excess skill descriptions.
+  Declarative skill deck governance. Syncs working set to match
+  skill-deck.toml via symlinks. Deny-by-default removes undeclared
+  skills. CRITICAL when writing a deck for others: verify every
+  locator path against the REAL repo structure before publishing.
+  A wrong path silently fails for every user who runs deck link.
+  Clone the repo and check — never guess `skills/<name>`.
 when_to_use: |
   Skill conflicts, too many skills, clean up or organize skills,
   skill-deck.toml, sync working set, initialize deck, what are
   these symlinks in .claude/skills/, silent blend, manage skill deck.
+
+  CRITICAL — verify before publishing a deck for others:
+  - Writing a deck.toml that will be shared/published → clone the
+    target repo FIRST, verify every locator resolves to a real path
+  - The user running `deck link` has no way to know a path is wrong
+  - A broken locator = all downstream users get silent failure
+  - Use `deck validate --remote <deck.toml>` to check every locator
+  - Never assume skills live under `skills/` — repo layouts vary
 allowed-tools:
   - Bash(bunx @lythos/skill-deck@{{PACKAGE_VERSION}} *)
 # ── deck governance metadata (consumed by lythoskill tooling, not by agent platforms) ──
