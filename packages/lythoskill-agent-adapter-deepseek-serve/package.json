@@ -22,6 +22,6 @@
     "serve-mode"
   ],
   "dependencies": {
-    "@lythos/agent-adapter": "^0.9.33"
+    "@lythos/agent-adapter": "workspace:*"
   }
 }

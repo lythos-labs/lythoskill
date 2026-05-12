@@ -10,11 +10,11 @@
     },
     "packages/lythoskill-agent-adapter": {
       "name": "@lythos/agent-adapter",
-      "version": "0.10.0",
+      "version": "0.10.1",
     },
     "packages/lythoskill-agent-adapter-claude-sdk": {
       "name": "@lythos/agent-adapter-claude-sdk",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "@anthropic-ai/claude-agent-sdk": "^0.2.131",
         "@lythos/agent-adapter": "^0.9.25",
@@ -22,27 +22,27 @@
     },
     "packages/lythoskill-agent-adapter-codex": {
       "name": "@lythos/agent-adapter-codex",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "@lythos/agent-adapter": "^0.9.48",
       },
     },
     "packages/lythoskill-agent-adapter-deepseek-serve": {
       "name": "@lythos/agent-adapter-deepseek-serve",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "@lythos/agent-adapter": "^0.9.33",
       },
     },
     "packages/lythoskill-arena": {
       "name": "@lythos/skill-arena",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-arena": "src/cli.ts",
       },
       "dependencies": {
-        "@lythos/cold-pool": "^0.9.25",
-        "@lythos/test-utils": "^0.9.1",
+        "@lythos/cold-pool": "workspace:*",
+        "@lythos/test-utils": "workspace:*",
         "zod": "^3.24.0",
         "zod-to-json-schema": "^3.25.2",
       },
@@ -52,7 +52,7 @@
     },
     "packages/lythoskill-cold-pool": {
       "name": "@lythos/cold-pool",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "cold-pool": "src/cli.ts",
       },
@@ -63,51 +63,51 @@
     },
     "packages/lythoskill-creator": {
       "name": "@lythos/skill-creator",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-creator": "src/cli.ts",
       },
     },
     "packages/lythoskill-curator": {
       "name": "@lythos/skill-curator",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-curator": "src/cli.ts",
       },
       "dependencies": {
-        "@lythos/cold-pool": "^0.9.36",
-        "@lythos/infra": "^0.9.36",
+        "@lythos/cold-pool": "workspace:*",
+        "@lythos/infra": "workspace:*",
         "node-sql-parser": "^5.4.0",
         "yaml": "^2.8.3",
       },
     },
     "packages/lythoskill-deck": {
       "name": "@lythos/skill-deck",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-deck": "src/cli.ts",
       },
       "dependencies": {
         "@iarna/toml": "^2.2.5",
-        "@lythos/cold-pool": "^0.9.25",
+        "@lythos/cold-pool": "workspace:*",
         "yaml": "^2.8.3",
         "zod": "^4.3.6",
       },
     },
     "packages/lythoskill-hello-world": {
       "name": "@lythos/hello-world",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-hello-world": "src/cli.ts",
       },
     },
     "packages/lythoskill-infra": {
       "name": "@lythos/infra",
-      "version": "0.10.0",
+      "version": "0.10.1",
     },
     "packages/lythoskill-project-cortex": {
       "name": "@lythos/project-cortex",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "bin": {
         "lythoskill-project-cortex": "src/cli.ts",
       },
@@ -117,7 +117,7 @@
     },
     "packages/lythoskill-test-utils": {
       "name": "@lythos/test-utils",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "dependencies": {
         "@lythos/agent-adapter": "^0.9.25",
         "zod": "^4.4.3",
@@ -126,23 +126,23 @@
     },
   },
   "packages": {
-    "@anthropic-ai/claude-agent-sdk": ["@anthropic-ai/claude-agent-sdk@0.2.131", "", { "dependencies": { "@anthropic-ai/sdk": "^0.81.0", "@modelcontextprotocol/sdk": "^1.29.0" }, "optionalDependencies": { "@anthropic-ai/claude-agent-sdk-darwin-arm64": "0.2.131", "@anthropic-ai/claude-agent-sdk-darwin-x64": "0.2.131", "@anthropic-ai/claude-agent-sdk-linux-arm64": "0.2.131", "@anthropic-ai/claude-agent-sdk-linux-arm64-musl": "0.2.131", "@anthropic-ai/claude-agent-sdk-linux-x64": "0.2.131", "@anthropic-ai/claude-agent-sdk-linux-x64-musl": "0.2.131", "@anthropic-ai/claude-agent-sdk-win32-arm64": "0.2.131", "@anthropic-ai/claude-agent-sdk-win32-x64": "0.2.131" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-4Xak+BlcxXuni5BvNeb0tnSapIoCBxE7cFnXvkUs0EwbY88FkmdJEtBXZbF7NRuN8bUwDeNxvy0Fs0dWnzpU+g=="],
+    "@anthropic-ai/claude-agent-sdk": ["@anthropic-ai/claude-agent-sdk@0.2.139", "", { "dependencies": { "@anthropic-ai/sdk": "^0.81.0", "@modelcontextprotocol/sdk": "^1.29.0" }, "optionalDependencies": { "@anthropic-ai/claude-agent-sdk-darwin-arm64": "0.2.139", "@anthropic-ai/claude-agent-sdk-darwin-x64": "0.2.139", "@anthropic-ai/claude-agent-sdk-linux-arm64": "0.2.139", "@anthropic-ai/claude-agent-sdk-linux-arm64-musl": "0.2.139", "@anthropic-ai/claude-agent-sdk-linux-x64": "0.2.139", "@anthropic-ai/claude-agent-sdk-linux-x64-musl": "0.2.139", "@anthropic-ai/claude-agent-sdk-win32-arm64": "0.2.139", "@anthropic-ai/claude-agent-sdk-win32-x64": "0.2.139" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-9zmitYoxCQiQZsTUbm9IGC6VyZt70J3NLtkRQPQvFVfz7bKDrhlZZKzXmyl2XmqedXEIeQy2ACmwdjwzPIVIAw=="],
 
-    "@anthropic-ai/claude-agent-sdk-darwin-arm64": ["@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.131", "", { "os": "darwin", "cpu": "arm64" }, "sha512-jOGq8lAi6bakqX0MBVkJDOddC2xSYnP1XHzps2cBF696dQlHoXs4hqU+69Wt4oKScyw4tM4Pe+Mmeut9LJqbEg=="],
+    "@anthropic-ai/claude-agent-sdk-darwin-arm64": ["@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.139", "", { "os": "darwin", "cpu": "arm64" }, "sha512-dnuO2E0x6o9GAk9iZZKlEd10h+0PQFdTfr5aQU4I0W+0ReKsFEoE9LAqfomS2EvLUQ9L62X0+n0iyZQmAVi1kw=="],
 
-    "@anthropic-ai/claude-agent-sdk-darwin-x64": ["@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.131", "", { "os": "darwin", "cpu": "x64" }, "sha512-IxewhApb20ucAxnpUCAwETLjO5PsQRAJIBBlDlNqPsd20LIZVVQuQ5orFf6CGEs6MfYRnWz2FYwfHhguGNPIyQ=="],
+    "@anthropic-ai/claude-agent-sdk-darwin-x64": ["@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.139", "", { "os": "darwin", "cpu": "x64" }, "sha512-SXyldBIwpMHDXppPGObXZ1wjSSWf/YPgD6vK4nssIXarC/DtMRnAQ419Hb3q5MaBB29vSjOPKmG0MOkMltFR/A=="],
 
-    "@anthropic-ai/claude-agent-sdk-linux-arm64": ["@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.131", "", { "os": "linux", "cpu": "arm64" }, "sha512-GDwaga8aadtVeYq1wJM2BSWp5l/Srel7L5WRbEvkEWXeGP463S7VLJyiNVcbjbi/HLmyQigEkzFoHfZdeqKOvw=="],
+    "@anthropic-ai/claude-agent-sdk-linux-arm64": ["@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.139", "", { "os": "linux", "cpu": "arm64" }, "sha512-qfnQ4SjEcq//iGAJkk25J6j4Tq+dvQe9wHks0dcaSdGOs2D96Teqrb358YJe+nke2DBKVUa9Y4ComW3aUBM29w=="],
 
-    "@anthropic-ai/claude-agent-sdk-linux-arm64-musl": ["@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.131", "", { "os": "linux", "cpu": "arm64" }, "sha512-7efL5otHqTKMeNxIztEjEGs8ktlR3hfMmVbo1HaEbs+tkJ6fvMwS3k4xnUP7Bqy+GsM+U9r9kRdNz4MVdc80hg=="],
+    "@anthropic-ai/claude-agent-sdk-linux-arm64-musl": ["@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.139", "", { "os": "linux", "cpu": "arm64" }, "sha512-gzMfit9t7Fiy5taZ+miAaP8ZmOMc+hv8Ov3UOXGwJunK6H+0F88ctBSnolDPMPQaS6s2WoMD0o8fhUbBudtMVw=="],
 
-    "@anthropic-ai/claude-agent-sdk-linux-x64": ["@anthropic-ai/claude-agent-sdk-linux-x64@0.2.131", "", { "os": "linux", "cpu": "x64" }, "sha512-tJJggvCGtkK876CowajF/42AdUy0TTJk0gHeCKuDCMJF3hMs70EtYnwyM81nb10tKUFb6zYdvn6iPn6iGx7iFQ=="],
+    "@anthropic-ai/claude-agent-sdk-linux-x64": ["@anthropic-ai/claude-agent-sdk-linux-x64@0.2.139", "", { "os": "linux", "cpu": "x64" }, "sha512-2Gqy5hV/MyObbwSyNhj5ha2cY5EZnUfDLvpEwR1eeOaU1yqnxzsdNzXWgHIyWQGKGNE2ICwgLYtt6AtOJGWpPg=="],
 
-    "@anthropic-ai/claude-agent-sdk-linux-x64-musl": ["@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.131", "", { "os": "linux", "cpu": "x64" }, "sha512-WNqUJscB1F86Igbnw5zXpndT89I7l3aIvPJQEOrSA5JaIDmfJft8QA1rrJPwf2tcxP8nNS0H3MbEFBAxq92bNw=="],
+    "@anthropic-ai/claude-agent-sdk-linux-x64-musl": ["@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.139", "", { "os": "linux", "cpu": "x64" }, "sha512-Fg/aQs1vdyqLrNXqGa1i7/ODpGxP6ud/K/2AgVarLteg2Z3ZnrHPvPQ6iQmTGI8+BhxAZ141t4Dg0CWz3CoqCQ=="],
 
-    "@anthropic-ai/claude-agent-sdk-win32-arm64": ["@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.131", "", { "os": "win32", "cpu": "arm64" }, "sha512-LDXYMqR3T1JtaIusmVDr6e539IhE+IULKYBiLC7+v7VvLG6niP1cC+4W/zYZRnUcbzUgcfoIi1FvrWhtF6/M+A=="],
+    "@anthropic-ai/claude-agent-sdk-win32-arm64": ["@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.139", "", { "os": "win32", "cpu": "arm64" }, "sha512-HusAU/gSQ0G0AHU+Hj/ps0Tl5JaUF2nxkp+G42tU6hpnwLMOQMdLx/yqvSQnz4WSxggxiDFmYvMDLYAmuE9Qdg=="],
 
-    "@anthropic-ai/claude-agent-sdk-win32-x64": ["@anthropic-ai/claude-agent-sdk-win32-x64@0.2.131", "", { "os": "win32", "cpu": "x64" }, "sha512-gwLUkQWtK9Un2i9mWWQgoaEk+2rzamiH3r4j7aoTyVzB4ZQgxdBBOP9ac5o9pIwQE+vflr0HvKk1O54Z320Vng=="],
+    "@anthropic-ai/claude-agent-sdk-win32-x64": ["@anthropic-ai/claude-agent-sdk-win32-x64@0.2.139", "", { "os": "win32", "cpu": "x64" }, "sha512-eJjbtLvEBJcTrl4WJhmhP7FYdTVvx/XtioifH7OEnCoxQozMHhOmA0X90csplIRpttX+jX2PqnE5j2FwU20eCw=="],
 
     "@anthropic-ai/sdk": ["@anthropic-ai/sdk@0.81.0", "", { "dependencies": { "json-schema-to-ts": "^3.1.1" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" }, "optionalPeers": ["zod"], "bin": { "anthropic-ai-sdk": "bin/cli" } }, "sha512-D4K5PvEV6wPiRtVlVsJHIUhHAmOZ6IT/I9rKlTf84gR7GyyAurPJK7z9BOf/AZqC5d1DhYQGJNKRmV+q8dGhgw=="],
 
@@ -376,7 +376,7 @@
 
     "wrappy": ["wrappy@1.0.2", "", {}, "sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ=="],
 
-    "yaml": ["yaml@2.8.4", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-ml/JPOj9fOQK8RNnWojA67GbZ0ApXAUlN2UQclwv2eVgTgn7O9gg9o7paZWKMp4g0H3nTLtS9LVzhkpOFIKzog=="],
+    "yaml": ["yaml@2.9.0", "", { "bin": { "yaml": "bin.mjs" } }, "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="],
 
     "zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
@@ -396,16 +396,6 @@
 
     "@lythos/skill-arena/@lythos/agent-adapter-claude-sdk": ["@lythos/agent-adapter-claude-sdk@0.9.51", "", { "dependencies": { "@anthropic-ai/claude-agent-sdk": "^0.2.131", "@lythos/agent-adapter": "^0.9.25" } }, "sha512-BRERWdfPjNylDtmW7y6+bRZc9gMwIpVfX63sxPfNud5TjWsd+YbjGrYiI8F/yr3sUt45Zj2Qh4Oy4V2GGZVcfQ=="],
 
-    "@lythos/skill-arena/@lythos/cold-pool": ["@lythos/cold-pool@0.9.51", "", { "dependencies": { "@lythos/infra": "^0.9.36", "simple-git": "^3.36.0" }, "bin": { "cold-pool": "src/cli.ts" } }, "sha512-nIvo379iYNIqHBDJez4V+Hw/Q74H2BxzeT5PewUVVQU78x15UqPEN4xakQ7N/a8eH3pZc2JA3GHz0InSOzchFQ=="],
-
-    "@lythos/skill-arena/@lythos/test-utils": ["@lythos/test-utils@0.9.51", "", { "dependencies": { "@lythos/agent-adapter": "^0.9.25", "zod": "^4.4.3", "zod-to-json-schema": "^3.25.2" } }, "sha512-z8tUZQkfdxDOBEh1XOQABmhxb7q6iv2OtNozX1bfx6IY77cplAwLw3T2nIcIIhuUOd0tTHnftkz+I8R4vgSVmg=="],
-
-    "@lythos/skill-curator/@lythos/cold-pool": ["@lythos/cold-pool@0.9.51", "", { "dependencies": { "@lythos/infra": "^0.9.36", "simple-git": "^3.36.0" }, "bin": { "cold-pool": "src/cli.ts" } }, "sha512-nIvo379iYNIqHBDJez4V+Hw/Q74H2BxzeT5PewUVVQU78x15UqPEN4xakQ7N/a8eH3pZc2JA3GHz0InSOzchFQ=="],
-
-    "@lythos/skill-curator/@lythos/infra": ["@lythos/infra@0.9.51", "", {}, "sha512-n1eYV4RziSd1x8hQ/GtnGzzZRxQCFAMCb0IiuV+oAPAm/7RR705yewYRRTvXiuEK3kJGmWQbHmJy5Ng1fDwVbQ=="],
-
-    "@lythos/skill-deck/@lythos/cold-pool": ["@lythos/cold-pool@0.9.51", "", { "dependencies": { "@lythos/infra": "^0.9.36", "simple-git": "^3.36.0" }, "bin": { "cold-pool": "src/cli.ts" } }, "sha512-nIvo379iYNIqHBDJez4V+Hw/Q74H2BxzeT5PewUVVQU78x15UqPEN4xakQ7N/a8eH3pZc2JA3GHz0InSOzchFQ=="],
-
     "@lythos/skill-deck/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
     "@lythos/test-utils/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
@@ -419,13 +409,5 @@
     "@lythos/project-cortex/@lythos/test-utils/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
     "@lythos/skill-arena/@lythos/agent-adapter-claude-sdk/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/skill-arena/@lythos/cold-pool/@lythos/infra": ["@lythos/infra@0.9.51", "", {}, "sha512-n1eYV4RziSd1x8hQ/GtnGzzZRxQCFAMCb0IiuV+oAPAm/7RR705yewYRRTvXiuEK3kJGmWQbHmJy5Ng1fDwVbQ=="],
-
-    "@lythos/skill-arena/@lythos/test-utils/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/skill-arena/@lythos/test-utils/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
-
-    "@lythos/skill-deck/@lythos/cold-pool/@lythos/infra": ["@lythos/infra@0.9.51", "", {}, "sha512-n1eYV4RziSd1x8hQ/GtnGzzZRxQCFAMCb0IiuV+oAPAm/7RR705yewYRRTvXiuEK3kJGmWQbHmJy5Ng1fDwVbQ=="],
   }
 }

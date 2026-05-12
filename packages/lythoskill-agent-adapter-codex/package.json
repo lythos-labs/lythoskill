@@ -22,6 +22,6 @@
     "codex-cli"
   ],
   "dependencies": {
-    "@lythos/agent-adapter": "^0.9.48"
+    "@lythos/agent-adapter": "workspace:*"
   }
 }

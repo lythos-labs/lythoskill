@@ -58,6 +58,31 @@ if [ -n "$STAGED_CORTEX_RENAMES" ]; then
   echo "💡 Run 'cortex probe' to verify Status History is consistent."
 fi
 
+# 0.6. Workspace internal deps MUST use workspace:*, not semver
+STAGED_PKG_JSON=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/package\.json$' || true)
+
+if [ -n "$STAGED_PKG_JSON" ]; then
+  BAD_DEPS=$(grep -n '"@lythos/[^"]*":\s*"\^' $STAGED_PKG_JSON 2>/dev/null || true)
+  if [ -n "$BAD_DEPS" ]; then
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  ❌ SEMVER ON INTERNAL @lythos DEP — USE workspace:*       ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Workspace-internal dependencies must use workspace:*,     ║"
+    echo "║  never ^0.x.y. Semver resolves to stale npm cache — local  ║"
+    echo "║  source changes become invisible to dependent packages.    ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "$BAD_DEPS" | while read line; do
+      printf "║    %-54s ║\n" "$line"
+    done
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Fix: change \"^0.x.y\" → \"workspace:*\" in the files above.  ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    exit 1
+  fi
+fi
+
 # 1. ADR governance checks (fast — fail early if violated)
 if [ -f scripts/adr-check.sh ]; then
   bash scripts/adr-check.sh || exit 1

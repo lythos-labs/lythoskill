@@ -41,6 +41,6 @@
   },
   "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-project-cortex#readme",
   "devDependencies": {
-    "@lythos/test-utils": "^0.9.25"
+    "@lythos/test-utils": "workspace:*"
   }
 }
