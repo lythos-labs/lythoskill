@@ -9,6 +9,7 @@ import {
   existsSync, mkdirSync, writeFileSync, readFileSync,
 } from 'node:fs'
 import { join, resolve, basename } from 'node:path'
+import { fetchWithProxy } from '@lythos/infra'
 import {
   parseDeckSkills,
   checkSkillExistence,
@@ -181,14 +182,14 @@ async function singleRun(args: string[]) {
     let allFailed = true
 
     // Try direct first
-    try { res = await fetch(url, { signal: AbortSignal.timeout(30_000) }); if (res.ok) allFailed = false } catch {}
+    try { res = await fetchWithProxy(url, { signal: AbortSignal.timeout(30_000) }); if (res.ok) allFailed = false } catch {}
 
     // Auto-fallback: try mirrors when direct fails
     if (!res?.ok) {
       for (const mirrorUrl of mirrorUrls(url)) {
         try {
           console.log(`   ↳ trying mirror: ${mirrorUrl}`)
-          const r = await fetch(mirrorUrl, { signal: AbortSignal.timeout(30_000) })
+          const r = await fetchWithProxy(mirrorUrl, { signal: AbortSignal.timeout(30_000) })
           if (r.ok) { res = r; allFailed = false; break }
         } catch {}
       }

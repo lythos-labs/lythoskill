@@ -17,21 +17,21 @@
       "version": "0.10.1",
       "dependencies": {
         "@anthropic-ai/claude-agent-sdk": "^0.2.131",
-        "@lythos/agent-adapter": "^0.9.25",
+        "@lythos/agent-adapter": "workspace:*",
       },
     },
     "packages/lythoskill-agent-adapter-codex": {
       "name": "@lythos/agent-adapter-codex",
       "version": "0.10.1",
       "dependencies": {
-        "@lythos/agent-adapter": "^0.9.48",
+        "@lythos/agent-adapter": "workspace:*",
       },
     },
     "packages/lythoskill-agent-adapter-deepseek-serve": {
       "name": "@lythos/agent-adapter-deepseek-serve",
       "version": "0.10.1",
       "dependencies": {
-        "@lythos/agent-adapter": "^0.9.33",
+        "@lythos/agent-adapter": "workspace:*",
       },
     },
     "packages/lythoskill-arena": {
@@ -42,12 +42,13 @@
       },
       "dependencies": {
         "@lythos/cold-pool": "workspace:*",
+        "@lythos/infra": "workspace:*",
         "@lythos/test-utils": "workspace:*",
         "zod": "^3.24.0",
         "zod-to-json-schema": "^3.25.2",
       },
       "optionalDependencies": {
-        "@lythos/agent-adapter-claude-sdk": "^0.9.25",
+        "@lythos/agent-adapter-claude-sdk": "workspace:*",
       },
     },
     "packages/lythoskill-cold-pool": {
@@ -57,7 +58,7 @@
         "cold-pool": "src/cli.ts",
       },
       "dependencies": {
-        "@lythos/infra": "^0.9.36",
+        "@lythos/infra": "workspace:*",
         "simple-git": "^3.36.0",
       },
     },
@@ -90,6 +91,7 @@
       "dependencies": {
         "@iarna/toml": "^2.2.5",
         "@lythos/cold-pool": "workspace:*",
+        "@lythos/infra": "workspace:*",
         "yaml": "^2.8.3",
         "zod": "^4.3.6",
       },
@@ -112,14 +114,14 @@
         "lythoskill-project-cortex": "src/cli.ts",
       },
       "devDependencies": {
-        "@lythos/test-utils": "^0.9.25",
+        "@lythos/test-utils": "workspace:*",
       },
     },
     "packages/lythoskill-test-utils": {
       "name": "@lythos/test-utils",
       "version": "0.10.1",
       "dependencies": {
-        "@lythos/agent-adapter": "^0.9.25",
+        "@lythos/agent-adapter": "workspace:*",
         "zod": "^4.4.3",
         "zod-to-json-schema": "^3.25.2",
       },
@@ -384,30 +386,10 @@
 
     "@anthropic-ai/claude-agent-sdk/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
-    "@lythos/agent-adapter-claude-sdk/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/agent-adapter-codex/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/agent-adapter-deepseek-serve/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/cold-pool/@lythos/infra": ["@lythos/infra@0.9.51", "", {}, "sha512-n1eYV4RziSd1x8hQ/GtnGzzZRxQCFAMCb0IiuV+oAPAm/7RR705yewYRRTvXiuEK3kJGmWQbHmJy5Ng1fDwVbQ=="],
-
-    "@lythos/project-cortex/@lythos/test-utils": ["@lythos/test-utils@0.9.51", "", { "dependencies": { "@lythos/agent-adapter": "^0.9.25", "zod": "^4.4.3", "zod-to-json-schema": "^3.25.2" } }, "sha512-z8tUZQkfdxDOBEh1XOQABmhxb7q6iv2OtNozX1bfx6IY77cplAwLw3T2nIcIIhuUOd0tTHnftkz+I8R4vgSVmg=="],
-
-    "@lythos/skill-arena/@lythos/agent-adapter-claude-sdk": ["@lythos/agent-adapter-claude-sdk@0.9.51", "", { "dependencies": { "@anthropic-ai/claude-agent-sdk": "^0.2.131", "@lythos/agent-adapter": "^0.9.25" } }, "sha512-BRERWdfPjNylDtmW7y6+bRZc9gMwIpVfX63sxPfNud5TjWsd+YbjGrYiI8F/yr3sUt45Zj2Qh4Oy4V2GGZVcfQ=="],
-
     "@lythos/skill-deck/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
-
-    "@lythos/test-utils/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
 
     "@lythos/test-utils/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
 
     "@modelcontextprotocol/sdk/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
-
-    "@lythos/project-cortex/@lythos/test-utils/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
-
-    "@lythos/project-cortex/@lythos/test-utils/zod": ["zod@4.4.3", "", {}, "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="],
-
-    "@lythos/skill-arena/@lythos/agent-adapter-claude-sdk/@lythos/agent-adapter": ["@lythos/agent-adapter@0.9.51", "", {}, "sha512-HjBuc92E9/SGax3g7BOrnAogi1l+2v8zT0qjGkTnQPdD/bYPQ5IvloGAAIeSQDjkmosCV1L7JVLbHPOvPAqGyQ=="],
   }
 }

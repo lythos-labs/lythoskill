@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@lythos/cold-pool": "workspace:*",
+    "@lythos/infra": "workspace:*",
     "@lythos/test-utils": "workspace:*",
     "zod": "^3.24.0",
     "zod-to-json-schema": "^3.25.2"
