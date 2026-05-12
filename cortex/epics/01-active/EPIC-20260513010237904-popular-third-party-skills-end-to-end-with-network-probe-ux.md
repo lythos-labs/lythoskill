@@ -40,6 +40,10 @@ checklist_skipped_reason: agent non-interactive session
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
+| TASK-20260513010246527 | completed | probeConnectivity with concurrent racing + error collection (8b097c5) |
+| TASK-20260513033254695 | backlog | Restore refresh apply-mode (plan-first guardrail) — implementation regressed from documented design |
+| TASK-20260513033256305 | backlog | Wire probeConnectivity into plan→apply boundary for deck add/refresh — env probe insertion point |
+| TASK-20260513033455974 | backlog | Restore CLI subcommand `--help` per ADR-20260423182606313 — cortex/refresh treat `--help` as positional arg |
 
 ## 经验沉淀
 

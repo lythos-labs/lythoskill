@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/13 01:09:53
+> 自动生成于 2026/5/13 03:32:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 201 | 进行中: 0, 待验收: 0, 已完成: 176 |
+| Tasks | 202 | 进行中: 0, 待验收: 0, 已完成: 176 |
 | Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
-| ADRs | 65 | 已接受: 50 |
+| ADRs | 66 | 已接受: 50 |
 
 ---
 
@@ -254,7 +254,7 @@ _无_
 
 _无_
 
-### 终止 (24)
+### 终止 (25)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -280,6 +280,7 @@ _无_
 - 🛑 ~~TASK-20260506102619862~~: Implement distinct runtime behavior for innate/tool/combo skill types
 - 🛑 ~~TASK-20260506193936311~~: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - 🛑 ~~TASK-20260507223935542~~: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
+- 🛑 ~~TASK-20260513033214684~~: --help
 
 ---
 
@@ -350,6 +351,7 @@ _无_
 - 🤔 **ADR-20260511210000000** (01-proposed): Consolidate curator output to `~/.agents/lythoskill/curator/`
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
 - ✅ **ADR-20260512191438745** (02-accepted): LYTHOS_MIRROR env var for transparent GitHub proxy/mirror in restricted networks
+- 🤔 **ADR-20260513011442965** (01-proposed): Network proxy auto-discovery for resilient connectivity
 
 ---
 
