@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/12 01:15:06
+> 自动生成于 2026/5/13 01:09:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 200 | 进行中: 0, 待验收: 0, 已完成: 171 |
-| Epics | 28 | 活跃: 0, 已完成: 24, 悬置: 2, 已归档: 2 |
-| ADRs | 64 | 已接受: 49 |
+| Tasks | 201 | 进行中: 0, 待验收: 0, 已完成: 176 |
+| Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
+| ADRs | 65 | 已接受: 50 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260513010237904**: Popular third-party skills end-to-end with network probe UX
 
 ### 已完成
 
@@ -59,12 +59,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (0)
 
-- [ ] **TASK-20260510234339990**: P2 sweep — 4 packages: remaining code quality fixes (TOML parse, path join, renameSync guard, locale, etc.)
-- [ ] **TASK-20260511091105701**: replace regex-based SQL check with real parser (node-sql-parser) — LLM hand-roll tendency anti-pattern
-- [ ] **TASK-20260511093956018**: deck add: multi-skill discovery warning when repo contains multiple skills — list all, ask user to pick or add all
-- [ ] **TASK-20260511095504433**: parseLocator #ref support — branch/tag/commit suffix compatible with skills.sh parseFragmentRef
+_无_
 
 ### 进行中 (0)
 
@@ -74,7 +71,7 @@ _无_
 
 _无_
 
-### 已完成 (171)
+### 已完成 (176)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -235,6 +232,10 @@ _无_
 - ✅ ~~TASK-20260510202837850~~: cold-pool P2 reliability — git timeout, symlink loop, truncated tree, prefix matching, cloneUrl protocol
 - ✅ ~~TASK-20260510202837878~~: cold-pool P2 maintainability — dedup prune, O(N^2) hasSkillMd, behind semantics, untyped lock, timestamp consistency, type drift, locator guards
 - ✅ ~~TASK-20260510202837906~~: CI supply-chain — pin third-party GitHub Action SHA
+- ✅ ~~TASK-20260510234339990~~: P2 sweep — 4 packages: remaining code quality fixes (TOML parse, path join, renameSync guard, locale, etc.)
+- ✅ ~~TASK-20260511091105701~~: replace regex-based SQL check with real parser (node-sql-parser) — LLM hand-roll tendency anti-pattern
+- ✅ ~~TASK-20260511093956018~~: deck add: multi-skill discovery warning when repo contains multiple skills — list all, ask user to pick or add all
+- ✅ ~~TASK-20260511095504433~~: parseLocator #ref support — branch/tag/commit suffix compatible with skills.sh parseFragmentRef
 - ✅ ~~TASK-20260511235656113~~: cold-pool: fetch-plan git checkout failure silently returns wrong status
 - ✅ ~~TASK-20260511235909747~~: cold-pool: walk() bare catch silently drops entire subtree on readdir failure (cold-pool.ts:131)
 - ✅ ~~TASK-20260511235909780~~: cold-pool: collectRecursive() bare catch silently drops subtree (cold-pool.ts:157)
@@ -247,6 +248,7 @@ _无_
 - ✅ ~~TASK-20260512000201473~~: deck: return error indicators from metadata operations (link.ts, add.ts, remove.ts)
 - ✅ ~~TASK-20260512000201505~~: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
 - ✅ ~~TASK-20260512000201534~~: cortex: fix 5 medium patterns — dispatch, ADR accept, git add, config parse, coupling
+- ✅ ~~TASK-20260513010246527~~: Implement probeConnectivity with TDD + racing + proper error collection
 
 ### 悬置 (0)
 
@@ -347,6 +349,7 @@ _无_
 - 🤔 **ADR-20260511093900000** (01-proposed): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
 - 🤔 **ADR-20260511210000000** (01-proposed): Consolidate curator output to `~/.agents/lythoskill/curator/`
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
+- ✅ **ADR-20260512191438745** (02-accepted): LYTHOS_MIRROR env var for transparent GitHub proxy/mirror in restricted networks
 
 ---
 
