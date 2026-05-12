@@ -2,15 +2,9 @@
 max_cards = 15
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
-# Multi-agent alternatives (uncomment one to switch):
-# working_set = ".agents/skills"   # Codex CLI, OpenClaw
-# working_set = ".cursor/skills"   # Cursor-native
-# working_set = ".kimi/skills"     # Kimi
-# working_set = ".windsurf/skills" # Windsurf
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-
 
 [tool.skills.lythoskill-project-cortex]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
@@ -55,3 +49,4 @@ path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-dee
 
 [tool.skills.research-report]
 path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+
