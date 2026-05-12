@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/13 04:12:14
+> 自动生成于 2026/5/13 04:32:46
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 208 | 进行中: 0, 待验收: 0, 已完成: 176 |
+| Tasks | 210 | 进行中: 0, 待验收: 0, 已完成: 176 |
 | Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
 | ADRs | 67 | 已接受: 51 |
 
@@ -59,7 +59,7 @@
 
 ## 📄 Tasks
 
-### 待办 (6)
+### 待办 (8)
 
 - [ ] **TASK-20260513033254695**: Restore refresh apply-mode — plan-first guardrail (memory feedback_refresh_is_plan_first says default was discover-only with explicit --apply; implementation regressed to direct apply)
 - [ ] **TASK-20260513033256305**: Wire probeConnectivity (8b097c5) into plan→apply boundary for deck add/refresh — env probe before executing the plan; surface unreachable proxies / unreachable cold-pool entries before any git operation
@@ -67,6 +67,8 @@
 - [ ] **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 - [ ] **TASK-20260513035228296**: CI E2E publish-validation gate — after publish, spawn clean bunx <pkg>@<new-version> in tmp dir, verify resolves; gate the release pipeline so workspace:* or other manifest bugs cannot silently reach npm again
 - [ ] **TASK-20260513040027913**: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
+- [ ] **TASK-20260513042407452**: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
+- [ ] **TASK-20260513042408337**: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
 
 ### 进行中 (0)
 
