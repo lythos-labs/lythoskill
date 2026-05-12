@@ -82,6 +82,17 @@ When the thought "I should just do it, the user is already angry" appears, that 
 
 **sed: detector, not scalpel.** `sed` and `grep` are for surveying — find occurrences, confirm the landscape, build a list. `sed -i` is a file-level `|| true`: one silent mismatch is undetectable corruption. When qa-sweep or manual inspection surfaces a recurring anti-pattern, the safe workflow is: survey with grep/sed (read-only) → design the right abstraction (extract a util, normalize an interface) → fix each call site one by one with the type checker watching → verify with `bun --filter='*' run test`. If the change is too large for site-by-site repair (whole-file rewrite, cross-cutting restructure), invoke `lythoskill-red-green-release` — show the target state via heredoc, don't describe the transformation. See [`cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md`](./cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md).
 
+**Deck first — don't ask, dispatch.** When the user asks for research, analysis, QA, or audit work, reach for `arena single` with a pre-built deck from `examples/decks/` BEFORE asking "should I use X or do it manually?" This repo has 18 pre-built decks for common tasks. The conditioned reflex is: user says "调研" → `arena single --deck examples/decks/deep-research.toml`, user says "扫一下" → `arena single --deck examples/decks/qa-sweep.toml`. Do NOT ask "should I use the research skill or do it myself?" — just dispatch. The subagent works in parallel while you continue other work. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) for the full catalogue.
+
+| User says | Deck to use | Command |
+|-----------|------------|---------|
+| 调研 / 研究 / 查一下 | `deep-research.toml` | `arena single --deck examples/decks/deep-research.toml --brief "..."` |
+| 扫一下 / 审计 / 找问题 | `qa-sweep.toml` | `arena single --deck examples/decks/qa-sweep.toml --brief "..."` |
+| 设计 / 架构 / 画图 | `architecture-explainer.toml` | `arena single --deck examples/decks/architecture-explainer.toml --brief "..."` |
+| 写文档 / 科普 | `documents.toml` | `arena single --deck examples/decks/documents.toml --brief "..."` |
+| 治理 / task / epic | `governance.toml` | `arena single --deck examples/decks/governance.toml --brief "..."` |
+| 体验 / 测试 UX | `scout.toml` | `arena single --deck examples/decks/scout.toml --brief "..."` |
+
 **Project hot spots & work patterns** (distilled from `git log -60` + qa-sweep audit):
 
 | Hot file | Risk | Why |
