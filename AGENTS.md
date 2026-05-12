@@ -296,6 +296,22 @@ These two skills complement each other: TDD keeps test structure aligned with ar
 
 Full pattern documentation: [cortex/wiki/01-patterns/intent-plan-execute-fractal-architecture-pattern.md](./cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
 
+### Plan must include research
+
+A Plan that skips research is an imagined plan. Inside the **Plan** layer, after listing behaviors and designing the interface, **search for existing patterns and mature implementations** before committing to an approach.
+
+```
+Plan layer:
+  1. List behaviors to test
+  2. Design public interface
+  3. 🔍 Search MDN / Bun docs / GitHub issues for established patterns
+  4. Pick and document the chosen approach
+```
+
+**Why this matters:** Agents burn tokens re-deriving `Promise.race` semantics, timeout cancellation strategies, or error-collection patterns that MDN, Bun docs, and open-source projects have already documented. Five minutes of search beats thirty minutes of trial-and-error. The `probeConnectivity` case (TASK-20260513010246527) started with a custom racing loop; a web search revealed `Promise.any` + shared `AbortController` as the standard pattern — the custom loop was correct for the specific requirement (collect all failures + return first success), but the search saved fifteen minutes of unproductive debate.
+
+**When to skip:** Pure data transforms, one-line fixes, or changes that clearly have no ecosystem precedent.
+
 ### QA Security Sweep (module audit workflow)
 
 When the user asks to audit/sweep/check a module, or when you want to assess code quality before committing large changes, follow this 5-phase loop:
