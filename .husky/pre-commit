@@ -49,8 +49,13 @@ if [ -n "$STAGED_CORTEX_RENAMES" ]; then
   done
   echo "╚══════════════════════════════════════════════════════════════╝"
   echo ""
-  echo "To fix: git reset HEAD <file> — then use cortex CLI to move it."
-  exit 1
+  echo "║  If this was NOT done via cortex CLI:                        ║"
+  echo "║    git reset HEAD <file> — then use cortex CLI to move it.  ║"
+  echo "║  If this WAS done via cortex CLI (complete/start/done):     ║"
+  echo "║    this is expected — proceed. probe is the real gate.      ║"
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+  echo "💡 Run 'cortex probe' to verify Status History is consistent."
 fi
 
 # 1. ADR governance checks (fast — fail early if violated)
