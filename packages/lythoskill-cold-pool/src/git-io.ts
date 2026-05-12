@@ -11,6 +11,17 @@ import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
+/** Injectable exec for testing. Matches node:child_process execFileSync signature. */
+export type GitExec = typeof execFileSync
+
+/** Read LYTHOS_SOCKS_PROXY env var and return git-config args if present. */
+function socksProxyArgs(): string[] {
+  const proxy = process.env.LYTHOS_SOCKS_PROXY?.trim()
+  if (!proxy) return []
+  const url = proxy.startsWith('socks5://') ? proxy : `socks5://${proxy}`
+  return ['-c', `http.proxy=${url}`, '-c', `https.proxy=${url}`]
+}
+
 export interface GitCloneOptions {
   /** Default 1 (shallow). Set to 0 to disable depth (full history). */
   depth?: number
@@ -22,18 +33,23 @@ export interface GitCloneOptions {
   timeout?: number
 }
 
-export function gitClone(url: string, dir: string, opts?: GitCloneOptions): void {
-  const args = ['clone']
+export function gitClone(
+  url: string,
+  dir: string,
+  opts?: GitCloneOptions,
+  exec: GitExec = execFileSync,
+): void {
+  const args = [...socksProxyArgs(), 'clone']
   const depth = opts?.depth ?? 1
   if (depth > 0) {
     args.push('--depth', String(depth))
   }
   args.push(url, dir)
   const timeout = opts?.timeout ?? 120_000
-  execFileSync('git', args, { stdio: opts?.stdio ?? 'pipe', timeout })
+  exec('git', args, { stdio: opts?.stdio ?? 'pipe', timeout })
 
   if (opts?.ref && opts.ref !== 'HEAD') {
-    execFileSync('git', ['checkout', opts.ref], { cwd: dir, stdio: opts?.stdio ?? 'pipe', timeout })
+    exec('git', [...socksProxyArgs(), 'checkout', opts.ref], { cwd: dir, stdio: opts?.stdio ?? 'pipe', timeout })
   }
 }
 
@@ -42,9 +58,13 @@ export interface GitPullResult {
   message: string
 }
 
-export function gitPull(dir: string, timeoutMs: number = 30000): GitPullResult {
+export function gitPull(
+  dir: string,
+  timeoutMs: number = 30000,
+  exec: GitExec = execFileSync,
+): GitPullResult {
   try {
-    const output = execFileSync('git', ['pull'], {
+    const output = exec('git', [...socksProxyArgs(), 'pull'], {
       cwd: dir,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
