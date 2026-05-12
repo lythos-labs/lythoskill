@@ -83,6 +83,44 @@ if [ -n "$STAGED_PKG_JSON" ]; then
   fi
 fi
 
+# 0.7. No cross-package relative imports in packages/*/src/
+#      Per ADR-20260513041030769. Pattern `from '../../<other-pkg>/src/'`
+#      ships broken to npm because npm publish does not include sibling
+#      packages in the tarball — external consumers cannot resolve the
+#      path. Must use the workspace dep instead:
+#        import { x } from '@lythos/<other-pkg>'
+#      The publish-time rewriter translates workspace:* → ^version
+#      for the published manifest.
+STAGED_TS_SRC=$(git diff --cached --name-only --diff-filter=ACM \
+  | grep -E '^packages/[^/]+/src/.*\.ts$' \
+  | grep -v '\.test\.ts$' || true)
+
+if [ -n "$STAGED_TS_SRC" ]; then
+  BAD_IMPORTS=$(grep -nE "from\s+['\"]\.\./\.\./[^'\"]+/src/" $STAGED_TS_SRC 2>/dev/null || true)
+  if [ -n "$BAD_IMPORTS" ]; then
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  ❌ CROSS-PACKAGE RELATIVE IMPORT — USE WORKSPACE DEP      ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Pattern \`from '../../<pkg>/src/'\` ships broken to npm:    ║"
+    echo "║  npm publish does not include sibling packages in the      ║"
+    echo "║  tarball, so external consumers cannot resolve the path.   ║"
+    echo "║  This is the bug class that broke 0.11.0 and 0.11.1.       ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "$BAD_IMPORTS" | while read line; do
+      printf "║    %-54s ║\n" "$line"
+    done
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Fix: declare @lythos/<pkg>: workspace:* in dependencies   ║"
+    echo "║  of the importing package, then:                           ║"
+    echo "║    import { x } from '@lythos/<other-pkg>'                 ║"
+    echo "║  See ADR-20260513041030769 for the full rule.              ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    exit 1
+  fi
+fi
+
 # 1. ADR governance checks (fast — fail early if violated)
 if [ -f scripts/adr-check.sh ]; then
   bash scripts/adr-check.sh || exit 1

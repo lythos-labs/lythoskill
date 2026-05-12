@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/13 04:01:08
+> 自动生成于 2026/5/13 04:12:14
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 208 | 进行中: 0, 待验收: 0, 已完成: 176 |
 | Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
-| ADRs | 66 | 已接受: 50 |
+| ADRs | 67 | 已接受: 51 |
 
 ---
 
@@ -357,6 +357,7 @@ _无_
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
 - ✅ **ADR-20260512191438745** (02-accepted): LYTHOS_MIRROR env var for transparent GitHub proxy/mirror in restricted networks
 - 🤔 **ADR-20260513011442965** (01-proposed): Network proxy auto-discovery for resilient connectivity
+- ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
 
 ---
 
