@@ -14,6 +14,7 @@ import { execFileSync } from 'node:child_process'
 import type { ColdPool } from './cold-pool.js'
 import type { Locator, FetchPlan, FetchResult, FetchIO } from './types.js'
 import { gitClone } from './git-io.js'
+import { getMirror, rewriteUrl } from './mirror.js'
 
 export function buildFetchPlan(
   pool: ColdPool,
@@ -22,9 +23,11 @@ export function buildFetchPlan(
 ): FetchPlan {
   const targetDir = pool.resolveDir(locator)
   const protocol = process.env.LYTHOS_GIT_PROTOCOL || 'https'
-  const cloneUrl = locator.isLocalhost
+  const rawCloneUrl = locator.isLocalhost
     ? ''
     : `${protocol}://${locator.host}/${locator.owner}/${locator.repo}.git`
+  const mirror = getMirror()
+  const cloneUrl = rawCloneUrl ? rewriteUrl(rawCloneUrl, mirror) : ''
 
   return {
     locator,
