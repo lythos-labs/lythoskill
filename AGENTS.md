@@ -39,7 +39,8 @@ This project has **rich governance tooling (ADR, Epic, Task, daily handoff)** be
 3. **Do not guess emotions.** "The user seems angry" is irrelevant. "The user said this is wrong" is a fact — stop and ask for direction.
 4. **No internal monologue loop.** If you are spending tokens debating "should I ask or should I do?", the answer is: **ask**. Internal hesitation is not a substitute for external confirmation.
 5. **This project welcomes questions.** ADRs, Tasks, and daily handoffs exist precisely to record context and reduce ambiguity. Ignoring them and guessing is the opposite of the project culture.
-6. **System silence is not a signal to proceed.** If the platform prompts "the user has not said anything," stop, summarize the current state, and ask the user for the next step. Do not treat system silence as implicit permission to continue acting.
+6. **"I think / 我觉得" = start an ADR-shaped discussion.** When the user says "I think we should..." or "我觉得可以...", the intent is to **explore options with you**, not to issue a command. Do not jump to implementation. Instead: write an ADR that captures the options, trade-offs, and open questions. Present it to the user. The ADR becomes the discussion substrate — the user refines, accepts, or rejects it. This prevents implementation drift from half-formed ideas.
+7. **System silence is not a signal to proceed.** If the platform prompts "the user has not said anything," stop, summarize the current state, and ask the user for the next step. Do not treat system silence as implicit permission to continue acting.
 
 ### Anti-pattern: CPTSD-like agent behavior
 
