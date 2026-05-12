@@ -313,6 +313,35 @@ Plan layer:
 
 **When to skip:** Pure data transforms, one-line fixes, or changes that clearly have no ecosystem precedent.
 
+### Intent belongs to the user — do not rename the request, do not manufacture cost
+
+The Intent layer (Goal) is the user's, per the Agent Behavior Boundary table at the top of this file. When the user asks for a "simple fetch wrapper," do **not** silently substitute it with "write a `fetch-text` helper with a new signature" — that is Intent hijacking, a Hard Rule #2 violation disguised as helpfulness. Tell-tales of the pattern:
+
+- You restate the user's ask using your preferred terminology, then treat the restatement as their original request.
+- When corrected, you defend the restatement instead of returning to the original Intent.
+- You **manufacture cost** to justify the rename: "the alternative would be very long," "this approach is cleaner," "rewriting from scratch is risky." The 2026-05-13 saga's "alternative" was three extra lines.
+- You **skip the ADR** for architectural decisions you made (signature shape, abstraction boundary, file name). Hard Rule #6 says "I think / 我觉得" → start an ADR. If you made the equivalent of "I think this should be a wrapper not an interceptor" and skipped the ADR, you violated the same rule.
+
+Positive path: when you notice yourself reframing the user's words, **stop** and quote their original ask back literally. If you disagree with their framing, ask — do not silently substitute. If the choice is architecturally significant (signature, return type, exported name, abstraction layer), write the ADR first or invoke `lythoskill-project-cortex` to register the decision, even if the code change is small. *Small change ≠ small decision.*
+
+### When direction is wrong — return to Plan and state the target shape
+
+The Plan/Execute boundary exists precisely so rollback is cheap. When the user clarifies that the interface or abstraction is wrong, **return to Plan and state the desired target shape** — do not stay in Execute morphing the existing files toward the right answer. Declaring "the file should look like X" has fixed cost; patching toward X scales with how many call sites get touched. Six files modified to rename a wrapper costs more attention than the twenty lines you'd write from scratch with the corrected understanding.
+
+Structurally this is the same anti-pattern as the `sed` incident that catalyzed `lythoskill-red-green-release`: when the change is too large for site-by-site repair, **show the target state via heredoc**, do not describe the transformation. The 2026-05-13 fetch-interceptor saga (six files modified, tests rewritten twice, `skill-deck.toml` nearly deleted, multiple user corrections) was the same anti-pattern in a different vocabulary — patching toward a moving target instead of restating it.
+
+Positive path: when the user says "that's not what I asked for," do not reach for `sed -i` or incremental rename. Reach for `git checkout HEAD -- <file>` or `git reset` to return to the Plan boundary, then either rewrite the target file from scratch or invoke `lythoskill-red-green-release` for a target-state heredoc patch. With version control, code is free to discard; attention is not.
+
+See [`cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md`](./cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md) and [`cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md`](./cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md).
+
+### Verify includes reconciling derived state
+
+Many declarative files have a reconciler that produces derived state: `skill-deck.toml` → `.claude/skills/` symlinks via `deck link`; `package.json` → `node_modules` via `bun install`; `cortex/tasks/` → indexes via the cortex CLI. **Verify is not "the commit landed" — it is "did the reconciler run after the change."** Reverting a declarative file via `git revert` or `git checkout` does *not* un-do the derived state; the reconciler must run again.
+
+For agent-initiated edits, the reconciler call belongs in Execute. For git-driven changes (revert / checkout / merge / rebase touching a declarative file), a post-checkout / post-merge hook should auto-trigger the reconciler — the intent is implicit in the git operation. `deck link` and `bun install` are idempotent; running them is the safe move when state looks inconsistent.
+
+The `ea971d9` commit of 2026-05-13 reverted `skill-deck.toml` without re-running `deck link`; the user manually re-stitched `.claude/skills/` symlinks. The earlier `8b23d70` commit fixed `package.json` workspace deps but skipped the matching `bun install`, leaving `bun.lock` with stale `^0.9.x` resolutions for an entire session. Both were Verify violations of the same shape, not missing rules.
+
 ### QA Security Sweep (module audit workflow)
 
 When the user asks to audit/sweep/check a module, or when you want to assess code quality before committing large changes, follow this 5-phase loop:
