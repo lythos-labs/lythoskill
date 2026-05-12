@@ -121,6 +121,14 @@ if [ -n "$STAGED_TS_SRC" ]; then
   fi
 fi
 
+# 0.8. Private secret leak — values from .private/*.env must not appear
+#      in staged content. Anything declared private was declared private
+#      for a reason; if it shows up in a committable file, that's a
+#      leak. Delegated to scripts/check-private-leaks.sh.
+if [ -f scripts/check-private-leaks.sh ]; then
+  bash scripts/check-private-leaks.sh || exit 1
+fi
+
 # 1. ADR governance checks (fast — fail early if violated)
 if [ -f scripts/adr-check.sh ]; then
   bash scripts/adr-check.sh || exit 1
