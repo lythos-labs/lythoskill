@@ -1,0 +1,30 @@
+# Social Chinese Deck — 小红书/WeChat social content workflow
+# Image cards → covers → format → publish to WeChat + Weibo.
+#
+# Usage:
+#   bun packages/lythoskill-deck/src/cli.ts link --deck playground/baoyu-decks-v2/social-chinese.toml
+
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[tool.skills.baoyu-image-cards]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-image-cards"
+role = "Generate Xiaohongshu/WeChat image card series with 12 styles × 8 layouts × 3 palettes"
+
+[tool.skills.baoyu-cover-image]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-cover-image"
+role = "Generate article cover images with 5-D customization (type/palette/render/text/mood)"
+
+[tool.skills.baoyu-markdown-to-html]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-markdown-to-html"
+role = "Convert markdown to WeChat-compatible styled HTML with themes and bottom citations"
+
+[tool.skills.baoyu-post-to-wechat]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-post-to-wechat"
+role = "Publish articles (文章) and image-text posts (贴图) to WeChat Official Account"
+
+[tool.skills.baoyu-post-to-weibo]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-post-to-weibo"
+role = "Publish regular posts and headline articles (头条文章) to Weibo via Chrome CDP"

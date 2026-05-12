@@ -1,0 +1,30 @@
+# Visual Production Deck — Infographics, slides, diagrams, covers, illustrations
+# Five visual output formats covering data, presentation, technical, branding, and article needs.
+#
+# Usage:
+#   bun packages/lythoskill-deck/src/cli.ts link --deck playground/baoyu-decks-v2/visual-production.toml
+
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[tool.skills.baoyu-infographic]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-infographic"
+role = "Generate professional infographics with 21 layout types and 22 visual styles"
+
+[tool.skills.baoyu-slide-deck]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-slide-deck"
+role = "Generate professional slide deck images optimized for reading and sharing"
+
+[tool.skills.baoyu-diagram]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-diagram"
+role = "Create professional dark-themed SVG diagrams — architecture, flowchart, sequence, mindmap, etc."
+
+[tool.skills.baoyu-cover-image]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-cover-image"
+role = "Generate article cover images with 5-D customization (type/palette/render/text/mood)"
+
+[tool.skills.baoyu-article-illustrator]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-article-illustrator"
+role = "Analyze article structure, identify illustration positions, generate consistent visual aids"

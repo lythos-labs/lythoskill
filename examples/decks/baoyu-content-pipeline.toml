@@ -1,0 +1,30 @@
+# Content Pipeline Deck — Ingest, translate, format, transcribe, publish
+# End-to-end content processing: URL capture → YouTube transcript → format → translate → HTML output.
+#
+# Usage:
+#   bun packages/lythoskill-deck/src/cli.ts link --deck playground/baoyu-decks-v2/content-pipeline.toml
+
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[tool.skills.baoyu-url-to-markdown]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-url-to-markdown"
+role = "Fetch any URL and convert to clean markdown via Chrome CDP with site-specific adapters"
+
+[tool.skills.baoyu-youtube-transcript]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-youtube-transcript"
+role = "Download YouTube transcripts/subtitles and cover images by URL or video ID"
+
+[tool.skills.baoyu-translate]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-translate"
+role = "Three-mode translation (quick/normal/refined) with custom glossary and terminology support"
+
+[tool.skills.baoyu-format-markdown]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-format-markdown"
+role = "Format plain text or markdown with frontmatter, headings, lists, code blocks — read-only content"
+
+[tool.skills.baoyu-markdown-to-html]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-markdown-to-html"
+role = "Convert markdown to styled HTML with WeChat-compatible themes and bottom citations"
