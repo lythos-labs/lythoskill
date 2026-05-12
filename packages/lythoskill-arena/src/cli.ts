@@ -174,19 +174,34 @@ async function singleRun(args: string[]) {
     } catch (e: any) {
       if (e.code !== 'ERR_INVALID_URL') console.debug(`deck URL parse skipped (not a URL): ${url}`)
     }
+    const { mirrorUrls, isLikelyGitHubBlock } = await import('../../lythoskill-cold-pool/src/mirror.js')
     const dest = resolve(process.cwd(), 'arena-deck.toml')
     console.log(`📥 Fetching arena deck: ${url}`)
-    let res: Response
-    try { res = await fetch(url, { signal: AbortSignal.timeout(30_000) }) } catch (e: any) {
-      console.error(`❌ Cannot reach ${url}
-   Network issue? Try a GitHub proxy mirror:
-     ${url.replace('https://raw.githubusercontent.com/', 'https://ghfast.top/https://raw.githubusercontent.com/')}
-   Or download manually and reference the local file.`)
+    let res: Response | undefined
+    let allFailed = true
+
+    // Try direct first
+    try { res = await fetch(url, { signal: AbortSignal.timeout(30_000) }); if (res.ok) allFailed = false } catch {}
+
+    // Auto-fallback: try mirrors when direct fails
+    if (!res?.ok) {
+      for (const mirrorUrl of mirrorUrls(url)) {
+        try {
+          console.log(`   ↳ trying mirror: ${mirrorUrl}`)
+          const r = await fetch(mirrorUrl, { signal: AbortSignal.timeout(30_000) })
+          if (r.ok) { res = r; allFailed = false; break }
+        } catch {}
+      }
+    }
+
+    if (!res?.ok) {
+      const errorDetail = res ? `HTTP ${res.status}` : 'unreachable'
+      console.error(`❌ Cannot reach ${url} (${errorDetail})`)
+      if (allFailed) console.error('   All mirrors exhausted. Set LYTHOS_MIRROR to use a custom mirror.')
+      console.error('   Or download manually and reference the local file.')
       process.exit(1)
     }
-    if (!res.ok) { console.error(`❌ Failed to fetch deck (HTTP ${res.status}): ${url}
-   Try a GitHub proxy mirror:
-     ${url.replace('https://raw.githubusercontent.com/', 'https://ghfast.top/https://raw.githubusercontent.com/')}`); process.exit(1) }
+
     deckWrite(dest, await res.text())
     console.log(`   → saved to ${dest}`)
     deckPath = dest
