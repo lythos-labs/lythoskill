@@ -15,6 +15,7 @@ export type {
   FetchIO,
 } from './types.js'
 
+export { getMirror, rewriteUrl, mirrorUrls } from './mirror.js'
 export { parseLocator, formatLocator } from './parse-locator.js'
 export type { DirEntry, ListPlan, ListPlanEntry } from './cold-pool.js'
 export { ColdPool, DEFAULT_COLD_POOL_PATH, buildListPlan } from './cold-pool.js'

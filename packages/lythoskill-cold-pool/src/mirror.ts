@@ -2,7 +2,7 @@
  * Mirror URL rewriting for restricted networks.
  *
  * Three layers, checked in order:
- *   1. LYTHOS_MIRROR env var (explicit user choice)
+ *   1. LYTHOSKILL_GH_MIRROR env var (explicit user choice)
  *   2. HTTPS_PROXY / HTTP_PROXY (standard — Bun fetch and git respect these natively)
  *   3. Known public mirrors (auto-fallback when GitHub is unreachable)
  *
@@ -20,7 +20,7 @@ const KNOWN_MIRRORS = [
 // ── Explicit user mirror ──────────────────────────────────────────────
 
 export function getMirror(): string | undefined {
-  const v = process.env.LYTHOS_MIRROR?.trim()
+  const v = process.env.LYTHOSKILL_GH_MIRROR?.trim()
   if (!v) return undefined
   if (v.startsWith('http://') || v.startsWith('https://')) {
     return v.replace(/\/+$/, '')
