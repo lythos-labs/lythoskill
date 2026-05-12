@@ -107,6 +107,24 @@ describe('normalizeSkillsSh', () => {
       .toBe('github.com/mattpocock/skills')
   })
 
+  // baoyu-skills @skill syntax (largest personal skill pack, 17,900+ stars)
+  it('normalizes JimLiu/baoyu-skills@baoyu-image-cards', () => {
+    const r = normalizeSkillsSh('JimLiu/baoyu-skills@baoyu-image-cards')
+    expect(r.fq).toBe('github.com/JimLiu/baoyu-skills')
+    expect(r.skillFilter).toBe('baoyu-image-cards')
+  })
+
+  it('normalizes jimliu/baoyu-skills@baoyu-infographic (case insensitive)', () => {
+    const r = normalizeSkillsSh('jimliu/baoyu-skills@baoyu-infographic')
+    expect(r.fq).toBe('github.com/jimliu/baoyu-skills')
+    expect(r.skillFilter).toBe('baoyu-infographic')
+  })
+
+  it('normalizes baoyu-skills subpath form', () => {
+    expect(normalizeSkillsSh('JimLiu/baoyu-skills/skills/baoyu-diagram').fq)
+      .toBe('github.com/JimLiu/baoyu-skills/skills/baoyu-diagram')
+  })
+
   // subpath
   it('normalizes owner/repo/subpath', () => {
     expect(normalizeSkillsSh('anthropics/skills/skills/frontend-design').fq)
