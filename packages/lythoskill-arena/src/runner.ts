@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { runAgentScenario, type AgentScenario } from '@lythos/test-utils/agent-bdd'
@@ -13,6 +13,7 @@ import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan 
 import { resolvePlayer, resolveSides } from './player'
 import { aggregateAllStats } from './stats'
 import type { SideStats } from './stats'
+import { buildCopyPlan } from './preflight'
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -135,7 +136,14 @@ ${taskPath}
     const cellDir = join(artifactsDir, 'runs', cell.side, `run-${cell.run}`)
     mkdirSync(cellDir, { recursive: true })
 
+    const workDir = join(artifactsDir, 'work', cell.side)
+    mkdirSync(workDir, { recursive: true })
+    const originalCwd = process.cwd()
+
     try {
+      // Align shell CWD with agent workdir so player CLIs (kimi, etc.) use the right directory
+      process.chdir(workDir)
+
       const agent = useAgent(resolvePlayer(cell.player))
       const result = await runAgentScenario({
         scenarioPath: taskAbs,
@@ -177,9 +185,12 @@ ${taskPath}
           await linkProc.exited
           log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
         },
-        // Isolated CWD: /tmp/arena-<id>/<side>/ — no parent .claude/skills/ to walk up into
-        baseDir: join(tmpdir(), `arena-${arenaId}`, cell.side),
+        // Each side gets its own persistent workdir under artifactsDir (not /tmp)
+        baseDir: workDir,
       })
+
+      // Restore CWD before copying (copy logic uses absolute paths)
+      process.chdir(originalCwd)
 
       const v = (result.verdict ?? {
         verdict: 'ERROR' as const,
@@ -187,7 +198,28 @@ ${taskPath}
         criteria: [],
       }) as JudgeVerdict
 
-      // Persist per-cell verdict + agent output for auditability
+      // Persist agent stdout/stderr + copy artifacts (aligns with single mode)
+      writeFileSync(join(cellDir, 'agent-stdout.txt'), result.agentResult.stdout, 'utf-8')
+      if (result.agentResult.stderr) {
+        writeFileSync(join(cellDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
+      }
+
+      // Copy agent-produced files from workdir to cellDir (like single mode)
+      const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
+      try {
+        const entries = readdirSync(workDir)
+        const plan = buildCopyPlan(workDir, cellDir, entries, skipSet)
+        for (const { src, dest, name } of plan) {
+          try {
+            cpSync(src, dest, { recursive: true })
+          } catch (e) {
+            log?.(`⚠️ Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
+          }
+        }
+      } catch (e) {
+        log?.(`⚠️ Failed to read agent workdir for copy: ${e instanceof Error ? e.message : e}`)
+      }
+
       writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify({
         ...v,
         agent_stdout: result.agentResult.stdout.slice(0, 5000),
