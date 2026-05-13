@@ -3,15 +3,23 @@ import { probeConnectivity } from './mirror.js'
 
 describe('probeConnectivity', () => {
   let originalFetch: typeof fetch
+  let originalEnv: string | undefined
   let fetchCalls: Array<{ url: string; options: RequestInit }>
 
   beforeEach(() => {
     originalFetch = globalThis.fetch
+    originalEnv = process.env.LYTHOSKILL_GH_MIRROR
+    delete process.env.LYTHOSKILL_GH_MIRROR
     fetchCalls = []
   })
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    if (originalEnv !== undefined) {
+      process.env.LYTHOSKILL_GH_MIRROR = originalEnv
+    } else {
+      delete process.env.LYTHOSKILL_GH_MIRROR
+    }
   })
 
   function mockFetch(
@@ -50,11 +58,12 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 2 ──
-  test('direct fails, mirror ok → returns mirror path', async () => {
+  test('direct fails, user mirror ok → returns mirror path', async () => {
+    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 500 })],
-        ['https://ghfast.top/https://example.com/skill', new Response(null, { status: 200 })],
+        ['https://my-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
       ]),
     )
 
@@ -62,7 +71,7 @@ describe('probeConnectivity', () => {
 
     expect(result).toMatchObject({
       path: 'mirror',
-      url: 'https://ghfast.top/https://example.com/skill',
+      url: 'https://my-mirror.example.com/https://example.com/skill',
       latencyMs: expect.any(Number),
     })
   })
@@ -91,14 +100,13 @@ describe('probeConnectivity', () => {
 
   // ── Vertical Slice 5: Racing behavior ──
   test('probes race concurrently, not sequentially', async () => {
+    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
     const start = performance.now()
 
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 500 })],
-        ['https://ghfast.top/https://example.com/skill', new Response(null, { status: 200 })],
-        ['https://ghproxy.com/https://example.com/skill', new Response(null, { status: 200 })],
-        ['https://mirror.ghproxy.com/https://example.com/skill', new Response(null, { status: 200 })],
+        ['https://my-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
       ]),
       50, // each mock fetch takes 50ms
     )
@@ -108,11 +116,26 @@ describe('probeConnectivity', () => {
     const elapsed = performance.now() - start
 
     expect(result?.path).toBe('mirror')
-    // Sequential would take ~200ms (4 × 50ms). Racing should be ~50-100ms.
+    // Sequential would take ~100ms (2 × 50ms). Racing should be ~50-100ms.
     expect(elapsed).toBeLessThan(150)
   })
 
-  // ── Vertical Slice 6: Timeout honored ──
+  // ── Vertical Slice 6: No user mirror set → only probes direct ──
+  test('without user mirror, only probes direct', async () => {
+    mockFetch(
+      new Map([
+        ['https://example.com/skill', new Response(null, { status: 200 })],
+      ]),
+    )
+
+    const result = await probeConnectivity('https://example.com/skill')
+
+    expect(result?.path).toBe('direct')
+    expect(fetchCalls.length).toBe(1)
+    expect(fetchCalls[0].url).toBe('https://example.com/skill')
+  })
+
+  // ── Vertical Slice 7: Timeout honored ──
   test('timeout aborts slow probes', async () => {
     globalThis.fetch = async (_input, init?) => {
       return new Promise((_, reject) => {

@@ -6,6 +6,7 @@
 |--------|------|------|
 | proposed | 2026-05-12 | Created |
 | accepted | 2026-05-12 | Accepted |
+| superseded | 2026-05-13 | Auto-fallback `KNOWN_MIRRORS` removed per ADR-20260513144000000. `LYTHOSKILL_GH_MIRROR` env var remains. |
 
 ## 背景
 

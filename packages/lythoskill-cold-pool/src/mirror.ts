@@ -1,23 +1,14 @@
 /**
  * Mirror URL rewriting for restricted networks.
  *
- * Three layers, checked in order:
- *   1. LYTHOSKILL_GH_MIRROR env var (explicit user choice)
- *   2. HTTPS_PROXY / HTTP_PROXY (standard — Bun fetch and git respect these natively)
- *   3. Known public mirrors (auto-fallback when GitHub is unreachable)
+ * Two layers only — the tool never decides which third party to trust:
+ *   1. LYTHOSKILL_GH_MIRROR env var (explicit user choice, user bears trust)
+ *   2. LYTHOS_SOCKS_PROXY / HTTPS_PROXY / HTTP_PROXY (standard, user's own infra)
  *
- * Per ADR-20260512191438745.
+ * No hard-coded mirror list. Auto-fallback to "known" third-party mirrors was
+ * removed: the tool must not silently delegate trust to an external service
+ * that can return tampered skill files (see ADR-202605130...).
  */
-
-// ── Known public mirrors (tried in order when GitHub is unreachable) ──
-
-const KNOWN_MIRRORS = [
-  'https://ghfast.top',            // commonly used in CN
-  'https://ghproxy.com',           // commonly used in CN
-  'https://mirror.ghproxy.com',    // ghproxy alternative domain
-]
-
-// ── Explicit user mirror ──────────────────────────────────────────────
 
 export function getMirror(): string | undefined {
   const v = process.env.LYTHOSKILL_GH_MIRROR?.trim()
@@ -28,18 +19,14 @@ export function getMirror(): string | undefined {
   return `https://${v.replace(/\/+$/, '')}`
 }
 
-// ── URL rewriting ─────────────────────────────────────────────────────
-
 export function rewriteUrl(url: string, mirror?: string): string {
   if (!mirror) return url
   return `${mirror}/${url}`
 }
 
 export function mirrorUrls(url: string): string[] {
-  const mirrors = [...KNOWN_MIRRORS]
   const explicit = getMirror()
-  if (explicit) mirrors.unshift(explicit)
-  return mirrors.map(m => rewriteUrl(url, m))
+  return explicit ? [rewriteUrl(url, explicit)] : []
 }
 
 export function isLikelyGitHubBlock(err: unknown): boolean {
@@ -61,7 +48,7 @@ export interface ProbeFailure {
 }
 
 /**
- * Quick connectivity probe: race direct + all mirrors concurrently.
+ * Quick connectivity probe: race direct + user mirror (if set) concurrently.
  * Uses short timeout (default 3s) to fail fast instead of waiting for
  * the full git clone / fetch timeout.
  *

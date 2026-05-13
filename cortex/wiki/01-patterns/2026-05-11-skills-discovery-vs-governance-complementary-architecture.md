@@ -1,6 +1,6 @@
 ---
 created: 2026-05-11
-updated: 2026-05-11
+updated: 2026-05-13
 category: pattern
 ---
 
@@ -16,7 +16,7 @@ skills.sh / agent-skills hubs          lythoskill
    discovery (有什么?)                    governance (用什么 + 怎么隔离)
    trending / leaderboards               deny-by-default
    "npx skills add <repo>"               skill-deck.toml (declarative)
-   universal .agents/skills/             per-project working set
+   command-line install (-g opt-in)      per-project working set
    cross-agent compatible                lock + reconcile + restore
    security verification (Snyk/Gen)      arena test-before-adopt
 ```
@@ -45,13 +45,41 @@ They're not competitors — they're complementary layers in the same pipeline.
 
 ## Why This Separation Matters
 
-**skills.sh can't govern**: it installs everything into a shared directory. No per-project isolation,
-no deny-by-default, no lock file reconciliation across teams.
+**skills.sh discovers; lythoskill governs** — but "governs" here means *declarative* governance,
+not that skills.sh lacks governance entirely.
 
-**lythoskill can't discover**: it indexes what's already in the cold pool. No trending, no
-leaderboards, no community ratings.
+skills.sh *can* install to a specific project (`npx skills add -g ./my-project owner/repo`).
+It is **command-line governance**: run a bash script, the skill is there. The mental model is
+imperative — you *do* something to change state. This works well for solo exploration and
+quick experiments.
 
-**Together**: skills.sh (or any skill hub) finds candidates → lythoskill governs adoption.
+lythoskill is **declarative governance**: you write what you want in `skill-deck.toml`, then
+`deck link` reconciles reality to match the declaration. The mental model is state-driven —
+like `pom.xml` or `package.json`. This works well for team collaboration, CI reproducibility,
+and deny-by-default isolation (only declared skills are visible; everything else is excluded).
+
+| Dimension | skills.sh (`npx skills add`) | lythoskill (`skill-deck.toml`) |
+|---|---|---|
+| Mental model | Imperative — "run this command" | Declarative — "declare desired state" |
+| Sharing intent | Re-run the script (or share the command) | Share the file (git-tracked, diffable) |
+| Per-project isolation | `-g` flag (opt-in per invocation) | Deny-by-default (all undeclared excluded) |
+| Lock/reconcile | Manual — re-run scripts when env changes | Automatic — `deck link` reconciles drift |
+| Team sync | Bash scripts, README instructions | Single `skill-deck.toml` + `deck.lock` |
+| Rollback | Re-run previous commands | `git revert` on deck.toml, re-link |
+
+**skills.sh has its own closed loop**: discovery → install → run. It is a complete toolchain
+that works standalone. Users can `npx skills find`, `npx skills add`, and use the skill without
+ever touching lythoskill.
+
+**lythoskill chooses to interop with skills.sh** — not because skills.sh is incomplete, but
+because openness is a design value. A user who discovers a skill on skills.sh should be able
+to bring it into lythoskill's declarative workflow without friction. `deck add owner/repo`
+accepts skills.sh shorthand precisely to honor that user's existing context.
+
+**Together**: skills.sh (or any skill hub) runs its own full pipeline; lythoskill offers an
+alternative governance layer that some teams prefer for declarative, reproducible, team-scoped
+skill management. They coexist — skills.sh for quick discovery and imperative install,
+lythoskill for declarative working-set contracts.
 
 ## Concrete Example
 

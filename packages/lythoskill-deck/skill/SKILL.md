@@ -189,7 +189,7 @@ If a skill lives at `skills/pdf/` inside the `anthropics/skills` repo, the FQ lo
 
 Bare names fail for monorepo skills because the flat-scan searches `readdirSync` order and is non-deterministic when multiple repos contain the same name. **Always use fully-qualified locators.**
 
-**Agent duty — verify before guessing**: When you encounter an unfamiliar skill repo and are unsure of its internal directory layout (e.g., whether the skill lives at repo root or under `skills/`), use web search to inspect the actual repository structure before writing the locator. Do not guess path segments. Tools like `ghproxy` can accelerate GitHub API access when direct requests time out.
+**Agent duty — verify before guessing**: When you encounter an unfamiliar skill repo and are unsure of its internal directory layout (e.g., whether the skill lives at repo root or under `skills/`), use web search to inspect the actual repository structure before writing the locator. Do not guess path segments.
 
 **deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
 to avoid collisions with the Agent Skills open standard or future platform extensions.
