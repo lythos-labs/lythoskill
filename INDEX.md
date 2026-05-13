@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/13 04:32:46
+> 自动生成于 2026/5/13 09:54:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 210 | 进行中: 0, 待验收: 0, 已完成: 176 |
+| Tasks | 212 | 进行中: 0, 待验收: 0, 已完成: 176 |
 | Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
 | ADRs | 67 | 已接受: 51 |
 
@@ -59,7 +59,7 @@
 
 ## 📄 Tasks
 
-### 待办 (8)
+### 待办 (10)
 
 - [ ] **TASK-20260513033254695**: Restore refresh apply-mode — plan-first guardrail (memory feedback_refresh_is_plan_first says default was discover-only with explicit --apply; implementation regressed to direct apply)
 - [ ] **TASK-20260513033256305**: Wire probeConnectivity (8b097c5) into plan→apply boundary for deck add/refresh — env probe before executing the plan; surface unreachable proxies / unreachable cold-pool entries before any git operation
@@ -69,6 +69,8 @@
 - [ ] **TASK-20260513040027913**: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
 - [ ] **TASK-20260513042407452**: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
 - [ ] **TASK-20260513042408337**: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
+- [ ] **TASK-20260513095345353**: Set up showcase/ directory for committed arena demos — start with migrating T5 (2026-05-13 agent-skills-intro CTO brief) as inaugural entry; README + reproduce.sh per demo
+- [ ] **TASK-20260513095346630**: Run T5-style arena single on competitive-landscape research as the brief — produce md+html research report on agent-skills-eval / MemTensor skills-vote / etc. Deck: deep-research + baoyu
 
 ### 进行中 (0)
 
