@@ -1,0 +1,52 @@
+# Combo Deck — Deep Research × Baoyu artifact production
+#
+# T5 arena single demo for lythoskill 2026-05-13.
+# Combines the deep-research suite (Weizhena/Deep-Research-skills) with
+# baoyu's content pipeline (JimLiu/baoyu-skills) to produce a real
+# artifact (styled HTML page), not just a text completion.
+#
+# Differentiation: agent-skills-eval can only observe text completions
+# via openai.invoke(); arena runs a full claude subagent in a sandbox
+# cwd, so it sees the actual HTML file the agent writes. Skills like
+# baoyu-markdown-to-html are arena's structural territory.
+#
+# Usage:
+#   bunx @lythos/skill-arena@latest single \
+#     --deck playground/2026-05-13-deep-research-baoyu-combo/skill-deck.toml \
+#     --brief "$(cat playground/2026-05-13-deep-research-baoyu-combo/brief.md)"
+
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+# ── deep-research suite: outline → parallel deep agents → synthesized report ──
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+role = "Generate structured research outline from a topic — fields, objectives, research objects"
+
+[tool.skills.research-deep]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
+role = "Launch independent parallel agents for each outline item, gather structured evidence"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+role = "Synthesize deep research results into structured markdown report with source attribution"
+
+# ── baoyu content pipeline: fetch web content + format + HTML output ──
+
+[tool.skills.baoyu-url-to-markdown]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-url-to-markdown"
+role = "Fetch any URL and convert to clean markdown via Chrome CDP with site-specific adapters — gather raw source material for the report"
+
+[tool.skills.baoyu-format-markdown]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-format-markdown"
+role = "Format the synthesized markdown with frontmatter, headings, lists, code blocks for readability"
+
+[tool.skills.baoyu-markdown-to-html]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-markdown-to-html"
+role = "Convert the final markdown into a styled HTML page (WeChat-compatible theme) — the artifact arena will observe and that prompt-completion frameworks cannot see"
