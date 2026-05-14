@@ -141,41 +141,114 @@ If ANY of these fail, STOP. Fix the configuration before proceeding. Common fail
 
 If self-check passes, proceed to the arena command. The self-check report is your execution environment audit trail — include it when reporting errors.
 
-## Commands
+## Execution Modes
 
-### Primary: single agent run (`single`)
+### DEFAULT: Agent-Orchestrated
 
-The simplest path — one subagent, one deck, one task. Used by `examples/quick-agent.sh` internally.
+**This is the default for all arena tasks.** The agent reads the config, prepares isolated environments, dispatches subagents, and judges — without invoking `arena vs` or `arena single` CLI commands.
+
+The agent's ReAct loop IS the arena runner. Each side gets an independent CWD container.
+
+```mermaid
+flowchart TD
+    A[User: 'compare A vs B' or arena.toml] --> B{Is --player flag set?}
+    B -->|Yes| C[CLI Mode: arena vs --config]
+    B -->|No — DEFAULT| D[Agent reads arena.toml]
+    D --> E[PREFLIGHT: per-side workDir + deck link + self-check]
+    E --> F{All preflights pass?}
+    F -->|No| G[Fix: adjust mirror, retry link, report]
+    G --> E
+    F -->|Yes| H[SPAWN: sessions_spawn × N<br/>parallel, background=true<br/>each with isolated CWD + deck]
+    H --> I[WAIT: all subagents complete]
+    I --> J[COLLECT: artifacts from each side]
+    J --> K[Comparative judge vs criteria]
+    K --> L[Write report.md with per-side verdicts]
+    L --> M[Spent tokens per side?]
+    M -->|Yes| N[Multiply by market price<br/>Add to report as cost estimate]
+    M -->|No| O[Skip — no billing data]
+    N --> P[Done]
+    O --> P
+    
+    style D fill:#4a9,stroke:#333
+    style E fill:#49a,stroke:#333
+    style H fill:#a4a,stroke:#333
+    style K fill:#aa4,stroke:#333
+**Why this is the default:** per-side CWD isolation prevents skill pollution. Preflight identifies misconfiguration before execution. Agent can fix failures mid-run (switch mirror, adjust timeout, retry) — CLI mode cannot.
+
+### OPT-IN: Player Mode (`--player`)
+
+Use ONLY when user explicitly says "用 kimi 跑", "use codex", "run with deepseek", etc.
 
 ```bash
-# URL deck (auto-fetched) + inline brief — no local files needed
+# Single deck, explicit player
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} single \
-  --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
-  --brief "Investigate this repo and produce a deck plan" \
+  --deck ./skill-deck.toml \
+  --brief "Investigate this repo" \
   --player kimi
-```
 
-### Declarative: `run --config` (k8s-style)
-
-Use an `arena.toml` to declare task + sides + criteria — reproducible, version-controlled, dry-runnable.
-
-```bash
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} run --config ./arena.toml
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} run --config ./arena.toml --dry-run
-```
-
-`arena.toml` declares per-side player + deck + criteria; `run --config` orchestrates the whole comparison.
-
-### Declarative mode (recommended)
-
-```bash
+# vs mode with arena.toml (each side's player is declared in the config)
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml --dry-run
 ```
 
-### Legacy: `scaffold` (human-in-the-loop)
+Player mode uses `bunx @lythos/skill-arena` CLI — the runner spawns a player CLI process per side.
 
-For controlled-variable comparison via per-deck scaffolds. The CLI creates the directory + per-side decks; the agent dispatches subagents and judges.
+## Agent-Orchestrated Protocol
+
+### 1. Parse the config
+
+Read `arena.toml` or deck files. Extract: sides, task, criteria (if any), per-side deck paths.
+
+### 2. Prepare per-side environments
+
+For EACH side, create an isolated workDir:
+
+```bash
+mkdir -p playground/arena-{timestamp}/work/{side}/
+```
+
+In each workDir:
+- Copy or fetch the side's deck file
+- `bunx @lythos/skill-deck@latest link` — isolate skills to that side
+- Run preflight self-check (CWD, skills, writable, player probe)
+
+### 3. Preflight self-check (idempotent)
+
+```
+WHO AM I:    pwd
+WHERE AM I:  ls .claude/skills/
+WHAT SKILLS: for each skill, read frontmatter name + description
+CWD WRITABLE: touch + rm test
+DECK OK:     deck file exists and is valid TOML
+```
+
+If ANY fail → fix before proceeding. Include preflight results in the final report.
+
+### 4. Dispatch subagents
+
+Spawn one subagent per side with `run_in_background: true`:
+
+```
+subagent: "Arena cell: {side}"
+prompt: "You are running an arena comparison cell.
+  CWD: {workDir}
+  Deck: {deckPath}
+  Task: {taskBrief}
+  Preflight: {preflight report}
+  Produce output to: {outputDir}/"
+```
+
+All subagents run in PARALLEL. Each has its own CWD and isolated skills.
+
+### 5. Judge and report
+
+After ALL subagents complete:
+- Collect artifacts from each side's output dir
+- Run comparative judge against criteria
+- Write `report.md` with per-side results + judge verdict
+- Include preflight reports as execution environment audit trail
+
+## CLI Commands (Opt-in Player Mode Only)
 
 ```bash
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} scaffold \
