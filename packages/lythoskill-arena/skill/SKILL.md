@@ -235,7 +235,17 @@ prompt: "You are running an arena comparison cell.
   Deck: {deckPath}
   Task: {taskBrief}
   Preflight: {preflight report}
-  Produce output to: {outputDir}/"
+  Produce output to: {outputDir}/
+
+  MANDATORY — write decision-log.jsonl to {outputDir}/.
+  Each line is one JSON object with: t (seconds elapsed),
+  phase (setup/content/design/output), decision (what you chose),
+  reason (why). This is your decision trail — the only way the
+  orchestrator can understand your reasoning chain.
+
+  Example:
+  {\"t\":0,\"phase\":\"setup\",\"decision\":\"selected Golden Hour palette\",\"reason\":\"warm tones match baking theme\"}
+  {\"t\":12,\"phase\":\"content\",\"decision\":\"6 science topics\",\"reason\":\"Baker's Percentages requires chemistry depth\"}"
 ```
 
 All subagents run in PARALLEL. Each has its own CWD and isolated skills.
@@ -244,9 +254,12 @@ All subagents run in PARALLEL. Each has its own CWD and isolated skills.
 
 After ALL subagents complete:
 - Collect artifacts from each side's output dir
+- **Collect decision-log.jsonl from each side** — the decision trail IS the observable behavior
 - Run comparative judge against criteria
 - Write `report.md` with per-side results + judge verdict
-- Include preflight reports as execution environment audit trail
+- Include preflight reports + decision-log summaries as execution environment audit trail
+
+The decision log makes the agent's reasoning chain visible. Without it, you only see the artifact — not why it was made that way.
 
 ## CLI Commands (Opt-in Player Mode Only)
 
