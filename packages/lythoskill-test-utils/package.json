@@ -14,7 +14,8 @@
     "./agent-bdd": "./src/agent-bdd.ts",
     "./judge": "./src/judge.ts",
     "./agents": "./src/agents/index.ts",
-    "./schema": "./src/schema.ts"
+    "./schema": "./src/schema.ts",
+    "./sanitize": "./src/sanitize.ts"
   },
   "license": "MIT",
   "publishConfig": {

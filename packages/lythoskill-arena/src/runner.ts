@@ -1,13 +1,14 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, cpSync, readdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync, readFileSync, cpSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
-import { runAgentScenario, type AgentScenario } from '@lythos/test-utils/agent-bdd'
+import { homedir } from 'node:os'
 import { useAgent } from '@lythos/test-utils/agents'
-// Optional: register heavy adapters if their packages are installed
+import { createSanitizer } from '@lythos/test-utils/sanitize'
+import { runLLMJudge } from '@lythos/test-utils/judge'
+import { readCheckpoints } from '@lythos/test-utils/bdd-runner'
+import { ArenaManifest, Player, type JudgeInput, type Evidence, type JudgeVerdict } from '@lythos/test-utils/schema'
+import type { ArenaManifest as ArenaManifestType } from '@lythos/test-utils/schema'
 try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
 try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
-import { ArenaManifest, Player } from '@lythos/test-utils/schema'
-import type { ArenaManifest as ArenaManifestType, JudgeVerdict } from '@lythos/test-utils/schema'
 import { runComparativeJudge } from './comparative-judge'
 import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan } from './arena-toml'
 import { resolvePlayer, resolveSides } from './player'
@@ -22,8 +23,6 @@ function stamp(): string {
   return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}${String(d.getSeconds()).padStart(2, '0')}`
 }
 
-// ── Declarative runner (arena.toml → execute) ─────────────────────────────
-
 export interface ArenaResult {
   manifest: ArenaManifestType
   report: unknown
@@ -31,7 +30,30 @@ export interface ArenaResult {
   artifactsDir: string
 }
 
-/** Format an execution plan as readable CLI output (pure). */
+// ── Task + judge text resolution (no parsing — natural language) ──────────
+
+function resolveTaskText(toml: ArenaToml, configDir?: string): string {
+  const p = toml.arena.task
+  const candidate = configDir ? resolve(configDir, p) : resolve(p)
+  if (existsSync(candidate)) return readFileSync(candidate, 'utf-8')
+  return p
+}
+
+function resolveJudgeText(toml: ArenaToml, configDir?: string): string | null {
+  if (toml.arena.judge) {
+    const p = toml.arena.judge
+    const candidate = configDir ? resolve(configDir, p) : resolve(p)
+    if (existsSync(candidate)) return readFileSync(candidate, 'utf-8')
+    return p
+  }
+  if (toml.arena.criteria && toml.arena.criteria.length > 0) {
+    return toml.arena.criteria.map(c => `- ${c}`).join('\n')
+  }
+  return null
+}
+
+// ── Plan formatting ───────────────────────────────────────────────────────
+
 export function formatPlanOutput(plan: ExecutionPlan): string[] {
   const lines: string[] = []
   const sideCount = new Set(plan.cells.map(c => c.side)).size
@@ -42,51 +64,25 @@ export function formatPlanOutput(plan: ExecutionPlan): string[] {
   return lines
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────
+
 export async function runArenaFromToml(opts: {
   toml: ArenaToml
   taskPath: string
   outDir?: string
   dryRun?: boolean
   log?: (msg: string) => void
-  configDir?: string    // for resolving relative paths
+  configDir?: string
 }): Promise<ArenaResult | { plan: ReturnType<typeof buildExecutionPlan> }> {
   const { toml, taskPath, outDir, dryRun, log, configDir } = opts
 
-  // Resolve relative paths against config dir (anti-footgun: cwd may differ)
   const resolvePath = (p: string) => {
     if (p.startsWith('/')) return p
     if (configDir) return resolve(configDir, p)
     return resolve(p)
   }
-  const resolveOrCreateTask = (): { path: string; cleanup?: () => void } => {
-    const candidate = resolvePath(taskPath)
-    if (existsSync(candidate)) return { path: candidate }
-    // taskPath is inline text — write temp scenario file
-    const tmp = join(tmpdir(), `arena-task-${stamp()}.agent.md`)
-    writeFileSync(tmp, `---
-name: arena task
-description: ${taskPath.slice(0, 80)}
-timeout: 120000
----
 
-## Given
-- Working directory with an empty project
-- bun is available
-
-## When
-${taskPath}
-
-## Then
-- Complete the task above
-- Write a summary to output.md
-
-## Judge
-- completeness
-- correctness
-`)
-    return { path: tmp, cleanup: () => { try { rmSync(tmp) } catch {} } }
-  }
-  const { path: taskAbs, cleanup: taskCleanup } = resolveOrCreateTask()
+  const taskText = resolveTaskText(toml, configDir)
   const resolvedToml: ArenaToml = {
     ...toml,
     side: toml.side.map(s => ({ ...s, deck: resolvePath(s.deck) })),
@@ -94,11 +90,8 @@ ${taskPath}
 
   const plan = buildExecutionPlan(resolvedToml)
 
-  // dry-run: return plan without executing
   if (dryRun) {
-    for (const line of formatPlanOutput(plan)) {
-      log?.(line)
-    }
+    for (const line of formatPlanOutput(plan)) log?.(line)
     return { plan }
   }
 
@@ -106,14 +99,10 @@ ${taskPath}
   const artifactsDir = outDir || join(process.cwd(), 'runs', arenaId)
   const resolved = resolveSides(resolvedToml)
 
-  // Build manifest
-  const taskContent = existsSync(taskAbs)
-    ? readFileSync(taskAbs, 'utf-8').slice(0, 200)
-    : taskPath // inline description, not a file path
   const manifest = ArenaManifest.parse({
     id: arenaId,
     created_at: new Date().toISOString(),
-    task: taskContent,
+    task: taskText.slice(0, 200),
     mode: 'decks',
     participants: [...new Map(resolved.map(r => [r.side.name, r])).values()].map(r => ({
       id: r.side.name,
@@ -122,14 +111,19 @@ ${taskPath}
       deck: r.side.deck,
       description: `${r.playerName} × ${r.side.deck}`,
     })),
-    criteria: resolvedToml.arena.criteria,
+    criteria: resolvedToml.arena.criteria ?? [resolvedToml.arena.judge ?? 'completeness'],
     status: 'running',
   })
 
   mkdirSync(artifactsDir, { recursive: true })
   writeFileSync(join(artifactsDir, 'arena.json'), JSON.stringify(manifest, null, 2) + '\n')
 
-  // Execute plan: per-cell agent run
+  const judgeText = resolveJudgeText(resolvedToml, configDir)
+  const judgeInput: JudgeInput | undefined = judgeText
+    ? { criteria: judgeText, task_context: taskText.slice(0, 500) }
+    : undefined
+
+  // ── Per-cell: agent.spawn directly, no AgentScenario/parseAgentMd ────
   const verdictsBySide = new Map<string, JudgeVerdict[]>()
 
   for (const cell of plan.cells) {
@@ -141,78 +135,47 @@ ${taskPath}
     const originalCwd = process.cwd()
 
     try {
-      // Align shell CWD with agent workdir so player CLIs (kimi, etc.) use the right directory
+      // Setup: deck + AGENTS.md + link
+      writeFileSync(join(workDir, 'skill-deck.toml'), readFileSync(cell.deck, 'utf-8'))
+      writeFileSync(join(workDir, 'AGENTS.md'), [
+        '# Arena Test Environment',
+        `**Side**: ${cell.side}`, `**Player**: ${cell.player}`, `**Run**: ${cell.run}`,
+        '## Task', '', taskText,
+        '## How This Works',
+        '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
+        '- Complete the task using available skills. Output to this directory.',
+      ].join('\n'))
+      const linkProc = Bun.spawn(
+        ['bunx', '@lythos/skill-deck', 'link'],
+        { cwd: workDir, env: { ...process.env, HOME: process.env.HOME! } },
+      )
+      await linkProc.exited
+      log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
+
       process.chdir(workDir)
 
+      // Direct agent.spawn (no parseAgentMd, no AgentScenario)
       const agent = useAgent(resolvePlayer(cell.player))
-      const result = await runAgentScenario({
-        scenarioPath: taskAbs,
-        agent,
-        async setupWorkdir(scenario: AgentScenario, workdir: string) {
-          mkdirSync(workdir, { recursive: true })
-          const deckContent = readFileSync(cell.deck, 'utf-8')
-          writeFileSync(join(workdir, 'skill-deck.toml'), deckContent)
-
-          // Write AGENTS.md bootloader — agents read this on entry
-          writeFileSync(join(workdir, 'AGENTS.md'), [
-            '# Arena Test Environment',
-            '',
-            `**Side**: ${cell.side}`,
-            `**Player**: ${cell.player}`,
-            `**Run**: ${cell.run}`,
-            '',
-            '## Task',
-            '',
-            scenario.it ?? scenario.description ?? '(no task description)',
-            '',
-            '## How This Works',
-            '',
-            '- This is an isolated arena test directory. No parent `.claude/skills/` exists.',
-            '- Skills are configured in `skill-deck.toml` and symlinked by `deck link`.',
-            '- Complete the task above using the available skills.',
-            '- Output your work to this directory (or `output/` if specified).',
-            '',
-            '## Expected Output',
-            '',
-            'After completing the task, write a brief summary of what you did.',
-          ].join('\n'))
-
-          // Link skills via bunx (works both locally and when installed via bunx)
-          const linkProc = Bun.spawn(
-            ['bunx', '@lythos/skill-deck', 'link'],
-            { cwd: workdir, env: { ...process.env, HOME: process.env.HOME! } },
-          )
-          await linkProc.exited
-          log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
-        },
-        // Each side gets its own persistent workdir under artifactsDir (not /tmp)
-        baseDir: workDir,
+      const agentResult = await agent.spawn({
+        cwd: workDir,
+        brief: taskText,
+        timeoutMs: 300000,
       })
 
-      // Restore CWD before copying (copy logic uses absolute paths)
       process.chdir(originalCwd)
 
-      const v = (result.verdict ?? {
-        verdict: 'ERROR' as const,
-        reason: 'No verdict returned',
-        criteria: [],
-      }) as JudgeVerdict
+      // Persist agent output
+      const sanitizer = createSanitizer({ projectRoot: process.cwd(), homeDir: homedir(), workDir })
+      writeFileSync(join(cellDir, 'agent-stdout.txt'), sanitizer.sanitize(agentResult.stdout), 'utf-8')
+      if (agentResult.stderr) writeFileSync(join(cellDir, 'agent-stderr.txt'), sanitizer.sanitize(agentResult.stderr), 'utf-8')
 
-      // Persist agent stdout/stderr + copy artifacts (aligns with single mode)
-      writeFileSync(join(cellDir, 'agent-stdout.txt'), result.agentResult.stdout, 'utf-8')
-      if (result.agentResult.stderr) {
-        writeFileSync(join(cellDir, 'agent-stderr.txt'), result.agentResult.stderr, 'utf-8')
-      }
-
-      // Copy agent-produced files from workdir to cellDir (like single mode)
+      // Copy artifacts
       const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
       try {
         const entries = readdirSync(workDir)
-        const plan = buildCopyPlan(workDir, cellDir, entries, skipSet)
-        for (const { src, dest, name } of plan) {
-          try {
-            cpSync(src, dest, { recursive: true })
-          } catch (e) {
+        const copyPlan = buildCopyPlan(workDir, cellDir, entries, skipSet)
+        for (const { src, dest, name } of copyPlan) {
+          try { cpSync(src, dest, { recursive: true }) } catch (e) {
             log?.(`⚠️ Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
           }
         }
@@ -220,11 +183,38 @@ ${taskPath}
         log?.(`⚠️ Failed to read agent workdir for copy: ${e instanceof Error ? e.message : e}`)
       }
 
+      // Evidence
+      const checkpoints = readCheckpoints(workDir)
+      let artifactFiles: string[] = []
+      try {
+        for (const e of readdirSync(workDir)) {
+          if (!e.startsWith('.') && !skipSet.has(e) && e !== 'agent-stdout.txt' && e !== 'agent-stderr.txt' && e !== 'judge-verdict.json' && e !== '_checkpoints') {
+            artifactFiles.push(e)
+          }
+        }
+      } catch {}
+
+      // Per-cell judge — runLLMJudge as toolbox function, no intermediate pipeline
+      let v: JudgeVerdict
+      if (judgeInput) {
+        const evidence: Evidence = {
+          sandbox_cwd: workDir,
+          stdout: agentResult.stdout,
+          stderr: agentResult.stderr,
+          artifact_files: artifactFiles,
+        }
+        const judgeAgent = useAgent(resolvePlayer(resolved[0]?.platform ?? 'claude'))
+        const judgeResult = await runLLMJudge(judgeInput, evidence, checkpoints, judgeAgent)
+        v = judgeResult.verdict ?? { verdict: 'ERROR' as const, reason: 'No verdict returned', criteria: [] }
+      } else {
+        v = { verdict: 'ERROR' as const, reason: 'No judge criteria provided', criteria: [] }
+      }
+
       writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify({
         ...v,
-        agent_stdout: result.agentResult.stdout.slice(0, 5000),
-        agent_stderr: result.agentResult.stderr.slice(0, 1000),
-        duration_ms: result.agentResult.durationMs,
+        agent_stdout: agentResult.stdout.slice(0, 5000),
+        agent_stderr: agentResult.stderr.slice(0, 1000),
+        duration_ms: agentResult.durationMs,
       }, null, 2) + '\n')
 
       if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
@@ -241,55 +231,30 @@ ${taskPath}
     }
   }
 
-  // Aggregate stats
+  // Aggregate + comparative
   const stats = aggregateAllStats(verdictsBySide)
-
-  // Comparative judge
   const flatVerdicts: { participantId: string; verdict: unknown }[] = []
   for (const [side, verdicts] of verdictsBySide) {
-    // Use the first run's verdict for comparative judge (or aggregate into one)
-    if (verdicts.length > 0) {
-      flatVerdicts.push({ participantId: side, verdict: verdicts[0] })
-    }
+    if (verdicts.length > 0) flatVerdicts.push({ participantId: side, verdict: verdicts[0] })
   }
-
   const judge = useAgent(resolved[0]?.platform ?? 'claude')
-  const report = await runComparativeJudge({
-    manifest,
-    verdicts: flatVerdicts,
-    judge,
-    workdir: artifactsDir,
-  })
-
-  // Write report
+  const report = await runComparativeJudge({ manifest, verdicts: flatVerdicts, judge, workdir: artifactsDir })
   writeReport(artifactsDir, manifest, report, stats)
 
-  // Update manifest
   const finalManifest = ArenaManifest.parse({ ...manifest, status: 'completed' })
   writeFileSync(join(artifactsDir, 'arena.json'), JSON.stringify(finalManifest, null, 2) + '\n')
 
   return { manifest: finalManifest, report, stats, artifactsDir }
 }
 
-// ── Backward compat: CLI-flag style runner ─────────────────────────────────
+// ── Backward compat ──────────────────────────────────────────────────────
 
 export async function runArena(opts: {
-  taskPath: string
-  playerPaths: string[]
-  deckPaths: string[]
-  criteria: string[]
-  outDir: string
+  taskPath: string; playerPaths: string[]; deckPaths: string[]; criteria: string[]; outDir: string
 }): Promise<{ manifest: ArenaManifestType; report: unknown; artifactsDir: string }> {
   const { taskPath, playerPaths, deckPaths, criteria, outDir } = opts
-
-  // Convert CLI flags to ArenaToml internally
   const toml: ArenaToml = {
-    arena: {
-      task: readFileSync(resolve(taskPath), 'utf-8').slice(0, 200),
-      criteria,
-      runs_per_side: 1,
-      max_participants: Math.min(playerPaths.length, deckPaths.length),
-    },
+    arena: { task: readFileSync(resolve(taskPath), 'utf-8').slice(0, 200), criteria, runs_per_side: 1, max_participants: Math.min(playerPaths.length, deckPaths.length) } as any,
     side: playerPaths.flatMap((playerPath, pi) =>
       deckPaths.map((deckPath, di) => ({
         name: `run-${String(pi * deckPaths.length + di + 1).padStart(2, '0')}`,
@@ -298,89 +263,61 @@ export async function runArena(opts: {
       }))
     ),
   }
-
   const result = await runArenaFromToml({ toml, taskPath, outDir })
   const { manifest, report, artifactsDir } = result as ArenaResult
   return { manifest, report, artifactsDir }
 }
 
-// ── Report renderer ────────────────────────────────────────────────────────
+// ── Report ────────────────────────────────────────────────────────────────
 
-function writeReport(dir: string, manifest: ArenaManifestType, report: unknown & { score_matrix?: { participant_id: string; criterion: string; weight: number; score: number; rationale: string }[]; pareto?: { participant_id: string; dominated: boolean; dominated_by: string[] }[]; key_findings?: string[]; recommendations?: { audience: string; recommendation: string }[] }, stats: SideStats[]): void {
+function writeReport(dir: string, manifest: ArenaManifestType, report: any, stats: SideStats[]): void {
   const lines: string[] = [
-    `# Arena Report: ${manifest.id}`,
-    '',
+    `# Arena Report: ${manifest.id}`, '',
     `**Task**: ${manifest.task}`,
-    `**Criteria**: ${manifest.criteria.map(c => typeof c === 'string' ? c : c.label).join(', ')}`,
-    `**Date**: ${new Date().toISOString()}`,
-    '',
-    '## Score Matrix',
-    '',
-    renderScoreMatrix(report),
-    '',
-    '## Per-Side Statistics',
-    '',
-    renderStatsTable(stats),
-    '',
-    '## Pareto Frontier',
-    '',
-    renderPareto(report),
-    '',
-    '## Key Findings',
-    '',
-    ...(report.key_findings ?? []).map((f: string) => `- ${f}`),
-    '',
-    '## Recommendations',
-    '',
-    ...(report.recommendations ?? []).map((r: { audience: string; recommendation: string }) => `- **${r.audience}**: ${r.recommendation}`),
+    `**Criteria**: ${manifest.criteria.map((c: any) => typeof c === 'string' ? c : c.label).join(', ')}`,
+    `**Date**: ${new Date().toISOString()}`, '',
+    '## Score Matrix', '', renderScoreMatrix(report), '',
+    '## Per-Side Statistics', '', renderStatsTable(stats), '',
+    '## Pareto Frontier', '', renderPareto(report), '',
+    '## Key Findings', '', ...(report.key_findings ?? []).map((f: string) => `- ${f}`), '',
+    '## Recommendations', '', ...(report.recommendations ?? []).map((r: any) => `- **${r.audience}**: ${r.recommendation}`),
   ]
-
   writeFileSync(join(dir, 'report.md'), lines.join('\n') + '\n')
 }
 
 function renderStatsTable(stats: SideStats[]): string {
   if (stats.length === 0) return 'No statistics available.\n'
-
-  let table = `| Side | Runs | Pass Rate | Mean Confidence | Criteria |\n`
-  table += `|------|------|-----------|-----------------|----------|\n`
-
+  let table = `| Side | Runs | Pass Rate | Mean Confidence | Criteria |\n|------|------|-----------|-----------------|----------|\n`
   for (const s of stats) {
     const confStr = s.meanConfidence != null ? `${s.meanConfidence.toFixed(0)}%` : '-'
     const criteriaStr = s.criteria.map(c => `${c.name}: ${(c.mean * 100).toFixed(0)}%`).join(', ')
     table += `| ${s.sideName} | ${s.runs} | ${(s.passRate * 100).toFixed(0)}% | ${confStr} | ${criteriaStr} |\n`
   }
-
   return table
 }
 
-function renderScoreMatrix(report: unknown & { score_matrix?: { participant_id: string; criterion: string; weight: number; score: number; rationale: string }[] }): string {
+function renderScoreMatrix(report: any): string {
   if (!report.score_matrix?.length) return 'No scores available.\n'
-
-  const participants = [...new Set(report.score_matrix.map(s => s.participant_id))]
-  const criteria = [...new Set(report.score_matrix.map(s => s.criterion))]
-
-  let table = `| Criterion | Weight | ${participants.join(' | ')} |\n`
-  table += `|${'---|'.repeat(2 + participants.length)}\n`
-
+  const participants = [...new Set(report.score_matrix.map((s: any) => s.participant_id))]
+  const criteria = [...new Set(report.score_matrix.map((s: any) => s.criterion))]
+  let table = `| Criterion | Weight | ${participants.join(' | ')} |\n|${'---|'.repeat(2 + participants.length)}\n`
   for (const c of criteria) {
-    table += `| ${c} | 25% | ${participants.map(p => {
-      const cell = report.score_matrix!.find(s => s.participant_id === p && s.criterion === c)
+    table += `| ${c} | 25% | ${participants.map((p: any) => {
+      const cell = report.score_matrix!.find((s: any) => s.participant_id === p && s.criterion === c)
       return `**${cell?.score ?? '?'}**`
     }).join(' | ')} |\n`
   }
-
-  table += `| **Weighted Total** | 100% | ${participants.map(p => {
-    const pScores = report.score_matrix!.filter(s => s.participant_id === p)
-    const avg = pScores.length ? pScores.reduce((sum, s) => sum + s.score, 0) / pScores.length : 0
+  table += `| **Weighted Total** | 100% | ${participants.map((p: any) => {
+    const pScores = report.score_matrix!.filter((s: any) => s.participant_id === p)
+    const avg = pScores.length ? pScores.reduce((sum: number, s: any) => sum + s.score, 0) / pScores.length : 0
     return `**${avg.toFixed(1)}**`
   }).join(' | ')} |\n`
-
   return table
 }
 
-function renderPareto(report: unknown & { pareto?: { participant_id: string; dominated: boolean; dominated_by: string[] }[] }): string {
+function renderPareto(report: any): string {
   if (!report.pareto?.length) return 'No Pareto analysis.\n'
-  return report.pareto.map(p =>
+  return report.pareto.map((p: any) =>
     p.dominated
       ? `- **${p.participant_id}**: dominated by ${p.dominated_by.join(', ')}`
       : `- **${p.participant_id}**: Pareto-optimal (non-dominated)`

@@ -23,14 +23,21 @@ export type Side = z.infer<typeof Side>
 
 export const ArenaToml = z.object({
   arena: z.object({
-    task: z.string(),              // task description or path to TASK-arena.md
-    criteria: z.array(z.string()).min(1),
+    task: z.string(),              // task description or path to TASK.agent.md
+    // judge: path to judge.md file (preferred) or inline natural-language criteria text.
+    // When present, readFileSync + pass as JudgeInput.criteria directly — no parsing.
+    // If absent, fall back to criteria string[] (legacy, each string becomes a bullet).
+    judge: z.string().optional().describe('Path to judge.md (natural-language criteria for the judge LLM) or inline criteria text. No parsing — passed directly as JudgeInput.criteria.'),
+    criteria: z.array(z.string()).optional().describe('Legacy string criteria. Each becomes a bullet in generated judge prompt. Use judge for full natural-language criteria.'),
     runs_per_side: z.number().int().positive().default(1),
     max_participants: z.number().int().min(2).max(5).default(5),
     model: z.string().optional(),  // e.g. "claude-sonnet-4-6"
     endpoint: z.string().optional(), // e.g. "api.anthropic.com"
     notes: z.string().optional(),  // freeform reproducibility notes
-  }),
+  }).refine(
+    data => !!(data.judge || (data.criteria && data.criteria.length > 0)),
+    { message: 'At least one of arena.judge or arena.criteria must be provided' }
+  ),
   side: z.array(Side).min(2).max(5),
 })
 export type ArenaToml = z.infer<typeof ArenaToml>
@@ -38,7 +45,6 @@ export type ArenaToml = z.infer<typeof ArenaToml>
 // ── Parser ─────────────────────────────────────────────────────────────────
 
 export function parseArenaToml(content: string): ArenaToml {
-  // Simple inline TOML parser for arena.toml (no external dep needed for this subset)
   const parsed = parseToml(content)
   return ArenaToml.parse(parsed)
 }
@@ -55,7 +61,7 @@ export interface ExecutionCell {
 
 export interface ExecutionPlan {
   task: string
-  criteria: string[]
+  judge: string | null             // resolved judge text (from judge.md or inline)
   cells: ExecutionCell[]
   total_runs: number
 }
@@ -75,7 +81,7 @@ export function buildExecutionPlan(toml: ArenaToml): ExecutionPlan {
   }
   return {
     task: toml.arena.task,
-    criteria: toml.arena.criteria,
+    judge: toml.arena.judge ?? null,
     cells,
     total_runs: cells.length,
   }
@@ -108,7 +114,6 @@ function parseToml(text: string): Record<string, unknown> {
     const sectionMatch = line.match(/^\[(.+?)\]$/)
     if (sectionMatch) {
       const key = sectionMatch[1]
-      // nested key like "side.env"
       if (key.includes('.')) {
         const [parent, child] = key.split('.')
         const parentArr = arrayTables.get(parent)
@@ -130,13 +135,8 @@ function parseToml(text: string): Record<string, unknown> {
       const key = line.slice(0, eqIdx).trim()
       let value = line.slice(eqIdx + 1).trim()
 
-      // String value
       if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1)
-      } else if (value === 'true') {
-        value = 'true'
-      } else if (value === 'false') {
-        value = 'false'
       }
 
       // Array value: ["a", "b"]
@@ -166,7 +166,6 @@ function parseToml(text: string): Record<string, unknown> {
     }
   }
 
-  // Materialize array tables into result
   for (const [key, arr] of arrayTables) {
     result[key] = arr
   }

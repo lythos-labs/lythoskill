@@ -567,6 +567,131 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 
 ---
 
+## Agent Runtime Behavior (Arena Operations)
+
+> Arena runtime 规范 — 经验值来自多次 arena 运行调试（arena single / vs mode, claude/kimi player, bare/deck combo 对比）。
+
+### Timeout 经验映射
+
+不同任务类型需要不同的 timeout。120s 不是万能值。
+
+| 任务类型 | 推荐 Timeout | 原因 |
+|----------|-------------|------|
+| 简单编码（单文件、明确 spec） | 60–120s | 确定性高，agent 直接执行 |
+| 写作 + 研究（需要 web search） | 180–300s | 搜索、阅读、构思占大量时间 |
+| 写作 + 研究 + HTML 渲染 | 300s+ | 额外工具调用 + 渲染开销 |
+| 多步骤 skill 管道 | 300s+ | 每个 skill 增加一层调用 overhead |
+
+**规则**: arena.toml / TASK.agent.md 的 `timeout` 字段必须按任务类型设置，不要默认 120s。
+
+### Agent CWD 行为
+
+**kimi CLI 使用 shell CWD，不是 Bun.spawn 的 `cwd` 参数。**
+
+```
+Bun.spawn({ cwd: '/tmp/arena-*/' })  ← 这个 cwd 对 kimi 无效
+kimi --print --afk                   ← agent 的 Shell 工具用 process.cwd()
+```
+
+**后果**:
+- agent 创建的文件落在 arena 启动时的 shell CWD，不是 `/tmp/`
+- vs 模式之前用 `/tmp/arena-*/` 作为 baseDir，agent 文件写到别处，copy 逻辑找不到
+
+**修复**: 串行运行下用 `process.chdir(workDir)` 在启动 agent 前改变 shell CWD，运行后恢复。每个 side 有独立的持久化 workdir（`artifactsDir/work/<side>/`）。
+
+### vs / single 模式行为对齐
+
+| 维度 | single 模式 | vs 模式 |
+|------|------------|---------|
+| 产物保存 | ✅ agent-stdout.txt + stderr + judge-verdict + 文件 copy | 之前只存 judge-verdict |
+| 产物目录 | `agent-output-<timestamp>/` 或 `--out` | `runs/<arena-id>/runs/<side>/run-N/` |
+| workdir | `runs/agent-bdd/<stamp>/<scenario>/` | `artifactsDir/work/<side>/` |
+| copy 逻辑 | ✅ cli.ts:308-328 `buildCopyPlan` | 之前缺失 |
+
+**规则**: vs 模式必须复用 single 模式的产物复制逻辑。`buildCopyPlan` 从 workdir copy 到 cellDir，skip `.claude/`、`skill-deck.toml` 等元数据。
+
+### Judge Prompt 设计
+
+**TASK.agent.md 只定义 criteria，JSON 格式由 arena 运行时注入。**
+
+反例（不要把格式要求写在 TASK.agent.md 里）:
+```markdown
+## Judge
+Return a JSON object with {verdict, reason, criteria}...
+```
+→ 这会让 task agent 也试图返回 JSON，干扰正常执行。
+
+正例（TASK.agent.md 只写 criteria）:
+```markdown
+## Judge
+- concrete_analogy: Uses a relatable analogy beyond "plugin"
+- skill_cases: Lists 3-5 real open-source skills with what/who/scenarios
+```
+→ arena 在运行时注入 JSON schema 要求和角色指令。
+
+**角色边界 — judge agent 必须明确知道自己是 evaluator 不是 executor:**
+
+```
+You are a TEST JUDGE — not the task executor.
+Your ONLY job is to evaluate whether another AI agent correctly completed a task.
+Do NOT execute the task yourself. Do NOT write content, do NOT search the web.
+```
+
+**分隔线明确标注被评估任务 vs 你的角色**，避免 agent 被中文 task 内容带偏。
+
+### Agent-friendly 错误设计
+
+Per ADR-20260507014124191。错误信息不是给人读的字符串，而是给 agent 决策的结构化数据。
+
+**反例**（不要这样做）:
+```
+❌ Judge failed after 2 attempt(s): JSON Parse error: Unexpected EOF
+```
+→ agent 不知道发生了什么、该做什么。
+
+**正例**（ValidationReport 模式，见 `packages/lythoskill-cold-pool/src/types.ts` + `src/validate-plan.ts`）:
+```typescript
+// packages/lythoskill-cold-pool/src/types.ts
+export interface ValidationReport {
+  status: 'valid' | 'invalid' | 'ambiguous'
+  locator: string
+  phase: 'syntax' | 'repo-existence' | 'path-existence' | 'skill-md-existence'
+  findings: {
+    parseError?: string
+    repoExists?: boolean
+    repoIsPrivate?: boolean
+    skillMdFound?: boolean
+    detectedPaths?: string[]   // 实际存在的 SKILL.md 候选目录
+    remoteStatus?: number
+  }
+  suggestedFixes: Array<{
+    action: 'update-locator' | 'web-search' | 'prompt-user'
+    confidence: number          // 0..1
+    message: string
+    newLocator?: string
+  }>
+}
+
+// 使用示例：deck validate --format=json
+// packages/lythoskill-cold-pool/src/validate-plan.ts
+export function buildValidationPlan(locator: string): ValidationPlan {
+  // phase 把验证拆成 4 个阶段，agent 读 phase 就知道问题落在哪一层
+  // - syntax: locator 字符串本身不符合 FQ 规则 → 修拼写
+  // - repo-existence: locator 解析成功但 repo 不在 github → owner/repo 错了
+  // - path-existence: repo 存在但 skill 子路径不在 → detectedPaths 给出实际候选
+  // - skill-md-existence: 路径存在但没 SKILL.md → 这个 repo 不是 skill repo
+}
+```
+
+**消费者**:
+- CLI text 模式: `--format=text` 渲染为人类可读表格
+- CLI JSON 模式: `--format=json` 输出完整 ValidationReport，agent 直接消费
+- CI: 识别 `ambiguous`（rate-limited/private）vs `invalid`，只把后者算 fail
+
+**规则**: CLI 错误路径输出必须包含 `phase` + `findings` + `suggestedFixes`。纯字符串错误只在 `--format=text` 人类模式下渲染。参考实现: `packages/lythoskill-cold-pool/src/validate-plan.ts`。
+
+---
+
 ## Release & Auth Workflow
 
 > **Read this before running any `git remote`, `npm publish`, `npm login`, or version-bump command.**

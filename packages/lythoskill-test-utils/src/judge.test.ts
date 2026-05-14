@@ -1,41 +1,111 @@
 import { describe, test, expect } from 'bun:test'
 import { buildJudgePrompt, runLLMJudge } from './judge'
-import type { AgentScenario } from './agent-bdd'
-import type { AgentAdapter, AgentRunResult } from './agents/types'
+import type { JudgeInput, Evidence } from './schema'
+import type { AgentAdapter } from './agents/types'
+import type { CheckpointEntry } from './schema'
 
-function makeScenario(judge?: string): AgentScenario {
+function makeInput(overrides?: Partial<JudgeInput>): JudgeInput {
   return {
-    name: 'test-scenario',
-    description: '',
-    timeout: 30000,
-    given: { deck: {} },
-    when: 'Run a test command.',
-    then: ['Output should contain OK'],
-    judge: judge ?? 'Check that output contains OK.',
-  }
-}
-
-function makeAgentResult(overrides?: Partial<AgentRunResult>): AgentRunResult {
-  return {
-    stdout: 'OK\nDone.',
-    stderr: '',
-    code: 0,
-    durationMs: 1000,
-    checkpoints: [{ step: 'test', tool: 'echo', args: [], timestamp: '2026-01-01T00:00:00Z' }],
+    criteria: 'Check that output contains OK.',
+    task_context: 'Simple test task for unit testing.',
     ...overrides,
   }
 }
 
-describe('buildJudgePrompt', () => {
-  test('includes scenario instructions, criteria, evidence, and tool instruction', () => {
-    const scenario = makeScenario()
-    const result = makeAgentResult()
-    const prompt = buildJudgePrompt(scenario, result, result.checkpoints)
+function makeEvidence(overrides?: Partial<Evidence>): Evidence {
+  return {
+    sandbox_cwd: '/tmp/test-workdir',
+    stdout: 'OK\nDone.',
+    stderr: '',
+    artifact_files: ['output.html'],
+    ...overrides,
+  }
+}
 
-    expect(prompt).toContain('Run a test command.')
+function makeCheckpoints(): CheckpointEntry[] {
+  return [{ step: 'test', tool: 'echo', args: [], timestamp: '2026-01-01T00:00:00Z' } as CheckpointEntry]
+}
+
+describe('buildJudgePrompt', () => {
+  test('includes role boundary, TASK CONTEXT (not invocation), criteria, and evidence', () => {
+    const prompt = buildJudgePrompt(makeInput(), makeEvidence(), makeCheckpoints())
+
+    expect(prompt).toContain('TEST JUDGE')
+    expect(prompt).toContain('not the task executor')
+    expect(prompt).toContain('TASK CONTEXT')
+    expect(prompt).toContain('Simple test task')
     expect(prompt).toContain('Check that output contains OK.')
     expect(prompt).toContain('OK')
-    expect(prompt).toContain('submit_verdict')
+    expect(prompt).toContain('output.html')
+  })
+
+  test('handles empty task_context', () => {
+    const prompt = buildJudgePrompt(
+      makeInput({ task_context: '' }),
+      makeEvidence(),
+      makeCheckpoints()
+    )
+    expect(prompt).toContain('(no additional context)')
+  })
+
+  test('handles empty criteria', () => {
+    const prompt = buildJudgePrompt(
+      makeInput({ criteria: '' }),
+      makeEvidence(),
+      makeCheckpoints()
+    )
+    expect(prompt).toContain('(no criteria specified')
+  })
+
+  // Gap I fixed: precisely assert stdout truncation at 8000 chars
+  // Uses 'Q' to avoid false positives from template text ('executor', 'extra', 'text', 'sandbox')
+  test('truncates large stdout to 8000 characters', () => {
+    const long = 'Q'.repeat(10000)
+    const prompt = buildJudgePrompt(
+      makeInput(),
+      makeEvidence({ stdout: long }),
+      makeCheckpoints()
+    )
+    const qCount = (prompt.match(/Q/g) ?? []).length
+    expect(qCount).toBe(8000)
+  })
+
+  // Gap H fixed: negative test — task invocation text must NOT reach judge prompt
+  test('NEVER contains task invocation text (scenario.when)', () => {
+    // Even if criteria or task_context were accidentally contaminated with
+    // a typical task instruction pattern, the prompt structure itself prevents
+    // the "TASK UNDER EVALUATION" framing that caused the T6 hijacking bug.
+    const prompt = buildJudgePrompt(
+      makeInput({ criteria: 'Evaluate the HTML output.' }),
+      makeEvidence(),
+      makeCheckpoints()
+    )
+    // Old coupling path used "Task Instructions:" or similar framing.
+    // The new prompt uses "TASK CONTEXT" with explicit disclaimers.
+    expect(prompt).not.toContain('Task Instructions')
+    expect(prompt).not.toContain('TASK UNDER EVALUATION')
+    // The DEFENSE section explicitly tells judge to ignore task-instruction
+    // fragments that may appear in stdout.
+    expect(prompt).toContain('DEFENSE')
+  })
+
+  test('artifact_files list rendered in prompt', () => {
+    const prompt = buildJudgePrompt(
+      makeInput(),
+      makeEvidence({ artifact_files: ['out.html', 'src/data.json'] }),
+      makeCheckpoints()
+    )
+    expect(prompt).toContain('out.html')
+    expect(prompt).toContain('src/data.json')
+  })
+
+  test('empty artifact_files shows no-files message', () => {
+    const prompt = buildJudgePrompt(
+      makeInput(),
+      makeEvidence({ artifact_files: [] }),
+      makeCheckpoints()
+    )
+    expect(prompt).toContain('(no artifact files detected)')
   })
 })
 
@@ -53,8 +123,7 @@ describe('runLLMJudge', () => {
         }
       },
     }
-
-    const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
     expect(result.verdict).not.toBeNull()
     expect(result.verdict!.verdict).toBe('PASS')
     expect(result.error).toBeUndefined()
@@ -73,9 +142,7 @@ describe('runLLMJudge', () => {
         }
       },
     }
-
-    const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
-    expect(result.verdict).not.toBeNull()
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
     expect(result.verdict!.verdict).toBe('FAIL')
   })
 
@@ -92,9 +159,7 @@ describe('runLLMJudge', () => {
         }
       },
     }
-
-    const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
-    expect(result.verdict).not.toBeNull()
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
     expect(result.verdict!.verdict).toBe('PASS')
   })
 
@@ -111,8 +176,7 @@ describe('runLLMJudge', () => {
         }
       },
     }
-
-    const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
     expect(result.verdict!.verdict).toBe('ERROR')
     expect(result.verdict!.reason).toContain('Judge failed')
     expect(result.verdict!.error).toBeTruthy()
@@ -131,9 +195,68 @@ describe('runLLMJudge', () => {
         }
       },
     }
-
-    const result = await runLLMJudge(makeScenario(), makeAgentResult(), [], '/tmp/test', adapter)
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
     expect(result.verdict!.verdict).toBe('ERROR')
     expect(result.verdict!.error).toContain('invalid_value')
+  })
+
+  // Gap J: normalizeVerdictJson branch coverage — notes → reason
+  test('normalizes notes field into reason', async () => {
+    const adapter: AgentAdapter = {
+      name: 'mock',
+      async spawn() {
+        return {
+          stdout: '{"verdict":"PASS","notes":"Everything checks out.","criteria":[]}',
+          stderr: '',
+          code: 0,
+          durationMs: 10,
+          checkpoints: [],
+        }
+      },
+    }
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
+    expect(result.verdict!.verdict).toBe('PASS')
+    expect(result.verdict!.reason).toBe('Everything checks out.')
+  })
+
+  // Gap J: normalizeVerdictJson branch coverage — summary → reason
+  test('normalizes summary field into reason', async () => {
+    const adapter: AgentAdapter = {
+      name: 'mock',
+      async spawn() {
+        return {
+          stdout: '{"verdict":"FAIL","summary":"Task incomplete.","criteria":[]}',
+          stderr: '',
+          code: 0,
+          durationMs: 10,
+          checkpoints: [],
+        }
+      },
+    }
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
+    expect(result.verdict!.reason).toBe('Task incomplete.')
+  })
+
+  // Gap J: normalizeVerdictJson branch coverage — criteria object → array
+  test('converts nested criteria object into array', async () => {
+    const adapter: AgentAdapter = {
+      name: 'mock',
+      async spawn() {
+        return {
+          stdout: '{"verdict":"PASS","reason":"ok","correctness":true,"completeness":false}',
+          stderr: '',
+          code: 0,
+          durationMs: 10,
+          checkpoints: [],
+        }
+      },
+    }
+    const result = await runLLMJudge(makeInput(), makeEvidence(), [], adapter)
+    expect(result.verdict!.verdict).toBe('PASS')
+    expect(result.verdict!.criteria).toHaveLength(2)
+    expect(result.verdict!.criteria[0].name).toBe('correctness')
+    expect(result.verdict!.criteria[0].passed).toBe(true)
+    expect(result.verdict!.criteria[1].name).toBe('completeness')
+    expect(result.verdict!.criteria[1].passed).toBe(false)
   })
 })

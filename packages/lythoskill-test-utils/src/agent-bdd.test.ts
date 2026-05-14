@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node
 import { join } from 'node:path'
 import { parseAgentMd, runAgentScenario } from './agent-bdd'
 import type { AgentAdapter } from './agents/types'
+import type { JudgeInput } from './schema'
 
 describe('parseAgentMd', () => {
   test('parses frontmatter fields (name, description, timeout)', () => {
@@ -54,7 +55,7 @@ Some setup
     expect(() => parseAgentMd(content)).toThrow('Invalid .agent.md: missing ## When')
   })
 
-  test('parses ## Judge section when present', () => {
+  test('## Judge section is IGNORED (no longer regex-extracted)', () => {
     const content = `---
 name: Judged scenario
 ---
@@ -72,11 +73,12 @@ Run a command.
 Verify the output is correct.
 `
     const result = parseAgentMd(content)
-    expect(result.judge).toBe('Verify the output is correct.')
+    // judge is always empty — criteria live in arena.toml [arena].judge, not markdown
+    expect(result.judge).toBe('')
     expect(result.then).toEqual(['Result should be correct'])
   })
 
-  test('empty judge when no ## Judge section', () => {
+  test('empty judge (always — ## Judge not parsed)', () => {
     const content = `---
 name: No judge
 ---
@@ -140,7 +142,7 @@ describe('runAgentScenario', () => {
     },
   }
 
-  test('runs scenario end-to-end with mock agent (no judge)', async () => {
+  test('runs scenario end-to-end with mock agent, no judge (no scenario.judge)', async () => {
     const baseDir = join('/tmp', 'agent-bdd-test-' + Date.now())
     const agentMdPath = join(baseDir, 'test.agent.md')
     mkdirSync(baseDir, { recursive: true })
@@ -169,47 +171,64 @@ Please say "task completed".
     expect(result.agentResult.stdout).toBe('task completed')
     expect(result.agentResult.code).toBe(0)
     expect(result.checkpoints).toEqual([])
-    expect(result.verdict).toBeNull() // no Judge section
-    expect(result.artifactDir).toContain('mock-scenario')
+    expect(result.verdict).toBeNull() // no judge criteria provided
     expect(setupCalled.called).toBe(true)
 
-    // Verify artifacts were persisted
     expect(existsSync(join(result.artifactDir, 'agent-stdout.txt'))).toBe(true)
     expect(existsSync(join(result.artifactDir, 'agent-stderr.txt'))).toBe(true)
     expect(existsSync(join(result.artifactDir, 'judge-verdict.json'))).toBe(true)
 
     const judgeVerdict = JSON.parse(readFileSync(join(result.artifactDir, 'judge-verdict.json'), 'utf-8'))
     expect(judgeVerdict.verdict).toBeNull()
-    expect(judgeVerdict.reason).toContain('No ## Judge')
+    expect(judgeVerdict.reason).toContain('both absent')
 
-    // Cleanup
     rmSync(baseDir, { recursive: true, force: true })
   })
 
-  test('runs scenario with judge section', async () => {
-    const baseDir = join('/tmp', 'agent-bdd-judge-' + Date.now())
+  test('runs scenario with judgeInput override (external, from arena.toml)', async () => {
+    const baseDir = join('/tmp', 'agent-bdd-judge-override-' + Date.now())
     const agentMdPath = join(baseDir, 'judge-test.agent.md')
     mkdirSync(baseDir, { recursive: true })
     writeFileSync(agentMdPath, `---
 name: Judged Scenario
+description: Context for judge only — NOT task instructions
 ---
 
 ## When
 Run the task.
 
-## Judge
-Check correctness.
-
 ## Then
 - Output correct
 `)
 
-    // Mock judge that returns PASS
+    const judgeInput: JudgeInput = {
+      criteria: 'External criteria from arena.toml [arena].judge or judge.md',
+      task_context: 'Context from arena.toml task field',
+    }
+
     const judgeAdapter: AgentAdapter = {
       name: 'mock-judge',
-      async spawn() {
+      async spawn(opts: { brief: string }) {
+        if (opts.brief.includes('Run the task.')) {
+          return {
+            stdout: JSON.stringify({ verdict: 'ERROR' as const, reason: 'BUG: judge saw task instructions', criteria: [] }),
+            stderr: '',
+            code: 0,
+            durationMs: 3,
+            checkpoints: [],
+          }
+        }
+        if (!opts.brief.includes('External criteria from arena.toml')) {
+          return {
+            stdout: JSON.stringify({ verdict: 'ERROR' as const, reason: 'BUG: judge missing external criteria', criteria: [] }),
+            stderr: '',
+            code: 0,
+            durationMs: 3,
+            checkpoints: [],
+          }
+        }
         return {
-          stdout: '{"verdict":"PASS","reason":"Looks good.","criteria":[{"name":"correctness","passed":true}]}',
+          stdout: JSON.stringify({ verdict: 'PASS' as const, reason: 'External criteria evaluated.', criteria: [{ name: 'check', passed: true }] }),
           stderr: '',
           code: 0,
           durationMs: 3,
@@ -223,6 +242,7 @@ Check correctness.
       agent: mockAdapter,
       setupWorkdir(_s, wd) { mkdirSync(wd, { recursive: true }) },
       judgeAgent: judgeAdapter,
+      judgeInput,
       baseDir,
     })
 

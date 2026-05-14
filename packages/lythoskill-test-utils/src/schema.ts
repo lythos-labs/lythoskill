@@ -57,9 +57,6 @@ export const DeckConfig = z.object({
   working_set: z.string().optional(),
   innate: z.record(SkillEntry).optional(),
   tool: z.record(SkillEntry).optional(),
-  // combo: meta-declaration, not a skill type. Named groups with coordination prompt.
-  // Does NOT count against max_cards — it's metadata about how skills work together.
-  // If coordination is complex enough to need logic, fork a single skill instead.
   combo: z.record(z.object({
     skills: z.array(z.string()).describe('Skill names in this combo'),
     prompt: z.string().optional().describe('How these skills coordinate — agent reads this as instructions'),
@@ -73,7 +70,7 @@ export const DeckConfig = z.object({
 export type DeckConfig = z.infer<typeof DeckConfig>
 
 // ── P0: Agent Scenario ────────────────────────────────────────────────────
-// Anchored on: parseAgentMd output (deck/test/*.agent.md)
+// Anchored on: parseAgentMd output.
 
 export const AgentScenario = z.object({
   name: z.string().default('unnamed agent scenario'),
@@ -87,6 +84,22 @@ export const AgentScenario = z.object({
   judge: z.string().default(''),
 })
 export type AgentScenario = z.infer<typeof AgentScenario>
+
+// ── P0: Judge Input (decoupled from AgentScenario.when, per ADR-20260514050300) ──
+
+export const JudgeInput = z.object({
+  criteria: z.string().describe('Evaluation criteria — what the judge checks. Free-text (legacy ## Judge content) or structured from arena.toml [judge.criteria].'),
+  task_context: z.string().default('').describe('Task background (audience, format, taste anchors) shown to judge. NOT the task invocation text. Separates question paper from exam-day instructions.'),
+})
+export type JudgeInput = z.infer<typeof JudgeInput>
+
+export const Evidence = z.object({
+  sandbox_cwd: z.string().describe('Absolute path; judge may read files under here. Also used as judge.spawn cwd.'),
+  stdout: z.string(),
+  stderr: z.string(),
+  artifact_files: z.array(z.string()).default([]).describe('Relative paths within sandbox_cwd that the agent produced. Collected recursively; directories are not listed, only files.'),
+})
+export type Evidence = z.infer<typeof Evidence>
 
 // ── P1: Player ────────────────────────────────────────────────────────────
 // Anchored on: ADR-20260424120936541
@@ -135,7 +148,6 @@ export function normalizeCriteriaWeights(criteria: z.infer<typeof CriteriaField>
   if (unset.length > 0) {
     const share = Math.floor(100 / result.length)
     const remainder = 100 - share * (result.length - unset.length) - unset.length * share
-    // Adjust: give equal shares, last one gets remainder
     let distributed = 0
     for (const c of result) {
       if (c.weight === undefined) {
@@ -143,13 +155,11 @@ export function normalizeCriteriaWeights(criteria: z.infer<typeof CriteriaField>
         distributed++
       }
     }
-    // Fix rounding: add remainder to the last auto-weighted criterion
     if (distributed > 0) {
       const last = result.filter(c => c.weight === share).pop()
       if (last) last.weight = share + remainder
     }
   }
-  // Ensure all weights are defined
   for (const c of result) {
     if (c.weight === undefined) c.weight = 25
   }
@@ -186,8 +196,8 @@ export const ArenaManifest = z.object({
 }, { message: 'Criteria weights (integers 0-100) must sum to 100' })
 export type ArenaManifest = z.infer<typeof ArenaManifest>
 
-// ── P1: Arena Run Context (reproducibility metadata) ───────────────────────
-// Anchored on: ADR-20260505225159725 (arena = reproducible experiment)
+// ── P1: Arena Run Context ─────────────────────────────────────────────────
+// Anchored on: ADR-20260505225159725
 
 export const ArenaRunContext = z.object({
   git_ref: z.string().describe('Git commit hash at time of run'),
@@ -200,7 +210,7 @@ export const ArenaRunContext = z.object({
 export type ArenaRunContext = z.infer<typeof ArenaRunContext>
 
 // ── P1: Comparative Report ────────────────────────────────────────────────
-// Anchored on: playground/arena-bdd-research/report.md (semantic structure)
+// Anchored on: playground/arena-bdd-research/report.md
 
 export const ScoreCell = z.object({
   participant_id: z.string(),

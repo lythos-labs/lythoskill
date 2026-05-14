@@ -1,14 +1,14 @@
-import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { readFileSync, mkdirSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs'
+import { join, resolve, relative } from 'node:path'
 import { homedir } from 'node:os'
 import type { AgentAdapter, AgentRunResult, CheckpointEntry } from './agents/types'
 import { createSanitizer } from './sanitize'
 import { readCheckpoints } from './bdd-runner'
 import { runLLMJudge } from './judge'
-import { AgentScenario as AgentScenarioSchema, type AgentScenario, type JudgeVerdict } from './schema'
+import { AgentScenario as AgentScenarioSchema, type AgentScenario, type JudgeVerdict, type JudgeInput, type Evidence } from './schema'
 
 // Re-export for backward compat
-export type { AgentScenario, JudgeVerdict, JudgeCriterion } from './schema'
+export type { AgentScenario, JudgeVerdict, JudgeCriterion, JudgeInput, Evidence } from './schema'
 
 // ── Scenario result type ───────────────────────────────────────────────────
 
@@ -29,7 +29,35 @@ const PROJECT_ROOT = (() => {
   return dir
 })()
 
+// ── Artifact collection (Gap F: recursive, file-only) ─────────────────────
+
+const ARTIFACT_SKIP = new Set([
+  '.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md',
+  'agent-stdout.txt', 'agent-stderr.txt', 'judge-verdict.json', '_checkpoints',
+])
+
+function collectArtifacts(dir: string, rootDir: string): string[] {
+  const result: string[] = []
+  let entries: string[]
+  try { entries = readdirSync(dir) } catch { return result }
+  for (const e of entries) {
+    if (e.startsWith('.') || ARTIFACT_SKIP.has(e)) continue
+    const full = join(dir, e)
+    let stat
+    try { stat = statSync(full) } catch { continue }
+    if (stat.isDirectory()) {
+      result.push(...collectArtifacts(full, rootDir))
+    } else {
+      result.push(relative(rootDir, full))
+    }
+  }
+  return result
+}
+
 // ── parseAgentMd ───────────────────────────────────────────────────────────
+// ## Judge section no longer extracted — judge criteria live in arena.toml
+// or are passed as JudgeInput. Markdown is for LLM agents to read, not for
+// regex-based structured-data extraction.
 
 export function parseAgentMd(content: string): AgentScenario {
   const lines = content.split('\n')
@@ -61,8 +89,10 @@ export function parseAgentMd(content: string): AgentScenario {
     if (key === 'timeout') timeout = Number(value) || 30000
   }
 
-  // Extract sections
-  const sectionRegex = /##\s*(Given|When|Then|Judge)\s*\n/i
+  // Extract sections — ## Judge is intentionally excluded.
+  // Judge criteria live as natural-language text (arena.toml [arena].judge
+  // or judge.md), passed via JudgeInput, not regex-parsed from markdown.
+  const sectionRegex = /##\s*(Given|When|Then)\s*\n/i
   const sections: Record<string, string> = {}
   let pos = 0
   while (true) {
@@ -80,7 +110,7 @@ export function parseAgentMd(content: string): AgentScenario {
   }
 
   // Parse Given — look for deck declaration bullets
-  const givenDeck: DeckConfig = {}
+  const givenDeck: Record<string, unknown> = {}
   const givenText = sections.given || ''
   const toolMatch = givenText.match(/tool skills?:\s*([^\n]+)/i)
   if (toolMatch) {
@@ -112,10 +142,10 @@ export function parseAgentMd(content: string): AgentScenario {
     name,
     description,
     timeout,
-    given: { deck: givenDeck },
+    given: { deck: givenDeck as Record<string, { path: string }> },
     when: sections.when,
     then: thenBullets,
-    judge: sections.judge || '',
+    judge: '',  // no longer extracted from markdown
   }
 
   return AgentScenarioSchema.parse(result)
@@ -129,6 +159,8 @@ export async function runAgentScenario(opts: {
   agent: AgentAdapter
   setupWorkdir: (scenario: AgentScenario, workdir: string) => void | Promise<void>
   judgeAgent?: AgentAdapter
+  /** Optional override — when provided, used directly instead of building from scenario.judge */
+  judgeInput?: JudgeInput
   baseDir?: string
   timeoutMs?: number
   idleTimeoutMs?: number
@@ -139,6 +171,7 @@ export async function runAgentScenario(opts: {
     agent,
     setupWorkdir,
     judgeAgent,
+    judgeInput: externalJudgeInput,
     baseDir,
     timeoutMs,
     idleTimeoutMs,
@@ -183,11 +216,23 @@ export async function runAgentScenario(opts: {
 
   const checkpoints = readCheckpoints(artifactDir)
 
-  // Optional LLM judge
+  // Collect agent-produced files recursively
+  const artifactFiles = collectArtifacts(artifactDir, artifactDir)
+
+  // Determine judge input: external override takes priority,
+  // then legacy scenario.judge, otherwise skip judging entirely.
   let verdict: JudgeVerdict | null = null
-  if (scenario.judge) {
+  const effectiveJudgeInput = externalJudgeInput ?? (scenario.judge ? { criteria: scenario.judge, task_context: scenario.description } as JudgeInput : null)
+
+  if (effectiveJudgeInput) {
     const judge = judgeAgent ?? agent
-    const judgeResult = await runLLMJudge(scenario, agentResult, checkpoints, artifactDir, judge)
+    const evidence: Evidence = {
+      sandbox_cwd: artifactDir,
+      stdout: agentResult.stdout,
+      stderr: agentResult.stderr,
+      artifact_files: artifactFiles,
+    }
+    const judgeResult = await runLLMJudge(effectiveJudgeInput, evidence, checkpoints, judge)
 
     writeFileSync(
       join(artifactDir, 'judge-verdict.json'),
@@ -213,7 +258,7 @@ export async function runAgentScenario(opts: {
       JSON.stringify(
         {
           verdict: null,
-          reason: 'No ## Judge section in scenario',
+          reason: 'No judge criteria provided — arena.toml [arena].judge or scenario.judge both absent',
           error: null,
           timestamp: new Date().toISOString(),
         },
@@ -232,4 +277,3 @@ export async function runAgentScenario(opts: {
     artifactDir,
   }
 }
-

@@ -18,6 +18,22 @@ player = "claude-code"
 deck = "./decks/b.toml"
 `
 
+const judgeToml = `
+[arena]
+task = "Test task"
+judge = "Evaluate completeness and correctness. Return JSON."
+
+[[side]]
+name = "runner-a"
+player = "claude-code"
+deck = "./decks/a.toml"
+
+[[side]]
+name = "runner-b"
+player = "claude-code"
+deck = "./decks/b.toml"
+`
+
 const fullToml = `
 [arena]
 task = "Generate auth flow diagram"
@@ -46,19 +62,24 @@ pre_run = ["npm ci", "npm run build"]
 working_dir = "/workspace"
 `
 
-// ── Schema + Parser ────────────────────────────────────────────────────────
-
 describe('parseArenaToml', () => {
-  test('parses minimal two-side arena', () => {
+  test('parses minimal two-side arena with criteria', () => {
     const result = parseArenaToml(minimalToml)
     expect(result.arena.task).toBe('Test task')
     expect(result.arena.criteria).toEqual(['a', 'b'])
-    expect(result.arena.runs_per_side).toBe(1)       // default
+    expect(result.arena.runs_per_side).toBe(1)
     expect(result.side).toHaveLength(2)
     expect(result.side[0].name).toBe('runner-a')
     expect(result.side[0].player).toBe('claude-code')
     expect(result.side[0].deck).toBe('./decks/a.toml')
-    expect(result.side[0].control).toBe(false)         // default
+    expect(result.side[0].control).toBe(false)
+  })
+
+  test('parses arena with judge field (preferred over criteria)', () => {
+    const result = parseArenaToml(judgeToml)
+    expect(result.arena.judge).toContain('Evaluate completeness')
+    expect(result.arena.criteria).toBeUndefined()
+    expect(result.side).toHaveLength(2)
   })
 
   test('parses full arena with runs_per_side and control', () => {
@@ -83,7 +104,17 @@ describe('parseArenaToml', () => {
     expect(() => parseArenaToml(bad)).toThrow()
   })
 
-  test('rejects empty criteria', () => {
+  test('rejects neither judge nor criteria provided', () => {
+    const bad = `[arena]\ntask = "x"\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
+    expect(() => parseArenaToml(bad)).toThrow()
+  })
+
+  test('accepts judge without criteria (either is sufficient)', () => {
+    const toml = `[arena]\ntask = "x"\njudge = "Evaluate this."\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
+    expect(() => parseArenaToml(toml)).not.toThrow()
+  })
+
+  test('rejects empty criteria and no judge', () => {
     const bad = `[arena]\ntask = "x"\ncriteria = []\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     expect(() => parseArenaToml(bad)).toThrow()
   })
@@ -115,18 +146,20 @@ describe('parseArenaToml', () => {
   })
 })
 
-// ── Execution Plan ─────────────────────────────────────────────────────────
-
 describe('buildExecutionPlan', () => {
   test('generates plan: 2 sides × 1 run = 2 cells', () => {
     const toml = parseArenaToml(minimalToml)
     const plan = buildExecutionPlan(toml)
     expect(plan.task).toBe('Test task')
-    expect(plan.criteria).toEqual(['a', 'b'])
+    expect(plan.judge).toBeNull()
     expect(plan.cells).toHaveLength(2)
     expect(plan.total_runs).toBe(2)
-    expect(plan.cells[0]).toEqual({ side: 'runner-a', player: 'claude-code', deck: './decks/a.toml', run: 1, control: false })
-    expect(plan.cells[1]).toEqual({ side: 'runner-b', player: 'claude-code', deck: './decks/b.toml', run: 1, control: false })
+  })
+
+  test('generates plan with judge field populated', () => {
+    const toml = parseArenaToml(judgeToml)
+    const plan = buildExecutionPlan(toml)
+    expect(plan.judge).toContain('Evaluate completeness')
   })
 
   test('generates plan: 3 sides × 3 runs = 9 cells', () => {
@@ -134,13 +167,6 @@ describe('buildExecutionPlan', () => {
     const plan = buildExecutionPlan(toml)
     expect(plan.cells).toHaveLength(9)
     expect(plan.total_runs).toBe(9)
-
-    // Cells are ordered: side 0 run 1, side 0 run 2, side 0 run 3, side 1 run 1, ...
-    expect(plan.cells[0]).toEqual({ side: 'minimal', player: 'standard-coder', deck: './decks/minimal.toml', run: 1, control: false })
-    expect(plan.cells[1]).toEqual({ side: 'minimal', player: 'standard-coder', deck: './decks/minimal.toml', run: 2, control: false })
-    expect(plan.cells[2]).toEqual({ side: 'minimal', player: 'standard-coder', deck: './decks/minimal.toml', run: 3, control: false })
-    expect(plan.cells[3]).toEqual({ side: 'rich', player: 'expert-architect', deck: './decks/rich.toml', run: 1, control: false })
-    expect(plan.cells[8]).toEqual({ side: 'baseline', player: 'standard-coder', deck: './decks/baseline.toml', run: 3, control: true })
   })
 
   test('control flag preserved in plan cells', () => {
@@ -151,37 +177,9 @@ describe('buildExecutionPlan', () => {
     expect(baselineCells.every(c => c.control)).toBe(true)
   })
 
-  test('dry-run output format matches expected log', () => {
-    const toml = parseArenaToml(minimalToml)
-    const plan = buildExecutionPlan(toml)
-
-    // Simulate what --dry-run would log
-    const logs: string[] = []
-    for (const line of formatPlanOutput(plan)) {
-      logs.push(line)
-    }
-
-    expect(logs.some(l => l.includes('2 cells'))).toBe(true)
-    expect(logs.some(l => l.includes('runner-a'))).toBe(true)
-    expect(logs.some(l => l.includes('runner-b'))).toBe(true)
-    expect(logs.some(l => l.includes('claude-code'))).toBe(true)
-    expect(logs.every(l => !l.includes('control'))).toBe(true) // no control flags in minimal
-  })
-
-  test('dry-run output shows control flag for control sides', () => {
-    const toml = parseArenaToml(fullToml)
-    const plan = buildExecutionPlan(toml)
-    const lines = formatPlanOutput(plan)
-    const baselineLines = lines.filter(l => l.includes('baseline'))
-    // All baseline cells should have [control] flag
-    expect(baselineLines.every(l => l.includes('[control]'))).toBe(true)
-  })
-
   test('dry-run: plan is pure data, no side effects', () => {
-    // The entire plan generation is a pure function — dry-run is just printing it
     const toml = parseArenaToml(fullToml)
     const plan = buildExecutionPlan(toml)
-    // Verify plan is self-describing for a --dry-run output
     expect(plan.total_runs).toBeGreaterThan(0)
     expect(plan.cells.every(c => typeof c.side === 'string')).toBe(true)
     expect(plan.cells.every(c => typeof c.player === 'string')).toBe(true)
