@@ -1,6 +1,6 @@
 {
   "name": "@lythos/infra",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "Runtime infrastructure base — SqliteDb, config fetch, shared helpers",
   "keywords": [
     "ai-agent",
