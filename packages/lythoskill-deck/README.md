@@ -90,7 +90,7 @@ prompt = "Search for latest info, then generate professional document with diagr
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills (deny-by-default). |
 | `validate` | `[deck.toml] [--workdir <dir>]` | Validate deck config without modifying files. |
 | `add` | `<locator> [--alias <alias>] [--type <type>] [--deck <path>]` | Add skill to cold pool + deck.toml. Accepts skills.sh syntax (owner/repo, owner/repo@skill, github:owner/repo) and FQ locators. |
-| `refresh` | `[<fq\|alias>] [--deck <path>]` | Pull latest versions of declared skills from upstream git repos. Pass a name to refresh one skill. |
+| `refresh` | `[<fq\|alias>] [--deck <path>] [--exec]` | Scan declared skills for upstream updates (plan-only by default). Add `--exec` to actually pull. Agent-driven apply preferred. |
 | `remove` | `<fq\|alias> [--deck <path>]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `to-symlink` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to symlink mode (live link, follows cold pool) |
 | `to-snapshot` | `<alias> [--deck <path>] [--workdir <dir>]` | Switch a skill to snapshot mode (pinned cp of current HEAD) |

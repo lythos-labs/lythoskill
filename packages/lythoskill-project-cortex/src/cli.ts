@@ -116,6 +116,12 @@ async function main(): Promise<void> {
   const restArgs = process.argv.slice(4);
   const allFlags = process.argv.slice(3);
 
+  // --help anywhere in the arg list triggers help (not treated as a positional arg)
+  if (allFlags.includes('--help') || allFlags.includes('-h')) {
+    printHelp();
+    process.exit(0);
+  }
+
   switch (command) {
     case 'init':
       initWorkflow(config);

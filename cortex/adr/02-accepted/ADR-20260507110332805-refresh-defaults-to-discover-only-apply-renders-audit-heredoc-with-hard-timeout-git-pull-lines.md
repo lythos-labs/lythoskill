@@ -80,9 +80,33 @@
 - **优点**: 兼容性最好
 - **缺点**: retry 不能解决 auth hang 和 merge conflict;反而把单次失败变多次失败,延长 hang 时间。Doesn't address root cause(默认就不该 pull)
 
+### 方案 E: discover-only by default + agent-driven apply (New)
+
+`deck refresh` 默认输出结构化 plan（JSON / markdown table），不执行任何 git pull。
+
+apply 不是 `--apply` flag。apply 是 **agent 消费 plan 后自主执行** — agent 可以执行 heredoc 中的命令，也可以自己做决策：
+- agent 读取 plan（哪些 skill behind，哪些 unreachable）
+- agent 决策：pull 哪些、跳过哪些、哪些需要人工处理
+- agent 逐个执行 git pull，每步前 probeConnectivity 验证 remote 可达
+- 失败时 agent 可尝试修复（mirror 切换、auth 提示、conflict 处理）
+
+和 curator `runRefreshPlan` + `runRefreshExecute` 的区别：
+- curator: plan 写入 human-readable todo file → 人执行 `refresh-execute`
+- deck refresh: plan 作为 agent-consumable structured report → agent 执行
+
+- **优点**:
+  - 默认路径永远安全（纯只读 + hard timeout）
+  - apply 阶段有智能（probe + retry + 修复），不是写死脚本
+  - 和 agent-first 设计一致：agent 看到信息就知道怎么走正路
+- **缺点**:
+  - 需要 agent 具备执行 git 命令的能力（已有）
+  - plan 格式需要对 agent 友好（结构化 JSON + HATEOAS 错误）
+
 ## 决策
 
-**选择**: 方案 C — discover-only by default + `--apply` 渲染审计 heredoc。
+**选择**: 方案 E — discover-only by default + agent-driven apply。
+
+方案 C（`--apply` heredoc）被方案 E 取代：heredoc 是 human-driven，agent-driven 更符合 lythoskill 的 agent-first 设计。
 
 **原因**:
 

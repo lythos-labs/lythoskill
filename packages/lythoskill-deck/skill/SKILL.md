@@ -57,10 +57,12 @@ bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name
 # Add with explicit alias and section
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name --alias tdd --type tool
 
-# Pull latest versions of declared skills from upstream
+# Scan declared skills for upstream updates (plan-only, no pull)
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh
-# Refresh a single skill by alias or FQ path
+# Refresh a single skill (plan-only)
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh tdd
+# Execute the plan (actually git pull)
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh --exec
 
 # Remove a skill from deck and working set (cold pool untouched)
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} remove tdd
@@ -103,11 +105,18 @@ non-symlink entities → backed up then removed; missing declared skills → lin
 
 You never diagnose the working set manually. Just run `link`.
 
-`refresh` pulls the latest version of declared skills from their upstream git
-repositories. Pass an alias or FQ path to refresh a single skill; omit to refresh
-all declared skills. It skips `localhost/*` skills (user-managed) and non-git
-directories. After `refresh`, run `link` to sync any changed skills into the
-working set.
+`refresh` (default: **plan-only**, no git pull) scans declared skills and reports
+per-skill behind counts. You get a structured plan — which repos need updating,
+which are up to date, which are unreachable. No destructive operation is executed
+by default.
+
+To actually pull, use `--exec`. Or better: let an agent read the plan and
+execute per target — the agent can probe each remote before pulling, switch
+mirrors when unreachable, handle non-fast-forward divergence, and skip risky
+repos. This is agent-driven apply, not a dead heredoc script.
+
+After `refresh --exec`, run `link` to sync any changed skills into the working
+set. Pass an alias or FQ path to scope to a single skill.
 
 > `deck update` is deprecated and will be removed in v1.0.0. Use `refresh`.
 ## Format Migration

@@ -2,8 +2,10 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (39)
+## 📚 Patterns (41)
 
+- **[2026-05-14]** [agent-driven-plan-first-architecture](./01-patterns/2026-05-14-agent-driven-plan-first-architecture.md)
+- **[2026-05-14]** [arena-agent-bdd-architecture-flow](./01-patterns/2026-05-14-arena-agent-bdd-architecture-flow.md)
 - **[2026-05-12]** [workspace-protocol-in-source-concrete-version-at-publish](./01-patterns/2026-05-12-workspace-protocol-in-source-concrete-version-at-publish.md)
 - **[2026-05-11]** [skills-discovery-vs-governance-complementary-architecture](./01-patterns/2026-05-11-skills-discovery-vs-governance-complementary-architecture.md)
 - **[2026-05-10]** [side-deck-pattern-specialized-task-decks-for-arena-single](./01-patterns/2026-05-10-side-deck-pattern-specialized-task-decks-for-arena-single.md)

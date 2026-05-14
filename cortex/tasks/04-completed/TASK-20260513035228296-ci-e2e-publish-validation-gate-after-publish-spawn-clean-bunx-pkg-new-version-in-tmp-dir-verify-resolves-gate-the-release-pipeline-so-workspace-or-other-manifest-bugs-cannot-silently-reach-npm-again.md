@@ -1,4 +1,4 @@
-# TASK-20260513040027913: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
+# TASK-20260513035228296: CI E2E publish-validation gate — after publish, spawn clean bunx <pkg>@<new-version> in tmp dir, verify resolves; gate the release pipeline so workspace:* or other manifest bugs cannot silently reach npm again
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-12 | Created |
+| completed | 2026-05-14 | Implemented: publish.sh now spawns clean bunx + bun add in tmp dir after publish to verify resolution; exits 1 on failure |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513040027913)
+feat(scope): description (TASK-20260513035228296)
 
 - Detail 1
 - Detail 2

@@ -1,4 +1,4 @@
-# TASK-20260513035228296: CI E2E publish-validation gate — after publish, spawn clean bunx <pkg>@<new-version> in tmp dir, verify resolves; gate the release pipeline so workspace:* or other manifest bugs cannot silently reach npm again
+# TASK-20260513033455974: Restore CLI subcommand help per ADR-20260423182606313 — cortex CLI and refresh both treat help as positional arg
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-12 | Created |
+| in-progress | 2026-05-14 | Started |
+| completed | 2026-05-14 | Fixed: cortex CLI and deck CLI now check `--help` / `-h` anywhere in args before treating as positional arg. 49+94 tests pass. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513035228296)
+feat(scope): description (TASK-20260513033455974)
 
 - Detail 1
 - Detail 2

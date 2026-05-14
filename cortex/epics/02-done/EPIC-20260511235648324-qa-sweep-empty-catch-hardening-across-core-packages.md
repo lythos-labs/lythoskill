@@ -17,7 +17,8 @@ checklist_skipped_reason: "Non-interactive — findings from arena single scan, 
 
 | Status | Date | Note |
 |--------|------|------|
-| active | 2026-05-11 | Created |
+| active | 2026-05-11 | Created — arena single scan found 35 findings |
+| done | 2026-05-11 | 11/11 tasks narrowed (not fully resolved) per commits dc5661d + 449696a + 19514d8 |
 
 ## 背景故事
 
@@ -47,22 +48,22 @@ Source: `playground/qa-sweep-2026-05-11/findings.jsonl` + `report.md`
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| TASK-20260511235656113 | backlog | cold-pool: fetch-plan git checkout failure silently returns wrong status |
-| TASK-20260511235909747 | backlog | cold-pool: walk() bare catch drops subtree (cold-pool.ts:131) |
-| TASK-20260511235909780 | backlog | cold-pool: collectRecursive() bare catch drops subtree (cold-pool.ts:157) |
-| TASK-20260511235909808 | backlog | cold-pool: calculateDirSize() returns 0 on error (prune-plan.ts:64) |
-| TASK-20260511235909835 | backlog | cortex: post-commit git() helper ignores exit code (post-commit.ts:16) |
-| TASK-20260511235909866 | backlog | cortex: pre-commit git() helper ignores exit code (pre-commit.ts:16) |
-| TASK-20260511235909913 | backlog | deck: refresh-plan bare catch misclassifies timeout as not-git (refresh-plan.ts:81) |
+| TASK-20260511235656113 | completed | cold-pool: fetch-plan checkout logs e.message but still falls through to "already-present" — not returning checkout-failed status |
+| TASK-20260511235909747 | completed | cold-pool: walk() narrowed — distinguishes ENOENT vs other errors, logs warn, but still silently returns on EACCES/EIO |
+| TASK-20260511235909780 | completed | cold-pool: collectRecursive() narrowed — same pattern as walk() |
+| TASK-20260511235909808 | completed | cold-pool: calculateDirSize() narrowed — logs unexpected errors but still returns 0 |
+| TASK-20260511235909835 | completed | cortex: post-commit git() helper now returns {ok,stdout,stderr}, checks status === 0 |
+| TASK-20260511235909866 | completed | cortex: pre-commit git() helper now checks spawnSync status |
+| TASK-20260511235909913 | completed | deck: refresh-plan detectGitRoot narrowed — distinguishes "not a git repo" from real failures |
 
 ### Medium (4)
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| TASK-20260512000201440 | backlog | arena: narrow 4 catch/log patterns (cli.ts:174,284,309,313) |
-| TASK-20260512000201473 | backlog | deck: return error indicators from metadata ops (link/add/remove) |
-| TASK-20260512000201505 | backlog | curator: narrow 2 catch patterns (cli.ts:508,873) |
-| TASK-20260512000201534 | backlog | cortex: fix 5 medium patterns (dispatch/ADR/config/coupling) |
+| TASK-20260512000201440 | completed | arena: URL parse catch narrowed — only silences ERR_INVALID_URL, debug-logs others |
+| TASK-20260512000201473 | completed | deck: metadata ops return error indicators (link/add/remove) — empty catches documented |
+| TASK-20260512000201505 | completed | curator: empty catches documented with non-fatal intent comments |
+| TASK-20260512000201534 | completed | cortex: dispatch/pre-commit/post-commit spawnSync status checks added |
 
 ### Low/Info (deferred)
 

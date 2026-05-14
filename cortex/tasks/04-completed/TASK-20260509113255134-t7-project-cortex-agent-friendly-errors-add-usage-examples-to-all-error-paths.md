@@ -5,8 +5,8 @@
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-09 | Created |
-| backlog | 2026-05-09 | Inventory 完成 — 实际 cortex 错误信息覆盖**不均**(epic.ts 已 ✅,cli.ts 顶层 + move.ts/wiki.ts 多处 🔴/🟡),起因是急行军式增量加命令 |
+| backlog | 2026-05-09 | Created — Inventory 完成: epic.ts ✅ baseline, cli.ts 顶层 16 bare + move.ts/wiki.ts 多处 🔴/🟡 |
+| completed | 2026-05-10 | Completed — commit 75883d3, 49 tests pass |
 
 ## 背景与目标
 

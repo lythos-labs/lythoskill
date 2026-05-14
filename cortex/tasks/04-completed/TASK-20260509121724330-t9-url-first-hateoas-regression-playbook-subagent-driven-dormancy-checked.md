@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-09 | Created — v0.9.43 baseline 已 7/7 PASS,待 T7/T8 应用 |
+| completed | 2026-05-10 | Completed — commit f373ff4, 7/7 PASS + dormancy verified + dual-coverage S8 |
 
 ## 背景与目标
 

@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/13 09:54:24
+> 自动生成于 2026/5/15 00:00:05
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 212 | 进行中: 0, 待验收: 0, 已完成: 176 |
-| Epics | 29 | 活跃: 1, 已完成: 24, 悬置: 2, 已归档: 2 |
-| ADRs | 67 | 已接受: 51 |
+| Tasks | 212 | 进行中: 0, 待验收: 0, 已完成: 183 |
+| Epics | 29 | 活跃: 0, 已完成: 25, 悬置: 2, 已归档: 2 |
+| ADRs | 67 | 已接受: 52 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260513010237904**: Popular third-party skills end-to-end with network probe UX
+_无_
 
 ### 已完成
 
@@ -44,6 +44,7 @@
 - ✅ **EPIC-20260508201323933**: Project showcase — README, Vitepress, and public positioning for the governance layer
 - ✅ **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
 - ✅ **EPIC-20260511235648324**: QA sweep: empty catch hardening across core packages
+- ✅ **EPIC-20260513010237904**: Popular third-party skills end-to-end with network probe UX
 
 ### 悬置
 
@@ -59,18 +60,9 @@
 
 ## 📄 Tasks
 
-### 待办 (10)
+### 待办 (0)
 
-- [ ] **TASK-20260513033254695**: Restore refresh apply-mode — plan-first guardrail (memory feedback_refresh_is_plan_first says default was discover-only with explicit --apply; implementation regressed to direct apply)
-- [ ] **TASK-20260513033256305**: Wire probeConnectivity (8b097c5) into plan→apply boundary for deck add/refresh — env probe before executing the plan; surface unreachable proxies / unreachable cold-pool entries before any git operation
-- [ ] **TASK-20260513033455974**: Restore CLI subcommand help per ADR-20260423182606313 — cortex CLI and refresh both treat help as positional arg
-- [ ] **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
-- [ ] **TASK-20260513035228296**: CI E2E publish-validation gate — after publish, spawn clean bunx <pkg>@<new-version> in tmp dir, verify resolves; gate the release pipeline so workspace:* or other manifest bugs cannot silently reach npm again
-- [ ] **TASK-20260513040027913**: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
-- [ ] **TASK-20260513042407452**: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
-- [ ] **TASK-20260513042408337**: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
-- [ ] **TASK-20260513095345353**: Set up showcase/ directory for committed arena demos — start with migrating T5 (2026-05-13 agent-skills-intro CTO brief) as inaugural entry; README + reproduce.sh per demo
-- [ ] **TASK-20260513095346630**: Run T5-style arena single on competitive-landscape research as the brief — produce md+html research report on agent-skills-eval / MemTensor skills-vote / etc. Deck: deep-research + baoyu
+_无_
 
 ### 进行中 (0)
 
@@ -80,7 +72,7 @@ _无_
 
 _无_
 
-### 已完成 (176)
+### 已完成 (183)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -232,14 +224,14 @@ _无_
 - ✅ ~~TASK-20260509104331469~~: T6 — Arena e2e verification test plan: agent-run task + run --config + file output validation
 - ✅ ~~TASK-20260509113254423~~: T4 — Curator simplification: delete discover CLI + feed-adapters.ts per ADR-20260508230803515
 - ✅ ~~TASK-20260509113255134~~: T7 — project-cortex agent-friendly errors: add Usage + examples to all error paths
-- ✅ ~~TASK-20260509113256236~~: T8 — General catch error cleanup: replace --skills style patterns across all CLI packages
+- ✅ ~~TASK-20260509113256236~~: T8 — General catch error cleanup: replace `❌ ${e.message}` style patterns across all CLI packages
 - ✅ ~~TASK-20260509121724330~~: T9 — URL-first HATEOAS regression playbook (subagent-driven, dormancy-checked)
 - ✅ ~~TASK-20260509155623694~~: Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs and avoid sync/link name collision
 - ✅ ~~TASK-20260509163129782~~: Migrate prune/reconcile from deck to cold-pool with FSM reference counting
 - ✅ ~~TASK-20260509164621003~~: buildListPlan SKILL.md alignment + mode column v6 + cold-pool CLI rebuild
 - ✅ ~~TASK-20260510202828095~~: cold-pool P1 fixes — execSync→execFileSync, --lock default, import ReconcileDesiredState
 - ✅ ~~TASK-20260510202837850~~: cold-pool P2 reliability — git timeout, symlink loop, truncated tree, prefix matching, cloneUrl protocol
-- ✅ ~~TASK-20260510202837878~~: cold-pool P2 maintainability — dedup prune, O(N^2) hasSkillMd, behind semantics, untyped lock, timestamp consistency, type drift, locator guards
+- ✅ ~~TASK-20260510202837878~~: cold-pool P2 maintainability — dedup prune, O(N²) hasSkillMd, behind semantics, untyped lock, timestamp consistency, type drift, locator guards
 - ✅ ~~TASK-20260510202837906~~: CI supply-chain — pin third-party GitHub Action SHA
 - ✅ ~~TASK-20260510234339990~~: P2 sweep — 4 packages: remaining code quality fixes (TOML parse, path join, renameSync guard, locale, etc.)
 - ✅ ~~TASK-20260511091105701~~: replace regex-based SQL check with real parser (node-sql-parser) — LLM hand-roll tendency anti-pattern
@@ -258,12 +250,19 @@ _无_
 - ✅ ~~TASK-20260512000201505~~: curator: narrow 2 catch patterns — index freshness and clone cleanup (cli.ts:508,873)
 - ✅ ~~TASK-20260512000201534~~: cortex: fix 5 medium patterns — dispatch, ADR accept, git add, config parse, coupling
 - ✅ ~~TASK-20260513010246527~~: Implement probeConnectivity with TDD + racing + proper error collection
+- ✅ ~~TASK-20260513033254695~~: Restore refresh apply-mode — plan-first guardrail (memory feedback_refresh_is_plan_first says default was discover-only with explicit --apply; implementation regressed to direct apply)
+- ✅ ~~TASK-20260513033256305~~: Wire probeConnectivity (8b097c5) into plan→apply boundary for deck add/refresh — env probe before executing the plan; surface unreachable proxies / unreachable cold-pool entries before any git operation
+- ✅ ~~TASK-20260513033455974~~: Restore CLI subcommand help per ADR-20260423182606313 — cortex CLI and refresh both treat help as positional arg
+- ✅ ~~TASK-20260513035228296~~: CI E2E publish-validation gate — after publish, spawn clean bunx <pkg>@<new-version> in tmp dir, verify resolves; gate the release pipeline so workspace:* or other manifest bugs cannot silently reach npm again
+- ✅ ~~TASK-20260513040027913~~: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
+- ✅ ~~TASK-20260513095345353~~: Set up showcase/ directory for committed arena demos — start with migrating T5 (2026-05-13 agent-skills-intro CTO brief) as inaugural entry; README + reproduce.sh per demo
+- ✅ ~~TASK-20260513095346630~~: Run T5-style arena single on competitive-landscape research as the brief — produce md+html research report on agent-skills-eval / MemTensor skills-vote / etc. Deck: deep-research + baoyu
 
-### 悬置 (0)
+### 悬置 (1)
 
-_无_
+- ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (25)
+### 终止 (27)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -290,6 +289,8 @@ _无_
 - 🛑 ~~TASK-20260506193936311~~: Implement DeepSeek TUI AgentAdapter: one-shot mode + player registry
 - 🛑 ~~TASK-20260507223935542~~: Agent BDD: curator discover + cross-validate local cold pool vs remote feeds (new/updated/stale detection)
 - 🛑 ~~TASK-20260513033214684~~: --help
+- 🛑 ~~TASK-20260513042407452~~: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
+- 🛑 ~~TASK-20260513042408337~~: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
 
 ---
 
@@ -351,7 +352,7 @@ _无_
 - ✅ **ADR-20260508075913360** (02-accepted): Extract runtime infrastructure package (@lythos/infra)
 - ✅ **ADR-20260508204215712** (02-accepted): Environment-gated tests
 - ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
-- 🤔 **ADR-20260509104832428** (01-proposed): Remove run --decks CLI-flag mode — keep only run --config arena.toml
+- ✅ **ADR-20260509104832428** (02-accepted): Remove run --decks CLI-flag mode — keep only run --config arena.toml
 - ✅ **ADR-20260509144134332** (02-accepted): Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs
 - 🤔 **ADR-20260509170343037** (01-proposed): Cold-pool metadata DB data fingerprint for integrity verification
 - 🤔 **ADR-20260510233000000** (01-proposed): Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
@@ -359,9 +360,9 @@ _无_
 - 🤔 **ADR-20260511093900000** (01-proposed): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
 - 🤔 **ADR-20260511210000000** (01-proposed): Consolidate curator output to `~/.agents/lythoskill/curator/`
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
-- ✅ **ADR-20260512191438745** (02-accepted): LYTHOS_MIRROR env var for transparent GitHub proxy/mirror in restricted networks
 - 🤔 **ADR-20260513011442965** (01-proposed): Network proxy auto-discovery for resilient connectivity
 - ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
+- ✅ **ADR-20260513144000000** (02-accepted): No hard-coded third-party mirror list — trust boundary belongs to user
 
 ---
 

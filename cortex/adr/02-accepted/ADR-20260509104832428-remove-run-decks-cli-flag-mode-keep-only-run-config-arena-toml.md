@@ -4,6 +4,7 @@
 
 | Status | Date | Note |
 |--------|------|------|
+| accepted | 2026-05-09 | Accepted — arena.toml is SSOT per ADR-20260509144134332
 | proposed | 2026-05-09 | Created |
 | accepted | 2026-05-09 | 0.10.0 batch — rename + CLI-flag removal |
 

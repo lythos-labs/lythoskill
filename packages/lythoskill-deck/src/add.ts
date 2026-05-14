@@ -28,6 +28,7 @@ import {
   hashSkillMd,
   type Locator,
 } from '@lythos/cold-pool'
+import { probeConnectivity } from '@lythos/cold-pool/src/mirror.js'
 import { findDeckToml, expandHome } from './link.js'
 import { validateAlias } from './path-guard.js'
 
@@ -262,6 +263,24 @@ export async function addSkill(
   }
   // git clone needs the parent of the target dir (e.g. host/owner/) to exist
   mkdirSync(dirname(fetchPlan.targetDir), { recursive: true })
+
+  // ── Plan→Apply boundary: probe network before any git operation ────────
+  if (fetchPlan.cloneUrl) {
+    const probe = await probeConnectivity(fetchPlan.cloneUrl, 5000)
+    if (!probe) {
+      console.error(`❌ Cannot reach ${fetchPlan.cloneUrl}`)
+      console.error(`   Network probe failed — the host may be unreachable or blocked.`)
+      console.error(``)
+      console.error(`   To fix:`)
+      console.error(`     export LYTHOSKILL_GH_MIRROR="https://your-mirror.com"`)
+      console.error(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
+      console.error(`     # See: AGENTS.md → Network Restrictions`)
+      process.exit(1)
+    }
+    if (probe.path === 'mirror') {
+      console.log(`🪞 Using mirror: ${probe.url} (${probe.latencyMs}ms)`)
+    }
+  }
 
   // Note: if cold pool already has the repo (fetchPlan.alreadyExists),
   // executeFetchPlan returns status: 'already-present' and skips clone.

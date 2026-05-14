@@ -112,3 +112,45 @@ for pkg in "${PACKAGES[@]}"; do
 done
 
 echo "🎉 All packages published!"
+
+# ── E2E publish validation ───────────────────────────────────────────
+# Spawn clean bunx in tmp dir to catch workspace:* or other manifest bugs
+# that slip through despite pre-publish rewrite. This is the catch-all gate.
+
+echo ""
+echo "🔍 E2E validation: verifying published packages resolve externally..."
+
+TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"; cleanup' EXIT
+
+VALIDATION_FAILED=0
+for pkg in "${PACKAGES[@]}"; do
+  PKG_DIR="$ROOT_DIR/$pkg"
+  PKG_NAME=$(node -p "require('$PKG_DIR/package.json').name")
+  PKG_VERSION=$(node -p "require('$PKG_DIR/package.json').version")
+
+  echo "   Verifying $PKG_NAME@$PKG_VERSION ..."
+
+  # Try to resolve the package in a clean tmp directory
+  if ! (cd "$TMP_DIR" && bunx "$PKG_NAME@$PKG_VERSION" --help >/dev/null 2>&1 || \
+        cd "$TMP_DIR" && bun add "$PKG_NAME@$PKG_VERSION" >/dev/null 2>&1); then
+    echo "   ❌ FAILED: $PKG_NAME@$PKG_VERSION could not be resolved externally."
+    echo "      Possible causes: workspace:* leaked into manifest, broken main/bin field, tarball malformed."
+    VALIDATION_FAILED=1
+  else
+    echo "   ✅ Resolved: $PKG_NAME@$PKG_VERSION"
+  fi
+done
+
+rm -rf "$TMP_DIR"
+
+if [ "$VALIDATION_FAILED" -eq 1 ]; then
+  echo ""
+  echo "❌ E2E validation FAILED. At least one package could not be resolved externally."
+  echo "   The published manifest(s) may contain workspace:* or other bugs."
+  echo "   Check the failed package(s) above. Do NOT tag a release until fixed."
+  exit 1
+fi
+
+echo ""
+echo "✅ E2E validation passed. All packages resolve correctly from npm."

@@ -49,6 +49,7 @@ const format = flagValue('--format')
 const noBackup = args.includes('--no-backup')
 const dryRun = args.includes('--dry-run')
 const remote = args.includes('--remote')
+const execFlag = args.includes('--exec')
 const mode = flagValue('--mode') as 'symlink' | 'snapshot' | undefined
 
 const HELP_CONFIG = {
@@ -76,7 +77,14 @@ const HELP_CONFIG = {
     { flag: '--yes', description: 'Skip interactive confirmation' },
     { flag: '--remote', description: 'For validate: probe each FQ locator against api.github.com' },
     { flag: '--format <text|json>', description: 'For validate: output format (default: text)' },
+    { flag: '--exec', description: 'For refresh: execute git pull instead of printing plan-only' },
   ],
+}
+
+// --help / -h anywhere in the arg list triggers help (not treated as a positional arg or ignored)
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(formatHelp(HELP_CONFIG))
+  process.exit(0)
 }
 
 switch (command) {
@@ -98,7 +106,7 @@ switch (command) {
   }
   case 'refresh': {
     const refreshTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
-    refreshDeck(deckPath, workdir, refreshTarget)
+    await refreshDeck(deckPath, workdir, refreshTarget, execFlag)
     break
   }
   case 'update': {

@@ -1,11 +1,12 @@
-# TASK-20260513095346630: Run T5-style arena single on competitive-landscape research as the brief — produce md+html research report on agent-skills-eval / MemTensor skills-vote / etc. Deck: deep-research + baoyu
+# TASK-20260513040027913: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-13 | Created |
+| backlog | 2026-05-12 | Created |
+| completed | 2026-05-14 | Closed via trailer |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513095346630)
+feat(scope): description (TASK-20260513040027913)
 
 - Detail 1
 - Detail 2

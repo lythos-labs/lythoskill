@@ -18,6 +18,7 @@ checklist_skipped_reason: agent non-interactive session
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-12 | Created |
+| done | 2026-05-14 | 5/6 completed, 1 suspended (bun publish eval — publish.sh stable) |
 
 ## 背景故事
 <!-- 填写需求来源:触发事件、问题描述、目标价值 -->
@@ -41,11 +42,11 @@ checklist_skipped_reason: agent non-interactive session
 | 任务 | 状态 | 描述 |
 |------|------|------|
 | TASK-20260513010246527 | completed | probeConnectivity with concurrent racing + error collection (8b097c5) |
-| TASK-20260513033254695 | backlog | Restore refresh apply-mode (plan-first guardrail) — implementation regressed from documented design |
-| TASK-20260513033256305 | backlog | Wire probeConnectivity into plan→apply boundary for deck add/refresh — env probe insertion point |
-| TASK-20260513033455974 | backlog | Restore CLI subcommand `--help` per ADR-20260423182606313 — cortex/refresh treat `--help` as positional arg |
-| TASK-20260513035226597 | backlog | Evaluate `bun publish` vs `npm publish` + rewrite (Bun ≥1.3 may auto-rewrite workspace:*; verify via dry-run before any switch) |
-| TASK-20260513035228296 | backlog | CI E2E publish-validation gate — spawn clean `bunx <pkg>@<new-version>` after publish to catch workspace:* and other manifest bugs |
+| TASK-20260513033254695 | completed | Restore refresh apply-mode — default plan-only, `--exec` triggers execution; ADR updated with scheme E |
+| TASK-20260513033256305 | completed | Wire probeConnectivity into plan→apply boundary — deck add probes cloneUrl, deck refresh probes first git target |
+| TASK-20260513033455974 | completed | Restore CLI subcommand `--help` — cortex + deck CLI check for `--help`/`-h` anywhere in args before positional processing |
+| TASK-20260513035226597 | suspended | Evaluate `bun publish` — deferred; current publish.sh is stable enough |
+| TASK-20260513035228296 | completed | CI E2E publish-validation gate — publish.sh spawns clean bunx + bun add in tmp dir to verify resolution |
 
 ## 经验沉淀
 

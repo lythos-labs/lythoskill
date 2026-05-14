@@ -24,8 +24,8 @@ checklist_skipped_reason: Continuation of showcase epic; tasks T1/T2/T3 break do
 | T4 — Curator simplification | ✅ completed | `TASK-20260509113254423`: 删 feed-adapters.ts + discover CLI per ADR-20260508230803515 |
 | T5 — Arena doc + CLI rename + HATEOAS errors | ✅ completed | `TASK-20260509101438298`: --skills deleted; single/vs rename; agent-friendly errors; examples/arena/ |
 | T6 — Arena e2e verification | ✅ completed | `TASK-20260509104331469`: 7/7 scenarios PASS (single/vs/scaffold/docx) |
-| T7 — project-cortex HATEOAS errors | 🔲 backlog | `TASK-20260509113255134`: 所有错误加 Usage + 示例 + 引导 |
-| T8 — General catch cleanup | 🔲 backlog | `TASK-20260509113256236`: 所有包的 `❌ ${e.message}` 替换为 HATEOAS |
+| T7 — project-cortex HATEOAS errors | ✅ completed | `TASK-20260509113255134`: commit 75883d3, 17 bare errors → HATEOAS + requireDocId helper |
+| T8 — General catch cleanup | ✅ completed | `TASK-20260509113256236`: user-facing paths upgraded across all CLI packages; internal resilience catches narrowed (not fully eliminated) |
 | T9 — URL-first HATEOAS regression playbook | ✅ baseline (T7/T8 待应用) | `TASK-20260509121724330`: v0.9.43 7/7 PASS + dormancy 验证;subagent 隔离 worktree;复用于 T7/T8 |
 
 ## Deferred (from T2)

@@ -1,4 +1,4 @@
-# TASK-20260513033254695: Restore refresh apply-mode — plan-first guardrail (memory feedback_refresh_is_plan_first says default was discover-only with explicit --apply; implementation regressed to direct apply)
+# TASK-20260513042408337: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-12 | Created |
+| terminated | 2026-05-14 | Framing rejected — radar chart / OG card are downstream deck responsibilities (e.g., baoyu-chart skill), not arena builtins. See memory: arena-pipeline-not-builtin-html. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513033254695)
+feat(scope): description (TASK-20260513042408337)
 
 - Detail 1
 - Detail 2

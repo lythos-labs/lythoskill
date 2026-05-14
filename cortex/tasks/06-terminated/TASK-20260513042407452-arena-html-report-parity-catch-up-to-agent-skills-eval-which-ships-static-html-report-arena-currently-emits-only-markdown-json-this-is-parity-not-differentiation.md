@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-12 | Created |
+| terminated | 2026-05-14 | Framing rejected — arena should NOT generate HTML internally. HTML report is produced by downstream deck (e.g., research + baoyu skills), not arena builtins. See memory: arena-pipeline-not-builtin-html. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->

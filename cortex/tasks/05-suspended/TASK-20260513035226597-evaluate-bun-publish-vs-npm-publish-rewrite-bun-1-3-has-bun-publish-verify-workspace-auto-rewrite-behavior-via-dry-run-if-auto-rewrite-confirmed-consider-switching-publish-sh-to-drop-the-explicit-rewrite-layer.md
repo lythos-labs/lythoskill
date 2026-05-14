@@ -1,11 +1,12 @@
-# TASK-20260513095345353: Set up showcase/ directory for committed arena demos — start with migrating T5 (2026-05-13 agent-skills-intro CTO brief) as inaugural entry; README + reproduce.sh per demo
+# TASK-20260513035226597: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-13 | Created |
+| backlog | 2026-05-12 | Created |
+| suspended | 2026-05-14 | Deferred — current publish.sh is stable enough (workspace:* rewrite layer works). Revisit when bun publish matures or rewrite complexity becomes painful. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +31,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513095345353)
+feat(scope): description (TASK-20260513035226597)
 
 - Detail 1
 - Detail 2

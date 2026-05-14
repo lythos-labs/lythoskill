@@ -3,6 +3,12 @@ created: 2026-05-10
 status: proposed
 ---
 
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-10 | Created — path-guard.ts implemented in deck, pre-commit check added |
+
 # ADR-20260510233000000: Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
 
 ## Background

@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-09 | Created |
+| completed | 2026-05-10 | Completed — commit 93c3e0b: feed-adapters.ts + discover CLI deleted; SKILL.md stale discover refs remain (known debt) |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->

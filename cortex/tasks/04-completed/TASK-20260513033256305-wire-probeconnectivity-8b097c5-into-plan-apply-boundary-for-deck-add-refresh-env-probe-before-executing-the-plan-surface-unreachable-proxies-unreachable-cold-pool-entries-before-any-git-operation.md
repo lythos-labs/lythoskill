@@ -1,4 +1,4 @@
-# TASK-20260513035226597: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
+# TASK-20260513033256305: Wire probeConnectivity (8b097c5) into plan→apply boundary for deck add/refresh — env probe before executing the plan; surface unreachable proxies / unreachable cold-pool entries before any git operation
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-12 | Created |
+| in-progress | 2026-05-14 | Started |
+| completed | 2026-05-14 | Wired: deck add probes cloneUrl before executeFetchPlan; deck refresh probes first git target before executeRefreshPlan. HATEOAS error on failure. 94 tests pass. |
 
 ## 背景与目标
 <!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
@@ -30,7 +32,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260513035226597)
+feat(scope): description (TASK-20260513033256305)
 
 - Detail 1
 - Detail 2
