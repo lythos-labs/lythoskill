@@ -24,3 +24,4 @@ Options:
   --yes                      Skip interactive confirmation
   --remote                   For validate: probe each FQ locator against api.github.com
   --format <text|json>       For validate: output format (default: text)
+  --exec                     For refresh: execute git pull instead of printing plan-only
