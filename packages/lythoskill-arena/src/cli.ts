@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 import { writeFileSync, readFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { homedir } from 'node:os'
