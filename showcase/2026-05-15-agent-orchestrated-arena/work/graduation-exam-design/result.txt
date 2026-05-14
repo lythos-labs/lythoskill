@@ -1,0 +1,4 @@
+File: Cookie_Recipe_Report.docx
+Size: 181 KB
+Contents: Multi-page chocolate chip cookie recipe report with cover page, 5-dimension radar chart (Taste 92/Nutrition 35/Difficulty 25/Time 55/Cost 20), Baker's Percentages ingredient table with scientific roles, food-science explanations for each technique, step-by-step method with troubleshooting guide, and cited references. Embedded radar chart PNG image in document.
+Design skills used: theme-factory (Golden Hour palette — Mustard #f4a900, Terracotta #c1666b, Warm Beige #d4b896, Chocolate Brown #4a403a), frontend-design (bold cover layout, decorative color bands, asymmetric hierarchy), brand-guidelines (consistent typography — Arial headers, Georgia body; accent rotation across sections; smart color-on-background selection).

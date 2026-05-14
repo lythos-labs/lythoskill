@@ -1,0 +1,31 @@
+# Graduation Exam — Research + Design + Docx
+# Combined: recipe-report core + design-studio polish
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.research]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
+
+[tool.skills.research-report]
+path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
+
+[tool.skills.docx]
+path = "github.com/anthropics/skills/skills/docx"
+
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+role = "Distinctive, non-generic aesthetic direction"
+
+[tool.skills.theme-factory]
+path = "github.com/anthropics/skills/skills/theme-factory"
+role = "10 professional theme systems with curated color palettes and font pairings"
+
+[tool.skills.brand-guidelines]
+path = "github.com/anthropics/skills/skills/brand-guidelines"
+role = "Apply consistent brand color, typography, and design system"
