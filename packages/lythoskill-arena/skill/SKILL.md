@@ -116,6 +116,31 @@ deck link --deck ./skill-deck.toml   # restore YOUR deck (not the arena deck)
 ```
 This is mandatory — forgetting leaves you on the stripped arena deck.
 
+## Preflight Protocol (MANDATORY before every single/vs run)
+
+**CWD is the most fragile variable in arena.** Before running `single` or `vs`, always execute a self-check to verify the agent sees the correct environment. This is idempotent — running it multiple times must return the same result.
+
+```
+Self-check (run via Bash before arena command):
+
+1. WHO AM I:     pwd
+2. WHERE AM I:   ls -la .claude/skills/ 2>/dev/null || echo "no .claude/skills/"
+3. WHAT SKILLS:  for d in .claude/skills/*/; do
+                   head -3 "$d/SKILL.md" 2>/dev/null | grep -E "^name:|^description:" | head -2
+                 done
+4. CWD WRITABLE: touch .arena-write-test && rm .arena-write-test && echo "CWD writable" || echo "CWD NOT WRITABLE"
+5. PLAYER CHECK: which kimi codex deepseek 2>/dev/null || echo "check ANTHROPIC_API_KEY for claude"
+6. DECK EXISTS:  test -f <deck-path> && echo "Deck: $(wc -c < <deck-path>) bytes" || echo "DECK MISSING"
+```
+
+If ANY of these fail, STOP. Fix the configuration before proceeding. Common failures:
+- `no .claude/skills/`: forgot to `deck link` before running arena
+- `CWD NOT WRITABLE`: `--out` flag not set or directory permissions
+- `DECK MISSING`: URL not fetched or local path wrong
+- Skills listing empty: deck link created symlinks but cold pool missing — run `deck refresh`
+
+If self-check passes, proceed to the arena command. The self-check report is your execution environment audit trail — include it when reporting errors.
+
 ## Commands
 
 ### Primary: single agent run (`single`)
