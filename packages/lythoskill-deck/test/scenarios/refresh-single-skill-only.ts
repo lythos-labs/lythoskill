@@ -1,7 +1,7 @@
 import type { Scenario } from '../runner.ts'
 
 export default {
-  name: 'refresh single skill only processes that target',
+  name: 'refresh plan-only: single skill target scopes plan output',
   given: {
     coldPool: {
       'github.com/lythos-labs/lythoskill-test-stubs/skill-a': {
@@ -21,8 +21,8 @@ export default {
   },
   when: ['git init cold-pool/github.com/lythos-labs/lythoskill-test-stubs/skill-a', 'lythoskill-deck refresh skill-a'],
   then: {
-    exitCode: 1,
-    stdoutContains: ['single skill', 'skill-a'],
+    exitCode: 0,
+    stdoutContains: ['skill-a'],
     stdoutExcludes: ['skill-b'],
   },
 } satisfies Scenario

@@ -1,0 +1,14 @@
+## Report: `.claude/skills/` directory
+
+**Status:** Exists and contains **6 skills**
+
+| # | Skill Name | Symlink? | Points To |
+|---|-----------|----------|-----------|
+| 1 | `design-doc-mermaid` | ✅ Yes | `.../github.com/SpillwaveSolutions/design-doc-mermaid` |
+| 2 | `docx` | ✅ Yes | `.../anthropics/skills/skills/docx` |
+| 3 | `pdf` | ✅ Yes | `.../anthropics/skills/skills/pdf` |
+| 4 | `research` | ✅ Yes | `.../Deep-Research-skills/skills/research-en/research` |
+| 5 | `research-deep` | ✅ Yes | `.../Deep-Research-skills/skills/research-en/research-deep` |
+| 6 | `research-report` | ✅ Yes | `.../Deep-Research-skills/skills/research-en/research-report` |
+
+**Summary:** All 6 skills are **symbolic links** pointing to external directories. There are no regular files or non-symlink directories inside `.claude/skills/`.
