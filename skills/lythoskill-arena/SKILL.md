@@ -151,9 +151,9 @@ The agent's ReAct loop IS the arena runner. Each side gets an independent CWD co
 
 ```mermaid
 flowchart TD
-    A[User: 'compare A vs B' or arena.toml] --> B{Is --player flag set?}
-    B -->|Yes| C[CLI Mode: arena vs --config]
-    B -->|No — DEFAULT| D[Agent reads arena.toml]
+    A[User: 'compare' / 'vs' / 'arena'] --> B{Cross-player comparison?}
+    B -->|Yes — different players| C[useAgent mode<br/>arena vs --config<br/>each side spawns its player CLI]
+    B -->|No — DEFAULT<br/>same player, different decks| D[Agent reads config]
     D --> E[PREFLIGHT: per-side workDir + deck link + self-check]
     E --> F{All preflights pass?}
     F -->|No| G[Fix: adjust mirror, retry link, report]
@@ -163,21 +163,21 @@ flowchart TD
     I --> J[COLLECT: artifacts from each side]
     J --> K[Comparative judge vs criteria]
     K --> L[Write report.md with per-side verdicts]
-    L --> M[Spent tokens per side?]
-    M -->|Yes| N[Multiply by market price<br/>Add to report as cost estimate]
-    M -->|No| O[Skip — no billing data]
-    N --> P[Done]
-    O --> P
+    L --> M[Done]
     
+    style B fill:#f96,stroke:#333
+    style C fill:#f96,stroke:#333
     style D fill:#4a9,stroke:#333
     style E fill:#49a,stroke:#333
     style H fill:#a4a,stroke:#333
     style K fill:#aa4,stroke:#333
 **Why this is the default:** per-side CWD isolation prevents skill pollution. Preflight identifies misconfiguration before execution. Agent can fix failures mid-run (switch mirror, adjust timeout, retry) — CLI mode cannot.
 
-### OPT-IN: Player Mode (`--player`)
+### OPT-IN: Cross-Player Mode (`arena vs --config`)
 
-Use ONLY when user explicitly says "用 kimi 跑", "use codex", "run with deepseek", etc.
+Use ONLY when comparing different players (kimi vs codex vs deepseek vs claude).
+The player axis requires spawning real CLI runtimes — agent-orchestrated cannot simulate
+another agent's memory, hooks, or tool-use semantics.
 
 ```bash
 # Single deck, explicit player
