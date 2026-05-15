@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.13.2
+version: 0.13.3
 type: standard
 description: |
   Stateless one-shot skill execution and controlled-variable comparison.
@@ -20,8 +20,8 @@ when_to_use: |
   ALSO trigger when user says "test this skill", "try this deck",
   "compare A vs B", "audit this package", "sweep for bugs".
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.13.2 *)
-  - Bash(bunx @lythos/skill-deck@0.13.2 link *)
+  - Bash(bunx @lythos/skill-arena@0.13.3 *)
+  - Bash(bunx @lythos/skill-deck@0.13.3 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -181,14 +181,14 @@ another agent's memory, hooks, or tool-use semantics.
 
 ```bash
 # Single deck, explicit player
-bunx @lythos/skill-arena@0.13.2 single \
+bunx @lythos/skill-arena@0.13.3 single \
   --deck ./skill-deck.toml \
   --brief "Investigate this repo" \
   --player kimi
 
 # vs mode with arena.toml (each side's player is declared in the config)
-bunx @lythos/skill-arena@0.13.2 vs --config ./arena.toml
-bunx @lythos/skill-arena@0.13.2 vs --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.13.3 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.13.3 vs --config ./arena.toml --dry-run
 ```
 
 Player mode uses `bunx @lythos/skill-arena` CLI — the runner spawns a player CLI process per side.
@@ -309,7 +309,7 @@ The arena runner stores raw `agent-stdout.txt`; parse it when the structured dec
 The default and most frequently used mode. Runs a single deck against a task with isolated `/tmp` workdir, then copies all artifacts to `--out`.
 
 ```bash
-bunx @lythos/skill-arena@0.13.2 single \
+bunx @lythos/skill-arena@0.13.3 single \
   --deck ./examples/decks/recipe-report.toml \
   --brief "Produce a professional .docx report with embedded radar chart" \
   --player kimi \
@@ -329,8 +329,8 @@ bunx @lythos/skill-arena@0.13.2 single \
 Declarative Pareto-optimal comparison. Use when you need controlled-variable analysis across multiple decks.
 
 ```bash
-bunx @lythos/skill-arena@0.13.2 vs --config ./arena.toml --dry-run
-bunx @lythos/skill-arena@0.13.2 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.13.3 vs --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.13.3 vs --config ./arena.toml
 ```
 
 ### `scaffold` — legacy directory setup
@@ -338,7 +338,7 @@ bunx @lythos/skill-arena@0.13.2 vs --config ./arena.toml
 Only creates directories and deck files. Agent orchestrates execution manually.
 
 ```bash
-bunx @lythos/skill-arena@0.13.2 scaffold \
+bunx @lythos/skill-arena@0.13.3 scaffold \
   --task "Generate auth flow diagram" \
   --decks "./decks/minimal.toml,./decks/rich.toml" \
   --criteria "quality,token,maintainability"
@@ -347,7 +347,7 @@ bunx @lythos/skill-arena@0.13.2 scaffold \
 ### `viz` — visualize completed arena run
 
 ```bash
-bunx @lythos/skill-arena@0.13.2 viz runs/arena-<id>/
+bunx @lythos/skill-arena@0.13.3 viz runs/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
