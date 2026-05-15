@@ -55,15 +55,29 @@ bunx @lythos/skill-arena@0.13.1 <command>
 ## Quick Start
 
 ```bash
-# Single: test a deck with one agent
-bunx @lythos/skill-arena@0.13.1 single \
+# Single: test a deck with one agent (most common)
+bunx @lythos/skill-arena@latest single \
+  --deck ./examples/decks/scout.toml \
+  --brief "Generate auth flow diagram" \
+  --player kimi \
+  --timeout 300000 \
+  --out ./output
+
+# Single with remote deck (URL auto-fetched)
+bunx @lythos/skill-arena@latest single \
   --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
-  --brief "Generate auth flow diagram"
+  --brief "Generate auth flow diagram" \
+  --out ./output
 
 # Vs: compare multiple decks side by side
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/research-compare/arena.toml > arena.toml
-bunx @lythos/skill-arena@0.13.1 vs --config ./arena.toml
+bunx @lythos/skill-arena@latest vs --config ./arena.toml
 ```
+
+**Default behavior:**
+- Agent runs in an isolated `/tmp` workdir (no workspace pollution)
+- All artifacts are copied to `--out` after completion
+- Prompt template injects fixed contract (decision-log, robustness, tool preference) + your brief as variable
 
 ## Commands
 

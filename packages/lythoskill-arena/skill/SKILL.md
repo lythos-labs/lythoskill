@@ -261,7 +261,81 @@ After ALL subagents complete:
 
 The decision log makes the agent's reasoning chain visible. Without it, you only see the artifact — not why it was made that way.
 
-## CLI Commands (Opt-in Player Mode Only)
+## Prompt Techniques
+
+### Reference passing (don't inline everything)
+
+If the task context is large (cortex cards, research notes, prior ADRs), **do not paste the full text into the prompt**. Instead, pass a reference and let the subagent read it:
+
+```
+TASK:
+Review the cold-pool reconcile design. Read these cards for context:
+- cortex/adr/02-accepted/ADR-20260507021957847-cold-pool-manager-design.md
+- cortex/wiki/01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md
+
+Then implement the reconcile command in packages/lythoskill-cold-pool/src/.
+```
+
+**Why this works:**
+- Subagent has the same file-read capability as the orchestrator
+- Shorter prompt = lower token cost, less attention dilution
+- The subagent can re-read the card if it needs to check a detail mid-task
+
+**When NOT to use:**
+- Small, self-contained tasks (inlining is faster than a round-trip read)
+- Time-sensitive tasks where every tool call costs latency
+
+This is a technique, not a constraint. Use judgment.
+
+### Capturing decision trails from player CLI output
+
+Kimi's `--output-format=stream-json` emits the full tool-call chain as JSONL:
+
+```jsonl
+{"role":"assistant","content":"Let me check the directory.","tool_calls":[{"type":"function","id":"tc_1","function":{"name":"Shell","arguments":"{\"command\":\"ls\"}"}}]}
+{"role":"tool","tool_call_id":"tc_1","content":"agent-stdout.txt\ncookie_recipe_report.docx\n..."}
+```
+
+If you need the subagent's reasoning chain but the subagent did not write `decision-log.jsonl`, you can reconstruct it from the JSONL output:
+- `tool_calls` entries = "decision" (what the agent chose to do)
+- `content` after tool execution = "reason" (what the agent observed)
+
+The arena runner stores raw `agent-stdout.txt`; parse it when the structured decision log is missing.
+
+## CLI Commands
+
+### `single` — one deck, one task (most common)
+
+The default and most frequently used mode. Runs a single deck against a task with isolated `/tmp` workdir, then copies all artifacts to `--out`.
+
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} single \
+  --deck ./examples/decks/recipe-report.toml \
+  --brief "Produce a professional .docx report with embedded radar chart" \
+  --player kimi \
+  --timeout 600000 \
+  --out ./output
+```
+
+**What happens:**
+1. Deck is copied to an isolated `/tmp/arena-single-*/` workdir
+2. `deck link` symlinks skills into `.claude/skills/`
+3. Agent spawns with prompt template (fixed contract + your brief as variable)
+4. Agent completes task, writes decision-log.jsonl
+5. All artifacts copy back to `--out`
+
+### `vs` — multi-deck comparison with arena.toml
+
+Declarative Pareto-optimal comparison. Use when you need controlled-variable analysis across multiple decks.
+
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
+```
+
+### `scaffold` — legacy directory setup
+
+Only creates directories and deck files. Agent orchestrates execution manually.
 
 ```bash
 bunx @lythos/skill-arena@{{PACKAGE_VERSION}} scaffold \
@@ -270,10 +344,10 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} scaffold \
   --criteria "quality,token,maintainability"
 ```
 
-### Visualize results
+### `viz` — visualize completed arena run
 
 ```bash
-bunx @lythos/skill-arena@{{PACKAGE_VERSION}} viz tmp/arena-<id>/
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} viz runs/arena-<id>/
 ```
 
 Renders ASCII bar charts and radar comparison from `report.md`.
@@ -282,19 +356,17 @@ Renders ASCII bar charts and radar comparison from `report.md`.
 
 | Flag | Used by | Description |
 |------|---------|-------------|
-| `--task <path\|desc>` | single, vs, scaffold | Task description or path to TASK-arena.md |
-| `--brief "<prompt>"` | single | Inline task brief (alternative to `--task` path) |
-| `--deck <path>` | single | Deck for the single subagent |
+| `--brief "<prompt>"` | single | **Primary input.** Inline task brief injected as `{brief}` variable |
+| `--task <path\|desc>` | single, vs, scaffold | Task file path (alternative to `--brief`) |
+| `--deck <path\|url>` | single | Deck for the single subagent. URL auto-fetched |
+| `--player <name>` | single | Agent player: `kimi` (default), `codex`, `deepseek`, `claude` |
+| `--timeout <ms>` | single | Subagent timeout. Complex tasks need 300000–600000 |
+| `--out <dir>` | single, vs | Output directory. All artifacts copy here after run |
 | `--config <path>` | vs | Declarative arena.toml |
-| `--players <list>` | run (CLI mode) | Comma-separated player.toml paths |
+| `--dry-run` | vs --config | Print execution plan without running |
 | `--decks <list>` | scaffold | Comma-separated deck.toml paths |
 | `--criteria <list>` | scaffold | Evaluation dimensions (default: syntax,context,logic,token) |
-| `--player <name>` | single | Specific player (default: kimi) |
-| `--out <dir>` | single, vs | Output directory |
 | `--dir <dir>` | scaffold | Parent dir (default: tmp) |
-| `--project <dir>` | all | Project root (default: .) |
-| `--timeout <ms>` | single | Subagent timeout |
-| `--dry-run` | vs --config | Print plan without running |
 
 
 ## Directory Structure (generated by CLI)

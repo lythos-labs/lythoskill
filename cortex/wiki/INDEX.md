@@ -4,6 +4,7 @@
 
 ## 📚 Patterns (41)
 
+- **[2026-05-15]** [graduation-exam-spec](./01-patterns/2026-05-15-graduation-exam-spec.md)
 - **[2026-05-14]** [agent-driven-plan-first-architecture](./01-patterns/2026-05-14-agent-driven-plan-first-architecture.md)
 - **[2026-05-14]** [arena-agent-bdd-architecture-flow](./01-patterns/2026-05-14-arena-agent-bdd-architecture-flow.md)
 - **[2026-05-12]** [workspace-protocol-in-source-concrete-version-at-publish](./01-patterns/2026-05-12-workspace-protocol-in-source-concrete-version-at-publish.md)

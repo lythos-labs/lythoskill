@@ -22,6 +22,22 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 
 ---
 
+## Index (Page Table)
+
+> Light-weight pointers. Full content lives in wiki pages. Read the pointer, follow the link.
+
+| Topic | Pointer | Full page |
+|-------|---------|-----------|
+| **Graduation Exam** | End-to-end integration test: cookie recipe `.docx` + radar chart | [`cortex/wiki/01-patterns/2026-05-15-graduation-exam-spec.md`](./cortex/wiki/01-patterns/2026-05-15-graduation-exam-spec.md) |
+| **Release & Auth** | Versions, git remote, npm publish — pre-configured, do not touch | § [Release & Auth Workflow](#release--auth-workflow) below |
+| **Deck Catalogue** | 18 pre-built decks for common tasks | [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) |
+| **Guard Scripts** | Pre-commit, path-safety, test-report — meta-layer guards | § [Guard-script sensitivity](#guard-script-sensitivity) below |
+| **Test SSOT** | `bun --filter='*' run test` is canonical | § [Test SSOT](#test-ssot) below |
+| **Daily Handoff** | Session state recovery | `daily/YYYY-MM-DD.md` (latest date file) |
+| **Cortex Governance** | ADR, Epic, Task, Wiki | `cortex/INDEX.md` |
+
+---
+
 ## Agent Behavior Boundary
 
 This project has **rich governance tooling (ADR, Epic, Task, daily handoff)** because it values explicit decisions over implicit assumptions. As an agent working in this repo, follow this boundary:

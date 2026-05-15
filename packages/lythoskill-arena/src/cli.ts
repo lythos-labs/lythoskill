@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
 import { writeFileSync, readFileSync, mkdirSync, existsSync, realpathSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { homedir } from 'node:os'
+import { homedir, tmpdir } from 'node:os'
 import { ZodError } from 'zod'
-import { formatPlanOutput, type ArenaResult } from './runner'
+import { formatPlanOutput, type ArenaResult, buildArenaPrompt } from './runner'
 import { parseArenaToml, buildExecutionPlan } from './arena-toml'
 import { buildCopyPlan, parseDeckSkills } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
@@ -264,9 +264,17 @@ async function singleRun(args: string[]) {
   else console.log(`📋 brief: ${opts.brief!.slice(0, 60)}...`)
 
   // Setup workdir
-  const agentWorkdir = join(process.cwd(), `arena-single-${Date.now()}`)
+  const agentWorkdir = join(tmpdir(), `arena-single-${Date.now()}`)
   mkdirSync(agentWorkdir, { recursive: true })
   writeFileSync(join(agentWorkdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
+  writeFileSync(join(agentWorkdir, 'AGENTS.md'), [
+    '# Arena Test Environment',
+    `**Mode**: single`,
+    '## How This Works',
+    '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
+    '- Complete the task using available skills. Output to this directory.',
+    '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
+  ].join('\n'))
 
   const deckRaw = readFileSync(join(agentWorkdir, 'skill-deck.toml'), 'utf-8')
   let deckParsed: Record<string, any> = {}
@@ -307,10 +315,16 @@ async function singleRun(args: string[]) {
     console.warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
   }
 
-  // Direct agent.spawn — natural-language task text, no parsing
+  // Template injection: brief is the {task} variable, template carries fixed contract
+  const fullPrompt = buildArenaPrompt({
+    brief: taskText,
+    cwd: agentWorkdir,
+    deckPath: deckPath,
+    outputDir: agentWorkdir,
+  })
   const agentResult = await agent.spawn({
     cwd: agentWorkdir,
-    brief: taskText,
+    brief: fullPrompt,
     timeoutMs: Number(opts.timeout ?? 120000),
   })
 
@@ -321,7 +335,7 @@ async function singleRun(args: string[]) {
   // Copy agent-produced files to outDir
   const { cpSync, readdirSync, existsSync: es3 } = await import('node:fs')
   if (es3(agentWorkdir)) {
-    const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock'])
+    const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
     try {
       const entries = readdirSync(agentWorkdir)
       const plan = buildCopyPlan(agentWorkdir, outDir, entries, skipSet)

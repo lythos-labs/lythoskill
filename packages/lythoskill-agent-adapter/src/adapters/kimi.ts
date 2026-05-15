@@ -1,7 +1,7 @@
 import { writeFileSync, unlinkSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import type { AgentAdapter, AgentRunResult } from '../types'
+import type { AgentAdapter, AgentRunResult, CheckpointEntry } from '../types'
 import { readCheckpoints } from '../checkpoint'
 import { registerAgent } from '../registry'
 
@@ -13,28 +13,59 @@ export function buildKimiCommand(): string[] {
 }
 
 /**
- * Parse kimi stream-json output into plain text.
- * Each line is a JSON event; extracts text from assistant role messages.
- * content can be string or array of content blocks.
+ * Parse kimi stream-json output into plain text + checkpoint trace.
+ * Each line is a JSON event; extracts text from assistant role messages
+ * and tool_calls/tool messages into CheckpointEntry for white-box replay.
  */
-export function parseKimiStreamJson(raw: string): string {
-  const lines: string[] = []
+export function parseKimiStreamJson(raw: string): { text: string; checkpoints: CheckpointEntry[] } {
+  const textLines: string[] = []
+  const checkpoints: CheckpointEntry[] = []
+  const pendingTools = new Map<string, { name: string; args: string }>()
+
   for (const line of raw.split('\n')) {
     if (!line.trim()) continue
     try {
       const event = JSON.parse(line)
-      if (event.role !== 'assistant') continue
-      const content = event.content
-      if (typeof content === 'string') {
-        lines.push(content)
-      } else if (Array.isArray(content)) {
-        for (const block of content) {
-          if (block.type === 'text' && block.text) lines.push(block.text)
+      if (event.role === 'assistant') {
+        const content = event.content
+        if (typeof content === 'string') {
+          textLines.push(content)
+        } else if (Array.isArray(content)) {
+          for (const block of content) {
+            if (block.type === 'text' && block.text) textLines.push(block.text)
+          }
+        }
+
+        if (Array.isArray(event.tool_calls)) {
+          for (const tc of event.tool_calls) {
+            if (tc.type === 'function' && tc.function) {
+              checkpoints.push({
+                step: 'tool_call',
+                tool: tc.function.name,
+                args: [tc.function.arguments],
+                timestamp: new Date().toISOString(),
+              })
+              pendingTools.set(tc.id, { name: tc.function.name, args: tc.function.arguments })
+            }
+          }
+        }
+      } else if (event.role === 'tool' && event.tool_call_id) {
+        const pending = pendingTools.get(event.tool_call_id)
+        if (pending) {
+          checkpoints.push({
+            step: 'tool_result',
+            tool: pending.name,
+            args: [pending.args],
+            stdout_summary: String(event.content ?? '').slice(0, 500),
+            timestamp: new Date().toISOString(),
+          })
+          pendingTools.delete(event.tool_call_id)
         }
       }
     } catch { /* skip malformed lines */ }
   }
-  return lines.join('\n')
+
+  return { text: textLines.join('\n'), checkpoints }
 }
 
 // ── Spawn wrapper (IO, tested via BDD / arena integration) ──────────────────
@@ -67,16 +98,26 @@ async function spawnKimi(opts: {
   const stderr = await new Response(proc.stderr).text()
   const code = proc.exitCode ?? 1
 
-  let stdout: string
+  let text: string
+  let streamCheckpoints: CheckpointEntry[]
   try {
-    stdout = parseKimiStreamJson(rawStdout)
+    const parsed = parseKimiStreamJson(rawStdout)
+    text = parsed.text
+    streamCheckpoints = parsed.checkpoints
   } catch {
-    stdout = rawStdout
+    text = rawStdout
+    streamCheckpoints = []
   }
 
-  const checkpoints = readCheckpoints(opts.cwd)
+  // Preserve raw JSONL for post-hoc white-box analysis
+  try {
+    writeFileSync(join(opts.cwd, 'agent-stdout-raw.jsonl'), rawStdout, 'utf-8')
+  } catch { /* ignore write failures */ }
 
-  return { stdout: stdout.trim(), stderr, code, durationMs, checkpoints }
+  const fileCheckpoints = readCheckpoints(opts.cwd)
+  const checkpoints = [...streamCheckpoints, ...fileCheckpoints]
+
+  return { stdout: text.trim(), stderr, code, durationMs, checkpoints }
 }
 
 const kimiAdapter: AgentAdapter = {

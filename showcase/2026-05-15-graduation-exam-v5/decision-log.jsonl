@@ -1,0 +1,9 @@
+{"t":0,"phase":"setup","decision":"selected classic chocolate chip cookie recipe","reason":"universally recognized, rich scientific basis for explanations"}
+{"t":3,"phase":"setup","decision":"chose matplotlib for radar chart generation","reason":"reliable, scriptable, produces high-quality PNG for embedding"}
+{"t":6,"phase":"design","decision":"5-dimension radar: Taste 9, Nutrition 5, Difficulty 3, Time 4, Cost 6","reason":"reflects high flavor appeal, moderate nutrition, low difficulty, short time, moderate cost"}
+{"t":9,"phase":"design","decision":"used Baker's Percentages with 250g flour base","reason":"professional baking standard; flour fixed at 100% enables easy scaling and formula comparison"}
+{"t":14,"phase":"content","decision":"9 ingredients with scientific explanations","reason":"each major ingredient has distinct chemical/physical role worth explaining"}
+{"t":20,"phase":"content","decision":"included Maillard reaction, gluten development, caramelization, leavening chemistry","reason":"core baking science concepts that explain cookie texture and flavor"}
+{"t":28,"phase":"output","decision":"generated docx with docx-js using local npm install","reason":"skill mandates docx-js for new documents; global install failed, local install resolved module resolution"}
+{"t":35,"phase":"output","decision":"validated DOCX with skill-provided validate.py script","reason":"ensures OOXML compliance and correct structure"}
+{"t":40,"phase":"output","decision":"wrote decision-log.jsonl with 8 decision entries","reason":"orchestrator requires reasoning trail in specified JSONL format"}

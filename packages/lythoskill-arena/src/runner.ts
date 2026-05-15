@@ -52,6 +52,47 @@ function resolveJudgeText(toml: ArenaToml, configDir?: string): string | null {
   return null
 }
 
+// ── Prompt template (IoC: brief = variable, template = fixed contract) ────
+
+export function buildArenaPrompt(opts: {
+  brief: string
+  cwd: string
+  deckPath: string
+  outputDir?: string
+  preflightReport?: string
+}): string {
+  const out = opts.outputDir ?? opts.cwd
+  const lines = [
+    'You are running an arena evaluation cell.',
+    '',
+    `CWD: ${opts.cwd}`,
+    `Deck: ${opts.deckPath}`,
+    `Produce output to: ${out}/`,
+    '',
+    'MANDATORY — write decision-log.jsonl to the output directory.',
+    'Each line is one JSON object with: t (seconds elapsed),',
+    'phase (setup/content/design/output), decision (what you chose),',
+    'reason (why). This is your decision trail — the only way the',
+    'orchestrator can understand your reasoning chain.',
+    '',
+    'Example:',
+    '{"t":0,"phase":"setup","decision":"selected Golden Hour palette","reason":"warm tones match baking theme"}',
+    '{"t":12,"phase":"content","decision":"6 science topics","reason":"requires chemistry depth"}',
+    '',
+    'ROBUSTNESS — If any command or script fails, read the error output, fix the issue, and retry.',
+    'Do not stop on the first error. Ensure all required output files exist before finishing.',
+    '',
+    'TOOLS — Use the skills already linked in .claude/skills/ (check with `ls .claude/skills/`).',
+    'They are available and tested. Only write alternative scripts if the linked skills explicitly',
+    'cannot handle the task.',
+  ]
+  if (opts.preflightReport) {
+    lines.push('', 'Preflight:', opts.preflightReport)
+  }
+  lines.push('', 'TASK:', opts.brief)
+  return lines.join('\n')
+}
+
 // ── Plan formatting ───────────────────────────────────────────────────────
 
 export function formatPlanOutput(plan: ExecutionPlan): string[] {
@@ -140,10 +181,10 @@ export async function runArenaFromToml(opts: {
       writeFileSync(join(workDir, 'AGENTS.md'), [
         '# Arena Test Environment',
         `**Side**: ${cell.side}`, `**Player**: ${cell.player}`, `**Run**: ${cell.run}`,
-        '## Task', '', taskText,
         '## How This Works',
         '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
         '- Complete the task using available skills. Output to this directory.',
+        '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
       ].join('\n'))
       const linkProc = Bun.spawn(
         ['bunx', '@lythos/skill-deck', 'link'],
@@ -156,9 +197,15 @@ export async function runArenaFromToml(opts: {
 
       // Direct agent.spawn (no parseAgentMd, no AgentScenario)
       const agent = useAgent(resolvePlayer(cell.player))
+      const fullPrompt = buildArenaPrompt({
+        brief: taskText,
+        cwd: workDir,
+        deckPath: cell.deck,
+        outputDir: workDir,
+      })
       const agentResult = await agent.spawn({
         cwd: workDir,
-        brief: taskText,
+        brief: fullPrompt,
         timeoutMs: 300000,
       })
 
