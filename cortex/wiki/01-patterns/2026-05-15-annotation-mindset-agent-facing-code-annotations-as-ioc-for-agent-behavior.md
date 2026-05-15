@@ -94,7 +94,22 @@ Agent sees this and:
 2. Uses bash tool to run `brew install curl` or `apt-get install curl`
 3. Or uses web fetch to find the right install method for its OS
 
-## Why this is IoC
+## Why this is IoC — the navigation app model
+
+早期比喻"给指南针不给地图"不够准确。更好的模型是**导航 app**：
+
+- **地图存在** — SKILL.md、schema、API 契约提供全局结构
+- **路标是附加层** — 错误上下文、inline 注解在决策节点出现
+- **开车的是你** — agent 的 ReAct loop 做实际判断和执行
+
+导航 app 不会替你绕过施工路段，它只说"前方封闭，建议走 XX 路"——这正是 3-part 错误模板在做的事。它也不会在每一段直路上都播报（不滥用注解），只在岔路口、异常情况才介入。
+
+| 层 | 形式 | 时机 | 功能 |
+|----|------|------|------|
+| **地图** | SKILL.md mermaid/表格/流程 | 任务开始前 | 全局结构，建立心智模型 |
+| **路标** | 错误上下文、inline 注解 | 执行中遇到异常 | 局部决策，临机应变 |
+
+Mermaid 在这里特别合适：文本格式 agent 可直接读，人类也能在 GitHub/wiki 上看到渲染结果——"对 agent 的注解不干扰人类"这一性质再次体现。
 
 | IoC layer | Traditional | Agent era |
 |-----------|-------------|-----------|
@@ -111,6 +126,33 @@ The agent is the container. The annotations are the wiring instructions. The col
 - **Code comments** near system tool calls — add when non-obvious (e.g. "this curl call requires --head for probe")
 - **Config files** — frontmatter is the annotation schema
 - **SKILL.md** — the canonical annotation for project-level tools
+
+## Boundaries and caveats
+
+### Multi-agent capability variance
+
+This pattern assumes the agent has sufficient capability to read context → search → execute repair. The project primarily targets Claude (Opus/Sonnet) which has demonstrated this ability (seed bootstrap v7 proved agent can workaround network probe failures autonomously).
+
+For less capable agents (some local models, early-generation LLMs), the same clear context may not trigger effective ReAct loops. In those cases, a more structured fallback (pre-defined install commands per OS) may be needed. The L2 inline hint degrades gracefully — even if the agent can't act on it, the human-readable text still serves the human user.
+
+### Don't over-annotate
+
+The core property of annotations:
+
+- **Present → useful**: provides meta-information to guide container/agent behavior
+- **Absent → harmless**: main logic does not depend on annotations
+- **Non-invasive**: declarative, not imperative
+
+But abuse is real. If every function adds large agent guidance blocks, signal becomes noise. The L0/L1/L2 layering exists precisely to prevent this: system tools need nothing, project tools are documented centrally in SKILL.md, inline hints only appear on error paths.
+
+### Agent-first, not agent-only
+
+"Clear error context" is good engineering practice for humans too. The difference is in consumption:
+
+- **Human**: reads error → understands what went wrong → decides next step
+- **Agent**: reads error → triggers ReAct loop → executes repair
+
+Both benefit from the same 3-part template. No dual maintenance needed.
 
 ## When not to apply
 
