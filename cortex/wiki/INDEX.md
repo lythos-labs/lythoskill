@@ -54,8 +54,9 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (18)
+## 📖 Lessons (19)
 
+- **[2026-05-15]** [baoyu-skills-dependency-audit-for-lythoskill-content-creation](./03-lessons/2026-05-15-baoyu-skills-dependency-audit-for-lythoskill-content-creation.md)
 - **[2026-05-15]** [curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience](./03-lessons/2026-05-15-curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience.md)
 - **[2026-05-12]** [whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite](./03-lessons/2026-05-12-whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite.md)
 - **[2026-05-08]** [feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product](./03-lessons/2026-05-08-feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product.md)
