@@ -1105,6 +1105,26 @@ Arena 是整个项目最核心的 dogfooding 工具。我们自己每天都会�
 
 Agent 读取错误信息后应能立即执行修复，不需要猜测或回到人类。
 
+### Annotation mindset — 代码即注解，agent 是容器
+
+**Annotation mindset** 是 HATEOAS 在代码层面的延伸。与 Spring IoC 扫描 `@Autowired` 来装配依赖类似，agent runtime 扫描代码注释、错误消息和 SKILL.md frontmatter 来装配行为。
+
+三层注解，agent 不需要的绝不给：
+
+| 层级 | 内容 | 需要注解吗？ |
+|------|------|-----------|
+| **L0 系统工具** | git, curl, docker, node, bun | ❌ Agent 已充分训练，内建知识足够 |
+| **L1 项目工具** | lythoskill-deck, skill-creator, arena | ✅ SKILL.md 就是注解——agent 读它来学习 schema 和用法 |
+| **L2 内联提示** | 错误消息、代码注释、配置项 | ✅ 只在非显然时加——告诉 agent "看到这个时该怎么做" |
+
+**核心规则**：代码中的提示是触发器，agent 的知识 + web fetch 是解析器。不要给 agent 地图（结构化框架），给指南针（清晰的上下文）。
+
+示例：
+- ❌ `throw new Error('curl failed')` — agent 无法行动
+- ✅ `throw new Error('curl not found — required for SOCKS proxy. Install: brew install curl (macOS), apt-get install curl (Linux). Or unset LYTHOS_SOCKS_PROXY')` — agent 直接执行修复
+
+完整论述见 `cortex/wiki/01-patterns/2026-05-15-annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior.md`。
+
 ### Fallback hints 必须配套 dormancy 测试
 
 任何 "失败 fallback" 提示（mirror / proxy / retry / degraded mode）都必须配套一个 **dormancy 属性测试**：在 happy path 上 grep stderr 中的 fallback 关键字，要求 0 匹配。
