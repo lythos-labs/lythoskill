@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (41)
+## 📚 Patterns (43)
 
+- **[2026-05-15]** [seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion](./01-patterns/2026-05-15-seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion.md)
 - **[2026-05-15]** [graduation-exam-spec](./01-patterns/2026-05-15-graduation-exam-spec.md)
 - **[2026-05-14]** [agent-driven-plan-first-architecture](./01-patterns/2026-05-14-agent-driven-plan-first-architecture.md)
 - **[2026-05-14]** [arena-agent-bdd-architecture-flow](./01-patterns/2026-05-14-arena-agent-bdd-architecture-flow.md)
