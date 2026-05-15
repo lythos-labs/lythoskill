@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+  <defs>
+    <!-- Grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#0f172a"/>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+
+  <!-- Title -->
+  <text x="450" y="35" fill="white" font-size="18" font-weight="700" text-anchor="middle" font-family="'JetBrains Mono', 'SF Mono', monospace">AI Coding Agents — 5-Dimension Radar Comparison</text>
+
+  <!-- Radar chart center and dimensions -->
+  <!-- Center: 450, 340 -->
+  <!-- 5 dimensions: Code Quality (top), Context Understanding (top-right), Tool Use (bottom-right), Cost Efficiency (bottom-left), Ecosystem (top-left) -->
+
+  <!-- Grid circles -->
+  <circle cx="450" cy="340" r="40" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="450" cy="340" r="80" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="450" cy="340" r="120" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="450" cy="340" r="160" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="3,3"/>
+  <circle cx="450" cy="340" r="200" fill="none" stroke="#334155" stroke-width="1"/>
+
+  <!-- Grid labels -->
+  <text x="450" y="128" fill="#64748b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">10</text>
+  <text x="450" y="168" fill="#64748b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">8</text>
+  <text x="450" y="208" fill="#64748b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">6</text>
+  <text x="450" y="248" fill="#64748b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">4</text>
+  <text x="450" y="288" fill="#64748b" font-size="9" text-anchor="middle" font-family="'JetBrains Mono', monospace">2</text>
+
+  <!-- Axis lines -->
+  <!-- Code Quality: top (90 degrees) -->
+  <line x1="450" y1="340" x2="450" y2="120" stroke="#475569" stroke-width="1"/>
+  <!-- Context Understanding: top-right (18 degrees) -->
+  <line x1="450" y1="340" x2="640" y2="271" stroke="#475569" stroke-width="1"/>
+  <!-- Tool Use: bottom-right (306 degrees / -54 degrees) -->
+  <line x1="450" y1="340" x2="640" y2="409" stroke="#475569" stroke-width="1"/>
+  <!-- Cost Efficiency: bottom-left (234 degrees / -126 degrees) -->
+  <line x1="450" y1="340" x2="260" y2="409" stroke="#475569" stroke-width="1"/>
+  <!-- Ecosystem: top-left (162 degrees) -->
+  <line x1="450" y1="340" x2="260" y2="271" stroke="#475569" stroke-width="1"/>
+
+  <!-- Axis labels -->
+  <text x="450" y="108" fill="white" font-size="11" font-weight="600" text-anchor="middle" font-family="'JetBrains Mono', monospace">Code Quality</text>
+  <text x="680" y="265" fill="white" font-size="11" font-weight="600" text-anchor="start" font-family="'JetBrains Mono', monospace">Context Understanding</text>
+  <text x="680" y="415" fill="white" font-size="11" font-weight="600" text-anchor="start" font-family="'JetBrains Mono', monospace">Tool Use</text>
+  <text x="220" y="415" fill="white" font-size="11" font-weight="600" text-anchor="end" font-family="'JetBrains Mono', monospace">Cost Efficiency</text>
+  <text x="220" y="265" fill="white" font-size="11" font-weight="600" text-anchor="end" font-family="'JetBrains Mono', monospace">Ecosystem</text>
+
+  <!--
+    Data points (scale: 0-10, radius 200 = 10)
+    Claude Code:  CQ=9.2, CU=9.5, TU=8.5, CE=7.0, EC=9.0
+    Cursor:       CQ=8.8, CU=8.0, TU=9.0, CE=8.5, EC=8.5
+    Copilot:      CQ=8.5, CU=8.2, TU=8.0, CE=9.0, EC=9.5
+    Windsurf:     CQ=7.8, CU=7.5, TU=8.2, CE=9.2, EC=6.5
+    Kimi:         CQ=7.5, CU=8.8, TU=6.5, CE=8.8, EC=5.5
+
+    Angles (from center, 0 at top, clockwise):
+    Code Quality:      270° (up)      → cos=-0, sin=-1
+    Context Understanding:  306°      → cos=0.588, sin=-0.809
+    Tool Use:          342°           → cos=0.951, sin=-0.309
+    Cost Efficiency:   198°           → cos=-0.951, sin=0.309
+    Ecosystem:         234°           → cos=-0.588, sin=0.809
+  -->
+
+  <!-- Claude Code polygon: #22d3ee (cyan) -->
+  <polygon points="450,156 567,187.4 640,273.7 380,398.4 332,158.8" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" stroke-width="2"/>
+  <circle cx="450" cy="156" r="4" fill="#22d3ee"/>
+  <circle cx="567" cy="187.4" r="4" fill="#22d3ee"/>
+  <circle cx="640" cy="273.7" r="4" fill="#22d3ee"/>
+  <circle cx="380" cy="398.4" r="4" fill="#22d3ee"/>
+  <circle cx="332" cy="158.8" r="4" fill="#22d3ee"/>
+
+  <!-- Cursor polygon: #34d399 (emerald) -->
+  <polygon points="450,164 568,210.4 660,278.2 410,369 356,188" fill="rgba(52,211,153,0.12)" stroke="#34d399" stroke-width="2"/>
+  <circle cx="450" cy="164" r="4" fill="#34d399"/>
+  <circle cx="568" cy="210.4" r="4" fill="#34d399"/>
+  <circle cx="660" cy="278.2" r="4" fill="#34d399"/>
+  <circle cx="410" cy="369" r="4" fill="#34d399"/>
+  <circle cx="356" cy="188" r="4" fill="#34d399"/>
+
+  <!-- Copilot polygon: #a78bfa (violet) -->
+  <polygon points="450,170 565,200.8 640,284 360,358 344,148" fill="rgba(167,139,250,0.12)" stroke="#a78bfa" stroke-width="2"/>
+  <circle cx="450" cy="170" r="4" fill="#a78bfa"/>
+  <circle cx="565" cy="200.8" r="4" fill="#a78bfa"/>
+  <circle cx="640" cy="284" r="4" fill="#a78bfa"/>
+  <circle cx="360" cy="358" r="4" fill="#a78bfa"/>
+  <circle cx="344" cy="148" r="4" fill="#a78bfa"/>
+
+  <!-- Windsurf polygon: #fbbf24 (amber) -->
+  <polygon points="450,183.2 560,233.5 652,289.5 366,335.2 370,210" fill="rgba(251,191,36,0.12)" stroke="#fbbf24" stroke-width="2"/>
+  <circle cx="450" cy="183.2" r="4" fill="#fbbf24"/>
+  <circle cx="560" cy="233.5" r="4" fill="#fbbf24"/>
+  <circle cx="652" cy="289.5" r="4" fill="#fbbf24"/>
+  <circle cx="366" cy="335.2" r="4" fill="#fbbf24"/>
+  <circle cx="370" cy="210" r="4" fill="#fbbf24"/>
+
+  <!-- Kimi polygon: #fb7185 (rose) -->
+  <polygon points="450,190 555,195.2 617,298 372,364.4 389,229.6" fill="rgba(251,113,133,0.12)" stroke="#fb7185" stroke-width="2"/>
+  <circle cx="450" cy="190" r="4" fill="#fb7185"/>
+  <circle cx="555" cy="195.2" r="4" fill="#fb7185"/>
+  <circle cx="617" cy="298" r="4" fill="#fb7185"/>
+  <circle cx="372" cy="364.4" r="4" fill="#fb7185"/>
+  <circle cx="389" cy="229.6" r="4" fill="#fb7185"/>
+
+  <!-- Legend -->
+  <rect x="320" y="520" width="260" height="140" rx="8" fill="rgba(30,41,59,0.7)" stroke="#334155" stroke-width="1"/>
+  <text x="340" y="545" fill="white" font-size="12" font-weight="700" font-family="'JetBrains Mono', monospace">Legend</text>
+
+  <!-- Legend items -->
+  <line x1="340" y1="560" x2="360" y2="560" stroke="#22d3ee" stroke-width="3"/>
+  <text x="368" y="564" fill="#cbd5e1" font-size="10" font-family="'JetBrains Mono', monospace">Claude Code (avg: 8.64)</text>
+
+  <line x1="340" y1="580" x2="360" y2="580" stroke="#34d399" stroke-width="3"/>
+  <text x="368" y="584" fill="#cbd5e1" font-size="10" font-family="'JetBrains Mono', monospace">Cursor (avg: 8.56)</text>
+
+  <line x1="340" y1="600" x2="360" y2="600" stroke="#a78bfa" stroke-width="3"/>
+  <text x="368" y="604" fill="#cbd5e1" font-size="10" font-family="'JetBrains Mono', monospace">GitHub Copilot (avg: 8.64)</text>
+
+  <line x1="340" y1="620" x2="360" y2="620" stroke="#fbbf24" stroke-width="3"/>
+  <text x="368" y="624" fill="#cbd5e1" font-size="10" font-family="'JetBrains Mono', monospace">Windsurf (avg: 7.84)</text>
+
+  <line x1="340" y1="640" x2="360" y2="640" stroke="#fb7185" stroke-width="3"/>
+  <text x="368" y="644" fill="#cbd5e1" font-size="10" font-family="'JetBrains Mono', monospace">Kimi (avg: 7.42)</text>
+
+  <!-- Score table -->
+  <rect x="40" y="520" width="260" height="140" rx="8" fill="rgba(30,41,59,0.7)" stroke="#334155" stroke-width="1"/>
+  <text x="60" y="545" fill="white" font-size="11" font-weight="700" font-family="'JetBrains Mono', monospace">Dimension Scores</text>
+
+  <text x="60" y="565" fill="#94a3b8" font-size="9" font-family="'JetBrains Mono', monospace">Agent        CQ   CU   TU   CE   EC</text>
+  <text x="60" y="582" fill="#22d3ee" font-size="9" font-family="'JetBrains Mono', monospace">Claude      9.2  9.5  8.5  7.0  9.0</text>
+  <text x="60" y="597" fill="#34d399" font-size="9" font-family="'JetBrains Mono', monospace">Cursor      8.8  8.0  9.0  8.5  8.5</text>
+  <text x="60" y="612" fill="#a78bfa" font-size="9" font-family="'JetBrains Mono', monospace">Copilot     8.5  8.2  8.0  9.0  9.5</text>
+  <text x="60" y="627" fill="#fbbf24" font-size="9" font-family="'JetBrains Mono', monospace">Windsurf    7.8  7.5  8.2  9.2  6.5</text>
+  <text x="60" y="642" fill="#fb7185" font-size="9" font-family="'JetBrains Mono', monospace">Kimi        7.5  8.8  6.5  8.8  5.5</text>
+
+  <!-- Footer note -->
+  <text x="450" y="685" fill="#64748b" font-size="8" text-anchor="middle" font-family="'JetBrains Mono', monospace">Scale: 0-10 per dimension | CQ=Code Quality, CU=Context Understanding, TU=Tool Use, CE=Cost Efficiency, EC=Ecosystem</text>
+</svg>
