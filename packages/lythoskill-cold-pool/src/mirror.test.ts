@@ -4,12 +4,15 @@ import { probeConnectivity } from './mirror.js'
 describe('probeConnectivity', () => {
   let originalFetch: typeof fetch
   let originalEnv: string | undefined
+  let originalSocks: string | undefined
   let fetchCalls: Array<{ url: string; options: RequestInit }>
 
   beforeEach(() => {
     originalFetch = globalThis.fetch
     originalEnv = process.env.LYTHOSKILL_GH_MIRROR
+    originalSocks = process.env.LYTHOS_SOCKS_PROXY
     delete process.env.LYTHOSKILL_GH_MIRROR
+    delete process.env.LYTHOS_SOCKS_PROXY
     fetchCalls = []
   })
 
@@ -19,6 +22,11 @@ describe('probeConnectivity', () => {
       process.env.LYTHOSKILL_GH_MIRROR = originalEnv
     } else {
       delete process.env.LYTHOSKILL_GH_MIRROR
+    }
+    if (originalSocks !== undefined) {
+      process.env.LYTHOS_SOCKS_PROXY = originalSocks
+    } else {
+      delete process.env.LYTHOS_SOCKS_PROXY
     }
   })
 
@@ -156,5 +164,87 @@ describe('probeConnectivity', () => {
 
     expect(result).toBeUndefined()
     expect(elapsed).toBeLessThan(500) // 100ms timeout + overhead
+  })
+
+  // ── Vertical Slice 8: SOCKS proxy routing ──
+  test('SOCKS proxy set, curl succeeds → returns direct path', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
+    const execCalls: Array<{ file: string; args: string[] }> = []
+
+    const mockExec = (file: unknown, args: unknown) => {
+      execCalls.push({ file: String(file), args: args as string[] })
+      return ''
+    }
+    const result = await probeConnectivity('https://example.com/skill', 3000, {
+      execFileSync: mockExec as any,
+    })
+
+    expect(result).toMatchObject({
+      path: 'direct',
+      url: 'https://example.com/skill',
+      latencyMs: expect.any(Number),
+    })
+    expect(execCalls.length).toBe(1)
+    expect(execCalls[0].file).toBe('curl')
+    expect(execCalls[0].args).toContain('--proxy')
+    expect(execCalls[0].args).toContain('socks5://127.0.0.1:1080')
+  })
+
+  // ── Vertical Slice 9: SOCKS proxy with socks5:// prefix ──
+  test('SOCKS proxy already has socks5:// prefix → does not double-prefix', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = 'socks5://proxy.example.com:1080'
+    const execCalls: Array<{ file: string; args: string[] }> = []
+
+    const mockExec2 = (file: unknown, args: unknown) => {
+      execCalls.push({ file: String(file), args: args as string[] })
+      return ''
+    }
+    await probeConnectivity('https://example.com/skill', 3000, {
+      execFileSync: mockExec2 as any,
+    })
+
+    expect(execCalls[0].args).toContain('socks5://proxy.example.com:1080')
+    expect(execCalls[0].args).not.toContain('socks5://socks5://proxy.example.com:1080')
+  })
+
+  // ── Vertical Slice 10: SOCKS proxy fails, direct via fetch succeeds ──
+  test('SOCKS proxy fails, fetch fallback succeeds', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
+
+    const result = await probeConnectivity('https://example.com/skill', 3000, {
+      execFileSync: () => {
+        throw new Error('curl failed')
+      },
+      fetch: async () => new Response(null, { status: 200 }),
+    })
+
+    // When SOCKS proxy is configured but curl fails, the direct probe fails.
+    // No automatic fallback to unproxied fetch — user explicitly chose proxy.
+    expect(result).toBeUndefined()
+  })
+
+  // ── Vertical Slice 11: SOCKS proxy only affects direct, mirror still works ──
+  test('SOCKS proxy fails but mirror succeeds', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
+    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
+    const execCalls: Array<{ file: string; args: string[] }> = []
+
+    const result = await probeConnectivity('https://example.com/skill', 3000, {
+      execFileSync: (file, args) => {
+        execCalls.push({ file: String(file), args: args as string[] })
+        throw new Error('curl failed')
+      },
+      fetch: async (input) => {
+        const url = String(input)
+        if (url.includes('my-mirror')) {
+          return new Response(null, { status: 200 })
+        }
+        throw new Error('ENOTFOUND')
+      },
+    })
+
+    // SOCKS proxy is only used for direct probes; mirror probes use native fetch
+    expect(result?.path).toBe('mirror')
+    expect(execCalls.length).toBe(1) // only one curl call for direct probe
   })
 })

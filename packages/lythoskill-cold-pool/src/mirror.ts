@@ -10,6 +10,8 @@
  * that can return tampered skill files (see ADR-202605130...).
  */
 
+import { execFileSync } from 'node:child_process'
+
 export function getMirror(): string | undefined {
   const v = process.env.LYTHOSKILL_GH_MIRROR?.trim()
   if (!v) return undefined
@@ -47,19 +49,30 @@ export interface ProbeFailure {
   reason: string
 }
 
+export interface ProbeDeps {
+  fetch?: typeof globalThis.fetch
+  execFileSync?: typeof execFileSync
+}
+
 /**
  * Quick connectivity probe: race direct + user mirror (if set) concurrently.
  * Uses short timeout (default 3s) to fail fast instead of waiting for
  * the full git clone / fetch timeout.
+ *
+ * When LYTHOS_SOCKS_PROXY is set, direct probes route through the SOCKS
+ * proxy via curl (Bun fetch does not support socks5://).
  *
  * Returns the first success, or undefined with failures recorded.
  */
 export async function probeConnectivity(
   url: string,
   timeoutMs = 3000,
+  deps?: ProbeDeps,
 ): Promise<ProbeResult & { failures?: ProbeFailure[] } | undefined> {
   const start = performance.now()
   const failures: ProbeFailure[] = []
+  const _fetch = deps?.fetch ?? globalThis.fetch
+  const _exec = deps?.execFileSync ?? execFileSync
 
   async function tryFetch(
     targetUrl: string,
@@ -67,7 +80,32 @@ export async function probeConnectivity(
   ): Promise<ProbeResult | undefined> {
     const t0 = performance.now()
     try {
-      const res = await fetch(targetUrl, {
+      // Route direct probes through SOCKS proxy when configured
+      if (pathLabel === 'direct') {
+        const socksProxy = process.env.LYTHOS_SOCKS_PROXY?.trim()
+        if (socksProxy) {
+          const proxyUrl = socksProxy.startsWith('socks5://') ? socksProxy : `socks5://${socksProxy}`
+          _exec(
+            'curl',
+            [
+              '--silent',
+              '--head',
+              '--location',
+              '--proxy',
+              proxyUrl,
+              '--connect-timeout',
+              String(Math.ceil(timeoutMs / 1000)),
+              '--max-time',
+              String(Math.ceil(timeoutMs / 1000)),
+              targetUrl,
+            ],
+            { encoding: 'utf-8', timeout: timeoutMs + 500 },
+          )
+          return { path: pathLabel, url: targetUrl, latencyMs: Math.round(performance.now() - t0) }
+        }
+      }
+
+      const res = await _fetch(targetUrl, {
         method: 'HEAD',
         signal: AbortSignal.timeout(timeoutMs),
         redirect: 'follow',

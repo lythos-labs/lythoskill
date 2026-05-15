@@ -137,9 +137,8 @@ export class ColdPool {
         const sub = join(dir, d.name)
         if (existsSync(join(sub, 'SKILL.md'))) {
           push(sub)
-        } else {
-          walk(sub, push)
         }
+        walk(sub, push)
       }
     }
 

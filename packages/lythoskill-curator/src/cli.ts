@@ -97,7 +97,14 @@ export function scanSkill(path: string): SkillMeta | null {
   const text = readFileSync(skillMdPath, 'utf-8');
   const contentHash = createHash('sha256').update(text, 'utf-8').digest('hex');
   const { frontmatter: rawFm, body } = parseFrontmatter(text);
-  const frontmatter = YAML.parse(rawFm._raw as string) || {};
+
+  let frontmatter: Record<string, unknown> = {}
+  try {
+    frontmatter = YAML.parse(rawFm._raw as string) || {}
+  } catch {
+    // Frontmatter parse failed — use empty frontmatter, derive basics from path.
+    // The skill still exists and has a path; basic metadata is derivable.
+  }
 
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
   const hasExamples = statSync(join(path, 'examples'), { throwIfNoEntry: false })?.isDirectory() || false;
