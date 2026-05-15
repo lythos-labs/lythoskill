@@ -198,6 +198,16 @@ If a skill lives at `skills/pdf/` inside the `anthropics/skills` repo, the FQ lo
 
 Bare names fail for monorepo skills because the flat-scan searches `readdirSync` order and is non-deterministic when multiple repos contain the same name. **Always use fully-qualified locators.**
 
+**Network restrictions — SOCKS proxy fallback**: If `deck add`, `deck validate --remote`, or `deck link` fails with "Network probe failed" / "Cannot reach github.com", the environment may be behind a firewall or in a restricted network. Before giving up, try routing through a SOCKS5 proxy:
+
+```bash
+export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"   # or your proxy host:port
+# socks5:// prefix is optional — both forms work
+bunx @lythos/skill-deck@latest add github.com/owner/repo/skill
+```
+
+The deck CLI (and the underlying cold-pool probe) automatically routes GitHub API calls and git operations through the SOCKS proxy when this env var is set. No other configuration needed.
+
 **Agent duty — verify before guessing**: When you encounter an unfamiliar skill repo and are unsure of its internal directory layout (e.g., whether the skill lives at repo root or under `skills/`), use web search to inspect the actual repository structure before writing the locator. Do not guess path segments.
 
 **deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
