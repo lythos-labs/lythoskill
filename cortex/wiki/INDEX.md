@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (43)
+## 📚 Patterns (44)
 
+- **[2026-05-15]** [annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior](./01-patterns/2026-05-15-annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior.md)
 - **[2026-05-15]** [seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion](./01-patterns/2026-05-15-seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion.md)
 - **[2026-05-15]** [graduation-exam-spec](./01-patterns/2026-05-15-graduation-exam-spec.md)
 - **[2026-05-14]** [agent-driven-plan-first-architecture](./01-patterns/2026-05-14-agent-driven-plan-first-architecture.md)
@@ -53,8 +54,9 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (17)
+## 📖 Lessons (18)
 
+- **[2026-05-15]** [curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience](./03-lessons/2026-05-15-curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience.md)
 - **[2026-05-12]** [whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite](./03-lessons/2026-05-12-whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite.md)
 - **[2026-05-08]** [feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product](./03-lessons/2026-05-08-feed-adapter-counter-example-agent-autonomous-concept-stone-misread-as-product.md)
 - **[2026-05-07]** [real-world-skill-repo-structure-survey](./03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md)
