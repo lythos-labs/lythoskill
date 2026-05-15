@@ -1,6 +1,6 @@
 {
   "name": "@lythos/project-cortex",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Project governance CLI — tasks, epics, ADRs, wiki indexing",
   "keywords": [
     "ai-agent",

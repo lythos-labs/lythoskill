@@ -49,7 +49,7 @@ Note: Claude `-p` mode has known issues with web tools in Bun.spawn (deferred to
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena@0.13.1 <command>
+bunx @lythos/skill-arena@0.13.2 <command>
 ```
 
 ## Quick Start
@@ -85,23 +85,23 @@ bunx @lythos/skill-arena@latest vs --config ./arena.toml
 
 ```bash
 # Print execution plan without running
-bunx @lythos/skill-arena@0.13.1 vs --config arena.toml --dry-run
+bunx @lythos/skill-arena@0.13.2 vs --config arena.toml --dry-run
 
 # Execute with per-side runs_per_side and statistical aggregation
-bunx @lythos/skill-arena@0.13.1 vs --config arena.toml
+bunx @lythos/skill-arena@0.13.2 vs --config arena.toml
 ```
 
 ### Scaffold mode (legacy, manual execution)
 
 ```
-bunx @lythos/skill-arena@0.13.1 scaffold --task "Generate auth flow diagram" \
+bunx @lythos/skill-arena@0.13.2 scaffold --task "Generate auth flow diagram" \
   --decks https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml
 ```
 
 ### Viz
 
 ```bash
-bunx @lythos/skill-arena@0.13.1 viz runs/arena-<id>/
+bunx @lythos/skill-arena@0.13.2 viz runs/arena-<id>/
 ```
 
 ## Skill Documentation
@@ -115,7 +115,7 @@ The agent-visible **Skill** layer documentation is here:
 Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
 
 ```
-Starter (this package) → npm publish → bunx @lythos/skill-arena@0.13.1 ...
+Starter (this package) → npm publish → bunx @lythos/skill-arena@0.13.2 ...
 Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
 Output  (skills/<name>/)             → git commit → agent-visible skill
 ```
