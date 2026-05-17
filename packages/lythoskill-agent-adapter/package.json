@@ -1,6 +1,6 @@
 {
   "name": "@lythos/agent-adapter",
-  "version": "0.13.3",
+  "version": "0.14.0",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
