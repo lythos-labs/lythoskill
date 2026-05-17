@@ -29,18 +29,33 @@ Read arena SKILL.md → prepare-workdir → preflight → task → self-judge �
 | Skill under test | frontend-design (Anthropic) |
 | Deck | Single skill, no brand-guidelines |
 | Task | "Generate a 'Subscribe' button HTML component" |
-| Model | DeepSeek4Pro (user-configured) |
+| Models | DeepSeek4Pro, Kimi K2.6 |
+
+## Three-Model Cross-Comparison
+
+Same `reproduce.sh`, same `frontend-design` skill, same task brief. Three independent agents. Three radically different designs — all valid.
+
+| | DeepSeek4Pro (origin) | DeepSeek4Pro (replay) | Kimi K2.6 |
+|---|---|---|---|
+| **Aesthetic** | Luxury Editorial | Luxury Editorial | Neo-Brutalist |
+| **Palette** | `#0e0c08` + gold | Dark + gold | `#f4f1ea` + `#ff2a6d` + `#05d9e8` |
+| **Typography** | Playfair Display + DM Mono | Playfair Display | Archivo Black + Space Mono |
+| **Borders** | Fine gold inner ring | Fine gold | 4px solid black + 8px hard shadow |
+| **Copy tone** | "Dispatches from the frontier" | Editorial | "Join the Chaos" / "No fluff. No funnels" |
+| **Decisions** | 13 | 11 | 8 |
+| **Score** | 8.7 | — | 8.7 |
+| **Code** | 9KB | 7.1KB | 3KB |
+| **File** | `side-a/decision-log.jsonl` | `replay-decision-log.jsonl` | `kimi-k2.6-decision-log.jsonl` |
+
+### Key Finding
+
+Both extremes — luxury editorial dark and neo-brutalist light — satisfy the `frontend-design` skill's constraints: no AI-slop, no banned fonts, distinctive aesthetic. The protocol is identical; the design is model-dependent. **This is exactly what arena exists to compare.**
+
+The replay subagent (DeepSeek4Pro, same model, different run) converged on the same aesthetic direction as the origin — suggesting intra-model consistency. The Kimi K2.6 diverged to a completely different valid solution — confirming inter-model variance.
 
 ## Reproduce.sh Replay (Verified)
 
-The `reproduce.sh` was independently replayed by a different subagent.
-
-| Origin | Agent | Decision Log |
-|--------|-------|-------------|
-| First run | DeepSeek4Pro (zero-knowledge) | 13 entries — `decision-log.jsonl` |
-| Replay | DeepSeek4Pro | 11 entries — `replay-decision-log.jsonl` |
-
-SHA-256 checksums match between workdir and archive. Both agents produced the same structure: `subscribe-button.html` + `decision-log.jsonl`.
+The `reproduce.sh` was independently replayed by a different DeepSeek4Pro subagent. SHA-256 checksums match between workdir and archive. Same structure: `subscribe-button.html` + `decision-log.jsonl`.
 
 ### Why reproduce.sh Is Agent-Only
 

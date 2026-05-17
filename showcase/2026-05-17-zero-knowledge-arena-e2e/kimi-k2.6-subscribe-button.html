@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscribe — Neo-Brutalist Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --ink: #0a0a0a;
+    --accent: #ff2a6d;
+    --accent-2: #05d9e8;
+    --border: 4px solid var(--ink);
+    --shadow: 8px 8px 0px var(--ink);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Space Mono', monospace;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .subscribe-card {
+    background: #fff;
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .subscribe-card::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 160px;
+    height: 160px;
+    background: var(--accent-2);
+    border: var(--border);
+    border-radius: 50%;
+    z-index: 0;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .subscribe-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -40px;
+    width: 120px;
+    height: 120px;
+    background: var(--accent);
+    border: var(--border);
+    z-index: 0;
+    animation: float 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    50% { transform: translate(10px, -15px) rotate(5deg); }
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .tag {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 0.35rem 0.7rem;
+    margin-bottom: 1.25rem;
+    border: var(--border);
+  }
+
+  h1 {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .highlight {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 6px;
+    text-underline-offset: 4px;
+  }
+
+  p.lead {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    opacity: 0.85;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  input[type="email"] {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    padding: 1rem 1.25rem;
+    border: var(--border);
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  input[type="email"]::placeholder {
+    color: var(--ink);
+    opacity: 0.4;
+  }
+
+  input[type="email"]:focus {
+    box-shadow: 6px 6px 0px var(--accent-2);
+    transform: translate(-2px, -2px);
+  }
+
+  .btn-subscribe {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 2rem;
+    border: var(--border);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 6px 6px 0px var(--ink);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-subscribe::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.25);
+    transform: skewX(-20deg);
+    transition: left 0.4s ease;
+  }
+
+  .btn-subscribe:hover::before {
+    left: 120%;
+  }
+
+  .btn-subscribe:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 9px 9px 0px var(--ink);
+  }
+
+  .btn-subscribe:active {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0px var(--ink);
+  }
+
+  .btn-subscribe:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: 3px 3px 0px var(--ink);
+    transform: translate(2px, 2px);
+  }
+
+  .feedback {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 0.75rem;
+    min-height: 1.4em;
+  }
+
+  .feedback.success { color: #00c853; }
+  .feedback.error { color: #ff1744; }
+
+  .trust {
+    margin-top: 1.5rem;
+    font-size: 0.7rem;
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .trust svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--ink);
+    stroke-width: 2;
+    fill: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .subscribe-card::before,
+    .subscribe-card::after,
+    .btn-subscribe::before {
+      animation: none;
+      transition: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <article class="subscribe-card" aria-label="Newsletter subscription">
+    <div class="content">
+      <span class="tag">Weekly Drop</span>
+      <h1>Join the <span class="highlight">Chaos</span></h1>
+      <p class="lead">No fluff. No funnels. Just raw design energy delivered to your inbox every Monday.</p>
+
+      <form class="form-group" id="subForm" novalidate>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="you@domain.com"
+          aria-label="Email address"
+          required
+        />
+        <button type="submit" class="btn-subscribe" id="submitBtn" aria-live="polite">
+          Subscribe Now
+        </button>
+      </form>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <div class="trust">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        No spam. Unsubscribe anytime. 12,847 designers already in.
+      </div>
+    </div>
+  </article>
+
+<script>
+  const form = document.getElementById('subForm');
+  const btn = document.getElementById('submitBtn');
+  const feedback = document.getElementById('feedback');
+  const emailInput = document.getElementById('email');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+
+    if (!email || !emailInput.checkValidity()) {
+      feedback.textContent = 'Please enter a valid email address.';
+      feedback.className = 'feedback error';
+      emailInput.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+
+    setTimeout(() => {
+      btn.textContent = 'Subscribed ✓';
+      btn.style.background = 'var(--accent-2)';
+      feedback.textContent = 'Welcome to the chaos. Check your inbox.';
+      feedback.className = 'feedback success';
+      emailInput.value = '';
+    }, 1200);
+  });
+</script>
+</body>
+</html>
