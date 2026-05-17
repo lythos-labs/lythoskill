@@ -43,5 +43,9 @@ export function createWiki(title: string, config: WorkflowConfig, category: stri
   const template = createWikiTemplate(title, today, category.replace(/s$/, ''));
   writeFileSync(filepath, template);
 
-  console.log(`✅ Created: ${filepath}`);
+  console.log(`✅ Step 1/3: CLI created → ${filepath}`);
+  console.log(`🔄 Step 2/3: YOUR TURN — edit the file, fill these sections:`);
+  console.log(`   Context / Details / When to Apply or Not / Related`);
+  console.log(`   After you complete Step 2, continue to:`);
+  console.log(`⏳ Step 3/3: Verify with 'cortex probe' before commit`);
 }
