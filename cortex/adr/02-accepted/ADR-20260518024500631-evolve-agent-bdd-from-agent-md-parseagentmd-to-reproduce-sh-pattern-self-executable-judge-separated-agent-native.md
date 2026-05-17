@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-18 | Created |
+| accepted | 2026-05-17 | Accepted |
 
 ## 背景
 
@@ -52,19 +53,25 @@ Refs: ADR-20260514050300 (arena judge separation), wiki 2026-05-17-arena-cli-arc
 
 ### 方案 B：reproduce.sh 作为一等公民 — Selected
 
-`reproduce.sh` 成为 Agent BDD 的标准 scenario 格式：
+`reproduce.sh` 不是全自动测试脚本——它是 **shell scaffold + IoC handoff**：
+- Shell 负责确定性操作（deck 创建、prepare-workdir、archive）
+- stdout 作为 agent prompt injection 通道——当 agent 读到 `echo "<spawn subagent to ...>"` 时，它识别这是自己的角色并接管推理
+- 人类 `bash reproduce.sh` 看到的是不完整的 echo——只有 agent 能完成
+
+这个模式不是被设计的，是被发现的。zero-knowledge arena e2e 的 reproduce.sh 里，第一个 subagent 自发写了 `echo` 作为 prompt 通道，重放 agent 在没有 schema 的情况下理解了这个约定。
+
 ```
 showcase/<date>-<name>/
-├── reproduce.sh          # 可执行 scenario
-├── README.md             # 人类可读描述 + verdict
-├── judge.md              # criteria（arena.toml judge 字段引用）
-└── decision-log.jsonl    # agent 推理日志
+├── reproduce.sh          # scaffold + IoC handoff（Step 3 = agent trigger）
+├── README.md             # 人类可读描述 + verdict checklist
+├── decision-log.jsonl    # agent 推理日志（agent 在 Step 3 产出）
+└── judge.md              # criteria（可选，arena.toml judge 字段引用）
 ```
 
-arena / BDD runner 直接执行 reproduce.sh，捕获 exit code + stdout/stderr，写入 runs/ verdict。
+arena / BDD runner 执行 reproduce.sh，在 stdout 中识别 IoC 标记 → 接管 agent 步骤 → 收集 decision-log.jsonl → 写入 verdict。
 
-- 优点：自执行、无 parser、agent-native、arena 对齐
-- 缺点：需要新的 runner 路径（轻量——本质是 `Bun.spawn('bash reproduce.sh')`）
+- 优点：IoC 原生、无 parser、agent-native、人类可读但不完全可执行
+- 缺点：BDD runner 需要理解 IoC handoff 约定（识别 stdout 中的 agent trigger 标记）
 
 ### 方案 C：混合 — reproduce.sh 新场景，.agent.md 现存不动 — Transition
 
@@ -74,10 +81,11 @@ arena / BDD runner 直接执行 reproduce.sh，捕获 exit code + stdout/stderr�
 
 **选择：方案 B（reproduce.sh 一等公民），方案 C 作为过渡期并存。**
 
-1. reproduce.sh 是 agent 的自然输出——不需要教 agent 学新格式
-2. 解决命名冲突（`.agent.md` 消亡）
-3. arena 已走通 Judge 分离路径，BDD 直接复用
-4. 自可执行性 → coverage dashboard 可构建
+1. reproduce.sh 是 agent 的 IoC 原生输出——shell 做确定性 scaffold，stdout 做 prompt injection 触发 agent 推理。不需要教 agent 学新格式
+2. 解决命名冲突（`.agent.md` 消亡，不与 `AGENTS.md` 混淆）
+3. arena 已走通 Judge 分离路径，BDD 直接复用——judge 从 stdin/brief 中消失
+4. IoC handoff 模式可被 BDD runner 标准化识别（stdout 中的 `<spawn subagent>` 等约定标记）
+5. Coverage dashboard 扫 `showcase/*/reproduce.sh` → 在 IoC 标记处注入 agent → 收集 decision-log → 汇总 verdict
 
 **实施优先级**：
 1. Phase 1: reproduce.sh 契约规范（exit code、stdout 格式、metadata 约定）
@@ -101,6 +109,8 @@ arena / BDD runner 直接执行 reproduce.sh，捕获 exit code + stdout/stderr�
 ## 相关
 
 - ADR-20260514050300 (arena judge criteria separation) — 同一问题类的 arena 侧解
-- wiki 2026-05-17-arena-cli-archaeology-and-agent-os-design-principles.md
-- wiki 2026-05-17-arena-as-empirical-rule-validation.md
-- 关联 EPIC: EPIC-20260518024500632 (待创建)
+- wiki `shell-stdout-as-agent-prompt-injection.md` — reproduce.sh 的 IoC 机制：shell 做 scaffold，stdout 做 prompt injection，agent 在 echo 标记处接管推理。不是被设计的，是被发现的
+- wiki `control-transfer-protocol-cli-agent-boundary-as-interrupt-vector-table.md` — OS 隐喻：CLI = user space (确定性操作)，Agent = kernel space (推理)。stdout/stderr 是 interrupt vector，三种中断类型（Prompt Injection / Error as Interrupt / Guard Violation）
+- wiki `annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior.md` — agent-facing 代码注释作为 IoC
+- wiki `2026-05-17-arena-cli-archaeology-and-agent-os-design-principles.md` — arena CLI 地层学：agent 行为灾难驱动出的防御性架构
+- 关联 EPIC: EPIC-20260518024809887
