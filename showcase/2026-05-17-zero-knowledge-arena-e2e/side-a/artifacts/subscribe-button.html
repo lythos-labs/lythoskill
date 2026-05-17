@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscribe — Lythos Editions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c8a84e;
+    --gold-bright: #e4c76b;
+    --gold-dim: #8b7230;
+    --bg-deep: #0e0c08;
+    --bg-surface: #1a1610;
+    --ink: #f0ebe0;
+    --ink-dim: #a09880;
+    --ink-muted: #5c5646;
+    --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --font-mono: 'DM Mono', 'Courier New', monospace;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--bg-deep);
+    font-family: var(--font-mono);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ── Atmospheric background ── */
+  .atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .atmosphere::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200, 168, 78, 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 20% 80%, rgba(200, 168, 78, 0.04) 0%, transparent 60%);
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ── Card container ── */
+  .subscribe-card {
+    position: relative;
+    z-index: 1;
+    width: min(520px, 90vw);
+    padding: 3.5rem 2.5rem;
+    background: var(--bg-surface);
+    border: 1px solid rgba(200, 168, 78, 0.15);
+    border-radius: 2px;
+    opacity: 0;
+    transform: translateY(24px);
+    animation: card-reveal 0.9s var(--ease-out-expo) 0.1s forwards;
+  }
+
+  /* ── Subtle inner border accent ── */
+  .subscribe-card::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(200, 168, 78, 0.08);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+
+  @keyframes card-reveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Typography ── */
+  .overline {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.3s forwards;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+    opacity: 0;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.45s forwards;
+  }
+
+  .title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .description {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.6s forwards;
+  }
+
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+
+  /* ── Form ── */
+  .subscribe-form {
+    display: flex;
+    gap: 0;
+    opacity: 0;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.75s forwards;
+  }
+
+  .input-group {
+    flex: 1;
+    position: relative;
+  }
+
+  .email-input {
+    width: 100%;
+    height: 52px;
+    padding: 0 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(200, 168, 78, 0.2);
+    border-right: none;
+    border-radius: 2px 0 0 2px;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    outline: none;
+    transition: border-color 0.35s ease, background 0.35s ease;
+  }
+
+  .email-input::placeholder {
+    color: var(--ink-muted);
+    font-style: italic;
+    letter-spacing: 0.06em;
+  }
+
+  .email-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(200, 168, 78, 0.45);
+  }
+
+  .subscribe-btn {
+    position: relative;
+    height: 52px;
+    padding: 0 2rem;
+    background: linear-gradient(
+      175deg,
+      var(--gold-bright) 0%,
+      var(--gold) 40%,
+      var(--gold-dim) 100%
+    );
+    border: none;
+    border-radius: 0 2px 2px 0;
+    color: var(--bg-deep);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.25s var(--ease-out-expo), box-shadow 0.35s ease;
+  }
+
+  /* ── Button shine layer ── */
+  .subscribe-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.15) 100%
+    );
+    border-radius: 0 2px 2px 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  /* ── Button hover glow ── */
+  .subscribe-btn::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 2px;
+    background: var(--gold-bright);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.35s ease, filter 0.35s ease;
+    filter: blur(12px);
+  }
+
+  .subscribe-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(200, 168, 78, 0.2);
+  }
+
+  .subscribe-btn:hover::after {
+    opacity: 0.35;
+  }
+
+  .subscribe-btn:hover::before {
+    opacity: 0.6;
+  }
+
+  .subscribe-btn:active {
+    transform: translateY(0) scale(0.985);
+    transition: transform 0.1s var(--ease-out-expo);
+  }
+
+  /* ── Success state ── */
+  .subscribe-card.success .subscribe-form {
+    display: none;
+  }
+
+  .success-message {
+    display: none;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--gold);
+    text-align: center;
+    opacity: 0;
+  }
+
+  .subscribe-card.success .success-message {
+    display: block;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.2s forwards;
+  }
+
+  /* ── Fine print ── */
+  .fine-print {
+    margin-top: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    opacity: 0;
+    animation: fade-in 0.6s var(--ease-out-expo) 0.9s forwards;
+  }
+</style>
+</head>
+<body>
+
+<div class="atmosphere"></div>
+<div class="noise"></div>
+
+<article class="subscribe-card" id="subscribeCard">
+  <p class="overline">The Journal</p>
+  <h1 class="title">Receive <em>dispatches</em> from the frontier.</h1>
+  <p class="description">
+    One essay per month. No algorithms. No noise. Just careful thinking delivered to your inbox.
+  </p>
+
+  <form class="subscribe-form" id="subscribeForm" autocomplete="off">
+    <div class="input-group">
+      <input
+        type="email"
+        class="email-input"
+        id="emailInput"
+        placeholder="your@address.com"
+        required
+        aria-label="Email address"
+      >
+    </div>
+    <button type="submit" class="subscribe-btn" id="subscribeBtn">
+      Subscribe
+    </button>
+  </form>
+
+  <p class="success-message" id="successMessage">
+    Welcome. Your first dispatch arrives Sunday.
+  </p>
+
+  <p class="fine-print">
+    No spam. Unsubscribe anytime with a single click.<br>
+    We use Buttondown for delivery.
+  </p>
+</article>
+
+<script>
+  const card = document.getElementById('subscribeCard');
+  const form = document.getElementById('subscribeForm');
+  const btn = document.getElementById('subscribeBtn');
+  const input = document.getElementById('emailInput');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    if (!input.checkValidity()) {
+      input.classList.add('invalid');
+      input.style.borderColor = 'rgba(220, 80, 60, 0.6)';
+      setTimeout(() => {
+        input.style.borderColor = 'rgba(200, 168, 78, 0.2)';
+      }, 800);
+      return;
+    }
+
+    // Loading state
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+    btn.style.cursor = 'wait';
+
+    // Simulate submission
+    setTimeout(() => {
+      card.classList.add('success');
+    }, 900);
+  });
+
+  // Restore button state on input change (for retry UX)
+  input.addEventListener('input', function() {
+    if (btn.disabled) {
+      btn.textContent = 'Subscribe';
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      card.classList.remove('success');
+    }
+  });
+</script>
+
+</body>
+</html>
