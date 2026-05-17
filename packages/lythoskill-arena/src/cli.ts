@@ -100,6 +100,8 @@ Examples:
   lythoskill-arena vs --config arena.toml --dry-run
   lythoskill-arena vs --config arena.toml
   lythoskill-arena viz runs/arena-20260504
+  lythoskill-arena prepare-workdir --deck ./decks/scout.toml --out /tmp/arena-20260517-side-a
+  lythoskill-arena archive --from /tmp/arena-20260517 --to playground/arena-20260517 --sides side-a,side-b
 `)
     process.exit(0)
   }
@@ -113,6 +115,8 @@ function cli(args: string[]) {
   if (cmd === 'vs' || cmd === 'compare') return vsRun(rest)
   if (cmd === 'single' || cmd === 'run') return singleRun(rest)
   if (cmd === 'viz') return vizRun(rest)
+  if (cmd === 'prepare-workdir') return prepareWorkdir(rest)
+  if (cmd === 'archive') return archiveRun(rest)
 
   console.error(`Unknown command: ${cmd}`)
   process.exit(1)
@@ -429,6 +433,154 @@ async function vizRun(args: string[]) {
   if (!existsSync(arenaJsonPath)) { console.error(`❌ arena.json not found in: ${runsDir}`); process.exit(1) }
 
   console.log(`📈 Arena HTML report not yet implemented. See report.md in ${runsDir}/`)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── prepare-workdir: reusable workdir setup (used by both CLI and agent) ──
+// Intent: create an isolated arena workdir with deck linked and ready to run
+
+async function prepareWorkdir(args: string[]) {
+  const opts: Record<string, string | undefined> = {}
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--deck' || args[i] === '-d') opts.deck = args[++i]
+    else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
+    else if (args[i] === '--brief' || args[i] === '-b') opts.brief = args[++i]
+  }
+
+  if (!opts.deck) {
+    console.error(`❌ --deck <path> is required.
+   lythoskill-arena prepare-workdir --deck ./skill-deck.toml --out /tmp/arena-side-a`)
+    process.exit(1)
+  }
+
+  const deckPath = resolve(opts.deck)
+  if (!existsSync(deckPath)) {
+    console.error(`❌ Deck file not found: ${deckPath}`)
+    process.exit(1)
+  }
+
+  const workDir = opts.out
+    ? resolve(opts.out)
+    : join(tmpdir(), `arena-${Date.now()}`)
+  mkdirSync(workDir, { recursive: true })
+
+  // Copy deck into workdir
+  writeFileSync(join(workDir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
+
+  // Write AGENTS.md (same contract as CLI singleRun)
+  writeFileSync(join(workDir, 'AGENTS.md'), [
+    '# Arena Test Environment',
+    '**Mode**: agent-orchestrated cell',
+    '## How This Works',
+    '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
+    '- Complete the task using available skills. Output to this directory.',
+    '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
+  ].join('\n'))
+
+  // Parse deck for link + checks
+  const deckRaw = readFileSync(join(workDir, 'skill-deck.toml'), 'utf-8')
+  let deckParsed: Record<string, any> = {}
+  try { deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any> } catch {}
+  const hasSkills = parseDeckSkills(deckParsed).length > 0
+
+  if (hasSkills) {
+    const { existsSync: es2 } = await import('node:fs')
+    const localDeckCli = join(import.meta.dir, '..', '..', 'lythoskill-deck', 'src', 'cli.ts')
+    const linkCmd = es2(localDeckCli)
+      ? ['bun', localDeckCli, 'link']
+      : ['bunx', '@lythos/skill-deck', 'link']
+    const linkProc = Bun.spawn(linkCmd,
+      { cwd: workDir, env: { ...process.env, HOME: process.env.HOME! } },
+    )
+    await linkProc.exited
+    const linkStderr = await new Response(linkProc.stderr).text()
+    const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
+    if (!linkResult.ok) {
+      console.error(`❌ ${linkResult.error}`)
+      process.exit(1)
+    }
+  } else {
+    console.log('ℹ️  No skills declared in deck — skipping link')
+  }
+
+  // Skill existence check
+  try {
+    const coldPoolDefault = join(homedir(), '.agents', 'skill-repos')
+    const coldPoolDir = resolveColdPoolDir(deckParsed?.deck?.cold_pool, homedir(), coldPoolDefault)
+    const skills = parseDeckSkills(deckParsed)
+    const checks = checkSkillExistence(skills, coldPoolDir, existsSync)
+    for (const warning of formatSkillWarnings(checks)) {
+      console.warn(`⚠️  ${warning}`)
+    }
+  } catch (e) {
+    console.warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
+  }
+
+  console.log(`✅ Workdir ready → ${workDir}`)
+  console.log(`   deck: ${deckPath}`)
+  if (opts.brief) console.log(`   brief: ${opts.brief!.slice(0, 60)}...`)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── archive: copy agent outputs from workdir(s) to outDir ─────────────────
+// Intent: same copy behavior as CLI singleRun, reusable for agent-orchestrated
+
+async function archiveRun(args: string[]) {
+  const opts: Record<string, string | undefined> = {}
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--from' || args[i] === '-f') opts.from = args[++i]
+    else if (args[i] === '--to' || args[i] === '-o') opts.to = args[++i]
+    else if (args[i] === '--sides') opts.sides = args[++i]
+    else if (args[i] === '--report') opts.report = args[++i]
+  }
+
+  if (!opts.from || !opts.to) {
+    console.error(`❌ --from <workdir> and --to <outdir> are required.
+   lythoskill-arena archive --from /tmp/arena-20260517 --to playground/arena-20260517 --sides side-a,side-b --report ./report.md`)
+    process.exit(1)
+  }
+
+  const fromDir = resolve(opts.from)
+  const outDir = resolve(opts.to)
+  mkdirSync(outDir, { recursive: true })
+
+  // Copy report if provided
+  if (opts.report && existsSync(resolve(opts.report))) {
+    const { cpSync } = await import('node:fs')
+    cpSync(resolve(opts.report), join(outDir, 'report.md'))
+    console.log(`📄 report.md → ${outDir}/report.md`)
+  }
+
+  // Copy per-side outputs (same skipSet as CLI singleRun)
+  const { cpSync, readdirSync } = await import('node:fs')
+  const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
+
+  const sides = opts.sides ? opts.sides.split(',') : ['.']
+  for (const side of sides) {
+    const sideWorkDir = side === '.' ? fromDir : join(fromDir, side)
+    if (!existsSync(sideWorkDir)) {
+      console.warn(`⚠️  Side workdir not found: ${sideWorkDir}`)
+      continue
+    }
+
+    const sideOutDir = join(outDir, side)
+    mkdirSync(sideOutDir, { recursive: true })
+
+    const entries = readdirSync(sideWorkDir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (skipSet.has(entry.name)) continue
+      const src = join(sideWorkDir, entry.name)
+      const dest = join(sideOutDir, entry.name)
+      try {
+        cpSync(src, dest, { recursive: entry.isDirectory() })
+        console.log(`   ${side}/${entry.name} → ${dest}`)
+      } catch (e) {
+        console.warn(`⚠️  Failed to copy ${side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
+      }
+    }
+  }
+
+  console.log(`✅ Archive complete → ${outDir}`)
 }
 
 // ── Entry point ────────────────────────────────────────────────────────────

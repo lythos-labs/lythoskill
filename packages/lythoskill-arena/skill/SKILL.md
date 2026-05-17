@@ -113,16 +113,23 @@ See `references/player-setup.md` for player discovery, installation, and API key
 
 ### 1. Setup — isolate per side
 
-For EACH side, create an isolated workdir in `/tmp/` (never in project root or any committed directory):
+For EACH side, use `prepare-workdir` (same behavior as CLI `single` mode):
 
 ```bash
-mkdir -p /tmp/arena-{timestamp}/work/{side}/
-cd /tmp/arena-{timestamp}/work/{side}
-# Write skill-deck.toml with this side's skills
-bunx @lythos/skill-deck@latest link --deck skill-deck.toml --cold-pool ~/.agents/skill-repos
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} prepare-workdir \
+  --deck ./side-a.toml \
+  --out /tmp/arena-$(date +%Y%m%d-%H%M%S)-side-a \
+  --brief "task description"
 ```
 
-> **Sandbox discipline**: `/tmp` is the experiment sandbox. Copy outputs to your project's artifact directory (e.g. `--out ./output/` or a docs/showcase dir) after the run. Never run experiments in committed directories.
+What `prepare-workdir` does (same as CLI single mode):
+1. Creates workdir in `/tmp/`
+2. Copies deck into workdir
+3. Writes `AGENTS.md` with decision-log contract
+4. Runs `deck link`
+5. Checks skill existence in cold pool
+
+> **Sandbox discipline**: `/tmp` is the experiment sandbox. Never run experiments in committed directories.
 
 ### 2. Preflight self-check (BEFORE dispatch)
 
@@ -149,13 +156,46 @@ All subagents run in PARALLEL. Each writes to its own isolated workdir. No file 
 
 > **Platform note**: `run_in_background` (or your platform's async spawn equivalent) keeps parent unblocked. Subagent inherits parent CWD — include `"Your working directory is {workDir}"` in the prompt so it cd's to the right place. Subagent skills load from `.claude/skills/` in that workdir.
 
-### 4. Collect + Judge + Report
+### 4. Collect + Judge + Report + Archive
 
 After ALL complete:
-- Collect artifacts + decision-log.jsonl per side
+
+**1. Collect**
+- Gather artifacts + `decision-log.jsonl` from each side's workdir
+
+**2. Judge**
 - Spawn judge subagent with all artifacts as context
-- Judge scores per criteria → write `report.md`
-- RESTORE parent deck: `deck link --deck ./skill-deck.toml`
+- Score per criteria → write `report.md`
+
+**3. Archive (same behavior as CLI `--out`)**
+
+Use `archive` command (same copy logic as CLI `single` mode):
+
+```bash
+bunx @lythos/skill-arena@{{PACKAGE_VERSION}} archive \
+  --from /tmp/arena-$(date +%Y%m%d-%H%M%S) \
+  --to playground/arena-$(date +%Y%m%d-%H%M%S) \
+  --sides side-a,side-b \
+  --report ./report.md
+```
+
+What `archive` does (same as CLI `--out`):
+1. Creates outDir
+2. Copies report.md
+3. Copies per-side outputs (skips `.claude`, `skill-deck.toml`, `skill-deck.lock`, `AGENTS.md`)
+4. Preserves directory structure
+
+**Archive contract** (same as CLI default):
+| File | Required | Purpose |
+|------|----------|---------|
+| `report.md` | YES | Comparative analysis + verdict |
+| `README.md` | YES | Deck configs, task brief, run metadata |
+| `{side}/decision-log.jsonl` | YES | Agent reasoning per side |
+| `{side}/artifacts/*` | YES | HTML, docx, pdf, etc. |
+| `reproduce.sh` | NO | One-command replay |
+
+**4. Restore**
+- `deck link --deck ./skill-deck.toml`
 
 ## Reference passing (don't inline large context)
 
@@ -211,7 +251,7 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
 |-----------|-------------|---------------------|
 | `run_in_background` | Async spawn. Parent continues. Completion triggers notification. | Does NOT change subagent CWD. Must set via prompt. |
 | `prompt` | Initial instructions to subagent. | Does NOT auto-load skills. Skills load from subagent's actual workdir. |
-| `subagent_type` | Which agent impl handles the task. | Does NOT control model (Claude vs Kimi). Model is host config. |
+| `subagent_type` | Which agent implementation (claude, general-purpose, etc.) handles the task. | Does NOT set cross-player mode. Cross-player requires CLI runner with `--player`. |
 
 ## Supporting References
 
