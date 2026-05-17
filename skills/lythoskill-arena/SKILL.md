@@ -38,15 +38,17 @@ deck_managed_dirs:
 ```
 User says: "test/compare/arena/benchmark/A vs B"
     │
-    ├── Different PLAYERS? (kimi vs codex vs claude)
-    │     → CLI runner REQUIRED
+    ├── Cross-PLAYER? (kimi vs codex vs claude)
+    │   OR user explicitly says useAgent/specific player
+    │   OR platform doesn't support Agent tool subagents
+    │     → CLI runner REQUIRED (useAgent → Bun.spawn)
     │     → bunx @lythos/skill-arena vs --config arena.toml
     │     → Each side spawns its player CLI process
     │
     └── Same player, different DECKS? (DEFAULT)
           → Agent-orchestrated — NO CLI
           → YOU spawn subagents via Agent tool
-          → Isolated workdirs + per-deck link + parallel dispatch
+          → CLI prepare-workdir + CLI archive + parallel dispatch
           → Judge subagent collects + scores
 ```
 
@@ -58,12 +60,12 @@ User says: "test/compare/arena/benchmark/A vs B"
 flowchart TD
     A[Parse request: single or vs?] --> B{Cross-PLAYER?}
     B -->|Yes| C[CLI: bunx arena vs --config]
-    B -->|No — DEFAULT| D[PREFLIGHT: per-side workDir + deck link]
+    B -->|No — DEFAULT| D[PREPARE: CLI prepare-workdir × N sides]
     D --> E[SPAWN: Agent tool × N, parallel]
     E --> F[WAIT: all subagents complete]
     F --> G[COLLECT: artifacts + decision-logs]
     G --> H[JUDGE: spawn judge subagent]
-    H --> I[REPORT: write report.md]
+    H --> I[ARCHIVE: CLI archive to outDir]
     I --> J[RESTORE: deck link parent deck]
 ```
 
@@ -122,14 +124,7 @@ bunx @lythos/skill-arena@0.14.0 prepare-workdir \
   --brief "task description"
 ```
 
-What `prepare-workdir` does (same as CLI single mode):
-1. Creates workdir in `/tmp/`
-2. Copies deck into workdir
-3. Writes `AGENTS.md` with decision-log contract
-4. Runs `deck link`
-5. Checks skill existence in cold pool
-
-> **Sandbox discipline**: `/tmp` is the experiment sandbox. Never run experiments in committed directories.
+> `/tmp` is the experiment sandbox. Never run experiments in committed directories.
 
 ### 2. Preflight self-check (BEFORE dispatch)
 
@@ -179,13 +174,7 @@ bunx @lythos/skill-arena@0.14.0 archive \
   --report ./report.md
 ```
 
-What `archive` does (same as CLI `--out`):
-1. Creates outDir
-2. Copies report.md
-3. Copies per-side outputs (skips `.claude`, `skill-deck.toml`, `skill-deck.lock`, `AGENTS.md`)
-4. Preserves directory structure
-
-**Archive contract** (same as CLI default):
+**Archive contract** (same skipSet as CLI `--out`: skips `.claude`, `skill-deck.toml`, `skill-deck.lock`, `AGENTS.md`) (same as CLI default):
 | File | Required | Purpose |
 |------|----------|---------|
 | `report.md` | YES | Comparative analysis + verdict |
