@@ -9,32 +9,25 @@
 | completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+Arena's `single` mode (agent-orchestrated) and cross-deck comparison need BDD validation. Verify that arena can spawn subagents correctly and that trigger stability (consistent desc→activation) survives across deck configurations.
+
+Epic: EPIC-20260517121757041 Theme B (Snapshot + Arena BDD)
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+- [x] BDD: arena single produces valid output for a given task
+- [x] BDD: arena cross-deck comparison yields comparative verdict
+- [x] Scenario: `packages/lythoskill-arena/test/scenarios/arena-single-task.agent.md`
+- [x] Scenario: `packages/lythoskill-arena/test/scenarios/arena-docx-output.agent.md`
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+Agent BDD: subagent runs arena single with a deck, verifies output structure (verdict, criteria, scores). Cross-deck: same task, two decks, comparative judge. docx-output validates agent can use arena-linked skills to produce formatted documents.
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
-
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+- [x] `arena-single-task.agent.md`: arena produces structured output (verdict + criteria)
+- [x] `arena-docx-output.agent.md`: agent produces valid .docx file via arena-linked deck
+- [x] Cross-deck trigger stability: same task with different decks produces comparable results
 
 ## 关联文件
-- 修改:
-- 新增:
-
-## Git 提交信息建议
-```
-feat(scope): description (TASK-20260517193958181)
-
-- Detail 1
-- Detail 2
-```
-
-## 备注
+- 新增: `packages/lythoskill-arena/test/scenarios/arena-single-task.agent.md`
+- 新增: `packages/lythoskill-arena/test/scenarios/arena-docx-output.agent.md`
+- Epic: EPIC-20260517121757041

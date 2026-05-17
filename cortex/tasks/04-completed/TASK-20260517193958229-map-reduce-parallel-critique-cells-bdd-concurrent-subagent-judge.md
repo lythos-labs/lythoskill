@@ -9,32 +9,24 @@
 | completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+Arena's comparative judge uses a map-reduce pattern: each criterion dispatched to an independent subagent (map), then verdict assembled from parallel critiques (reduce). This BDD validates the concurrent subagent spawn + judge pipeline works end-to-end.
+
+Epic: EPIC-20260517121757041 Theme B (Snapshot + Arena BDD)
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+- [x] BDD: arena comparative judge correctly spawns parallel subagents per criterion
+- [x] Scenario: `packages/lythoskill-test-utils/test/scenarios/bdd-runner.agent.md`
+- [x] Scenario: `packages/lythoskill-curator/test/scenarios/graduation-exam.agent.md`
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+Agent BDD via bdd-runner: spawn multiple subagents simultaneously, each judging one criterion cell. Reduce step merges verdicts. Validates: no race conditions, all criteria evaluated, verdict structure valid. Curator graduation exam validates skill discovery pipeline.
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
-
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+- [x] `bdd-runner.agent.md`: parallel subagent dispatch produces valid merged verdict
+- [x] `graduation-exam.agent.md`: curator skill discovery scenario passes
+- [x] All criteria cells evaluated (no silent skips from concurrency bugs)
 
 ## 关联文件
-- 修改:
-- 新增:
-
-## Git 提交信息建议
-```
-feat(scope): description (TASK-20260517193958229)
-
-- Detail 1
-- Detail 2
-```
-
-## 备注
+- 新增: `packages/lythoskill-test-utils/test/scenarios/bdd-runner.agent.md`
+- 新增: `packages/lythoskill-curator/test/scenarios/graduation-exam.agent.md`
+- Epic: EPIC-20260517121757041

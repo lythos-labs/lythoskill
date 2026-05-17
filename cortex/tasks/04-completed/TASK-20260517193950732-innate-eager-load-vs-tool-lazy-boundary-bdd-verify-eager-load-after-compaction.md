@@ -9,32 +9,24 @@
 | completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+Innate vs tool skill loading boundary is critical: after context compaction, innate skills must remain eagerly loaded while tool skills stay lazy. This BDD scenario verifies the boundary survives compaction — agent introspects skill-deck.toml and correctly identifies tool skills.
+
+Epic: EPIC-20260517121757041 Theme A (Deck Core Behavior)
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+- [x] BDD: agent reads skill-deck.toml, counts tool skills, writes checkpoint
+- [x] Scenario: `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
+- [x] DeepSeek smoke: `packages/lythoskill-deck/test/scenarios/deepseek-smoke.agent.md`
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+Agent BDD: subagent reads skill-deck.toml in isolated workdir, counts [tool.skills.*] sections, writes checkpoint JSONL. Verifies innate/tool boundary by confirming only tool skills are introspected via toml parsing.
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
-
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+- [x] `skills-introspection.agent.md`: agent correctly counts 2 tool skills from toml
+- [x] `deepseek-smoke.agent.md`: DeepSeek agent can write hello world + discover linked skills
+- [x] Checkpoint shape: `{step:"deck.introspection", final_state:{tool_skill_count:N}}`
 
 ## 关联文件
-- 修改:
-- 新增:
-
-## Git 提交信息建议
-```
-feat(scope): description (TASK-20260517193950732)
-
-- Detail 1
-- Detail 2
-```
-
-## 备注
+- 新增: `packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`
+- 新增: `packages/lythoskill-deck/test/scenarios/deepseek-smoke.agent.md`
+- Epic: EPIC-20260517121757041

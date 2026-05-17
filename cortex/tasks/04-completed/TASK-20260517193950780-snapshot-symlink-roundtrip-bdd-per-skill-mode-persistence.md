@@ -9,32 +9,26 @@
 | completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+`to-symlink` / `to-snapshot` subcommands let users switch between symlink and directory-copy modes per skill. Need BDD validation that roundtrip and content integrity work correctly. Snapshot mode is critical for Codex CLI compatibility (symlink bug #11314) and version pinning.
+
+Epic: EPIC-20260517121757041 Theme B (Snapshot + Arena BDD)
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+- [x] BDD: to-snapshot creates complete directory copy, to-symlink restores symlink
+- [x] Scenario: `packages/lythoskill-deck/test/scenarios/deck-to-symlink-to-snapshot.agent.md`
+- [x] Verify content integrity: 258-line SKILL.md + 27KB example.html survive roundtrip
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+Agent BDD in `/tmp/deck-bdd-snapshot/` isolation: critique skill as symlink → `to-snapshot` → verify directory with full content → `to-symlink` → verify symlink restored. Discovery: `deck link` reconciler doesn't yet respect per-skill mode (uses symlink for everything) — documented as behavior gap, not a bug (per TASK-20260517122556223).
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
-
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+- [x] to-snapshot creates complete directory copy with all files intact
+- [x] to-symlink restores symlink pointing to cold pool source
+- [x] Roundtrip (symlink→snapshot→symlink) preserves all content
+- [ ] Snapshot preserved by `deck link` (behavior gap — future work)
 
 ## 关联文件
-- 修改:
-- 新增:
-
-## Git 提交信息建议
-```
-feat(scope): description (TASK-20260517193950780)
-
-- Detail 1
-- Detail 2
-```
-
-## 备注
+- 新增: `packages/lythoskill-deck/test/scenarios/deck-to-symlink-to-snapshot.agent.md`
+- ADR: ADR-20260507190157540 (snapshot 原始设计)
+- ADR: ADR-20260509144134332 (rename sync/freeze → to-symlink/to-snapshot)
+- Epic: EPIC-20260517121757041

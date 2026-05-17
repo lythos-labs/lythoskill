@@ -335,10 +335,50 @@ export function probeStatus(config: WorkflowConfig): void {
     console.log('     💡 If all tasks completed, close the epic: cortex epic done <id>')
   }
 
+  // ── Empty-shell detection ──────────────────────────────────────────
+  // Detect tasks/epics/adrs whose body sections still contain template
+  // placeholders (PLACEHOLDER_, 需求1, <!-- 填写). These are "empty shells"
+  // — files created by CLI but never filled by agent.
+  const emptyShells: string[] = [];
+  const EMPTY_SHELL_PATTERNS: RegExp[] = [
+    /^- \[ \] ⚠️ PLACEHOLDER_/m,
+    /^- \[ \] 需求\d/m,
+    /^<!-- 填写/m,
+  ];
+
+  function detectEmptyShells(files: string[], label: string): void {
+    for (const file of files) {
+      try {
+        const content = readFileSync(file, 'utf-8');
+        for (const pat of EMPTY_SHELL_PATTERNS) {
+          if (pat.test(content)) {
+            const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
+            const rel = relative(process.cwd(), file);
+            emptyShells.push(`${id}: ${rel}`);
+            break;
+          }
+        }
+      } catch (_) { /* skip unreadable */ }
+    }
+  }
+
+  detectEmptyShells(taskFiles, 'task');
+  detectEmptyShells(epicFiles, 'epic');
+  detectEmptyShells(adrFiles, 'adr');
+
+  if (emptyShells.length > 0) {
+    console.log('\n📭 Empty shells (template not filled):');
+    for (const s of emptyShells) {
+      console.log(`     ⚠️  ${s}`);
+    }
+    console.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
+    console.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0) {
     console.log('✅ All clear! No inconsistencies found.');
   } else {
     if (allIssues.length > 0) {

@@ -8,6 +8,7 @@
 | backlog | 2026-05-17 | Created |
 | in-progress | 2026-05-17 | Started |
 | review | 2026-05-17 | Deliverables committed |
+| completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
 `archive --sides side-a` expects `$WORKDIR/side-a/` subdirectory to exist, but `prepare-workdir` doesn't create per-side subdirectories. Agent outputs go directly to `$WORKDIR` root. Result: empty archive for single-deck tests.

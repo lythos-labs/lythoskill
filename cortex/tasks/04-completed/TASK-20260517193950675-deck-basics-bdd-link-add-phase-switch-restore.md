@@ -9,32 +9,24 @@
 | completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+Deck had zero behavioral test coverage. This BDD scenario verifies that an agent can autonomously add a skill to the deck via CLI and sync the working set.
+
+Epic: EPIC-20260517121757041 Theme A (Deck Core Behavior)
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+- [x] BDD: agent adds skill-b to deck via toml edit + `deck link` + checkpoint
+- [x] Scenario: `packages/lythoskill-deck/test/scenarios/deck-add.agent.md`
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+Agent BDD: subagent reads scenario, executes Given/When/Then/Judge in isolated `/tmp` workdir. Verifies: toml updated, symlink created, checkpoint JSONL valid.
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
-
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+- [x] `deck-add.agent.md` scenario validates: deck link creates symlink for new skill
+- [x] Checkpoint shape matches `{step:"deck.add", final_state:{added:"skill-b"}}`
+- [x] Cold pool source untouched after add
 
 ## 关联文件
-- 修改:
-- 新增:
-
-## Git 提交信息建议
-```
-feat(scope): description (TASK-20260517193950675)
-
-- Detail 1
-- Detail 2
-```
-
-## 备注
+- 新增: `packages/lythoskill-deck/test/scenarios/deck-add.agent.md`
+- 新增: `packages/lythoskill-deck/test/scenarios/deck-remove.agent.md`
+- 新增: `packages/lythoskill-deck/test/scenarios/deck-refresh.agent.md`
+- Epic: EPIC-20260517121757041
