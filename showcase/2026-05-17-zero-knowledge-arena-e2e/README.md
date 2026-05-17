@@ -29,7 +29,7 @@ Read arena SKILL.md → prepare-workdir → preflight → task → self-judge �
 | Skill under test | frontend-design (Anthropic) |
 | Deck | Single skill, no brand-guidelines |
 | Task | "Generate a 'Subscribe' button HTML component" |
-| Model | Kimi (user-configured) |
+| Model | DeepSeek4Pro (user-configured) |
 
 ## Reproduce.sh Replay (Verified)
 
@@ -37,7 +37,7 @@ The `reproduce.sh` was independently replayed by a different subagent.
 
 | Origin | Agent | Decision Log |
 |--------|-------|-------------|
-| First run | Kimi (zero-knowledge) | 13 entries — `decision-log.jsonl` |
+| First run | DeepSeek4Pro (zero-knowledge) | 13 entries — `decision-log.jsonl` |
 | Replay | DeepSeek4Pro | 11 entries — `replay-decision-log.jsonl` |
 
 SHA-256 checksums match between workdir and archive. Both agents produced the same structure: `subscribe-button.html` + `decision-log.jsonl`.
