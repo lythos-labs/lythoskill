@@ -192,7 +192,7 @@ What `archive` does (same as CLI `--out`):
 | `README.md` | YES | Deck configs, task brief, run metadata |
 | `{side}/decision-log.jsonl` | YES | Agent reasoning per side |
 | `{side}/artifacts/*` | YES | HTML, docx, pdf, etc. |
-| `reproduce.sh` | NO | One-command replay |
+| `reproduce.sh` | NO | Shell script recording `prepare-workdir` + `archive` commands (agent spawn is manual, CLI commands are reproducible) |
 
 **4. Restore**
 - `deck link --deck ./skill-deck.toml`
