@@ -471,10 +471,21 @@ async function prepareWorkdir(args: string[]) {
   writeFileSync(join(workDir, 'AGENTS.md'), [
     '# Arena Test Environment',
     '**Mode**: agent-orchestrated cell',
+    '',
+    '## Setup Order (why this sequence)',
+    '1. `skill-deck.toml` copied here → declares which skills you can use',
+    '2. `deck link` runs → cold pool skills become visible in `.claude/skills/`',
+    '3. Skill existence checked → warns if any declared skill is missing from cold pool',
+    '4. `AGENTS.md` written last → confirms setup succeeded before agent starts',
+    'If setup fails mid-sequence, the workdir is incomplete and nothing runs.',
+    '',
     '## How This Works',
-    '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
-    '- Complete the task using available skills. Output to this directory.',
-    '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
+    '- Write ALL output files to this directory (CWD).',
+    '- Use available skills — check `ls .claude/skills/`.',
+    '',
+    '## Output Contract',
+    '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
+    '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
   ].join('\n'))
 
   // Parse deck for link + checks
