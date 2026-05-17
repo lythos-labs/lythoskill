@@ -1,0 +1,5 @@
+[deck]
+max_cards = 3
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+# Minimal deck — no extra skills to isolate the agent's native TypeScript ability.
