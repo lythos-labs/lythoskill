@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/5/18 01:44:37
+> 自动生成于 2026/5/18 02:13:41
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 230 | 进行中: 0, 待验收: 1, 已完成: 196 |
 | Epics | 31 | 活跃: 1, 已完成: 26, 悬置: 2, 已归档: 2 |
-| ADRs | 72 | 已接受: 56 |
+| ADRs | 72 | 已接受: 70 |
 
 ---
 
@@ -331,14 +331,14 @@ _无_
 - ✅ **ADR-20260501090811296** (02-accepted): CI consistency check abandoned in favor of pre-commit hook for skill build
 - ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
 - ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
-- 🤔 **ADR-20260501160000000** (01-proposed): skill-deck.toml section semantics and innate skill re-attachment after context compaction
-- 🤔 **ADR-20260501170000000** (01-proposed): Description Preference Learning via Arena — Pilot Results
+- ✅ **ADR-20260501160000000** (02-accepted): skill-deck.toml section semantics and innate skill re-attachment after context compaction
+- ✅ **ADR-20260501170000000** (02-accepted): Description Preference Learning via Arena — Pilot Results
 - ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
 - ✅ **ADR-20260502012643244** (02-accepted): FQ-only locator — 删除 bare-name 与隐式策略 fallback
 - ✅ **ADR-20260502012643344** (02-accepted): 项目自身 skill 通过 `localhost/me/<name>` symlink 自举，删除 `cold_pool="."` 特例
 - ✅ **ADR-20260502012643444** (02-accepted): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端
-- 🤔 **ADR-20260502012643544** (01-proposed): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
-- 🤔 **ADR-20260502110308316** (01-proposed): Arena TOML Schema — Player as Facade 与对决声明
+- ✅ **ADR-20260502012643544** (02-accepted): Skills as Flat Controllers — 多作者共存约束下的去中心化 skill mesh
+- ✅ **ADR-20260502110308316** (02-accepted): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
 - ✅ **ADR-20260503003314901** (02-accepted): git-coupling for cortex governance documents via commit trailer
@@ -348,15 +348,15 @@ _无_
 - ✅ **ADR-20260503180000000** (02-accepted): Unit Test Framework Selection — Curator Mind Applied
 - ✅ **ADR-20260503222838594** (02-accepted): Kanban pull mode with CFD observability for agent-driven task management
 - ❌ **ADR-20260503230522270** (03-rejected): LeetCode-style Agent BDD harness with tmpdir sandbox + claude -p driver
-- 🤔 **ADR-20260504134942164** (01-proposed): description-when-to-use-field-stratification-for-cross-cli-compatibility
-- 🤔 **ADR-20260504135256566** (01-proposed): cortex init ships trailer-driven hooks as the jira-simulation deliverable
+- ✅ **ADR-20260504134942164** (02-accepted): description-when-to-use-field-stratification-for-cross-cli-compatibility
+- ✅ **ADR-20260504135256566** (02-accepted): cortex init ships trailer-driven hooks as the jira-simulation deliverable
 - ✅ **ADR-20260504172913972** (02-accepted): Agent BDD budget governance — time/token/retry limits as first-class constraints
 - ✅ **ADR-20260504200632939** (02-accepted): Structured judge schema — Zod-first with function-calling enforcement
 - ✅ **ADR-20260505221432740** (02-accepted): Standardize test file co-location across monorepo packages
 - ✅ **ADR-20260505225159725** (02-accepted): Criterion definition schema — from bare strings to structured scoring dimensions with rubrics
 - ✅ **ADR-20260506021112492** (02-accepted): Kimi CLI as default AgentAdapter — Player abstraction validation and CWD isolation for deny-by-default
 - ✅ **ADR-20260506103209293** (02-accepted): Supersede combo-skill-as-orchestration-layer — combo is now a deck-level prompt, not a separate skill
-- 🤔 **ADR-20260506214000000** (01-proposed): AgentAdapter as standalone plugin/extension library
+- ✅ **ADR-20260506214000000** (02-accepted): AgentAdapter as standalone plugin/extension library
 - ✅ **ADR-20260507014124191** (02-accepted): Agent-friendly CLI error as decision tree with repo-structure inference heuristics
 - ✅ **ADR-20260507021957847** (02-accepted): @lythos/cold-pool as dedicated resource-holder package with k8s-style reconciliation between skill-deck.lock and filesystem actual state
 - ✅ **ADR-20260507110332770** (02-accepted): Prune defaults to audit heredoc; never auto-rm cold pool entries
@@ -371,16 +371,16 @@ _无_
 - ✅ **ADR-20260508230803515** (02-accepted): Curator does not wrap external skill discovery APIs as feed adapters - agent web fetch beats hand-rolled adapters
 - ✅ **ADR-20260509104832428** (02-accepted): Remove run --decks CLI-flag mode — keep only run --config arena.toml
 - ✅ **ADR-20260509144134332** (02-accepted): Rename deck sync/freeze to to-symlink/to-snapshot for action-explicit verbs
-- 🤔 **ADR-20260509170343037** (01-proposed): Cold-pool metadata DB data fingerprint for integrity verification
-- 🤔 **ADR-20260510233000000** (01-proposed): Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
-- 🤔 **ADR-20260511000000000** (01-proposed): Deck skill sources — git-only FQ locators vs hub/marketplace integration
-- 🤔 **ADR-20260511093900000** (01-proposed): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
-- 🤔 **ADR-20260511210000000** (01-proposed): Consolidate curator output to `~/.agents/lythoskill/curator/`
+- ✅ **ADR-20260509170343037** (02-accepted): Cold-pool metadata DB data fingerprint for integrity verification
+- ✅ **ADR-20260510233000000** (02-accepted): Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
+- ✅ **ADR-20260511000000000** (02-accepted): Deck skill sources — git-only FQ locators vs hub/marketplace integration
+- ✅ **ADR-20260511093900000** (02-accepted): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
+- ✅ **ADR-20260511210000000** (02-accepted): Consolidate curator output to `~/.agents/lythoskill/curator/`
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
-- 🤔 **ADR-20260513011442965** (01-proposed): Network proxy auto-discovery for resilient connectivity
+- ✅ **ADR-20260513011442965** (02-accepted): Network proxy auto-discovery for resilient connectivity
 - ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
 - ✅ **ADR-20260513144000000** (02-accepted): No hard-coded third-party mirror list — trust boundary belongs to user
-- 🤔 **ADR-20260515204135649** (01-proposed): Agent self-healing environment — clear error context over structured framework
+- ✅ **ADR-20260515204135649** (02-accepted): Agent self-healing environment — clear error context over structured framework
 - ✅ **ADR-20260517140421425** (02-accepted): CLI vs Agent-Orchestrated Behavioral Parity
 - ✅ **ADR-20260517142840955** (02-accepted): Agent-Adapter — Independent Process Spawn for Reliable Multi-Player Orchestration
 - ✅ **ADR-20260517152850372** (02-accepted): Deck `also_link_to` — Multi-CLI Working Set via POSSE Pattern
