@@ -155,4 +155,60 @@ describe('MetadataDB', () => {
       db2.close()
     })
   })
+
+  describe('integrity fingerprint', () => {
+    it('creates fingerprint after reconcileDeckReferences', () => {
+      db.reconcileDeckReferences('/tmp/test-deck', [
+        { locator: 'github.com/a/b/skill-x', alias: 'x' },
+      ])
+      const result = db.validateIntegrity()
+      expect(result.ok).toBe(true)
+      expect(result.stored).not.toBeNull()
+      expect(result.computed).toBe(result.stored!)
+    })
+
+    it('detects data tampering (corrupted active locators)', () => {
+      db.reconcileDeckReferences('/tmp/test-deck', [
+        { locator: 'github.com/a/b/skill-x', alias: 'x' },
+      ])
+      expect(db.validateIntegrity().ok).toBe(true)
+
+      // Tamper: remove a locator directly via SQL
+      db['db'].exec(`DELETE FROM deck_refs`)
+      const result = db.validateIntegrity()
+      expect(result.ok).toBe(false)
+      expect(result.message).toContain('mismatch')
+    })
+
+    it('detects swapped DB (different schema version)', () => {
+      db.reconcileDeckReferences('/tmp/test-deck', [
+        { locator: 'github.com/a/b/skill-x', alias: 'x' },
+      ])
+      expect(db.validateIntegrity().ok).toBe(true)
+
+      // Tamper: bump schema version in fingerprint record without migration
+      db['db'].exec(`UPDATE _meta_fingerprint SET schema_version = 99`)
+      const result = db.validateIntegrity()
+      expect(result.ok).toBe(false)
+      expect(result.message).toContain('Schema version')
+    })
+
+    it('returns ok when fingerprint is consistent', () => {
+      db.reconcileDeckReferences('/tmp/deck-1', [
+        { locator: 'github.com/x/y/skill-a', alias: 'a' },
+        { locator: 'github.com/x/y/skill-b', alias: 'b' },
+      ])
+      const r1 = db.validateIntegrity()
+      expect(r1.ok).toBe(true)
+
+      // Second reconcile with same data — fingerprint recomputed, still ok
+      db.reconcileDeckReferences('/tmp/deck-1', [
+        { locator: 'github.com/x/y/skill-a', alias: 'a' },
+        { locator: 'github.com/x/y/skill-b', alias: 'b' },
+      ])
+      const r2 = db.validateIntegrity()
+      expect(r2.ok).toBe(true)
+      expect(r2.stored).toBe(r1.computed) // stored should now be latest
+    })
+  })
 })

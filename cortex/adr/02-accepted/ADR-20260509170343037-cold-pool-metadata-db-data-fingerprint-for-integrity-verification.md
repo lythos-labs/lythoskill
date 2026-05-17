@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-09 | Created |
+| accepted | 2026-05-17 | Accepted |
 
 ## 并发考虑（2026-05-09 补充）
 

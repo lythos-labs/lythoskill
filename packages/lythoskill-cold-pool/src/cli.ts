@@ -185,9 +185,19 @@ async function main(): Promise<void> {
         }
       }
 
+      // Metadata integrity check
+      const integrity = pool.metadata.validateIntegrity()
+
       pool.metadata.close()
 
       // Report
+      if (!integrity.ok) {
+        if (integrity.stored === null) {
+          console.log(`ℹ️  Metadata fingerprint not yet stored — first reconcile will create it.`)
+        } else {
+          console.log(`⚠️  Metadata integrity: ${integrity.message}`)
+        }
+      }
       console.log(`\n📊 Validate Report`)
       console.log(`   Cold pool: ${coldPoolPath}`)
       console.log(`   Skills declared: ${lock.skills.length}`)

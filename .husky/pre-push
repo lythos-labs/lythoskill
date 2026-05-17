@@ -20,6 +20,37 @@ else
   echo "   Install: brew install semgrep"
 fi
 
+# 1. Governance waterline + CLI change awareness
+#    Agents see git changes — tip about what to verify before pushing.
+echo ""
+CHANGED_CLI=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -E '^packages/[^/]+/src/' | grep -v '\.test\.ts$' || true)
+CHANGED_SKILL=$(git diff --name-only origin/main...HEAD 2>/dev/null | grep -E '^packages/[^/]+/skill/' || true)
+
+if [ -n "$CHANGED_CLI" ] || [ -n "$CHANGED_SKILL" ]; then
+  echo "╔══════════════════════════════════════════════════════════════╗"
+  echo "║  🧠 CLI / Skill source changed — agent self-check:         ║"
+  if [ -n "$CHANGED_CLI" ]; then
+    echo "║                                                              ║"
+    echo "║  CLI surface modified. Before pushing, verify:               ║"
+    echo "║    1. Tests pass for changed packages                        ║"
+    echo "║    2. README.md updated if public CLI surface changed        ║"
+    echo "║    3. ADR accepted if this implements a proposed decision    ║"
+    echo "║    4. Intent/plan/execute separation holds (IO not inlined)  ║"
+    echo "║                                                              ║"
+  fi
+  if [ -n "$CHANGED_SKILL" ]; then
+    echo "║  SKILL.md source changed — skill rebuild will auto-run on    ║"
+    echo "║  next commit. If desc changed, arena verify before push.     ║"
+  fi
+  echo "╚══════════════════════════════════════════════════════════════╝"
+  echo ""
+fi
+
+# 2. Cortex probe — surface state drift the agent should address
+if [ -f packages/lythoskill-project-cortex/src/cli.ts ]; then
+  bun packages/lythoskill-project-cortex/src/cli.ts probe 2>&1 | grep -E "📭|⚠️.*proposed|⚠️.*in review|⚠️.*active epic" || true
+fi
+
 MAX_RETRIES=3
 RETRY_DELAY=2
 

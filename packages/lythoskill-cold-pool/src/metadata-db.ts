@@ -21,6 +21,7 @@
  */
 
 import { SqliteDb } from '@lythos/infra'
+import { createHash } from 'node:crypto'
 
 export type DeckRefState = 'added' | 'linked' | 'removed'
 
@@ -52,7 +53,7 @@ export interface DeckReference {
   removedAt: string | null
 }
 
-const CURRENT_SCHEMA = 6
+const CURRENT_SCHEMA = 7
 
 export class MetadataDB extends SqliteDb {
   constructor(dbPath: string) {
@@ -103,6 +104,16 @@ export class MetadataDB extends SqliteDb {
     this.exec(`CREATE INDEX IF NOT EXISTS idx_deck_refs_state ON deck_refs(state)`)
     this.exec(`CREATE INDEX IF NOT EXISTS idx_skills_repo ON skills(host, owner, repo)`)
 
+    this.exec(`
+      CREATE TABLE IF NOT EXISTS _meta_fingerprint (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        fingerprint TEXT NOT NULL,
+        computed_at TEXT NOT NULL,
+        schema_version INTEGER NOT NULL,
+        active_locator_count INTEGER NOT NULL
+      )
+    `)
+
     // Schema migrations
     this.migrateSchema(CURRENT_SCHEMA, [
       { version: 1, sql: `CREATE TABLE IF NOT EXISTS _schema_version (version INTEGER NOT NULL)` },
@@ -125,6 +136,18 @@ export class MetadataDB extends SqliteDb {
       {
         version: 6,
         sql: `ALTER TABLE deck_refs ADD COLUMN mode TEXT DEFAULT 'symlink'`,
+      },
+      {
+        version: 7,
+        sql: `
+          CREATE TABLE IF NOT EXISTS _meta_fingerprint (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            fingerprint TEXT NOT NULL,
+            computed_at TEXT NOT NULL,
+            schema_version INTEGER NOT NULL,
+            active_locator_count INTEGER NOT NULL
+          )
+        `,
       },
     ])
   }
@@ -360,5 +383,71 @@ export class MetadataDB extends SqliteDb {
       }
       insert.finalize()
     })()
+
+    this.computeAndStoreFingerprint()
+  }
+
+  // ── Integrity fingerprint ─────────────────────────────────────
+
+  private computeAndStoreFingerprint(): void {
+    const activeLocators = this.getAllActiveLocators().sort().join('\n')
+    const repoCount = (this.db.query('SELECT COUNT(*) as cnt FROM repos').get() as { cnt: number } | null)?.cnt ?? 0
+    const skillCount = (this.db.query('SELECT COUNT(*) as cnt FROM skills').get() as { cnt: number } | null)?.cnt ?? 0
+    const refCount = (this.db.query('SELECT COUNT(*) as cnt FROM deck_refs').get() as { cnt: number } | null)?.cnt ?? 0
+    const alc = activeLocators ? activeLocators.split('\n').length : 0
+    const payload = `${activeLocators}\n${CURRENT_SCHEMA}\n${repoCount}\n${skillCount}\n${refCount}`
+    const fingerprint = createHash('sha256').update(payload).digest('hex')
+
+    this.exec(
+      `INSERT OR REPLACE INTO _meta_fingerprint (id, fingerprint, computed_at, schema_version, active_locator_count)
+       VALUES (1, $fp, $now, $sv, $alc)`,
+      { $fp: fingerprint, $now: this.now(), $sv: CURRENT_SCHEMA, $alc: alc },
+    )
+  }
+
+  /**
+   * Recompute the fingerprint and compare with stored value.
+   * Returns { ok: true } if match, { ok: false, message } with repair hint if mismatch.
+   */
+  validateIntegrity(): { ok: boolean; stored: string | null; computed: string; message: string } {
+    const row = this.db
+      .query(`SELECT fingerprint, computed_at, schema_version FROM _meta_fingerprint WHERE id = 1`)
+      .get() as { fingerprint: string; computed_at: string; schema_version: number } | null
+
+    const activeLocators = this.getAllActiveLocators().sort().join('\n')
+    const repoCount = (this.db.query('SELECT COUNT(*) as cnt FROM repos').get() as { cnt: number } | null)?.cnt ?? 0
+    const skillCount = (this.db.query('SELECT COUNT(*) as cnt FROM skills').get() as { cnt: number } | null)?.cnt ?? 0
+    const refCount = (this.db.query('SELECT COUNT(*) as cnt FROM deck_refs').get() as { cnt: number } | null)?.cnt ?? 0
+    const payload = `${activeLocators}\n${CURRENT_SCHEMA}\n${repoCount}\n${skillCount}\n${refCount}`
+    const computed = createHash('sha256').update(payload).digest('hex')
+
+    if (!row) {
+      return {
+        ok: false,
+        stored: null,
+        computed,
+        message: 'No fingerprint stored. DB may be uninitialized — run deck link to rebuild.',
+      }
+    }
+
+    if (row.schema_version !== CURRENT_SCHEMA) {
+      return {
+        ok: false,
+        stored: row.fingerprint,
+        computed,
+        message: `Schema version mismatch: stored ${row.schema_version}, current ${CURRENT_SCHEMA}. Run deck link to rebuild metadata.`,
+      }
+    }
+
+    if (row.fingerprint !== computed) {
+      return {
+        ok: false,
+        stored: row.fingerprint,
+        computed,
+        message: 'Fingerprint mismatch — metadata DB may have been swapped, corrupted, or desynchronized from cold pool. Run deck link to rebuild.',
+      }
+    }
+
+    return { ok: true, stored: row.fingerprint, computed, message: 'Integrity OK' }
   }
 }
