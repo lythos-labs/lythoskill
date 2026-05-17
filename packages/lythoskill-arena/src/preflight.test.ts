@@ -393,3 +393,192 @@ describe('formatSkillWarnings', () => {
     expect(formatSkillWarnings(checks)[0]).toContain('[transient]')
   })
 })
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildArchiveSidePlan
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildArchiveSidePlan
+// ═══════════════════════════════════════════════════════════════════════════
+
+import { buildArchiveSidePlan } from './preflight'
+import { join as pathJoin } from 'node:path'
+
+const TMP = '/tmp/arena-test'
+
+describe('buildArchiveSidePlan', () => {
+
+  test('default: sides=["."] maps to fromDir', () => {
+    const plan = buildArchiveSidePlan(TMP, ['.'], _p => true)
+    expect(plan).toEqual([
+      { side: '.', sourceDir: TMP, found: true },
+    ])
+  })
+
+  test('single side, subdirectory exists → source = fromDir/side', () => {
+    const exists = (p: string) => p === pathJoin(TMP, 'side-a')
+    const plan = buildArchiveSidePlan(TMP, ['side-a'], exists)
+    expect(plan).toEqual([
+      { side: 'side-a', sourceDir: pathJoin(TMP, 'side-a'), found: true },
+    ])
+  })
+
+  test('single side, subdirectory MISSING → fallback to fromDir root', () => {
+    const plan = buildArchiveSidePlan(TMP, ['side-a'], _p => false)
+    expect(plan).toEqual([
+      { side: 'side-a', sourceDir: TMP, found: true },
+    ])
+  })
+
+  test('multi side, all subdirectories exist', () => {
+    const exists = (p: string) =>
+      p === pathJoin(TMP, 'side-a') || p === pathJoin(TMP, 'side-b')
+    const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b'], exists)
+    expect(plan).toEqual([
+      { side: 'side-a', sourceDir: pathJoin(TMP, 'side-a'), found: true },
+      { side: 'side-b', sourceDir: pathJoin(TMP, 'side-b'), found: true },
+    ])
+  })
+
+  test('multi side, one missing → found=false (caller handles warn+skip)', () => {
+    const exists = (p: string) => p === pathJoin(TMP, 'side-a')
+    const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b'], exists)
+    expect(plan).toEqual([
+      { side: 'side-a', sourceDir: pathJoin(TMP, 'side-a'), found: true },
+      { side: 'side-b', sourceDir: pathJoin(TMP, 'side-b'), found: false },
+    ])
+  })
+
+  test('"." side does NOT trigger fallback when missing (found=false)', () => {
+    const plan = buildArchiveSidePlan(TMP, ['.'], _p => false)
+    expect(plan).toEqual([
+      { side: '.', sourceDir: TMP, found: false },
+    ])
+  })
+
+  test('empty sides array → empty plan', () => {
+    const plan = buildArchiveSidePlan(TMP, [], _p => true)
+    expect(plan).toEqual([])
+  })
+
+  test('three sides, middle missing', () => {
+    const exists = (p: string) =>
+      p === pathJoin(TMP, 'side-a') || p === pathJoin(TMP, 'side-c')
+    const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b', 'side-c'], exists)
+    expect(plan).toEqual([
+      { side: 'side-a', sourceDir: pathJoin(TMP, 'side-a'), found: true },
+      { side: 'side-b', sourceDir: pathJoin(TMP, 'side-b'), found: false },
+      { side: 'side-c', sourceDir: pathJoin(TMP, 'side-c'), found: true },
+    ])
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// buildPreparePlan
+// ═══════════════════════════════════════════════════════════════════════════
+
+import { buildPreparePlan } from './preflight'
+
+const DECK_ONE_SKILL = `
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+`
+
+const DECK_EMPTY = `
+[deck]
+max_cards = 5
+`
+
+const DECK_TWO_SKILLS = `
+[deck]
+max_cards = 10
+
+[innate.skills.deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+`
+
+describe('buildPreparePlan', () => {
+
+  test('single skill deck → plan with 1 skill, hasSkills=true', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/test-deck.toml',
+      deckContent: DECK_ONE_SKILL,
+      workDir: '/tmp/arena-test',
+      skillCount: 0,
+    })
+    expect(plan.skills).toHaveLength(1)
+    expect(plan.skills[0].name).toBe('pdf')
+    expect(plan.skills[0].section).toBe('tool')
+    expect(plan.hasSkills).toBe(true)
+    expect(plan.workDir).toBe('/tmp/arena-test')
+    expect(plan.deckPath).toBe('/tmp/test-deck.toml')
+  })
+
+  test('empty deck → skills=[], hasSkills=false', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/empty.toml',
+      deckContent: DECK_EMPTY,
+      workDir: '/tmp/arena-empty',
+      skillCount: 0,
+    })
+    expect(plan.skills).toEqual([])
+    expect(plan.hasSkills).toBe(false)
+  })
+
+  test('two skills (innate + tool) → both parsed with correct sections', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/two.toml',
+      deckContent: DECK_TWO_SKILLS,
+      workDir: '/tmp/arena-two',
+      skillCount: 0,
+    })
+    expect(plan.skills).toHaveLength(2)
+    expect(plan.skills[0]).toEqual({ name: 'deck', path: 'github.com/lythos-labs/lythoskill/skills/lythoskill-deck', section: 'innate' })
+    expect(plan.skills[1]).toEqual({ name: 'pdf', path: 'github.com/anthropics/skills/skills/pdf', section: 'tool' })
+    expect(plan.hasSkills).toBe(true)
+  })
+
+  test('AGENTS.md contains mandatory sections', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/d.toml',
+      deckContent: DECK_ONE_SKILL,
+      workDir: '/tmp/arena-md',
+      skillCount: 0,
+    })
+    expect(plan.agentsMd).toContain('Arena Test Environment')
+    expect(plan.agentsMd).toContain('Setup Order')
+    expect(plan.agentsMd).toContain('decision-log.jsonl')
+    expect(plan.agentsMd).toContain('skill-deck.toml')
+  })
+
+  test('invalid TOML → skills=[], hasSkills=false (no crash)', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/bad.toml',
+      deckContent: 'this is not toml {{{',
+      workDir: '/tmp/arena-bad',
+      skillCount: 0,
+    })
+    expect(plan.skills).toEqual([])
+    expect(plan.hasSkills).toBe(false)
+  })
+
+  test('deckContent is preserved in plan', () => {
+    const plan = buildPreparePlan({
+      deckPath: '/tmp/d.toml',
+      deckContent: DECK_ONE_SKILL,
+      workDir: '/tmp/arena-preserve',
+      skillCount: 0,
+    })
+    expect(plan.deckContent).toBe(DECK_ONE_SKILL)
+  })
+})

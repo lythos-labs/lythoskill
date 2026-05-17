@@ -1,7 +1,7 @@
 ---
 lane: main
-checklist_completed: false
-checklist_skipped_reason: batch create from completed BDD tests
+checklist_completed: true
+checklist_skipped_reason: BDD scenarios validated PASS 2026-05-17, tasks recreated + completed
 ---
 # EPIC-20260517121757041: Agent BDD 覆盖 — deck/arena skill 行为验证
 
@@ -13,36 +13,48 @@ checklist_skipped_reason: batch create from completed BDD tests
 > Agent BDD 覆盖 — deck/arena skill 行为验证
 
 ## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-17 | Created |
+| active | 2026-05-17 | Tasks linked, body filled |
 
 ## 背景故事
-<!-- 填写需求来源:触发事件、问题描述、目标价值 -->
+Deck and arena skills had zero behavioral test coverage. Manual verification after each change. 5 BDD scenarios validated 2026-05-17 in session 9 — all PASS. Tests are scenario-based agent BDD (agent validates behavior via subagent execution), not CI-runnable unit tests.
 
 ## 需求树
 
-### 主题A #backlog
-- **触发**:
-- **需求**:
-- **实现**:
-- **产出**:
-- **验证**:
+### 主题A: Deck核心行为 #completed
+- **产出**: 2 BDD scenarios, PASS
+- **验证**: TASK-20260517193950675, TASK-20260517193950732
+
+### 主题B: Snapshot + Arena BDD #completed
+- **产出**: 3 BDD scenarios, PASS
+- **验证**: TASK-20260517193950780, TASK-20260517193958181, TASK-20260517193958229
+
+### 主题C: Remaining work #backlog
+- **需求**: per-skill mode reconciler
+- **实现**: TASK-20260517122556223
 
 ## 技术决策
 
 | ADR | 标题 | 状态 |
 |-----|------|------|
+| ADR-20260517142840955 | agent-adapter independent spawn | accepted |
+| ADR-20260517152850372 | deck also_link_to multi-CLI POSSE | accepted |
 
 ## 关联任务
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-
-## 经验沉淀
+| TASK-20260517193950675 | completed | Deck basics BDD — link/add/phase-switch/restore |
+| TASK-20260517193950732 | completed | Innate eager-load vs tool lazy boundary BDD |
+| TASK-20260517193950780 | completed | Snapshot symlink roundtrip BDD |
+| TASK-20260517193958181 | completed | Arena single + cross-deck vs trigger stability BDD |
+| TASK-20260517193958229 | completed | Map-reduce parallel critique cells BDD |
+| TASK-20260517122556223 | backlog | Wire per-skill mode into deck link reconciler |
 
 ## 归档条件
-- [ ] 所有任务完成
-- [ ] 验证通过
+- [x] 5 BDD scenarios validated PASS
+- [ ] per-skill mode wired into reconciler (TASK-20260517122556223)
+- [ ] CI-runnable test coverage where feasible

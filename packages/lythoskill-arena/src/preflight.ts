@@ -195,6 +195,104 @@ export function resolveColdPoolDir(
   return raw.startsWith('~') ? `${homeDir}${raw.slice(1)}` : raw
 }
 
+// ── buildArchiveSidePlan ──────────────────────────────────────────────────
+
+/**
+ * A single side's source mapping in an archive plan.
+ * Pure data — no IO, no console.
+ */
+export interface ArchiveSideEntry {
+  side: string
+  sourceDir: string
+  found: boolean
+}
+
+/**
+ * Build the per-side source directory plan for archive.
+ *
+ * Pure: strings + existence function → ArchiveSideEntry[].
+ * IO (`existsSync`) is injected via `existsFn` — test with mock, run with real.
+ *
+ * Single-side fallback: when --sides specifies exactly one named side and its
+ * subdirectory doesn't exist (agent put files in workdir root, prepare-workdir
+ * didn't create per-side dirs), fall back to `fromDir` as source (found=true).
+ *
+ * Default (no --sides): sides = ['.'] → sourceDir = fromDir.
+ */
+export function buildArchiveSidePlan(
+  fromDir: string,
+  sides: string[],
+  existsFn: (path: string) => boolean
+): ArchiveSideEntry[] {
+  const plan: ArchiveSideEntry[] = []
+  for (const side of sides) {
+    let sourceDir = side === '.' ? fromDir : join(fromDir, side)
+    let found = existsFn(sourceDir)
+    if (!found && sides.length === 1 && side !== '.') {
+      sourceDir = fromDir
+      found = true
+    }
+    plan.push({ side, sourceDir, found })
+  }
+  return plan
+}
+
+// ── buildPreparePlan ─────────────────────────────────────────────────────
+
+/**
+ * Plan-only result for prepare-workdir — what WOULD be created.
+ * Pure data, no IO. Caller renders this before executing.
+ */
+export interface PreparePlan {
+  deckPath: string
+  deckContent: string
+  workDir: string
+  skills: SkillDecl[]
+  hasSkills: boolean
+  agentsMd: string
+}
+
+/**
+ * Build the prepare-workdir plan from raw inputs.
+ *
+ * Pure computation: deck path + content → what workdir would contain.
+ * Caller does IO (reading deck, computing timestamp) and injects results.
+ */
+export function buildPreparePlan(params: {
+  deckPath: string
+  deckContent: string
+  workDir: string
+  skillCount: number
+  brief?: string
+}): PreparePlan {
+  let deckParsed: Record<string, any> = {}
+  try { deckParsed = Bun.TOML.parse(params.deckContent) as Record<string, any> } catch {}
+  const skills = parseDeckSkills(deckParsed)
+  const hasSkills = skills.length > 0
+
+  const agentsMd = [
+    '# Arena Test Environment',
+    '**Mode**: agent-orchestrated cell',
+    '',
+    '## Setup Order (why this sequence)',
+    '1. `skill-deck.toml` copied here → declares which skills you can use',
+    '2. `deck link` runs → cold pool skills become visible in `.claude/skills/`',
+    '3. Skill existence checked → warns if any declared skill is missing from cold pool',
+    '4. `AGENTS.md` written last → confirms setup succeeded before agent starts',
+    'If setup fails mid-sequence, the workdir is incomplete and nothing runs.',
+    '',
+    '## How This Works',
+    '- Write ALL output files to this directory (CWD).',
+    '- Use available skills — check `ls .claude/skills/`.',
+    '',
+    '## Output Contract',
+    '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
+    '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
+  ].join('\n')
+
+  return { deckPath: params.deckPath, deckContent: params.deckContent, workDir: params.workDir, skills, hasSkills, agentsMd }
+}
+
 // ── formatSkillWarnings ──────────────────────────────────────────────────
 
 /**

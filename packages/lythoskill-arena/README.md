@@ -16,7 +16,7 @@
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena@0.14.0 <command>
+bunx @lythos/skill-arena@0.14.1 <command>
 ```
 
 ## Quick Start
@@ -65,6 +65,42 @@ bunx @lythos/skill-arena@latest scaffold \
   --decks "./decks/minimal.toml,./decks/rich.toml"
 ```
 
+### `prepare-workdir` — isolate + link skills (agent-orchestrated)
+
+```bash
+bunx @lythos/skill-arena@latest prepare-workdir \
+  --deck ./skill-deck.toml \
+  --out /tmp/arena-side-a \
+  --brief "task description"
+
+# Plan-first: review before executing
+bunx @lythos/skill-arena@latest prepare-workdir \
+  --deck ./skill-deck.toml \
+  --out /tmp/arena-side-a \
+  --brief "task" \
+  --dry-run
+```
+
+Creates `/tmp`-isolated workdir with deck copied, AGENTS.md written, and `deck link` run. `--dry-run` prints the plan (skills, workdir path, link needed) without creating anything.
+
+### `archive` — collect agent outputs (agent-orchestrated)
+
+```bash
+bunx @lythos/skill-arena@latest archive \
+  --from /tmp/arena-side-a \
+  --to ./playground/output \
+  --sides side-a
+
+# Plan-first: review what would be copied
+bunx @lythos/skill-arena@latest archive \
+  --from /tmp/arena-side-a \
+  --to ./playground/output \
+  --sides side-a \
+  --dry-run
+```
+
+Copies agent artifacts from workdir(s) to output, skipping internal files (`.claude`, `skill-deck.toml`, `skill-deck.lock`, `AGENTS.md`). Single-side archives fall back to workdir root when the named side subdirectory doesn't exist. `--dry-run` shows the per-side plan before copying.
+
 ### `viz` — render results
 
 ```bash
@@ -79,9 +115,12 @@ bunx @lythos/skill-arena@latest viz runs/arena-<id>/
 | `--deck <path\|url>` | single | Deck file (URL auto-fetched) |
 | `--player <name>` | single, vs | Only for cross-player: kimi\|codex\|deepseek\|claude |
 | `--timeout <ms>` | single | Subagent timeout (300000–600000 for complex tasks) |
-| `--out <dir>` | single, vs | Output directory |
+| `--from <dir>` | archive | Source workdir |
+| `--to <dir>` | archive | Output directory |
+| `--sides <names>` | archive | Comma-separated side names (default: `.`) |
+| `--out <dir>` | single, vs, prepare-workdir | Output / workdir directory |
 | `--config <path>` | vs | arena.toml |
-| `--dry-run` | vs | Print plan without execution |
+| `--dry-run` | vs, prepare-workdir, archive | Print plan without execution |
 
 ## Prerequisites (cross-player only)
 

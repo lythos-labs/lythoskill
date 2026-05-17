@@ -36,18 +36,4 @@ role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→f
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release"
 role = "Heredoc patch workflow: declarative full-file replacement. Use when sed is tempting."
 
-[tool.skills.research]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research"
-
-[tool.skills.research-add-fields]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-add-fields"
-
-[tool.skills.research-add-items]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-add-items"
-
-[tool.skills.research-deep]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-deep"
-
-[tool.skills.research-report]
-path = "github.com/Weizhena/Deep-Research-skills/skills/research-en/research-report"
 

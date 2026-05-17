@@ -2,7 +2,7 @@
 name: "Epic: done moves active to done"
 description: |
   Running `cortex epic done EPIC-DONE-001` moves the epic from 01-active/ to
-  02-done/.
+  99-done/.
 ---
 
 ## Given
@@ -16,5 +16,5 @@ description: |
 
 ## Then
 
-- Epic file exists at `cortex/epics/02-done/EPIC-DONE-001-*.md`
+- Epic file exists at `cortex/epics/99-done/EPIC-DONE-001-*.md`
 - Epic file does NOT exist in `01-active/`

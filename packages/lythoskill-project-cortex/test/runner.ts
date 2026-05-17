@@ -349,7 +349,7 @@ function setupCortexFixture(workdir: string, scenario: Scenario): void {
     const lane = (epic.lane as 'main' | 'emergency') || 'main'
     const status = epic.status || 'active'
     const subdir = status === 'active' ? '01-active' :
-                   status === 'done' ? '02-done' :
+                   status === 'done' ? '99-done' :
                    status === 'suspended' ? '03-suspended' :
                    status === 'archived' ? '04-archived' : '01-active'
     const filename = `${id}-fixture-epic.md`

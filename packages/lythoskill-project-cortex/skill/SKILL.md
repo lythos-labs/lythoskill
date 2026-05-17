@@ -144,7 +144,7 @@ cortex/
 │   └── 04-superseded/
 ├── epics/
 │   ├── 01-active/
-│   ├── 02-done/
+│   ├── 99-done/
 │   ├── 03-suspended/
 │   └── 04-archived/
 ├── tasks/

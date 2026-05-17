@@ -19,7 +19,7 @@ export const DEFAULT_CONFIG: WorkflowConfig = {
   },
   epicSubdirs: {
     active: '01-active',
-    done: '02-done',
+    done: '99-done',
     suspended: '03-suspended',
     archived: '04-archived',
   },

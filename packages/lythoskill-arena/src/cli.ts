@@ -5,7 +5,7 @@ import { homedir, tmpdir } from 'node:os'
 import { ZodError } from 'zod'
 import { formatPlanOutput, type ArenaResult, buildArenaPrompt } from './runner'
 import { parseArenaToml, buildExecutionPlan } from './arena-toml'
-import { buildCopyPlan, parseDeckSkills } from './preflight'
+import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckSkills } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
 
 // ─── fetchWithProxy (infra dependency, no package boundary) ─────────────────
@@ -441,10 +441,12 @@ async function vizRun(args: string[]) {
 
 async function prepareWorkdir(args: string[]) {
   const opts: Record<string, string | undefined> = {}
+  let dryRun = false
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--deck' || args[i] === '-d') opts.deck = args[++i]
     else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
     else if (args[i] === '--brief' || args[i] === '-b') opts.brief = args[++i]
+    else if (args[i] === '--dry-run') dryRun = true
   }
 
   if (!opts.deck) {
@@ -462,39 +464,36 @@ async function prepareWorkdir(args: string[]) {
   const workDir = opts.out
     ? resolve(opts.out)
     : join(tmpdir(), `arena-${Date.now()}`)
+  const deckContent = readFileSync(deckPath, 'utf-8')
+
+  // ── Plan (pure computation — what WOULD be created) ────────────────────
+  const plan = buildPreparePlan({
+    deckPath,
+    deckContent,
+    workDir,
+    skillCount: 0, // computed inside from deckContent
+    brief: opts.brief,
+  })
+
+  console.log('📋 Prepare plan:')
+  console.log(`   deck:    ${plan.deckPath}`)
+  console.log(`   workdir: ${plan.workDir}`)
+  console.log(`   skills:  ${plan.skills.length} declared (${plan.skills.map(s => s.name).join(', ') || 'none'})`)
+  console.log(`   link:    ${plan.hasSkills ? 'Bun.spawn deck link' : 'skip (no skills)'}`)
+  console.log(`   AGENTS.md: write (${plan.agentsMd.split('\n').length} lines)`)
+  if (opts.brief) console.log(`   brief:   ${opts.brief!.slice(0, 60)}...`)
+
+  if (dryRun) {
+    console.log(`\n🏁 Dry-run complete (no files created). Remove --dry-run to execute.`)
+    return
+  }
+
+  // ── Execute: create workdir ──────────────────────────────────────────
   mkdirSync(workDir, { recursive: true })
+  writeFileSync(join(workDir, 'skill-deck.toml'), deckContent)
+  writeFileSync(join(workDir, 'AGENTS.md'), plan.agentsMd)
 
-  // Copy deck into workdir
-  writeFileSync(join(workDir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
-
-  // Write AGENTS.md (same contract as CLI singleRun)
-  writeFileSync(join(workDir, 'AGENTS.md'), [
-    '# Arena Test Environment',
-    '**Mode**: agent-orchestrated cell',
-    '',
-    '## Setup Order (why this sequence)',
-    '1. `skill-deck.toml` copied here → declares which skills you can use',
-    '2. `deck link` runs → cold pool skills become visible in `.claude/skills/`',
-    '3. Skill existence checked → warns if any declared skill is missing from cold pool',
-    '4. `AGENTS.md` written last → confirms setup succeeded before agent starts',
-    'If setup fails mid-sequence, the workdir is incomplete and nothing runs.',
-    '',
-    '## How This Works',
-    '- Write ALL output files to this directory (CWD).',
-    '- Use available skills — check `ls .claude/skills/`.',
-    '',
-    '## Output Contract',
-    '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
-    '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
-  ].join('\n'))
-
-  // Parse deck for link + checks
-  const deckRaw = readFileSync(join(workDir, 'skill-deck.toml'), 'utf-8')
-  let deckParsed: Record<string, any> = {}
-  try { deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any> } catch {}
-  const hasSkills = parseDeckSkills(deckParsed).length > 0
-
-  if (hasSkills) {
+  if (plan.hasSkills) {
     const { existsSync: es2 } = await import('node:fs')
     const localDeckCli = join(import.meta.dir, '..', '..', 'lythoskill-deck', 'src', 'cli.ts')
     const linkCmd = es2(localDeckCli)
@@ -517,9 +516,8 @@ async function prepareWorkdir(args: string[]) {
   // Skill existence check
   try {
     const coldPoolDefault = join(homedir(), '.agents', 'skill-repos')
-    const coldPoolDir = resolveColdPoolDir(deckParsed?.deck?.cold_pool, homedir(), coldPoolDefault)
-    const skills = parseDeckSkills(deckParsed)
-    const checks = checkSkillExistence(skills, coldPoolDir, existsSync)
+    const coldPoolDir = resolveColdPoolDir(Bun.TOML.parse(deckContent)?.deck?.cold_pool, homedir(), coldPoolDefault)
+    const checks = checkSkillExistence(plan.skills, coldPoolDir, existsSync)
     for (const warning of formatSkillWarnings(checks)) {
       console.warn(`⚠️  ${warning}`)
     }
@@ -538,11 +536,13 @@ async function prepareWorkdir(args: string[]) {
 
 async function archiveRun(args: string[]) {
   const opts: Record<string, string | undefined> = {}
+  let dryRun = false
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--from' || args[i] === '-f') opts.from = args[++i]
     else if (args[i] === '--to' || args[i] === '-o') opts.to = args[++i]
     else if (args[i] === '--sides') opts.sides = args[++i]
     else if (args[i] === '--report') opts.report = args[++i]
+    else if (args[i] === '--dry-run') dryRun = true
   }
 
   if (!opts.from || !opts.to) {
@@ -553,40 +553,57 @@ async function archiveRun(args: string[]) {
 
   const fromDir = resolve(opts.from)
   const outDir = resolve(opts.to)
+
+  const sides = opts.sides ? opts.sides.split(',') : ['.']
+  const plan = buildArchiveSidePlan(fromDir, sides, existsSync)
+
+  // ── Plan output (always shown, also serves as dry-run) ──────────────────
+  console.log('📋 Archive plan:')
+  for (const pe of plan) {
+    if (!pe.found) {
+      console.log(`   ⚠️  ${pe.side}: not found (${pe.sourceDir}) — will skip`)
+    } else if (pe.sourceDir === fromDir && pe.side !== '.') {
+      console.log(`   ${pe.side}: ${pe.sourceDir} (fallback → root) → ${join(outDir, pe.side)}`)
+    } else {
+      console.log(`   ${pe.side}: ${pe.sourceDir} → ${join(outDir, pe.side)}`)
+    }
+  }
+  if (dryRun) {
+    console.log(`\n🏁 Dry-run complete (no files copied). Remove --dry-run to execute.`)
+    return
+  }
+
+  // ── Execute: copy files ───────────────────────────────────────────────
   mkdirSync(outDir, { recursive: true })
 
-  // Copy report if provided
   if (opts.report && existsSync(resolve(opts.report))) {
-    const { cpSync } = await import('node:fs')
-    cpSync(resolve(opts.report), join(outDir, 'report.md'))
+    const { cpSync: cpR } = await import('node:fs')
+    cpR(resolve(opts.report), join(outDir, 'report.md'))
     console.log(`📄 report.md → ${outDir}/report.md`)
   }
 
-  // Copy per-side outputs (same skipSet as CLI singleRun)
   const { cpSync, readdirSync } = await import('node:fs')
   const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
 
-  const sides = opts.sides ? opts.sides.split(',') : ['.']
-  for (const side of sides) {
-    const sideWorkDir = side === '.' ? fromDir : join(fromDir, side)
-    if (!existsSync(sideWorkDir)) {
-      console.warn(`⚠️  Side workdir not found: ${sideWorkDir}`)
+  for (const planEntry of plan) {
+    if (!planEntry.found) {
+      console.warn(`⚠️  Side workdir not found: ${planEntry.sourceDir}`)
       continue
     }
 
-    const sideOutDir = join(outDir, side)
+    const sideOutDir = join(outDir, planEntry.side)
     mkdirSync(sideOutDir, { recursive: true })
 
-    const entries = readdirSync(sideWorkDir, { withFileTypes: true })
+    const entries = readdirSync(planEntry.sourceDir, { withFileTypes: true })
     for (const entry of entries) {
       if (skipSet.has(entry.name)) continue
-      const src = join(sideWorkDir, entry.name)
+      const src = join(planEntry.sourceDir, entry.name)
       const dest = join(sideOutDir, entry.name)
       try {
         cpSync(src, dest, { recursive: entry.isDirectory() })
-        console.log(`   ${side}/${entry.name} → ${dest}`)
+        console.log(`   ${planEntry.side}/${entry.name} → ${dest}`)
       } catch (e) {
-        console.warn(`⚠️  Failed to copy ${side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
+        console.warn(`⚠️  Failed to copy ${planEntry.side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
       }
     }
   }
