@@ -3,24 +3,24 @@ name: lythoskill-deck
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Declarative skill deck governance. Syncs working set to match
-  skill-deck.toml via symlinks. Deny-by-default removes undeclared
-  skills. CRITICAL when writing a deck for others: verify every
-  locator path against the REAL repo structure before publishing.
-  A wrong path silently fails for every user who runs deck link.
-  Clone the repo and check — never guess `skills/<name>`.
+  Declarative skill deck governance. `deck link` reconciles the working set
+  to match skill-deck.toml — deny-by-default removes undeclared skills.
+  DEFAULT patterns: PHASE SWITCH via separate deck files (deck link --deck
+  phase<N>.toml), SEED bootstrap (minimal deck → agent self-expands via
+  deck add + curator discovery). Always restores parent deck. Zero state
+  pollution between phases. INNATE FIRST: after compaction, session reload,
+  or skill refresh — read every innate skill's full SKILL.md before any
+  tool skill. Innate = eagerly loaded, always full context. Tool = lazy,
+  read only on trigger. CRITICAL when writing a deck for others: verify
+  every locator path against the REAL repo structure before publishing.
 when_to_use: |
   Skill conflicts, too many skills, clean up or organize skills,
-  skill-deck.toml, sync working set, initialize deck, what are
-  these symlinks in .claude/skills/, silent blend, manage skill deck.
-
-  CRITICAL — verify before publishing a deck for others:
-  - Writing a deck.toml that will be shared/published → clone the
-    target repo FIRST, verify every locator resolves to a real path
-  - The user running `deck link` has no way to know a path is wrong
-  - A broken locator = all downstream users get silent failure
-  - Use `deck validate --remote <deck.toml>` to check every locator
-  - Never assume skills live under `skills/` — repo layouts vary
+  skill-deck.toml, sync working set, initialize deck, manage skill deck,
+  phase switch, seed bootstrap, fork to localhost, multi-file deck,
+  deck add, deck link, deck refresh, deck validate, deck remove,
+  silent blend, what are these symlinks in .claude/skills/.
+  ALSO trigger when user says "switch deck", "add skill", "remove skill",
+  "clean up skills", "organize my deck", "create phase deck".
 allowed-tools:
   - Bash(bunx @lythos/skill-deck@{{PACKAGE_VERSION}} *)
 # ── deck governance metadata (consumed by lythoskill tooling, not by agent platforms) ──
@@ -35,213 +35,150 @@ deck_managed_dirs:
 
 # lythoskill-deck: Declarative Skill Deck Governance
 > What matters is not how many skills you have, but which ones the agent sees at the same time.
-## What This Does
-`skill-deck.toml` declares which skills a project needs. `deck link` creates
-symlinks in `.claude/skills/` for declared skills and **removes everything else**.
-This is deny-by-default: undeclared skills do not exist in the agent's view.
-## Commands
+
+## Core Model
+
+`skill-deck.toml` declares desired state. `deck link` makes `.claude/skills/` match — creates symlinks for declared skills, removes everything else. Deny-by-default: undeclared skills do not exist in the agent's view.
+
+```
+Cold Pool (~/.agents/skill-repos/)  →  deck add  →  skill-deck.toml  →  deck link  →  .claude/skills/
+     (all downloaded skills)              (declare)      (desired state)    (reconcile)    (working set — what agent sees)
+```
+
+## Multi-File Phase Decks (BEST PRACTICE)
+
+When a task spans different skill sets, use **separate deck files per phase** instead of editing a single toml:
+
 ```bash
-# Always run from your project root (where skill-deck.toml lives)
-cd /path/to/your-project
+# Phase 1 — brand design
+deck link --deck phase1-brand.toml --cold-pool ~/.agents/skill-repos
 
-# Reconcile working set to match declarations (the routine command)
+# Phase 2 — content creation (atomic switch, Phase 1 skills gone)
+deck link --deck phase2-content.toml --cold-pool ~/.agents/skill-repos
+
+# Done — restore parent deck
+deck link --deck ./skill-deck.toml
+```
+
+Each phase deck is independently auditable. Never add/remove entries in-place when switching contexts — a wrong edit silently breaks the previous phase's composition. The reconciler handles the transition: old symlinks removed, new ones created, no state leaks.
+
+## Seed Bootstrap
+
+Start with a minimal deck (only lythoskill-deck as innate). The agent reads deck SKILL.md → learns schema → uses curator `name LIKE '%keyword%'` to discover skills → `deck add` + `deck link` → self-expands. Governance skill is the only irreducible dependency.
+
+```toml
+[deck]
+max_cards = 8
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+```
+
+## Commands
+
+```bash
+# ── Core (use these every time) ──
+
+# Reconcile working set to match declaration
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link
-# Specify a non-default deck file
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./path/to/deck.toml
-# Deck in subdirectory, working set anchored to current dir
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./decks/arena.toml --workdir .
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./phase1-brand.toml
 
-# Download a skill to cold pool and add to deck (one-shot)
+# Add skill from cold pool or download URL
 bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name --alias my-skill --type tool
 
-# Add with explicit alias and section
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill-name --alias tdd --type tool
+# ── Maintenance ──
 
-# Scan declared skills for upstream updates (plan-only, no pull)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh
-# Refresh a single skill (plan-only)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh tdd
-# Execute the plan (actually git pull)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh --exec
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh              # plan-only scan for updates
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} refresh --exec       # actually git pull
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} remove <alias>       # remove from deck + working set
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate             # check TOML schema
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate --remote    # probe locators against GitHub
 
-# Remove a skill from deck and working set (cold pool untouched)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} remove tdd
+# ── Advanced ──
 
-# Cold pool GC — use cold-pool CLI (metadata DB based, cross-deck safe)
-#   bunx @lythos/cold-pool prune         # interactive
-#   bunx @lythos/cold-pool prune --yes    # skip confirmation
-
-# Validate deck configuration (TOML schema + locator structure)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate
-# Validate a specific deck file
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate ./decks/my-deck.toml
-# Probe each FQ locator against GitHub (network)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} validate --remote
-
-# Per-skill mode switch — snapshot (cp, pinned) ↔ symlink (live, follows cold pool)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} to-symlink <alias>     # snapshot → symlink
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} to-snapshot <alias>    # symlink → snapshot, pinning current HEAD
-
-# Reconcile lock file vs cold pool — k8s-style drift report
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} reconcile
-# Apply convergence (downloads missing, refreshes behind, prunes orphans)
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} reconcile --apply
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} reconcile --apply --yes
-
-# Convert deprecated string-array deck.toml → alias-as-key dict
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema --dry-run
-
-# Then re-sync working set
-bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link
-```
-`link` is a **reconciler** that converges actual state to declared state:
-undeclared symlinks → removed; broken/circular symlinks → recreated;
-non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
-
-> **If a declared skill is not in the cold pool**, `link` reports `Skill not found`
-> and skips it. Add it first with `bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add <locator>`
-> or place it manually in the cold pool.
-
-You never diagnose the working set manually. Just run `link`.
-
-`refresh` (default: **plan-only**, no git pull) scans declared skills and reports
-per-skill behind counts. You get a structured plan — which repos need updating,
-which are up to date, which are unreachable. No destructive operation is executed
-by default.
-
-To actually pull, use `--exec`. Or better: let an agent read the plan and
-execute per target — the agent can probe each remote before pulling, switch
-mirrors when unreachable, handle non-fast-forward divergence, and skip risky
-repos. This is agent-driven apply, not a dead heredoc script.
-
-After `refresh --exec`, run `link` to sync any changed skills into the working
-set. Pass an alias or FQ path to scope to a single skill.
-
-> `deck update` is deprecated and will be removed in v1.0.0. Use `refresh`.
-## Format Migration
-When you read a project's `skill-deck.toml`, check its format **before** running
-any `deck` command.
-
-**Old string-array format** (deprecated):
-```toml
-[tool]
-skills = ["github.com/owner/repo/skill-name"]
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} to-symlink <alias>   # snapshot → symlink
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} to-snapshot <alias>  # symlink → snapshot (pin HEAD)
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} reconcile            # drift report vs cold pool
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} reconcile --apply    # converge
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema       # old string-array → alias-as-key
 ```
 
-**New alias-as-key dict format** (current):
-```toml
-[tool.skills.skill-name]
-path = "github.com/owner/repo/skill-name"
-```
+`link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
 
-**Agent duty — detect and prompt**: If you see `skills = [...]` (string array)
-in any `[innate]`, `[tool]`, or `[transient]` section, the deck is in the deprecated
-format. Ask the user whether to migrate before proceeding:
+`refresh` defaults to **plan-only** (no git pull). Use `--exec` to apply, or let an agent read the plan and execute per target — the agent can probe remotes, switch mirrors, handle divergence.
+
+> `deck update` is deprecated. Use `refresh`.
+
+## Format Detection (agent duty)
+
+Before running any `deck` command, check the toml format. If you see `skills = [...]` (string array), it's the deprecated format. Ask before migrating:
 
 ```
 ⚠️  This deck uses the deprecated string-array format. Run migrate?
    bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema
+   bunx @lythos/skill-deck@{{PACKAGE_VERSION}} migrate-schema --dry-run  # preview first
 ```
 
-Do NOT silently migrate. The user may be maintaining backward compatibility.
-Only suggest; let them decide.
+Do NOT silently migrate.
 
-**Migration is safe**: `migrate-schema` creates a timestamped backup of the old
-deck before writing the new format. Run `migrate-schema --dry-run` first to
-preview the diff without modifying the file.
-## Initialize
-```bash
-# Copy template and edit [innate]/[tool] sections
-cp ${CLAUDE_SKILL_DIR}/assets/skill-deck.toml.template ./skill-deck.toml
-# Or migrate existing unmanaged .claude/skills/
-bash ${CLAUDE_SKILL_DIR}/scripts/deck-migrate.sh
-```
-Then run `bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link` to sync.
-## Diagnose (read-only)
-```bash
-bash ${CLAUDE_SKILL_DIR}/scripts/deck-status.sh
-```
-Reports skills in cold pool but not in deck, expiring transients, managed-dir overlaps.
 ## Key Concepts
+
 | Concept | One-liner |
 |---------|-----------|
-| **Cold Pool** | All downloaded skills (`~/.agents/skill-repos/`). Agent cannot see here. |
-| **skill-deck.toml** | Declares desired state: "this project uses these skills." |
-| **`deck link`** | Reconciler. Makes `.claude/skills/` match the declaration. |
-| **Working Set** | `.claude/skills/` — symlinks only. What the agent actually scans. |
-| **skill-deck.lock** | Machine-generated snapshot: resolved paths, hashes, constraints. |
+| Cold Pool | All downloaded skills (`~/.agents/skill-repos/`). Agent cannot see here. |
+| skill-deck.toml | Declares desired state. Alias-as-key dict format. |
+| deck link | Reconciler. Makes `.claude/skills/` match the declaration. |
+| Working Set | `.claude/skills/` — symlinks only. What the agent actually scans. |
+| skill-deck.lock | Machine-generated snapshot: resolved paths, hashes, constraints. |
+
 ## Constraints
-- **deny-by-default** — undeclared skills are physically absent.
-- **link backs up real directories** — non-symlink entries in `.claude/skills/` are archived to `.claude/skills.bak.YYYYMMDD-HHMMSS.tar.gz` before removal. Total size > 100MB causes link to refuse (use `--no-backup` or clean up manually).
-- **max_cards** — exceeding the budget causes link to refuse.
-- **transient expires** — past-due transients trigger warnings.
-- **managed_dirs overlap** — two skills claiming the same directory triggers a warning.
-- **Never manually create subdirectories in `.claude/skills/`.** Use `deck link`. Manual directories become untracked "ghost skills" that get backed up and removed on the next link.
-- **deck does not run post-install steps** — `add`/`link` place skills in the working set. Any additional setup (API keys, env vars, external tool dependencies) is the skill's own responsibility; follow that skill's README.
-## Gotchas
-**lstatSync, not existsSync**: The reconciler uses `lstatSync` (does not follow
-symlinks) to detect entities. `existsSync` returns `false` for broken symlinks,
-causing `EEXIST` errors on recreation. If writing custom working-set scripts, use `lstatSync`.
-**SKILL.md type field**: Only `standard` or `flow` are valid (agent platform validation).
-`innate`/`tool`/`transient` are **skill-deck.toml section names**, not
-SKILL.md types. Using them as types causes silent skip.
-`combo` is a meta-declaration (skills + prompt), not a skill type.
-**Skill locators**: `skill-deck.toml` accepts two locator styles. The FQ locator maps directly to the repository's internal directory structure — no implicit prefix is inserted.
+
+- **deny-by-default** — undeclared skills are physically absent from working set
+- **max_cards** — exceeding the budget causes link to refuse
+- **link backs up real directories** — non-symlink entries archived to `.claude/skills.bak.*.tar.gz`
+- **transient expires** — past-due transients trigger warnings
+- **managed_dirs overlap** — two skills claiming same directory triggers warning
+- **Never manually create subdirectories in `.claude/skills/`** — use `deck link`
+- **deck does not run post-install steps** — API keys, env vars are the skill's own responsibility
+
+## Locators — Always Fully-Qualified
 
 | Style | Example | Reliability |
 |-------|---------|-------------|
-| Bare name | `lythoskill-deck` | Fragile — only works if skill is at cold-pool root or wins the flat-scan lottery |
-| Fully-qualified | `github.com/lythos-labs/lythoskill/skills/lythoskill-deck` | Reliable — deterministic path matching |
+| Fully-qualified | `github.com/lythos-labs/lythoskill/skills/lythoskill-deck` | Reliable — deterministic path |
+| Bare name | `lythoskill-deck` | Fragile — non-deterministic readdir order |
 
-If a skill lives at `skills/pdf/` inside the `anthropics/skills` repo, the FQ locator must include the full internal path: `github.com/anthropics/skills/skills/pdf`. The deck does **not** auto-insert a `skills/` prefix.
+The deck does NOT auto-insert a `skills/` prefix. Verify repo structure before writing locators.
 
-Bare names fail for monorepo skills because the flat-scan searches `readdirSync` order and is non-deterministic when multiple repos contain the same name. **Always use fully-qualified locators.**
+## Gotchas
 
-**Network restrictions — SOCKS proxy fallback**: If `deck add`, `deck validate --remote`, or `deck link` fails with "Network probe failed" / "Cannot reach github.com", the environment may be behind a firewall or in a restricted network. Before giving up, try routing through a SOCKS5 proxy:
+**deck link uses lstatSync, not existsSync** — `existsSync` returns false for broken symlinks, causing EEXIST errors.
+
+**SKILL.md type field**: Only `standard` or `flow` are valid. `innate`/`tool`/`transient` are deck toml section names, not SKILL.md types. `deck_skill_type` (custom field) for `fork`/`transient` declarations.
+
+**Network restrictions — SOCKS proxy**: If `deck add` or `validate --remote` fails with "Cannot reach github.com", set `LYTHOS_SOCKS_PROXY`:
 
 ```bash
-export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"   # or your proxy host:port
-# socks5:// prefix is optional — both forms work
-bunx @lythos/skill-deck@latest add github.com/owner/repo/skill
+export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill
 ```
 
-The deck CLI (and the underlying cold-pool probe) automatically routes GitHub API calls and git operations through the SOCKS proxy when this env var is set. No other configuration needed.
+**Innate priority**: After compaction, read `innate` skills' full SKILL.md first. `tool` skills are lazy — read on trigger. Agent-side convention.
 
-**Agent duty — verify before guessing**: When you encounter an unfamiliar skill repo and are unsure of its internal directory layout (e.g., whether the skill lives at repo root or under `skills/`), use web search to inspect the actual repository structure before writing the locator. Do not guess path segments.
+**Never guess locators** — web-search the repo structure before writing paths for unfamiliar repos.
 
-**deck_ prefix**: All custom frontmatter fields in lythoskill use the `deck_` prefix
-to avoid collisions with the Agent Skills open standard or future platform extensions.
-**deck_skill_type**: Use the custom field `deck_skill_type` to declare a skill's
-intrinsic deck role — never overload the official `type` field. `type` is reserved for
-agent platform validation (`standard` or `flow` only).
-
-| `deck_skill_type` | When to declare | Why |
-|-------------------|-----------------|-----|
-| `fork` | Skill is a local adaptation of an upstream skill | Upstream's desc/behavior structurally conflicts with our arena-tested conclusions |
-| `transient` | Skill is a temporary workaround with `expires` | Signals "this skill expects to disappear as the ecosystem evolves" |
-
-`innate` / `tool` are **deck-level deployment choices** declared in `skill-deck.toml`
-sections, not single-card properties. The same skill can be `innate` in one deck and
-`tool` in another.
-
-**Innate priority**: after context compaction or skill reload, read `innate` skills'
-full SKILL.md first (eager/hungry model). `tool` skills are lazy — read on trigger.
-This is an agent-side convention, not a CLI enforcement. The lock file's `type` field
-is your signal.
-
-**Standard compliance**: lythoskill-deck does not modify the Agent Skills standard.
-Every skill remains a directory with SKILL.md. Deck only controls which directories
-appear in `.claude/skills/`. Without deck, skills work normally via manual placement.
 ## Supporting References
-Read these **only when the specific topic arises**:
+
 | When you need to… | Read |
 |--------------------|------|
-| Understand the cold pool → deck → working set pipeline | [references/architecture.md](./references/architecture.md) |
-| Look up a lythoskill term (silent blend, niche, transient…) | [references/glossary.md](./references/glossary.md) |
-| Write or edit a skill-deck.toml file | [references/toml-format.md](./references/toml-format.md) |
-| Set up a cold pool for the first time | [references/cold-pool-setup.md](./references/cold-pool-setup.md) |
-| Choose, compare, or organize skills for a deck | [references/deck-building.md](./references/deck-building.md) |
+| Understand cold pool → deck → working set pipeline | [references/architecture.md](./references/architecture.md) |
+| Look up a lythoskill term | [references/glossary.md](./references/glossary.md) |
+| Write or edit skill-deck.toml | [references/toml-format.md](./references/toml-format.md) |
+| Set up a cold pool | [references/cold-pool-setup.md](./references/cold-pool-setup.md) |
+| Build or organize a deck | [references/deck-building.md](./references/deck-building.md) |
 | Run arena benchmarks with deck isolation | [references/arena-integration.md](./references/arena-integration.md) |
-| Understand SKILL.md type values or skill thickness layers | [references/skill-types.md](./references/skill-types.md) |
-| Add custom frontmatter fields to a skill | [references/custom-fields.md](./references/custom-fields.md) |
+| Understand SKILL.md types or skill thickness | [references/skill-types.md](./references/skill-types.md) |
+| Add custom frontmatter fields | [references/custom-fields.md](./references/custom-fields.md) |

@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/15 19:43:42
+> 自动生成于 2026/5/17 12:18:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 212 | 进行中: 0, 待验收: 0, 已完成: 183 |
-| Epics | 30 | 活跃: 1, 已完成: 25, 悬置: 2, 已归档: 2 |
-| ADRs | 67 | 已接受: 52 |
+| Tasks | 217 | 进行中: 0, 待验收: 0, 已完成: 188 |
+| Epics | 31 | 活跃: 2, 已完成: 25, 悬置: 2, 已归档: 2 |
+| ADRs | 68 | 已接受: 52 |
 
 ---
 
@@ -17,6 +17,7 @@
 ### 进行中
 
 - **EPIC-20260515001514240**: Emergency: migrate test/scenarios/ to src/ co-located unit tests
+- **EPIC-20260517121757041**: Agent BDD 覆盖 — deck/arena skill 行为验证
 
 ### 已完成
 
@@ -72,7 +73,7 @@ _无_
 
 _无_
 
-### 已完成 (183)
+### 已完成 (188)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -257,6 +258,11 @@ _无_
 - ✅ ~~TASK-20260513040027913~~: Pre-commit guard for cross-package relative imports — reject from ../../<pkg>/src in packages/*/src
 - ✅ ~~TASK-20260513095345353~~: Set up showcase/ directory for committed arena demos — start with migrating T5 (2026-05-13 agent-skills-intro CTO brief) as inaugural entry; README + reproduce.sh per demo
 - ✅ ~~TASK-20260513095346630~~: Run T5-style arena single on competitive-landscape research as the brief — produce md+html research report on agent-skills-eval / MemTensor skills-vote / etc. Deck: deep-research + baoyu
+- ✅ ~~TASK-20260517121808215~~: BDD: deck abc 基础 — link/add/phase-switch/restore
+- ✅ ~~TASK-20260517121813603~~: BDD: innate eager-load — curator innate + critique tool
+- ✅ ~~TASK-20260517121819470~~: BDD: to-symlink/to-snapshot 切换 + link 行为缺口
+- ✅ ~~TASK-20260517121825279~~: BDD: arena single + cross-deck vs 三连触发稳定
+- ✅ ~~TASK-20260517121830977~~: BDD: map-reduce 并行 critique — 3 cell 不同 workdir 不同 deck
 
 ### 悬置 (1)
 
@@ -363,6 +369,7 @@ _无_
 - 🤔 **ADR-20260513011442965** (01-proposed): Network proxy auto-discovery for resilient connectivity
 - ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
 - ✅ **ADR-20260513144000000** (02-accepted): No hard-coded third-party mirror list — trust boundary belongs to user
+- 🤔 **ADR-20260515204135649** (01-proposed): Agent self-healing environment — clear error context over structured framework
 
 ---
 

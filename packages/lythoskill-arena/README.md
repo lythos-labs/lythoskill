@@ -1,48 +1,15 @@
 # @lythos/skill-arena
 
-![CI](https://img.shields.io/badge/CI-41%20unit%20tests-brightgreen) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2)
+> Controlled-variable benchmark for AI agent skills. Test single decks or compare A/B — agent-orchestrated by default, cross-player when you need it.
 
-> Controlled-variable benchmark for AI agent skills. Compare skills, decks, or configurations on the same task — single-skill A/B or full-deck Pareto frontier analysis. Now with declarative `arena.toml` (k8s-manifest style) and deterministic Pareto frontier.
+## Modes at a Glance
 
-## Why
+| Mode | How | When |
+|------|-----|------|
+| **Agent-Orchestrated** (DEFAULT) | Agent tool spawns subagents, parallel dispatch, native judge | Single deck test, cross-deck A/B comparison |
+| **Cross-Player** (OPT-IN) | CLI runner spawns different agent binaries via Bun.spawn | Comparing kimi vs codex vs claude |
 
-"Which skill is better?" is the wrong question. The right question is "which skill is better for what."
-
-`skill-arena` scaffolds isolated environments where subagents complete the same task under different decks. A judge agent scores outputs across multiple dimensions. Supports:
-
-- **Mode 1**: Single-skill comparison (controlled variable — same helper skills, different test skill).
-- **Mode 2**: Full-deck comparison (Pareto frontier — no single winner, only optimal trade-offs).
-
-## Prerequisites
-
-Arena runs AI agents as subprocesses. You need at least one agent CLI installed:
-
-### Kimi CLI (recommended default)
-
-Kimi Code CLI is the default player for arena — it has reliable headless execution with eager tool loading (no deferred tool deadlock).
-
-```bash
-# Install via uv (recommended) — uv is Python's bunx equivalent
-uv tool install kimi-cli
-# Or run without installing:
-uvx kimi-cli --print -p "hello"
-
-# Authenticate
-kimi login
-# Or set API key:
-export KIMI_API_KEY=your_key
-```
-
-Docs: [https://github.com/MoonshotAI/kimi-cli](https://github.com/MoonshotAI/kimi-cli)
-
-### Claude CLI (secondary)
-
-```bash
-npm install -g @anthropic-ai/claude-code
-claude --version  # should be ≥ 2.1.128
-```
-
-Note: Claude `-p` mode has known issues with web tools in Bun.spawn (deferred tool deadlock). Kimi is the default for reliability.
+**95% of arena use is agent-orchestrated.** The Agent tool can spawn parallel subagents with isolated workdirs and different decks — zero CLI. Cross-player mode is ONLY needed when comparing different agent CLIs (the Agent tool can only spawn same-type agents).
 
 ## Install
 
@@ -55,86 +22,95 @@ bunx @lythos/skill-arena@0.13.3 <command>
 ## Quick Start
 
 ```bash
-# Single: test a deck with one agent (most common)
+# single — test one deck (most common)
 bunx @lythos/skill-arena@latest single \
   --deck ./examples/decks/scout.toml \
   --brief "Generate auth flow diagram" \
-  --player kimi \
-  --timeout 300000 \
   --out ./output
 
-# Single with remote deck (URL auto-fetched)
-bunx @lythos/skill-arena@latest single \
-  --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml \
-  --brief "Generate auth flow diagram" \
-  --out ./output
-
-# Vs: compare multiple decks side by side
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/arena/research-compare/arena.toml > arena.toml
+# cross-deck vs — compare two decks (agent-orchestrated)
+# Create arena.toml declaring sides with different decks, then:
 bunx @lythos/skill-arena@latest vs --config ./arena.toml
+
+# cross-player vs — compare kimi vs codex (CLI only)
+bunx @lythos/skill-arena@latest vs --config ./arena.toml --player kimi
 ```
 
-**Default behavior:**
-- Agent runs in an isolated `/tmp` workdir (no workspace pollution)
-- All artifacts are copied to `--out` after completion
-- Prompt template injects fixed contract (decision-log, robustness, tool preference) + your brief as variable
+**What happens**: Agent creates isolated `/tmp` workdir per side, `deck link` skills, spawns parallel subagents, collects artifacts, judge scores outputs. Parent deck restored after.
 
 ## Commands
 
-### Declarative mode (k8s-style, recommended)
+### `single` — one deck, one task
 
 ```bash
-# Print execution plan without running
-bunx @lythos/skill-arena@0.13.3 vs --config arena.toml --dry-run
-
-# Execute with per-side runs_per_side and statistical aggregation
-bunx @lythos/skill-arena@0.13.3 vs --config arena.toml
+bunx @lythos/skill-arena@latest single \
+  --deck ./deck.toml \
+  --brief "Produce a .docx report with radar chart" \
+  --timeout 600000 \
+  --out ./output
 ```
 
-### Scaffold mode (legacy, manual execution)
-
-```
-bunx @lythos/skill-arena@0.13.3 scaffold --task "Generate auth flow diagram" \
-  --decks https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml
-```
-
-### Viz
+### `vs` — multi-deck comparison
 
 ```bash
-bunx @lythos/skill-arena@0.13.3 viz runs/arena-<id>/
+bunx @lythos/skill-arena@latest vs --config ./arena.toml
+bunx @lythos/skill-arena@latest vs --config ./arena.toml --dry-run
+```
+
+### `scaffold` — legacy directory setup
+
+```bash
+bunx @lythos/skill-arena@latest scaffold \
+  --task "Generate auth flow diagram" \
+  --decks "./decks/minimal.toml,./decks/rich.toml"
+```
+
+### `viz` — render results
+
+```bash
+bunx @lythos/skill-arena@latest viz runs/arena-<id>/
+```
+
+## Parameters
+
+| Flag | Command | Description |
+|------|---------|-------------|
+| `--brief "<text>"` | single | Inline task brief |
+| `--deck <path\|url>` | single | Deck file (URL auto-fetched) |
+| `--player <name>` | single, vs | Only for cross-player: kimi\|codex\|deepseek\|claude |
+| `--timeout <ms>` | single | Subagent timeout (300000–600000 for complex tasks) |
+| `--out <dir>` | single, vs | Output directory |
+| `--config <path>` | vs | arena.toml |
+| `--dry-run` | vs | Print plan without execution |
+
+## Prerequisites (cross-player only)
+
+For cross-player mode, install at least one agent CLI:
+
+```bash
+uv tool install kimi-cli           # kimi (recommended default)
+npm i -g @openai/codex             # codex
+# deepseek: bundled with desktop app or pip install deepseek-cli
+# claude: set ANTHROPIC_API_KEY (SDK, no CLI binary needed)
 ```
 
 ## Skill Documentation
 
-This package is the **Starter** layer (CLI implementation).  
-The agent-visible **Skill** layer documentation is here:  
-[packages/lythoskill-arena/skill/SKILL.md](../../packages/lythoskill-arena/skill/SKILL.md)
+The agent-visible skill layer: [skill/SKILL.md](./skill/SKILL.md)
 
 ## Architecture
 
-Part of the [lythoskill](https://github.com/lythos-labs/lythoskill) ecosystem — the thin-skill pattern separates heavy logic (this npm package) from lightweight agent instructions (SKILL.md).
-
-```
-Starter (this package) → npm publish → bunx @lythos/skill-arena@0.13.3 ...
-Skill   (packages/<name>/skill/)     → build → SKILL.md + thin scripts
-Output  (skills/<name>/)             → git commit → agent-visible skill
-```
-
-### Runtime architecture (intent/plan/execute)
-
 ```
 arena.toml  →  ArenaToml (Zod)  →  ExecutionPlan (pure)  →  per-cell agent spawn (IO)
-                                    ↓
-                aggregateAllStats (pure)  ←  verdicts[]
-                                    ↓
-                runComparativeJudge (IO)  →  report.md + Pareto frontier
+                                   ↓
+               aggregateAllStats (pure)  ←  verdicts[]
+                                   ↓
+               runComparativeJudge (IO)  →  report.md + Pareto frontier
 ```
 
-- **Intent**: `arena.toml` declarative config (k8s-manifest style)
+- **Intent**: `arena.toml` declarative config
 - **Plan**: `buildExecutionPlan()`, `aggregateSideStats()`, `computePareto()` — pure functions
-- **Execute**: `runAgentScenario` per cell, `runComparativeJudge` — IO via `AgentAdapter`
-
-Built on `@lythos/test-utils` shared infrastructure.
+- **Execute**: Agent tool spawn (agent-orchestrated) or `AgentAdapter` (cross-player)
 
 ## License
 
