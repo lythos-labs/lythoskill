@@ -31,6 +31,23 @@ Read arena SKILL.md → prepare-workdir → preflight → task → self-judge �
 | Task | "Generate a 'Subscribe' button HTML component" |
 | Model | Kimi (user-configured) |
 
+## Reproduce.sh Replay (Verified)
+
+The `reproduce.sh` was independently replayed by a different subagent.
+
+| Origin | Agent | Decision Log |
+|--------|-------|-------------|
+| First run | Kimi (zero-knowledge) | 13 entries — `decision-log.jsonl` |
+| Replay | DeepSeek4Pro | 11 entries — `replay-decision-log.jsonl` |
+
+SHA-256 checksums match between workdir and archive. Both agents produced the same structure: `subscribe-button.html` + `decision-log.jsonl`.
+
+### Why reproduce.sh Is Agent-Only
+
+`bash reproduce.sh` prints Step 3 as an echo line. A human sees text. An agent reads stdout, recognizes `<spawn subagent>` as its role, and takes over. This IoC pattern **emerged from the first subagent** — it wrote echo as a prompt channel without being told. The replay subagent understood without a schema.
+
+→ Wiki: [Shell stdout as Agent Prompt Injection](../../cortex/wiki/01-patterns/2026-05-17-shell-stdout-as-agent-prompt-injection.md)
+
 ## Output Structure
 
 ```

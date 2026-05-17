@@ -1,6 +1,25 @@
 #!/bin/bash
 # Arena single-deck test: frontend-design
 # Run date: 2026-05-17
+#
+# ═══════════════════════════════════════════════════════════════════════════
+# AGENT-ONLY REPLAY — human execution is intentionally incomplete.
+#
+#   bash reproduce.sh
+#
+# Step 3 is NOT a shell command. It prints a contextual instruction to stdout.
+# When a HUMAN runs this, Step 3 is useless — they see an echo line and nothing.
+# When an AGENT runs this, Step 3 acts as IoC prompt injection:
+#   the agent reads stdout, recognizes <spawn subagent> as its role, takes over.
+#
+# This pattern was NOT pre-designed. The first subagent wrote echo as a prompt
+# channel without being told. The replay subagent understood without a schema.
+#   Pattern: Shell stdout as Agent Prompt Injection (see cortex/wiki for details)
+#   Verified: 2026-05-17 — independent replay agent PASS, same output structure.
+#
+# Run this as: bash reproduce.sh
+# (agent must execute Step 3 manually — use frontend-design skill in $WORKDIR)
+# ═══════════════════════════════════════════════════════════════════════════
 set -e
 
 DECK="/tmp/test-deck.toml"
