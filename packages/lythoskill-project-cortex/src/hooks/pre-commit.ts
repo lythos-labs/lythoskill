@@ -100,7 +100,19 @@ try {
   const tips: string[] = []
   if (proposedADRs > 0) tips.push(`${proposedADRs} proposed ADR → 配套实现已落地？cortex adr accept <id>`)
   if (reviewTasks > 0) tips.push(`${reviewTasks} in review → 验收通过？cortex done <id>`)
-  if (activeEpics > 0) tips.push(`${activeEpics} active epic → 任务全完成？cortex epic done <id>`)
+  if (activeEpics > 0) {
+    tips.push(`${activeEpics} active epic → 任务全完成？cortex epic done <id>`)
+  } else {
+    // Zero active epics — tip to create one if this looks like significant work.
+    const staged = git(['diff', '--cached', '--name-only', '--diff-filter=ACM'])
+    const stagedFiles = staged.ok ? staged.stdout.split('\n').filter(Boolean) : []
+    const pkgCount = new Set(stagedFiles.filter((f: string) => f.startsWith('packages/')).map((f: string) => f.split('/')[1])).size
+    if (pkgCount >= 2) {
+      tips.push(`0 active epic, ${pkgCount} packages touched → 值得追踪？cortex epic "..." --lane main`)
+    } else if (stagedFiles.length > 0) {
+      tips.push('0 active epic → 本次改动跨多个 commit？cortex epic "..." --lane main')
+    }
+  }
 
   if (tips.length > 0) {
     console.log()
