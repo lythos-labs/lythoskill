@@ -134,17 +134,7 @@ If ANY fail → fix before proceeding.
 
 ### 3. Dispatch — parallel spawn
 
-**One subagent per side. Agent tool parameters explained:**
-
-| Parameter | What it does | What it does NOT do |
-|-----------|-------------|---------------------|
-| `run_in_background: true` | Subagent runs asynchronously. Parent agent continues immediately. Subagent completion triggers a system notification. | Does NOT change subagent's CWD. Subagent inherits parent's CWD unless explicitly told otherwise. |
-| `prompt` | Initial instructions given to subagent. Subagent receives this as its first user message. | Does NOT automatically load skills for subagent. Skill loading depends on subagent's actual working directory. |
-| `subagent_type` | Determines which agent implementation (claude, general-purpose, etc.) handles the task. | Does NOT control which model (Claude vs Kimi vs others) the subagent uses — model is a user/host-level configuration, not an arena parameter. |
-
-**CWD behavior**: Subagent starts in the **parent's CWD** (where YOU are). To make it use the isolated workdir, include in the prompt: `"Your working directory is {workDir}. All files must be written there."` The subagent will `cd` to that directory and use it as its base.
-
-**Skill loading**: Subagent loads skills from `.claude/skills/` in its **actual working directory** (after cd). Skills from parent session are visible in the system prompt but do not override the workdir's deck. This is why `/tmp` isolation matters — no parent project skills leak in.
+One subagent per side:
 
 ```
 subagent prompt:
@@ -156,6 +146,8 @@ subagent prompt:
 ```
 
 All subagents run in PARALLEL. Each writes to its own isolated workdir. No file conflicts.
+
+> **Platform note**: `run_in_background` (or your platform's async spawn equivalent) keeps parent unblocked. Subagent inherits parent CWD — include `"Your working directory is {workDir}"` in the prompt so it cd's to the right place. Subagent skills load from `.claude/skills/` in that workdir.
 
 ### 4. Collect + Judge + Report
 
@@ -212,6 +204,14 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
 **Judge is not a script**: Semantic comparison ("which better fits the scenario") requires LLM inference. Token counting is scriptable; judgment is not.
 
 **vs does not pick a winner**: Pareto frontier analysis — a cheap-medium-quality deck and expensive-high-quality deck can both be non-dominated.
+
+**Subagent spawn parameters** (Claude Code baseline — adapt to your platform):
+
+| Parameter | What it does | What it does NOT do |
+|-----------|-------------|---------------------|
+| `run_in_background` | Async spawn. Parent continues. Completion triggers notification. | Does NOT change subagent CWD. Must set via prompt. |
+| `prompt` | Initial instructions to subagent. | Does NOT auto-load skills. Skills load from subagent's actual workdir. |
+| `subagent_type` | Which agent impl handles the task. | Does NOT control model (Claude vs Kimi). Model is host config. |
 
 ## Supporting References
 
