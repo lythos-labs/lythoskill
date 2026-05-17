@@ -46,11 +46,13 @@ export function buildClaudeCommand(opts: {
   env?: Record<string, string>
   allowedTools?: string
   disallowedTools?: string
+  modelTier?: 'fast' | 'balanced' | 'deep'
 }): SpawnCommand {
   const promptFile = join(tmpdir(), `claude-prompt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`)
   const allowed = opts.allowedTools ?? DEFAULT_ALLOWED_TOOLS
   const disallowed = opts.disallowedTools ?? DEFAULT_DISALLOWED_TOOLS
-  const shellCmd = `claude -p --output-format json --permission-mode bypassPermissions --allowedTools '${allowed}' --disallowedTools '${disallowed}' < ${promptFile}`
+  const modelFlag = opts.modelTier === 'fast' ? ' --model haiku' : opts.modelTier === 'deep' ? ' --model opus' : ''
+  const shellCmd = `claude -p --output-format json --permission-mode bypassPermissions --allowedTools '${allowed}' --disallowedTools '${disallowed}'${modelFlag} < ${promptFile}`
 
   return {
     cmd: 'sh',

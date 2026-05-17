@@ -6,6 +6,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-17 | Created |
+| in-progress | 2026-05-17 | Started |
+| review | 2026-05-17 | Deliverables committed |
+| completed | 2026-05-17 | Done |
 
 ## 背景与目标
 `deck link` always produces symlinks regardless of per-skill mode in lock file. Schema has had `mode` field since v0.9.32 but reconciler isn't mode-aware. Snapshot mode motivated by Codex symlink bug (#11314 — top-level symlink only, not individual skills). Lythoskill unaffected but snapshot mode is needed for cross-CLI compatibility.

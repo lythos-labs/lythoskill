@@ -6,6 +6,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-17 | Created |
+| in-progress | 2026-05-17 | Started |
+| review | 2026-05-17 | Deliverables committed |
+| completed | 2026-05-17 | Done |
 
 ## 背景与目标
 agent-adapter needs `modelTier` parameter (fast/balanced/deep) for reliable cross-player comparison. Native subagent model routing is broken in Claude Code and Codex — the agent tool doesn't expose model selection, so A/B comparisons are unreliable (different models produce different quality). agent-adapter bypasses native subagent via independent OS processes, enabling explicit model control.

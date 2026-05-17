@@ -188,6 +188,7 @@ interface DeclaredSkill {
   alias: string;       // working-set flat symlink name
   type: "innate" | "tool" | "combo" | "transient";
   sourcePath: string;
+  mode?: 'symlink' | 'snapshot';
   expires?: string;
 }
 
@@ -234,7 +235,8 @@ for (const entry of parsedEntries) {
       continue
     }
   }
-  declared.push({ name: entry.path, alias: entry.alias, type: entry.type, sourcePath: result.path });
+  const entryMode = (entry as any).mode as 'symlink' | 'snapshot' | undefined;
+  declared.push({ name: entry.path, alias: entry.alias, type: entry.type, sourcePath: result.path, mode: entryMode });
 }
 
 // transient: sub-tables with path field (kept backward-compat; future ADR may unify)
@@ -427,7 +429,8 @@ for (const item of declared) {
 
   try {
     mkdirSync(dirname(dest), { recursive: true });
-    if (MODE === 'snapshot') {
+    const linkMode = item.mode ?? MODE;
+	    if (linkMode === 'snapshot') {
       cpSync(item.sourcePath, dest, { recursive: true });
     } else {
       symlinkSync(item.sourcePath, dest);
@@ -463,7 +466,7 @@ for (const item of declared) {
     type: item.type,
     source: sourceRel,
     dest: relative(PROJECT_DIR, dest),
-    mode: MODE,
+    mode: item.mode ?? MODE,
     content_hash: contentHash,
     linked_at: new Date().toISOString(),
     ...(item.expires ? { expires: item.expires } : {}),

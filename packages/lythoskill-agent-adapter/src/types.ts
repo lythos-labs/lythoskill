@@ -41,6 +41,8 @@ export interface AgentAdapter {
     env?: Record<string, string>
     allowedTools?: string
     disallowedTools?: string
+    /** Model tier for cross-player comparison. fast=haiku/gpt-4o-mini, balanced=sonnet/default, deep=opus/gpt-4. */
+    modelTier?: 'fast' | 'balanced' | 'deep'
   }): Promise<AgentRunResult>
 
   /** Optional: structured tool invocation (function-calling). If absent, judge falls back to prompt + parse + Zod. */

@@ -8,7 +8,10 @@ import { registerAgent } from '../registry'
 // ── Pure functions (testable without CLI) ────────────────────────────────────
 
 /** Build kimi --print command args (no shell wrapper — safe from injection). */
-export function buildKimiCommand(): string[] {
+export function buildKimiCommand(_modelTier?: 'fast' | 'balanced' | 'deep'): string[] {
+  // Kimi CLI has no --model flag; model selection is via /model slash command,
+  // config.toml, or KIMI_MODEL_NAME env var. modelTier is accepted but unused
+  // — Kimi effectively provides one tier via coding plan.
   return ['kimi', '--print', '--afk', '--output-format', 'stream-json']
 }
 

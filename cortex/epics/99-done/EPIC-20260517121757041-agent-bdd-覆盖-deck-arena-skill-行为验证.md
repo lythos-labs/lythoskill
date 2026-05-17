@@ -18,6 +18,7 @@ checklist_skipped_reason: BDD scenarios validated PASS 2026-05-17, tasks recreat
 |--------|------|------|
 | active | 2026-05-17 | Created |
 | active | 2026-05-17 | Tasks linked, body filled |
+| done | 2026-05-17 | Done |
 
 ## 背景故事
 Deck and arena skills had zero behavioral test coverage. Manual verification after each change. 5 BDD scenarios validated 2026-05-17 in session 9 — all PASS. Tests are scenario-based agent BDD (agent validates behavior via subagent execution), not CI-runnable unit tests.

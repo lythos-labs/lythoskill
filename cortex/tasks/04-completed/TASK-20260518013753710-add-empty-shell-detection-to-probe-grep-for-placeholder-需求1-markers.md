@@ -8,6 +8,7 @@
 | backlog | 2026-05-17 | Created |
 | in-progress | 2026-05-17 | Started |
 | review | 2026-05-17 | Deliverables committed |
+| completed | 2026-05-17 | Done |
 
 ## 背景与目标
 TASK-20260517193716031 added ⚠️ REQUIRED / PLACEHOLDER markers to templates and mandatory-fill directive to SKILL.md. But probe.ts never checks for these markers — "Empty templates will be REJECTED by pre-commit probe" in SKILL.md line 83 is a false claim. 5 BDD tasks found in 04-completed/ are 100% template (empty shells) and probe said nothing.
