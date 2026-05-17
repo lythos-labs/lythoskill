@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-01 | Created — pending implementation |
+| accepted | 2026-05-17 | Accepted |
 
 ## Context
 

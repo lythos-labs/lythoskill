@@ -87,4 +87,28 @@ if (ids.length > 0) {
   console.log(`   当前 in-progress: ${ids.join(', ')}`)
 }
 
+// ── 4. Governance waterline (non-blocking tip) ──────────────────────────
+
+try {
+  const adrProposedDir = `${ROOT}/cortex/adr/01-proposed`
+  const reviewDir = `${ROOT}/cortex/tasks/03-review`
+  const activeEpicDir = `${ROOT}/cortex/epics/01-active`
+  const proposedADRs = scanFiles([adrProposedDir], 'ADR').files.length
+  const reviewTasks = scanFiles([reviewDir], 'TASK').files.length
+  const activeEpics = scanFiles([activeEpicDir], 'EPIC').files.length
+
+  const tips: string[] = []
+  if (proposedADRs > 0) tips.push(`${proposedADRs} proposed ADR → 配套实现已落地？cortex adr accept <id>`)
+  if (reviewTasks > 0) tips.push(`${reviewTasks} in review → 验收通过？cortex done <id>`)
+  if (activeEpics > 0) tips.push(`${activeEpics} active epic → 任务全完成？cortex epic done <id>`)
+
+  if (tips.length > 0) {
+    console.log()
+    console.log('🌊 Governance waterline — check before next commit:')
+    for (const t of tips) console.log(`   ${t}`)
+  }
+} catch {
+  // Cortex may not be initialized — skip
+}
+
 process.exit(0)

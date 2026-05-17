@@ -10,6 +10,7 @@ updated: 2026-05-15
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-15 | Created |
+| accepted | 2026-05-17 | Accepted |
 
 ## 背景
 

@@ -1,0 +1,14 @@
+#!/bin/sh
+# post-commit — cortex trailer dispatch
+# Installed by: bunx @lythos/project-cortex init
+#
+# Parses commit message trailers (Closes:/Task:/ADR:/Epic:) and
+# dispatches state transitions via cortex CLI. Non-blocking —
+# errors are logged but do not prevent the commit.
+#
+# To customize, edit this file. The init command will not overwrite
+# an existing post-commit hook.
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+
+bunx @lythos/project-cortex dispatch-trailers
