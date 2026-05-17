@@ -1,0 +1,13 @@
+# Vanilla Deck — seed bootstrap baseline
+# Bare minimum: only deck governance as innate. Agent self-expands via `deck add`.
+# Usage:
+#   bunx @lythos/skill-arena prepare-workdir --deck ./vanilla.toml --out /tmp/arena-test --brief "task"
+#   # Subagent reads AGENTS.md → understands project → deck add skills as needed
+
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"

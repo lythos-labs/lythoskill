@@ -8,9 +8,10 @@
 ### Software Engineering
 | Deck | Skills | Use |
 |------|--------|-----|
+| [vanilla.toml](./vanilla.toml) | lythoskill-deck (innate only) | Seed bootstrap — agent self-expands from zero |
 | [engineering.toml](./engineering.toml) | tdd, to-prd, mermaid | TDD + PRD + architecture diagrams |
 | [full-stack.toml](./full-stack.toml) | react, composition, tdd, pdf, mermaid | React + component patterns + TDD |
-| [scout.toml](./scout.toml) | lythoskill-deck (innate only) | Minimal baseline — measure deck impact |
+| [scout.toml](./scout.toml) | lythoskill-deck (innate only) | Deprecated — see vanilla.toml |
 
 ### Documents & Research
 | Deck | Skills | Use |
