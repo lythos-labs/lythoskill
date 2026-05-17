@@ -15,6 +15,10 @@ export function createAdr(title: string, config: WorkflowConfig): void {
   const template = createAdrTemplate(id, title);
   writeFileSync(filepath, template);
 
-  console.log(`✅ Created: ${filepath}`);
+  console.log(`✅ Step 1/3: ADR file created → ${filepath}`);
   console.log(`🏛️  ADR ID: ${id}`);
+  console.log(`🔄 Step 2/3 NOW: Edit the file to fill ALL sections`);
+  console.log(`   Required: 背景 / 决策驱动 / 选项(≥2) / 决策 / 影响`);
+  console.log(`   Empty placeholders will be REJECTED by pre-commit probe.`);
+  console.log(`⏳ Step 3/3 LATER: Run 'cortex probe' before commit to verify`);
 }

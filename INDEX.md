@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/17 12:18:45
+> 自动生成于 2026/5/17 22:47:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 217 | 进行中: 0, 待验收: 0, 已完成: 188 |
-| Epics | 31 | 活跃: 2, 已完成: 25, 悬置: 2, 已归档: 2 |
-| ADRs | 68 | 已接受: 52 |
+| Tasks | 228 | 进行中: 0, 待验收: 1, 已完成: 194 |
+| Epics | 31 | 活跃: 1, 已完成: 26, 悬置: 2, 已归档: 2 |
+| ADRs | 72 | 已接受: 56 |
 
 ---
 
@@ -16,7 +16,6 @@
 
 ### 进行中
 
-- **EPIC-20260515001514240**: Emergency: migrate test/scenarios/ to src/ co-located unit tests
 - **EPIC-20260517121757041**: Agent BDD 覆盖 — deck/arena skill 行为验证
 
 ### 已完成
@@ -46,6 +45,7 @@
 - ✅ **EPIC-20260508222319639**: Doc + test infra sweep — SSOT for agentskill.sh syndication
 - ✅ **EPIC-20260511235648324**: QA sweep: empty catch hardening across core packages
 - ✅ **EPIC-20260513010237904**: Popular third-party skills end-to-end with network probe UX
+- ✅ **EPIC-20260515001514240**: Emergency: migrate test/scenarios/ to src/ co-located unit tests
 
 ### 悬置
 
@@ -61,19 +61,21 @@
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (3)
 
-_无_
+- [ ] **TASK-20260517122556223**: Wire per-skill mode (symlink/snapshot) into deck link reconciler
+- [ ] **TASK-20260517193716031**: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
+- [ ] **TASK-20260517193718598**: agent-adapter modelTier parameter + description update for reliable cross-player comparison
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260517174257817**: Fix archive --sides expecting subdirectory that prepare-workdir doesn't create, causing empty archive
 
-### 已完成 (188)
+### 已完成 (194)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -263,12 +265,18 @@ _无_
 - ✅ ~~TASK-20260517121819470~~: BDD: to-symlink/to-snapshot 切换 + link 行为缺口
 - ✅ ~~TASK-20260517121825279~~: BDD: arena single + cross-deck vs 三连触发稳定
 - ✅ ~~TASK-20260517121830977~~: BDD: map-reduce 并行 critique — 3 cell 不同 workdir 不同 deck
+- ✅ ~~TASK-20260517193950675~~: Deck basics BDD — link/add/phase-switch/restore
+- ✅ ~~TASK-20260517193950732~~: Innate eager-load vs tool lazy boundary BDD — verify eager-load after compaction
+- ✅ ~~TASK-20260517193950780~~: Snapshot symlink roundtrip BDD — per-skill mode persistence
+- ✅ ~~TASK-20260517193958181~~: Arena single + cross-deck vs trigger stability BDD
+- ✅ ~~TASK-20260517193958229~~: Map-reduce parallel critique cells BDD — concurrent subagent judge
+- ✅ ~~TASK-20260517194318952~~: Move root test/scenarios to package-co-located test directories per TESTING.md
 
 ### 悬置 (1)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (27)
+### 终止 (28)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -297,6 +305,7 @@ _无_
 - 🛑 ~~TASK-20260513033214684~~: --help
 - 🛑 ~~TASK-20260513042407452~~: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
 - 🛑 ~~TASK-20260513042408337~~: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
+- 🛑 ~~TASK-20260517174254946~~: Fix extra double quote syntax error in arena reproduce.sh --to argument
 
 ---
 
@@ -370,6 +379,10 @@ _无_
 - ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
 - ✅ **ADR-20260513144000000** (02-accepted): No hard-coded third-party mirror list — trust boundary belongs to user
 - 🤔 **ADR-20260515204135649** (01-proposed): Agent self-healing environment — clear error context over structured framework
+- ✅ **ADR-20260517140421425** (02-accepted): CLI vs Agent-Orchestrated Behavioral Parity
+- ✅ **ADR-20260517142840955** (02-accepted): Agent-Adapter — Independent Process Spawn for Reliable Multi-Player Orchestration
+- ✅ **ADR-20260517152850372** (02-accepted): Deck `also_link_to` — Multi-CLI Working Set via POSSE Pattern
+- ✅ **ADR-20260517224131119** (02-accepted): Multi-layer project context persistence — agent context architecture by volatility class
 
 ---
 

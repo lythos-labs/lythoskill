@@ -2,10 +2,11 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (46)
+## 📚 Patterns (47)
 
 - **[2026-05-17]** [shell-stdout-as-agent-prompt-injection](./01-patterns/2026-05-17-shell-stdout-as-agent-prompt-injection.md)
 - **[2026-05-17]** [alias-as-role-slot-name-resolution-and-working-set-flattening](./01-patterns/2026-05-17-alias-as-role-slot-name-resolution-and-working-set-flattening.md)
+- **[2026-05-17]** [control-transfer-protocol-cli-agent-boundary-as-interrupt-vector-table](./01-patterns/2026-05-17-control-transfer-protocol-cli-agent-boundary-as-interrupt-vector-table.md)
 - **[2026-05-15]** [annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior](./01-patterns/2026-05-15-annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior.md)
 - **[2026-05-15]** [seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion](./01-patterns/2026-05-15-seed-bootstrap-pattern-minimal-governance-skill-enables-agent-self-expansion.md)
 - **[2026-05-15]** [graduation-exam-spec](./01-patterns/2026-05-15-graduation-exam-spec.md)

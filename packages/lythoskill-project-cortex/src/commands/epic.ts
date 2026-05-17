@@ -87,9 +87,13 @@ export async function createEpic(
   const content = createEpicTemplate(id, title, templateOptions);
   writeFileSync(filepath, content);
 
-  console.log(`✅ Created: ${filepath}`);
+  console.log(`✅ Step 1/3: Epic file created → ${filepath}`);
   console.log(`📋 Epic ID: ${id}`);
   console.log(`   Lane:    ${lane}`);
   if (options.override) console.log(`   Override: ${options.override}`);
   if (checklistSkippedReason) console.log(`   Checklist: skipped — ${checklistSkippedReason}`);
+  console.log(`🔄 Step 2/3 NOW: Edit the file to fill ALL sections`);
+  console.log(`   Required: Background Story / Requirement Tree / Technical Decisions / Archive Criteria`);
+  console.log(`   Empty placeholders will be REJECTED by pre-commit probe.`);
+  console.log(`⏳ Step 3/3 LATER: Run 'cortex probe' before commit to verify`);
 }

@@ -76,7 +76,13 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} init
 bunx @lythos/project-cortex@{{PACKAGE_VERSION}} dispatch-trailers
 ```
 
-> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID。
+> **⚠️ MANDATORY: CLI create is Step 1/3. Step 2/3 is IMMEDIATE EDIT.**
+> After `cortex task/epic/adr` creates the file, you MUST edit it right away
+> to fill Background, Requirements, and Acceptance Criteria.
+> The CLI prints `Step 2/3 NOW: Edit the file...` — follow it.
+> Empty templates will be REJECTED by pre-commit probe.
+>
+> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。
 
 # Generate INDEX.md with overview stats and document listing
 bunx @lythos/project-cortex@{{PACKAGE_VERSION}} index

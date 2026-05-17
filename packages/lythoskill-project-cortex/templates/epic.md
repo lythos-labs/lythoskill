@@ -19,11 +19,12 @@ checklist_completed: {{CHECKLIST_COMPLETED}}
 | active | {{DATE}} | Created |
 
 ## 背景故事
-<!-- 填写需求来源:触发事件、问题描述、目标价值 -->
+<!-- ⚠️ REQUIRED: 触发事件、问题描述、目标价值。不填会被 probe 拦截。 -->
 
 ## 需求树
 
 ### 主题A #backlog
+<!-- ⚠️ REQUIRED: 至少一个主题。保留占位符 = 空壳。 -->
 - **触发**:
 - **需求**:
 - **实现**:
@@ -31,17 +32,21 @@ checklist_completed: {{CHECKLIST_COMPLETED}}
 - **验证**:
 
 ## 技术决策
+<!-- ⚠️ REQUIRED: 关联的 ADR 决策。不填会被 probe 拦截。 -->
 
 | ADR | 标题 | 状态 |
 |-----|------|------|
 
 ## 关联任务
+<!-- ⚠️ REQUIRED: 子任务列表。不填会被 probe 拦截。 -->
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
 
 ## 经验沉淀
+<!-- ⚠️ REQUIRED: 技术洞察、流程改进、避坑指南。不填会被 probe 拦截。 -->
 
 ## 归档条件
+<!-- ⚠️ REQUIRED: 可观测的归档判据。不填会被 probe 拦截。 -->
 - [ ] 所有任务完成
 - [ ] 验证通过

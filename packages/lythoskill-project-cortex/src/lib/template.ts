@@ -46,18 +46,20 @@ export function createTaskTemplate(id: string, title: string): string {
 | backlog | ${today} | Created |
 
 ## 背景与目标
-<!-- 填写背景：为什么需要这个任务？解决什么问题？ -->
+<!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
 
 ## 需求详情
-- [ ] 需求1
-- [ ] 需求2
+<!-- ⚠️ REQUIRED: 列出具体需求。保留占位符 = 空壳。 -->
+- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_1
+- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_2
 
 ## 技术方案
-<!-- 填写实现方案、关键决策、参考资源 -->
+<!-- ⚠️ REQUIRED: 实现方案、关键决策、参考资源。不填会被 probe 拦截。 -->
 
 ## 验收标准
-- [ ] 标准1
-- [ ] 标准2
+<!-- ⚠️ REQUIRED: 可测试的验收标准。保留占位符 = 空壳。 -->
+- [ ] ⚠️ PLACEHOLDER_CRITERION_1
+- [ ] ⚠️ PLACEHOLDER_CRITERION_2
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->
@@ -152,14 +154,16 @@ export function createAdrTemplate(id: string, title: string): string {
 | proposed | ${today} | Created |
 
 ## 背景
-<!-- 问题描述和上下文 -->
+<!-- ⚠️ REQUIRED: 问题描述和上下文。不填会被 probe 拦截。 -->
 
 ## 决策驱动
+<!-- ⚠️ REQUIRED: 为什么需要做这个决策？ -->
 -
 
 ## 选项
 
 ### 方案A
+<!-- ⚠️ REQUIRED: 至少两个方案对比。保留占位符 = 空壳。 -->
 **优点**:
 -
 
@@ -167,13 +171,16 @@ export function createAdrTemplate(id: string, title: string): string {
 -
 
 ### 方案B
+<!-- ⚠️ REQUIRED: -->
 
 ## 决策
-**选择**: 方案X
+<!-- ⚠️ REQUIRED: 明确选择 + 原因。保留占位符 = 空壳。 -->
+**选择**: ⚠️ PLACEHOLDER_SCHEME
 
 **原因**:
 
 ## 影响
+<!-- ⚠️ REQUIRED: 正面 / 负面 / 后续。不填会被 probe 拦截。 -->
 - 正面:
 - 负面:
 - 后续:

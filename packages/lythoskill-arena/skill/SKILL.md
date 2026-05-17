@@ -113,6 +113,38 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
 
 See `references/player-setup.md` for player discovery, installation, and API key setup.
 
+## Standard Posture: Arena as Mindset Validator
+
+**Purpose**: Verify that a skill's **mental model** (SOP, behavior pattern, decision chain) actually shapes agent behavior — not just that the skill file is read.
+
+**Minimal deck principle**: Include ONLY the governance skill (`lythoskill-deck`) and the target skill under test. Extra skills dilute the signal — you are testing whether the target skill's intent survives when no other skills are there to compensate.
+
+**Standard posture** (4 steps):
+
+1. **Prepare** — `prepare-workdir` with minimal deck
+   ```bash
+   bunx @lythos/skill-arena@{{PACKAGE_VERSION}} prepare-workdir \
+     --deck ./test-deck.toml \
+     --out /tmp/arena-$(date +%Y%m%d-%H%M%S) \
+     --brief "Execute the target skill's core workflow"
+   ```
+
+2. **Dispatch** — spawn subagent with decision-log mandate
+   - Prompt MUST include: "Your working directory is {workDir}. Deck: {deckPath}. Task: {brief}. MANDATORY: write decision-log.jsonl to your CWD. Each line records a decision you made and why."
+
+3. **Observe** — collect decision-log, not just artifacts
+   - Read `decision-log.jsonl` from workdir
+   - Check: did the subagent follow the skill's declared SOP?
+   - Check: did the subagent stop at decision points and ask, or did it guess?
+   - Check: are the decisions traceable to the skill's instructions?
+
+4. **Judge** — score mindset alignment, not output correctness
+   - "Did the subagent behave as the skill intended?" > "Was the output correct?"
+   - A correct output achieved by guessing is a FAIL — the skill's mental model did not transfer.
+   - A wrong output achieved by faithfully following the skill's SOP is valuable feedback — the skill's instructions need refinement.
+
+**Why this matters**: A skill that declares "MUST FILL" but agents consistently leave empty has a **mindset gap** — the skill's intent is stated but not enforced by the agent's decision chain. Arena catches this before the skill reaches users.
+
 ## Agent-Orchestrated Protocol
 
 ### 1. Setup — isolate per side
