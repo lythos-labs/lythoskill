@@ -40,7 +40,8 @@ Refs: ADR-20260514050300 (arena judge separation), wiki 2026-05-17-arena-cli-arc
 2. arena 已证明 Judge 分离可行——BDD 应该跟进，不重复发明
 3. 正则解析是技术债——shell 脚本不需要 parser
 4. Agent 自然行为就是写脚本——reproduce.sh 不是被发明的，是被发现的（7 个独立涌现实例）
-5. 可复现性是闭环的前提——主流测试框架的 coverage dashboard 要求可执行 + 可追踪
+5. **零知识复现验证**：2026-05-18，一个无 prior context 的 subagent 仅通过 `bash reproduce.sh` + 读取 stdout 即完成完整 BDD 场景（create + test + judge → PASS, 12 tool calls, 80s）。Agent 原生语言 = shell echo，不是 markdown
+6. 可复现性是闭环的前提——主流测试框架的 coverage dashboard 要求可执行 + 可追踪
 
 ## 选项
 
