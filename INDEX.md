@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/18 00:47:25
+> 自动生成于 2026/5/18 01:44:37
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 229 | 进行中: 0, 待验收: 1, 已完成: 196 |
+| Tasks | 230 | 进行中: 0, 待验收: 1, 已完成: 196 |
 | Epics | 31 | 活跃: 1, 已完成: 26, 悬置: 2, 已归档: 2 |
 | ADRs | 72 | 已接受: 56 |
 
@@ -72,7 +72,7 @@ _无_
 
 ### 待验收 (1)
 
-- 🔍 **TASK-20260517174257817**: Fix archive --sides expecting subdirectory that prepare-workdir doesn't create, causing empty archive
+- 🔍 **TASK-20260518013753710**: Add empty-shell detection to probe — grep for PLACEHOLDER/需求1 markers
 
 ### 已完成 (196)
 
@@ -264,7 +264,7 @@ _无_
 - ✅ ~~TASK-20260517121819470~~: BDD: to-symlink/to-snapshot 切换 + link 行为缺口
 - ✅ ~~TASK-20260517121825279~~: BDD: arena single + cross-deck vs 三连触发稳定
 - ✅ ~~TASK-20260517121830977~~: BDD: map-reduce 并行 critique — 3 cell 不同 workdir 不同 deck
-- ✅ ~~TASK-20260517193716031~~: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
+- ✅ ~~TASK-20260517174257817~~: Fix archive --sides expecting subdirectory that prepare-workdir doesn't create, causing empty archive
 - ✅ ~~TASK-20260517193950675~~: Deck basics BDD — link/add/phase-switch/restore
 - ✅ ~~TASK-20260517193950732~~: Innate eager-load vs tool lazy boundary BDD — verify eager-load after compaction
 - ✅ ~~TASK-20260517193950780~~: Snapshot symlink roundtrip BDD — per-skill mode persistence
@@ -277,7 +277,7 @@ _无_
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (28)
+### 终止 (29)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -307,6 +307,7 @@ _无_
 - 🛑 ~~TASK-20260513042407452~~: Arena HTML report parity — catch up to agent-skills-eval which ships static HTML report; arena currently emits only markdown+JSON; this is parity not differentiation
 - 🛑 ~~TASK-20260513042408337~~: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
 - 🛑 ~~TASK-20260517174254946~~: Fix extra double quote syntax error in arena reproduce.sh --to argument
+- 🛑 ~~TASK-20260517193716031~~: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
 
 ---
 
