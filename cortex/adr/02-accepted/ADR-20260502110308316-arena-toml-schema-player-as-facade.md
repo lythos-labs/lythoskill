@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-02 | Context: arena CLI 当前使用命令行标志，缺乏可复现的声明式配置 |
+| accepted | 2026-05-17 | Accepted |
 
 ## Context
 

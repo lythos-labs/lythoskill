@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-04 | Created — fills gap in ADR-20260501170000000 |
+| accepted | 2026-05-17 | Accepted |
 
 ## 背景
 

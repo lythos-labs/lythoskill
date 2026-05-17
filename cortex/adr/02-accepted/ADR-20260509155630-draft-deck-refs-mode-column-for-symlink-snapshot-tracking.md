@@ -71,3 +71,6 @@ ADR-20260509144134332 在 deck_refs 表引入了 FSM（state = added/linked/remo
 **schema-first**: metadata-db 的 `deck_refs` 表已在 v6 迁移加了 `mode TEXT DEFAULT 'symlink'` 列。
 查询和更新方法暂未补全（`addReference`/`reconcileDeckReferences` 不带 mode 参数）。
 等实际使用中发现 mode 级别区分需求时再补全。
+
+
+| accepted | 2026-05-17 | Accepted |

@@ -8,6 +8,7 @@ status: proposed
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-11 | Created — git-only FQ locator decision ratified; agent does hub→git conversion |
+| accepted | 2026-05-17 | Accepted |
 
 # ADR-20260511000000000: Deck skill sources — git-only FQ locators vs hub/marketplace integration
 

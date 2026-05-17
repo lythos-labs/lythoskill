@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-11 | Created — resolve vacillation from ADR-20260424000744041 |
+| accepted | 2026-05-17 | Accepted |
 
 ## 背景
 

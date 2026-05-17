@@ -8,6 +8,7 @@ status: proposed
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-11 | Created — normalizeSkillsSh() implemented in deck add.ts, 17 top skills.sh skills parse correctly |
+| accepted | 2026-05-17 | Accepted |
 
 # ADR-20260511093900000: skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
 

@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-02 | Follow-up to ADR-20260423101938000 (Thin Skill Pattern, accepted) |
+| accepted | 2026-05-17 | Accepted |
 
 ## Context
 
