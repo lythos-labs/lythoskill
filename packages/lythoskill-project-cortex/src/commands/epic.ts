@@ -92,8 +92,10 @@ export async function createEpic(
   console.log(`   Lane:    ${lane}`);
   if (options.override) console.log(`   Override: ${options.override}`);
   if (checklistSkippedReason) console.log(`   Checklist: skipped — ${checklistSkippedReason}`);
-  console.log(`🔄 Step 2/3 NOW: Edit the file to fill ALL sections`);
-  console.log(`   Required: Background Story / Requirement Tree / Technical Decisions / Archive Criteria`);
+  console.log(`🔄 Step 2/3 NOW: YOU MUST EDIT AND FILL THIS FILE`);
+  console.log(`   ⚠️  This is NOT a completed epic. The template is EMPTY.`);
+  console.log(`   ⚠️  Agent: write Background Story, Requirement Tree, Technical Decisions, Archive Criteria NOW.`);
+  console.log(`   ⚠️  Stop here. Do NOT proceed to other work until filled.`);
   console.log(`   Empty placeholders will be REJECTED by pre-commit probe.`);
   console.log(`⏳ Step 3/3 LATER: Run 'cortex probe' before commit to verify`);
 }

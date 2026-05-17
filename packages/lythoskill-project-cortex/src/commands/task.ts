@@ -17,8 +17,10 @@ export function createTask(title: string, config: WorkflowConfig): void {
 
   console.log(`✅ Step 1/3: Task file created → ${filepath}`);
   console.log(`📝 Task ID: ${id}`);
-  console.log(`🔄 Step 2/3 NOW: Edit the file to fill ALL sections`);
-  console.log(`   Required: 背景与目标 / 需求详情 / 技术方案 / 验收标准`);
+  console.log(`🔄 Step 2/3 NOW: YOU MUST EDIT AND FILL THIS FILE`);
+  console.log(`   ⚠️  This is NOT a completed task. The template is EMPTY.`);
+  console.log(`   ⚠️  Agent: write 背景与目标, 需求详情, 技术方案, 验收标准 NOW.`);
+  console.log(`   ⚠️  Stop here. Do NOT proceed to other work until filled.`);
   console.log(`   Empty placeholders will be REJECTED by pre-commit probe.`);
   console.log(`⏳ Step 3/3 LATER: Run 'cortex probe' before commit to verify`);
 }
