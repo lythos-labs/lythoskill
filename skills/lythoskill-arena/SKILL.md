@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.14.0
+version: 0.14.1
 type: standard
 description: |
   Test play for skills and deck configurations. DEFAULT: agent reads
@@ -22,8 +22,8 @@ when_to_use: |
   ALSO trigger when user says "test this skill", "try this deck",
   "compare A vs B", "audit this package", "sweep for bugs".
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.14.0 *)
-  - Bash(bunx @lythos/skill-deck@0.14.0 link *)
+  - Bash(bunx @lythos/skill-arena@0.14.1 *)
+  - Bash(bunx @lythos/skill-deck@0.14.1 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -54,45 +54,47 @@ User says: "test/compare/arena/benchmark/A vs B"
 
 ## Default: Agent-Orchestrated (single & cross-deck vs)
 
-**This is how arena works 95% of the time.** The agent reads config, preps isolated environments, spawns parallel subagents, judges — zero CLI invocations.
+**This is how arena works 95% of the time.** The agent and CLI operate as a two-way control transfer protocol. Agent delegates mechanical invariants to CLI. CLI hands control back via its exit paths (success → next step; error → fix command). Agent stays in its own main loop — the subagent pattern is container spawn, not external RPC.
 
 ```mermaid
 flowchart TD
-    A[Parse request: single or vs?] --> B{Cross-PLAYER?}
-    B -->|Yes| C[CLI: bunx arena vs --config]
-    B -->|No — DEFAULT| D[PREPARE: CLI prepare-workdir × N sides]
-    D --> E[SPAWN: Agent tool × N, parallel]
-    E --> F[WAIT: all subagents complete]
-    F --> G[COLLECT: artifacts + decision-logs]
-    G --> H[JUDGE: spawn judge subagent]
-    H --> I[ARCHIVE: CLI archive to outDir]
-    I --> J[RESTORE: deck link parent deck]
+    A["🤖 Agent: parse request"] --> B{Cross-PLAYER?}
+    B -->|Yes| C[🔧 CLI vs --config]
+    B -->|No — DEFAULT| D["🤖 Agent → 🔧 CLI: prepare-workdir"]
+    D -->|"✅ workdir ready"| E["🤖 Agent: spawn subagents"]
+    E --> F["🤖 Subagents: execute + write artifacts"]
+    F --> G["🤖 Agent: collect + spawn judge"]
+    G --> H["🤖 Judge: score → report.md"]
+    H --> I["🤖 Agent → 🔧 CLI: archive"]
+    I -->|"✅ archived"| J["🤖 Agent → 🔧 CLI: deck link restore"]
 ```
+
+**The protocol in one line**: Agent hands to CLI (`prepare-workdir`, `archive`, `deck link`). CLI exits with success (`✅ workdir ready → spawn`) or HATEOAS error (`❌ missing --deck → here's the fix command → retry`). Agent reads the exit, decides next move, continues. Three CLI exit points, three handoffs back to agent.
 
 ### single — test one deck
 
 ```
-User: "test this skill" / "try this deck" / "run arena single"
-  → Create isolated workdir
-  → deck link the target deck
-  → Agent tool spawn ×1: execute task
-  → Collect artifacts → DONE
+🤖→🔧 prepare-workdir --out /tmp/arena-xxx --brief "task"
+    CLI exits: ✅ Workdir ready → 🤖 spawn subagent
+🤖 Agent tool spawn: subagent executes in workdir, writes artifacts + decision-log.jsonl
+🤖→🔧 archive --from /tmp/arena-xxx --to ./playground --sides side-a
+    CLI exits: ✅ Archive complete → 🤖 done
+🤖→🔧 deck link parent deck (restore)
 ```
 
 ### cross-deck vs — compare decks A vs B
 
 ```
-User: "compare deck A vs B" / "which deck is better"
-  → Create N isolated workdirs
-  → Each with its own deck link (different skill-deck.toml)
-  → Agent tool spawn ×N, run_in_background=true
-  → All run in PARALLEL — independent CWDs, independent decks
-  → Collect artifacts from all sides
-  → Spawn judge subagent: score per criteria
-  → Write report.md
+🤖→🔧 prepare-workdir × N (each side isolated, each with own deck)
+    CLI exits: ✅ Workdir ready × N → 🤖 spawn N subagents in parallel
+🤖 Agent tool spawn ×N, run_in_background=true
+🤖 Collect artifacts + decision-logs from all sides
+🤖 Spawn judge subagent: score per criteria → report.md
+🤖→🔧 archive --from /tmp/arena-xxx --to ./playground --sides side-a,side-b
+🤖→🔧 deck link parent deck (restore)
 ```
 
-**Why agent-orchestrated is default**: CWD isolation prevents skill pollution. Agent can fix failures mid-run (switch mirror, adjust timeout, retry). Decision-log.jsonl from each subagent provides full observability. Cross-deck vs IS map-reduce — same agent type, different decks, parallel spawn, judge reduce.
+**Why agent-orchestrated is default**: Subagent = container spawn, not external RPC. Agent stays in its own main loop — can read subagent output, fix failures mid-run (switch mirror, adjust timeout, retry), spawn judge. Decision-log.jsonl from each subagent provides full observability. Cross-deck vs IS map-reduce — same agent type, different decks, parallel spawn, judge reduce.
 
 ## Cross-Player Mode (OPT-IN, CLI only)
 
@@ -100,13 +102,13 @@ Use ONLY when comparing different players (kimi vs codex vs deepseek vs claude).
 
 ```bash
 # Single deck, explicit player
-bunx @lythos/skill-arena@0.14.0 single \
+bunx @lythos/skill-arena@0.14.1 single \
   --deck ./skill-deck.toml \
   --brief "Investigate this repo" \
   --player kimi
 
 # vs mode with arena.toml (each side's player in config)
-bunx @lythos/skill-arena@0.14.0 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.14.1 vs --config ./arena.toml
 ```
 
 See `references/player-setup.md` for player discovery, installation, and API key setup.
@@ -118,13 +120,22 @@ See `references/player-setup.md` for player discovery, installation, and API key
 For EACH side, use `prepare-workdir` (same behavior as CLI `single` mode):
 
 ```bash
-bunx @lythos/skill-arena@0.14.0 prepare-workdir \
+# Plan-first: review before executing
+bunx @lythos/skill-arena@0.14.1 prepare-workdir \
+  --deck ./side-a.toml \
+  --out /tmp/arena-$(date +%Y%m%d-%H%M%S)-side-a \
+  --brief "task description" \
+  --dry-run
+
+# Execute (same command minus --dry-run)
+bunx @lythos/skill-arena@0.14.1 prepare-workdir \
   --deck ./side-a.toml \
   --out /tmp/arena-$(date +%Y%m%d-%H%M%S)-side-a \
   --brief "task description"
 ```
 
 > `/tmp` is the experiment sandbox. Never run experiments in committed directories.
+> Plan-first (`--dry-run`) shows skills, workdir path, link needed — review before IO.
 
 ### 2. Preflight self-check (BEFORE dispatch)
 
@@ -164,10 +175,19 @@ After ALL complete:
 
 **3. Archive (same behavior as CLI `--out`)**
 
-Use `archive` command (same copy logic as CLI `single` mode):
+Use `archive` command (same copy logic as CLI `single` mode). Plan-first: dry-run to review what will be copied, then execute.
 
 ```bash
-bunx @lythos/skill-arena@0.14.0 archive \
+# Plan-first
+bunx @lythos/skill-arena@0.14.1 archive \
+  --from /tmp/arena-$(date +%Y%m%d-%H%M%S) \
+  --to playground/arena-$(date +%Y%m%d-%H%M%S) \
+  --sides side-a,side-b \
+  --report ./report.md \
+  --dry-run
+
+# Execute (same minus --dry-run)
+bunx @lythos/skill-arena@0.14.1 archive \
   --from /tmp/arena-$(date +%Y%m%d-%H%M%S) \
   --to playground/arena-$(date +%Y%m%d-%H%M%S) \
   --sides side-a,side-b \
@@ -202,11 +222,11 @@ Subagent has the same Read capability — shorter prompt, lower cost, can re-rea
 
 ```bash
 # single — most common
-bunx @lythos/skill-arena@0.14.0 single \
+bunx @lythos/skill-arena@0.14.1 single \
   --deck ./deck.toml --brief "task" --out ./output
 
 # vs — declarative config
-bunx @lythos/skill-arena@0.14.0 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.14.1 vs --config ./arena.toml
 
 # Parameters
 # --brief "<prompt>"    Inline task (primary input for single)
