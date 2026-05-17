@@ -10,6 +10,8 @@ description: |
   needs the CLI runner. Always restores parent deck. No install, no
   working-set pollution, no deck overwrite. Subagent-friendly: resumes
   interrupted runs from saved state.
+  CRITICAL: experiments run in `/tmp`, never in committed directories.
+  Subagent inherits parent CWD — prompt must explicitly set workDir.
 when_to_use: |
   TEST a skill before adopting. COMPARE two decks on the same task.
   BENCHMARK skill performance. CROSS-PLAYER compare kimi vs codex vs claude.
@@ -111,14 +113,16 @@ See `references/player-setup.md` for player discovery, installation, and API key
 
 ### 1. Setup — isolate per side
 
-For EACH side, create an isolated workdir:
+For EACH side, create an isolated workdir in `/tmp/` (never in project root or any committed directory):
 
 ```bash
-mkdir -p playground/arena-{timestamp}/work/{side}/
-cd work/{side}
+mkdir -p /tmp/arena-{timestamp}/work/{side}/
+cd /tmp/arena-{timestamp}/work/{side}
 # Write skill-deck.toml with this side's skills
 bunx @lythos/skill-deck@latest link --deck skill-deck.toml --cold-pool ~/.agents/skill-repos
 ```
+
+> **Sandbox discipline**: `/tmp` is the experiment sandbox. Copy outputs to your project's artifact directory (e.g. `--out ./output/` or a docs/showcase dir) after the run. Never run experiments in committed directories.
 
 ### 2. Preflight self-check (BEFORE dispatch)
 
@@ -130,17 +134,28 @@ If ANY fail → fix before proceeding.
 
 ### 3. Dispatch — parallel spawn
 
-One subagent per side, `run_in_background: true`:
+**One subagent per side. Agent tool parameters explained:**
+
+| Parameter | What it does | What it does NOT do |
+|-----------|-------------|---------------------|
+| `run_in_background: true` | Subagent runs asynchronously. Parent agent continues immediately. Subagent completion triggers a system notification. | Does NOT change subagent's CWD. Subagent inherits parent's CWD unless explicitly told otherwise. |
+| `prompt` | Initial instructions given to subagent. Subagent receives this as its first user message. | Does NOT automatically load skills for subagent. Skill loading depends on subagent's actual working directory. |
+| `subagent_type` | Determines which agent implementation (claude, general-purpose, etc.) handles the task. | Does NOT control which model (Claude vs Kimi vs others) the subagent uses — model is a user/host-level configuration, not an arena parameter. |
+
+**CWD behavior**: Subagent starts in the **parent's CWD** (where YOU are). To make it use the isolated workdir, include in the prompt: `"Your working directory is {workDir}. All files must be written there."` The subagent will `cd` to that directory and use it as its base.
+
+**Skill loading**: Subagent loads skills from `.claude/skills/` in its **actual working directory** (after cd). Skills from parent session are visible in the system prompt but do not override the workdir's deck. This is why `/tmp` isolation matters — no parent project skills leak in.
 
 ```
 subagent prompt:
-  "You are an arena cell. CWD: {workDir}. Deck: {deckPath}.
+  "You are an arena cell. Your working directory: {workDir}.
+   Deck: {deckPath}.
    Task: {brief}
    MANDATORY: write decision-log.jsonl to your CWD.
    Each line: {"t":<seconds>,"phase":"...","decision":"...","reason":"..."}"
 ```
 
-All subagents run in PARALLEL. Each has isolated CWD + deck. No skill pollution.
+All subagents run in PARALLEL. Each writes to its own isolated workdir. No file conflicts.
 
 ### 4. Collect + Judge + Report
 
@@ -155,9 +170,9 @@ After ALL complete:
 If task context is large (cortex cards, research notes), pass file REFERENCES, not inline text:
 
 ```
-TASK: Review the cold-pool design.
-Read: cortex/adr/02-accepted/ADR-xxx.md, cortex/wiki/01-patterns/xxx.md
-Then implement in packages/lythoskill-cold-pool/src/.
+TASK: Review the API design.
+Read: docs/adr/ADR-xxx.md, docs/patterns/xxx.md
+Then implement in src/.
 ```
 
 Subagent has the same Read capability — shorter prompt, lower cost, can re-read. Use inlining only for small, self-contained tasks.
