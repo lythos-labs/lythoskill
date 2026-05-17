@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-17 | Created |
+| completed | 2026-05-17 | Closed via trailer |
 
 ## 背景与目标
 cortex SKILL.md desc encourages agent to create CLI shells but has no pushy directive to fill content. Result: agent runs `cortex task "..."`, sees output, considers work done. The file exists but body is empty template — no requirements, no acceptance criteria, no technical plan. This creates invisible debt: the task exists (probe passes) but a subagent assigned to it has zero guidance.

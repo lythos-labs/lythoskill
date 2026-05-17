@@ -57,10 +57,11 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (21)
+## 📖 Lessons (22)
 
 - **[2026-05-17]** [excessive-self-questioning-as-agent-anti-pattern](./03-lessons/2026-05-17-excessive-self-questioning-as-agent-anti-pattern.md)
 - **[2026-05-17]** [codex-symlink-snapshot-mode-origin-and-evolution](./03-lessons/2026-05-17-codex-symlink-snapshot-mode-origin-and-evolution.md)
+- **[2026-05-17]** [arena-as-empirical-rule-validation-closing-the-guesswork-loop-that-mnilax-style-manual-testing-can-t](./03-lessons/2026-05-17-arena-as-empirical-rule-validation-closing-the-guesswork-loop-that-mnilax-style-manual-testing-can-t.md)
 - **[2026-05-15]** [baoyu-skills-dependency-audit-for-lythoskill-content-creation](./03-lessons/2026-05-15-baoyu-skills-dependency-audit-for-lythoskill-content-creation.md)
 - **[2026-05-15]** [curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience](./03-lessons/2026-05-15-curator-catalog-accuracy-findskilldirectories-recursion-bug-and-scanskill-frontmatter-resilience.md)
 - **[2026-05-12]** [whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite](./03-lessons/2026-05-12-whack-a-mole-resolved-workspace-deps-swung-between-local-correct-and-publish-correct-until-publish-time-rewrite.md)

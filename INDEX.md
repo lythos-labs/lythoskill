@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/17 22:47:57
+> 自动生成于 2026/5/18 00:47:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 228 | 进行中: 0, 待验收: 1, 已完成: 194 |
+| Tasks | 229 | 进行中: 0, 待验收: 1, 已完成: 196 |
 | Epics | 31 | 活跃: 1, 已完成: 26, 悬置: 2, 已归档: 2 |
 | ADRs | 72 | 已接受: 56 |
 
@@ -61,10 +61,9 @@
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (2)
 
 - [ ] **TASK-20260517122556223**: Wire per-skill mode (symlink/snapshot) into deck link reconciler
-- [ ] **TASK-20260517193716031**: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
 - [ ] **TASK-20260517193718598**: agent-adapter modelTier parameter + description update for reliable cross-player comparison
 
 ### 进行中 (0)
@@ -75,7 +74,7 @@ _无_
 
 - 🔍 **TASK-20260517174257817**: Fix archive --sides expecting subdirectory that prepare-workdir doesn't create, causing empty archive
 
-### 已完成 (194)
+### 已完成 (196)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -265,12 +264,14 @@ _无_
 - ✅ ~~TASK-20260517121819470~~: BDD: to-symlink/to-snapshot 切换 + link 行为缺口
 - ✅ ~~TASK-20260517121825279~~: BDD: arena single + cross-deck vs 三连触发稳定
 - ✅ ~~TASK-20260517121830977~~: BDD: map-reduce 并行 critique — 3 cell 不同 workdir 不同 deck
+- ✅ ~~TASK-20260517193716031~~: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
 - ✅ ~~TASK-20260517193950675~~: Deck basics BDD — link/add/phase-switch/restore
 - ✅ ~~TASK-20260517193950732~~: Innate eager-load vs tool lazy boundary BDD — verify eager-load after compaction
 - ✅ ~~TASK-20260517193950780~~: Snapshot symlink roundtrip BDD — per-skill mode persistence
 - ✅ ~~TASK-20260517193958181~~: Arena single + cross-deck vs trigger stability BDD
 - ✅ ~~TASK-20260517193958229~~: Map-reduce parallel critique cells BDD — concurrent subagent judge
 - ✅ ~~TASK-20260517194318952~~: Move root test/scenarios to package-co-located test directories per TESTING.md
+- ✅ ~~TASK-20260518004641351~~: Arena Standard Posture SOP — mindset validator protocol and meta-test showcase
 
 ### 悬置 (1)
 
