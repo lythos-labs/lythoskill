@@ -15,4 +15,6 @@ Examples:
   lythoskill-arena vs --config arena.toml --dry-run
   lythoskill-arena vs --config arena.toml
   lythoskill-arena viz runs/arena-20260504
+  lythoskill-arena prepare-workdir --deck ./decks/scout.toml --out /tmp/arena-20260517-side-a
+  lythoskill-arena archive --from /tmp/arena-20260517 --to playground/arena-20260517 --sides side-a,side-b
 
