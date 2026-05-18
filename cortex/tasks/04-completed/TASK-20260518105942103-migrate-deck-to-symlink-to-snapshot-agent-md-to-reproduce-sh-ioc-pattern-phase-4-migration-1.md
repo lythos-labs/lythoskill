@@ -6,6 +6,9 @@
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
 | in-progress | 2026-05-18 | reproduce.sh + judge.md written |
+| in-progress | 2026-05-18 | Started |
+| review | 2026-05-18 | Deliverables committed |
+| completed | 2026-05-18 | Done |
 
 ## 背景与目标
 `deck-to-symlink-to-snapshot.agent.md` 是 deck BDD 中 IO 密度最高的场景（25 IO ops）——验证 symlink ↔ snapshot 往返、lock file mode 更新、内容保留、幂等性。迁移到 reproduce.sh IoC 模式。
@@ -15,8 +18,9 @@ Parent: TASK-20260518030349966 (Phase 4), Epic: EPIC-20260518024809887
 ## 需求详情
 - [x] 写 reproduce.sh: shell scaffold (Steps 1-2) + IoC handoff (Step 3) + judge reference (Step 4)
 - [x] 写 judge.md: 10 个 criteria，weighted，judge agent only
-- [ ] 零知识 subagent 执行 reproduce.sh → 验证 roundtrip → PASS
-- [ ] judge-verdict.json 产出并提交
+- [x] 执行 reproduce.sh → agent 验证 roundtrip → 10/10 PASS
+- [x] judge-verdict.json + decision-log.jsonl 产出并提交
+- [x] 原 .agent.md 保留共存
 
 ## 技术方案
 Co-located in `packages/lythoskill-deck/test/scenarios/to-symlink-snapshot-bdd/`:

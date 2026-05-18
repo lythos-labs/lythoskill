@@ -1,0 +1,12 @@
+{"step":"verify_initial_symlink","decision":"lstat confirms isSymbolicLink=true","reason":"deck link creates symlinks by default","ts":"2026-05-18T11:04:00Z"}
+{"step":"verify_initial_lock_mode","decision":"lock file has mode: symlink","reason":"LinkedSkillSchema defaults mode to symlink","ts":"2026-05-18T11:04:05Z"}
+{"step":"to_snapshot","decision":"executed to-snapshot skill-x","reason":"Shell reports symlink → snapshot","ts":"2026-05-18T11:04:10Z"}
+{"step":"verify_snapshot_dir","decision":"lstat confirms isDirectory=true, isSymbolicLink=false","reason":"cpSync replaced symlink with real directory","ts":"2026-05-18T11:04:15Z"}
+{"step":"verify_snapshot_content","decision":"SKILL.md content preserved: '# skill-x' + 'Test skill.'","reason":"cpSync recursive preserves all files","ts":"2026-05-18T11:04:20Z"}
+{"step":"verify_snapshot_lock","decision":"lock file updated to mode: snapshot","reason":"link.ts writes item.mode ?? MODE to lock file","ts":"2026-05-18T11:04:25Z"}
+{"step":"to_symlink","decision":"executed to-symlink skill-x","reason":"Shell reports snapshot → symlink","ts":"2026-05-18T11:04:30Z"}
+{"step":"verify_symlink_restored","decision":"lstat confirms isSymbolicLink=true again","reason":"scaffold script replaced directory with symlink","ts":"2026-05-18T11:04:35Z"}
+{"step":"verify_symlink_lock","decision":"lock file back to mode: symlink","reason":"scaffold writes mode field on each link","ts":"2026-05-18T11:04:40Z"}
+{"step":"idempotent_snapshot","decision":"second to-snapshot: 'already in snapshot mode'","reason":"scaffold detects existing directory, skips cp","ts":"2026-05-18T11:04:45Z"}
+{"step":"idempotent_symlink","decision":"second to-symlink: 'already in symlink mode'","reason":"scaffold detects existing symlink, skips","ts":"2026-05-18T11:04:50Z"}
+{"step":"complete","decision":"ALL 10 criteria PASS","reason":"Roundtrip symlink→snapshot→symlink verified, content preserved, idempotency confirmed","ts":"2026-05-18T11:05:00Z"}

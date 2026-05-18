@@ -1,0 +1,17 @@
+{
+  "verdict": "PASS",
+  "criteria": {
+    "initial_symlink": {"pass": true, "evidence": "lstat → isSymbolicLink() = true"},
+    "initial_lock_mode": {"pass": true, "evidence": "skill-deck.lock → mode: 'symlink'"},
+    "snapshot_dir": {"pass": true, "evidence": "after to-snapshot: isDirectory=true, isSymbolicLink=false"},
+    "snapshot_content": {"pass": true, "evidence": "SKILL.md contains '# skill-x' + 'Test skill.' — preserved"},
+    "snapshot_lock_mode": {"pass": true, "evidence": "skill-deck.lock → mode: 'snapshot'"},
+    "symlink_restored": {"pass": true, "evidence": "after to-symlink: isSymbolicLink=true"},
+    "symlink_lock_mode": {"pass": true, "evidence": "skill-deck.lock → mode: 'symlink'"},
+    "idempotent_snapshot": {"pass": true, "evidence": "second to-snapshot: 'already in snapshot mode'"},
+    "idempotent_symlink": {"pass": true, "evidence": "second to-symlink: 'already in symlink mode'"},
+    "decision_log": {"pass": true, "evidence": "12 entries with step/decision/reason/ts"}
+  },
+  "notes": "All 10 criteria PASS. reproduce.sh IoC pattern: shell handled Steps 1-2 (scaffold + link), agent executed Step 3 (verify + to-snapshot + to-symlink + idempotency), 94 unit tests pass. IO behavior verified on real filesystem.",
+  "judged_at": "2026-05-18T11:05:00Z"
+}
