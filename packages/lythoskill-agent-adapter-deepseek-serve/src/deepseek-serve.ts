@@ -60,15 +60,6 @@ function updateThreadMapping(sessionId: string, threadId: string): void {
   writeLock(lock)
 }
 
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch {
-    return false
-  }
-}
-
 // ── Port finder ─────────────────────────────────────────────────────────────
 
 async function findFreePort(start: number): Promise<number> {
@@ -100,37 +91,59 @@ async function getVersion(): Promise<string | null> {
 
 let cachedPort: number | null = null
 
-async function ensureServeRunning(): Promise<number> {
-  if (cachedPort !== null) {
-    // Quick health check
-    try {
-      const res = await fetch(`http://127.0.0.1:${cachedPort}/health`, { signal: AbortSignal.timeout(2000) })
-      if (res.ok) return cachedPort
-    } catch {}
-    cachedPort = null
+/** Discover a running daemon by probing known ports. No PID dependency —
+ *  bunx sandboxes block process.kill(pid, 0) so health-check is the only
+ *  reliable signal. Tries: cachedPort → lock port → base range. */
+async function discoverRunningDaemon(): Promise<number | null> {
+  // Build candidate list: cached + lock file + base range
+  const candidates: number[] = []
+  if (cachedPort !== null) candidates.push(cachedPort)
+
+  const lock = readLock()
+  if (lock) candidates.push(lock.port)
+
+  // Also probe a small range around BASE_PORT (catches zombie daemons from
+  // previous failed starts that left no lock file)
+  for (let p = BASE_PORT; p < BASE_PORT + 4; p++) {
+    if (!candidates.includes(p)) candidates.push(p)
   }
 
-  // Check version
+  for (const port of candidates) {
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/health`, { signal: AbortSignal.timeout(1000) })
+      if (res.ok) return port
+    } catch {}
+  }
+  return null
+}
+
+async function ensureServeRunning(): Promise<number> {
+  // 1. Try health-check discovery first (no PID — works in bunx sandbox)
+  const discovered = await discoverRunningDaemon()
+  if (discovered !== null) {
+    // Refresh lock file if stale (daemon outlived the lock)
+    const lock = readLock()
+    if (!lock || lock.port !== discovered) {
+      const version = await getVersion()
+      writeLock({
+        pid: 0,  // PID unknown — daemon was discovered, not spawned by us
+        port: discovered,
+        version: version || 'unknown',
+        startedAt: lock?.startedAt || new Date().toISOString(),
+        threads: lock?.threads || {},
+      })
+    }
+    cachedPort = discovered
+    return discovered
+  }
+
+  // 2. No daemon found — start one
   const version = await getVersion()
   if (!version) throw new Error('DeepSeek CLI not found. Install: https://github.com/Hmbown/deepseek-tui')
   if (!version.startsWith('0.8.')) {
     console.warn(`⚠️  DeepSeek version ${version} — tested on 0.8.14. May behave differently.`)
   }
 
-  // Check lock file
-  const lock = readLock()
-  if (lock && isProcessAlive(lock.pid)) {
-    // Verify health
-    try {
-      const res = await fetch(`http://127.0.0.1:${lock.port}/health`, { signal: AbortSignal.timeout(2000) })
-      if (res.ok) {
-        cachedPort = lock.port
-        return lock.port
-      }
-    } catch {}
-  }
-
-  // Start new serve instance
   const port = await findFreePort(BASE_PORT)
   console.log(`🔧 Starting DeepSeek serve on port ${port}...`)
 
