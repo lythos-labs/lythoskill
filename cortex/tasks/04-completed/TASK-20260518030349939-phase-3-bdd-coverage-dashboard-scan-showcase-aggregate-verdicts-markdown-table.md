@@ -5,6 +5,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
+| in-progress | 2026-05-18 | Started |
+| review | 2026-05-18 | Deliverables committed |
+| completed | 2026-05-18 | Done |
 
 ## 背景与目标
 Agent BDD 缺少 test framework 级别的"一眼可见"。每次 BDD 跑很贵（LLM 调用），不能像单元测试一样每次 commit 全跑。需要两件事：
