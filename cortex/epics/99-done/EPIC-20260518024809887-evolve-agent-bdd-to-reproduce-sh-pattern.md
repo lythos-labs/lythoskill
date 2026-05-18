@@ -15,6 +15,7 @@ checklist_skipped_reason: CLI-driven from session, ADR already written
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-18 | Created |
+| done | 2026-05-18 | Done |
 
 ## 背景故事
 

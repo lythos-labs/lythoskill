@@ -6,6 +6,8 @@
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
 | in-progress | 2026-05-18 | Started |
+| review | 2026-05-18 | Deliverables committed |
+| completed | 2026-05-18 | Done |
 
 ## 背景与目标
 现有 `.agent.md` scenarios（10 个，分布在 deck/arena/curator/test-utils 的 `test/scenarios/`）按需迁移到 reproduce.sh。不强制全量——迁移 Judge 分离或自执行性收益明显的场景。

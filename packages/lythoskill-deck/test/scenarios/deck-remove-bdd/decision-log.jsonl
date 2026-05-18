@@ -1,0 +1,9 @@
+{"step":"initial_state","decision":"inspect","reason":"Confirm baseline: skill-a and skill-b both in toml, both symlinked, both in cold pool","ts":"2026-05-18T12:10:55Z"}
+{"step":"deck_remove","decision":"execute","reason":"Run bun cli.ts remove skill-a --deck <toml> --workdir <project>","ts":"2026-05-18T12:10:56Z"}
+{"step":"verify_toml_removed","decision":"grep","reason":"grep skill-a on skill-deck.toml returns 0 matches; C1 toml_removed PASS","ts":"2026-05-18T12:10:57Z"}
+{"step":"verify_toml_preserved","decision":"grep","reason":"grep skill-b on skill-deck.toml returns [tool.skills.skill-b] with path; C2 toml_preserved PASS","ts":"2026-05-18T12:10:57Z"}
+{"step":"verify_symlink_removed","decision":"ls","reason":"ls skill-a returns ENOENT; symlink deleted; C3 symlink_removed PASS","ts":"2026-05-18T12:10:57Z"}
+{"step":"verify_symlink_preserved","decision":"stat","reason":"stat confirms skill-b is a symlink pointing to cold-pool; C4 symlink_preserved PASS","ts":"2026-05-18T12:10:57Z"}
+{"step":"verify_cold_pool_intact","decision":"cat","reason":"cold-pool/localhost/me/skill-a/SKILL.md content is '# skill-a'; C5 cold_pool_intact PASS","ts":"2026-05-18T12:10:57Z"}
+{"step":"verify_relink_stable","decision":"execute link","reason":"Re-ran deck link; only skill-b linked (1 skill), skill-a absent from toml and symlinks; C6 relink_stable PASS","ts":"2026-05-18T12:11:00Z"}
+{"step":"judge_verdict","decision":"write verdict","reason":"All 7 criteria met: toml_removed, toml_preserved, symlink_removed, symlink_preserved, cold_pool_intact, relink_stable, decision_log","ts":"2026-05-18T12:11:01Z"}

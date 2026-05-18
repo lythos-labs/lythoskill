@@ -1,0 +1,32 @@
+{
+  "verdict": "PASS",
+  "criteria": {
+    "correctness": {
+      "met": true,
+      "weight": 1,
+      "detail": "greet.ts exports function greet(name: string): string returning `Hello, ${name}!` via template literal"
+    },
+    "completeness": {
+      "met": true,
+      "weight": 1,
+      "detail": "greet.test.ts has 2 test() calls: greet('World') and greet('')"
+    },
+    "execution": {
+      "met": true,
+      "weight": 1,
+      "detail": "result.txt contains '2 pass, 0 fail' from bun test output"
+    },
+    "decision_log": {
+      "met": true,
+      "weight": 1,
+      "detail": "decision-log.jsonl has 3 valid JSONL lines with step/decision/reason/ts fields"
+    },
+    "code_quality": {
+      "met": true,
+      "weight": 0.5,
+      "detail": "Clean TypeScript, no 'any' types, no unused imports"
+    }
+  },
+  "all_weight_1_met": true,
+  "code_quality_acceptable": true
+}

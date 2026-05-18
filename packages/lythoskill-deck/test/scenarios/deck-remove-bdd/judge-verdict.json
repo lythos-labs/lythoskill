@@ -1,0 +1,15 @@
+{
+  "verdict": "PASS",
+  "scenario": "deck-remove-bdd",
+  "timestamp": "2026-05-18T12:11:00Z",
+  "criteria": {
+    "toml_removed": {"status": "PASS", "detail": "skill-a absent from skill-deck.toml"},
+    "toml_preserved": {"status": "PASS", "detail": "skill-b present in skill-deck.toml"},
+    "symlink_removed": {"status": "PASS", "detail": ".claude/skills/skill-a does not exist (ENOENT)"},
+    "symlink_preserved": {"status": "PASS", "detail": ".claude/skills/skill-b is a symlink to cold-pool"},
+    "cold_pool_intact": {"status": "PASS", "detail": "cold-pool/localhost/me/skill-a/SKILL.md exists with '# skill-a'"},
+    "relink_stable": {"status": "PASS", "detail": "deck link after remove syncs 1 skill (skill-b only), skill-a stays gone"},
+    "decision_log": {"status": "PASS", "detail": "decision-log.jsonl written with 9 entries"}
+  },
+  "summary": "All 7/7 criteria met. deck remove correctly removes the specified skill from toml + symlink while preserving other skills and leaving the cold pool untouched. Re-link remains stable."
+}
