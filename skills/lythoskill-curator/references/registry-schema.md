@@ -21,7 +21,7 @@ Each element in `skills[]`:
 | `path` | string | Absolute path to skill directory |
 | `source` | string | Provenance: `github.com/<org>/<repo>` or `localhost` (inferred from path) |
 | `managedDirs` | string[] | From `deck_managed_dirs` |
-| `niches` | string[] | From `deck_niche` (split on `,`) |
+| `niches` | string[] | Agent-enriched via `curator tag`, not extracted from SKILL.md frontmatter (ADR-20260518123403810) |
 | `triggerPhrases` | string[] | Extracted from `description` + `when_to_use` |
 | `hasScripts` | boolean | `scripts/` directory exists |
 | `hasExamples` | boolean | `examples/` directory exists |

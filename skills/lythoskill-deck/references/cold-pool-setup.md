@@ -14,7 +14,7 @@ Go-module-style paths for global uniqueness and source traceability:
 ├── github.com/<owner>/<repo>/
 │   └── skills/<skill-name>/SKILL.md     # monorepo
 ├── gitlab.com/<owner>/<repo>/SKILL.md   # standalone
-└── localhost/<name>/SKILL.md            # local-only
+└── localhost/me/<skill>/SKILL.md        # local-only (host/owner/repo aligned)
 ```
 Deck only checks whether `SKILL.md` exists at the resolved path.
 It does not care how the skill arrived.

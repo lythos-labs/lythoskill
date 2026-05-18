@@ -38,7 +38,7 @@ These fields are specific to the lythoskill ecosystem and are ignored by non-lyt
 
 | Field | In Catalog | Why Indexed |
 |-------|-----------|-------------|
-| `deck_niche` | ✅ (as `niches`) | Domain classification; overlap detection |
+| `deck_niche` | ❌ (removed) | Agent-enriched via `curator tag` instead (ADR-20260518123403810) |
 | `deck_managed_dirs` | ✅ (as `managed_dirs`) | Directory conflict detection |
 | `deck_dependencies` | ✅ | Dependency graph for deck resolution |
 | `metadata.lyth_*` | ❌ | Internal telemetry; not actionable at index time |
