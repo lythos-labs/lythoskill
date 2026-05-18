@@ -40,6 +40,7 @@ export interface ListPlan {
  * directory. Terminal-depth heuristics alone miss real-world layouts
  * like monorepos with subdirs, multi-skill repos, and mixed-depth clones.
  */
+/** Pure plan builder — IO (readdirSync) done by caller, results injected as allEntries. */
 export function buildListPlan(rootPath: string, allEntries: DirEntry[]): ListPlan {
   const plan: ListPlanEntry[] = []
   const dirSet = new Set(allEntries.filter(e => e.isDirectory).map(e => e.relPath))

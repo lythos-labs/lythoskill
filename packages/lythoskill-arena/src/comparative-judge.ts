@@ -53,6 +53,7 @@ export function computePareto(vectors: { participant_id: string; scores: Record<
 
 // ── Comparative Judge Prompt ──────────────────────────────────────────────
 
+/** Pure prompt builder — no IO. Execution: arena vs mode subagent spawn (cli.ts vsRun). */
 export function buildComparativePrompt(opts: {
   manifest: ArenaManifest
   verdicts: { participantId: string; verdict: unknown }[]

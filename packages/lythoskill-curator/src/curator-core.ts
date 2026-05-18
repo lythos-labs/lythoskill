@@ -200,7 +200,7 @@ export interface RefreshPlan {
 }
 
 /** Build a refresh plan by scanning the cold pool for git repos.
- *  Pure — does not fetch or pull. Caller handles network IO. */
+ *  Local IO only (findSkillDirs + existsSync). No network IO (fetch/pull). */
 export function buildRefreshPlan(poolPath: string): RefreshPlan {
   const dirs = findSkillDirs(poolPath)
   const seen = new Set<string>()

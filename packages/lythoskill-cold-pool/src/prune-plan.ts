@@ -82,6 +82,7 @@ function defaultFormatSize(bytes: number): string {
  * 2. Queries metadata DB for all active locators (state = added/linked/NULL).
  * 3. A repo is prunable if no active locator references it.
  */
+/** Plan builder — IO via ColdPool (findSkillDirectories, metadata queries). Execute: executePrunePlan(plan, io?) in same file. Mock ColdPool for plan-mode tests. */
 export function buildPrunePlan(coldPoolPath: string): PrunePlan {
   const pool = new ColdPool(coldPoolPath)
   const allRepos = pool.findSkillDirectories()

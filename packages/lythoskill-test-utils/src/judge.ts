@@ -4,6 +4,7 @@ import { JudgeVerdict, type JudgeInput, type Evidence } from './schema'
 
 export { JudgeCriterion, JudgeVerdict, type JudgeInput, type Evidence } from './schema'
 
+/** Pure prompt builder — no IO. Execution: runLLMJudge() in same file handles LLM spawn. */
 export function buildJudgePrompt(
   input: JudgeInput,
   evidence: Evidence,

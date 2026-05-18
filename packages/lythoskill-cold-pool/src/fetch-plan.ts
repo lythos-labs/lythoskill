@@ -16,6 +16,7 @@ import type { Locator, FetchPlan, FetchResult, FetchIO } from './types.js'
 import { gitClone } from './git-io.js'
 import { getMirror, rewriteUrl } from './mirror.js'
 
+/** Plan builder — IO via ColdPool parameter (pool.has, pool.resolveDir). Execute: executeFetchPlan(plan, io?) in same file. Mock ColdPool for plan-mode tests. */
 export function buildFetchPlan(
   pool: ColdPool,
   locator: Locator,

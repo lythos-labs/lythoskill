@@ -32,6 +32,7 @@ export interface ValidationIO {
 
 const DEFAULT_CHECKS: ValidationCheck[] = ['syntax', 'remote', 'path']
 
+/** Pure plan builder. Execute: executeValidationPlan(plan, io?) in same file — IO injected via ValidationIO. */
 export function buildValidationPlan(
   rawInput: string,
   opts?: { checks?: ReadonlyArray<ValidationCheck>; ref?: string },

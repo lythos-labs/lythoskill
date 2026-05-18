@@ -66,6 +66,7 @@ export interface ExecutionPlan {
   total_runs: number
 }
 
+/** Plan builder — pure data transform. Execution: arena/runner.ts spawns subagents. */
 export function buildExecutionPlan(toml: ArenaToml): ExecutionPlan {
   const cells: ExecutionCell[] = []
   for (const side of toml.side) {

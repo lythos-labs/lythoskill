@@ -66,6 +66,7 @@ function extractRepo(source: string): RepoKey | null {
 
 // ── Plan builder ───────────────────────────────────────────────────────────
 
+/** Plan builder — IO via ColdPool parameter (list, has, metadata). Execute: executeReconcilePlan(plan, io?) in same file. Mock ColdPool for plan-mode tests. */
 export function buildReconcilePlan(
   coldPool: ColdPool,
   desired: ReconcileDesiredState,

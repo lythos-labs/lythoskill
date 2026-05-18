@@ -54,6 +54,7 @@ function resolveJudgeText(toml: ArenaToml, configDir?: string): string | null {
 
 // ── Prompt template (IoC: brief = variable, template = fixed contract) ────
 
+/** Pure prompt builder — no IO. Execution: arena subagent spawn (cli.ts singleRun / vsRun). */
 export function buildArenaPrompt(opts: {
   brief: string
   cwd: string
