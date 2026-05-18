@@ -1,26 +1,21 @@
 // ── Curator core: pure functions extracted from CLI ────────────────────────
-// Architecture: Feed → Cold Pool → Working Set
+// Architecture: Agent Discovery → Cold Pool → Curator Index → Working Set
 //
-//   Feeds (Layer -1)     Cold Pool (Layer 0)     Working Set (Layer 1)
-//   ────────────────     ───────────────────     ──────────────────────
-//   LobeHub trending     ~/.agents/skill-repos/   .claude/skills/
-//   GitHub search        ├── github.com/...       ├── deck -> cold pool
-//   agentskill.sh        ├── localhost/...        └── (deny-by-default)
-//   skills.sh            └── ...
-//   npm registry
+//   Agent (explore)       Cold Pool (Layer 0)     Curator Index (Layer 1)   Working Set
+//   ────────────────      ───────────────────     ──────────────────────     ───────────
+//   WebSearch             ~/.agents/skill-repos/   REGISTRY.json             .claude/skills/
+//   WebFetch / gh CLI     ├── github.com/...       catalog.db                ├── deck -> cold pool
+//   MCP                   ├── localhost/...        (agent-enriched niche)    └── (deny-by-default)
+//                         └── ...
 //
-//   FeedAdapter wraps heterogeneous upstream sources (REST, GraphQL, HTML scrape)
-//   into uniform FeedItem[]. The agent reviews candidates → curator add → cold pool.
-//   Cold pool is the local cache (like ~/.m2/repository). Feed is the remote mirror
-//   (like Maven Central / Nexus). Agent's superpower: wrapping disparate APIs into
-//   one interface — no need for every source to be a Maven repo.
+//   Curator does NOT implement feed adapters (ADR-20260508230803515).
+//   The agent uses its own tools (WebSearch, WebFetch, gh CLI) for discovery.
+//   Curator indexes the cold pool + stores agent-enriched metadata (ADR-20260518123403810).
+//   Feed concept survives as schema layer, not adapter code.
 //
-// Future: remote feed adapters (LobeHub, agentskill.sh, GitHub) unite under FeedAdapter.
-
-// ── Feed metadata (for skill lineage tracking) ──────────────────────────
-// Curator used to have remote feed adapters (GitHub, LobeHub, agentskill.sh)
-// but ADR-20260508230803515 rejected the pattern: agent web fetch / MCP
-// beats hand-rolled feed adapters. Only the lineage metadata type remains.
+//   Cold pool is the local cache (like ~/.m2/repository for Maven).
+//   Agent's superpower: wrapping disparate APIs into one discovery SOP —
+//   no need for every source to have a hand-rolled adapter.
 
 export interface Feed {
   type: 'github' | 'marketplace' | 'lobehub' | 'npm' | 'url'
@@ -334,7 +329,7 @@ export function buildSkillMeta(frontmatter: Record<string, unknown>, path: strin
     whenToUse,
     allowedTools: arr(frontmatter['allowed-tools'] ?? frontmatter.allowedTools ?? []),
     triggerPhrases: [...new Set([...extractQuotedPhrases(description), ...extractQuotedPhrases(whenToUse)])],
-    niches: arr(frontmatter.niches ?? []),
+    niches: [],  // Agent-enriched via 'curator tag', not extracted from frontmatter (ADR-20260518123403810)
     tags: arr(frontmatter.tags ?? []),
     userInvocable: frontmatter['user-invocable'] != null ? Boolean(frontmatter['user-invocable']) : null,
     deckSkillType: (frontmatter.deckSkillType as string) || (frontmatter['deck-skill-type'] as string) || null,

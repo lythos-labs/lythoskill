@@ -56,7 +56,7 @@ export async function executeValidationPlan(
     fixes.push({
       action: 'update-locator',
       confidence: 0.5,
-      message: 'Locator must be FQ: host.tld/owner/repo[/skill] or localhost/<name>. Bare names are rejected per ADR-20260502012643244.',
+      message: 'Locator must be FQ: host.tld/owner/repo[/skill] or localhost/me/<skill>. Bare names are rejected per ADR-20260502012643244.',
     })
     return {
       status: 'invalid',

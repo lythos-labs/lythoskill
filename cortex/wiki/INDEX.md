@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (48)
+## 📚 Patterns (49)
 
+- **[2026-05-18]** [skill-incubator-sop-curator-driven-skill-creation-pipeline](./01-patterns/2026-05-18-skill-incubator-sop-curator-driven-skill-creation-pipeline.md)
 - **[2026-05-18]** [zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents](./01-patterns/2026-05-18-zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents.md)
 - **[2026-05-17]** [shell-stdout-as-agent-prompt-injection](./01-patterns/2026-05-17-shell-stdout-as-agent-prompt-injection.md)
 - **[2026-05-17]** [alias-as-role-slot-name-resolution-and-working-set-flattening](./01-patterns/2026-05-17-alias-as-role-slot-name-resolution-and-working-set-flattening.md)

@@ -5,15 +5,14 @@
  *   - `host.tld/owner/repo[/skill]`        — remote skill
  *   - `host.tld/owner/repo[/skill]#ref`    — remote skill at branch/tag/commit
  *   - `host.tld/owner/repo`                — remote standalone (skill = null)
- *   - `localhost/owner/repo[/skill]`       — local skill, full form
- *   - `localhost/<skill>`                  — local quick form (owner=me, repo=<skill>)
+ *   - `localhost/me/<skill>`               — local skill, full form (host/owner/repo aligned)
  *
  * The locator is a path. Appending it to the cold-pool base dir gives an
  * existing directory; SKILL.md inside is the skill content. For localhost,
  * `host === 'localhost'` signals "no remote, no clone, no refresh".
  *
- * `localhost/<skill>` shorthand maps to `localhost/me/<skill>` internally —
- * a convenience for personal skills that don't need owner/repo structure.
+ * localhost follows the same host/owner/repo shape as remote locators —
+ * `me` is the conventional owner for personal skills.
  *
  * `#ref` suffix (branch/tag/commit) is compatible with skills.sh's
  * `parseFragmentRef`. The ref is passed to gitClone for checkout.

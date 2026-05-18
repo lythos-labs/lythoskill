@@ -16,7 +16,6 @@ import { createHash } from 'node:crypto'
 import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, findSkillDirs, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
-import { createGitHubSearchAdapter, createLobeHubAdapter, createAgentSkillShAdapter } from './feed-adapters'
 import { gitClone } from '@lythos/cold-pool'
 import { validateInColdPool, isReadOnlyQuery, safeGit, safeRmSync } from './guard.js'
 
@@ -80,7 +79,7 @@ export function extractQuotedPhrases(text: string): string[] {
 
 export function inferSource(path: string): string {
   // Cold-pool layout: <pool>/github.com/<org>/<repo>/.../<skill>/
-  //                  <pool>/localhost/<skill>/
+  //                  <pool>/localhost/me/<skill>/
   const parts = path.split('/');
   const ghIdx = parts.indexOf('github.com');
   if (ghIdx >= 0 && parts.length > ghIdx + 2) {
@@ -114,13 +113,12 @@ export function scanSkill(path: string): SkillMeta | null {
 
   // CLI-specific IO extras
   const managedDirs = frontmatter.deck_managed_dirs || frontmatter.managed_dirs || [];
-  const niches = frontmatter.deck_niche ? [frontmatter.deck_niche] : [];
 
   return {
     ...core,
     path,
     managedDirs: Array.isArray(managedDirs) ? managedDirs : [managedDirs].filter(Boolean),
-    niches: Array.isArray(niches) ? niches : [niches].filter(Boolean),
+    niches: [],  // Agent-enriched via 'tag', not extracted from frontmatter (ADR-20260518123403810)
     hasScripts, hasExamples,
     deckDependencies: frontmatter.deck_dependencies || {},
     // Ensure these match SkillMeta interface
@@ -160,13 +158,19 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[], f
 
     const isNew = db.getContentHash(s.path) === null
 
+    // Preserve agent-enriched niches on re-scan (ADR-20260518123403810)
+    const existingNiches = !isNew ? db.get<{ niches: string }>(
+      `SELECT niches FROM skills WHERE path = $path`, { $path: s.path }
+    ) : null
+    const niches = existingNiches?.niches ?? '[]'
+
     db.insertSkill({
       $name: s.name,
       $description: s.description,
       $type: s.type,
       $version: s.version,
       $path: s.path,
-      $niches: JSON.stringify(s.niches),
+      $niches: niches,
       $managed_dirs: JSON.stringify(s.managedDirs),
       $trigger_phrases: JSON.stringify(s.triggerPhrases),
       $has_scripts: s.hasScripts ? 1 : 0,
@@ -388,7 +392,7 @@ function printSchema(db: CatalogDb) {
   console.log('### Example queries')
   console.log('```bash')
   console.log('lythoskill-curator query "SELECT name, type FROM skills WHERE deck_skill_type = \'combo\'"')
-  console.log('lythoskill-curator query "SELECT name, niches FROM skills WHERE niches LIKE \'%report%\'"')
+  console.log('lythoskill-curator query "SELECT name, niches FROM skills WHERE niches LIKE \'%agent-tagged%\'"')
   console.log('lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
   console.log('```')
 }
@@ -543,6 +547,34 @@ interface AuditCheck {
   count: number
 }
 
+// Known deprecated patterns — mechanical detection, agent judges severity (ADR-20260518123403810)
+const LEGACY_PATTERNS = [
+  { pattern: /skills\.sh/i, message: 'references deprecated skills.sh marketplace; use agent WebSearch + curator add' },
+  { pattern: /deck\s+status\s+sh/i, message: 'references removed deck status sh command' },
+  { pattern: /HANDOFF\.md/i, message: 'references deprecated HANDOFF.md; use daily/YYYY-MM-DD.md (ADR-20260424125637347)' },
+  { pattern: /deck\s+update/i, message: 'references deprecated deck update; use deck refresh' },
+]
+
+function checkLegacyPatterns(db: CatalogDb): { name: string; path: string; pattern: string }[] {
+  const results: { name: string; path: string; pattern: string }[] = []
+  const skills = db.all<{ name: string; path: string }>(`SELECT name, path FROM skills`)
+  for (const s of skills) {
+    const skillMdPath = join(s.path, 'SKILL.md')
+    if (!existsSync(skillMdPath)) continue
+    try {
+      const body = readFileSync(skillMdPath, 'utf-8')
+      for (const lp of LEGACY_PATTERNS) {
+        if (lp.pattern.test(body)) {
+          results.push({ name: s.name, path: s.path, pattern: lp.message })
+        }
+      }
+    } catch {
+      // unreadable SKILL.md — structural audit catches this separately
+    }
+  }
+  return results
+}
+
 function runAudit(argv: string[]) {
   const dbPath = resolveDbPath(argv)
 
@@ -579,14 +611,7 @@ function runAudit(argv: string[]) {
     `).all() as Record<string, any>[]
     checks.push({ title: 'Type anomalies (not standard or flow)', rows: typeAnomalies, count: typeAnomalies.length })
 
-    // 3. Empty niches
-    const emptyNiches = db.query(`
-      SELECT name, path, niches FROM skills
-      WHERE niches = '[]' OR niches IS NULL OR niches = ''
-    `).all() as Record<string, any>[]
-    checks.push({ title: 'Empty niches', rows: emptyNiches, count: emptyNiches.length })
-
-    // 4. Orphan scripts (has_scripts=1 but no scripts/ dir on disk)
+    // 3. Orphan scripts (has_scripts=1 but no scripts/ dir on disk)
     const scriptPaths = db.query(`
       SELECT name, path FROM skills WHERE has_scripts = 1
     `).all() as { name: string; path: string }[]
@@ -598,13 +623,17 @@ function runAudit(argv: string[]) {
     }
     checks.push({ title: 'Orphan scripts (has_scripts=true but no scripts/ dir)', rows: orphanScripts, count: orphanScripts.length })
 
-    // 5. dao_shu_qi_yong coverage (deck_skill_type)
+    // 4. dao_shu_qi_yong coverage (deck_skill_type)
     const coverage = db.query(`
       SELECT CASE WHEN deck_skill_type IS NULL OR deck_skill_type = '' THEN '(unset)' ELSE deck_skill_type END AS deck_skill_type, COUNT(*) AS count
       FROM skills
       GROUP BY CASE WHEN deck_skill_type IS NULL OR deck_skill_type = '' THEN '(unset)' ELSE deck_skill_type END
     `).all() as Record<string, any>[]
     checks.push({ title: 'dao_shu_qi_yong coverage (deck_skill_type)', rows: coverage, count: 0 })
+
+    // 5. Legacy pattern check (mechanical detection, agent judges)
+    const legacyIssues = checkLegacyPatterns(db)
+    checks.push({ title: 'Legacy patterns (deprecated references in SKILL.md body)', rows: legacyIssues, count: legacyIssues.length })
 
     // Total skills
     const totalResult = db.query(`SELECT COUNT(*) AS total FROM skills`).get() as { total: number }
@@ -873,6 +902,54 @@ export function runAdd(argv: string[]) {
     if (reason) console.log(`   Reason: ${reason}`)
     console.log(`\n💡 To use this skill in a project, run:`)
     console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
+
+    // Write-through cache: index the new skill immediately (ADR-20260518123403810)
+    // Curator scan is the reconciliation loop that fixes any drift later.
+    try {
+      const skillDirs = findSkillDirs(plan.repoPath)
+      if (skillDirs.length > 0) {
+        const outputDir = `${process.env.HOME}/.agents/lythoskill/curator`
+        mkdirSync(outputDir, { recursive: true })
+        const dbPath = join(outputDir, 'catalog.db')
+
+        // Scan new skills and write to existing index (merge, not rebuild)
+        for (const skillDir of skillDirs) {
+          const s = scanSkill(skillDir)
+          if (s) {
+            const db = new CatalogDb(dbPath)
+            try {
+              db.insertSkill({
+                $name: s.name, $description: s.description, $type: s.type,
+                $version: s.version, $path: s.path,
+                $niches: JSON.stringify([]),
+                $managed_dirs: JSON.stringify(s.managedDirs),
+                $trigger_phrases: JSON.stringify(s.triggerPhrases),
+                $has_scripts: s.hasScripts ? 1 : 0,
+                $has_examples: s.hasExamples ? 1 : 0,
+                $body_preview: s.bodyPreview,
+                $source: s.source, $when_to_use: s.whenToUse,
+                $allowed_tools: JSON.stringify(s.allowedTools),
+                $author: s.author,
+                $user_invocable: s.userInvocable != null ? (s.userInvocable ? 1 : 0) : null,
+                $tags: JSON.stringify(s.tags),
+                $deck_dependencies: JSON.stringify(s.deckDependencies),
+                $deck_skill_type: s.deckSkillType,
+                $content_hash: s.contentHash,
+                $status: 'parsed',
+                $indexed_at: new Date().toISOString(),
+                $last_parsed_at: new Date().toISOString(),
+                $parse_error: null,
+              })
+              console.log(`   📇 Indexed: ${s.name}`)
+            } finally {
+              db.close()
+            }
+          }
+        }
+      }
+    } catch {
+      // Index update is best-effort — curator scan will catch up later
+    }
   } catch (e: any) {
     // Clean up empty directory left by failed clone
     try {
@@ -887,6 +964,81 @@ export function runAdd(argv: string[]) {
   }
 }
 
+// ── Tag: agent-enriched metadata ──────────────────────────────
+
+function runTag(argv: string[]) {
+  const skillName = argv.find(a => !a.startsWith('-'))
+  if (!skillName) {
+    console.error('Usage: lythoskill-curator tag <skill-name> [--niche <value>] [--qa <json>] [--db <path>]')
+    console.error('')
+    console.error('Agent-enriched metadata layer. Writes curator\'s personal annotations')
+    console.error('(L3 买家秀) separate from skill author\'s frontmatter (L1 卖家秀).')
+    console.error('')
+    console.error('Options:')
+    console.error('  --niche <value>    Niche tag (repeatable)')
+    console.error('  --qa <json>        QA signal: {"source_type":"self/arena","signal_value":8,...}')
+    console.error('  --db, -d <path>    Database path')
+    process.exit(1)
+  }
+
+  const dbPath = resolveDbPath(argv)
+  if (!dbPath || !existsSync(dbPath)) {
+    console.error('❌ Catalog DB not found. Run `lythoskill-curator` first.')
+    process.exit(1)
+  }
+
+  const niches: string[] = []
+  const qaSignals: string[] = []
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === '--niche' && argv[i + 1]) {
+      niches.push(argv[++i])
+    } else if (argv[i] === '--qa' && argv[i + 1]) {
+      qaSignals.push(argv[++i])
+    }
+  }
+
+  if (niches.length === 0 && qaSignals.length === 0) {
+    console.error('❌ At least one --niche or --qa is required.')
+    process.exit(1)
+  }
+
+  const db = new CatalogDb(dbPath)
+  try {
+    const existing = db.get<{ niches: string }>(
+      `SELECT niches FROM skills WHERE name = $name`,
+      { $name: skillName }
+    )
+    if (!existing) {
+      console.error(`❌ Skill not found: ${skillName}`)
+      console.error('   Run `lythoskill-curator query "SELECT name FROM skills"` to list indexed skills.')
+      process.exit(1)
+    }
+
+    const currentNiches: string[] = (() => {
+      try { return JSON.parse(existing.niches || '[]') } catch { return [] }
+    })()
+
+    // Merge: append new niches, deduplicate
+    const merged = [...new Set([...currentNiches, ...niches])]
+    // Append QA signals with qa: prefix
+    for (const qa of qaSignals) {
+      merged.push(`qa:${qa}`)
+    }
+
+    db.run(`UPDATE skills SET niches = $niches WHERE name = $name`, {
+      $niches: JSON.stringify(merged),
+      $name: skillName,
+    })
+
+    console.log(`✅ Tagged ${skillName}`)
+    if (niches.length > 0) console.log(`   niches: ${niches.join(', ')}`)
+    if (qaSignals.length > 0) console.log(`   qa: ${qaSignals.length} signal(s)`)
+    console.log(`   total niches: ${merged.length}`)
+  } finally {
+    db.close()
+  }
+}
+
 // ── Main Entry ───────────────────────────────────────────────
 
 if (import.meta.main) {
@@ -896,6 +1048,7 @@ if (import.meta.main) {
   if (cmd === '--help' || cmd === '-h') {
     console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
     console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
+    console.log('       lythoskill-curator tag <skill-name> --niche <value> [--qa <json>]')
     console.log('       lythoskill-curator refresh-plan [--pool <dir>]')
     console.log('       lythoskill-curator refresh-execute [--pool <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
@@ -910,20 +1063,21 @@ if (import.meta.main) {
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('                         --branch <name>      Specific branch (default: default branch)')
     console.log('                         --full              Full clone (default: --depth 1 shallow)')
+    console.log('  tag <skill-name>      Write agent-enriched metadata (niche + QA) to indexed skill')
+    console.log('                         --niche <value>      Niche tag (repeatable)')
+    console.log('                         --qa <json>          QA signal with provenance')
     console.log('  refresh-plan          Scan cold pool for git repos, check upstreams, write TODO')
     console.log('                         --pool <dir>        Cold pool path')
     console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
     console.log('                         --pool <dir>        Cold pool path')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
-      console.log('  refresh-plan          Scan cold pool git repos, check upstreams, write TODO file')
-    console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
-    console.log('  audit                 Run predefined checks and output an audit report')
+    console.log('  audit                 Run structural + legacy checks and output an audit report')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
     console.log('Options:')
     console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
     console.log('  --pool <dir>          Cold pool path for add (default: ~/.agents/skill-repos)')
-    console.log('  --db, -d <path>       Database path for query/audit (default: ./catalog.db)')
+    console.log('  --db, -d <path>       Database path for query/audit/tag (default: ./catalog.db)')
     process.exit(0)
   }
 
@@ -933,6 +1087,8 @@ if (import.meta.main) {
     runRefreshExecute(args.slice(1))
   } else if (cmd === 'add') {
     runAdd(args.slice(1))
+  } else if (cmd === 'tag') {
+    runTag(args.slice(1))
   } else if (cmd === 'query') {
     runQuery(args.slice(1))
   } else if (cmd === 'audit') {

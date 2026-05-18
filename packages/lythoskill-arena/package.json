@@ -49,6 +49,8 @@
     "zod-to-json-schema": "^3.25.2"
   },
   "optionalDependencies": {
-    "@lythos/agent-adapter-claude-sdk": "workspace:*"
+    "@lythos/agent-adapter-claude-sdk": "workspace:*",
+    "@lythos/agent-adapter-deepseek-serve": "workspace:*",
+    "@lythos/agent-adapter-codex": "workspace:*"
   }
 }

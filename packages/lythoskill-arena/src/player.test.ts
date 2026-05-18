@@ -21,11 +21,11 @@ deck = "./decks/rich.toml"
 
 describe('resolvePlayer', () => {
   test('maps claude-code → claude', () => {
-    expect(resolvePlayer('claude-code')).toBe('claude')
+    expect(resolvePlayer('claude-code')).toBe('claude-sdk')
   })
 
   test('maps Claude → claude (case insensitive)', () => {
-    expect(resolvePlayer('Claude')).toBe('claude')
+    expect(resolvePlayer('Claude')).toBe('claude-sdk')
   })
 
   test('maps kimi → kimi', () => {
@@ -37,7 +37,7 @@ describe('resolvePlayer', () => {
   })
 
   test('trims whitespace', () => {
-    expect(resolvePlayer('  claude-code  ')).toBe('claude')
+    expect(resolvePlayer('  claude-code  ')).toBe('claude-sdk')
   })
 })
 
@@ -45,7 +45,7 @@ describe('resolveSides', () => {
   test('resolves all sides in arena.toml', () => {
     const sides = resolveSides(toml)
     expect(sides).toHaveLength(2)
-    expect(sides[0].platform).toBe('claude')
+    expect(sides[0].platform).toBe('claude-sdk')
     expect(sides[1].platform).toBe('expert-architect')
     expect(sides[0].playerName).toBe('claude-code')
   })
@@ -63,7 +63,7 @@ describe('groupBySide', () => {
     expect(groups).toHaveLength(2)
     expect(groups[0].runs).toBe(3) // runs_per_side
     expect(groups[1].runs).toBe(3)
-    expect(groups[0].platform).toBe('claude')
+    expect(groups[0].platform).toBe('claude-sdk')
   })
 
   test('control flag preserved', () => {

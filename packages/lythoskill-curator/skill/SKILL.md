@@ -3,237 +3,257 @@ name: lythoskill-curator
 version: {{PACKAGE_VERSION}}
 type: standard
 description: |
-  Skill discovery engine. Scans your local cold pool (~/.agents/skill-repos),
-  indexes all SKILL.md frontmatter into REGISTRY.json + catalog.db, and lets you
-  query by type, niche, source, or keyword. The CLI is a dumb indexer — YOU are
-  the smart agent who combines curator data with web search, deep research, and
-  project context to make recommendations. Reconciler-style: any filesystem state
-  → scan → converges to clean index. Auto-backs up old index; rollback via `restore`.
+  Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
+  indexes SKILL.md frontmatter into REGISTRY.json + catalog.db. CLI is mechanical
+  glue (scan/query/tag/audit) — YOU are the agent who combines curator's local cache
+  with WebSearch, deep research, and arena testing to discover, annotate, fact-check,
+  and recommend. Curator = 查卡器 + 备注 + 组卡审美. Reconciler-style: any filesystem
+  state → scan → converges to clean index. Auto-backup; rollback via `restore`.
 when_to_use: |
   Find a skill for X, search skills, what skills do I have, list all skills,
   catalog skills, explore cold pool, scan skill pool, skill index, update index,
   recommend a deck, is there a skill for Y, discover skills, cold pool query,
-  skill lookup, what's available, curator query, curator scan, curator audit.
+  skill lookup, what's available, curator query, curator scan, curator audit,
+  curator tag, annotate skill, fact-check skill, cross-reference skill quality.
   ALSO trigger when user wants to do a task and you need to find the right skill:
-  web-search for candidates → curator check if already in cold pool →
-  curator query for similar skills by niche → recommend with confidence.
+  curator query local cache → WebSearch for new candidates →
+  curator add + curator tag → arena test → curator tag --qa → recommend with confidence.
 allowed-tools:
   - Bash(bunx @lythos/skill-curator@{{PACKAGE_VERSION}} *)
   - WebSearch
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
-deck_niche: meta.curation
 deck_managed_dirs:
   - ~/.agents/lythoskill/curator/
 ---
 
 # Skill Curator
-> Smart agent, dumb tool. Curator indexes what exists — YOU decide what's good.
-> The CLI catalogs every skill on the shelf. The agent (that's you) does the thinking.
+> 策展者/买家秀 = 查卡器 + 备注 + 组卡审美
+> CLI is mechanical glue (scan, query, tag, audit). Agent does the thinking.
 
-## How Recommendation Actually Works
+## Mental Model: Curator = 策展者 (Curator's Perspective)
 
-Curator CLI is intentionally dumb — it produces **facts** (what skills exist, their
-metadata, their niches). The **agent** combines these facts with project context,
-web search, and deep research to make real recommendations.
+Curator is NOT a discovery engine. It's the **curator's personal knowledge base** —
+a card searcher + personal notes system for the skill ecosystem.
 
-**The full discovery workflow (agent does all of this):**
+**Two complementary modes**:
+
+| Mode | Metaphor | What it does |
+|------|----------|-------------|
+| 记者 (Journalist) | Investigation + narrative + expression | Fact-check claims, cross-reference sources, detect bias, assign confidence |
+| 架构师 (Architect) | Composition aesthetics | Understand synergies, deduce combos, judge structural fit, design archetypes |
+
+**组卡审美 (composition taste) has three inputs**:
+1. **Arena 实战数值** — quantitative: scores, pass/fail, performance data
+2. **审美评析** — qualitative: your own judgment of a skill's design, clarity, fit
+3. **Combo 推演** — systemic: how skills compose, what synergies emerge, what archetype they form
+
+A curator doesn't just verify facts (记者). A curator understands **how skills combine
+to be beautiful** (架构师). This is what separates a card database from a deck builder.
+
+**Curator 依赖 deck + arena 的能力**：curator 不评估孤立技能——它评估"这张牌在这个卡组里完成这个任务"的表现。Arena 测试的是 deck 级别能力，curator 记录的是 deck-task 级别的 QA。一张牌在一副卡组里表现出色，在另一副里可能无用。架构师理解这种上下文依赖性。
+
+## Discovery SOP (Agent-Driven)
+
+The explore slot is dominated by **agent + search** (WebSearch, gh CLI, WebFetch).
+Curator's job is NOT to be the discovery engine — it's the **local cache** that makes
+discovery faster, and the **enrichment layer** that remembers what was found.
+
 ```
-1. WebSearch for skill candidates            ← agent superpower
-2. curator query "SELECT * FROM skills       ← check what's already in cold pool
-   WHERE name LIKE '%security%'"
-3. curator query "SELECT * FROM skills       ← find similar skills by niche
-   WHERE niches LIKE '%audit%'"
-4. Arena single --deck qa-sweep.toml         ← test before adopting
-5. Deck add <locator>                        ← add to project deck
+1. curator query "SELECT name, description FROM skills       ← local cache: "in cold pool?"
+   WHERE description LIKE '%<keyword>%'"
+2. WebSearch for "<task> skill agent"                        ← remote discovery
+3. WebFetch / gh CLI to inspect candidates                  ← deep dive
+4. curator add <locator> --pool ...                          ← seed cold pool
+5. curator scan                                              ← re-index
+6. curator tag <name> --niche "<classification>"             ← agent-enriched metadata (L3)
+   [--qa '{"source_type":"self/arena","signal_value":8,...}']
+7. arena single/vs                                           ← test before adopting
+8. curator tag <name> --qa '{"source_type":"self/arena"...}' ← record test results
+9. Recommend with confidence: "skill X fits because...       ← agent reasoning
+   (3 arena PASS + hub A confirms + curator scan clean)"
 ```
 
-**Why not hardcode recommendations in the CLI?** Keyword-matching (TF-IDF, domain boost)
-captures surface similarity but misses causal chains: "project-cortex produces structured
-ADRs; repomix-handoff consumes them — they form a producer-consumer pair." Only LLM
-reasoning discovers these patterns. The CLI provides the data; the agent does inference.
-
-**Three-layer trust model (all agent-side):**
-```
-L1 卖家秀: skill's own description           ← what the skill claims
-L2 Big V:   curator index (REGISTRY.json)    ← unified schema, queryable
-L3 买家秀: arena evaluation + your judgment  ← real testing, real recommendation
-```
-
-Curator gives you L2. You bring L3.
-
-**This is thin skill pattern at the architecture level**: stable layer in npm/CLI
-(git, filesystem, SQLite) — intelligence layer in agent (search, evaluate, recommend).
-External discovery and integration belong to the agent, not the tool.
+**Curator is NOT the discovery engine.** It's the agent's local data source.
+The agent combines curator query + WebSearch + its own reasoning for
+discover → rank → recommend.
 
 ## Commands
-### Index the cold pool
-```bash
-# Scan and produce REGISTRY.json + catalog.db
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} [POOL_PATH]
 
-# Defaults:
-#   POOL_PATH = ~/.agents/skill-repos
-#   Output    = ~/.agents/lythoskill/curator/   (personal environment scan)
-#
-# Custom output (e.g. per-pool isolation):
+### Index the cold pool (scan)
+```bash
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} [POOL_PATH]
+# Defaults: POOL_PATH = ~/.agents/skill-repos
+#           Output    = ~/.agents/lythoskill/curator/
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} ~/.agents/skill-repos --output /tmp/my-index/
 ```
-Curator is a **reconciler** (K8s-style): no matter what state the index is in
-(stale, corrupted, missing), running `curator` converges it to a clean, current
-index. Old index is automatically backed up before rebuild.
+Reconciler-style: converges any state to a clean index. Auto-backup before rebuild.
 
-### Discover new skills from remote feeds
+### Tag — agent-enriched metadata (L3 买家秀)
 ```bash
-# Query remote feeds (GitHub topic search, agentskill.sh, etc.) for skill candidates
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} discover
+# Write niche tags (curator's personal classification)
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} tag <skill-name> --niche "meta.governance.deck"
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} tag <skill-name> --niche "code-review" --niche "security"
 
-# Filter by keyword
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} discover --q "pdf"
+# Write QA signal with provenance (REQUIRED)
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} tag <skill-name> \
+  --qa '{"source_type":"self/arena","source_name":"arena-single-2026-05-18","signal_type":"score","signal_value":8}'
+
+# Reference external hub assessment (L2, with provenance)
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} tag <skill-name> \
+  --qa '{"source_type":"hub/agentskill.sh","source_url":"https://...","signal_type":"securityScore","signal_value":95}'
 ```
 
-Output is a Markdown table of candidates with locator, source, and dedup hints.
-Agent reviews → uses `curator add` to persist selected skills to the cold pool.
+**Tag is agent-enriched, NOT extracted from SKILL.md frontmatter.** Skill authors write L1 卖家秀
+(description). The curator writes L3 买家秀 (niche + QA). These are separate data layers.
+Re-scan preserves agent-written tags (merge strategy: scan updates name/description/path,
+preserves niches column).
 
-### Add a skill to the cold pool
-```bash
-# Download a skill (git clone) into the cold pool — no install, no skill-deck.toml change
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos
-
-# Plan-first (no actual clone)
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
-
-# With provenance metadata
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
-  --reason "Found via agentskill.sh" \
-  --branch main \
-  --forked-from github.com/upstream/repo
-```
-
-`add` clones into the cold pool with a decision record written to `additions.jsonl`.
-It does NOT modify `skill-deck.toml` — that's deck's job. Use `--dry-run` to preview the plan.
-
-### Refresh upstreams (plan-first)
-```bash
-# Step 1: scan cold pool, identify repos behind upstream, write TODO heredoc
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} refresh-plan
-
-# Step 2: pull behind repos one by one, marking progress in plan
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} refresh-execute
-```
-
-Per ADR-20260507110332805, refresh defaults to plan-first to prevent E2E timeouts.
-The plan is a heredoc with `git pull --ff-only` lines you can audit before executing.
-
-### Rollback (if rebuild produces bad data)
-```bash
-# Restore the most recent backup
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore
-# Custom output directory:
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore --output ~/.agents/lythoskill/curator/
-```
+**QA provenance schema**: every signal must carry `source_type`, `source_name`, and `signal_value`.
+No-provenance signals are rejected. See ADR-20260518123403810.
 
 ### Query the index
 ```bash
-# SQL query → Markdown table
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
-# Specify db path
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query --db ./catalog.db "SELECT * FROM catalog_meta"
-# Inspect table structure
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "PRAGMA table_info(skills)"
-# Show schema when no query is provided
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query   # show schema overview
 ```
-
-Output is a formatted Markdown table — easy to read in chat or pipe to other tools.
+Output is Markdown table. SQL is a good DSL for showing intent — declarative, readable.
 
 ### Audit the index
 ```bash
-# Run predefined checks and output a report
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} audit
-# Specify db path
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} audit --db ./catalog.db
 ```
 
-Checks performed:
-- **Missing frontmatter**: skills without `version`, `description`, or `when_to_use`
-- **Type anomalies**: `type` values that are not `standard` or `flow`
-- **Empty niches**: skills with no niches declared
-- **Orphan scripts**: skills with `has_scripts=true` but no matching `scripts/` dir
-- **dao_shu_qi_yong coverage**: count skills with/without `deck_skill_type`
+Checks: missing frontmatter, type anomalies, orphan scripts, deck_skill_type coverage,
+**legacy pattern detection** (deprecated references like `skills.sh`, `deck status sh`,
+`HANDOFF.md` in SKILL.md body). Empty niches are NOT violations — niches are agent-enriched,
+not author-declared.
 
-Report format: one Markdown table per check, plus a summary score out of 100.
-
-### Typical queries
+### Add a skill to the cold pool
 ```bash
-# Same-niche skills (potential conflicts for deck)
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, niches FROM skills WHERE niches LIKE '%report%'"
-# Managed directory overlaps
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
-# Duplicate detection (same name, different sources)
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
+  --reason "Found via WebSearch for code review skills" --branch main
+```
+
+### Refresh upstreams (plan-first)
+```bash
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} refresh-plan
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} refresh-execute
+```
+
+### Rollback
+```bash
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} restore
+```
+
+## Fact-Check + Confidence Evaluation (记者)
+
+The curator's verification layer — not just collecting QA signals, but verifying
+claims and assigning structured confidence. The agent is a **journalist** (记者):
+investigation + narrative synthesis + expression.
+
+### Fact-Check Workflow
+```
+1. curator query → get skill's current QA signals
+2. Agent cross-references:
+   - Author claim (L1): "fast and reliable"
+   - Arena self-test (L3): 30s timeout? → contradiction → flag
+   - Hub A (L2): score 9/10 vs Hub B (L2): score 4/10 → signal divergence → needs self-test
+   - 3 independent arena runs agree → evidence convergence → HIGH confidence
+3. curator tag --qa → write structured confidence assessment
+```
+
+### Confidence Dimensions
+- **Evidence quantity**: how many independent sources
+- **Evidence quality**: self-test > shared arena > hub > author claim
+- **Evidence consistency**: convergent or contradictory?
+- **Freshness**: recent test > 6-month-old data
+
+### Source-Filtered Bias Detection
+Toggle sources to see different composite pictures:
+- All sources: 8/10
+- Exclude Hub A: 6/10 (Hub A systematically rates +2 on TypeScript skills)
+- Self-test only: 7/10 (smaller sample, higher confidence per sample)
+
+This difference IS the signal. Curator doesn't decide which source to trust —
+it shows the multi-source picture and lets the agent/user judge.
+
+### Confidence Output Format
+```
+Claim X: HIGH confidence (3 self-tests PASS + 1 hub confirms, 0 contradictions)
+Claim Y: LOW confidence (author-only claim, no independent verification)
+Claim Z: CONTRADICTED (author says "fast", arena shows 30s timeout)
+```
+
+## Typical Queries
+```bash
+# Skills by agent-enriched niche
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, niches FROM skills WHERE niches LIKE '%agent-tagged%'"
+# Duplicate detection
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query \
   "SELECT name, path FROM skills WHERE name IN (SELECT name FROM skills GROUP BY name HAVING COUNT(*) > 1)"
-# Combo / transient / fork skills (localhost-first types)
+# Combo / transient / fork skills
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
-# Skills by deck governance type
-bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, deck_skill_type, path FROM skills WHERE deck_skill_type = 'combo'"
+# Managed directory overlaps
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
 ```
 
-## Curator + Deck Workflow
+## Curator + Deck + Arena Workflow
 ```
-curator scan → catalog.db          "What do I have?"
+curator scan → catalog.db              "What's in my collection?"
     ↓
-agent queries + project context    "What should I use?"       (LLM reasoning)    ↓
-agent edits skill-deck.toml        "Declare desired state"
+agent: curator query + WebSearch       "Find me a skill for X"     (discovery)
     ↓
-deck link                          "Enforce it"
+curator add + curator scan             "Add to cold pool"         (collection)
     ↓
-arena (optional)                   "Verify it"
+curator tag --niche ... [--qa ...]     "Write my notes"           (enrichment)
+    ↓
+deck add + deck link                   "Activate in working set"  (use)
+    ↓
+arena single/vs                        "Test it myself"            (verify)
+    ↓
+curator tag --qa '{"source_type":"self/arena"...}'  "Record result" (remember)
+    ↓
+Next discovery: richer cache + QA → better recommendations        (compound)
 ```
 
-Curator does **not**: score, rank, recommend, modify toml, or download skills.
-Curator does: turn "192 local skills" into structured, queryable data in milliseconds.
+**Data flywheel**: more usage → more QA data → better curator → better recommendations →
+more targeted testing → even more QA data. Curator's value compounds over time
+while deck/arena deliver steady-state value.
+
 ## Gotchas
-**Reconciler mental model**: Curator is K8s-controller-style. Whatever state the
-index is in — stale, corrupted, missing columns — one `curator` run converges it
-to clean. Schema migrations are automatic (missing columns get added). Old data is
-backed up before any destructive change.
+**Agent-enriched niches, not frontmatter-extracted**: niches come from `curator tag`,
+not from SKILL.md frontmatter. Scan preserves existing niches on re-scan (merge strategy).
 
-**Backup before rebuild**: Every scan automatically backs up `REGISTRY.json` and
-`catalog.db` with a timestamped `.bak.YYYY-MM-DD-HH-MM-SS` suffix. If a scan
-produces bad data, run `curator restore` to roll back to the most recent backup.
+**Empty niche is NOT a violation**: audit no longer flags empty niches. Skills without
+agent-enriched metadata are normal — especially newly indexed skills.
 
-**Index freshness**: Query stderr shows when the index was generated. If older than
-7 days, curator warns you to re-scan. Stale indexes miss newly cloned skills.
+**Legacy pattern detection**: audit checks SKILL.md bodies for deprecated references
+(`skills.sh`, `deck status sh`, `HANDOFF.md`, `deck update`). Mechanical detection,
+agent judges severity.
 
-**catalog.db not found**: If querying before scanning, CLI prints which paths it
-searched and suggests the scan command. Don't create the db manually.
-**JSON array fields**: `niches`, `managed_dirs`, `trigger_phrases` are stored as
-JSON strings in SQLite. Use `json_extract()` for element access:
-```sql
-SELECT name, json_extract(niches, '$[0]') AS primary_niche FROM skills;
-```
-**Deterministic output**: Same cold pool always produces the same REGISTRY.json
-(sorted, stable). Safe to diff across scans for drift detection.
-**deck_skill_type**: This is a lythoskill custom frontmatter field (`deck_` prefix),
-not an Agent Skills standard field. It indexes `combo`, `transient`, and `fork`
-skills for curator filtering. Skills without it return `NULL` in queries.
-## Cold Pool CLI (sister tool)
+**Reconciler mental model**: K8s-controller-style. One `curator` run converges any state
+to clean. Auto-backup before rebuild. Use `curator restore` to roll back.
 
-Curator indexes the cold pool. To manage the cold pool itself, use `cold-pool` CLI:
+**Index freshness**: query stderr shows generation time. >7 days → warning.
 
-```bash
-# Check cold pool health
-bunx @lythos/cold-pool validate --lock ./skill-deck.lock
+**catalog.db not found**: run `curator` first to scan and build the index.
 
-# Prune unreferenced repos (heredoc audit first — never auto-delete)
-bunx @lythos/cold-pool prune
+**JSON array fields**: `niches`, `managed_dirs`, `trigger_phrases` stored as JSON strings
+in SQLite. Use `json_extract()` for element access.
 
-# Add skills to cold pool (use this, then curator scan to re-index)
-bunx @lythos/skill-curator add github.com/owner/repo
-```
+**QA provenance required**: every QA signal via `--qa` must include `source_type` and
+`source_name`. No-provenance signals are rejected.
 
-Full pipeline: `cold-pool add` → `curator scan` → `curator query` → `deck add`
+**Feed concept survives as schema, not adapter code**: curator does NOT implement HTTP
+API adapters. Agent uses WebSearch/WebFetch/gh CLI for external discovery. Curator
+can maintain feed schemas (URL patterns, data shapes) as metadata — but the execution
+is agent-side. See ADR-20260508230803515.
 
 ## Supporting References
 Read these **only when the specific topic arises**:
@@ -245,4 +265,3 @@ Read these **only when the specific topic arises**:
 | Identify skill combination patterns (pipeline, modality…) | [references/combination-patterns.md](./references/combination-patterns.md) |
 | Understand curator's design principles | [references/design-principles.md](./references/design-principles.md) |
 | See the full data flow and trust model | [references/architecture.md](./references/architecture.md) |
-| Discover skills via MCP (agentskill.sh) | [references/mcp-discovery.md](./references/mcp-discovery.md) |

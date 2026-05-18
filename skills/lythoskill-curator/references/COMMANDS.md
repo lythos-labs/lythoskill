@@ -1,6 +1,7 @@
 <!-- AUTO-GENERATED -->
 Usage: lythoskill-curator [pool-path] [--output <dir>]
        lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]
+       lythoskill-curator tag <skill-name> --niche <value> [--qa <json>]
        lythoskill-curator refresh-plan [--pool <dir>]
        lythoskill-curator refresh-execute [--pool <dir>]
        lythoskill-curator query <SQL> [--db <path>]
@@ -15,17 +16,18 @@ Commands:
                          --forked-from <loc>  Original skill if this is a fork
                          --branch <name>      Specific branch (default: default branch)
                          --full              Full clone (default: --depth 1 shallow)
+  tag <skill-name>      Write agent-enriched metadata (niche + QA) to indexed skill
+                         --niche <value>      Niche tag (repeatable)
+                         --qa <json>          QA signal with provenance
   refresh-plan          Scan cold pool for git repos, check upstreams, write TODO
                          --pool <dir>        Cold pool path
   refresh-execute       Pull behind repos one by one, marking progress in plan
                          --pool <dir>        Cold pool path
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
-  refresh-plan          Scan cold pool git repos, check upstreams, write TODO file
-  refresh-execute       Pull behind repos one by one, marking progress in plan
-  audit                 Run predefined checks and output an audit report
+  audit                 Run structural + legacy checks and output an audit report
   restore               Roll back to the most recent backup
 
 Options:
   --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)
   --pool <dir>          Cold pool path for add (default: ~/.agents/skill-repos)
-  --db, -d <path>       Database path for query/audit (default: ./catalog.db)
+  --db, -d <path>       Database path for query/audit/tag (default: ./catalog.db)

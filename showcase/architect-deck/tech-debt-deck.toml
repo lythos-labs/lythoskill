@@ -1,0 +1,9 @@
+# Tech Debt Audit Deck — 架构师维度 prebuilt example
+# Single-skill deck: systematic codebase health assessment.
+# 9 audit dimensions, file:line citations, multi-tool auto-detection.
+# Use when: conducting a thorough codebase health check.
+# See curator evaluation: 参考价值——QA 方法论.
+
+[standard.skills.tech-debt]
+locator = "github.com/ksimback/tech-debt-skill"
+reason = "架构师维度: 9 维度系统性代码健康审计, file:line citation, 多工具自动检测 — QA 方法论参考"

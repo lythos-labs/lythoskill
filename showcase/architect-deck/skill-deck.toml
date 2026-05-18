@@ -1,0 +1,16 @@
+# Architect Deck — 架构师维度 example
+# Two complementary skills for agent system architecture:
+#   harness        = meta-factory, 6 team patterns (Pipeline, Fan-out, etc.)
+#   harness-patterns = structural analysis, 6 layers, 11 references
+#
+# Together they cover: composition analysis + pattern-aware design.
+# Created from curator discovery → journalist evaluation → deck composition.
+# See ADR-20260518123403810, reproduce.sh verifies.
+
+[standard.skills.harness]
+locator = "github.com/revfactory/harness"
+reason = "架构师维度: 6 种 team architecture patterns, meta-factory 设计 — 直接对应组卡审美"
+
+[standard.skills.harness-patterns]
+locator = "github.com/keli-wen/agentic-harness-patterns-skill"
+reason = "架构师维度: 6 层 harness 结构分析, 11 deep-dive references — 结构分析能力"

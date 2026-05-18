@@ -31,7 +31,7 @@ Three layers, sharing the project's `intent → plan → execute` pattern
 Per `ADR-20260502012643244`, locators are FQ-only:
 
 - `host.tld/owner/repo[/skill]` — remote skill (monorepo, flat, or arbitrary subdir)
-- `localhost/<name>` — local-only skill, no remote origin
+- `localhost/me/<skill>` — local-only skill, no remote origin (host/owner/repo aligned)
 
 Bare names and `owner/repo` shorthand are rejected — `parseLocator` returns null.
 

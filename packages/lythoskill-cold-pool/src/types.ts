@@ -11,9 +11,10 @@
  *   - `host.tld/owner/repo` (remote standalone — repo root has SKILL.md, skill = null)
  *   - `localhost/owner/repo[/skill]` (no remote — same shape, host literal `localhost`)
  *
- * Bare names, shorthand `owner/repo`, and `localhost/<name>` (no owner/repo)
- * are rejected by `parseLocator`. The locator is a path: appending to coldPool
- * yields `<coldPool>/<host>/<owner>/<repo>[/skill]/SKILL.md`. The only thing
+ * Bare names and shorthand `owner/repo` are rejected by `parseLocator`.
+ * localhost follows host/owner/repo shape: `localhost/me/<skill>`.
+ * The locator is a path: appending to coldPool yields
+ * `<coldPool>/<host>/<owner>/<repo>[/skill]/SKILL.md`. The only thing
  * `isLocalhost` controls is "no remote operations" (no clone, no pull, no fetch).
  */
 export interface Locator {

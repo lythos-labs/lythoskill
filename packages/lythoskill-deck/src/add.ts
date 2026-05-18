@@ -183,7 +183,7 @@ function exitInvalidLocator(locator: string): never {
   console.error(`     owner/repo@skill                — skills.sh syntax`)
   console.error(`     owner/repo/subpath              — subdirectory`)
   console.error(`     github:owner/repo               — explicit GitHub prefix`)
-  console.error(`     localhost/<name>                — local-only skill`)
+  console.error(`     localhost/me/<skill>             — local-only skill (host/owner/repo aligned)`)
   console.error(``)
   console.error(`   Note: FQ locators look like URLs but map to cold pool paths:`)
   console.error(`     github.com/o/r/skills/s → ~/.agents/skill-repos/github.com/o/r/skills/s/SKILL.md`)

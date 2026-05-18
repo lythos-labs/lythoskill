@@ -9,6 +9,7 @@ import { ArenaManifest, Player, type JudgeInput, type Evidence, type JudgeVerdic
 import type { ArenaManifest as ArenaManifestType } from '@lythos/test-utils/schema'
 try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
 try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
+try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
 import { runComparativeJudge } from './comparative-judge'
 import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan } from './arena-toml'
 import { resolvePlayer, resolveSides } from './player'

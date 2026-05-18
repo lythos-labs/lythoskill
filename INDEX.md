@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/18 12:19:25
+> 自动生成于 2026/5/18 15:01:16
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 241 | 进行中: 0, 待验收: 0, 已完成: 205 |
-| Epics | 32 | 活跃: 0, 已完成: 28, 悬置: 2, 已归档: 2 |
-| ADRs | 73 | 已接受: 71 |
+| Tasks | 249 | 进行中: 0, 待验收: 0, 已完成: 210 |
+| Epics | 34 | 活跃: 0, 已完成: 30, 悬置: 2, 已归档: 2 |
+| ADRs | 74 | 已接受: 72 |
 
 ---
 
@@ -48,6 +48,8 @@ _无_
 - ✅ **EPIC-20260515001514240**: Emergency: migrate test/scenarios/ to src/ co-located unit tests
 - ✅ **EPIC-20260517121757041**: Agent BDD 覆盖 — deck/arena skill 行为验证
 - ✅ **EPIC-20260518024809887**: Evolve Agent BDD to reproduce.sh pattern
+- ✅ **EPIC-20260518125955940**: Curator MVP: mindset refactor + legacy migration — thin core, thick data
+- ✅ **EPIC-20260518145235543**: Emergency: fix arena agent-adapter — claude defaults to SDK, deepseek available, codex in vs mode
 
 ### 悬置
 
@@ -63,9 +65,11 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (3)
 
-_无_
+- [ ] **TASK-20260518145245246**: Fix resolvePlayer claude → claude-sdk, deprecate claude-cli adapter registration under claude name
+- [ ] **TASK-20260518145245296**: Add @lythos/agent-adapter-deepseek-serve as arena dependency + verify import works in bunx
+- [ ] **TASK-20260518145245344**: Import codex adapter in runner.ts so codex is available in arena vs mode
 
 ### 进行中 (0)
 
@@ -75,7 +79,7 @@ _无_
 
 _无_
 
-### 已完成 (205)
+### 已完成 (210)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -282,6 +286,11 @@ _无_
 - ✅ ~~TASK-20260518105942103~~: Migrate deck-to-symlink-to-snapshot to reproduce.sh
 - ✅ ~~TASK-20260518110819248~~: localhost/<skill> quick form for personal skills
 - ✅ ~~TASK-20260518111443694~~: Standardize layered testing with plan-mode integration layer
+- ✅ ~~TASK-20260518130210081~~: Remove frontmatter niche extraction + add tag command — agent-enriched metadata
+- ✅ ~~TASK-20260518130212342~~: Audit rule realignment: drop empty-niche violation, add legacy pattern check
+- ✅ ~~TASK-20260518130214814~~: Rewrite curator SKILL.md: discovery SOP via agent+search, not curator as engine
+- ✅ ~~TASK-20260518130217386~~: Legacy reference cleanup: skills.sh, deck status sh, HANDOFF.md across repo
+- ✅ ~~TASK-20260518130219922~~: Curator reproduce.sh: scan → tag → query → audit full IoC verification
 
 ### 悬置 (1)
 
@@ -401,6 +410,7 @@ _无_
 - ✅ **ADR-20260517152850372** (02-accepted): Deck `also_link_to` — Multi-CLI Working Set via POSSE Pattern
 - ✅ **ADR-20260517224131119** (02-accepted): Multi-layer project context persistence — agent context architecture by volatility class
 - ✅ **ADR-20260518024500631** (02-accepted): Evolve Agent BDD from .agent.md+parseAgentMd to reproduce.sh pattern
+- ✅ **ADR-20260518123403810** (02-accepted): Curator role re-derivation: from rigid indexer to agent-assisted discovery companion
 
 ---
 

@@ -12,10 +12,12 @@ export interface ResolvedSide {
 
 /** Built-in player registry. Player names that map directly to useAgent platforms. */
 const BUILTIN_PLAYERS: Record<string, string> = {
-  'claude': 'claude',
-  'claude-code': 'claude',
+  'claude': 'claude-sdk',           // SDK mode (claude-cli is deprecated — ADR-20260518145235543)
+  'claude-code': 'claude-sdk',
+  'claude-cli': 'claude',           // legacy CLI spawn — explicitly opt-in
   'kimi': 'kimi',
   'deepseek': 'deepseek',
+  'codex': 'codex',
   'cursor': 'cursor',
   'gemini': 'gemini',
 }
