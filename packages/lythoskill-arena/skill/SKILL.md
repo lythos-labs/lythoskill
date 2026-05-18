@@ -306,3 +306,4 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} vs --config ./arena.toml
 | Set up continuous monitoring | [references/continuous-monitoring.md](./references/continuous-monitoring.md) |
 | Let agent self-initiate arena runs | [references/agent-autonomous-arena.md](./references/agent-autonomous-arena.md) |
 | Review design principles | [references/design-principles.md](./references/design-principles.md) |
+| Write or run reproduce.sh BDD scenarios | [references/reproduce-sh-bdd-contract.md](./references/reproduce-sh-bdd-contract.md) |
