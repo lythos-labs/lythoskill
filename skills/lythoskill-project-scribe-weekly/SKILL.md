@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe-weekly
-version: 0.14.3
+version: 0.14.4
 type: standard
 description: |
   Weekly synthesis writer. Distills the past 7 days' core thread + quest DAG
@@ -45,8 +45,8 @@ ls daily/*.md | sort | tail -7
 git log --since="7 days ago" --oneline
 
 # 3. Current cortex state
-bunx @lythos/project-cortex@0.14.3 index
-bunx @lythos/project-cortex@0.14.3 stats
+bunx @lythos/project-cortex@0.14.4 index
+bunx @lythos/project-cortex@0.14.4 stats
 
 # 4. Session recall — ask yourself:
 #    - What was the priority at week start?
@@ -129,7 +129,7 @@ Before relying on a weekly for planning, spot-check its claims against ground tr
 
 ```bash
 # Does the recorded epic/task status match reality?
-bunx @lythos/project-cortex@0.14.3 probe
+bunx @lythos/project-cortex@0.14.4 probe
 
 # Does the git activity match the claimed period?
 git log --since="2026-05-01" --until="2026-05-07" --oneline

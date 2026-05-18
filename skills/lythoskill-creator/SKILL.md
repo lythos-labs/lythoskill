@@ -41,13 +41,28 @@ Creates a monorepo with a starter package and an example skill.
 
 ### add-skill
 
-Add a new skill to an existing lythoskill monorepo.
+Add a new skill to an existing lythoskill monorepo. Follows the cortex Step 1/2/3 pattern:
+CLI creates template → agent fills content → probe verifies.
 
 ```bash
 bunx @lythos/skill-creator@0.14.4 add-skill <skill-name>
 ```
 
-Creates starter package + skill layer under `packages/<skill-name>/`. Requires `package.json` in the current directory (monorepo root). Skips existing files.
+**Step 1 (CLI)**: Creates `packages/<skill-name>/skill/SKILL.md` template.
+**Step 2 (agent)**: Edit SKILL.md — fill description, when_to_use, body, gotchas.
+**Step 3 (verify)**: Run `cortex probe` to confirm no empty-shell template.
+
+**Two skill types, decided upfront**:
+
+| Type | Has CLI? | Has package.json? | npm publish? | Example |
+|------|----------|-------------------|-------------|---------|
+| **Skill + CLI** | ✅ bin field | ✅ required | ✅ to npm | deck, arena, curator, cortex |
+| **Pure skill** | ❌ no CLI | ❌ none needed | ❌ skip | scribe, onboarding, coach, journalist |
+
+- **Skill + CLI**: `add-skill` creates `packages/<name>/` with `package.json` + `src/cli.ts` + `skill/SKILL.md`. Add to `scripts/publish.sh` PACKAGES array.
+- **Pure skill**: Create `packages/<name>/skill/SKILL.md` directly. No package.json, no CLI, no npm. Distribution via cold pool (git clone / localhost). The pre-commit build hook auto-creates `skills/<name>/` output.
+
+**After creation**: run `bunx @lythos/skill-creator build <name>` to build the skill output, then `git add skills/<name>/`.
 
 ### build
 
