@@ -92,7 +92,6 @@ PACKAGES=(
   "packages/lythoskill-arena"
   "packages/lythoskill-creator"
   "packages/lythoskill-deck"
-  "packages/lythoskill-journalist"
 )
 
 # Pre-publish: rewrite workspace:* → ^version in every package.json we will publish.
