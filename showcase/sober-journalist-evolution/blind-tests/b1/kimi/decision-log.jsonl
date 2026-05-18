@@ -1,0 +1,6 @@
+{"t":0,"phase":"setup","decision":"start research with journalist skill methodology","reason":"task requires factual verification, cross-referencing, and per-claim confidence — aligns with lythoskill-journalist core rules"}
+{"t":5,"phase":"setup","decision":"decompose claim into 9 atomic sub-claims","reason":"vague 'is Bun production-ready' is unverifiable; broke into performance, Express compat, npm compat, stability, security, APM, native addons, governance, adoption"}
+{"t":10,"phase":"content","decision":"search 4 parallel queries: performance, stability, ecosystem, case studies","reason":"independent evidence streams reduce echo-chamber risk per Rule 2"}
+{"t":35,"phase":"content","decision":"fetch Bun 1.2 official changelog and GitHub N-API issue tracker","reason":"primary source (L3) beats review articles (L2); needed specific Node.js test suite pass rates and N-API coverage data"}
+{"t":55,"phase":"design","decision":"structure output as CTO memo with per-claim confidence + provenance","reason":"user explicitly wants specifics not impressions; journalist Rule 5 demands per-claim confidence not aggregate score"}
+{"t":58,"phase":"output","decision":"write decision-log.jsonl + bun-production-readiness-report.md","reason":"AGENTS.md mandates decision-log.jsonl; report provides actionable evidence trail for CTO"}

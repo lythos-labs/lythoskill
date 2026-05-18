@@ -1,675 +1,235 @@
 # lythoskill
 
-> **Skill governance, not a skill collection.** If addyosmani/agent-skills and mattpocock/skills are npm packages, lythoskill is npm itself — the layer that installs, curates, validates, and reconciles them across projects and platforms.
+> **Declarative coordination for agent skills.** You declare which skills a project needs in `skill-deck.toml`. `deck link` reconciles the working set — undeclared skills are absent from the agent's view. Configure `working_set` for Claude Code, Kimi, Codex, Cursor, Windsurf, or any agent that scans a skills directory.
 >
-> **Built by AI agents working under human direction.** Agent Skills ecosystem governance: version-bump, install, curate, validate, and reconcile skills across projects and multi-agent platforms (Claude Code, Codex CLI, DeepSeek, Kimi, Cursor, Windsurf, Copilot). Dogfooded — we govern this project with its own tools.
+> If any of these four are false, it's not lythoskill: **declarative** (not imperative install/remove), **multi-platform** (not single-agent), **deny-by-default** (not "disabled" or "deprioritized"), **local-first** (no central server, no auth beyond git).
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
 
 **🌐 Languages:** [中文](./README.zh.md)
 
-**👤 Skill user?** → [Quick Start](#quick-start) — install Bun, run one command, done.  
-**🤖 AI agent?** → [For Agents](#for-agents) — your 4-step checklist.  
-**🛠️ Developer?** → [Development](#development) — clone, install, contribute.
-
-<details>
-<summary>📋 Table of Contents</summary>
-
-- [Do I need this?](#do-i-need-this)
-- [What lythoskill Provides](#what-lythoskill-provides)
-- [For Agents](#for-agents)
-- [Quick Start](#quick-start)
-- [skill-deck.toml Reference](#skill-decktoml-reference)
-- [Real-World Example](#real-world-example-deck-governed-nextjs-project)
-- [Arena: Systematize the Comparison](#arena-systematize-the-comparison)
-- [Cold Pool Convention](#cold-pool-convention)
-- [Ecosystem Tools](#ecosystem-tools)
-- [Architecture](#architecture)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
-
-</details>
-
 ---
 
-## The Problem
+## Should I use this?
 
-> 📍 **Path note for non-Claude users**: This README uses `.claude/skills/` as the running default in examples. Your path differs by agent — `.agents/skills/` (Codex CLI, OpenClaw), `.cursor/skills/`, `.kimi/skills/`, `.windsurf/skills/`, etc. Set `working_set` in `skill-deck.toml` ([table](#configure-working-set)) and substitute mentally throughout.
+When two skills both describe how to write tests, your agent gets conflicting instructions. "Disabling" a skill doesn't remove it — the agent can still see it. And when something goes wrong, you can't tell which skill caused it without removing them one by one. **lythoskill enforces deny-by-default**: undeclared skills are absent from the working set. If a conflict surfaces, bisect your `skill-deck.toml` — the lockfile tells you exactly what was loaded.
 
-When two conflicting skills are both visible to your agent, outputs become unpredictable. **lythoskill-deck** solves this with **deny-by-default**: undeclared skills are **physically absent** from your agent's working-set directory (`.claude/skills/` by default; configurable). Not "disabled". Not "deprioritized". **Gone.**
+But governance is only useful when complexity reaches a threshold. If you use `npx skills add` and have 3 skills that never conflict, you're fine — stay there.
 
-```toml
-[deck]
-max_cards = 10
-
-[tool.skills.my-skill]
-path = "github.com/owner/repo"
-```
-
-Run `deck link` → only declared skills are visible. No silent blend. No chaos.
-
----
-
-## Do I need this?
-
-Governance is only useful when complexity reaches a threshold.
+| | `npx skills add` | lythoskill `deck link` |
+|---|---|---|
+| Install | `npx skills add <repo>` — imperative | Declare in `skill-deck.toml` — declarative |
+| After install | Skill stays in scan path until `remove` | `deck link` reconciles — undeclared skills absent from working set |
+| Multi-platform | `-a claude-code` / `-a cursor` per install | One TOML, configure `working_set` per platform |
+| Discover | `npx skills find` → skills.sh directory | Curator scans local cold pool; agent uses WebSearch for discovery |
+| Share | `skills-lock.json` | `skill-deck.lock` |
 
 | Skills | State | Action |
 |--------|-------|--------|
-| 0–3, no conflicts | Simple | Don't use lythoskill. Put them in `.claude/skills/` manually. |
-| 5–10, some conflicts | Growing | **Install lythoskill-deck** — declare which skills this project needs. |
-| 10+, you author skills | Ecosystem | Use **deck + creator** — thin-skill pattern for maintainable skills. |
+| 0–3, no conflicts | Simple | Skip lythoskill. Manage manually. |
+| 5–10, some conflicts | Growing | Use **deck** — declare which skills this project needs. |
+| 10+, you author skills | Ecosystem | Use **deck + creator** — thin-skill pattern. |
+| Managing across teams/projects | Ecosystem | Full lythoskill: deck + creator + curator + arena. |
 
-**Decision tree:**
+You do **not** need lythoskill if you have ≤3 skills that never change across projects.
 
-```
-10+, and you author your own skills
-├─ Simple skills (SKILL.md + light bash)
-│   → Deck governance only
-└─ Complex skills (dependencies, tests, types, multi-skill teamwork)
-    → Deck + Thin Skill Pattern (full lythoskill)
-
-Managing a skill ecosystem across teams/projects/sources
-→ Full lythoskill (deck + creator + curator + arena)
-```
-
-**You do NOT need lythoskill if:**
-- You have ≤3 skills that never conflict
-- Your skill set never changes across projects
-- Your skills are pure SKILL.md files with no build step
-- You are a solo developer with one skill and no release cycle
+Beyond conflict prevention, `skill-deck.lock` gives you a single source of truth for "what skills were active when this was built." Commit it. Teammates get identical working sets. CI is reproducible. When something breaks, bisect the toml — the lockfile tells you exactly what changed.
 
 ---
 
-## What lythoskill Provides
+## Quick Start
 
-lythoskill serves two distinct audiences. You can use either independently.
-
-### Deck Governance — For Skill Users
-
-**The problem**: Your `.claude/skills/` is a zoo. 50+ skills from GitHub, skill hubs, and blog posts. Every time the agent starts, it scans everything — descriptions fight for context space, similar skills silently conflict, and you have no idea which ones are actually helping.
-
-**The solution**: Declare which skills this project needs. Everything else disappears.
-
-| Without deck governance | With deck governance |
-|---|---|
-| Agent scans 50+ skills, picks randomly | Agent sees exactly what you declared |
-| Similar skills silently conflict | `deny-by-default`: undeclared = invisible |
-| Context window wasted on irrelevant descriptions | `max_cards` budget enforces focus |
-
-**Key principle**: lythoskill-deck is a declarative package manager *and* a governor. `deck add` downloads skills from GitHub into your cold pool, appends them to `skill-deck.toml`, and runs `link` — all in one shot. You get both dependency management (like Maven) and runtime governance (like Kubernetes RBAC).
-
-### Thin Skill Pattern — For Skill Authors
-
-You are building a team-internal skill library or a public skill ecosystem. You need version control, CI, testing, and a clean separation between "development experience" and "agent-facing surface."
+**The magic moment — one command, a skill appears, done.**
 
 ```bash
-bunx @lythos/skill-creator@latest init my-skill
-cd my-skill
-bunx @lythos/skill-creator@latest build my-skill
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-init.sh | bash
 ```
 
-**Three-Layer Separation**:
+That's it. Bun installs if needed. A real skill (`frontend-design`, from Anthropic) downloads to your cold pool. `deck link` makes it the ONLY skill in your working set. `ls .claude/skills/` proves it.
+
+### What just happened?
+
+The script checked for Bun, created a `skill-deck.toml`, ran `deck link`, and verified the result:
+
+1. `skill-deck.toml` declared `frontend-design` (Anthropic's official design skill)
+2. `deck link` cloned it to `~/.agents/skill-repos/` (cold pool)
+3. Symlinked only that skill into `.claude/skills/` (working set)
+4. Self-check confirmed: one symlink, exactly what was declared
+
+It's the same feeling as `npm install` — a declared manifest, one command, reproducible result on disk. The difference from `npx skills add`: `deck link` is declarative (like `package.json`), not imperative (like `brew install`). You declare what you want. The system reconciles. Nothing extra appears.
+
+To add more skills: `curl ... | bash -s -- --skill github.com/owner/repo/path`. Or edit `skill-deck.toml` and run `bunx @lythos/skill-deck@latest link`. 
+
+### Give this to your agent instead
+
+Copy the block below. Tell your agent: "Set up lythoskill for this project." The agent reads it and executes.
+
+````
+Read https://raw.githubusercontent.com/lythos-labs/lythoskill/main/README.md.
+1. Check `bun --version` — if missing, install Bun.
+2. Pick a skill from skills.sh or anthropics/skills.
+3. Create a `skill-deck.toml`, run `bunx @lythos/skill-deck@latest link`.
+4. Verify skills appeared in your working_set directory.
+````
+
+### Manual setup
+
+```bash
+# 1. Create your deck
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 5
+cold_pool = "~/.agents/skill-repos"
+
+[tool.skills.example]
+path = "github.com/owner/repo"
+EOF
+
+# 2. Link
+bunx @lythos/skill-deck@latest link
+```
+
+---
+
+## How it works
+
+A **deck** is a declarative skill manifest — a `skill-deck.toml` file that names which skills are active. That's the core. Everything else (curator, arena, creator, coach) is tooling around that file.
 
 ```
-Starter (packages/<name>/)       → npm publish → implementation + CLI
-Skill   (packages/<name>/skill/) → build → SKILL.md + thin scripts
-Output  (skills/<name>/)         → committed to Git → agent-visible skill
+Remote (GitHub, localhost, etc.)
+    │
+    ▼ git clone / git pull
+Cold Pool  (~/.agents/skill-repos/)
+    │          github.com/lythos-labs/lythoskill/skills/lythoskill-deck/
+    │          github.com/mattpocock/skills/skills/engineering/tdd/
+    │          localhost/me/sober/
+    │
+    ▼ symlink (only declared skills)
+Working Set (.claude/skills/ or .kimi/skills/ or .cursor/skills/ etc.)
+    │
+    ▼ agent startup scan
+Agent sees only declared skills. No more. No less.
 ```
 
-## 🤖 For Agents
+Skills live in a **cold pool** — a local git cache at `~/.agents/skill-repos/`, organized like Go modules (`github.com/owner/repo`). No central registry. No auth server. No daemon.
+
+`deck link` writes a **lockfile** (`skill-deck.lock`) that pins each skill. Commit it — teammates get the exact same links.
+
+Skills are authored using the **thin-skill pattern**: heavy logic in npm packages, agent-facing instructions in lightweight SKILL.md files ([details](./AGENTS.md)).
+
+<details>
+<summary>🤖 For Agents</summary>
 
 If you are an AI agent reading this README:
 
-1. Check `bun --version` — if missing, install Bun (see [Quick Start](#quick-start))
-2. Choose a [pre-built deck](./examples/decks/) or create your own `skill-deck.toml`
-3. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to link into your working set
-4. Skills are now in your `working_set` directory — check `skill-deck.toml`'s `[deck] working_set` for your agent's path:
-   - `.claude/skills/` — Claude Code (default)
-   - `.agents/skills/` — Codex CLI, OpenClaw
-   - `.cursor/skills/` — Cursor
-   - `.kimi/skills/` — Kimi
-   - `.windsurf/skills/` — Windsurf
-   - `.github/skills/` — GitHub Copilot
+1. Check `bun --version` — if missing, install Bun
+2. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to activate the project's deck
+3. Skills load from the `working_set` directory in `skill-deck.toml`
 
-## Quick Start
+Agents use lythoskill to build real things. [`showcase/`](./showcase/) contains pages, reports, and tools built by agents using lythoskill-governed decks.
 
-> 💡 **Just cloned this repo?** Jump to the [Development](#development) section for contributor setup.
-
-**Prerequisites**:
-
-1. **Bun** (required) — TypeScript runtime for `bunx`:
-   ```bash
-   curl -fsSL https://bun.sh/install | bash
-   # After install: restart your shell or run `source ~/.bashrc`
-   ```
-
-2. **A player CLI** (optional) — for [Arena](#arena-skill-comparison). Install at least one:
-   ```bash
-   uv tool install kimi-cli && kimi login        # kimi (recommended)
-   npm i -g @openai/codex && codex login         # codex
-   # deepseek: bundled with DeepSeek desktop app
-   # claude: SDK mode (ANTHROPIC_API_KEY), no CLI binary required
-   ```
-
-> **This tool requires Bun, not Node.** `bunx` is the correct runner.
-
-### 30-Second Trial (curl, zero install beyond prerequisites)
-
-```bash
-# Deck + prompt → agent executes + judge scores → output.
-# No files touched in your project. Each run creates ./agent-output-<timestamp>/.
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
-```
-
-```bash
-# 网络不稳定？GitHub raw 被墙或太慢时走 ghproxy 中转：
-curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
-```
-
-Output lands in `./agent-output-<timestamp>/`. The agent sees the deck's skills (PDF, DOCX), writes the file, and copies it to the output directory. `./agent-output/`. The agent gets a temporary deck, does the work, produces output + judge verdict — your workspace is untouched.
-
-### Set Up a Workspace — For Real Projects
-
-Not just trying — you want a persistent project with its own deck. The `--deck` can be a URL, a local file, or one of the [pre-built decks](./examples/decks/). `--workdir` defaults to cwd, so the working set lands right where you are.
-
-```bash
-mkdir my-project && cd my-project
-
-# From a URL:
-bunx @lythos/skill-deck@latest link --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/engineering.toml
-
-# From a local pre-built deck:
-bunx @lythos/skill-deck@latest link --deck ~/lythoskill/examples/decks/documents.toml
-
-# From scratch — create your own:
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-
-[tool.skills.lythoskill-deck]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-EOF
-bunx @lythos/skill-deck@latest link
-```
-
-After `link`: `skill-deck.lock` is generated, working set is populated. Default location is `.claude/skills/` — change `working_set` in `skill-deck.toml` to match your agent:
-
-```toml
-[deck]
-working_set = ".claude/skills"   # Claude Code
-# working_set = ".agents/skills"   # Codex CLI, OpenClaw
-# working_set = ".cursor/skills"   # Cursor-native
-# working_set = ".github/skills"   # GitHub Copilot
-# working_set = ".windsurf/skills" # Windsurf
-```
-
-Edit `skill-deck.toml`, re-run `link` — the working set follows. Different project, different deck, different agent target, same cold pool. No contamination.
-
-Pre-built decks double as **shortcut commands** — drop one into `scripts/` and your project gets a capability in one line:
-
-```bash
-# Generate architecture docs for ANY project (like DeepWiki, but with your agent + skills):
-bunx @lythos/skill-deck@latest link --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/architecture-explainer.toml
-# Then: "Read this project and produce architecture.pdf with Mermaid diagrams."
-
-# Or as a scripts/ shortcut:
-# scripts/archdoc → bunx @lythos/skill-deck@latest link --deck <url> + agent prompt
-```
-
-| Pre-built deck | For |
-|----------------|-----|
-| `engineering.toml` | TDD, Git, Mermaid — everyday software work |
-| `documents.toml` | PDF, DOCX, web-search — content & research |
-| `design-studio.toml` | Design feedback, visual tools |
-| `full-stack.toml` | Frontend + backend + database |
-| `governance.toml` | Project management with ADR/Epic/Task |
-| `scout.toml` | Minimal — baseline for measuring deck impact |
-| `architecture-explainer.toml` | Mermaid diagrams + design taste — produce project architecture docs (like DeepWiki) |
-| `deep-research.toml` | Structured research pipeline: outline → parallel agents → report |
-
-### Same Task, Different Decks — The Core Loop
-
-One task. Three decks. Three different outcomes. **This is the lythoskill workflow: compare, don't guess.**
-
-Every run is isolated in `/tmp` — no skill cross-contamination, no deck collision. The agent sees *only* what its deck declares.
-
-```bash
-# ─── Baseline: bare agent (no skills — raw markdown) ───
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- scout \
-  "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
-
-# ─── Tool-enhanced: PDF + DOCX skills → professional document output ───
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- documents \
-  "Write a recipe for the perfect chocolate chip cookie as a .docx file. Use formatted headings, include ingredient ratios, and explain the science behind each step."
-
-# ─── Domain-enhanced: design taste + Mermaid diagrams ───
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- visual-explainer \
-  "Create a recipe for the perfect chocolate chip cookie with a Mermaid flowchart of the steps. Include ingredient ratios and the science behind each step."
-```
-
-| Deck | What it provides | The experiment |
-|------|-----------------|----------------|
-| `scout` | Nothing — agent's raw capability | **Baseline**: what does the model do with zero help? |
-| `documents` | PDF, DOCX, web-search | **Tool layer**: does format awareness change the output? |
-| `visual-explainer` | Mermaid diagrams, theme-factory | **Domain layer**: does design thinking lift a simple recipe? |
-
-**What you're seeing**: The same LLM, the same prompt — but different guardrails, different tools, different output quality. Deck governance makes this difference **visible and repeatable**.
-
-More decks and tasks:
-
-```bash
-# Web research tasks
-curl -fsSL ... | bash -s -- documents "Create a 3-day Tokyo itinerary for a first-time visitor who loves food and design."
-curl -fsSL ... | bash -s -- engineering "Research the current state of WebAssembly in 2026. 3-paragraph summary."
-
-# Design-centric tasks (compare visual-explainer vs design-studio)
-curl -fsSL ... | bash -s -- design-studio "Write a recipe for the perfect chocolate chip cookie. Include ingredient ratios and the science behind each step."
-```
-
-> **Read the diff.** Open `./agent-output-<timestamp>/` — with the `documents` deck you'll find `.docx` files, with `visual-explainer` Mermaid diagrams. The difference between `scout` and `visual-explainer` output is the difference between "the model tried" and "the deck delivered."
-
-See [`quick-agent.sh`](./examples/quick-agent.sh) for how deck isolation works under the hood. See [Arena](#arena-skill-comparison) for systematizing these comparisons.
-
-<details>
-<summary>🔧 Unstable GitHub connection?</summary>
-
-If `raw.githubusercontent.com` is slow or blocked, prefix the deck URL with a ghproxy:
-
-```bash
-# Built-in deck via proxy (use ghfast.top or gh-proxy.com)
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/quick-agent.sh | bash -s -- \
-  "https://ghfast.top/https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/documents.toml" \
-  "Write a recipe for the perfect chocolate chip cookie"
-```
-
-Any public GitHub raw URL works the same way — just prepend the proxy prefix.
 </details>
 
-### Install for Real Use
+### Explore Pre-Built Decks
 
-```bash
-# 1. Add a skill (downloads to cold pool + updates deck + links)
-bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>
+18+ decks for common tasks: documentation, research, architecture review, security audit. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md).
 
-# 2. Agent sees the skill. Everything else is physically absent.
-ls .claude/skills/
-```
+---
 
-That's it. `deck add` clones the repo to your [cold pool](#cold-pool-convention), appends the skill to `skill-deck.toml`, and runs `link`.
-
-### Or start with a pre-built deck (30 seconds)
-
-Not sure which skills to pick? One command installs a scenario-tuned deck:
-
-```bash
-# Default: document processing deck (PDF + DOCX + web search)
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash
-
-# Pick a different scene
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s engineering
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s full-stack
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/install-deck.sh | bash -s governance
-```
-
-Or copy a deck manually and link:
-
-```bash
-# Document processing: PDF + DOCX + web search
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/documents.toml > skill-deck.toml
-bunx @lythos/skill-deck@latest link
-```
-
-| Deck | Skills | Scene |
-|------|--------|-------|
-| [documents](./examples/decks/documents.toml) | PDF, DOCX | Document format tools — read/write office formats |
-| [design-studio](./examples/decks/design-studio.toml) | frontend-design, theme-factory, brand-guidelines | Design taste — kills AI slop fonts/colors, adds professional theming |
-| [visual-explainer](./examples/decks/visual-explainer.toml) | design-doc-mermaid, theme-factory | Diagrams + visuals — flowcharts, process diagrams, polished output |
-| [engineering](./examples/decks/engineering.toml) | TDD, to-PRD, design-doc-mermaid | Engineering workflow |
-| [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | Full-stack development |
-| [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | Project governance |
-
-> `link` only activates skills already in your cold pool. Missing skills? Use `deck add <path>` — one command clones to cold pool, updates deck, and links.
-
-For monorepo skills (multiple skills in one repo), include the full path:
-
-```bash
-# Monorepo: specify the skill path inside the repo
-bunx @lythos/skill-deck@latest add github.com/owner/repo/skills/my-skill
-
-# Advanced: manual clone (for specific branch/depth, then deck link)
-git clone https://github.com/owner/repo.git \
-  ~/.agents/skill-repos/github.com/owner/repo
-# deck add is recommended — it also records metadata for reconcile/refresh
-```
-
-### Naming cheat sheet
+## Naming Cheat Sheet
 
 ```
 lythoskill           ← the project / ecosystem
 skill-deck.toml      ← the config file you edit
-@lythos/skill-deck   ← the npm package you install
-deck                 ← the CLI command (short for lythoskill-deck)
-link                 ← the subcommand that syncs working set to toml
+@lythos/skill-deck   ← the npm package
+deck                 ← the CLI command
+link                 ← subcommand: reconcile working set to toml
 ```
-
-### Managing Your Deck
-
-**Remove a skill:** Delete its entry from `skill-deck.toml` and run:
-```bash
-bunx @lythos/skill-deck@latest link
-```
-
-**Update a skill:** Pull the latest code from its source and re-link:
-```bash
-cd ~/.agents/skill-repos/github.com/<owner>/<repo> && git pull
-bunx @lythos/skill-deck@latest link
-```
-
-`skill-deck.lock` tracks the resolved working set. Commit it to version control so teammates get the exact same skill links.
-
----
-
-## skill-deck.toml Reference
-
-| Section | Key | Required | Default | Description |
-|---------|-----|----------|---------|-------------|
-| `[deck]` | `max_cards` | No | `10` | Max skills active in the working set |
-| `[deck]` | `cold_pool` | No | `~/.agents/skill-repos` | Root directory for cloned skill repos |
-| `[deck]` | `working_set` | No | `.claude/skills` | Directory where symlinks are created |
-| `[innate]` | `skills.<name>.path` | Yes* | — | Always loaded; agent cannot override |
-| `[tool]` | `skills.<name>.path` | Yes* | — | Available for agent to invoke |
-| `[transient]` | `skills.<name>.path` | Yes* | — | Time-bounded skills (auto-expire) |
-
-\* Required when that section is used.
-
-**Skill types:**
-
-| Type | Behavior | max_cards? |
-|------|----------|------------|
-| **`[innate]`** | Eager — loaded at session start, agent cannot remove | Yes |
-| **`[tool]`** | Lazy — agent invokes on demand (default) | Yes |
-| **`[transient]`** | Lazy + expiry — agent can try, auto-expires | Yes |
-
-**`[combo]`** is not a skill type — it's a meta-declaration. It does NOT count against `max_cards`:
-
-```toml
-[combo.report-generation]
-skills = ["web-search", "docx", "mermaid"]
-prompt = "Search for latest info, then generate professional document with diagrams"
-```
-
-Combo = named group + coordination prompt. Agent reads the prompt as natural-language instructions for how skills work together. If coordination is genuinely complex, fork a single skill instead.
-
-> **Other agent platforms?** Set `working_set = ".kimi/skills/"` or `.cursor/skills/` in `skill-deck.toml`.
-
----
-
-## Real-World Example: Deck-Governed Next.js Project
-
-Here's how a subagent works under deck governance in practice.
-
-**Scenario**: Initialize a Next.js project, let the agent discover skills in the cold pool, assemble its own deck, and complete a development task.
-
-```bash
-# 1. Initialize the project
-npx create-next-app@latest my-app --default --use-bun
-cd my-app
-
-# 2. Add community skills to the cold pool (deck add handles clone + deck.toml + link)
-bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/frontend-design
-bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/pdf
-bunx @lythos/skill-deck@latest add github.com/vercel-labs/agent-skills/skills/react-best-practices
-
-# 3. Agent self-assembles the deck by reading SKILL.md files
-#    and deciding which skills the project needs.
-#    Example result (agent's own decision):
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"
-
-[innate.skills.lythoskill-deck]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-
-[innate.skills.project-cortex]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
-
-[innate.skills.project-onboarding]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
-
-[innate.skills.project-scribe]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
-
-[tool.skills.pdf]
-path = "github.com/anthropics/skills/skills/pdf"
-
-[tool.skills.docx]
-path = "github.com/anthropics/skills/skills/docx"
-
-[tool.skills.to-prd]
-path = "github.com/mattpocock/skills/skills/engineering/to-prd"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.gstack]
-path = "github.com/garrytan/gstack"
-
-[tool.skills.design-doc-mermaid]
-path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-EOF
-
-# 4. Sync the deck
-bunx @lythos/skill-deck@latest link
-```
-
-**What the agent does**:
-1. Reads every SKILL.md in `.claude/skills/` to understand capability boundaries
-2. Creates a task via `bunx @lythos/project-cortex@latest task "Build Todo List page"`
-3. Absorbs best practices from multiple skills while coding:
-   - **react-best-practices** → `useReducer`, `React.memo`, `useCallback`
-   - **frontend-design** → zinc palette, `rounded-2xl`, dark mode
-   - **composition-patterns** → Context Provider + barrel exports
-   - **webapp-testing** → Playwright, accessibility checks
-4. Records a session handoff to `daily/YYYY-MM-DD.md` when done
-
-**Outcome**: The agent does not code blindly. It reads skills first, follows governance workflow, and blends best practices from multiple skills into the codebase — all autonomously, without human micromanagement.
-
----
-
-## Arena: Systematize the Comparison
-
-The curl one-liners above are the entry point. Arena turns that pattern into a **scientific instrument**: controlled variables, statistical aggregation, multi-criteria scoring, and a reproducible audit trail.
-
-**The same experiment, formalized**:
-
-| Question | How to test |
-|---|---|
-| A or B? | `vs --config examples/arena/research-compare/arena.toml` — pre-made declarative config |
-| Does C improve my deck? | `vs --config examples/arena/add-remove/arena.toml` — pre-made declarative config |
-| Is D dead weight? | `vs --config examples/arena/add-remove/arena.toml` — pre-made declarative config |
-
-**Multi-dimensional scoring**: The judge outputs scores across quality, token efficiency, and maintainability. No single "winner" — you choose based on what you value.
-
-See [SKILL.md](skills/lythoskill-arena/SKILL.md) for full arena workflow documentation.
-
-### QA Audit (`arena single`)
-
-Run a security/pattern audit on any package with the qa-sweep deck:
-
-```bash
-bunx @lythos/skill-arena@latest single \
-  --deck examples/decks/qa-sweep.toml \
-  --brief "Audit packages/<name>/src/ for: empty catch, swallowed errors, || true, sed -i, uncaptured stderr, bare joins" \
-  --out playground/qa-sweep-$(date +%Y-%m-%d)
-```
-
-Produces `findings.jsonl` (machine-readable, one finding per line) + `report.md` (human summary).
-Findings map to cortex tasks; large-scope fixes invoke `lythoskill-red-green-release` heredoc.
-See [`examples/decks/qa-sweep-COMBO.md`](./examples/decks/qa-sweep-COMBO.md) for the full find→task→fix→verify loop.
-
----
-
-## Cold Pool Convention
-
-Your cold pool is where skills live when they are **not** active. It can grow without bound.
-
-lythoskill uses a **Go module-style directory structure** for the cold pool, with natural `owner/repo` traceability:
-
-```
-~/.agents/skill-repos/              ← Global cold pool (recommended default)
-├── github.com/
-│   ├── lythos-labs/
-│   │   └── lythoskill/             ← git clone https://github.com/lythos-labs/lythoskill.git
-│   │       └── skills/
-│   │           ├── lythoskill-deck/
-│   │           └── lythoskill-creator/
-│   ├── vercel-labs/
-│   │   └── agent-skills/           ← git clone https://github.com/vercel-labs/agent-skills.git
-│   │       └── skills/
-│   │           ├── react-best-practices/
-│   │           └── composition-patterns/
-│   └── someone/
-│       └── standalone-skill/       ← Non-monorepo: repo root = skill
-│           └── SKILL.md
-└── localhost/                      ← Local skills (uniform host/owner/repo)
-    └── me/                          ← Owner = you
-        └── my-experiment/
-            └── SKILL.md
-```
-
-**Why `~/.agents/skill-repos` is recommended**:
-- It is **global** — all projects share one cold pool; skills are downloaded once
-- It is **structured** — `github.com/<owner>/<repo>` provides source traceability and prevents name collisions
-- It is **extensible** — supports GitHub, GitLab, self-hosted, and local experiments; the path *is* the provenance
-
-**Adding skills to the cold pool** — `deck add` handles clone + deck.toml + link in one command:
-
-```bash
-bunx @lythos/skill-deck@latest add github.com/lythos-labs/lythoskill/skills/lythoskill-deck
-bunx @lythos/skill-deck@latest add github.com/mattpocock/skills/skills/engineering/tdd
-```
-
-Manual clone is still possible if you need a specific branch or depth, but `deck add` is the recommended path — it also records metadata (HEAD ref, skill hash) for reconcile and refresh.
-
-After that, declare the skill in your project's `skill-deck.toml` and run `deck link`. Deck takes over from there.
-
-**Why this structure**: Global uniqueness (`github.com/lythos-labs/lythoskill/lythoskill-deck` vs `github.com/anthropic/lythoskill-deck`), source traceability, and natural multi-host support (GitHub, GitLab, self-hosted).
-
-**Path resolution in skill-deck.toml**:
-- Short name `lythoskill-deck` → deck recursively scans the cold pool for a matching directory name
-- Qualified name `github.com/lythos-labs/lythoskill/lythoskill-deck` → direct lookup, avoids name collisions
-- Monorepo sub-skill `owner/repo/skills/skill-name` → `skills/` subdirectory is automatically recognized
-
-**Local development**: Set `cold_pool = "."` in your `skill-deck.toml`. Your project root becomes a cold pool entry, and `./skills/` is scanned just like `~/.agents/skill-repos/github.com/.../skills/`.
 
 ---
 
 ## Ecosystem Tools
 
-| Tool | npm | Focus | What it does |
-|---|---|---|---|
-| **lythoskill-deck** | [`@lythos/skill-deck`](https://www.npmjs.com/package/@lythos/skill-deck) | Governance | Declarative skill deck governance (`link`, deny-by-default, max_cards) |
-| **lythoskill-creator** | [`@lythos/skill-creator`](https://www.npmjs.com/package/@lythos/skill-creator) | Pattern | Scaffold and build thin-skill packages |
-| **lythoskill-curator** | [`@lythos/skill-curator`](https://www.npmjs.com/package/@lythos/skill-curator) | Governance | Index cold pool, output REGISTRY.json + catalog.db for agent reasoning |
-| **lythoskill-arena** | [`@lythos/skill-arena`](https://www.npmjs.com/package/@lythos/skill-arena) | Governance | Benchmark skill/deck effectiveness with controlled-variable comparisons |
-| **lythoskill-project-cortex** | [`@lythos/project-cortex`](https://www.npmjs.com/package/@lythos/project-cortex) | Both | GTD-style project governance (tasks, epics, ADRs, wiki) |
-| **lythoskill-project-scribe** | — | Both | Write project memory: handoffs, daily notes, pitfalls |
-| **lythoskill-project-onboarding** | — | Both | Read project memory with structured layer loading |
-| **lythoskill-red-green-release** | — | Both | Heredoc migration patch workflow: plan → patch → user approval → git tag |
+| Tool | What it does |
+|------|-------------|
+| **deck** | Declare, link, and govern skills across projects |
+| **creator** | Scaffold and build thin-skill packages |
+| **curator** | Scan the cold pool, index skills, query by niche/type/source |
+| **arena** | A/B test skills and deck configurations against real tasks |
+| **coach** | Review SKILL.md quality against best practices |
+| **cortex** | Project governance: ADR, Epic, Task, Wiki |
+
+We govern this project with our own tools. Every skill in `packages/` is built with creator. Every decision goes through cortex ADRs. Every release uses deck to manage working sets.
+
+---
+
+## Real-World Example: Deck-Governed Next.js Project
+
+See [`examples/`](./examples/) for a complete walkthrough of a deck-governed Next.js project: writing a rich-text editor, adding a PDF report generator, switching skills mid-development, and running an arena cross-review. The agent orchestrates skill composition autonomously — the deck provides the governance layer.
+
+---
+
+## Arena: A/B Test Skill Configurations
+
+Arena isolates skills in `/tmp` worktrees and spawns independent agents to execute the same task. Compare deck A vs deck B, kimi vs claude, or validate a single skill. See [`references/comparisons.md`](./references/comparisons.md) for how this compares to benchmark suites.
+
+---
+
+## Cold Pool Convention
+
+```
+~/.agents/skill-repos/
+  github.com/
+    lythos-labs/lythoskill/skills/lythoskill-deck/
+    mattpocock/skills/skills/engineering/tdd/
+  localhost/              ← your own skills, not yet shared
+    me/sober/
+    me/my-project-skill/
+```
+
+No central registry. Just git repos in a directory tree. The convention makes skills addressable by path — `github.com/owner/repo` maps to `~/.agents/skill-repos/github.com/owner/repo`.
 
 ---
 
 ## Architecture
 
 ```
-Cold Pool (~/.agents/skill-repos/)  →  Declaration (skill-deck.toml)  →  Working Set (.claude/skills/)
+Starter (packages/<name>/)       → npm publish → implementation + CLI
+Skill   (packages/<name>/skill/) → build → SKILL.md + thin scripts
+Output  (skills/<name>/)         → committed → agent-visible skill
 ```
 
-lythoskill governs on top of the Agent Skills standard — like Kubernetes governs containers without defining the OCI spec. Full architecture: see [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) or generate docs with the [architecture-explainer](./examples/decks/architecture-explainer.toml) deck.
+Three-layer separation: heavy logic lives in npm packages (Starter), agent-facing instructions live in lightweight SKILL.md files (Skill), and the agent sees only the output (committed symlinks).
 
-## Development
-
-> For contributors and developers working **inside this repo**.
-
-**Prerequisites:** Bun ≥1.0.
-
-```bash
-# Install Bun (if missing)
-curl -fsSL https://bun.sh/install | bash
-
-# 1. Install workspace dependencies
-bun install
-
-# 2. Sync the local skill deck
-bun packages/lythoskill-deck/src/cli.ts link
-
-# 3. Verify environment
-bun packages/lythoskill-project-cortex/src/cli.ts stats
-
-# Run all BDD scenarios (cortex + deck)
-bun run test:all
-```
-
-All set? See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for commit conventions and PR workflow.
+See [`references/comparisons.md`](./references/comparisons.md) for how this compares to npm, Maven, and Kubernetes RBAC.
 
 ---
 
 ## Testing
 
+```bash
+bun --filter='*' run test          # all 661 tests across 44 files
+bun run test:coverage              # coverage report
+bun run test:bdd                   # BDD integration tests
 ```
-649 tests pass in CI (unit + CLI BDD). Agent BDD (.agent.md) runs locally.
-```
-
-[Test conventions](./packages/lythoskill-test-utils/SCENARIOS.md) · [CI dashboard](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
-
----
-
-## Tech Stack
-
-| Layer | Choice |
-|---|---|
-| Runtime | **Bun** (native TypeScript) |
-| Language | **TypeScript** |
-| Module System | **ESM-only** (`"type": "module"`) |
-| Package Manager | **Bun** workspaces |
-| External Deps | **Skill layer**: zero-install via `bunx` (Bun runtime required). **Starter layer**: npm deps as needed |
-
----
-
-## Project Documents
-
-| Document | Purpose |
-|---|---|
-| [CLAUDE.md](./CLAUDE.md) | Guidance for Claude Code |
-| [AGENTS.md](./AGENTS.md) | Project guidance for Codex, Kimi, Copilot, Gemini |
-| [cortex/INDEX.md](./cortex/INDEX.md) | Governance system entry |
-| [cortex/adr/](./cortex/adr/) | Architecture Decision Records |
-| [skill-deck.toml](./skill-deck.toml) | This repo's active skill deck |
-| [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) | Reusable patterns and conventions |
 
 ---
 
 ## Troubleshooting
 
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| `Skill not found` after `deck link` | Skill missing from cold pool | `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` |
-| `bunx: command not found` | Bun not installed or shell not restarted | Run `source ~/.bashrc` or open a new terminal |
-| Symlink creation fails | Permissions or non-standard filesystem | Ensure `working_set` directory exists and is writable |
-| `quick-agent.sh` fails with `Deck fetch failed` | `raw.githubusercontent.com` unreachable | Prefix deck URL with `https://ghfast.top/` or `https://gh-proxy.com/` (see [network note](#quick-start)) |
-| `deck link` hangs or fails | `github.com` unreachable during skill clone | Use a git proxy: `git config --global url."https://ghfast.top/https://github.com/".insteadOf https://github.com/` |
+**"Command not found: deck"** → Use `bunx @lythos/skill-deck@latest <subcommand>` instead.
 
----
+**"bun: command not found"** → Install Bun: `curl -fsSL https://bun.sh/install | bash`.
 
-## License
+**Skill not visible to agent** → Check `working_set` in `skill-deck.toml` matches your agent's expected path:
+- `.claude/skills/` — Claude Code (default)
+- `.agents/skills/` — Codex CLI, OpenClaw
+- `.cursor/skills/` — Cursor
+- `.kimi/skills/` — Kimi
+- `.windsurf/skills/` — Windsurf
+- `.github/skills/` — GitHub Copilot
 
-MIT
+**Lockfile merge conflict** → Run `deck link` — the lockfile is fully derived from `skill-deck.toml`. Delete it and re-link if needed.

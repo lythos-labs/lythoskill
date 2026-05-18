@@ -1,0 +1,130 @@
+{
+  "test": "lythoskill-journalist blind validation",
+  "date": "2026-05-18",
+  "method": "6 blind scenarios, Claude agent-orchestrated + Kimi CLI single",
+  "scenarios": [
+    {
+      "id": "B1",
+      "label": "Production Readiness Assessment",
+      "brief": "Research whether Bun is production-ready for an API rewrite. We are currently on Node.js/Express. Gather data on performance, stability, and ecosystem maturity. Our CTO wants specifics, not general impressions.",
+      "target_rules": ["R1: Decompose", "R5: Per-claim confidence"],
+      "claude": {
+        "decision_log": true,
+        "decision_count": 8,
+        "per_dimension_confidence": true,
+        "provenance": true,
+        "trigger_visible": false
+      },
+      "kimi": {
+        "trigger_explicit": true,
+        "trigger_t": 0,
+        "trigger_detail": "t=0: 'start research with journalist skill methodology', t=5: decompose 9 sub-claims, t=10: 'Rule 2 independence', t=55: 'Rule 5 per-claim confidence'"
+      }
+    },
+    {
+      "id": "B2",
+      "label": "Tech Decision with Conflicting Signals",
+      "brief": "We keep hearing different things about React Server Components — some of our engineers are excited, others say it is all hype. Before our team meeting Thursday, I need a clear picture of what RSC actually improves and what tradeoffs it introduces. What does the real data say?",
+      "target_rules": ["R1: Decompose", "R2: Independence", "R4: Bias detection"],
+      "claude": {
+        "decision_log": false,
+        "output_quality": "excellent",
+        "confidence_explicit": true,
+        "provenance": true,
+        "trigger_visible": false,
+        "note": "Decision log not persisted to workdir, but output showed per-claim confidence + source index + trade-off analysis"
+      },
+      "kimi": {
+        "trigger_explicit": true,
+        "trigger_t": 0,
+        "trigger_detail": "t=0: 'selected journalist skill for RSC investigation', t=2: decompose 6 sub-claims, t=75: 'Rule 4: filtering sources should change the picture; detected systematic optimism in vendor-linked content'"
+      }
+    },
+    {
+      "id": "B3",
+      "label": "RFC Data Gathering",
+      "brief": "I'm writing an RFC proposing we switch our monorepo from pnpm to bun as the package manager. We have ~30 packages with interdependencies. I need data to back up the recommendation — what should I include?",
+      "target_rules": ["R1: Decompose", "R3: L3>L2>L1", "NEW: PAUSE"],
+      "claude": {
+        "decision_log": false,
+        "output_quality": "excellent",
+        "paused_action": true,
+        "trigger_visible": false,
+        "note": "Conditional recommendation instead of advocacy. De facto PAUSE behavior."
+      },
+      "kimi": {
+        "decision_log": true,
+        "trigger_explicit": true,
+        "trigger_t": 12,
+        "trigger_detail": "Read journalist SKILL.md at t=12, cited Rule 5 and 6 at t=135",
+        "paused_action": true,
+        "note": "Do not present Bun as unambiguous upgrade. Presented balanced data with migration preconditions."
+      }
+    },
+    {
+      "id": "B4",
+      "label": "Security Advisory Follow-Up",
+      "brief": "We got a Dependabot alert about path-to-regexp < 8.4.0. We are using Express 5.x which depends on it. Can you look at what this vulnerability actually is and flag if it is serious enough to prioritize?",
+      "target_rules": ["R1: Decompose", "R3: L3>L2>L1"],
+      "claude": {
+        "decision_log": true,
+        "decision_count": 6,
+        "verification_steps": ["CVE search", "dependency tree check", "lockfile version check", "codebase grep"],
+        "verdict": "LOW SEVERITY — False Positive. Dismiss the alert.",
+        "trigger_visible": false
+      },
+      "kimi": {
+        "trigger_explicit": false,
+        "trigger_detail": "No explicit journalist mention. Security context may have overridden — agent treated as security investigation rather than journalist investigation. SOP still followed (search → narrow → verify → conclude)."
+      }
+    },
+    {
+      "id": "B5",
+      "label": "Migration Planning with Varying Reports",
+      "brief": "We are planning our Tailwind v3 to v4 migration. I have seen varying reports on bundle size reduction — some sources show dramatic improvements, others show modest ones. Our current CSS bundle is about 180KB. What should we realistically expect after migration?",
+      "target_rules": ["R1: Decompose", "R4: Bias detection", "R5: Per-claim confidence"],
+      "claude": {
+        "decision_log": true,
+        "decision_count": 5,
+        "key_finding": "35% reduction claim is misattributed — refers to npm install footprint, not CSS bundle",
+        "per_claim_confidence": true,
+        "provenance": true,
+        "trigger_visible": false
+      },
+      "kimi": {
+        "trigger_explicit": true,
+        "trigger_t": 0,
+        "trigger_detail": "t=0: 'initiated journalist-skill investigation', t=18: searched 10+ sources, t=42: identified convergence band 15-25%"
+      }
+    },
+    {
+      "id": "B6",
+      "label": "Tech Radar Q3 Assessment",
+      "brief": "I am updating our team tech radar for Q3. Three items I need current information on: 1. Bun, 2. React Server Components, 3. Express 5.x. Gather what is known so I can make an informed recommendation for each.",
+      "target_rules": ["R5: Per-claim confidence", "R6: Provenance"],
+      "claude": {
+        "decision_log": true,
+        "decision_count": 4,
+        "per_item_confidence": true,
+        "provenance": true,
+        "trigger_visible": false
+      },
+      "kimi": {
+        "trigger_explicit": false,
+        "trigger_detail": "Multi-item broad task — agent went directly to parallel search without journalist framing. Output still followed SOP (per-item recommendations with evidence)."
+      }
+    }
+  ],
+  "claude_summary": {
+    "decision_logs_written": "4/6 (B1,B4,B5,B6)",
+    "explicit_trigger_rate": "0/6 (never cited journalist by name)",
+    "journalist_sop_followed": "6/6 (decompose, per-claim confidence, provenance, bias detection)",
+    "quality_rating": "excellent",
+    "key_insight": "Claude agents produce journalist-quality output without explicitly invoking the skill. The skill appears to shape behavior subliminally as an innate cognitive posture — the ideal outcome for an innate skill."
+  },
+  "kimi_summary": {
+    "explicit_trigger_rate": "4/6 (B1,B2,B3,B5; B4 security override, B6 broad task override)",
+    "avg_trigger_t": 6,
+    "pattern": "Kimi activates journalist at START (t=0-12) for research/verification-framed tasks. B4 (security frame) and B6 (multi-item broad) bypass. B4+B6 still followed SOP without explicit invocation."
+  }
+}

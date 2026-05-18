@@ -31,9 +31,6 @@ playground/
 # Private operational docs (local-only, never commit)
 .private/
 
-# Runtime lock file (contains absolute local paths, not portable)
-skill-deck.lock
-
 # Curator generated artifacts (cold pool index, regenerated at runtime)
 .lythoskill-curator/
 
