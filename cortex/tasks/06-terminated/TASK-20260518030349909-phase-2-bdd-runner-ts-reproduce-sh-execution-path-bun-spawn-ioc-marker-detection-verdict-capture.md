@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
+| terminated | 2026-05-18 | Terminated |
 
 ## 背景与目标
 bdd-runner.ts 当前只支持 `.agent.md` via parseAgentMd。新增 reproduce.sh 执行路径：spawn 脚本 → 检测 IoC handoff → agent 接管智能步骤 → 收集 verdict。与现有路径并存，返回相同 verdict 格式。

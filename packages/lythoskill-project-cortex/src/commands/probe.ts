@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
+import { spawnSync } from 'node:child_process';
 import type { WorkflowConfig } from '../types.js';
 import { listActiveEpics, countByLane } from '../lib/lane.js';
 
@@ -375,10 +376,45 @@ export function probeStatus(config: WorkflowConfig): void {
     console.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
   }
 
+  // ── Coverage snapshot drift ──────────────────────────────────────
+  // Scan packages/*/test/scenarios/coverage-snapshot-*.md — check if
+  // source files changed significantly since the snapshot was taken.
+  const coverageDrift: string[] = [];
+  const coverageDir = 'packages'
+  if (existsSync(coverageDir)) {
+    try {
+      for (const pkg of readdirSync(coverageDir)) {
+        const snapshotDir = join(coverageDir, pkg, 'test', 'scenarios')
+        if (!existsSync(snapshotDir)) continue
+        for (const f of readdirSync(snapshotDir)) {
+          if (!f.startsWith('coverage-snapshot-') || !f.endsWith('.md')) continue
+          const dateMatch = f.match(/coverage-snapshot-(\d{4}-\d{2}-\d{2})/)
+          if (!dateMatch) continue
+          const snapshotDate = dateMatch[1]
+          const srcDir = join(coverageDir, pkg, 'src')
+          if (!existsSync(srcDir)) continue
+          // git log --oneline --after="<date> 00:00:00" -- <srcDir>
+          const r = spawnSync('git', ['log', '--oneline', `--after=${snapshotDate} 00:00:00`, '--', srcDir],
+            { encoding: 'utf-8', timeout: 5000 })
+          if (r.status === 0 && r.stdout.trim()) {
+            const count = r.stdout.trim().split('\n').length
+            coverageDrift.push(`${pkg}: ${count} commit(s) since ${snapshotDate}`)
+          }
+        }
+      }
+    } catch (_) { /* git unavailable — skip */ }
+  }
+
+  if (coverageDrift.length > 0) {
+    console.log('\n📊 Coverage snapshot drift:')
+    for (const d of coverageDrift) console.log(`     ${d}`)
+    console.log('     💡 Significant changes since snapshot → consider re-running BDD.')
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0 && coverageDrift.length === 0) {
     console.log('✅ All clear! No inconsistencies found.');
   } else {
     if (allIssues.length > 0) {

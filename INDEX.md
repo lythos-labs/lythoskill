@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/18 02:25:15
+> 自动生成于 2026/5/18 12:04:06
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 230 | 进行中: 0, 待验收: 0, 已完成: 199 |
-| Epics | 31 | 活跃: 0, 已完成: 27, 悬置: 2, 已归档: 2 |
-| ADRs | 72 | 已接受: 70 |
+| Tasks | 241 | 进行中: 1, 待验收: 0, 已完成: 203 |
+| Epics | 32 | 活跃: 1, 已完成: 27, 悬置: 2, 已归档: 2 |
+| ADRs | 73 | 已接受: 71 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260518024809887**: Evolve Agent BDD to reproduce.sh pattern
 
 ### 已完成
 
@@ -62,19 +62,19 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (1)
 
-_无_
+- [ ] **TASK-20260518030349939**: Phase 3 — BDD coverage dashboard + change-impact probe
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260518030349966**: Phase 4 — migrate high-value .agent.md to reproduce.sh
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (199)
+### 已完成 (203)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -275,12 +275,16 @@ _无_
 - ✅ ~~TASK-20260517194318952~~: Move root test/scenarios to package-co-located test directories per TESTING.md
 - ✅ ~~TASK-20260518004641351~~: Arena Standard Posture SOP — mindset validator protocol and meta-test showcase
 - ✅ ~~TASK-20260518013753710~~: Add empty-shell detection to probe — grep for PLACEHOLDER/需求1 markers
+- ✅ ~~TASK-20260518030349878~~: Phase 1 — reproduce.sh contract spec
+- ✅ ~~TASK-20260518105942103~~: Migrate deck-to-symlink-to-snapshot to reproduce.sh
+- ✅ ~~TASK-20260518110819248~~: localhost/<skill> quick form for personal skills
+- ✅ ~~TASK-20260518111443694~~: Standardize layered testing with plan-mode integration layer
 
 ### 悬置 (1)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (29)
+### 终止 (34)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -311,6 +315,11 @@ _无_
 - 🛑 ~~TASK-20260513042408337~~: Arena radar chart + Open Graph social card — differentiation layer on top of HTML report parity; goal is twitter-shareable visual with reproducible git ref
 - 🛑 ~~TASK-20260517174254946~~: Fix extra double quote syntax error in arena reproduce.sh --to argument
 - 🛑 ~~TASK-20260517193716031~~: Fix cortex SKILL.md empty shell problem — CLI creates files but agent doesn't fill content
+- 🛑 ~~TASK-20260518030349909~~: Phase 2 — bdd-runner.ts reproduce.sh path
+- 🛑 ~~TASK-20260518030349994~~: Phase 5 — deprecate parseAgentMd ## Judge regex
+- 🛑 ~~TASK-20260518112246074~~: Refactor arena/preflight — IO separation
+- 🛑 ~~TASK-20260518112246109~~: Refactor cold-pool/validate-plan — IO separation
+- 🛑 ~~TASK-20260518112246144~~: Refactor curator/curator-core — IO separation
 
 ---
 
@@ -388,6 +397,7 @@ _无_
 - ✅ **ADR-20260517142840955** (02-accepted): Agent-Adapter — Independent Process Spawn for Reliable Multi-Player Orchestration
 - ✅ **ADR-20260517152850372** (02-accepted): Deck `also_link_to` — Multi-CLI Working Set via POSSE Pattern
 - ✅ **ADR-20260517224131119** (02-accepted): Multi-layer project context persistence — agent context architecture by volatility class
+- ✅ **ADR-20260518024500631** (02-accepted): Evolve Agent BDD from .agent.md+parseAgentMd to reproduce.sh pattern
 
 ---
 

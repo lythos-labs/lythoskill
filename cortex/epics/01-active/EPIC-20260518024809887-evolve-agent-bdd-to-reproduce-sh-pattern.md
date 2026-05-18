@@ -46,23 +46,27 @@ Refs: ADR-20260518024500631, ADR-20260514050300
 
 | ADR | 标题 | 状态 |
 |-----|------|------|
-| ADR-20260518024500631 | BDD evolution to reproduce.sh | proposed |
+| ADR-20260518024500631 | BDD evolution to reproduce.sh | accepted |
 | ADR-20260514050300 | judge criteria frontmatter separation | accepted |
+
+> **Judge boundary**: cross-player arena (vs mode) still needs judge — that's a different concern
+> from BDD. BDD separates judge from task prompt (judge.md). Arena keeps judge for cross-player
+> comparison. Both use the same principle (ADR-20260514050300), different execution layers.
 
 ## 关联任务
 
-| 任务 | 状态 | Phase |
-|------|------|-------|
-| TASK-20260518030349878 | backlog | Phase 1: reproduce.sh 契约规范 |
-| TASK-20260518030349909 | backlog | Phase 2: bdd-runner.ts reproduce.sh 路径 |
-| TASK-20260518030349939 | backlog | Phase 3: coverage dashboard + change-impact probe |
-| TASK-20260518030349966 | backlog | Phase 4: 迁移高价值 .agent.md |
-| TASK-20260518030349994 | backlog | Phase 5: 废弃 ## Judge 正则 |
+| 任务 | 状态 | Phase | 备注 |
+|------|------|-------|------|
+| TASK-20260518030349878 | completed | Phase 1: contract spec | ✅ `reproduce-sh-bdd-contract.md` |
+| TASK-20260518030349909 | terminated | Phase 2: bdd-runner | agent = runner, no code needed |
+| TASK-20260518030349939 | backlog | Phase 3: coverage dashboard | snapshots exist, formatter pending |
+| TASK-20260518030349966 | in-progress | Phase 4: migrate .agent.md | 1/5 done (deck-to-symlink-snapshot) |
+| TASK-20260518030349994 | terminated | Phase 5: deprecate ## Judge | naturally obsolete — reproduce.sh has no ## Judge |
 
 ## 归档条件
-- [ ] reproduce.sh 契约规范文档存在（Phase 1）
-- [ ] bdd-runner.ts 支持 reproduce.sh 执行路径（Phase 2）
-- [ ] coverage dashboard + change-impact probe 可运行（Phase 3）
-- [ ] 至少 3 个 scenarios 从 .agent.md 迁移到 reproduce.sh（Phase 4）
-- [ ] parseAgentMd `## Judge` 解析标注 deprecated（Phase 5）
-- [ ] 零知识 subagent 验收通过（cross-check）
+- [x] reproduce.sh 契约规范文档存在（Phase 1）
+- [x] 零知识 subagent 验收通过（2 independent, both PASS）
+- [x] agent = runner 无需 bdd-runner.ts 改动（Phase 2）
+- [x] `## Judge` 问题自然消退 — reproduce.sh 不嵌入 judge in task prompt（Phase 5）
+- [ ] coverage dashboard 可运行（Phase 3）
+- [ ] 至少 3 个 scenarios 迁移到 reproduce.sh（Phase 4）

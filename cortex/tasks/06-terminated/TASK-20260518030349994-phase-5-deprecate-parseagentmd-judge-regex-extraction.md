@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
+| terminated | 2026-05-18 | Terminated |
 
 ## 背景与目标
 reproduce.sh 成为标准后，移除 `parseAgentMd` 的 `## Judge` 正则提取。Judge criteria 来自 judge.md 或 arena.toml judge 字段——与 arena 已应用的修复一致（ADR-20260514050300）。

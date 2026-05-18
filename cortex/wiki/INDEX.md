@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (47)
+## 📚 Patterns (48)
 
+- **[2026-05-18]** [zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents](./01-patterns/2026-05-18-zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents.md)
 - **[2026-05-17]** [shell-stdout-as-agent-prompt-injection](./01-patterns/2026-05-17-shell-stdout-as-agent-prompt-injection.md)
 - **[2026-05-17]** [alias-as-role-slot-name-resolution-and-working-set-flattening](./01-patterns/2026-05-17-alias-as-role-slot-name-resolution-and-working-set-flattening.md)
 - **[2026-05-17]** [control-transfer-protocol-cli-agent-boundary-as-interrupt-vector-table](./01-patterns/2026-05-17-control-transfer-protocol-cli-agent-boundary-as-interrupt-vector-table.md)
@@ -57,8 +58,9 @@
 - **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
 - **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
 
-## 📖 Lessons (22)
+## 📖 Lessons (23)
 
+- **[2026-05-18]** [iocontract-reproduce-sh-exit-code-idempotency-semantics-for-ioc-handoff](./03-lessons/2026-05-18-iocontract-reproduce-sh-exit-code-idempotency-semantics-for-ioc-handoff.md)
 - **[2026-05-17]** [excessive-self-questioning-as-agent-anti-pattern](./03-lessons/2026-05-17-excessive-self-questioning-as-agent-anti-pattern.md)
 - **[2026-05-17]** [codex-symlink-snapshot-mode-origin-and-evolution](./03-lessons/2026-05-17-codex-symlink-snapshot-mode-origin-and-evolution.md)
 - **[2026-05-17]** [arena-as-empirical-rule-validation-closing-the-guesswork-loop-that-mnilax-style-manual-testing-can-t](./03-lessons/2026-05-17-arena-as-empirical-rule-validation-closing-the-guesswork-loop-that-mnilax-style-manual-testing-can-t.md)

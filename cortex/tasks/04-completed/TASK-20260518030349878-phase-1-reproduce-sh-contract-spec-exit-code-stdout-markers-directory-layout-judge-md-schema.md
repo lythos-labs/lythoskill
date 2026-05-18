@@ -5,6 +5,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created |
+| in-progress | 2026-05-18 | Started |
+| review | 2026-05-18 | Deliverables committed |
+| completed | 2026-05-18 | Done |
 
 ## 背景与目标
 7 个 showcase reproduce.sh 遵循涌现约定，无书面 spec。Phase 2-5 依赖稳定契约。约 100 行 markdown 约定文档。
