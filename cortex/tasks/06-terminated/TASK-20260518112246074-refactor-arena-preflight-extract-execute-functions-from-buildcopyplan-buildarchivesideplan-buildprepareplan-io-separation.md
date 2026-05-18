@@ -5,6 +5,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created — plan-mode audit found IO inlined |
+| in-progress | 2026-05-18 | Started |
+| terminated | 2026-05-18 | Terminated |
 
 ## 背景
 arena/preflight.ts: `buildCopyPlan`, `buildArchiveSidePlan`, `buildPreparePlan` — 3 plan builders without execute counterparts. IO (readdirSync, copyFileSync, writeFileSync) mixed with plan logic. Can't be plan-mode tested cleanly.

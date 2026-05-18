@@ -5,6 +5,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-18 | Created — plan-mode audit found execute missing |
+| in-progress | 2026-05-18 | Started |
+| terminated | 2026-05-18 | Terminated |
 
 ## 背景
 cold-pool/validate-plan.ts: `buildValidationPlan` exists but no `executeValidationPlan`. Validation IO (existsSync, readFileSync for lock file) is handled externally. Follow pattern: `buildValidationPlan` (pure) + `executeValidationPlan(plan, io?)`.
