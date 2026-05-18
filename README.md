@@ -1,13 +1,14 @@
 # lythoskill
 
 > **Declarative coordination for agent skills.** You declare which skills a project needs in `skill-deck.toml`. `deck link` reconciles the working set — undeclared skills are absent from the agent's view. Configure `working_set` for Claude Code, Kimi, Codex, Cursor, Windsurf, or any agent that scans a skills directory.
->
-> If any of these four are false, it's not lythoskill: **declarative** (not imperative install/remove), **multi-platform** (not single-agent), **deny-by-default** (not "disabled" or "deprioritized"), **local-first** (no central server, no auth beyond git).
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
 
 **🌐 Languages:** [中文](./README.zh.md)
 
@@ -40,32 +41,26 @@ Beyond conflict prevention, `skill-deck.lock` gives you a single source of truth
 
 ---
 
+<details>
+<summary>🤖 For Agents</summary>
+
+If you are an AI agent reading this README:
+
+1. Check `bun --version` — if missing, install Bun
+2. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to activate the project's deck
+3. Skills load from the `working_set` directory in `skill-deck.toml`
+
+Agents use lythoskill to build real things. [`showcase/`](./showcase/) contains pages, reports, and tools built by agents using lythoskill-governed decks.
+
+</details>
+
+---
+
 ## Quick Start
 
-**The magic moment — one command, a skill appears, done.**
+### Give this to your agent
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-init.sh | bash
-```
-
-That's it. Bun installs if needed. A real skill (`frontend-design`, from Anthropic) downloads to your cold pool. `deck link` makes it the ONLY skill in your working set. `ls .claude/skills/` proves it.
-
-### What just happened?
-
-The script checked for Bun, created a `skill-deck.toml`, ran `deck link`, and verified the result:
-
-1. `skill-deck.toml` declared `frontend-design` (Anthropic's official design skill)
-2. `deck link` cloned it to `~/.agents/skill-repos/` (cold pool)
-3. Symlinked only that skill into `.claude/skills/` (working set)
-4. Self-check confirmed: one symlink, exactly what was declared
-
-It's the same feeling as `npm install` — a declared manifest, one command, reproducible result on disk. The difference from `npx skills add`: `deck link` is declarative (like `package.json`), not imperative (like `brew install`). You declare what you want. The system reconciles. Nothing extra appears.
-
-To add more skills: `curl ... | bash -s -- --skill github.com/owner/repo/path`. Or edit `skill-deck.toml` and run `bunx @lythos/skill-deck@latest link`. 
-
-### Give this to your agent instead
-
-Copy the block below. Tell your agent: "Set up lythoskill for this project." The agent reads it and executes.
+Copy the block below. Tell your agent: "Set up lythoskill for this project." The agent reads, installs Bun if needed, creates a deck, runs `deck link`, and verifies.
 
 ````
 Read https://raw.githubusercontent.com/lythos-labs/lythoskill/main/README.md.
@@ -74,6 +69,20 @@ Read https://raw.githubusercontent.com/lythos-labs/lythoskill/main/README.md.
 3. Create a `skill-deck.toml`, run `bunx @lythos/skill-deck@latest link`.
 4. Verify skills appeared in your working_set directory.
 ````
+
+That's the agent-era quick start: tell your agent, not your terminal.
+
+### Or run it yourself
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-init.sh | bash
+```
+
+The script installs Bun, creates a `skill-deck.toml` with `frontend-design` (Anthropic's official design skill), runs `deck link`, and self-checks. One command, a skill appears, done.
+
+It's the same feeling as `npm install` — declared manifest, one command, reproducible result on disk. The difference from `npx skills add`: `deck link` is declarative (like `package.json`), not imperative (like `brew install`).
+
+To add more: `curl ... | bash -s -- --skill github.com/owner/repo/path`. Or edit `skill-deck.toml` and re-run `bunx @lythos/skill-deck@latest link`.
 
 ### Manual setup
 
@@ -98,8 +107,10 @@ bunx @lythos/skill-deck@latest link
 
 A **deck** is a declarative skill manifest — a `skill-deck.toml` file that names which skills are active. That's the core. Everything else (curator, arena, creator, coach) is tooling around that file.
 
+The design stays true to four principles: **declarative** (manifest, not imperative add/remove), **multi-platform** (one TOML, any agent), **deny-by-default** (undeclared = absent), **local-first** (git cache, no central server).
+
 ```
-Remote (GitHub, localhost, etc.)
+Sources (GitHub, localhost, etc.)
     │
     ▼ git clone / git pull
 Cold Pool  (~/.agents/skill-repos/)
@@ -119,19 +130,6 @@ Skills live in a **cold pool** — a local git cache at `~/.agents/skill-repos/`
 `deck link` writes a **lockfile** (`skill-deck.lock`) that pins each skill. Commit it — teammates get the exact same links.
 
 Skills are authored using the **thin-skill pattern**: heavy logic in npm packages, agent-facing instructions in lightweight SKILL.md files ([details](./AGENTS.md)).
-
-<details>
-<summary>🤖 For Agents</summary>
-
-If you are an AI agent reading this README:
-
-1. Check `bun --version` — if missing, install Bun
-2. Run `bunx @lythos/skill-deck@latest link --deck <url|path>` to activate the project's deck
-3. Skills load from the `working_set` directory in `skill-deck.toml`
-
-Agents use lythoskill to build real things. [`showcase/`](./showcase/) contains pages, reports, and tools built by agents using lythoskill-governed decks.
-
-</details>
 
 ### Explore Pre-Built Decks
 
@@ -225,7 +223,7 @@ bun run test:bdd                   # BDD integration tests
 **"bun: command not found"** → Install Bun: `curl -fsSL https://bun.sh/install | bash`.
 
 **Skill not visible to agent** → Check `working_set` in `skill-deck.toml` matches your agent's expected path:
-- `.claude/skills/` — Claude Code (default)
+- `.claude/skills/` — Claude Code
 - `.agents/skills/` — Codex CLI, OpenClaw
 - `.cursor/skills/` — Cursor
 - `.kimi/skills/` — Kimi
