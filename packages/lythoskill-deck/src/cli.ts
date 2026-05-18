@@ -114,12 +114,17 @@ switch (command) {
     updateDeck(deckPath, workdir, updateTarget)
     break
   }
-  case 'validate':
-    await validateDeck(deckPath, workdir, {
+  case 'validate': {
+    let validateDeckPath = deckPath
+    if (!validateDeckPath && args[1] && !args[1].startsWith('-')) {
+      validateDeckPath = resolveDeckPathSync(args[1]).path
+    }
+    await validateDeck(validateDeckPath, workdir, {
       remote,
       format: format === 'json' ? 'json' : 'text',
     })
     break
+  }
   case 'remove': {
     const removeTarget = args[1] && !args[1].startsWith('-') ? args[1] : undefined
     if (!removeTarget) {

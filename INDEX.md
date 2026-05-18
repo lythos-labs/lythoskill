@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/18 21:38:01
+> 自动生成于 2026/5/18 23:01:11
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 251 | 进行中: 0, 待验收: 0, 已完成: 211 |
-| Epics | 35 | 活跃: 1, 已完成: 30, 悬置: 2, 已归档: 2 |
+| Tasks | 252 | 进行中: 0, 待验收: 0, 已完成: 212 |
+| Epics | 35 | 活跃: 0, 已完成: 31, 悬置: 2, 已归档: 2 |
 | ADRs | 75 | 已接受: 73 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
+_无_
 
 ### 已完成
 
@@ -50,6 +50,7 @@
 - ✅ **EPIC-20260518024809887**: Evolve Agent BDD to reproduce.sh pattern
 - ✅ **EPIC-20260518125955940**: Curator MVP: mindset refactor + legacy migration — thin core, thick data
 - ✅ **EPIC-20260518145235543**: Emergency: fix arena agent-adapter — claude defaults to SDK, deepseek available, codex in vs mode
+- ✅ **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
 
 ### 悬置
 
@@ -80,7 +81,7 @@ _无_
 
 _无_
 
-### 已完成 (211)
+### 已完成 (212)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -293,6 +294,7 @@ _无_
 - ✅ ~~TASK-20260518130217386~~: Legacy reference cleanup: skills.sh, deck status sh, HANDOFF.md across repo
 - ✅ ~~TASK-20260518130219922~~: Curator reproduce.sh: scan → tag → query → audit full IoC verification
 - ✅ ~~TASK-20260518172921265~~: arena CLI single defaults output to CWD, leaks into project dir
+- ✅ ~~TASK-20260518230024421~~: fix(deck): validate positional arg [deck.toml] ignored — only --deck flag worked
 
 ### 悬置 (1)
 
