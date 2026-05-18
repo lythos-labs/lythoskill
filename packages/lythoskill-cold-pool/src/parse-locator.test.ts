@@ -110,7 +110,7 @@ describe('parseLocator — rejected forms (per ADR-20260502012643244 FQ-only)', 
     expect(parseLocator('localhost')).toBeNull()
   })
 
-  test('localhost/<name> (single name, missing repo) is rejected — that was the post-compaction agent invention', () => {
+  test('localhost/<name> (2 segments) is rejected — use localhost/me/<skill> for quick local form', () => {
     expect(parseLocator('localhost/my-skill')).toBeNull()
   })
 })

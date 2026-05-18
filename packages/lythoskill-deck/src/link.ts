@@ -76,7 +76,7 @@ export function findSource(name: string, coldPool: string, _projectDir: string):
   if (!locator) {
     return {
       path: null,
-      error: `Locator "${name}" is not FQ. Expected: host.tld/owner/repo[/skill] or localhost/<name>. Bare names rejected per ADR-20260502012643244.`,
+      error: `Locator "${name}" is not FQ. Expected: host.tld/owner/repo[/skill] or localhost/me/<skill>. Bare names rejected per ADR-20260502012643244.`,
     };
   }
 

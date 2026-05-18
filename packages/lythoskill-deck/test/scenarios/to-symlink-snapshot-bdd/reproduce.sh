@@ -13,7 +13,7 @@ set -e
 TEST_DIR="/tmp/to-symlink-snapshot-bdd-$(date +%Y%m%d-%H%M%S)"
 COLD_POOL="$TEST_DIR/cold-pool"
 PROJECT="$TEST_DIR/project"
-SKILL_DIR="$COLD_POOL/localhost/test-org/skill-x"
+SKILL_DIR="$COLD_POOL/localhost/me/skill-x"
 
 echo "=== Step 1: Create directory structure ==="
 mkdir -p "$SKILL_DIR" "$PROJECT"
@@ -29,7 +29,7 @@ cold_pool = "../cold-pool"
 working_set = ".claude/skills"
 
 [tool.skills.skill-x]
-path = "localhost/test-org/skill-x"
+path = "localhost/me/skill-x"
 DECKEOF
 
 echo "=== Step 2: deck link (initial symlink state) ==="
