@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/18 15:53:33
+> 自动生成于 2026/5/18 21:38:01
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 249 | 进行中: 0, 待验收: 0, 已完成: 210 |
+| Tasks | 251 | 进行中: 0, 待验收: 0, 已完成: 211 |
 | Epics | 35 | 活跃: 1, 已完成: 30, 悬置: 2, 已归档: 2 |
 | ADRs | 75 | 已接受: 73 |
 
@@ -65,11 +65,12 @@
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (4)
 
 - [ ] **TASK-20260518145245246**: Fix resolvePlayer claude → claude-sdk, deprecate claude-cli adapter registration under claude name
 - [ ] **TASK-20260518145245296**: Add @lythos/agent-adapter-deepseek-serve as arena dependency + verify import works in bunx
 - [ ] **TASK-20260518145245344**: Import codex adapter in runner.ts so codex is available in arena vs mode
+- [ ] **TASK-20260518212223198**: implement also_link_to multi-platform fan-out in deck link
 
 ### 进行中 (0)
 
@@ -79,7 +80,7 @@ _无_
 
 _无_
 
-### 已完成 (210)
+### 已完成 (211)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -291,6 +292,7 @@ _无_
 - ✅ ~~TASK-20260518130214814~~: Rewrite curator SKILL.md: discovery SOP via agent+search, not curator as engine
 - ✅ ~~TASK-20260518130217386~~: Legacy reference cleanup: skills.sh, deck status sh, HANDOFF.md across repo
 - ✅ ~~TASK-20260518130219922~~: Curator reproduce.sh: scan → tag → query → audit full IoC verification
+- ✅ ~~TASK-20260518172921265~~: arena CLI single defaults output to CWD, leaks into project dir
 
 ### 悬置 (1)
 
