@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/18 12:04:06
+> 自动生成于 2026/5/18 12:12:40
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 241 | 进行中: 1, 待验收: 0, 已完成: 203 |
-| Epics | 32 | 活跃: 1, 已完成: 27, 悬置: 2, 已归档: 2 |
+| Tasks | 241 | 进行中: 0, 待验收: 0, 已完成: 204 |
+| Epics | 32 | 活跃: 0, 已完成: 28, 悬置: 2, 已归档: 2 |
 | ADRs | 73 | 已接受: 71 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260518024809887**: Evolve Agent BDD to reproduce.sh pattern
+_无_
 
 ### 已完成
 
@@ -47,6 +47,7 @@
 - ✅ **EPIC-20260513010237904**: Popular third-party skills end-to-end with network probe UX
 - ✅ **EPIC-20260515001514240**: Emergency: migrate test/scenarios/ to src/ co-located unit tests
 - ✅ **EPIC-20260517121757041**: Agent BDD 覆盖 — deck/arena skill 行为验证
+- ✅ **EPIC-20260518024809887**: Evolve Agent BDD to reproduce.sh pattern
 
 ### 悬置
 
@@ -66,15 +67,15 @@
 
 - [ ] **TASK-20260518030349939**: Phase 3 — BDD coverage dashboard + change-impact probe
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260518030349966**: Phase 4 — migrate high-value .agent.md to reproduce.sh
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (203)
+### 已完成 (204)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -276,6 +277,7 @@ _无_
 - ✅ ~~TASK-20260518004641351~~: Arena Standard Posture SOP — mindset validator protocol and meta-test showcase
 - ✅ ~~TASK-20260518013753710~~: Add empty-shell detection to probe — grep for PLACEHOLDER/需求1 markers
 - ✅ ~~TASK-20260518030349878~~: Phase 1 — reproduce.sh contract spec
+- ✅ ~~TASK-20260518030349966~~: Phase 4 — migrate high-value .agent.md to reproduce.sh
 - ✅ ~~TASK-20260518105942103~~: Migrate deck-to-symlink-to-snapshot to reproduce.sh
 - ✅ ~~TASK-20260518110819248~~: localhost/<skill> quick form for personal skills
 - ✅ ~~TASK-20260518111443694~~: Standardize layered testing with plan-mode integration layer
