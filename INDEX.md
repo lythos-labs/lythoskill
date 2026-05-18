@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/18 15:01:16
+> 自动生成于 2026/5/18 15:53:33
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 249 | 进行中: 0, 待验收: 0, 已完成: 210 |
-| Epics | 34 | 活跃: 0, 已完成: 30, 悬置: 2, 已归档: 2 |
-| ADRs | 74 | 已接受: 72 |
+| Epics | 35 | 活跃: 1, 已完成: 30, 悬置: 2, 已归档: 2 |
+| ADRs | 75 | 已接受: 73 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
 
 ### 已完成
 
@@ -411,6 +411,7 @@ _无_
 - ✅ **ADR-20260517224131119** (02-accepted): Multi-layer project context persistence — agent context architecture by volatility class
 - ✅ **ADR-20260518024500631** (02-accepted): Evolve Agent BDD from .agent.md+parseAgentMd to reproduce.sh pattern
 - ✅ **ADR-20260518123403810** (02-accepted): Curator role re-derivation: from rigid indexer to agent-assisted discovery companion
+- ✅ **ADR-20260518155038335** (02-accepted): Reproduce.sh + decision-log + logical framework — verifying premise-conclusion stability
 
 ---
 
