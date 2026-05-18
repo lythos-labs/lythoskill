@@ -1,6 +1,6 @@
 # lythoskill
 
-> **Declarative coordination for agent skills.** You declare which skills a project needs in `skill-deck.toml`. `deck link` reconciles the working set — undeclared skills are absent from the agent's view. Configure `working_set` for Claude Code, Kimi, Codex, Cursor, Windsurf, or any agent that scans a skills directory.
+> **Declarative skill governance for AI agent teams.** Declare which skills a project needs in `skill-deck.toml`. `deck link` reconciles the working set — undeclared skills are physically absent from the agent's view. Curate your cold pool. Validate skill quality in arena. Manage decisions through cortex ADRs. One manifest governs Claude Code, Kimi, Codex, Cursor, Windsurf, or any agent that scans a skills directory. Built and self-governed by AI agents — see [how we govern this project](#ecosystem-tools).
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
@@ -14,11 +14,9 @@
 
 ---
 
-## Should I use this?
+## What problem does this solve?
 
 When two skills both describe how to write tests, your agent gets conflicting instructions. "Disabling" a skill doesn't remove it — the agent can still see it. And when something goes wrong, you can't tell which skill caused it without removing them one by one. **lythoskill enforces deny-by-default**: undeclared skills are absent from the working set. If a conflict surfaces, bisect your `skill-deck.toml` — the lockfile tells you exactly what was loaded.
-
-But governance is only useful when complexity reaches a threshold. If you use `npx skills add` and have 3 skills that never conflict, you're fine — stay there.
 
 | | `npx skills add` | lythoskill `deck link` |
 |---|---|---|
@@ -30,14 +28,12 @@ But governance is only useful when complexity reaches a threshold. If you use `n
 
 | Skills | State | Action |
 |--------|-------|--------|
-| 0–3, no conflicts | Simple | Skip lythoskill. Manage manually. |
+| 0–3, no conflicts | Simple | **deck** works, but manual management is fine too. |
 | 5–10, some conflicts | Growing | Use **deck** — declare which skills this project needs. |
 | 10+, you author skills | Ecosystem | Use **deck + creator** — thin-skill pattern. |
 | Managing across teams/projects | Ecosystem | Full lythoskill: deck + creator + curator + arena. |
 
-You do **not** need lythoskill if you have ≤3 skills that never change across projects.
-
-Beyond conflict prevention, `skill-deck.lock` gives you a single source of truth for "what skills were active when this was built." Commit it. Teammates get identical working sets. CI is reproducible. When something breaks, bisect the toml — the lockfile tells you exactly what changed.
+`skill-deck.lock` gives you a single source of truth for "what skills were active when this was built." Commit it. Teammates get identical working sets. CI is reproducible. When something breaks, bisect the toml — the lockfile tells you exactly what changed.
 
 ---
 
@@ -90,16 +86,67 @@ To add more: `curl ... | bash -s -- --skill github.com/owner/repo/path`. Or edit
 # 1. Create your deck
 cat > skill-deck.toml << 'EOF'
 [deck]
-max_cards = 5
+max_cards = 3
 cold_pool = "~/.agents/skill-repos"
 
-[tool.skills.example]
-path = "github.com/owner/repo"
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
 EOF
 
 # 2. Link
 bunx @lythos/skill-deck@latest link
 ```
+
+This uses Anthropic's official [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill — a real, runnable example. After linking, check `.claude/skills/` (or your configured `working_set`) and you'll see the skill files on disk. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) for 18+ pre-built decks.
+
+### Managing Your Deck
+
+**Add a skill** — supports skills.sh syntax (`owner/repo`), FQ locators, or `@skill` filters:
+```bash
+bunx @lythos/skill-deck@latest add vercel-labs/agent-skills
+bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/frontend-design
+```
+
+**Remove a skill** — from deck and working set (cold pool untouched):
+```bash
+bunx @lythos/skill-deck@latest remove <alias>
+```
+
+**Refresh skills** — scan for upstream updates (plan-only by default; add `--exec` to pull):
+```bash
+bunx @lythos/skill-deck@latest refresh           # plan-only
+bunx @lythos/skill-deck@latest refresh tdd --exec # pull a single skill
+```
+
+**Validate deck** — check TOML schema before committing:
+```bash
+bunx @lythos/skill-deck@latest validate
+```
+
+`skill-deck.lock` tracks the resolved working set. Commit it so teammates get identical links.
+
+---
+
+## skill-deck.toml Reference
+
+| Section | Key | Required | Default | Description |
+|---------|-----|----------|---------|-------------|
+| `[deck]` | `max_cards` | No | `10` | Max skills active in the working set |
+| `[deck]` | `cold_pool` | No | `~/.agents/skill-repos` | Root directory for cloned skill repos |
+| `[deck]` | `working_set` | No | `.claude/skills` | Directory where symlinks are created |
+| `[innate]` | `skills.<name>.path` | Yes* | — | Always loaded; agent cannot override |
+| `[tool]` | `skills.<name>.path` | Yes* | — | Available for agent to invoke |
+| `[transient]` | `skills.<name>.path` | Yes* | — | Time-bounded skills (auto-expire) |
+
+\* Required when that section is used.
+
+**Skill types:**
+
+| Type | Behavior | Counts against max_cards? |
+|------|----------|---------------------------|
+| **`[innate]`** | Eager — loaded at session start, agent cannot remove | Yes |
+| **`[tool]`** | Lazy — agent invokes on demand (default) | Yes |
+| **`[transient]`** | Lazy + expiry — auto-expires past due date | Yes |
 
 ---
 
@@ -137,6 +184,19 @@ Skills are authored using the **thin-skill pattern**: heavy logic in npm package
 
 ---
 
+## Why Trust This
+
+We are in early days. No Fortune 500 testimonial yet. What we have is **self-governance transparency**:
+
+- **Every decision is an ADR.** Browse [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) — 30+ architecture decisions with full reasoning, rejected alternatives, and confidence scores. No "trust us, we know better."
+- **Every release is arena-tested.** Before a skill ships, it runs through controlled-variable comparisons against real tasks. See [`showcase/`](./showcase/) for pages, reports, and tools built by agents using lythoskill-governed decks.
+- **Every skill is built with creator.** The thin-skill pattern (`packages/<name>/skill/SKILL.md`) means agent-facing instructions are separate from implementation — you can audit exactly what the agent sees.
+- **661 tests, 0 fail.** 71 unit tests for plan generation, 21 CLI BDD scenarios, 5 agent BDD scenarios. Coverage is honest — no gate inflation.
+
+This project is its own proof. We govern it with the same tools we ship.
+
+---
+
 ## Naming Cheat Sheet
 
 ```
@@ -151,16 +211,38 @@ link                 ← subcommand: reconcile working set to toml
 
 ## Ecosystem Tools
 
-| Tool | What it does |
-|------|-------------|
-| **deck** | Declare, link, and govern skills across projects |
-| **creator** | Scaffold and build thin-skill packages |
-| **curator** | Scan the cold pool, index skills, query by niche/type/source |
-| **arena** | A/B test skills and deck configurations against real tasks |
-| **coach** | Review SKILL.md quality against best practices |
-| **cortex** | Project governance: ADR, Epic, Task, Wiki |
+| Tool | npm | What it means for you |
+|------|-----|----------------------|
+| **deck** | [`@lythos/skill-deck`](https://www.npmjs.com/package/@lythos/skill-deck) | One file declares what skills are active. Teammates get identical setups. CI is reproducible. |
+| **creator** | [`@lythos/skill-creator`](https://www.npmjs.com/package/@lythos/skill-creator) | Build skills that are light for agents but maintainable for humans. No more 5,000-line SKILL.md files. |
+| **curator** | [`@lythos/skill-curator`](https://www.npmjs.com/package/@lythos/skill-curator) | Stop hoarding skills you forgot why you installed. Query by niche: "what testing skills do I have?" |
+| **arena** | [`@lythos/skill-arena`](https://www.npmjs.com/package/@lythos/skill-arena) | Prove a skill works before you adopt it. No more "works on my machine" — controlled comparison with evidence. |
+| **coach** | [`@lythos/skill-coach`](https://www.npmjs.com/package/@lythos/skill-coach) | Catch skill quality issues before they reach your agent. Like a linter, but for agent instructions. |
+| **cortex** | [`@lythos/project-cortex`](https://www.npmjs.com/package/@lythos/project-cortex) | GTD-style project governance: every decision is an ADR, every task is tracked, nothing falls through cracks. |
 
 We govern this project with our own tools. Every skill in `packages/` is built with creator. Every decision goes through cortex ADRs. Every release uses deck to manage working sets.
+
+---
+
+## Curator: Index Your Cold Pool
+
+As your skill collection grows, you lose track of what you have and **why**. Curator scans your cold pool, extracts metadata from every SKILL.md, and builds a searchable index.
+
+```bash
+# Index your cold pool
+bunx @lythos/skill-curator@latest ~/.agents/skill-repos
+
+# Add a skill with a decision record
+bunx @lythos/skill-curator@latest add github.com/foo/bar \
+  --pool ~/.agents/skill-repos \
+  --reason "Agent recommended, covers PDF extraction"
+
+# Query by niche or keyword
+bunx @lythos/skill-curator@latest query \
+  "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
+```
+
+Curator provides the data; Arena provides the comparison. See [`packages/lythoskill-curator/README.md`](./packages/lythoskill-curator/README.md) for full documentation.
 
 ---
 
@@ -172,7 +254,28 @@ See [`examples/`](./examples/) for a complete walkthrough of a deck-governed Nex
 
 ## Arena: A/B Test Skill Configurations
 
-Arena isolates skills in `/tmp` worktrees and spawns independent agents to execute the same task. Compare deck A vs deck B, kimi vs claude, or validate a single skill. See [`references/comparisons.md`](./references/comparisons.md) for how this compares to benchmark suites.
+Arena isolates skills in `/tmp` worktrees and spawns independent agents to execute the same task.
+
+**Test a single deck:**
+```bash
+bunx @lythos/skill-arena@latest single \
+  --deck ./examples/decks/scout.toml \
+  --brief "Generate auth flow diagram" \
+  --out ./output
+```
+
+**Compare two decks (agent-orchestrated, default):**
+```bash
+bunx @lythos/skill-arena@latest vs --config ./arena.toml
+```
+
+**Test with a specific player (cross-player):**
+```bash
+bunx @lythos/skill-arena@latest single \
+  --deck ./deck.toml --brief "task" --player kimi
+```
+
+Cross-player requires installing the target agent CLI (e.g. `uv tool install kimi-cli`, `npm i -g @openai/codex`). In `vs` mode, each side's player is declared in `arena.toml` — not via `--player`. See [`packages/lythoskill-arena/skill/SKILL.md`](./packages/lythoskill-arena/skill/SKILL.md) for the full protocol. See [`references/comparisons.md`](./references/comparisons.md) for how this compares to benchmark suites.
 
 ---
 
@@ -218,11 +321,18 @@ bun run test:bdd                   # BDD integration tests
 
 ## Troubleshooting
 
-**"Command not found: deck"** → Use `bunx @lythos/skill-deck@latest <subcommand>` instead.
+| Symptom | Fix |
+|---------|-----|
+| `Command not found: deck` | Use `bunx @lythos/skill-deck@latest <subcommand>` |
+| `bun: command not found` | Install Bun: `curl -fsSL https://bun.sh/install | bash` |
+| `bunx: command not found` after install | Restart shell or run `source ~/.bashrc` |
+| `Skill not found` after `deck link` | Skill missing from cold pool: `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` |
+| Skill not visible to agent | Check `working_set` matches your agent's path (see below) |
+| Symlink creation fails | Ensure `working_set` directory exists and is writable |
+| `deck link` hangs or fails | `github.com` may be unreachable; use a git proxy |
+| Lockfile merge conflict | Run `deck link` — lockfile is fully derived from `skill-deck.toml` |
 
-**"bun: command not found"** → Install Bun: `curl -fsSL https://bun.sh/install | bash`.
-
-**Skill not visible to agent** → Check `working_set` in `skill-deck.toml` matches your agent's expected path:
+**Agent `working_set` paths:**
 - `.claude/skills/` — Claude Code
 - `.agents/skills/` — Codex CLI, OpenClaw
 - `.cursor/skills/` — Cursor
@@ -230,4 +340,8 @@ bun run test:bdd                   # BDD integration tests
 - `.windsurf/skills/` — Windsurf
 - `.github/skills/` — GitHub Copilot
 
-**Lockfile merge conflict** → Run `deck link` — the lockfile is fully derived from `skill-deck.toml`. Delete it and re-link if needed.
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE) for details.
