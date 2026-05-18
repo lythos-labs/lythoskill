@@ -1,6 +1,6 @@
 ---
 name: lythoskill-journalist
-version: 0.1.0
+version: 0.14.4
 type: standard
 description: |
   记者系技能 — investigative claim verification via multi-source cross-referencing.

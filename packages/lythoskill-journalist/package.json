@@ -1,6 +1,6 @@
 {
   "name": "@lythos/skill-journalist",
-  "version": "0.1.0",
+  "version": "0.14.4",
   "description": "记者系技能 — investigative fact-checker for agent skill claims. Cross-references sources, detects bias, assigns structured confidence.",
   "keywords": [
     "ai-agent",
