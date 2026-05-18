@@ -50,6 +50,8 @@ bunx @lythos/skill-creator@0.14.4 add-skill <skill-name>
 
 **Step 1 (CLI)**: Creates `packages/<skill-name>/skill/SKILL.md` template.
 **Step 2 (agent)**: Edit SKILL.md — fill description, when_to_use, body, gotchas.
+  → After editing, run `bunx @lythos/skill-coach` to validate against 12-dimension quality rubric.
+  → Fix issues coach flags, then proceed to Step 3.
 **Step 3 (verify)**: Run `cortex probe` to confirm no empty-shell template.
 
 **Two skill types, decided upfront**:
