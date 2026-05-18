@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/18 12:12:40
+> 自动生成于 2026/5/18 12:19:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 241 | 进行中: 0, 待验收: 0, 已完成: 204 |
+| Tasks | 241 | 进行中: 0, 待验收: 0, 已完成: 205 |
 | Epics | 32 | 活跃: 0, 已完成: 28, 悬置: 2, 已归档: 2 |
 | ADRs | 73 | 已接受: 71 |
 
@@ -63,9 +63,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260518030349939**: Phase 3 — BDD coverage dashboard + change-impact probe
+_无_
 
 ### 进行中 (0)
 
@@ -75,7 +75,7 @@ _无_
 
 _无_
 
-### 已完成 (204)
+### 已完成 (205)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -277,6 +277,7 @@ _无_
 - ✅ ~~TASK-20260518004641351~~: Arena Standard Posture SOP — mindset validator protocol and meta-test showcase
 - ✅ ~~TASK-20260518013753710~~: Add empty-shell detection to probe — grep for PLACEHOLDER/需求1 markers
 - ✅ ~~TASK-20260518030349878~~: Phase 1 — reproduce.sh contract spec
+- ✅ ~~TASK-20260518030349939~~: Phase 3 — BDD coverage dashboard + change-impact probe
 - ✅ ~~TASK-20260518030349966~~: Phase 4 — migrate high-value .agent.md to reproduce.sh
 - ✅ ~~TASK-20260518105942103~~: Migrate deck-to-symlink-to-snapshot to reproduce.sh
 - ✅ ~~TASK-20260518110819248~~: localhost/<skill> quick form for personal skills
