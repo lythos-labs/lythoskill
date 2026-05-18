@@ -104,13 +104,13 @@ prompt = "Search for latest info, then generate professional document with diagr
 
 | `--alias <alias>` | Explicit alias for the skill (default: basename of path) | — |
 | `--type <type>` | Target section for `add`: `innate`, `tool`, or `transient` | `tool` |
-| `--mode <mode>` | Link mode for `add`/`link`: `symlink` (default) or `snapshot` (copy, for Codex compat) | `symlink` |
+| `--mode <mode>` | Link mode for `add`/`link`: `symlink` (default) or `snapshot` (copy, pinned to cold pool HEAD) | `symlink` |
 
 ### Safety guards
 
 `link` refuses to operate if `working_set` resolves to your home directory or root (`/`).
 
-**Snapshot mode** (`--mode snapshot` or `link --mode snapshot`): copies the source directory into the working set instead of symlinking. This is needed for agents that don't support symlinks (e.g. Codex #11314). Snapshots are pinned to the cold pool version at link time. Use `deck to-symlink <alias>` to switch back to symlink mode, or `deck to-snapshot <alias>` to pin a symlink as a snapshot.
+**Snapshot mode** (`--mode snapshot` or `link --mode snapshot`): copies the source directory into the working set instead of symlinking. Snapshots are pinned to the cold pool version at link time — useful when you want the working set to be a stable copy rather than a live symlink that follows cold pool updates. Use `deck to-symlink <alias>` to switch back to symlink mode, or `deck to-snapshot <alias>` to pin a symlink as a snapshot.
 
 ### Exit codes
 
