@@ -265,3 +265,4 @@ Read these **only when the specific topic arises**:
 | Identify skill combination patterns (pipeline, modality…) | [references/combination-patterns.md](./references/combination-patterns.md) |
 | Understand curator's design principles | [references/design-principles.md](./references/design-principles.md) |
 | See the full data flow and trust model | [references/architecture.md](./references/architecture.md) |
+| Understand WHY curator is this shape (ecosystem structural constraints, steel-man analysis) | [references/why-this-shape.md](./references/why-this-shape.md) |
