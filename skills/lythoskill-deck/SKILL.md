@@ -1,6 +1,6 @@
 ---
 name: lythoskill-deck
-version: 0.14.6
+version: 0.15.0
 type: standard
 description: |
   Declarative skill deck governance. `deck link` reconciles the working set
@@ -22,7 +22,7 @@ when_to_use: |
   ALSO trigger when user says "switch deck", "add skill", "remove skill",
   "clean up skills", "organize my deck", "create phase deck".
 allowed-tools:
-  - Bash(bunx @lythos/skill-deck@0.14.6 *)
+  - Bash(bunx @lythos/skill-deck@0.15.0 *)
 # ── deck governance metadata (consumed by lythoskill tooling, not by agent platforms) ──
 deck_niche: meta.governance.deck
 deck_dependencies:
@@ -82,28 +82,28 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 # ── Core (use these every time) ──
 
 # Reconcile working set to match declaration
-bunx @lythos/skill-deck@0.14.6 link
-bunx @lythos/skill-deck@0.14.6 link --deck ./phase1-brand.toml
+bunx @lythos/skill-deck@0.15.0 link
+bunx @lythos/skill-deck@0.15.0 link --deck ./phase1-brand.toml
 
 # Add skill from cold pool or download URL
-bunx @lythos/skill-deck@0.14.6 add github.com/owner/repo/skill-name
-bunx @lythos/skill-deck@0.14.6 add github.com/owner/repo/skill-name --alias my-skill --type tool
+bunx @lythos/skill-deck@0.15.0 add github.com/owner/repo/skill-name
+bunx @lythos/skill-deck@0.15.0 add github.com/owner/repo/skill-name --alias my-skill --type tool
 
 # ── Maintenance ──
 
-bunx @lythos/skill-deck@0.14.6 refresh              # plan-only scan for updates
-bunx @lythos/skill-deck@0.14.6 refresh --exec       # actually git pull
-bunx @lythos/skill-deck@0.14.6 remove <alias>       # remove from deck + working set
-bunx @lythos/skill-deck@0.14.6 validate             # check TOML schema
-bunx @lythos/skill-deck@0.14.6 validate --remote    # probe locators against GitHub
+bunx @lythos/skill-deck@0.15.0 refresh              # plan-only scan for updates
+bunx @lythos/skill-deck@0.15.0 refresh --exec       # actually git pull
+bunx @lythos/skill-deck@0.15.0 remove <alias>       # remove from deck + working set
+bunx @lythos/skill-deck@0.15.0 validate             # check TOML schema
+bunx @lythos/skill-deck@0.15.0 validate --remote    # probe locators against GitHub
 
 # ── Advanced ──
 
-bunx @lythos/skill-deck@0.14.6 to-symlink <alias>   # snapshot → symlink
-bunx @lythos/skill-deck@0.14.6 to-snapshot <alias>  # symlink → snapshot (pin HEAD)
-bunx @lythos/skill-deck@0.14.6 reconcile            # drift report vs cold pool
-bunx @lythos/skill-deck@0.14.6 reconcile --apply    # converge
-bunx @lythos/skill-deck@0.14.6 migrate-schema       # old string-array → alias-as-key
+bunx @lythos/skill-deck@0.15.0 to-symlink <alias>   # snapshot → symlink
+bunx @lythos/skill-deck@0.15.0 to-snapshot <alias>  # symlink → snapshot (pin HEAD)
+bunx @lythos/skill-deck@0.15.0 reconcile            # drift report vs cold pool
+bunx @lythos/skill-deck@0.15.0 reconcile --apply    # converge
+bunx @lythos/skill-deck@0.15.0 migrate-schema       # old string-array → alias-as-key
 ```
 
 `link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
@@ -118,8 +118,8 @@ Before running any `deck` command, check the toml format. If you see `skills = [
 
 ```
 ⚠️  This deck uses the deprecated string-array format. Run migrate?
-   bunx @lythos/skill-deck@0.14.6 migrate-schema
-   bunx @lythos/skill-deck@0.14.6 migrate-schema --dry-run  # preview first
+   bunx @lythos/skill-deck@0.15.0 migrate-schema
+   bunx @lythos/skill-deck@0.15.0 migrate-schema --dry-run  # preview first
 ```
 
 Do NOT silently migrate.
@@ -169,7 +169,7 @@ The deck does NOT auto-insert a `skills/` prefix. Verify repo structure before w
 
 ```bash
 export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"
-bunx @lythos/skill-deck@0.14.6 add github.com/owner/repo/skill
+bunx @lythos/skill-deck@0.15.0 add github.com/owner/repo/skill
 ```
 
 **Innate priority**: After compaction, read `innate` skills' full SKILL.md first. `tool` skills are lazy — read on trigger. Agent-side convention.
