@@ -32,14 +32,14 @@ Add optional `also_link_to` field to `[deck]`:
 ```toml
 [deck]
 working_set = ".claude/skills"
-also_link_to = ".codex/skills, .kimi/skills"   # comma-separated, NOT an array
+also_link_to = [".codex/skills", ".kimi/skills"]   # TOML array
 ```
 
 ### Design Rationale
 
 | Decision | Why |
 |----------|-----|
-| Comma-separated string, not array | TOML arrays add visual noise. A single extra path is 90% of use cases. Comma-separated is readable and keeps the deck flat. |
+| TOML array, not comma-separated string | Arrays are idiomatic TOML, support per-line comments, and extend naturally to array-of-tables if per-target options are needed later. Comma-separated was a fatigue-period decision. |
 | Named `also_link_to` not `extra_working_sets` | "Also" implies symmetry — same behavior, just more places. "Extra" implies secondary priority. |
 | Same reconciler logic | `also_link_to` paths use the exact same `deck link` reconciler. No new code path. |
 | Per-skill `mode` (symlink/snapshot) respected | Each target gets the mode declared in `skill-deck.lock`. Codex can use `snapshot` mode to avoid its symlink bug. |
@@ -73,9 +73,9 @@ Cold Pool (source of truth)
 - `deck refresh` already works per cold-pool repo — no change
 - `skill-deck.lock` remains a single file in the primary `working_set`
 - Per-skill `mode` allows Codex to use `snapshot` (avoids directory-level symlink bug)
-- No array syntax, no TOML complexity — one comma-separated string
+- Backward compat: comma-separated string still parses (with deprecation warning)
 
 ### Future
 
 - `deck link --also` flag to sync only `also_link_to` targets (skip primary)
-- Per-target `mode` override: `also_link_to = ".codex/skills:snapshot"` for Codex
+- Per-target `mode` override via array-of-tables: `[[deck.also_link_to]] path = ".codex/skills" mode = "snapshot"`
