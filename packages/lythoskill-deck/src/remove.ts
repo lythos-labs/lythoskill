@@ -33,6 +33,11 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   const WORKING_SET = expandHome(deck.deck?.working_set || ".claude/skills", PROJECT_DIR);
 
+  const ALSO_LINK_TO_RAW: string[] = Array.isArray(deck.deck?.also_link_to)
+    ? deck.deck.also_link_to.filter((v: any) => typeof v === 'string')
+    : [];
+  const ALSO_LINK_TO = ALSO_LINK_TO_RAW.map((p: string) => expandHome(p, PROJECT_DIR));
+
   // ── 定位目标 ────────────────────────────────────────────────
 
   const { entries: parsedEntries } = parseDeck(deckRaw);
@@ -95,6 +100,18 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     console.log(`  🗑️  Removed symlink: ${symlinkPath}`);
   } else {
     console.log(`  ⚠️  Symlink not found: ${symlinkPath}`);
+  }
+
+  // ── 删 also_link_to symlinks ─────────────────────────────────
+
+  for (const target of ALSO_LINK_TO) {
+    const linkPath = join(target, alias);
+    if (existsSync(linkPath)) {
+      rmSync(linkPath, { recursive: true, force: true });
+      console.log(`  🗑️  Removed also_link_to symlink: ${linkPath}`);
+    } else {
+      console.log(`  ⚠️  also_link_to symlink not found: ${linkPath}`);
+    }
   }
 
   // ── Metadata cleanup ────────────────────────────────────────
