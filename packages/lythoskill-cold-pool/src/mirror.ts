@@ -2,8 +2,11 @@
  * Mirror URL rewriting for restricted networks.
  *
  * Two layers only — the tool never decides which third party to trust:
- *   1. LYTHOSKILL_GH_MIRROR env var (explicit user choice, user bears trust)
+ *   1. LYTHOS_GH_MIRROR env var (explicit user choice, user bears trust)
  *   2. LYTHOS_SOCKS_PROXY / HTTPS_PROXY / HTTP_PROXY (standard, user's own infra)
+ *
+ * Backward compat: LYTHOSKILL_GH_MIRROR (legacy name) is still read with a
+ * deprecation warning. Prefer LYTHOS_GH_MIRROR for consistency with the LYTHOS_
  *
  * No hard-coded mirror list. Auto-fallback to "known" third-party mirrors was
  * removed: the tool must not silently delegate trust to an external service
@@ -13,7 +16,14 @@
 import { execFileSync } from 'node:child_process'
 
 export function getMirror(): string | undefined {
-  const v = process.env.LYTHOSKILL_GH_MIRROR?.trim()
+  let v = process.env.LYTHOS_GH_MIRROR?.trim()
+  if (!v) {
+    const legacy = process.env.LYTHOSKILL_GH_MIRROR?.trim()
+    if (legacy) {
+      console.warn('⚠️  LYTHOSKILL_GH_MIRROR is deprecated. Use LYTHOS_GH_MIRROR instead.')
+      v = legacy
+    }
+  }
   if (!v) return undefined
   if (v.startsWith('http://') || v.startsWith('https://')) {
     return v.replace(/\/+$/, '')

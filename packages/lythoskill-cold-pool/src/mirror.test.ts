@@ -9,8 +9,9 @@ describe('probeConnectivity', () => {
 
   beforeEach(() => {
     originalFetch = globalThis.fetch
-    originalEnv = process.env.LYTHOSKILL_GH_MIRROR
+    originalEnv = process.env.LYTHOS_GH_MIRROR
     originalSocks = process.env.LYTHOS_SOCKS_PROXY
+    delete process.env.LYTHOS_GH_MIRROR
     delete process.env.LYTHOSKILL_GH_MIRROR
     delete process.env.LYTHOS_SOCKS_PROXY
     fetchCalls = []
@@ -19,10 +20,11 @@ describe('probeConnectivity', () => {
   afterEach(() => {
     globalThis.fetch = originalFetch
     if (originalEnv !== undefined) {
-      process.env.LYTHOSKILL_GH_MIRROR = originalEnv
+      process.env.LYTHOS_GH_MIRROR = originalEnv
     } else {
-      delete process.env.LYTHOSKILL_GH_MIRROR
+      delete process.env.LYTHOS_GH_MIRROR
     }
+    delete process.env.LYTHOSKILL_GH_MIRROR
     if (originalSocks !== undefined) {
       process.env.LYTHOS_SOCKS_PROXY = originalSocks
     } else {
@@ -67,7 +69,7 @@ describe('probeConnectivity', () => {
 
   // ── Vertical Slice 2 ──
   test('direct fails, user mirror ok → returns mirror path', async () => {
-    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
+    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 500 })],
@@ -108,7 +110,7 @@ describe('probeConnectivity', () => {
 
   // ── Vertical Slice 5: Racing behavior ──
   test('probes race concurrently, not sequentially', async () => {
-    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
+    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     const start = performance.now()
 
     mockFetch(
@@ -226,7 +228,7 @@ describe('probeConnectivity', () => {
   // ── Vertical Slice 11: SOCKS proxy only affects direct, mirror still works ──
   test('SOCKS proxy fails but mirror succeeds', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
-    process.env.LYTHOSKILL_GH_MIRROR = 'https://my-mirror.example.com'
+    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     const execCalls: Array<{ file: string; args: string[] }> = []
 
     const result = await probeConnectivity('https://example.com/skill', 3000, {
@@ -246,5 +248,31 @@ describe('probeConnectivity', () => {
     // SOCKS proxy is only used for direct probes; mirror probes use native fetch
     expect(result?.path).toBe('mirror')
     expect(execCalls.length).toBe(1) // only one curl call for direct probe
+  })
+
+  // ── Backward compat: legacy env var name still works ──
+  test('LYTHOSKILL_GH_MIRROR (legacy) still works with deprecation warning', async () => {
+    // Ensure new name is not set
+    delete process.env.LYTHOS_GH_MIRROR
+    process.env.LYTHOSKILL_GH_MIRROR = 'https://legacy-mirror.example.com'
+    const warnCalls: string[] = []
+    const originalWarn = console.warn
+    console.warn = (...args: unknown[]) => {
+      warnCalls.push(args.map(String).join(' '))
+    }
+
+    mockFetch(
+      new Map([
+        ['https://example.com/skill', new Response(null, { status: 500 })],
+        ['https://legacy-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
+      ]),
+    )
+
+    const result = await probeConnectivity('https://example.com/skill')
+
+    console.warn = originalWarn
+
+    expect(result?.path).toBe('mirror')
+    expect(warnCalls.some((m) => m.includes('deprecated'))).toBe(true)
   })
 })

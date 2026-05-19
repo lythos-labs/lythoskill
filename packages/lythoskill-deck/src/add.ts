@@ -272,7 +272,7 @@ export async function addSkill(
       console.error(`   Network probe failed — the host may be unreachable or blocked.`)
       console.error(``)
       console.error(`   To fix:`)
-      console.error(`     export LYTHOSKILL_GH_MIRROR="https://your-mirror.com"`)
+      console.error(`     export LYTHOS_GH_MIRROR="https://your-mirror.com"`)
       console.error(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
       console.error(`     # See: AGENTS.md → Network Restrictions`)
       process.exit(1)

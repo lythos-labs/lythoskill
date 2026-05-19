@@ -82,7 +82,7 @@ export async function fetchDeckUrl(url: string, io?: FetchDeckIO): Promise<strin
   }
 
   if (!res?.ok) {
-    throw new Error(`Failed to fetch deck: ${normalized}\n   Set LYTHOSKILL_GH_MIRROR to use a custom mirror, or LYTHOS_SOCKS_PROXY for SOCKS5.`)
+    throw new Error(`Failed to fetch deck: ${normalized}\n   Set LYTHOS_GH_MIRROR to use a custom mirror, or LYTHOS_SOCKS_PROXY for SOCKS5.`)
   }
 
   writeFn(dest, await res.text())

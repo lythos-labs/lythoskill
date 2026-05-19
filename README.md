@@ -329,8 +329,18 @@ bun run test:bdd                   # BDD integration tests
 | `Skill not found` after `deck link` | Skill missing from cold pool: `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` |
 | Skill not visible to agent | Check `working_set` matches your agent's path (see below) |
 | Symlink creation fails | Ensure `working_set` directory exists and is writable |
-| `deck link` hangs or fails | `github.com` may be unreachable; use a git proxy |
+| `deck link` hangs or fails | `github.com` may be unreachable; see Environment Variables below |
 | Lockfile merge conflict | Run `deck link` — lockfile is fully derived from `skill-deck.toml` |
+
+**Environment Variables:**
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `LYTHOS_GH_MIRROR` | GitHub mirror for restricted networks | `export LYTHOS_GH_MIRROR="https://mirror.example.com"` |
+| `LYTHOS_SOCKS_PROXY` | SOCKS5 proxy for git/fetch operations | `export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"` |
+| `LYTHOS_GIT_PROTOCOL` | Git clone protocol (`https` or `ssh`) | `export LYTHOS_GIT_PROTOCOL="ssh"` |
+
+`LYTHOS_GH_MIRROR` rewrites `github.com` URLs to your mirror — the tool does not auto-fallback to third-party mirrors (trust boundary stays with you). `LYTHOS_SOCKS_PROXY` routes connectivity probes through `curl --proxy socks5://`. `LYTHOS_GIT_PROTOCOL` changes the scheme in clone URLs (default is `https`).
 
 **Agent `working_set` paths:**
 - `.claude/skills/` — Claude Code

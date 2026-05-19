@@ -127,7 +127,7 @@ export async function refreshDeck(
     if (!probe) {
       console.error(`⚠️  Network probe failed for ${probeUrl}`)
       console.error(`   Refresh may fail for git targets. To fix:`)
-      console.error(`     export LYTHOSKILL_GH_MIRROR="https://your-mirror.com"`)
+      console.error(`     export LYTHOS_GH_MIRROR="https://your-mirror.com"`)
       console.error(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
       console.error(`   Continuing anyway — per-target errors will be reported below.`)
       console.error()

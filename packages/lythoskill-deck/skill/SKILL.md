@@ -159,7 +159,13 @@ The deck does NOT auto-insert a `skills/` prefix. Verify repo structure before w
 
 **SKILL.md type field**: Only `standard` or `flow` are valid. `innate`/`tool`/`transient` are deck toml section names, not SKILL.md types. `deck_skill_type` (custom field) for `fork`/`transient` declarations.
 
-**Network restrictions — SOCKS proxy**: If `deck add` or `validate --remote` fails with "Cannot reach github.com", set `LYTHOS_SOCKS_PROXY`:
+**Network restrictions**: If `deck add` or `validate --remote` fails with "Cannot reach github.com", use one of these env vars:
+
+| Variable | When to use | Example |
+|----------|-------------|---------|
+| `LYTHOS_GH_MIRROR` | You have a GitHub mirror/proxy | `export LYTHOS_GH_MIRROR="https://mirror.example.com"` |
+| `LYTHOS_SOCKS_PROXY` | You have a SOCKS5 proxy | `export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"` |
+| `LYTHOS_GIT_PROTOCOL` | You need SSH instead of HTTPS | `export LYTHOS_GIT_PROTOCOL="ssh"` |
 
 ```bash
 export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"

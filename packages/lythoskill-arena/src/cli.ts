@@ -232,7 +232,7 @@ async function singleRun(args: string[]) {
     if (!res?.ok) {
       const errorDetail = res ? `HTTP ${res.status}` : 'unreachable'
       console.error(`❌ Cannot reach ${url} (${errorDetail})`)
-      if (allFailed) console.error('   Set LYTHOSKILL_GH_MIRROR to use a custom mirror.')
+      if (allFailed) console.error('   Set LYTHOS_GH_MIRROR to use a custom mirror.')
       console.error('   Or download manually and reference the local file.')
       process.exit(1)
     }
