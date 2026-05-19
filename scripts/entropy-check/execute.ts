@@ -115,20 +115,12 @@ function printRemediationSummary(failedChecks: CheckResult[], io: EntropyIO): vo
     if (!check.remediation || check.remediation.length === 0) continue
 
     io.log(`▸ ${check.name}`)
-    io.log(`  <spawn subagent to execute ${check.name} remediation SOP>`)
     io.log('')
 
-    for (let i = 0; i < check.remediation.length; i++) {
-      const step = check.remediation[i]
-      io.log(`  Step ${i + 1}: ${step.action}`)
-      if (step.command) {
-        io.log(`    $ ${step.command}`)
-      }
-      if (step.note) {
-        io.log(`    # ${step.note}`)
-      }
-      io.log('')
+    for (const line of check.remediation) {
+      io.log(`  ${line}`)
     }
+    io.log('')
   }
 
   io.log('┌─────────────────────────────────────────────────────────────┐')
