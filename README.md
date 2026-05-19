@@ -62,7 +62,14 @@ Copy the block below. Tell your agent: "Set up lythoskill for this project." The
 Read https://raw.githubusercontent.com/lythos-labs/lythoskill/main/README.md.
 1. Check `bun --version` — if missing, install Bun.
 2. Pick a skill from skills.sh or anthropics/skills.
-3. Create a `skill-deck.toml`, run `bunx @lythos/skill-deck@latest link`.
+3. Create `skill-deck.toml`:
+   ```toml
+   [deck]
+   max_cards = 10
+   [tool.skills.frontend-design]
+   path = "github.com/anthropics/skills/skills/frontend-design"
+   ```
+   Then run `bunx @lythos/skill-deck@latest link`.
 4. Verify skills appeared in your working_set directory.
 ````
 
