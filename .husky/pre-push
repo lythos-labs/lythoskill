@@ -49,8 +49,8 @@ fi
 # 2. Entropy check — weekly governance debt scan
 #    Non-blocking by default. Writes .last-entropy-check (gitignored) to survive
 #    across sessions. Over 7 days since last check → full scan. Under 7 days → skip.
-if [ -f scripts/entropy-check.sh ]; then
-  bash scripts/entropy-check.sh
+if [ -f scripts/entropy-check/index.ts ]; then
+  bun scripts/entropy-check/index.ts
 fi
 
 # 3. Cortex probe — surface state drift the agent should address
