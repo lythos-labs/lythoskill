@@ -176,6 +176,47 @@ bunx @lythos/skill-deck@0.15.0 add github.com/owner/repo/skill
 
 **Never guess locators** — web-search the repo structure before writing paths for unfamiliar repos.
 
+## Deck as Orchestrator — Task → Deck Mapping
+
+lythos has no standalone orchestrator. **The deck IS the orchestrator entry point.** You (the agent) select the right pre-built deck for the user's task, link it in an isolated environment, and execute. The three-layer distribution: light orchestration in combo prompt, medium in SKILL.md, heavy mechanical in CLI.
+
+### Intent → Deck mapping
+
+| User says | Deck to use | Command |
+|-----------|------------|---------|
+| 调研 / 研究 / 查一下 / research | `deep-research.toml` | `arena single --deck examples/decks/deep-research.toml --brief "..."` |
+| 扫一下 / 审计 / 找问题 / audit / sweep | `qa-sweep.toml` | `arena single --deck examples/decks/qa-sweep.toml --brief "..."` |
+| 设计 / 架构 / 画图 / architecture | `architecture-explainer.toml` | `arena single --deck examples/decks/architecture-explainer.toml --brief "..."` |
+| 写文档 / 科普 / docs | `documents.toml` | `arena single --deck examples/decks/documents.toml --brief "..."` |
+| 治理 / task / epic / governance | `governance.toml` | `arena single --deck examples/decks/governance.toml --brief "..."` |
+| 体验 / 测试 UX / scout | `scout.toml` | `arena single --deck examples/decks/scout.toml --brief "..."` |
+| 改bug / 诊断 / diagnose | Use `diagnose` skill directly | — |
+| 写测试 / TDD | Use `tdd` skill directly | — |
+| 发布 / release / ship | Use `lythoskill-red-green-release` skill directly | — |
+
+**Rule: deck first, don't ask.** User says "调研" → reach for `deep-research.toml`. User says "扫一下" → `qa-sweep.toml`. Do NOT ask "should I use X or do it manually?" — just dispatch. The subagent works in parallel.
+
+Full catalogue: [`examples/decks/INDEX.md`](./examples/decks/INDEX.md).
+
+### Isolation discipline
+
+**Experiments run in `/tmp`, never in committed directories.** Arena's `prepare-workdir` creates an isolated temp dir, links the deck there, and archives only outputs. No pollution of the project working set.
+
+```bash
+# Golden rule: never run experiments in the project root
+arena single --deck examples/decks/deep-research.toml --brief "..."  # auto-isolates in /tmp
+```
+
+### Orchestration weight — where does the logic go?
+
+| Your orchestration logic is… | Put it in… | Example |
+|------------------------------|------------|---------|
+| Light + conditional ("if X then Y") | `combo.prompt` in skill-deck.toml | "If git status shows conflicts, call merge-conflict" |
+| Medium + reusable across projects | Standalone SKILL.md in cold pool | A complex workflow with branching logic |
+| Heavy + mechanical (filesystem, backup) | CLI npm package | `deck link`, `arena single` |
+
+**The agent is the orchestrator. Tools execute.** You reason about conditions, pass state between calls, handle errors. Combo prompt gives you the playbook; CLI gives you the mechanical layer.
+
 ## Supporting References
 
 | When you need to… | Read |
