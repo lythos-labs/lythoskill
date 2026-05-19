@@ -125,6 +125,64 @@ if [ -n "$STAGED" ]; then
   echo "✅ Skills rebuilt and staged"
 fi
 
+# 2.5. Skills/ directory purity — must contain only build output, no symlinks
+#      Symlinks in skills/ indicate working_set collision (agent confused
+#      build output dir with deck working_set). Extraneous entries indicate
+#      external skills were committed into the build output directory.
+if [ -d skills/ ]; then
+  SYMLINK_COUNT=0
+  for link in skills/*; do
+    if [ -L "$link" ]; then
+      SYMLINK_COUNT=$((SYMLINK_COUNT + 1))
+    fi
+  done
+
+  if [ "$SYMLINK_COUNT" -gt 0 ]; then
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════╗"
+    echo "║  ❌ SYMLINKS IN skills/ — BUILD OUTPUT POLLUTION            ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  skills/ is the build output directory (thin pattern).       ║"
+    echo "║  Symlinks here indicate deck link ran with working_set       ║"
+    echo "║  pointing at skills/ — build output was overwritten.         ║"
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    for link in skills/*; do
+      if [ -L "$link" ]; then
+        printf "║    %-54s ║\n" "$(basename "$link") -> $(readlink "$link")"
+      fi
+    done
+    echo "╠══════════════════════════════════════════════════════════════╣"
+    echo "║  Fix: remove symlinks, then rebuild:                         ║"
+    echo "║    rm skills/<name>  # for each symlink                      ║"
+    echo "║    bunx @lythos/skill-creator build --all                    ║"
+    echo "║  Ensure deck.toml working_set ≠ \"skills\"                   ║"
+    echo "╚══════════════════════════════════════════════════════════════╝"
+    echo ""
+    exit 1
+  fi
+
+  # Check for extraneous entries (no corresponding packages/<name>/skill/)
+  for dir in skills/*; do
+    if [ -d "$dir" ]; then
+      name=$(basename "$dir")
+      if [ ! -d "packages/$name/skill" ]; then
+        echo ""
+        echo "╔══════════════════════════════════════════════════════════════╗"
+        echo "║  ❌ EXTRANEOUS ENTRY IN skills/ — NO SOURCE PACKAGE          ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        printf "║  %-58s ║\n" "'$(basename "$dir")' in skills/ has no matching"
+        printf "║  %-58s ║\n" "packages/$(basename "$dir")/skill/ source."
+        echo "║  External skills belong in cold pool, not build output.      ║"
+        echo "╠══════════════════════════════════════════════════════════════╣"
+        echo "║  Fix: git rm -r skills/$(basename "$dir")                     ║"
+        echo "╚══════════════════════════════════════════════════════════════╝"
+        echo ""
+        exit 1
+      fi
+    fi
+  done
+fi
+
 # 3. Cortex governance: Epic-ADR coupling + lane guard + in-progress reminder (TypeScript)
 #    → delegates to packages/lythoskill-project-cortex/src/hooks/pre-commit.ts (T2+T3)
 bun packages/lythoskill-project-cortex/src/hooks/pre-commit.ts

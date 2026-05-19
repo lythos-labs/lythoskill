@@ -62,16 +62,17 @@ discovery faster, and the **enrichment layer** that remembers what was found.
 ```
 1. curator query "SELECT name, description FROM skills       ← local cache: "in cold pool?"
    WHERE description LIKE '%<keyword>%'"
-2. WebSearch for "<task> skill agent"                        ← remote discovery
-3. WebFetch / gh CLI to inspect candidates                  ← deep dive
-4. curator add <locator> --pool ...                          ← seed cold pool
-5. curator scan                                              ← re-index
-6. curator tag <name> --niche "<classification>"             ← agent-enriched metadata (L3)
+2. bunx skills find "<query>"                                 ← skills.sh registry (structured, install counts)
+3. WebSearch for "<task> skill agent"                         ← remote discovery (fallback if skills.sh miss)
+4. WebFetch / gh CLI to inspect candidates                   ← deep dive
+5. curator add <locator> --pool ...                           ← seed cold pool
+6. curator scan                                               ← re-index
+7. curator tag <name> --niche "<classification>"              ← agent-enriched metadata (L3)
    [--qa '{"source_type":"self/arena","signal_value":8,...}']
-7. arena single/vs                                           ← test before adopting
-8. curator tag <name> --qa '{"source_type":"self/arena"...}' ← record test results
-9. Recommend with confidence: "skill X fits because...       ← agent reasoning
-   (3 arena PASS + hub A confirms + curator scan clean)"
+8. arena single/vs                                            ← test before adopting
+9. curator tag <name> --qa '{"source_type":"self/arena"...}'  ← record test results
+10. Recommend with confidence: "skill X fits because...        ← agent reasoning
+    (3 arena PASS + hub A confirms + curator scan clean)"
 ```
 
 **Curator is NOT the discovery engine.** It's the agent's local data source.

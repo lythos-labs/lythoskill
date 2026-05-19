@@ -198,7 +198,7 @@ lythoskill/
 
 **Recent decisions** (see `cortex/adr/` for full text):
 - Cold-pool is the sole holder of git side-effects (ADR-20260507021957847)
-- Curator stays local cold-pool only, no remote feed adapters (ADR-20260508230803515)
+- Curator stays local cold-pool only, no remote feed adapters (ADR-20260508230803515). Agent uses `bunx skills find` (skills.sh registry) + WebSearch + gh CLI for discovery; curator indexes what the agent brings back
 - `deck sync` renamed to `deck link` + `to-symlink`/`to-snapshot` (ADR-20260509144134332)
 - DB data fingerprint for skill content tracking (ADR-20260509170343037, proposed)
 

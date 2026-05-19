@@ -1,11 +1,14 @@
 [deck]
 max_cards = 15
 cold_pool = "~/.agents/skill-repos"
-working_set = "skills"
+working_set = ".claude/skills"
 also_link_to = ".agents/skills"
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[innate.skills.lythoskill-sober]
+path = "localhost/me/sober"
 
 [tool.skills.lythoskill-project-cortex]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
