@@ -103,7 +103,7 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/example
 
 脚本安装 Bun，创建一份带 `frontend-design`（Anthropic 官方设计技能）的 `skill-deck.toml`，运行 `deck link`，自我检查。一条命令，技能出现，搞定。
 
-和 `npm install` 的感受一样：声明清单 → 一条命令 → 磁盘上可复现的结果。与 `npx skills add` 的区别在于：`deck link` 是声明式：你先写清单，再跑命令，结果可复现。
+和 `npm install` 一样：先写清单，再跑命令，结果可复现。`npx skills add` 是命令式安装；`deck link` 是声明式调和。
 
 继续添加：`curl ... | bash -s -- --skill github.com/owner/repo/path`。或者编辑 `skill-deck.toml` 后重新运行 `bunx @lythos/skill-deck@latest link`。
 
@@ -128,24 +128,24 @@ bunx @lythos/skill-deck@latest link
 
 ### 管理你的 Deck
 
-**添加技能** —— 支持 skills.sh 语法（`owner/repo`）、FQ locator，或 `@skill` 过滤器：
+**添加技能**：支持 skills.sh 语法（`owner/repo`）、FQ locator，或 `@skill` 过滤器：
 ```bash
 bunx @lythos/skill-deck@latest add vercel-labs/agent-skills
 bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/frontend-design
 ```
 
-**移除技能** —— 从 deck 和 working set 中移除（cold pool 不动）：
+**移除技能**：从 deck 和 working set 中移除（cold pool 不动）：
 ```bash
 bunx @lythos/skill-deck@latest remove <alias>
 ```
 
-**刷新技能** —— 检查 upstream 更新（默认仅 plan；加 `--exec` 才 pull）：
+**刷新技能**：检查 upstream 更新（默认仅 plan；加 `--exec` 才 pull）：
 ```bash
 bunx @lythos/skill-deck@latest refresh           # 仅计划
 bunx @lythos/skill-deck@latest refresh tdd --exec # 拉取单个技能
 ```
 
-**验证 deck** —— 提交前检查 TOML 格式：
+**验证 deck**：提交前检查 TOML 格式：
 ```bash
 bunx @lythos/skill-deck@latest validate
 ```
@@ -292,9 +292,9 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 
 项目尚处早期，还没有 Fortune 500 的背书。但我们有**自治理透明度**：
 
-- **每个决策都是 ADR。** 浏览 [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) —— 30+ 架构决策，附完整推理、被拒绝的备选方案和置信度评分。没有"相信我们，我们更懂"。
-- **每个发布都经 arena 测试。** Skill 发布前，在真实任务上跑控制变量对比。见 [`showcase/`](./showcase/) —— agent 使用 lythoskill 治理的 deck 完成的页面、报告和工具。
-- **每个技能都用 creator 构建。** Thin-skill 模式（`packages/<name>/skill/SKILL.md`）意味着 agent 可见的指令与实现分离——你可以精确审计 agent 看到了什么。
+- **决策即 ADR。** 浏览 [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) —— 30+ 架构决策，附完整推理、被拒绝的备选方案和置信度评分。没有"相信我们，我们更懂"。
+- **发布前经 arena 测试。** Skill 发布前，在真实任务上跑控制变量对比。见 [`showcase/`](./showcase/) —— agent 使用 lythoskill 治理的 deck 完成的页面、报告和工具。
+- **技能与实现分离。** Thin-skill 模式（`packages/<name>/skill/SKILL.md`）让你能精确审计 agent 看到了什么。
 - **661 个测试，0 失败。** 71 个 plan 生成单元测试，21 个 CLI BDD 场景，5 个 agent BDD 场景。覆盖率诚实——没有 gate 膨胀。
 
 这个项目是它自己的证明。我们用自己发布的工具治理自己。
@@ -501,4 +501,4 @@ bun run test:all
 
 ## License
 
-MIT —— 见 [LICENSE](./LICENSE)。
+MIT。见 [LICENSE](./LICENSE)。
