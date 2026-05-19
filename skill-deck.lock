@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "generated_at": "2026-05-19T12:23:07.717Z",
+  "generated_at": "2026-05-19T12:27:26.303Z",
   "deck_source": {
     "path": "skill-deck.toml",
     "content_hash": "764d5147f1fc1a4a1daaef0bf10cf88941cb83543b00949a9bdd72261cf67c72"
@@ -16,8 +16,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
       "dest": ".claude/skills/lythoskill-deck",
       "mode": "symlink",
-      "content_hash": "7c6c7ae287491fa3eb70f7e6ac939b2ccbfcf2322f79cfe9e920bdc5de47382f",
-      "linked_at": "2026-05-19T12:23:07.707Z",
+      "content_hash": "51f331373a9765d23d3a4d3c34e8d50a57071b38c7b029f5a49b8fbc57a49997",
+      "linked_at": "2026-05-19T12:27:26.295Z",
       "deck_managed_dirs": [
         ".claude/skills/",
         "skill-deck.lock"
@@ -32,7 +32,7 @@
       "dest": ".claude/skills/lythoskill-sober",
       "mode": "symlink",
       "content_hash": "00c7843a3d8235bf042e0bf0ac421f26ce83cb6e3254c6c24ab6f13e33afffcb",
-      "linked_at": "2026-05-19T12:23:07.708Z",
+      "linked_at": "2026-05-19T12:27:26.297Z",
       "deck_managed_dirs": []
     },
     {
@@ -43,8 +43,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
       "dest": ".claude/skills/lythoskill-project-cortex",
       "mode": "symlink",
-      "content_hash": "5a03ffde843f9314ff94ef66e9733cbf97bf8bf8a2526c77e0f858ffa4eb9042",
-      "linked_at": "2026-05-19T12:23:07.710Z",
+      "content_hash": "468d1300c9710f8e01688c7ea62f0a27dc2574b9acf326ef675ec681f4b65e15",
+      "linked_at": "2026-05-19T12:27:26.298Z",
       "deck_managed_dirs": []
     },
     {
@@ -55,8 +55,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
       "dest": ".claude/skills/lythoskill-arena",
       "mode": "symlink",
-      "content_hash": "5a725cc114cbf64abbf19d84cc503d449bbfc289179908bbb1671d4c3975289b",
-      "linked_at": "2026-05-19T12:23:07.711Z",
+      "content_hash": "191aae59337d02f157ccee5d16bd2966423499ae0af100c448285d4f70eeae9f",
+      "linked_at": "2026-05-19T12:27:26.299Z",
       "deck_managed_dirs": [
         "tmp/arena-*/"
       ]
@@ -64,13 +64,13 @@
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
       "alias": "lythoskill-curator",
-      "deck_niche": "meta.curation",
+      "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
       "dest": ".claude/skills/lythoskill-curator",
       "mode": "symlink",
-      "content_hash": "4884bd3a273155cf5af8642505a8b68f60cc41c4a60648fd7738abcd3539b598",
-      "linked_at": "2026-05-19T12:23:07.712Z",
+      "content_hash": "19dba3b668db1d4c90044227f98d674023390b9746bb620e1dc6678d83b1c77a",
+      "linked_at": "2026-05-19T12:27:26.300Z",
       "deck_managed_dirs": [
         "~/.agents/lythoskill/curator/"
       ]
@@ -83,8 +83,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
       "dest": ".claude/skills/lythoskill-project-scribe",
       "mode": "symlink",
-      "content_hash": "204dded57b17ceebbed61ecd93bc49890899218793ed4b1745c991e907f16dc5",
-      "linked_at": "2026-05-19T12:23:07.712Z",
+      "content_hash": "dd80dedfcaeacd1bf5c38f9a02127c96322527d1ea66fd6e68e6f53407e3d67e",
+      "linked_at": "2026-05-19T12:27:26.300Z",
       "deck_managed_dirs": []
     },
     {
@@ -95,8 +95,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
       "dest": ".claude/skills/lythoskill-project-onboarding",
       "mode": "symlink",
-      "content_hash": "c3c6d28cc3ab2908a1ca4d333159db45b2c9e4d9ed8fb7e17c93072cd2aa23b6",
-      "linked_at": "2026-05-19T12:23:07.713Z",
+      "content_hash": "fd5a1bf0aa97003089d76cc2ee096e9c406a4e9f2430559189a6aad3e814c0f0",
+      "linked_at": "2026-05-19T12:27:26.301Z",
       "deck_managed_dirs": []
     },
     {
@@ -107,8 +107,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
       "dest": ".claude/skills/lythoskill-coach",
       "mode": "symlink",
-      "content_hash": "9a0531377aea741c68d1236af1aac5d6d9417ccefb24b57899838dd4ef13190b",
-      "linked_at": "2026-05-19T12:23:07.714Z",
+      "content_hash": "e2bfd42f2bba83427d0bd543aa3b1133fd52954a51ee1e14eed828bf84a393ea",
+      "linked_at": "2026-05-19T12:27:26.301Z",
       "deck_managed_dirs": []
     },
     {
@@ -120,7 +120,7 @@
       "dest": ".claude/skills/tdd",
       "mode": "symlink",
       "content_hash": "af059705061156fd4845ddbb736fe92b564118ac5f03551e09ef9e8f6d970638",
-      "linked_at": "2026-05-19T12:23:07.715Z",
+      "linked_at": "2026-05-19T12:27:26.301Z",
       "deck_managed_dirs": []
     },
     {
@@ -132,7 +132,7 @@
       "dest": ".claude/skills/diagnose",
       "mode": "symlink",
       "content_hash": "28886402bbfa0470248086eab9106a103b964b76ae9496e63ff0c8a6761b6d13",
-      "linked_at": "2026-05-19T12:23:07.715Z",
+      "linked_at": "2026-05-19T12:27:26.302Z",
       "deck_managed_dirs": []
     },
     {
@@ -143,8 +143,8 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",
       "dest": ".claude/skills/lythoskill-red-green-release",
       "mode": "symlink",
-      "content_hash": "36950e143748f9dcffeeb6915890f48bd568866278fb1ec8ae56c01689ef63ee",
-      "linked_at": "2026-05-19T12:23:07.716Z",
+      "content_hash": "845c8a8f5d8315b1b47d0babf9277982c9a6d5751ca4c1be8008eb317ef857a1",
+      "linked_at": "2026-05-19T12:27:26.302Z",
       "deck_managed_dirs": []
     },
     {
@@ -155,13 +155,25 @@
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe-weekly",
       "dest": ".claude/skills/lythoskill-project-scribe-weekly",
       "mode": "symlink",
-      "content_hash": "783e3bf79ae585847071e8eec0c30b27a097000189f31bc7d24395e0e3773e7c",
-      "linked_at": "2026-05-19T12:23:07.716Z",
+      "content_hash": "4069e9bd670e0f8baa4a8fb124dd0e54eb83e347175a915564a45cac147aeb4c",
+      "linked_at": "2026-05-19T12:27:26.302Z",
+      "deck_managed_dirs": []
+    },
+    {
+      "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-writer",
+      "alias": "lythoskill-writer",
+      "deck_niche": "",
+      "type": "tool",
+      "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-writer",
+      "dest": ".claude/skills/lythoskill-writer",
+      "mode": "symlink",
+      "content_hash": "45e237c2cdd28478df6726d9dfc01566899b850c1884e9ea78495d17f813a049",
+      "linked_at": "2026-05-19T12:27:26.302Z",
       "deck_managed_dirs": []
     }
   ],
   "constraints": {
-    "total_cards": 12,
+    "total_cards": 13,
     "max_cards": 15,
     "within_budget": true,
     "transient_warnings": [],
