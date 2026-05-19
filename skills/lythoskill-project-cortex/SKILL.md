@@ -1,6 +1,6 @@
 ---
 name: project-cortex
-version: 0.14.5
+version: 0.14.6
 type: standard
 description: |
   Register tasks BEFORE fixing bugs. Close epics when work is done.
@@ -38,7 +38,7 @@ when_to_use: |
   - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
   - ABSOLUTELY FORBIDDEN: mv/cp/rename task or epic files by hand. ALWAYS use CLI: `cortex start/done/complete/suspend <id>`. Manual moves skip Status History update and create probe noise.
 allowed-tools:
-  - Bash(bunx @lythos/project-cortex@0.14.5 *)
+  - Bash(bunx @lythos/project-cortex@0.14.6 *)
 ---
 
 # Project Cortex: ADR + Epic + Task + Wiki
@@ -65,15 +65,15 @@ derives tasks       guides tasks        links to epic/adr
 ## CLI Commands
 ```bash
 # Create documents (CLI assigns timestamp ID, generates from template)
-bunx @lythos/project-cortex@0.14.5 task "Fix login bug"
-bunx @lythos/project-cortex@0.14.5 epic "User auth system" --lane main|emergency
-bunx @lythos/project-cortex@0.14.5 adr "Choose database"
+bunx @lythos/project-cortex@0.14.6 task "Fix login bug"
+bunx @lythos/project-cortex@0.14.6 epic "User auth system" --lane main|emergency
+bunx @lythos/project-cortex@0.14.6 adr "Choose database"
 # Create a Wiki entry (dated, for knowledge capture)
-bunx @lythos/project-cortex@0.14.5 wiki "Your insight" --category pattern|faq|lesson
+bunx @lythos/project-cortex@0.14.6 wiki "Your insight" --category pattern|faq|lesson
 # Initialize cortex/ directory structure in current project
-bunx @lythos/project-cortex@0.14.5 init
+bunx @lythos/project-cortex@0.14.6 init
 # Process commit trailers (used by post-commit hook)
-bunx @lythos/project-cortex@0.14.5 dispatch-trailers
+bunx @lythos/project-cortex@0.14.6 dispatch-trailers
 ```
 
 > **⚠️ MANDATORY: CLI create is Step 1/3. Step 2/3 is IMMEDIATE EDIT.**
@@ -85,40 +85,40 @@ bunx @lythos/project-cortex@0.14.5 dispatch-trailers
 > **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。
 
 # Generate INDEX.md with overview stats and document listing
-bunx @lythos/project-cortex@0.14.5 index
+bunx @lythos/project-cortex@0.14.6 index
 
 # List all tasks, epics, ADRs
-bunx @lythos/project-cortex@0.14.5 list
+bunx @lythos/project-cortex@0.14.6 list
 
 # Show project statistics
-bunx @lythos/project-cortex@0.14.5 stats
+bunx @lythos/project-cortex@0.14.6 stats
 
 # Probe: check if file location matches internal status record + epic lane counts
-bunx @lythos/project-cortex@0.14.5 probe
+bunx @lythos/project-cortex@0.14.6 probe
 ```
 
 ## State Machine Commands
 
 ```bash
 # Task state machine
-bunx @lythos/project-cortex@0.14.5 start TASK-xxx
-bunx @lythos/project-cortex@0.14.5 review TASK-xxx
-bunx @lythos/project-cortex@0.14.5 done TASK-xxx        # review → completed only
-bunx @lythos/project-cortex@0.14.5 complete TASK-xxx    # any status → completed (trailer-driven)
-bunx @lythos/project-cortex@0.14.5 suspend TASK-xxx
-bunx @lythos/project-cortex@0.14.5 resume TASK-xxx
-bunx @lythos/project-cortex@0.14.5 terminate TASK-xxx
-bunx @lythos/project-cortex@0.14.5 archive TASK-xxx
+bunx @lythos/project-cortex@0.14.6 start TASK-xxx
+bunx @lythos/project-cortex@0.14.6 review TASK-xxx
+bunx @lythos/project-cortex@0.14.6 done TASK-xxx        # review → completed only
+bunx @lythos/project-cortex@0.14.6 complete TASK-xxx    # any status → completed (trailer-driven)
+bunx @lythos/project-cortex@0.14.6 suspend TASK-xxx
+bunx @lythos/project-cortex@0.14.6 resume TASK-xxx
+bunx @lythos/project-cortex@0.14.6 terminate TASK-xxx
+bunx @lythos/project-cortex@0.14.6 archive TASK-xxx
 
 # ADR state machine
-bunx @lythos/project-cortex@0.14.5 adr accept ADR-xxx
-bunx @lythos/project-cortex@0.14.5 adr reject ADR-xxx
-bunx @lythos/project-cortex@0.14.5 adr supersede ADR-xxx --by ADR-yyy
+bunx @lythos/project-cortex@0.14.6 adr accept ADR-xxx
+bunx @lythos/project-cortex@0.14.6 adr reject ADR-xxx
+bunx @lythos/project-cortex@0.14.6 adr supersede ADR-xxx --by ADR-yyy
 
 # Epic state machine
-bunx @lythos/project-cortex@0.14.5 epic done EPIC-xxx
-bunx @lythos/project-cortex@0.14.5 epic suspend EPIC-xxx
-bunx @lythos/project-cortex@0.14.5 epic resume EPIC-xxx
+bunx @lythos/project-cortex@0.14.6 epic done EPIC-xxx
+bunx @lythos/project-cortex@0.14.6 epic suspend EPIC-xxx
+bunx @lythos/project-cortex@0.14.6 epic resume EPIC-xxx
 ```
 
 `probe` is a read-only consistency check. It compares each document's directory
@@ -178,7 +178,7 @@ Numeric prefixes ensure GTD workflow ordering in `ls` output.
 
 **Preview next IDs before creating:**
 ```bash
-bunx @lythos/project-cortex@0.14.5 next-id
+bunx @lythos/project-cortex@0.14.6 next-id
 ```
 Output:
 ```
@@ -197,7 +197,7 @@ Agents should expect the following output patterns when invoking CLI commands.
 
 ### Creating a document
 ```bash
-bunx @lythos/project-cortex@0.14.5 adr "Choose database"
+bunx @lythos/project-cortex@0.14.6 adr "Choose database"
 ```
 Output:
 ```
@@ -206,7 +206,7 @@ Output:
 ```
 
 ```bash
-bunx @lythos/project-cortex@0.14.5 task "Fix login bug"
+bunx @lythos/project-cortex@0.14.6 task "Fix login bug"
 ```
 Output:
 ```
@@ -215,7 +215,7 @@ Output:
 ```
 
 ```bash
-bunx @lythos/project-cortex@0.14.5 epic "User auth system"
+bunx @lythos/project-cortex@0.14.6 epic "User auth system"
 ```
 Output:
 ```
@@ -225,7 +225,7 @@ Output:
 
 ### Project statistics
 ```bash
-bunx @lythos/project-cortex@0.14.5 stats
+bunx @lythos/project-cortex@0.14.6 stats
 ```
 Output:
 ```
@@ -258,7 +258,7 @@ Wiki:
 
 ### Consistency probe (read-only)
 ```bash
-bunx @lythos/project-cortex@0.14.5 probe
+bunx @lythos/project-cortex@0.14.6 probe
 ```
 Output when consistent:
 ```
@@ -308,15 +308,15 @@ stateDiagram-v2
 
 | From | To | Who | Trigger | CLI Command |
 |------|----|-----|---------|-------------|
-| backlog | in-progress | Subagent | Begins implementation | `bunx @lythos/project-cortex@0.14.5 start TASK-xxx` |
-| in-progress | review | Subagent | Core deliverables done, committed with task ID | `bunx @lythos/project-cortex@0.14.5 review TASK-xxx` |
-| review | completed | User/System | Exit criteria met, acceptance passed | `bunx @lythos/project-cortex@0.14.5 done TASK-xxx` |
-| any | completed | Trailer/Hook | Commit trailer closes task | `bunx @lythos/project-cortex@0.14.5 complete TASK-xxx` |
-| in-progress | suspended | Any | Blocked by external dependency | `bunx @lythos/project-cortex@0.14.5 suspend TASK-xxx` |
-| suspended | in-progress | Any | Blocker resolved | `bunx @lythos/project-cortex@0.14.5 resume TASK-xxx` |
-| any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex@0.14.5 terminate TASK-xxx` |
-| completed | archived | User/System | Long-term storage | `bunx @lythos/project-cortex@0.14.5 archive TASK-xxx` |
-| review | in-progress | User/System | Deliverables rejected, re-work required | `bunx @lythos/project-cortex@0.14.5 reject TASK-xxx` |
+| backlog | in-progress | Subagent | Begins implementation | `bunx @lythos/project-cortex@0.14.6 start TASK-xxx` |
+| in-progress | review | Subagent | Core deliverables done, committed with task ID | `bunx @lythos/project-cortex@0.14.6 review TASK-xxx` |
+| review | completed | User/System | Exit criteria met, acceptance passed | `bunx @lythos/project-cortex@0.14.6 done TASK-xxx` |
+| any | completed | Trailer/Hook | Commit trailer closes task | `bunx @lythos/project-cortex@0.14.6 complete TASK-xxx` |
+| in-progress | suspended | Any | Blocked by external dependency | `bunx @lythos/project-cortex@0.14.6 suspend TASK-xxx` |
+| suspended | in-progress | Any | Blocker resolved | `bunx @lythos/project-cortex@0.14.6 resume TASK-xxx` |
+| any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex@0.14.6 terminate TASK-xxx` |
+| completed | archived | User/System | Long-term storage | `bunx @lythos/project-cortex@0.14.6 archive TASK-xxx` |
+| review | in-progress | User/System | Deliverables rejected, re-work required | `bunx @lythos/project-cortex@0.14.6 reject TASK-xxx` |
 
 ### ADR State Machine
 
@@ -398,7 +398,7 @@ An epic in `01-active/` means the decision is ratified and work is underway — 
 
 ```bash
 # 1. Create the epic (generates the file)
-bunx @lythos/project-cortex@0.14.5 epic "Implement kanban flow" --lane main
+bunx @lythos/project-cortex@0.14.6 epic "Implement kanban flow" --lane main
 
 # 2. Commit the epic — pre-commit auto-accepts the linked ADR
 #    (ADR must reference the epic in its ## Related section: "Epic: EPIC-xxx")
@@ -425,9 +425,9 @@ After user says "LGTM": `git tag -a v0.X.0 -m "feat: description"`
 | **Subagent** | Execute tasks, drive status forward | tasks/01-backlog/ → 02-in-progress/ → 03-review/ |
 
 **Subagent workflow** (delegate with: "Execute TASK-xxx"):
-1. `bunx @lythos/project-cortex@0.14.5 start TASK-xxx`
+1. `bunx @lythos/project-cortex@0.14.6 start TASK-xxx`
 2. Implement, commit with task ID in message
-3. `bunx @lythos/project-cortex@0.14.5 review TASK-xxx`
+3. `bunx @lythos/project-cortex@0.14.6 review TASK-xxx`
 4. **Stop here.** Never use `done` — that requires user acceptance.
 ## Milestone Protocol (Prevents Fake Completion)
 Every task must define at creation:
@@ -459,7 +459,7 @@ This is deliberate — status ambiguity requires human judgment.
 **Templates in assets/, not in SKILL.md.** If you need to see the template format,
 read `${CLAUDE_SKILL_DIR}/assets/TASK-TEMPLATE.md` (or ADR/EPIC). Or look at
 existing files in cortex/ — the playground examples are real CLI output.
-**INDEX.md is generated, not hand-edited.** Run `bunx @lythos/project-cortex@0.14.5 index`
+**INDEX.md is generated, not hand-edited.** Run `bunx @lythos/project-cortex@0.14.6 index`
 after any status change. Manual edits will be overwritten.
 ## Supporting References
 Read these **only when the specific topic arises**:

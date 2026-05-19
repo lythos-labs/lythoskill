@@ -1,6 +1,6 @@
 ---
 name: lythoskill-curator
-version: 0.14.5
+version: 0.14.6
 type: standard
 description: |
   Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
@@ -19,7 +19,7 @@ when_to_use: |
   curator query local cache → WebSearch for new candidates →
   curator add + curator tag → arena test → curator tag --qa → recommend with confidence.
 allowed-tools:
-  - Bash(bunx @lythos/skill-curator@0.14.5 *)
+  - Bash(bunx @lythos/skill-curator@0.14.6 *)
   - WebSearch
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
@@ -83,25 +83,25 @@ discover → rank → recommend.
 
 ### Index the cold pool (scan)
 ```bash
-bunx @lythos/skill-curator@0.14.5 [POOL_PATH]
+bunx @lythos/skill-curator@0.14.6 [POOL_PATH]
 # Defaults: POOL_PATH = ~/.agents/skill-repos
 #           Output    = ~/.agents/lythoskill/curator/
-bunx @lythos/skill-curator@0.14.5 ~/.agents/skill-repos --output /tmp/my-index/
+bunx @lythos/skill-curator@0.14.6 ~/.agents/skill-repos --output /tmp/my-index/
 ```
 Reconciler-style: converges any state to a clean index. Auto-backup before rebuild.
 
 ### Tag — agent-enriched metadata (L3 买家秀)
 ```bash
 # Write niche tags (curator's personal classification)
-bunx @lythos/skill-curator@0.14.5 tag <skill-name> --niche "meta.governance.deck"
-bunx @lythos/skill-curator@0.14.5 tag <skill-name> --niche "code-review" --niche "security"
+bunx @lythos/skill-curator@0.14.6 tag <skill-name> --niche "meta.governance.deck"
+bunx @lythos/skill-curator@0.14.6 tag <skill-name> --niche "code-review" --niche "security"
 
 # Write QA signal with provenance (REQUIRED)
-bunx @lythos/skill-curator@0.14.5 tag <skill-name> \
+bunx @lythos/skill-curator@0.14.6 tag <skill-name> \
   --qa '{"source_type":"self/arena","source_name":"arena-single-2026-05-18","signal_type":"score","signal_value":8}'
 
 # Reference external hub assessment (L2, with provenance)
-bunx @lythos/skill-curator@0.14.5 tag <skill-name> \
+bunx @lythos/skill-curator@0.14.6 tag <skill-name> \
   --qa '{"source_type":"hub/agentskill.sh","source_url":"https://...","signal_type":"securityScore","signal_value":95}'
 ```
 
@@ -115,17 +115,17 @@ No-provenance signals are rejected. See ADR-20260518123403810.
 
 ### Query the index
 ```bash
-bunx @lythos/skill-curator@0.14.5 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
-bunx @lythos/skill-curator@0.14.5 query --db ./catalog.db "SELECT * FROM catalog_meta"
-bunx @lythos/skill-curator@0.14.5 query "PRAGMA table_info(skills)"
-bunx @lythos/skill-curator@0.14.5 query   # show schema overview
+bunx @lythos/skill-curator@0.14.6 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
+bunx @lythos/skill-curator@0.14.6 query --db ./catalog.db "SELECT * FROM catalog_meta"
+bunx @lythos/skill-curator@0.14.6 query "PRAGMA table_info(skills)"
+bunx @lythos/skill-curator@0.14.6 query   # show schema overview
 ```
 Output is Markdown table. SQL is a good DSL for showing intent — declarative, readable.
 
 ### Audit the index
 ```bash
-bunx @lythos/skill-curator@0.14.5 audit
-bunx @lythos/skill-curator@0.14.5 audit --db ./catalog.db
+bunx @lythos/skill-curator@0.14.6 audit
+bunx @lythos/skill-curator@0.14.6 audit --db ./catalog.db
 ```
 
 Checks: missing frontmatter, type anomalies, orphan scripts, deck_skill_type coverage,
@@ -135,21 +135,21 @@ not author-declared.
 
 ### Add a skill to the cold pool
 ```bash
-bunx @lythos/skill-curator@0.14.5 add github.com/owner/repo --pool ~/.agents/skill-repos
-bunx @lythos/skill-curator@0.14.5 add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
-bunx @lythos/skill-curator@0.14.5 add github.com/owner/repo --pool ~/.agents/skill-repos \
+bunx @lythos/skill-curator@0.14.6 add github.com/owner/repo --pool ~/.agents/skill-repos
+bunx @lythos/skill-curator@0.14.6 add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
+bunx @lythos/skill-curator@0.14.6 add github.com/owner/repo --pool ~/.agents/skill-repos \
   --reason "Found via WebSearch for code review skills" --branch main
 ```
 
 ### Refresh upstreams (plan-first)
 ```bash
-bunx @lythos/skill-curator@0.14.5 refresh-plan
-bunx @lythos/skill-curator@0.14.5 refresh-execute
+bunx @lythos/skill-curator@0.14.6 refresh-plan
+bunx @lythos/skill-curator@0.14.6 refresh-execute
 ```
 
 ### Rollback
 ```bash
-bunx @lythos/skill-curator@0.14.5 restore
+bunx @lythos/skill-curator@0.14.6 restore
 ```
 
 ## Fact-Check + Confidence Evaluation (记者)
@@ -194,14 +194,14 @@ Claim Z: CONTRADICTED (author says "fast", arena shows 30s timeout)
 ## Typical Queries
 ```bash
 # Skills by agent-enriched niche
-bunx @lythos/skill-curator@0.14.5 query "SELECT name, niches FROM skills WHERE niches LIKE '%agent-tagged%'"
+bunx @lythos/skill-curator@0.14.6 query "SELECT name, niches FROM skills WHERE niches LIKE '%agent-tagged%'"
 # Duplicate detection
-bunx @lythos/skill-curator@0.14.5 query \
+bunx @lythos/skill-curator@0.14.6 query \
   "SELECT name, path FROM skills WHERE name IN (SELECT name FROM skills GROUP BY name HAVING COUNT(*) > 1)"
 # Combo / transient / fork skills
-bunx @lythos/skill-curator@0.14.5 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
+bunx @lythos/skill-curator@0.14.6 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
 # Managed directory overlaps
-bunx @lythos/skill-curator@0.14.5 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
+bunx @lythos/skill-curator@0.14.6 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
 ```
 
 ## Curator + Deck + Arena Workflow
