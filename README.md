@@ -1,6 +1,6 @@
 # lythoskill
 
-> **Declarative skill governance for AI agent teams.** Declare which skills a project needs in `skill-deck.toml`. `deck link` reconciles the working set — undeclared skills are physically absent from the agent's view. Curate your cold pool. Validate skill quality in arena. Manage decisions through cortex ADRs. One manifest governs Claude Code, Kimi, Codex, Cursor, Windsurf, or any agent that scans a skills directory. Built and self-governed by AI agents — see [how we govern this project](#ecosystem-tools).
+> **Declarative skill governance AND orchestration for AI agent teams.** Declare which skills a project needs in `skill-deck.toml`. Combo prompts tell the agent how to orchestrate them. `deck link` reconciles the working set — undeclared skills are physically absent from the agent's view. The deck is the orchestrator: skill manifest + playbook + isolation discipline, all in one file. Built and self-governed by AI agents — see [how we govern this project](#ecosystem-tools).
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
 [![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
@@ -152,7 +152,7 @@ bunx @lythos/skill-deck@latest validate
 
 ## How it works
 
-A **deck** is a declarative skill manifest — a `skill-deck.toml` file that names which skills are active. That's the core. Everything else (curator, arena, creator, coach) is tooling around that file.
+A **deck** is both a **declarative skill manifest** and an **orchestrator** — a `skill-deck.toml` file that names which skills are active AND tells the agent how to combine them. Combo prompts describe orchestration in natural language ("if X then Y, pass A's output to B"). The deck is the agent's playbook. Everything else (curator, arena, creator, coach) is tooling around that file.
 
 The design stays true to four principles: **declarative** (manifest, not imperative add/remove), **multi-platform** (one TOML, any agent), **deny-by-default** (undeclared = absent), **local-first** (git cache, no central server).
 
