@@ -285,4 +285,85 @@ describe('linkDeck reconciler', () => {
     expect(existsSync(join(dest, 'SKILL.md'))).toBe(true)
   })
 
+  it('B4: also_link_to fan-out creates symlinks in additional targets', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    mkdirSync(join(projectDir, '.claude'), { recursive: true })
+
+    const skillDir = placeSkill(coldPool, 'github.com/owner/repo/skill')
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    const deckContent = `[deck]
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+also_link_to = [".agents/skills", ".kimi/skills"]
+
+[tool.skills.my-alias]
+path = "github.com/owner/repo/skill"
+`
+    writeFileSync(deckPath, deckContent)
+    linkDeck(deckPath, projectDir, { noBackup: true })
+
+    const primary = join(projectDir, '.claude', 'skills', 'my-alias')
+    const agents = join(projectDir, '.agents', 'skills', 'my-alias')
+    const kimi = join(projectDir, '.kimi', 'skills', 'my-alias')
+
+    expect(existsSync(primary)).toBe(true)
+    expect(lstatSync(primary).isSymbolicLink()).toBe(true)
+    expect(existsSync(agents)).toBe(true)
+    expect(lstatSync(agents).isSymbolicLink()).toBe(true)
+    expect(existsSync(kimi)).toBe(true)
+    expect(lstatSync(kimi).isSymbolicLink()).toBe(true)
+
+    // All point to the same source
+    expect(readlinkSync(primary)).toBe(skillDir)
+    expect(readlinkSync(agents)).toBe(skillDir)
+    expect(readlinkSync(kimi)).toBe(skillDir)
+  })
+
+  it('B5: also_link_to respects deny-by-default in each target', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    const skillA = placeSkill(coldPool, 'github.com/owner/skill-a')
+    const skillB = placeSkill(coldPool, 'github.com/owner/skill-b')
+
+    // First link with both skills
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    const deckV1 = `[deck]
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+also_link_to = [".agents/skills"]
+
+[tool.skills.skill-a]
+path = "github.com/owner/skill-a"
+
+[tool.skills.skill-b]
+path = "github.com/owner/skill-b"
+`
+    writeFileSync(deckPath, deckV1)
+    linkDeck(deckPath, projectDir, { noBackup: true })
+
+    expect(existsSync(join(projectDir, '.agents', 'skills', 'skill-b'))).toBe(true)
+
+    // Second link: remove skill-b
+    const deckV2 = `[deck]
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+also_link_to = [".agents/skills"]
+
+[tool.skills.skill-a]
+path = "github.com/owner/skill-a"
+`
+    writeFileSync(deckPath, deckV2)
+    linkDeck(deckPath, projectDir, { noBackup: true })
+
+    // skill-b should be removed from BOTH working_set and also_link_to
+    expect(existsSync(join(projectDir, '.claude', 'skills', 'skill-a'))).toBe(true)
+    expect(existsSync(join(projectDir, '.claude', 'skills', 'skill-b'))).toBe(false)
+    expect(existsSync(join(projectDir, '.agents', 'skills', 'skill-a'))).toBe(true)
+    expect(existsSync(join(projectDir, '.agents', 'skills', 'skill-b'))).toBe(false)
+  })
+
 })

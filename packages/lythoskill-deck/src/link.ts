@@ -180,6 +180,10 @@ const COLD_POOL_RAW = parsedToml.deck?.cold_pool || "~/.agents/skill-repos";
 const WORKING_SET = expandHome(WORKING_SET_RAW, PROJECT_DIR);
 const COLD_POOL = expandHome(COLD_POOL_RAW, PROJECT_DIR);
 const MAX_CARDS = Number(parsedToml.deck?.max_cards || 10);
+const ALSO_LINK_TO_RAW: string[] = Array.isArray(parsedToml.deck?.also_link_to)
+  ? parsedToml.deck.also_link_to.filter((v: any) => typeof v === 'string')
+  : [];
+const ALSO_LINK_TO = ALSO_LINK_TO_RAW.map(p => expandHome(p, PROJECT_DIR));
 
 // ── 收集声明 ────────────────────────────────────────────────
 
@@ -336,89 +340,108 @@ if (
   console.warn(`   cold_pool:   ${resolvedColdPool}`);
 }
 
-// ── 收束 working set ────────────────────────────────────────
+// ── 目录收束（复用于 working_set 和 also_link_to）────────
+function reconcileTargetDir(
+  targetDir: string,
+  declared: DeclaredSkill[],
+  declaredNames: Set<string>,
+  noBackup: boolean | undefined,
+  mode: 'symlink' | 'snapshot',
+  PROJECT_DIR: string,
+): void {
+  mkdirSync(targetDir, { recursive: true });
 
-mkdirSync(WORKING_SET, { recursive: true });
+  const nonSymlinks: string[] = [];
+  try {
+    for (const entry of readdirSync(targetDir)) {
+      if (entry.startsWith("_") || entry.startsWith(".")) continue;
+      const entryPath = join(targetDir, entry);
+      try {
+        const st = lstatSync(entryPath);
+        if (!st.isSymbolicLink()) nonSymlinks.push(entry);
+      } catch { continue; }
+    }
+  } catch {}
 
-// Pre-flight: 备份并清理非 symlink 实体（真实目录/文件）
-const nonSymlinks: string[] = [];
-try {
-  for (const entry of readdirSync(WORKING_SET)) {
-    if (entry.startsWith("_") || entry.startsWith(".")) continue;
-    const entryPath = join(WORKING_SET, entry);
-    try {
-      const st = lstatSync(entryPath);
-      if (!st.isSymbolicLink()) {
-        nonSymlinks.push(entry);
-      }
-    } catch { continue; }
-  }
-} catch {}
+  if (nonSymlinks.length > 0) {
+    let totalSize = 0;
+    for (const e of nonSymlinks) totalSize += calculateDirSize(join(targetDir, e));
 
-if (nonSymlinks.length > 0) {
-  // 计算总大小
-  let totalSize = 0;
-  for (const e of nonSymlinks) {
-    totalSize += calculateDirSize(join(WORKING_SET, e));
-  }
-
-  if (!opts?.noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
-    console.error(`❌ Found ${nonSymlinks.length} real directories in ${relative(PROJECT_DIR, WORKING_SET)} (> 100MB total).`);
-    console.error(`   Manual review required: ${nonSymlinks.join(", ")}`);
-    console.error(`   Use --no-backup to skip backup (removes without saving), or clean up manually.`);
-    process.exit(1);
-  }
-
-  if (!opts?.noBackup) {
-    const bakName = `skills.bak.${formatBackupDate(new Date())}.tar.gz`;
-    const bakPath = join(PROJECT_DIR, ".claude", bakName);
-    mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
-
-    const tarArgs = [
-      "czf", bakPath, "--",
-      ...nonSymlinks.map(e => "./" + relative(PROJECT_DIR, join(WORKING_SET, e))),
-    ];
-    try {
-      execFileSync("tar", tarArgs, {
-        cwd: PROJECT_DIR,
-        stdio: "pipe",
-      });
-      console.log(`📦 Backed up ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} to .claude/${bakName}`);
-    } catch (err: any) {
-      console.error(`❌ Backup failed: ${err.message || err}`);
-      console.error(`   Use --no-backup to skip backup, or fix the issue and retry.`);
+    if (!noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
+      console.error(`❌ Found ${nonSymlinks.length} real directories in ${relative(PROJECT_DIR, targetDir)} (> 100MB total).`);
+      console.error(`   Manual review required: ${nonSymlinks.join(", ")}`);
+      console.error("   Use --no-backup to skip backup, or clean up manually.");
       process.exit(1);
     }
-  } else {
-    console.log(`⚠️  --no-backup: removing ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} without backup`);
+
+    if (!noBackup) {
+      const bakName = `skills.bak.${formatBackupDate(new Date())}.tar.gz`;
+      const bakPath = join(PROJECT_DIR, ".claude", bakName);
+      mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
+      const tarArgs = ["czf", bakPath, "--", ...nonSymlinks.map(e => "./" + relative(PROJECT_DIR, join(targetDir, e)))];
+      try {
+        execFileSync("tar", tarArgs, { cwd: PROJECT_DIR, stdio: "pipe" });
+        console.log(`📦 Backed up ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} to .claude/${bakName}`);
+      } catch (err: any) {
+        console.error(`❌ Backup failed: ${err.message || err}`);
+        console.error("   Use --no-backup to skip backup, or fix the issue and retry.");
+        process.exit(1);
+      }
+    } else {
+      console.log(`⚠️  --no-backup: removing ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} without backup`);
+    }
+
+    for (const e of nonSymlinks) rmSync(join(targetDir, e), { recursive: true, force: true });
   }
 
-  for (const e of nonSymlinks) {
-    rmSync(join(WORKING_SET, e), { recursive: true, force: true });
+  try {
+    for (const entry of readdirSync(targetDir)) {
+      if (entry.startsWith("_") || entry.startsWith(".")) continue;
+      if (!declaredNames.has(entry)) {
+        const entryPath = join(targetDir, entry);
+        try {
+          const st = lstatSync(entryPath);
+          if (!st.isSymbolicLink()) continue;
+        } catch { continue; }
+        rmSync(entryPath, { recursive: true, force: true });
+        console.log(`  🗑️  Removed: ${entry}`);
+      }
+    }
+  } catch {}
+
+  for (const item of declared) {
+    const dest = join(targetDir, item.alias);
+    try { lstatSync(dest); rmSync(dest, { recursive: true, force: true }); } catch {}
+    try {
+      mkdirSync(dirname(dest), { recursive: true });
+      const linkMode = item.mode ?? mode;
+      if (linkMode === 'snapshot') cpSync(item.sourcePath, dest, { recursive: true });
+      else symlinkSync(item.sourcePath, dest);
+    } catch (err: any) {
+      console.error(`❌ Link failed: ${item.alias}: ${err.message || err}`);
+      continue;
+    }
+    console.log(`  🔗 ${item.alias}`);
   }
 }
 
-// 清理未声明的 symlink
+// ── 收束 working set ────────────────────────────────────────
+
 const declaredNames = new Set(declared.map(d => d.alias));
-try {
-  for (const entry of readdirSync(WORKING_SET)) {
-    if (entry.startsWith("_") || entry.startsWith(".")) continue;
-    if (!declaredNames.has(entry)) {
-      const entryPath = join(WORKING_SET, entry);
-      try {
-        const st = lstatSync(entryPath);
-        if (!st.isSymbolicLink()) continue; // 已在上文处理
-      } catch { continue; }
-      rmSync(entryPath, { recursive: true, force: true });
-      console.log(`  🗑️  Removed: ${entry}`);
-    }
-  }
-} catch {}
+	reconcileTargetDir(WORKING_SET, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
 
-// 创建 symlink
-const linkedSkills: LinkedSkill[] = [];
+// also_link_to fan-out (POSSE pattern, ADR-20260517152850372)
+for (const target of ALSO_LINK_TO) {
+  console.log('');
+  console.log('📋 also_link_to: ' + relative(PROJECT_DIR, target));
+  reconcileTargetDir(target, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
+}
 
-for (const item of declared) {
+// ── 收集元数据 ──────────────────────────────────────────────
+
+	const linkedSkills: LinkedSkill[] = [];
+
+	for (const item of declared) {
   const dest = join(WORKING_SET, item.alias);
 
   // 幂等：已存在则删除重建（lstat 不跟随 symlink，能处理断链/自引用 symlink）
