@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/19 17:39:31
+> 自动生成于 2026/5/19 21:02:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 254 | 进行中: 0, 待验收: 0, 已完成: 218 |
+| Tasks | 255 | 进行中: 0, 待验收: 0, 已完成: 219 |
 | Epics | 36 | 活跃: 0, 已完成: 32, 悬置: 2, 已归档: 2 |
 | ADRs | 79 | 已接受: 77 |
 
@@ -79,7 +79,7 @@ _无_
 
 _无_
 
-### 已完成 (218)
+### 已完成 (219)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -299,6 +299,7 @@ _无_
 - ✅ ~~TASK-20260519164659220~~: B: symlink检测跨平台 — stat -c 替换为 fs.lstatSync
 - ✅ ~~TASK-20260519164702541~~: C: cortex-probe 改用 stats + 启发式过滤，只报告 actionable 项
 - ✅ ~~TASK-20260519164705587~~: D: missing-weekly 加入周完成度百分比 + 导航
+- ✅ ~~TASK-20260519205953163~~: deck remove does not clean up also_link_to targets
 
 ### 悬置 (1)
 

@@ -2,8 +2,10 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (49)
+## 📚 Patterns (51)
 
+- **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
+- **[2026-05-19]** [where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern](./01-patterns/2026-05-19-where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern.md)
 - **[2026-05-18]** [skill-incubator-sop-curator-driven-skill-creation-pipeline](./01-patterns/2026-05-18-skill-incubator-sop-curator-driven-skill-creation-pipeline.md)
 - **[2026-05-18]** [zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents](./01-patterns/2026-05-18-zero-knowledge-reproduce-sh-handoff-self-discoverable-bdd-scenario-for-fresh-agents.md)
 - **[2026-05-17]** [shell-stdout-as-agent-prompt-injection](./01-patterns/2026-05-17-shell-stdout-as-agent-prompt-injection.md)
