@@ -1,57 +1,45 @@
 # lythoskill
 
-> **技能治理，不是技能集合。** 如果 addyosmani/agent-skills 和 mattpocock/skills 是 npm 包，lythoskill 就是 npm 本身——安装、策展、验证、收敛技能的平台层。
->
-> **完全由 AI agent 构建。** 零人类手写代码。12 个包，487+ 测试，外加治理体系本身——ADR、epic、task、wiki patterns——全部由 Claude Code、DeepSeek、Kimi 在人类指导下协作完成。我们用自己的治理工具管理构建了自己的项目。
+> **声明式技能治理与编排。** 在 `skill-deck.toml` 中声明项目需要哪些技能，combo prompt 告诉 agent 如何组合它们，`deck link` 将 working set 调和到声明状态——未声明的技能从 agent 视野中物理消失。deck 本身就是编排器：技能清单 + 执行剧本 + 隔离纪律，全部写在一个文件里。项目由 AI agent 自主构建和治理。详见[生态工具](#生态工具)章节。
 
 [![npm](https://img.shields.io/npm/v/@lythos/skill-deck)](https://www.npmjs.com/package/@lythos/skill-deck)
-[![BDD Tests](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
+[![CI](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml/badge.svg)](https://github.com/lythos-labs/lythoskill/actions/workflows/test.yml)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-000?logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![ESM](https://img.shields.io/badge/ESM-only-blue)](https://nodejs.org/api/esm.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lythos-labs/lythoskill)
+
 [English](./README.md)
 
-| **如果你想要...** | **你需要** |
-|---|---|
-| TDD 技能 | → [mattpocock/skills](https://github.com/mattpocock/skills) |
-| 管理 5 个项目里的 50 个技能 | → **lythoskill** |
-| PDF 生成技能 | → [anthropics/skills](https://github.com/anthropics/skills) |
-| 知道哪个 PDF 技能真的能用 | → **lythoskill**（arena） |
-| 技能集合 | → [awesome-agent-skills](https://github.com/kodustech/awesome-agent-skills) |
-| 防止技能静默冲突 | → **lythoskill**（deny-by-default） |
-
-**👤 技能使用者？** → [快速开始](#快速开始) — 安装 Bun，跑一条命令，搞定。  
-**🤖 AI agent？** → [Agent 专用](#如果你是-ai-agent) — 四步清单。  
-**🛠️ 开发者？** → [开发](#开发) — clone、安装、贡献代码。
-
 ---
 
-## 问题
+## 解决什么问题
 
-> 📍 **非 Claude 用户路径说明**:本文档以 `.claude/skills/` 作为示例默认值。你的路径因 agent 而异 —— `.agents/skills/`(Codex CLI / OpenClaw)、`.cursor/skills/`、`.kimi/skills/`、`.windsurf/skills/` 等。在 `skill-deck.toml` 里设 `working_set` 字段([表格](#configure-working-set)),阅读本文时心里替换即可。
+两个技能同时教 agent "怎么写测试"，agent 收到的指令就会冲突。"禁用"一个技能并不能真正移除它，agent 仍然看得见。出了问题，你只能逐个删除才能定位原因。
 
-当两个冲突的技能同时对 agent 可见，输出变得不可预测。**lythoskill-deck** 用 **deny-by-default** 解决：未声明的技能从你 agent 的 working set 目录(默认 `.claude/skills/`,可配置)中**物理消失**。不是"禁用"，不是"降权"。**彻底消失。**
+**lythoskill 实行 deny-by-default：** 未在 `skill-deck.toml` 中声明的技能，不会出现在 working set 目录里。未声明的技能从 working set 中**物理移除**，不是"禁用"或"降权"。如果冲突发生，二分查找你的 `skill-deck.toml` 即可——lockfile 精确记录了当时加载了什么。
 
-```toml
-[tool.skills.skill-name]
-path = "github.com/owner/repo"
-```
+| | `npx skills add` | lythoskill `deck link` |
+|---|---|---|
+| 安装方式 | `npx skills add <repo>` —— 命令式 | 在 `skill-deck.toml` 中声明 —— 声明式 |
+| 安装后 | 技能一直留在扫描路径，直到手动 `remove` | `deck link` 调和后，未声明的技能从 working set 消失 |
+| 多平台 | 每次安装都要指定 `-a claude-code` / `-a cursor` | 一个 TOML，按平台配置 `working_set` |
+| 发现 | `npx skills find` → skills.sh 目录 | Curator 扫描本地 cold pool；agent 用 WebSearch 发现新技能 |
+| 共享 | `skills-lock.json` | `skill-deck.lock` |
 
-运行 `deck link` → 只有声明的技能可见。没有静默混合。没有混乱。
+| 技能数量 | 状态 | 建议 |
+|--------|------|------|
+| 0–3，无冲突 | 简单 | **deck** 可用，但手动管理也完全没问题 |
+| 5–10，偶有冲突 | 增长中 | 用 **deck** —— 声明本项目需要哪些技能 |
+| 10+，自己编写技能 | 生态级 | 用 **deck + creator** —— thin-skill 模式 |
+| 跨团队/项目管理 | 生态级 | 完整 lythoskill：deck + creator + curator + arena |
 
----
+`skill-deck.lock` 是"构建时哪些技能处于活跃状态"的唯一真源。提交它，队友拿到完全一致的 working set，CI 可复现。出问题时二分 toml——lockfile 精确告诉你什么变了。
 
-## 我真的需要这个吗？
+### 我真的需要这个吗？
 
-治理只在复杂度达到阈值时才有用。
-
-| 技能数量 | 状态 | 行动 |
-|---------|------|------|
-| 0–3，无冲突 | 简单 | 不需要 lythoskill。手动放到 `.claude/skills/`。 |
-| 5–10，有冲突 | 增长中 | **安装 lythoskill-deck** —— 声明本项目需要的技能。 |
-| 10+，自己编写 | 生态 | 用 **deck + creator** —— thin-skill 模式，可维护。 |
+治理只在复杂度达到阈值时才有价值。
 
 <details>
 <summary>详细决策树（点击展开）</summary>
@@ -76,135 +64,197 @@ path = "github.com/owner/repo"
 
 ---
 
-## 快速开始
+<details>
+<summary>🤖 AI Agent 看这里</summary>
 
-**前置条件 — Bun 运行时**（`bunx` 需要它）：
-```bash
-# 安装 Bun（一次性，macOS/Linux/WSL）
-curl -fsSL https://bun.sh/install | bash
-# Windows: powershell -c "irm bun.sh/install.ps1 | iex"
-```
-安装后重启终端，或运行 `source ~/.bashrc`。
+如果你是正在阅读此 README 的 AI agent：
 
-> **本工具需要 Bun，不是 Node。** `bunx` 是正确的运行方式。`npx` 如果没有安装 Bun 会失败——包的 shebang 调用的是 `env bun`。如果你只有 Node/npm，请先安装 Bun。
+1. 检查 `bun --version` —— 如果没有，先安装 Bun
+2. 运行 `bunx @lythos/skill-deck@latest link --deck <url|path>` 激活项目 deck
+3. 技能从 `skill-deck.toml` 中 `working_set` 指定的目录加载
 
-```bash
-# 1. 添加一个技能（自动下载到 cold pool + 更新 deck + 链接）
-#    把 <owner>/<repo> 换成你真正想用的技能
-bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>
+Agent 用 lythoskill 构建真实产出。[`showcase/`](./showcase/) 收录了 agent 使用 lythoskill 治理的 deck 完成的页面、报告和工具。
 
-# 2. Agent 只看到它。其余技能物理上不存在。
-ls .claude/skills/
-```
-
-就这些。`deck add` 会把仓库 clone 进你的 [cold pool](#cold-pool-约定)，追加到 `skill-deck.toml`，然后跑 `link`。
-
-### 或者从预组 deck 开始（30 秒）
-
-不知道选什么技能？一句命令安装场景化 deck：
-
-```bash
-# 默认：文档处理 deck（PDF + DOCX + 网页搜索）
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash
-
-# 换其他场景
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s engineering
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s full-stack
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash -s governance
-```
-
-也可以手动复制 deck 再 link：
-
-```bash
-# 文档处理：PDF + DOCX + 网页搜索
-curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/documents.toml > skill-deck.toml
-bunx @lythos/skill-deck@latest link
-```
-
-| 预组 deck | 技能 | 场景 |
-|-----------|------|------|
-| [documents](./examples/decks/documents.toml) | PDF, DOCX, web-search | 文档处理 |
-| [engineering](./examples/decks/engineering.toml) | TDD, to-PRD, design-doc-mermaid | 工程规范 |
-| [full-stack](./examples/decks/full-stack.toml) | React, composition, TDD, PDF, diagrams | 全栈开发 |
-| [governance](./examples/decks/governance.toml) | deck, cortex, scribe, onboarding | 项目治理 |
-
-> `link` 只会激活 cold pool 里已有的技能。缺失的技能会报 "Skill not found"——用 `deck add <path>` 添加，或手动 clone。
-
-如果是 monorepo（一个仓库含多个技能），需要指定完整路径：
-
-```bash
-# Monorepo：指定仓库内的技能路径
-bunx @lythos/skill-deck@latest add github.com/owner/repo/skills/my-skill
-
-# 替代方案：手动 clone
-git clone https://github.com/owner/repo.git \
-  ~/.agents/skill-repos/github.com/owner/repo
-# 然后编辑 skill-deck.toml 并运行 `deck link`
-```
-
-### 命名速查
-
-```
-lythoskill           ← 项目 / 生态系统
-skill-deck.toml      ← 你编辑的配置文件
-@lythos/skill-deck   ← 你安装的 npm 包
-deck                 ← CLI 命令（lythoskill-deck 的简称）
-link                 ← 同步 toml 到 working set 的子命令
-```
-
-### 如果你是 AI Agent
-
-1. 先检查 `bun --version`——如果没有，先安装 Bun（见上方快速开始）
-2. 运行 `bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` 添加技能
-3. 运行 `bunx @lythos/skill-deck@latest link` 同步 working set
-4. 技能现在已在你的 working set 目录中(默认 `.claude/skills/`;查 `skill-deck.toml` 的 `[deck] working_set` 看你 agent 的实际路径),你可以直接读取
+</details>
 
 ---
 
-## 两层价值主张
+## 快速开始
 
-lythoskill 服务两个不同的受众，你可以独立使用任意一层。
+### 把这段丢给你的 agent
 
-### Deck 治理 —— 面向每一位技能使用者
+复制下面的内容，告诉你的 agent："给这个项目设置 lythoskill"。Agent 会阅读、安装 Bun（如需要）、创建 deck、运行 `deck link`、自我验证。
 
-**问题**：你的 `.claude/skills/` 是个动物园。50+ 个技能来自 GitHub、技能中心、博客文章。每次 agent 启动都要扫一遍——描述争夺上下文空间，相似技能静默冲突，你根本不知道哪些真的在起作用。
+````
+Read https://raw.githubusercontent.com/lythos-labs/lythoskill/main/README.md.
+1. Check `bun --version` —— if missing, install Bun.
+2. Pick a skill from skills.sh or anthropics/skills.
+3. Create a `skill-deck.toml`, run `bunx @lythos/skill-deck@latest link`.
+4. Verify skills appeared in your working_set directory.
+````
 
-**解决方案**：声明这个项目需要什么。其他的全部消失。
+这就是 agent 时代的快速开始：告诉 agent，不用自己敲命令。
 
-| 没有 deck 治理 | 有 deck 治理 |
-|---|---|
-| Agent 扫描 50+ 技能，随机挑 | Agent 精确看到你声明的 |
-| 相似技能静默冲突 | `deny-by-default`：未声明 = 不可见 |
-| 上下文窗口浪费在无关描述上 | `max_cards` 预算强制聚焦 |
-
-**多角色 deck**：Curator agent 只看到 curator 技能。Arena agent 只看到 arena 技能。Scribe agent 只看到 scribe 技能。每个 agent 拿一套定制 deck——无交叉污染，无膨胀上下文。
-
-**核心原则**：lythoskill-deck 既是声明式包管理器，也是治理者。`deck add` 从 GitHub/skills.sh 下载技能到 cold pool，追加到 `skill-deck.toml`，并自动跑 `link`——一步搞定。`deck link` 再把 working set 调和到声明状态，只有声明过的技能才可见。你同时拿到了依赖管理（类似 Maven）和运行时治理（类似 Kubernetes RBAC）。
-
-比如，开始使用一个新技能：
+### 或者自己跑
 
 ```bash
-# 1. 把技能仓库 clone 到 cold pool（一次性设置）
-git clone https://github.com/lythos-labs/lythoskill.git \
-  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
-
-# 2. 创建 skill-deck.toml——直接复制这段：
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-
-[tool.skills.lythoskill-deck]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-EOF
-
-# 3. 同步——deck 把 working set 调和到声明状态
-bunx @lythos/skill-deck@latest link
-# 或：npx @lythos/skill-deck link
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/quick-init.sh | bash
 ```
 
-用 `deck add` 可以把步骤 1–3 自动化成一条命令。你也可以用 `skills.sh`、`bunx` 或任何其他方式——deck 不关心技能怎么进 cold pool 的，只关心哪些在活跃状态。
+脚本安装 Bun，创建一份带 `frontend-design`（Anthropic 官方设计技能）的 `skill-deck.toml`，运行 `deck link`，自我检查。一条命令，技能出现，搞定。
 
-### Thin Skill Pattern —— 面向技能生态开发者
+和 `npm install` 的感受一样：声明清单 → 一条命令 → 磁盘上可复现的结果。与 `npx skills add` 的区别在于：`deck link` 是声明式：你先写清单，再跑命令，结果可复现。
+
+继续添加：`curl ... | bash -s -- --skill github.com/owner/repo/path`。或者编辑 `skill-deck.toml` 后重新运行 `bunx @lythos/skill-deck@latest link`。
+
+### 手动设置
+
+```bash
+# 1. 创建 deck
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 3
+cold_pool = "~/.agents/skill-repos"
+
+[tool.skills.frontend-design]
+path = "github.com/anthropics/skills/skills/frontend-design"
+EOF
+
+# 2. 链接
+bunx @lythos/skill-deck@latest link
+```
+
+这里用的是 Anthropic 官方 [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) 技能——真实可运行的示例。链接完成后检查 `.claude/skills/`（或你配置的 `working_set`），能看到技能文件在磁盘上。18+ 预组 deck 见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
+
+### 管理你的 Deck
+
+**添加技能** —— 支持 skills.sh 语法（`owner/repo`）、FQ locator，或 `@skill` 过滤器：
+```bash
+bunx @lythos/skill-deck@latest add vercel-labs/agent-skills
+bunx @lythos/skill-deck@latest add github.com/anthropics/skills/skills/frontend-design
+```
+
+**移除技能** —— 从 deck 和 working set 中移除（cold pool 不动）：
+```bash
+bunx @lythos/skill-deck@latest remove <alias>
+```
+
+**刷新技能** —— 检查 upstream 更新（默认仅 plan；加 `--exec` 才 pull）：
+```bash
+bunx @lythos/skill-deck@latest refresh           # 仅计划
+bunx @lythos/skill-deck@latest refresh tdd --exec # 拉取单个技能
+```
+
+**验证 deck** —— 提交前检查 TOML 格式：
+```bash
+bunx @lythos/skill-deck@latest validate
+```
+
+`skill-deck.lock` 记录解析后的 working set。提交它，队友拿到完全一致的链接。
+
+---
+
+## skill-deck.toml 配置参考
+
+| 段落 | 键 | 必需 | 默认值 | 说明 |
+|---------|-----|----------|---------|-------------|
+| `[deck]` | `max_cards` | 否 | `10` | working set 中最多同时激活多少技能 |
+| `[deck]` | `cold_pool` | 否 | `~/.agents/skill-repos` | 技能仓库的本地缓存根目录 |
+| `[deck]` | `working_set` | 否 | `.claude/skills` | 创建符号链接的目录（agent 扫描路径） |
+| `[innate]` | `skills.<name>.path` | 是* | — | 始终加载；agent 无法覆盖 |
+| `[tool]` | `skills.<name>.path` | 是* | — | agent 按需调用（默认） |
+| `[transient]` | `skills.<name>.path` | 是* | — | 限时技能，到期自动失效 |
+
+\* 使用该段落时必需。
+
+**技能类型：**
+
+| 类型 | 行为 | 占用 max_cards 配额？ |
+|------|----------|---------------------------|
+| **`[innate]`** | 主动加载——会话启动即加载，agent 无法移除 | 是 |
+| **`[tool]`** | 懒加载——agent 按需调用（默认） | 是 |
+| **`[transient]`** | 懒加载 + 到期自动失效 | 是 |
+
+---
+
+## 工作原理
+
+**Deck 既是声明式技能清单，也是编排器**——`skill-deck.toml` 不仅指定哪些技能处于活跃状态，还用 combo prompt 告诉 agent 如何组合它们。Combo prompt 用自然语言描述编排逻辑（"如果 X 则 Y，把 A 的输出传给 B"）。deck 就是 agent 的执行剧本。
+
+### 为什么 "deck = 编排器" 不是 buzzword
+
+编排能力**按权重分布**在三层：
+
+```
+┌─ 编排层（按权重分布）────────────────────────┐
+│                                              │
+│  🎯 Combo Prompt                             │
+│     轻量判断——"如果 X 则 Y，把 A 传给 B"     │
+│     零成本，内联在 deck 中                   │
+│                                              │
+│  📄 SKILL.md                                 │
+│     中等判断——复杂工作流，跨项目复用         │
+│     版本控制，住在 cold pool 里              │
+│                                              │
+│  ⚙️ CLI (npm)                                │
+│     重型机械——备份、符号链接、归档           │
+│     笨、可靠、可测试                         │
+│                                              │
+└──────────────────────────────────────────────┘
+         ↑
+    🧠 Agent
+       读取 deck → 推理 → 调度
+       智能循环，不是工具
+
+    skill-deck.toml
+    声明技能 + combo prompt
+    单文件，git 追踪
+         ↓ deck link
+    Working Set (.claude/skills/)
+    只有声明的技能存在于此
+         ↓ 启动时扫描
+    Agent 只看见声明的技能
+```
+
+> **编排器不是单独组件。** 它按权重分散：轻量判断留在 combo prompt（deck 内联），中等判断下沉到 SKILL.md（版本化、可复用），重型机械下沉到 CLI npm（笨、可靠）。agent 是推理引擎——deck 是剧本。
+>
+> **Deck 把确定性委托给 CLI。** Prompt 描述意图；CLI 强制执行保证。"如果 `working_set` 是 `~` 就拒绝"——这不能是 prompt 指令，必须是硬 gate。"删除前备份 100MB"——这是 `tar` 命令，不是 agent 该记住的东西。deck 做出的设计决策是：**确定性约束 → CLI（npm，已测试）。判断调用 → SKILL.md（agent 推理）。轻量胶水 → combo prompt（内联，零成本）。** 权重决定层级。
+
+**看实际效果：**
+- [Seed bootstrap](./showcase/2026-05-17-vanilla-seed-bootstrap/)：Agent 从 1 个技能（`lythoskill-deck`）起步，自主扩展到 5 个——读取 deck 的 SKILL.md，理解架构，添加技能，自我修复网络错误
+- [Combo orchestration](./showcase/2026-05-13-deep-research-baoyu-combo/)：来自 2 个无关仓库的 6 个技能组合成 single research→HTML 流水线——编排活在 deck 结构里，不是外部代码
+
+设计坚守四条原则：声明式清单（先写再跑）、多平台兼容（一个 TOML 适配任意 agent）、deny-by-default（未声明即不可见）、本地优先（git 缓存，不依赖中心服务器）。
+
+```
+来源（GitHub、localhost 等）
+    │
+    ▼ git clone / git pull
+Cold Pool (~/.agents/skill-repos/)
+    │          github.com/lythos-labs/lythoskill/skills/lythoskill-deck/
+    │          github.com/mattpocock/skills/skills/engineering/tdd/
+    │          localhost/me/sober/
+    │
+    ▼ 符号链接（仅声明的技能）
+Working Set (.claude/skills/ 或 .kimi/skills/ 或 .cursor/skills/ 等)
+    │
+    ▼ agent 启动扫描
+Agent 只看见声明的技能。不多不少。
+```
+
+技能住在 **cold pool**，即本地 git 缓存（`~/.agents/skill-repos/`），按 Go module 风格组织（`github.com/owner/repo`）。没有中央注册表，没有认证服务器，没有守护进程。
+
+`deck link` 生成 **lockfile**（`skill-deck.lock`）锁定每个技能。提交它，队友拿到完全一致的链接。
+
+技能使用 **thin-skill 模式** 编写：重型逻辑放在 npm 包里，agent 可见的指令放在轻量 SKILL.md 文件中（[详情](./AGENTS.md)）。
+
+### 探索预组 Deck
+
+18+ 面向常见任务的 deck：文档处理、调研、架构评审、安全审计等。见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
+
+---
+
+## Thin Skill Pattern
 
 你在构建团队内部的技能库或公开的技能生态。你需要版本控制、CI、测试，以及"开发体验"和"agent 可见面"之间的清晰分离。
 
@@ -238,245 +288,137 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 
 ---
 
-## 实际案例：用 Deck 管理 Next.js 项目
+## 为什么值得信任
 
-下面是一个真实的使用场景，展示 subagent 如何在 deck 治理下自主工作。
+项目尚处早期，还没有 Fortune 500 的背书。但我们有**自治理透明度**：
 
-**场景**：初始化一个 Next.js 项目，让 agent 自己从 cold pool 挑技能、组 deck、并完成开发任务。
+- **每个决策都是 ADR。** 浏览 [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) —— 30+ 架构决策，附完整推理、被拒绝的备选方案和置信度评分。没有"相信我们，我们更懂"。
+- **每个发布都经 arena 测试。** Skill 发布前，在真实任务上跑控制变量对比。见 [`showcase/`](./showcase/) —— agent 使用 lythoskill 治理的 deck 完成的页面、报告和工具。
+- **每个技能都用 creator 构建。** Thin-skill 模式（`packages/<name>/skill/SKILL.md`）意味着 agent 可见的指令与实现分离——你可以精确审计 agent 看到了什么。
+- **661 个测试，0 失败。** 71 个 plan 生成单元测试，21 个 CLI BDD 场景，5 个 agent BDD 场景。覆盖率诚实——没有 gate 膨胀。
 
-```bash
-# 1. 初始化项目
-npx create-next-app@latest my-app --default --use-bun
-cd my-app
-
-# 2. 把社区技能 clone 到 cold pool（一次性的全局准备）
-git clone https://github.com/anthropics/skills.git \
-  ~/.agents/skill-repos/github.com/anthropics/skills
-
-git clone https://github.com/vercel-labs/agent-skills.git \
-  ~/.agents/skill-repos/github.com/vercel-labs/agent-skills
-
-# 3. Agent 自己组 deck——读取 cold pool 里的所有 SKILL.md，
-#    根据项目需求决策选哪些技能，然后写 skill-deck.toml
-#    示例结果（agent 自主决策）：
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"
-
-[innate.skills.lythoskill-deck]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
-
-[innate.skills.project-cortex]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
-
-[innate.skills.project-onboarding]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
-
-[innate.skills.project-scribe]
-path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
-
-[tool.skills.pdf]
-path = "github.com/anthropics/skills/skills/pdf"
-
-[tool.skills.docx]
-path = "github.com/anthropics/skills/skills/docx"
-
-[tool.skills.to-prd]
-path = "github.com/mattpocock/skills/skills/engineering/to-prd"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.gstack]
-path = "github.com/garrytan/gstack"
-
-[tool.skills.design-doc-mermaid]
-path = "github.com/SpillwaveSolutions/design-doc-mermaid"
-EOF
-
-# 4. 同步 deck
-bunx @lythos/skill-deck@latest link
-```
-
-**Agent 的工作流**：
-1. 读取 `.claude/skills/` 下的每个 SKILL.md，理解能力边界
-2. 用 `bunx @lythos/project-cortex@latest task "实现 Todo List 页面"` 创建任务
-3. 编码时吸收多个技能的优点：
-   - **react-best-practices** → `useReducer` + `React.memo` + `useCallback`
-   - **frontend-design** → zinc 配色、rounded-2xl、暗色模式
-   - **composition-patterns** → Context Provider + barrel export
-   - **webapp-testing** → Playwright、无障碍检查
-4. 任务完成后自动记录 session handoff 到 `daily/YYYY-MM-DD.md`
-
-**效果**：agent 不会盲目编码。它会先读 skill、按 governance 流程组织工作、并把多个技能的最佳实践融入代码——全程自主，无需人工指定每一步。
+这个项目是它自己的证明。我们用自己发布的工具治理自己。
 
 ---
 
-## Arena：Skill 对比
-
-不确定该用哪个技能？Arena 在不同 skill 配置下跑相同任务并打分。不用猜。
-
-| 问题 | 测试方式 |
-|---|---|
-| A 还是 B？ | `vs --config examples/arena/research-compare/arena.toml` —— 预置声明式配置 |
-| C 能改善我的 deck 吗？ | `vs --config examples/arena/add-remove/arena.toml` —— 预置声明式配置 |
-| D 是死重吗？ | `vs --config examples/arena/add-remove/arena.toml` —— 预置声明式配置 |
-
-**多维度评分**：裁判输出质量、token 效率、可维护性三个维度的分数。没有单一"赢家"——你根据自己的价值观选择。
-
-完整 Arena 工作流文档：[SKILL.md](skills/lythoskill-arena/SKILL.md)
-
----
-
-## Cold Pool 约定
-
-Cold pool 是你的技能**不活跃时**住在哪里。它可以无限增长。
-
-lythoskill 用 **Go module 风格的目录结构**，天然带有 `owner/repo` 可追溯性：
+## 命名速查
 
 ```
-~/.agents/skill-repos/              ← 全局 cold pool（推荐默认值）
-├── github.com/
-│   ├── lythos-labs/
-│   │   └── lythoskill/             ← git clone https://github.com/lythos-labs/lythoskill.git
-│   │       └── skills/
-│   │           ├── lythoskill-deck/
-│   │           └── lythoskill-creator/
-│   ├── vercel-labs/
-│   │   └── agent-skills/           ← git clone https://github.com/vercel-labs/agent-skills.git
-│   │       └── skills/
-│   │           ├── react-best-practices/
-│   │           └── composition-patterns/
-│   └── someone/
-│       └── standalone-skill/       ← 非 monorepo：仓库根 = 技能
-│           └── SKILL.md
-└── localhost/                      ← 无远程来源的本地技能
-    └── my-experiment/
-        └── SKILL.md
+lythoskill           ← 项目 / 生态系统
+skill-deck.toml      ← 你编辑的配置文件
+@lythos/skill-deck   ← npm 包
+deck                 ← CLI 命令
+link                 ← 子命令：把 toml 调和到 working set
 ```
-
-**为什么推荐 `~/.agents/skill-repos`**：
-- 它是**全局的**——所有项目共享同一个 cold pool，技能只需下载一次
-- 它是**结构化的**——`github.com/<owner>/<repo>` 天然带有来源可追溯性，不会混淆同名技能
-- 它是**可扩展的**——支持 GitHub、GitLab、自建主机、本地实验，路径即来源
-
-**添加技能到 cold pool** —— 这是每个技能源的一次性设置。你可以手动做，也可以让 agent 帮你跑：
-
-```bash
-# 把任意技能仓库安装到 cold pool
-git clone https://github.com/<owner>/<repo>.git \
-  ~/.agents/skill-repos/github.com/<owner>/<repo>
-
-# 真实示例：
-git clone https://github.com/lythos-labs/lythoskill.git \
-  ~/.agents/skill-repos/github.com/lythos-labs/lythoskill
-
-git clone https://github.com/vercel-labs/agent-skills.git \
-  ~/.agents/skill-repos/github.com/vercel-labs/agent-skills
-```
-
-之后，在项目的 `skill-deck.toml` 里声明该技能，然后运行 `deck link`。Deck 从此接管。
-
-**skill-deck.toml 中的路径解析**：
-- 短名 `lythoskill-deck` → deck 会在 cold pool 中递归扫描同名目录
-- 限定名 `github.com/lythos-labs/lythoskill/lythoskill-deck` → 直接定位，避免同名冲突
-- Monorepo 子技能 `owner/repo/skills/skill-name` → 自动识别 `skills/` 子目录
-
-**本地开发**：在 `skill-deck.toml` 中设置 `cold_pool = "."`。项目根变成 cold pool 入口，`./skills/` 会被扫描，就像 `~/.agents/skill-repos/github.com/.../skills/` 一样。
 
 ---
 
 ## 生态工具
 
-| 工具 | npm | 层级 | 功能 |
-|---|---|---|---|
-| **lythoskill-deck** | [`@lythos/skill-deck`](https://www.npmjs.com/package/@lythos/skill-deck) | A | 声明式 skill deck 治理（`link`、deny-by-default、max_cards） |
-| **lythoskill-creator** | [`@lythos/skill-creator`](https://www.npmjs.com/package/@lythos/skill-creator) | B | 脚手架和构建 thin-skill 包 |
-| **lythoskill-curator** | [`@lythos/skill-curator`](https://www.npmjs.com/package/@lythos/skill-curator) | A | 索引 cold pool，输出 REGISTRY.json + catalog.db 供 agent 推理 |
-| **lythoskill-arena** | [`@lythos/skill-arena`](https://www.npmjs.com/package/@lythos/skill-arena) | A | 控制变量对比 skill/deck 效果 |
-| **lythoskill-project-cortex** | [`@lythos/project-cortex`](https://www.npmjs.com/package/@lythos/project-cortex) | Both | GTD 风格项目治理（tasks、epics、ADRs、wiki） |
-| **lythoskill-project-scribe** | — | Both | 写项目记忆：handoffs、日报、踩坑记录 |
-| **lythoskill-project-onboarding** | — | Both | 结构化分层加载读取项目记忆 |
-| **lythoskill-red-green-release** | — | Both | Heredoc 迁移补丁工作流：plan → patch → 用户验收 → git tag |
+| 工具 | npm | 对你的意义 |
+|------|-----|----------------------|
+| **deck** | [`@lythos/skill-deck`](https://www.npmjs.com/package/@lythos/skill-deck) | 一个文件声明哪些技能活跃。队友拿到相同配置。CI 可复现。 |
+| **creator** | [`@lythos/skill-creator`](https://www.npmjs.com/package/@lythos/skill-creator) | 构建对 agent 轻量、对人类可维护的技能。避免 5000 行 SKILL.md 的维护负担。 |
+| **curator** | [`@lythos/skill-curator`](https://www.npmjs.com/package/@lythos/skill-curator) | 停止囤积忘记用途的技能。按细分领域查询："我有哪些测试技能？" |
+| **arena** | [`@lythos/skill-arena`](https://www.npmjs.com/package/@lythos/skill-arena) | 采用前证明技能有效。用控制变量对比替代"我这能跑"，输出可验证的证据。 |
+| **coach** | [`@lythos/skill-coach`](https://www.npmjs.com/package/@lythos/skill-coach) | 在技能到达 agent 前拦截质量问题。像 linter，但针对 agent 指令。 |
+| **cortex** | [`@lythos/project-cortex`](https://www.npmjs.com/package/@lythos/project-cortex) | GTD 风格项目治理：每个决策都是 ADR，每个任务都被追踪。 |
+
+我们用这些工具治理这个项目。`packages/` 里的每个技能都用 creator 构建。每个决策都走 cortex ADR。每个发布都用 deck 管理 working set。
+
+---
+
+## Curator：索引你的 Cold Pool
+
+技能_collection 增长后，你会忘记自己有什么、**为什么**有。Curator 扫描 cold pool，从每份 SKILL.md 提取元数据，构建可搜索索引。
+
+```bash
+# 索引 cold pool
+bunx @lythos/skill-curator@latest ~/.agents/skill-repos
+
+# 带决策记录添加技能
+bunx @lythos/skill-curator@latest add github.com/foo/bar \
+  --pool ~/.agents/skill-repos \
+  --reason "Agent 推荐，覆盖 PDF 提取"
+
+# 按细分领域或关键词查询
+bunx @lythos/skill-curator@latest query \
+  "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
+```
+
+Curator 提供数据；Arena 提供对比。完整文档见 [`packages/lythoskill-curator/README.md`](./packages/lythoskill-curator/README.md)。
+
+---
+
+## 实际案例：Deck 治理的 Next.js 项目
+
+见 [`examples/`](./examples/)，完整 walkthrough 一个 deck 治理的 Next.js 项目：编写富文本编辑器、添加 PDF 报告生成器、开发中途切换技能、运行 arena 交叉评审。Agent 自主编排技能组合——deck 提供治理层。
+
+---
+
+## Arena：A/B 测试 Skill 配置
+
+Arena 把技能隔离在 `/tmp` worktree 中，生成独立 agent 执行相同任务。
+
+**测试单个 deck：**
+```bash
+bunx @lythos/skill-arena@latest single \
+  --deck ./examples/decks/scout.toml \
+  --brief "Generate auth flow diagram" \
+  --out ./output
+```
+
+**对比两个 deck（agent 编排，默认）：**
+```bash
+bunx @lythos/skill-arena@latest vs --config ./arena.toml
+```
+
+**用特定 player 测试（跨平台）：**
+```bash
+bunx @lythos/skill-arena@latest single \
+  --deck ./deck.toml --brief "task" --player kimi
+```
+
+跨平台需要安装目标 agent CLI（如 `uv tool install kimi-cli`、`npm i -g @openai/codex`）。`vs` 模式下每边的 player 在 `arena.toml` 中声明——不是通过 `--player`。完整协议见 [`packages/lythoskill-arena/skill/SKILL.md`](./packages/lythoskill-arena/skill/SKILL.md)。与 benchmark suite 的对比见 [`references/comparisons.md`](./references/comparisons.md)。
+
+---
+
+## Cold Pool 约定
+
+```
+~/.agents/skill-repos/
+  github.com/
+    lythos-labs/lythoskill/skills/lythoskill-deck/
+    mattpocock/skills/skills/engineering/tdd/
+  localhost/              ← 你自己的技能，尚未分享
+    me/sober/
+    me/my-project-skill/
+```
+
+没有中央注册表。就是目录树里的 git 仓库。约定让技能可通过路径寻址：`github.com/owner/repo` 映射到 `~/.agents/skill-repos/github.com/owner/repo`。
 
 ---
 
 ## 架构
 
-### Deck 治理模型
-
 ```
-Cold Pool（存储）              Declaration（意图）            Working Set（运行时）
-  ~/.agents/skill-repos/       skill-deck.toml                .claude/skills/
-  ├── github.com/.../            [deck]                         ├── web-search ->
-  └── localhost/.../             max_cards = 8                  ├── docx ->
-                                 [tool.skills.web-search]
-                                 path = "github.com/.../web-search"
-                                 [tool.skills.docx]
-                                 path = "github.com/.../docx"
-                                 [tool.skills.design-doc-mermaid]
-                                 path = "github.com/.../design-doc-mermaid"
+Starter (packages/<name>/)       → npm publish → 实现 + CLI
+Skill   (packages/<name>/skill/) → build → SKILL.md + 薄脚本
+Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 ```
 
-### 治理层定位
+三层分离：重型逻辑住在 npm 包（Starter）里，agent 可见的指令住在轻量 SKILL.md 文件（Skill）里，agent 只看到输出（提交的符号链接）。
 
-```
-Agent 平台（Claude Code、Kimi、Codex）
-        ↑  ← 定义 SKILL.md 标准
-   .claude/skills/  ← working set（deck 管理）
-        ↑
-  lythoskill-deck  ← 声明式治理（治理层）
-        ↑
-  skill-deck.toml  ← 人类声明期望状态
-        ↑
-   Cold Pool       ← 用户填充（git clone、skills.sh 等）
-        ↑
-Skill 来源（GitHub、Vercel、npm、内部仓库）
-```
-
-lythoskill 位于 skill 来源和 agent 平台之间——它不替换任何一方。它防止技能从 10 增长到 100+ 时自然积累的混乱。
-
-**类比**：如果你熟悉 Java/Maven，心智模型类似：
-- `skill-deck.toml` ≈ `pom.xml` —— 声明你需要什么
-- `deck add` ≈ `mvn dependency:get` —— 下载到本地存储
-- cold pool ≈ `~/.m2/repository` —— 本地缓存，下载过的一切都在这里
-- `deck link` ≈ 让依赖对项目可用——但用 symlink 而非复制
-- `.claude/skills/` ≈ 项目的 classpath —— 只有声明过的才可见
+与 npm、Maven、Kubernetes RBAC 的对比见 [`references/comparisons.md`](./references/comparisons.md)。
 
 ---
 
-## 快速参考
+## 测试
 
 ```bash
-# Deck 治理（仅 bunx —— 需要 Bun 运行时）
-bunx @lythos/skill-deck@latest link                       # 同步 toml -> working set
-bunx @lythos/skill-deck@latest add github.com/owner/repo             # 下载技能 + 添加到 deck
-bunx @lythos/skill-deck@latest link --deck ./my-deck.toml
-
-# Skill 脚手架
-bunx @lythos/skill-creator@latest init my-project
-bunx @lythos/skill-creator@latest build my-skill
-
-# 项目治理
-bunx @lythos/project-cortex@latest task "Fix auth flow"
-bunx @lythos/project-cortex@latest list
-bunx @lythos/project-cortex@latest index
-
-# Cold pool 整理
-bunx @lythos/skill-curator@latest ~/.agents/skill-repos
-# → 输出 ~/.agents/lythos/skill-curator/REGISTRY.json + catalog.db
-
-# Arena 单技能对比
-bunx @lythos/skill-arena@latest run \
-  --config examples/arena/research-compare/arena.toml
-
-# Arena 完整 deck 对比
-bunx @lythos/skill-arena@latest run \
-  --task "Generate auth flow" \
-  --decks "./decks/minimal.toml,./decks/rich.toml" \
-  --criteria "quality,token,maintainability"
+bun --filter='*' run test          # 全部 661 个测试，44 个文件
+bun run test:coverage              # 覆盖率报告
+bun run test:bdd                   # BDD 集成测试
 ```
 
 ---
@@ -508,52 +450,55 @@ bun run test:all
 
 ---
 
-## 测试
+## 故障排除
 
-仓库里的 BDD 场景是**LLM 可读的契约**——Markdown(或 TypeScript)写的 Given/When/Then,跑在一个极小的自定义 runner 上。不上 Cucumber、不上插件层,agent 不用先学框架就能读和写。
+| 症状 | 解决 |
+|---------|-----|
+| `Command not found: deck` | 用 `bunx @lythos/skill-deck@latest <subcommand>` |
+| `bun: command not found` | 安装 Bun：`curl -fsSL https://bun.sh/install \| bash` |
+| 安装 Bun 后 `bunx: command not found` | 重启终端或运行 `source ~/.bashrc` |
+| `deck link` 后提示 `Skill not found` | 技能不在 cold pool 中：`bunx @lythos/skill-deck@latest add github.com/<owner>/<repo>` |
+| Agent 看不见技能 | 检查 `working_set` 是否匹配 agent 的扫描路径（见下表） |
+| 符号链接创建失败 | 确保 `working_set` 目录存在且可写 |
+| `deck link` 卡住或失败 | `github.com` 可能不可达；见下方环境变量 |
+| Lockfile 合并冲突 | 运行 `deck link` —— lockfile 完全由 `skill-deck.toml` 派生 |
 
-| 类别 | CI 跑? | 在哪 |
-|------|--------|------|
-| **Unit** | 跑 | (按需引入;Vitest / `bun:test` 都可) |
-| **CLI integration BDD** | 跑 | `packages/*/test/scenarios/` |
-| **Agent BDD** | **不跑** —— 验证靠 LLM 推理,CI 没 LLM | 暂未写;未来用 `*.agent.md` 后缀 |
+**环境变量：**
 
-本地一把跑:
-```bash
-bun run test:all     # 当前 12 个 cortex + 21 个 deck 场景
-```
+| 变量 | 用途 | 示例 |
+|----------|---------|---------|
+| `LYTHOS_GH_MIRROR` | 受限网络的 GitHub 镜像 | `export LYTHOS_GH_MIRROR="https://mirror.example.com"` |
+| `LYTHOS_SOCKS_PROXY` | git/fetch 操作的 SOCKS5 代理 | `export LYTHOS_SOCKS_PROXY="127.0.0.1:1080"` |
+| `LYTHOS_GIT_PROTOCOL` | Git clone 协议（`https` 或 `ssh`） | `export LYTHOS_GIT_PROTOCOL="ssh"` |
 
-全部场景索引:[`packages/lythoskill-test-utils/SCENARIOS.md`](./packages/lythoskill-test-utils/SCENARIOS.md)
+`LYTHOS_GH_MIRROR` 把 `github.com` URL 重写到你的镜像。工具不会自动回落到第三方镜像（信任边界由你掌控）。`LYTHOS_SOCKS_PROXY` 通过 `curl --proxy socks5://` 路由连通性探测。`LYTHOS_GIT_PROTOCOL` 改变 clone URL 的 scheme（默认 `https`）。
+
+**Agent `working_set` 路径：**
+- `.claude/skills/` — Claude Code
+- `.agents/skills/` — Codex CLI, OpenClaw
+- `.cursor/skills/` — Cursor
+- `.kimi/skills/` — Kimi
+- `.windsurf/skills/` — Windsurf
+- `.github/skills/` — GitHub Copilot
 
 ---
 
-## 技术栈
+## 与熟悉系统的对比
 
-| 层级 | 选择 |
-|---|---|
-| 运行时 | **Bun**（原生 TypeScript） |
-| 语言 | **TypeScript** |
-| 模块系统 | **ESM-only**（`"type": "module"`） |
-| 包管理器 | **Bun** workspaces |
-| Skill 层依赖 | **零感知** —— 消费者通过 `bunx`/`npx` 调用已发布包，无需本地安装 |
-| Starter 层依赖 | 正常的 npm 依赖管理，由包管理器自动解析 |
+如果你了解以下系统，这里是我们与它们的共享原则和刻意不共享的实现：
 
----
+| 系统 | 我们共享什么 | 我们刻意不共享什么 |
+|------|-------------|-------------------|
+| **Maven** | 声明式清单、本地缓存、`owner/repo` 路径约定 | 制品仓库（Nexus/Central）、版本范围解析、传递依赖、构建生命周期、JAR 二进制制品 |
+| **Kubernetes RBAC** | 声明式权限、deny-by-default、状态调和 | etcd、scheduler、controller、watch loop、网络层 |
+| **npm** | 声明式 manifest、lockfile、install 命令 | 中央注册表、认证服务器、传递依赖解析、tarball CDN |
 
-## 项目文档
-
-| 文档 | 用途 |
-|---|---|
-| [README.md](./README.md) | 英文版项目说明 |
-| [AGENTS.md](./AGENTS.md) | 面向 Codex / Kimi / Copilot / Gemini 的项目指引 |
-| [CLAUDE.md](./CLAUDE.md) | 面向 Claude Code 的项目指引 |
-| [cortex/INDEX.md](./cortex/INDEX.md) | 治理系统入口 |
-| [cortex/adr/](./cortex/adr/) | 架构决策记录 |
-| [skill-deck.toml](./skill-deck.toml) | 本仓库的活跃 skill deck |
-| [cortex/wiki/01-patterns/](./cortex/wiki/01-patterns/) | 可复用模式与约定 |
+> 类比是手电筒，照亮局部，不绘制全局。我们共享原则层（声明式、获取、缓存、链接），但不共享实现层（二进制制品、传递解析、仓库服务器）。
+>
+> 完整对比见 [`references/comparisons.md`](./references/comparisons.md)。
 
 ---
 
 ## License
 
-MIT
+MIT —— 见 [LICENSE](./LICENSE)。
