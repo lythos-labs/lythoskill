@@ -59,6 +59,11 @@ ls cortex/tasks/02-in-progress/   # Active work
 **If the project has cortex**, the `ls -lt` on adr/, wiki/, epics/, tasks/ directories
 tells you what happened recently without reading every file — timestamps reveal
 the most recent decisions, research, and active work at a glance.
+
+**Cortex ID = timestamp**: ADR-/TASK-/EPIC- prefixes use `yyyyMMddHHmmssSSS`.
+This enables date-range grep reconstruction (e.g., `ls cortex/adr/02-accepted/ |
+grep '^ADR-2026051'` finds all May 2026 decisions). Use this when a weekly is
+missing or when verifying claims across a date range.
 ## Freshness Decision Table
 | Condition | Verdict | Action |
 |-----------|---------|--------|

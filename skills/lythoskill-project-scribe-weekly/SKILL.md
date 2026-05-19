@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe-weekly
-version: 0.14.5
+version: 0.14.6
 type: standard
 description: |
   Weekly synthesis writer. Distills the past 7 days' core thread + quest DAG
@@ -19,6 +19,8 @@ when_to_use: |
 
 ## Value Boundary
 
+Weekly is a **memory offloading mechanism**, not a menu listing.
+
 | Direct queries (skip these) | Scribe-weekly must synthesize |
 |-----------------------------|-------------------------------|
 | `git log --since="7 days ago"` | The *one* decision that mattered most |
@@ -27,6 +29,8 @@ when_to_use: |
 | `bunx @lythos/project-cortex list` | What pattern is hardening into a project trait |
 
 If the next agent can find it via `ls daily/`, `git log`, or `cortex index` — don't replicate it. Link to it.
+
+**Why this matters**: A future agent reading a weekly cold (no daily access) should get the *compressed representation* of the week's cognitive work — the pattern, not the commits. Without this, every agent must reconstruct the narrative from 6 daily files + 29 commits + 10 ADRs. Weekly offloads that reconstruction cost once, permanently.
 
 ## When to Run
 
@@ -45,8 +49,13 @@ ls daily/*.md | sort | tail -7
 git log --since="7 days ago" --oneline
 
 # 3. Current cortex state
-bunx @lythos/project-cortex@0.14.5 index
-bunx @lythos/project-cortex@0.14.5 stats
+bunx @lythos/project-cortex@0.14.6 index
+bunx @lythos/project-cortex@0.14.6 stats
+
+# Cortex uses timestamp IDs (ADR-yyyyMMddHHmmssSSS, TASK-...,
+# EPIC-...). This lets you grep by date range:
+#   ls cortex/adr/02-accepted/ | grep '^ADR-2026051'
+# Use this when reconstructing a missing weekly from ground truth.
 
 # 4. Session recall — ask yourself:
 #    - What was the priority at week start?
@@ -129,7 +138,7 @@ Before relying on a weekly for planning, spot-check its claims against ground tr
 
 ```bash
 # Does the recorded epic/task status match reality?
-bunx @lythos/project-cortex@0.14.5 probe
+bunx @lythos/project-cortex@0.14.6 probe
 
 # Does the git activity match the claimed period?
 git log --since="2026-05-01" --until="2026-05-07" --oneline
