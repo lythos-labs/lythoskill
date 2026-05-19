@@ -46,7 +46,14 @@ if [ -n "$CHANGED_CLI" ] || [ -n "$CHANGED_SKILL" ]; then
   echo ""
 fi
 
-# 2. Cortex probe — surface state drift the agent should address
+# 2. Entropy check — weekly governance debt scan
+#    Non-blocking by default. Writes .last-entropy-check (gitignored) to survive
+#    across sessions. Over 7 days since last check → full scan. Under 7 days → skip.
+if [ -f scripts/entropy-check.sh ]; then
+  bash scripts/entropy-check.sh
+fi
+
+# 3. Cortex probe — surface state drift the agent should address
 if [ -f packages/lythoskill-project-cortex/src/cli.ts ]; then
   bun packages/lythoskill-project-cortex/src/cli.ts probe 2>&1 | grep -E "📭|⚠️.*proposed|⚠️.*in review|⚠️.*active epic" || true
 fi

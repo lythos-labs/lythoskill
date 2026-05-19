@@ -33,6 +33,7 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 | **Deck Catalogue** | 18 pre-built decks for common tasks | [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) |
 | **Guard Scripts** | Pre-commit, path-safety, test-report — meta-layer guards | § [Guard-script sensitivity](#guard-script-sensitivity) below |
 | **Test SSOT** | `bun --filter='*' run test` is canonical | § [Test SSOT](#test-ssot) below |
+| **Agent BDD** | `reproduce.sh` — IoC handoff pattern for agent scenario replay | § [Agent BDD (reproduce.sh)](#agent-bdd-reproducesh) below |
 | **Daily Handoff** | Session state recovery | `daily/YYYY-MM-DD.md` (latest date file) |
 | **Cortex Governance** | ADR, Epic, Task, Wiki | `cortex/INDEX.md` |
 
@@ -97,7 +98,13 @@ When the thought "I should just do it, the user is already angry" appears, that 
 
 **Workspace internal deps must use `workspace:*`, NOT semver.** `packages/*/package.json` dependencies on other `@lythos/*` packages must declare `"workspace:*"`, never `"^0.9.x"`. Bun resolves semver ranges to npm registry (caching old published versions), which means local source changes are invisible to dependent packages. This was the root cause of mirror/github-naming changes not propagating to deck CLI for an entire session. Pre-commit enforces this — semver ranges on `@lythos/*` deps are rejected.
 
-**Test SSOT.** The canonical test runner is `bun --filter='*' run test` (per-package `test` scripts in `package.json`). `scripts/test-report.ts` is a snapshot supplement, not a replacement — it must produce the same counts. If the two diverge, the script is wrong. Unit tests live in `src/*.test.ts` (co-located). CLI BDD lives in `test/runner.ts`. Agent BDD (`.agent.md`) is manual-only. Real counts are in CI logs, not README badges. Wiki: [`2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md`](./cortex/wiki/02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md).
+**Test SSOT.** The canonical test runner is `bun --filter='*' run test` (per-package `test` scripts in `package.json`). `scripts/test-report.ts` is a snapshot supplement, not a replacement — it must produce the same counts. If the two diverge, the script is wrong. Unit tests live in `src/*.test.ts` (co-located). CLI BDD lives in `test/runner.ts`. Agent BDD uses `reproduce.sh` (showcase/) — shell scaffold + IoC handoff, replaces fragile `.agent.md`. Real counts are in CI logs, not README badges. Wiki: [`2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md`](./cortex/wiki/02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md).
+
+**Agent BDD (reproduce.sh).** Agent scenarios live in `showcase/<date>-<name>/reproduce.sh`. This is the canonical format — it replaces `.agent.md`, which suffered from four structural defects: naming collision with `AGENTS.md`, Judge embedded in task prompt (self-appeal), regex parsing fragility, and non-executability.
+
+The reproduce.sh pattern is **IoC handoff**: shell handles deterministic scaffold (deck creation, workdir prep, archive), stdout acts as prompt-injection channel for the agent (`echo "<spawn subagent to ...>"`), and Judge criteria live in external `judge.md` where the task agent never sees them. A human running `bash reproduce.sh` sees the echo and stops; an agent reads stdout, recognizes its role marker, and takes over reasoning. This convention was not pre-designed — it was discovered when a subagent spontaneously wrote echo as a prompt channel, and a replay agent understood it without a schema.
+
+Zero-knowledge verification (2026-05-17): a no-prior-context subagent executed `bash reproduce.sh` + read stdout → completed full scenario (create + test + judge → PASS, 12 tool calls, 80s). Agent native language = shell echo, not markdown schema. ADR: [`ADR-20260518024500631`](./cortex/adr/02-accepted/ADR-20260518024500631-evolve-agent-bdd-from-agent-md-parseagentmd-to-reproduce-sh-pattern-self-executable-judge-separated-agent-native.md).
 
 **sed: detector, not scalpel.** `sed` and `grep` are for surveying — find occurrences, confirm the landscape, build a list. `sed -i` is a file-level `|| true`: one silent mismatch is undetectable corruption. When qa-sweep or manual inspection surfaces a recurring anti-pattern, the safe workflow is: survey with grep/sed (read-only) → design the right abstraction (extract a util, normalize an interface) → fix each call site one by one with the type checker watching → verify with `bun --filter='*' run test`. If the change is too large for site-by-site repair (whole-file rewrite, cross-cutting restructure), invoke `lythoskill-red-green-release` — show the target state via heredoc, don't describe the transformation. See [`cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md`](./cortex/adr/02-accepted/ADR-20260424113917838-red-green-release-heredoc-migration-patch-design.md).
 
@@ -237,7 +244,7 @@ Every CLI command, test harness, and arena run decomposes into three layers. The
 Intent (DSL)   →  Plan (pure data)  →  Execute (IO with injectable adapters)
 arena.toml      →  ExecutionPlan     →  runArenaFromToml
 deck config     →  RefreshPlan       →  executeRefreshPlan
-.agent.md       →  AgentScenario     →  runAgentScenario
+reproduce.sh    →  AgentScenario     →  runAgentScenario
 ```
 
 ### Layer responsibilities
