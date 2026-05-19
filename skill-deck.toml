@@ -39,4 +39,7 @@ role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→f
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release"
 role = "Heredoc patch workflow: declarative full-file replacement. Use when sed is tempting."
 
+[tool.skills.lythoskill-project-scribe-weekly]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe-weekly"
+
 
