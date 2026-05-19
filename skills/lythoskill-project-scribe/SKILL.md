@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.14.6
+version: 0.15.0
 type: standard
 description: |
   Session memory writer. Dumps what file exploration cannot recover —
@@ -28,7 +28,7 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.14.6 list
+bunx @lythos/project-cortex@0.15.0 list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
