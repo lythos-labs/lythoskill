@@ -49,7 +49,7 @@ Commands:
   add-skill <name>  Add a new skill to an existing monorepo
   build <skill>     Build a skill for distribution
   build --all       Build all skills in packages/lythoskill-*/
-  align [path]      Audit project against current conventions (--fix to auto-correct)
+  align [--fix]     Audit project against current conventions (--fix to auto-correct)
   bump <target>     Lock-step bump all package versions (patch | minor | major | X.Y.Z)
   bump --dry-run    Preview the bump without writing files
 ```
@@ -58,7 +58,7 @@ Commands:
 
 This package is the **Starter** layer (CLI implementation).  
 The agent-visible **Skill** layer documentation is here:  
-[packages/lythoskill-creator/skill/SKILL.md](../../packages/lythoskill-creator/skill/SKILL.md)
+[packages/lythoskill-creator/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-creator/skill/SKILL.md)
 
 ## Architecture
 

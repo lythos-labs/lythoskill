@@ -34,7 +34,7 @@ cp -r node_modules/@lythos/hello-world/skill ./skills/my-skill
 ## Skill Documentation
 
 This package is primarily a **Skill** layer template — the agent-visible documentation is here:  
-[packages/lythoskill-hello-world/skill/SKILL.md](../../packages/lythoskill-hello-world/skill/SKILL.md)
+[packages/lythoskill-hello-world/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-hello-world/skill/SKILL.md)
 
 The CLI exists only as a minimal smoke test. The real value is the `SKILL.md` structure.
 

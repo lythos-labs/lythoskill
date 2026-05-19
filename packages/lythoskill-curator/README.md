@@ -22,8 +22,8 @@ bunx @lythos/skill-curator@0.15.0 <command>
 ## Quick Start
 
 ```bash
-# Index your cold pool
-bunx @lythos/skill-curator@0.15.0 ~/.agents/skill-repos
+# Scan cold pool and build index
+bunx @lythos/skill-curator@0.15.0
 
 # Add a skill (with decision record)
 bunx @lythos/skill-curator@0.15.0 add github.com/foo/bar-skill \
@@ -44,10 +44,13 @@ bunx @lythos/skill-curator@0.15.0 query "SELECT name, description FROM skills WH
 
 ```
 Usage: lythoskill-curator [pool-path] [--output <dir>]
-       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>]
+       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]
        lythoskill-curator query <SQL> [--db <path>]
        lythoskill-curator audit [--db <path>]
        lythoskill-curator restore [--output <dir>]
+       lythoskill-curator tag <skill-name> --niche <value> [--qa <json>] [--db <path>]
+       lythoskill-curator refresh-plan [--pool <dir>]
+       lythoskill-curator refresh-execute [--pool <dir>]
 
 Commands:
   (no args)             Scan cold pool and build REGISTRY.json + catalog.db
@@ -55,12 +58,22 @@ Commands:
                           --pool <dir>         Cold pool path (required)
                           --reason <text>      Why this skill was added
                           --forked-from <loc>  Original skill if this is a fork
+                          --branch <name>      Specific branch (default: default branch)
+                          --full               Full clone (default: --depth 1 shallow)
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
   audit                 Run predefined checks and output an audit report
   restore               Roll back to the most recent backup
+  tag <skill-name>      Write agent-enriched metadata to indexed skill
+                          --niche <value>      Niche tag (repeatable)
+                          --qa <json>          QA signal: {"source_type":"self/arena","signal_value":8,...}
+                          --db, -d <path>      Database path
+  refresh-plan          Scan cold pool for upstream updates, write TODO plan
+                          --pool <dir>         Cold pool path (default: ~/.agents/skill-repos)
+  refresh-execute       Pull behind repos one by one
+                          --pool <dir>         Cold pool path (default: ~/.agents/skill-repos)
 
 Options:
-  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)
+  --output, -o <dir>    Output directory (default: ~/.agents/lythoskill/curator)
   --pool <dir>          Cold pool path for add (required)
   --db, -d <path>       Database path for query/audit
 ```
@@ -89,20 +102,10 @@ See [references/architecture.md](./skill/references/architecture.md) for the ful
 
 This package is the **Starter** layer (CLI implementation).
 The agent-visible **Skill** layer documentation is here:
-[packages/lythoskill-curator/skill/SKILL.md](../../packages/lythoskill-curator/skill/SKILL.md)
+[packages/lythoskill-curator/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-curator/skill/SKILL.md)
 
 ## License
 
 MIT
 
-<!-- test-stats -->
-![pass](https://img.shields.io/badge/60_pass-0_fail-brightgreen) ![coverage](https://img.shields.io/badge/coverage-64%25-red)
 
-```
-File | % Funcs | % Lines | Uncovered Line #s
-| --- | --- | --- |
-All files | 69.44 | 63.61 |
- src/cli.ts | 25.00 | 14.14 | 42-44,48-55,133-208,214-232,240-261,265-289,295-318,322-360,366-381,387-409,413-446,450-541,554-642,656-659,663-716,722,726-754,758-807,856-857,868-869,871-903,905-921
- src/curator-core.ts | 100.00 | 98.24 | 201-202
- ```
-<!-- /test-stats -->

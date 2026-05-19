@@ -2,7 +2,7 @@
 
 Cold pool service layer for the lythoskill ecosystem.
 
-> Status: 0.9.32 — public API. Reconciliation (reconcile plan) is functional; execute convergence WIP.
+> Status: stable — public API
 
 ## What this is
 
@@ -10,6 +10,16 @@ A dedicated resource-holder package for the cold pool — the local cache of
 skill repositories at `~/.agents/skill-repos/` (configurable). This package
 is the **only** layer in the ecosystem that holds git side-effects.
 deck / curator / arena consume it instead of running `git clone` themselves.
+
+## CLI Commands
+
+```bash
+# Scan cold pool for unreferenced repos
+bunx @lythos/cold-pool@0.15.0 prune [--yes] [--dry-run]
+
+# Validate lock file against cold pool
+bunx @lythos/cold-pool@0.15.0 validate [--lock ./skill-deck.lock]
+```
 
 ## Architecture
 

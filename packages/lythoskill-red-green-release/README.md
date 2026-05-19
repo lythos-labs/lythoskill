@@ -49,7 +49,7 @@ Then run `bunx @lythos/skill-deck@latest link` to activate.
 
 ## Skill Documentation
 
-[packages/lythoskill-red-green-release/skill/SKILL.md](../../packages/lythoskill-red-green-release/skill/SKILL.md)
+[packages/lythoskill-red-green-release/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-red-green-release/skill/SKILL.md)
 
 ## Architecture
 

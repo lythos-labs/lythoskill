@@ -19,7 +19,7 @@ Then run `bunx @lythos/skill-deck@latest link` to activate.
 
 ## Skill Documentation
 
-[packages/lythoskill-project-onboarding/skill/SKILL.md](../../packages/lythoskill-project-onboarding/skill/SKILL.md)
+[packages/lythoskill-project-onboarding/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-project-onboarding/skill/SKILL.md)
 
 ## Architecture
 

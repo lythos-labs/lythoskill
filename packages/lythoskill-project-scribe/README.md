@@ -19,7 +19,7 @@ Then run `bunx @lythos/skill-deck@latest link` to activate.
 
 ## Skill Documentation
 
-[packages/lythoskill-project-scribe/skill/SKILL.md](../../packages/lythoskill-project-scribe/skill/SKILL.md)
+[packages/lythoskill-project-scribe/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-project-scribe/skill/SKILL.md)
 
 ## Architecture
 

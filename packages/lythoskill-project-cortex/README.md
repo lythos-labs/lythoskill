@@ -154,7 +154,7 @@ Run `bunx @lythos/project-cortex@0.15.0 probe` to check lane occupancy and catch
 
 This package is the **Starter** layer (CLI implementation).  
 The agent-visible **Skill** layer documentation is here:  
-[packages/lythoskill-project-cortex/skill/SKILL.md](../../packages/lythoskill-project-cortex/skill/SKILL.md)
+[packages/lythoskill-project-cortex/skill/SKILL.md](https://github.com/lythos-labs/lythoskill/blob/main/packages/lythoskill-project-cortex/skill/SKILL.md)
 
 ## Architecture
 
