@@ -16,7 +16,7 @@
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena@0.14.5 <command>
+bunx @lythos/skill-arena@0.14.6 <command>
 ```
 
 ## Quick Start
