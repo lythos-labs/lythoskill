@@ -142,4 +142,64 @@ describe('removeSkill', () => {
     expect(existsSync(join(workingSet, 'skill-a'))).toBe(false)
     expect(existsSync(skillDir)).toBe(true)
   })
+
+  it('C12: remove cleans also_link_to targets', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    const skillDir = placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+
+    const deckContent = `[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+also_link_to = [".agents/skills", ".kimi/skills"]
+
+[tool.skills.skill-a]
+path = "github.com/owner/repo/skill-a"
+`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    // Create symlinks in all 3 targets to simulate post-link state
+    const targets = [
+      join(projectDir, '.claude', 'skills'),
+      join(projectDir, '.agents', 'skills'),
+      join(projectDir, '.kimi', 'skills'),
+    ]
+    for (const t of targets) {
+      mkdirSync(t, { recursive: true })
+      symlinkSync(skillDir, join(t, 'skill-a'))
+    }
+
+    const { removeSkill } = await import('./remove.ts')
+    removeSkill('skill-a', deckPath, projectDir)
+
+    const deckContentAfter = readFileSync(deckPath, 'utf-8')
+    expect(deckContentAfter).not.toContain('[tool.skills.skill-a]')
+
+    for (const t of targets) {
+      expect(existsSync(join(t, 'skill-a'))).toBe(false)
+    }
+    expect(existsSync(skillDir)).toBe(true)
+  })
+
+  it('C13: remove with empty also_link_to preserves backward compat', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    const skillDir = placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+
+    const deckPath = buildDeck(projectDir, coldPoolRel, 'skill-a', 'github.com/owner/repo/skill-a')
+
+    const workingSet = join(projectDir, '.claude', 'skills')
+    mkdirSync(workingSet, { recursive: true })
+    symlinkSync(skillDir, join(workingSet, 'skill-a'))
+
+    const { removeSkill } = await import('./remove.ts')
+    removeSkill('skill-a', deckPath, projectDir)
+
+    expect(existsSync(join(workingSet, 'skill-a'))).toBe(false)
+    expect(existsSync(skillDir)).toBe(true)
+  })
 })

@@ -9,7 +9,7 @@
 import { parse as parseToml, stringify as stringifyToml } from "@iarna/toml";
 import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
-import { findDeckToml, expandHome } from "./link.js";
+import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
 import { ColdPool } from "@lythos/cold-pool";
 import { homedir } from "node:os";
@@ -33,10 +33,11 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   const WORKING_SET = expandHome(deck.deck?.working_set || ".claude/skills", PROJECT_DIR);
 
-  const ALSO_LINK_TO_RAW: string[] = Array.isArray(deck.deck?.also_link_to)
-    ? deck.deck.also_link_to.filter((v: any) => typeof v === 'string')
-    : [];
-  const ALSO_LINK_TO = ALSO_LINK_TO_RAW.map((p: string) => expandHome(p, PROJECT_DIR));
+  const ALSO_LINK_TO_RESULT = parseAlsoLinkTo(deck.deck?.also_link_to, PROJECT_DIR);
+  const ALSO_LINK_TO = ALSO_LINK_TO_RESULT.targets;
+  if (ALSO_LINK_TO_RESULT.deprecated) {
+    console.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
+  }
 
   // ── 定位目标 ────────────────────────────────────────────────
 

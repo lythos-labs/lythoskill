@@ -39,6 +39,20 @@ export function expandHome(p: string, base: string): string {
   return resolve(base, p);
 }
 
+export function parseAlsoLinkTo(raw: any, projectDir: string): { targets: string[], deprecated: boolean } {
+  if (Array.isArray(raw)) {
+    return {
+      targets: raw.filter((v: any) => typeof v === 'string').map(p => expandHome(p, projectDir)),
+      deprecated: false,
+    };
+  }
+  if (typeof raw === 'string' && raw.trim()) {
+    const targets = raw.split(',').map(s => s.trim()).filter(Boolean).map(p => expandHome(p, projectDir));
+    return { targets, deprecated: true };
+  }
+  return { targets: [], deprecated: false };
+}
+
 function hashContent(content: string): string {
   return createHash("sha256").update(content).digest("hex");
 }
@@ -180,10 +194,11 @@ const COLD_POOL_RAW = parsedToml.deck?.cold_pool || "~/.agents/skill-repos";
 const WORKING_SET = expandHome(WORKING_SET_RAW, PROJECT_DIR);
 const COLD_POOL = expandHome(COLD_POOL_RAW, PROJECT_DIR);
 const MAX_CARDS = Number(parsedToml.deck?.max_cards || 10);
-const ALSO_LINK_TO_RAW: string[] = Array.isArray(parsedToml.deck?.also_link_to)
-  ? parsedToml.deck.also_link_to.filter((v: any) => typeof v === 'string')
-  : [];
-const ALSO_LINK_TO = ALSO_LINK_TO_RAW.map(p => expandHome(p, PROJECT_DIR));
+const ALSO_LINK_TO_RESULT = parseAlsoLinkTo(parsedToml.deck?.also_link_to, PROJECT_DIR);
+const ALSO_LINK_TO = ALSO_LINK_TO_RESULT.targets;
+if (ALSO_LINK_TO_RESULT.deprecated) {
+  console.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
+}
 
 // ── 收集声明 ────────────────────────────────────────────────
 
