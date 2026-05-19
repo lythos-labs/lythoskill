@@ -18,6 +18,7 @@ checklist_skipped_reason: non-interactive agent session
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-19 | Created |
+| done | 2026-05-19 | Done |
 
 ## 背景故事
 

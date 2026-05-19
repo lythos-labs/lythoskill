@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/19 17:09:55
+> 自动生成于 2026/5/19 17:39:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 254 | 进行中: 0, 待验收: 0, 已完成: 217 |
-| Epics | 36 | 活跃: 1, 已完成: 31, 悬置: 2, 已归档: 2 |
-| ADRs | 79 | 已接受: 76 |
+| Tasks | 254 | 进行中: 0, 待验收: 0, 已完成: 218 |
+| Epics | 36 | 活跃: 0, 已完成: 32, 悬置: 2, 已归档: 2 |
+| ADRs | 79 | 已接受: 77 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
+_无_
 
 ### 已完成
 
@@ -51,6 +51,7 @@
 - ✅ **EPIC-20260518125955940**: Curator MVP: mindset refactor + legacy migration — thin core, thick data
 - ✅ **EPIC-20260518145235543**: Emergency: fix arena agent-adapter — claude defaults to SDK, deepseek available, codex in vs mode
 - ✅ **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
+- ✅ **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
 
 ### 悬置
 
@@ -66,9 +67,9 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260518212223198**: implement also_link_to multi-platform fan-out in deck link
+_无_
 
 ### 进行中 (0)
 
@@ -78,7 +79,7 @@ _无_
 
 _无_
 
-### 已完成 (217)
+### 已完成 (218)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -290,6 +291,7 @@ _无_
 - ✅ ~~TASK-20260518130217386~~: Legacy reference cleanup: skills.sh, deck status sh, HANDOFF.md across repo
 - ✅ ~~TASK-20260518130219922~~: Curator reproduce.sh: scan → tag → query → audit full IoC verification
 - ✅ ~~TASK-20260518172921265~~: arena CLI single defaults output to CWD, leaks into project dir
+- ✅ ~~TASK-20260518212223198~~: implement also_link_to multi-platform fan-out in deck link
 - ✅ ~~TASK-20260518230024421~~: fix(deck): validate positional arg [deck.toml] ignored — only --deck flag worked
 - ✅ ~~TASK-20260519144445916~~: Symlink pollution cleanup
 - ✅ ~~TASK-20260519144500000~~: Remove `LYTHOS_COLD_POOL` environment variable
@@ -420,7 +422,7 @@ _无_
 - ✅ **ADR-20260518155038335** (02-accepted): Reproduce.sh + decision-log + logical framework — verifying premise-conclusion stability
 - ✅ **ADR-20260519144445916** (02-accepted): working_set Must Not Alias Build Output Directory
 - ✅ **ADR-20260519144500000** (02-accepted): Remove `LYTHOS_COLD_POOL` Environment Variable
-- 🤔 **ADR-20260519153000000** (01-proposed): Scheduled Weekly Entropy Reduction
+- ✅ **ADR-20260519153000000** (02-accepted): Scheduled Weekly Entropy Reduction
 - ✅ **ADR-20260519165746212** (02-accepted): cortex probe --suspicious 模式
 
 ---

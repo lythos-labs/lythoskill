@@ -133,3 +133,6 @@ fi
 - Persist cron across sessions (requires durable scheduling)
 - Expand probe rules based on new failure modes discovered
 - Consider auto-fix for known patterns (e.g., working_set collision)
+
+
+| accepted | 2026-05-19 | Accepted |
