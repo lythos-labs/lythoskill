@@ -180,6 +180,12 @@ graph TB
 ```
 
 > **The orchestrator is not a separate component.** It's distributed by weight: light judgment stays in combo prompts (inline in the deck), medium judgment sinks to SKILL.md (versioned, reusable), heavy mechanical work sinks to CLI npm (dumb, reliable). The agent is the reasoning engine — the deck is the playbook.
+>
+> **The deck delegates determinism to the CLI.** Prompts describe intent; the CLI enforces guarantees. "Refuse if `working_set` is `~`" — that can't be a prompt instruction, it must be a hard gate. "Back up 100MB before removing" — that's a `tar` command, not something the agent should remember. The deck makes the design decision: **deterministic constraints → CLI (npm, tested). Judgment calls → SKILL.md (agent reasons). Light glue → combo prompt (inline, zero cost).** The weight decides the layer.
+
+**See it in action:**
+- [Seed bootstrap](./showcase/2026-05-17-vanilla-seed-bootstrap/): Agent starts with 1 skill (`lythoskill-deck`) and self-expands to 5 — reads deck SKILL.md, understands the architecture, adds skills, self-heals network errors
+- [Combo orchestration](./showcase/2026-05-13-deep-research-baoyu-combo/): 6 skills from 2 unrelated repos composed into a single research→HTML pipeline — orchestration lives in the deck structure, not external code
 
 The design stays true to four principles: **declarative** (manifest, not imperative add/remove), **multi-platform** (one TOML, any agent), **deny-by-default** (undeclared = absent), **local-first** (git cache, no central server).
 
