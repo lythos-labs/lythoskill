@@ -55,6 +55,12 @@ export function executeEntropyCheck(config: EntropyConfig, io: EntropyIO): Repor
   io.log('═══════════════════════════════════════════════════════════════')
   io.log('')
 
+  // Remediation SOP — reproduce.sh style IoC handoff
+  const failedChecks = results.filter(r => r.status === 'fail' || r.status === 'warn')
+  if (failedChecks.length > 0) {
+    printRemediationSummary(failedChecks, io)
+  }
+
   // Write checkpoint even on failure (prevents spam)
   io.writeFile(config.checkpointFile, String(now))
 
@@ -91,6 +97,44 @@ function printCheckResult(index: number, total: number, result: CheckResult, io:
       io.log(`      → ${detail}`)
     }
   }
+}
+
+function printRemediationSummary(failedChecks: CheckResult[], io: EntropyIO): void {
+  io.log('')
+  io.log('┌─────────────────────────────────────────────────────────────┐')
+  io.log('│  🔧  Remediation SOP — reproduce.sh style IoC handoff       │')
+  io.log('│                                                             │')
+  io.log('│  AGENT TRIGGER: read the <spawn subagent> blocks below,     │')
+  io.log('│  execute the SOP steps, write decision-log.jsonl to CWD.    │')
+  io.log('│  Human: manual execution also valid.                        │')
+  io.log('└─────────────────────────────────────────────────────────────┘')
+  io.log('')
+
+  for (const check of failedChecks) {
+    if (!check.remediation || check.remediation.length === 0) continue
+
+    io.log(`▸ ${check.name}`)
+    io.log(`  <spawn subagent to execute ${check.name} remediation SOP>`)
+    io.log('')
+
+    for (let i = 0; i < check.remediation.length; i++) {
+      const step = check.remediation[i]
+      io.log(`  Step ${i + 1}: ${step.action}`)
+      if (step.command) {
+        io.log(`    $ ${step.command}`)
+      }
+      if (step.note) {
+        io.log(`    # ${step.note}`)
+      }
+      io.log('')
+    }
+  }
+
+  io.log('┌─────────────────────────────────────────────────────────────┐')
+  io.log('│  After remediation, re-run:                                 │')
+  io.log('│    bun scripts/entropy-check/index.ts                       │')
+  io.log('└─────────────────────────────────────────────────────────────┘')
+  io.log('')
 }
 
 function formatDuration(seconds: number): string {

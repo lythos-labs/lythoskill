@@ -14,11 +14,18 @@ export type CheckName =
   | 'env-var-prefix'
   | 'missing-weekly'
 
+export interface RemediationStep {
+  action: string
+  command?: string
+  note?: string
+}
+
 export interface CheckResult {
   name: CheckName
   status: 'pass' | 'fail' | 'warn' | 'skip'
   message: string
   details?: string[]
+  remediation?: RemediationStep[]
 }
 
 export interface EntropyIO {
