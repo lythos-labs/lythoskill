@@ -6,7 +6,22 @@ category: pattern
 
 # Where is the orchestrator — combo prompt as lightweight orchestrator pattern
 
-> The orchestrator is not a separate component. It is the combo `prompt` field.
+> The orchestrator is not a separate component. It is distributed by weight across three layers: combo prompt (light), SKILL.md (medium), CLI (heavy). The three-layer architecture IS the orchestrator.
+
+### Smart agent, dumb tool
+
+The three layers exist to separate concerns by two axes: **weight** (how much logic) and **nature** (mechanical vs judgment).
+
+| Weight | Mechanical (dumb) | Judgment (smart) |
+|--------|-------------------|------------------|
+| **Heavy** | CLI npm — backup, symlink, validate | SKILL.md — complex reasoning, cross-deck reuse |
+| **Light** | — | Combo prompt — conditions, call order, state passing |
+
+- **Dumb tool (CLI)**: mechanical, reliable, testable. Filesystem ops, backup, symlink management. Plan/execute, not reasoning.
+- **Smart agent instruction (SKILL.md)**: complex judgment that's worth version-controlling and reusing across decks. Heavy orchestration logic lives here.
+- **Smart agent instruction (combo prompt)**: light, contextual judgment. "If X then Y, pass A's output to B." Too light to deserve its own file.
+
+The orchestration logic sinks by weight: light stays in prompt, heavy sinks to SKILL.md, heaviest (mechanical) sinks to CLI npm. The three layers ARE the orchestrator — distributed, not centralized.
 
 ## Context
 
