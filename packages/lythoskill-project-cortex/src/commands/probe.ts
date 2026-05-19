@@ -195,10 +195,16 @@ function printResults(results: ProbeResult[], label: string): void {
   }
 }
 
-export function probeStatus(config: WorkflowConfig): void {
-  console.log('\n🔍 Probing status consistency...\n');
-  console.log('Rule: Directory location is the source of truth.');
-  console.log('Status History inside files should reflect the latest move.\n');
+export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean }): void {
+  const suspicious = opts?.suspicious ?? false;
+
+  if (!suspicious) {
+    console.log('\n🔍 Probing status consistency...\n');
+    console.log('Rule: Directory location is the source of truth.');
+    console.log('Status History inside files should reflect the latest move.\n');
+  } else {
+    console.log('\n🔎 Probing suspicious patterns only (empty shells, staleness, drift, lane violations)...\n');
+  }
 
   const taskFiles = [
     ...scanDir(join(config.tasksDir, config.taskSubdirs.backlog), 'TASK-'),
@@ -228,9 +234,11 @@ export function probeStatus(config: WorkflowConfig): void {
   const epicResults = probeFiles(epicFiles, config, 'epic');
   const adrResults = probeFiles(adrFiles, config, 'adr');
 
-  printResults(taskResults, '📄 Tasks');
-  printResults(epicResults, '📋 Epics');
-  printResults(adrResults, '🏛️  ADRs');
+  if (!suspicious) {
+    printResults(taskResults, '📄 Tasks');
+    printResults(epicResults, '📋 Epics');
+    printResults(adrResults, '🏛️  ADRs');
+  }
 
   // --- Lane occupancy check (per ADR-20260503003315478, option E) ---
   const laneWarnings: string[] = [];
@@ -368,12 +376,23 @@ export function probeStatus(config: WorkflowConfig): void {
   detectEmptyShells(adrFiles, 'adr');
 
   if (emptyShells.length > 0) {
-    console.log('\n📭 Empty shells (template not filled):');
-    for (const s of emptyShells) {
-      console.log(`     ⚠️  ${s}`);
+    // In suspicious mode, only flag empty shells in non-stable dirs (backlog, in-progress, proposed)
+    const filtered = suspicious
+      ? emptyShells.filter(s => {
+          return s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
+        })
+      : emptyShells
+
+    if (filtered.length > 0) {
+      console.log('\n📭 Empty shells (template not filled):');
+      for (const s of filtered) {
+        console.log(`     ⚠️  ${s}`);
+      }
+      console.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
+      if (!suspicious) {
+        console.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
+      }
     }
-    console.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
-    console.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
   }
 
   // ── Coverage snapshot drift ──────────────────────────────────────
@@ -415,9 +434,9 @@ export function probeStatus(config: WorkflowConfig): void {
 
   console.log('\n' + '─'.repeat(50));
   if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0 && coverageDrift.length === 0) {
-    console.log('✅ All clear! No inconsistencies found.');
+    console.log(suspicious ? '✅ No suspicious patterns found.' : '✅ All clear! No inconsistencies found.');
   } else {
-    if (allIssues.length > 0) {
+    if (!suspicious && allIssues.length > 0) {
       console.log(`⚠️  Found ${allIssues.length} status issue(s) requiring human confirmation.`);
       console.log('   Please review the items above and decide:');
       console.log('   - Move file to correct directory, OR');

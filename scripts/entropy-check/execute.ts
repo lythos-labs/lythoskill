@@ -55,12 +55,6 @@ export function executeEntropyCheck(config: EntropyConfig, io: EntropyIO): Repor
   io.log('═══════════════════════════════════════════════════════════════')
   io.log('')
 
-  // Remediation SOP — reproduce.sh style IoC handoff
-  const failedChecks = results.filter(r => r.status === 'fail' || r.status === 'warn')
-  if (failedChecks.length > 0) {
-    printRemediationSummary(failedChecks, io)
-  }
-
   // Write checkpoint even on failure (prevents spam)
   io.writeFile(config.checkpointFile, String(now))
 
@@ -97,37 +91,6 @@ function printCheckResult(index: number, total: number, result: CheckResult, io:
       io.log(`      → ${detail}`)
     }
   }
-}
-
-function printRemediationSummary(failedChecks: CheckResult[], io: EntropyIO): void {
-  io.log('')
-  io.log('┌─────────────────────────────────────────────────────────────┐')
-  io.log('│  🔧  Remediation SOP — reproduce.sh style IoC handoff       │')
-  io.log('│                                                             │')
-  io.log('│  AGENT TRIGGER: read the <spawn subagent> blocks below,     │')
-  io.log('│  execute the SOP steps, write decision-log.jsonl to         │')
-  io.log('│  playground/entropy-check/ (gitignored, safe to write).     │')
-  io.log('│  Human: manual execution also valid.                        │')
-  io.log('└─────────────────────────────────────────────────────────────┘')
-  io.log('')
-
-  for (const check of failedChecks) {
-    if (!check.remediation || check.remediation.length === 0) continue
-
-    io.log(`▸ ${check.name}`)
-    io.log('')
-
-    for (const line of check.remediation) {
-      io.log(`  ${line}`)
-    }
-    io.log('')
-  }
-
-  io.log('┌─────────────────────────────────────────────────────────────┐')
-  io.log('│  After remediation, re-run:                                 │')
-  io.log('│    bun scripts/entropy-check/index.ts                       │')
-  io.log('└─────────────────────────────────────────────────────────────┘')
-  io.log('')
 }
 
 function formatDuration(seconds: number): string {

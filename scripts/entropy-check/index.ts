@@ -11,7 +11,7 @@
  */
 import { executeEntropyCheck } from './execute.ts'
 import type { EntropyConfig, EntropyIO } from './types.ts'
-import { readFileSync, existsSync, writeFileSync, readdirSync, statSync } from 'node:fs'
+import { readFileSync, existsSync, writeFileSync, readdirSync, lstatSync, statSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
@@ -84,6 +84,13 @@ function buildProductionIO(): EntropyIO {
         return readdirSync(path)
       } catch {
         return []
+      }
+    },
+    isSymlink(path: string): boolean {
+      try {
+        return lstatSync(path).isSymbolicLink()
+      } catch {
+        return false
       }
     },
     log(message: string): void {

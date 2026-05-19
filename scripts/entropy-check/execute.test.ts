@@ -20,6 +20,7 @@ function mockIO(overrides: Partial<EntropyIO> = {}): EntropyIO & { logs: string[
     exec: () => ({ stdout: '', stderr: '', exitCode: 0 }),
     now: () => 1000000,
     listDir: () => [],
+    isSymlink: () => false,
     log: (msg: string) => logs.push(msg),
     logs,
     ...overrides,
@@ -87,12 +88,7 @@ describe('executeEntropyCheck', () => {
       writeFile: (_path: string, content: string) => { written = content },
       exists: (p: string) => p.includes('skills') || p.includes('packages'),
       listDir: () => ['bad-symlink'],
-      exec: (cmd: string, args: string[]) => {
-        if (cmd === 'stat' && args[args.length - 1].includes('bad-symlink')) {
-          return { stdout: 'symbolic link', stderr: '', exitCode: 0 }
-        }
-        return { stdout: '', stderr: '', exitCode: 0 }
-      },
+      isSymlink: (p: string) => p.includes('bad-symlink'),
     })
     const report = executeEntropyCheck(baseConfig, io)
     expect(report.exitCode).toBe(1)

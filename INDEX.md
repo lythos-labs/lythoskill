@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/18 23:01:11
+> 自动生成于 2026/5/19 17:05:12
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 252 | 进行中: 0, 待验收: 0, 已完成: 212 |
-| Epics | 35 | 活跃: 0, 已完成: 31, 悬置: 2, 已归档: 2 |
-| ADRs | 75 | 已接受: 73 |
+| Tasks | 254 | 进行中: 0, 待验收: 0, 已完成: 217 |
+| Epics | 36 | 活跃: 1, 已完成: 31, 悬置: 2, 已归档: 2 |
+| ADRs | 79 | 已接受: 76 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
 
 ### 已完成
 
@@ -66,11 +66,8 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (1)
 
-- [ ] **TASK-20260518145245246**: Fix resolvePlayer claude → claude-sdk, deprecate claude-cli adapter registration under claude name
-- [ ] **TASK-20260518145245296**: Add @lythos/agent-adapter-deepseek-serve as arena dependency + verify import works in bunx
-- [ ] **TASK-20260518145245344**: Import codex adapter in runner.ts so codex is available in arena vs mode
 - [ ] **TASK-20260518212223198**: implement also_link_to multi-platform fan-out in deck link
 
 ### 进行中 (0)
@@ -81,7 +78,7 @@ _无_
 
 _无_
 
-### 已完成 (212)
+### 已完成 (217)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -281,7 +278,6 @@ _无_
 - ✅ ~~TASK-20260517193958229~~: Map-reduce parallel critique cells BDD — concurrent subagent judge
 - ✅ ~~TASK-20260517194318952~~: Move root test/scenarios to package-co-located test directories per TESTING.md
 - ✅ ~~TASK-20260518004641351~~: Arena Standard Posture SOP — mindset validator protocol and meta-test showcase
-- ✅ ~~TASK-20260518013753710~~: Add empty-shell detection to probe — grep for PLACEHOLDER/需求1 markers
 - ✅ ~~TASK-20260518030349878~~: Phase 1 — reproduce.sh contract spec
 - ✅ ~~TASK-20260518030349939~~: Phase 3 — BDD coverage dashboard + change-impact probe
 - ✅ ~~TASK-20260518030349966~~: Phase 4 — migrate high-value .agent.md to reproduce.sh
@@ -295,6 +291,12 @@ _无_
 - ✅ ~~TASK-20260518130219922~~: Curator reproduce.sh: scan → tag → query → audit full IoC verification
 - ✅ ~~TASK-20260518172921265~~: arena CLI single defaults output to CWD, leaks into project dir
 - ✅ ~~TASK-20260518230024421~~: fix(deck): validate positional arg [deck.toml] ignored — only --deck flag worked
+- ✅ ~~TASK-20260519144445916~~: Symlink pollution cleanup
+- ✅ ~~TASK-20260519144500000~~: Remove `LYTHOS_COLD_POOL` environment variable
+- ✅ ~~TASK-20260519164655956~~: A: 删除 CheckResult.remediation 字段 + printRemediationSummary
+- ✅ ~~TASK-20260519164659220~~: B: symlink检测跨平台 — stat -c 替换为 fs.lstatSync
+- ✅ ~~TASK-20260519164702541~~: C: cortex-probe 改用 stats + 启发式过滤，只报告 actionable 项
+- ✅ ~~TASK-20260519164705587~~: D: missing-weekly 加入周完成度百分比 + 导航
 
 ### 悬置 (1)
 
@@ -416,6 +418,10 @@ _无_
 - ✅ **ADR-20260518024500631** (02-accepted): Evolve Agent BDD from .agent.md+parseAgentMd to reproduce.sh pattern
 - ✅ **ADR-20260518123403810** (02-accepted): Curator role re-derivation: from rigid indexer to agent-assisted discovery companion
 - ✅ **ADR-20260518155038335** (02-accepted): Reproduce.sh + decision-log + logical framework — verifying premise-conclusion stability
+- ✅ **ADR-20260519144445916** (02-accepted): working_set Must Not Alias Build Output Directory
+- ✅ **ADR-20260519144500000** (02-accepted): Remove `LYTHOS_COLD_POOL` Environment Variable
+- 🤔 **ADR-20260519153000000** (01-proposed): Scheduled Weekly Entropy Reduction
+- ✅ **ADR-20260519165746212** (02-accepted): cortex probe --suspicious 模式
 
 ---
 

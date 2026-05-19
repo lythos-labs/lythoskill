@@ -25,6 +25,7 @@ function mockIO(overrides: Partial<EntropyIO> = {}): EntropyIO {
     exec: () => ({ stdout: '', stderr: '', exitCode: 0 }),
     now: () => 1000000,
     listDir: () => [],
+    isSymlink: () => false,
     log: () => {},
     ...overrides,
   }
@@ -59,11 +60,12 @@ describe('checkCortexProbe', () => {
   it('warns when cortex has warnings', () => {
     const io = mockIO({
       exists: (p) => p.includes('cli.ts'),
-      exec: () => ({
-        stdout: '⚠️  Proposed ADR found\n📭 Empty shells\n',
-        stderr: '',
-        exitCode: 0,
-      }),
+      exec: (cmd: string, args: string[]) => {
+        if (args.includes('probe')) {
+          return { stdout: '⚠️  cortex/adr/01-proposed/ADR-foo.md\n📭 Empty shells\n⚠️  cortex/tasks/01-backlog/TASK-bar.md\n', stderr: '', exitCode: 0 }
+        }
+        return { stdout: 'Tasks:\n  Backlog: 1\n', stderr: '', exitCode: 0 }
+      },
     })
     const result = checkCortexProbe(baseConfig, io)
     expect(result.status).toBe('warn')
@@ -82,7 +84,7 @@ describe('checkSymlinksInSkills', () => {
     const io = mockIO({
       exists: (p) => p.includes('skills'),
       listDir: () => ['lythoskill-deck', 'lythoskill-arena'],
-      exec: () => ({ stdout: 'regular file', stderr: '', exitCode: 0 }),
+      isSymlink: () => false,
     })
     const result = checkSymlinksInSkills(baseConfig, io)
     expect(result.status).toBe('pass')
@@ -92,14 +94,7 @@ describe('checkSymlinksInSkills', () => {
     const io = mockIO({
       exists: (p) => p.includes('skills'),
       listDir: () => ['lythoskill-deck', 'bad-link'],
-      exec: (_cmd, args) => {
-        const path = args[args.length - 1]
-        return {
-          stdout: path.includes('bad-link') ? 'symbolic link' : 'regular file',
-          stderr: '',
-          exitCode: 0,
-        }
-      },
+      isSymlink: (p) => p.includes('bad-link'),
     })
     const result = checkSymlinksInSkills(baseConfig, io)
     expect(result.status).toBe('fail')
@@ -182,6 +177,7 @@ describe('checkMissingWeekly', () => {
       exec: (cmd, args) => {
         if (args[0] === '+%V') return { stdout: '20\n', stderr: '', exitCode: 0 }
         if (args[0] === '+%Y') return { stdout: '2026\n', stderr: '', exitCode: 0 }
+        if (args[0] === '+%u') return { stdout: '5\n', stderr: '', exitCode: 0 }
         return { stdout: '', stderr: '', exitCode: 0 }
       },
     })
@@ -195,11 +191,14 @@ describe('checkMissingWeekly', () => {
       exec: (cmd, args) => {
         if (args[0] === '+%V') return { stdout: '21\n', stderr: '', exitCode: 0 }
         if (args[0] === '+%Y') return { stdout: '2026\n', stderr: '', exitCode: 0 }
+        if (args[0] === '+%u') return { stdout: '2\n', stderr: '', exitCode: 0 }
         return { stdout: '', stderr: '', exitCode: 0 }
       },
     })
     const result = checkMissingWeekly(baseConfig, io)
     expect(result.status).toBe('warn')
     expect(result.message).toContain('W21')
+    expect(result.message).toContain('29%')
+    expect(result.details?.some(d => d.includes('Tip:'))).toBe(true)
   })
 })

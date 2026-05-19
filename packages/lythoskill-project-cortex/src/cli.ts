@@ -40,6 +40,7 @@ Commands:
   index wiki            Generate wiki/INDEX.md only
   wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
+                        --suspicious   Only report suspicious patterns (empty shells, stale, drift)
   flow                  Show kanban CFD — count, avg age, WIP limits
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 
@@ -298,7 +299,7 @@ async function main(): Promise<void> {
       break;
 
     case 'probe':
-      probeStatus(config);
+      probeStatus(config, { suspicious: allFlags.includes('--suspicious') });
       break;
 
     case 'flow':

@@ -19,7 +19,6 @@ export interface CheckResult {
   status: 'pass' | 'fail' | 'warn' | 'skip'
   message: string
   details?: string[]
-  remediation?: string[]
 }
 
 export interface EntropyIO {
@@ -29,6 +28,7 @@ export interface EntropyIO {
   exec(command: string, args: string[]): { stdout: string; stderr: string; exitCode: number }
   now(): number
   listDir(path: string): string[]
+  isSymlink(path: string): boolean
   log(message: string): void
 }
 
