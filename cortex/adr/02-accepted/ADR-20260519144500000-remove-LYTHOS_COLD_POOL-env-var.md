@@ -1,6 +1,6 @@
 # ADR-20260519144500000: Remove `LYTHOS_COLD_POOL` Environment Variable
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-05-19
 **Supersedes**: Implicit early-scaffolding convention
 

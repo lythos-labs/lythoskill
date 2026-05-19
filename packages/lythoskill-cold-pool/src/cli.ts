@@ -51,8 +51,8 @@ async function main(): Promise<void> {
     process.exit(0)
   }
 
-  // Resolve cold pool path (env var > default)
-  const coldPoolPath = process.env.LYTHOS_COLD_POOL ?? DEFAULT_COLD_POOL_PATH
+  // Resolve cold pool path (default only; use --pool for override)
+  const coldPoolPath = DEFAULT_COLD_POOL_PATH
 
   switch (command) {
     // ── prune ─────────────────────────────────────────────────

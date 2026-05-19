@@ -4,8 +4,7 @@ import { join, relative } from 'node:path'
 import type { Locator } from './types.js'
 import { MetadataDB } from './metadata-db.js'
 
-export const DEFAULT_COLD_POOL_PATH = process.env.LYTHOS_COLD_POOL
-  ?? join(homedir(), '.agents/skill-repos')
+export const DEFAULT_COLD_POOL_PATH = join(homedir(), '.agents/skill-repos')
 
 // ── DirEntry — pure, injectable fs entry ─────────────────────────────────────
 
