@@ -152,7 +152,34 @@ bunx @lythos/skill-deck@latest validate
 
 ## How it works
 
-A **deck** is both a **declarative skill manifest** and an **orchestrator** — a `skill-deck.toml` file that names which skills are active AND tells the agent how to combine them. Combo prompts describe orchestration in natural language ("if X then Y, pass A's output to B"). The deck is the agent's playbook. Everything else (curator, arena, creator, coach) is tooling around that file.
+A **deck** is both a **declarative skill manifest** and an **orchestrator** — a `skill-deck.toml` file that names which skills are active AND tells the agent how to combine them. Combo prompts describe orchestration in natural language ("if X then Y, pass A's output to B"). The deck is the agent's playbook.
+
+### Why "deck = orchestrator" is not a buzzword
+
+```mermaid
+graph TB
+    subgraph "Orchestration Layer (distributed by weight)"
+        direction TB
+        CP["🎯 Combo Prompt<br/>Light judgment<br/>'if X then Y, pass A→B'<br/>Zero cost, inline in deck"]
+        SM["📄 SKILL.md<br/>Medium judgment<br/>Complex workflows, cross-project reuse<br/>Version-controlled, cold-pool resident"]
+        CL["⚙️ CLI (npm)<br/>Heavy mechanical<br/>Backup, symlink, archive<br/>Dumb, reliable, testable"]
+    end
+
+    AG["🧠 Agent<br/>Reads deck → reasons → dispatches<br/>The smart loop — not the tool"]
+    DK["skill-deck.toml<br/>Declares skills + combo prompts<br/>Single file, git-tracked"]
+    WS["Working Set<br/>.claude/skills/<br/>Only declared skills exist here"]
+    CP2["Cold Pool<br/>~/.agents/skill-repos/<br/>All downloaded, none visible to agent"]
+
+    DK -->|"deck link"| WS
+    CP2 -->|"symlink declared"| WS
+    AG -->|"reads prompts from"| DK
+    AG -->|"calls mechanical ops via"| CL
+    AG -->|"loads reasoning from"| SM
+    AG -->|"follows playbook from"| CP
+    WS -->|"scans at startup"| AG
+```
+
+> **The orchestrator is not a separate component.** It's distributed by weight: light judgment stays in combo prompts (inline in the deck), medium judgment sinks to SKILL.md (versioned, reusable), heavy mechanical work sinks to CLI npm (dumb, reliable). The agent is the reasoning engine — the deck is the playbook.
 
 The design stays true to four principles: **declarative** (manifest, not imperative add/remove), **multi-platform** (one TOML, any agent), **deny-by-default** (undeclared = absent), **local-first** (git cache, no central server).
 
