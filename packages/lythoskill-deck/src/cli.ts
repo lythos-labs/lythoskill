@@ -72,7 +72,7 @@ const HELP_CONFIG = {
     { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
 
     { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
-    { flag: '--type <type>', description: 'Target section: innate | tool | combo (default: tool)' },
+    { flag: '--type <type>', description: 'Target section: innate | tool (default: tool)' },
     { flag: '--dry-run', description: 'Show plan without executing (add)' },
     { flag: '--yes', description: 'Skip interactive confirmation' },
     { flag: '--remote', description: 'For validate: probe each FQ locator against api.github.com' },

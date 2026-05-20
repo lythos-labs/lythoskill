@@ -1,7 +1,7 @@
 import { parse as parseToml } from "@iarna/toml";
 import { SkillEntrySchema } from "./schema.js";
 
-export type SkillType = "innate" | "tool" | "combo";
+export type SkillType = "innate" | "tool";
 
 export interface ParsedSkillEntry {
   alias: string; // working-set flat symlink name = role identity
@@ -14,8 +14,9 @@ export interface ParsedSkillEntry {
 
 export interface ParsedDeck {
   entries: ParsedSkillEntry[];
-  deprecated: boolean; // true if any section used legacy string-array
+  deprecated: boolean;
   errors: string[];
+  comboPrompt?: string; // [combo] prompt — lightweight orchestration hint for agents
 }
 
 export function parseDeck(raw: string): ParsedDeck {
@@ -29,7 +30,7 @@ export function parseDeck(raw: string): ParsedDeck {
   const errors: string[] = [];
   let deprecated = false;
 
-  for (const section of ["innate", "tool", "combo"] as const) {
+  for (const section of ["innate", "tool"] as const) {
     const sectionData = parsed[section];
     if (!sectionData) continue;
 
@@ -79,5 +80,10 @@ export function parseDeck(raw: string): ParsedDeck {
     }
   }
 
-  return { entries, deprecated, errors };
+  // ── [combo] prompt — lightweight orchestration hint, not a skill section ──
+  const comboPrompt = parsed.combo?.prompt && typeof parsed.combo.prompt === "string"
+    ? parsed.combo.prompt.trim()
+    : undefined;
+
+  return { entries, deprecated, errors, comboPrompt };
 }

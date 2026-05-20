@@ -5,7 +5,7 @@ export const LinkedSkillSchema = z.object({
   name: z.string(),
   alias: z.string(),
   deck_niche: z.string(),
-  type: z.enum(["innate", "tool", "combo", "transient"]),
+  type: z.enum(["innate", "tool", "transient"]),
   source: z.string(),
   dest: z.string(),
   /** Link mode: symlink (live, follows cold pool) or snapshot (pinned copy). */

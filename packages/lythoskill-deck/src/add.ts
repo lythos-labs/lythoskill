@@ -222,8 +222,8 @@ export async function addSkill(
   }
   const skillType = (options.type || 'tool').toLowerCase()
 
-  if (!['innate', 'tool', 'combo'].includes(skillType)) {
-    console.error(`❌ Invalid type: ${skillType}. Must be innate, tool, or combo.`)
+  if (!['innate', 'tool'].includes(skillType)) {
+    console.error(`❌ Invalid type: ${skillType}. Must be innate or tool. (combo is now a prompt, not a skill type.)`)
     process.exit(1)
   }
 
