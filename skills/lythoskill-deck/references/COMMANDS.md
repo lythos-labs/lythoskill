@@ -19,7 +19,7 @@ Options:
   --mode <symlink|snapshot>  Link mode: symlink (default) or snapshot (cp)
   --no-backup                Skip tar backup when removing non-symlink entries
   --alias <name>             Explicit alias for the skill (default: basename of path)
-  --type <type>              Target section: innate | tool | combo (default: tool)
+  --type <type>              Target section: innate | tool (default: tool)
   --dry-run                  Show plan without executing (add)
   --yes                      Skip interactive confirmation
   --remote                   For validate: probe each FQ locator against api.github.com

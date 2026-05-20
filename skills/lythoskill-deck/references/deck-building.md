@@ -13,8 +13,8 @@ Four phases: Discovery → Evaluation → Organization → Maintenance.
 - **Deck synergy**: Arena `--decks` tests full-deck marginal effect, not single-card strength
 - **Silent blend check**: Same-niche innate skills must not coexist
 ## 3. Organization
-- **One niche, one skill** in innate. Exception: combo routing
-- **Thickness layers**: heavy assets → npm/pip; dispatchers → Flow/Combo; glue → SKILL.md + scripts
+- **One niche, one skill** in innate. Exception: combo.prompt routing
+- **Thickness layers**: heavy assets → npm/pip; dispatchers → Flow/combo.prompt; glue → SKILL.md + scripts
 - **Transient hardening**: repeated workaround → extract to package → skill keeps only the call
 ## 4. Maintenance
 - **Curator scan**: `bunx @lythos/skill-curator rebuild index` after new downloads
