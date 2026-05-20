@@ -39,6 +39,8 @@ interface SkillMeta {
   deckSkillType: string | null; // combo | transient | fork | null
   // FSM tracking
   contentHash: string;
+  status: string; // parsed | parse_error | incomplete
+  parseError: string | null; // error message if YAML.parse threw
 }
 
 
@@ -77,19 +79,6 @@ export function extractQuotedPhrases(text: string): string[] {
   return [...new Set(triggers)];
 }
 
-export function inferSource(path: string): string {
-  // Cold-pool layout: <pool>/github.com/<org>/<repo>/.../<skill>/
-  //                  <pool>/localhost/me/<skill>/
-  const parts = path.split('/');
-  const ghIdx = parts.indexOf('github.com');
-  if (ghIdx >= 0 && parts.length > ghIdx + 2) {
-    return `github.com/${parts[ghIdx + 1]}/${parts[ghIdx + 2]}`;
-  }
-  const localhostIdx = parts.indexOf('localhost');
-  if (localhostIdx >= 0) return 'localhost';
-  return 'unknown';
-}
-
 export function scanSkill(path: string): SkillMeta | null {
   const skillMdPath = join(path, 'SKILL.md');
   if (!statSync(skillMdPath, { throwIfNoEntry: false })) return null;
@@ -98,11 +87,13 @@ export function scanSkill(path: string): SkillMeta | null {
   const { frontmatter: rawFm, body } = parseFrontmatter(text);
 
   let frontmatter: Record<string, unknown> = {}
+  let parseError: string | null = null
   try {
     frontmatter = YAML.parse(rawFm._raw as string) || {}
-  } catch {
+  } catch (e) {
     // Frontmatter parse failed — use empty frontmatter, derive basics from path.
     // The skill still exists and has a path; basic metadata is derivable.
+    parseError = e instanceof Error ? e.message : String(e)
   }
 
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
@@ -110,6 +101,15 @@ export function scanSkill(path: string): SkillMeta | null {
 
   // Pure metadata transform
   const core = buildSkillMeta(frontmatter, path, body);
+
+  // Structural validation: classify scan quality
+  let status = 'parsed'
+  if (parseError) {
+    status = 'parse_error'
+  } else if (!core.description) {
+    // description is essential for discovery; without it the skill is effectively invisible
+    status = 'incomplete'
+  }
 
   // CLI-specific IO extras
   const managedDirs = frontmatter.deck_managed_dirs || frontmatter.managed_dirs || [];
@@ -136,6 +136,8 @@ export function scanSkill(path: string): SkillMeta | null {
     tags: core.tags,
     deckSkillType: core.deckSkillType,
     contentHash,
+    status,
+    parseError,
   };
 }
 
@@ -185,10 +187,10 @@ function writeCatalogDb(dbPath: string, poolPath: string, skills: SkillMeta[], f
       $deck_dependencies: JSON.stringify(s.deckDependencies),
       $deck_skill_type: s.deckSkillType,
       $content_hash: s.contentHash,
-      $status: 'parsed',
+      $status: s.status,
       $indexed_at: isNew ? now : null,
       $last_parsed_at: now,
-      $parse_error: null,
+      $parse_error: s.parseError,
     })
   }
 
@@ -297,18 +299,29 @@ export function runCurator(argv: string[]) {
   const skillDirs = findSkillDirs(poolPath);
 
   const skills: SkillMeta[] = [];
-  const skipped: string[] = [];
+  const skipped: { path: string; reason: string }[] = [];
   for (const path of skillDirs) {
-    try { const s = scanSkill(path); if (s) skills.push(s); else skipped.push(path); }
-    catch { skipped.push(path); }
+    try {
+      const s = scanSkill(path);
+      if (s) { skills.push(s); }
+      else { skipped.push({ path, reason: 'missing SKILL.md' }); }
+    } catch (e) {
+      skipped.push({ path, reason: `crash: ${e instanceof Error ? e.message : String(e)}` });
+    }
   }
 
+  const degraded = skills.filter(s => s.status !== 'parsed')
   console.log(`🧠 Skill Curator — Indexed ${skills.length} skills`);
+  if (degraded.length > 0) {
+    console.log(`⚠️  ${degraded.length} skill(s) indexed with degraded status:`);
+    for (const s of degraded) {
+      const tag = s.status === 'parse_error' ? 'YAML' : s.status === 'incomplete' ? 'MISSING' : s.status;
+      console.log(`   [${tag}] ${s.path}${s.parseError ? ` — ${s.parseError}` : ''}`);
+    }
+  }
   if (skipped.length > 0) {
-    console.log(`⚠️  Skipped ${skipped.length} skill(s) with unreadable or missing frontmatter:`);
-    for (const p of skipped.slice(0, 5)) console.log(`   ${p}`);
-    if (skipped.length > 5) console.log(`   ... and ${skipped.length - 5} more`);
-    console.log('   Run "curator audit" for diagnostics.');
+    console.log(`🚫 ${skipped.length} skill(s) skipped (unreadable):`);
+    for (const s of skipped) console.log(`   [${s.reason}] ${s.path}`);
   }
 
   const byType: Record<string, SkillMeta[]> = {};

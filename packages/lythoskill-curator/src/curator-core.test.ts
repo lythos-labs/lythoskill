@@ -19,9 +19,12 @@ describe('inferSource', () => {
     expect(inferSource('/pool/localhost/my-skill')).toBe('localhost')
   })
 
-  test('falls back to path prefix for unknown patterns', () => {
-    const result = inferSource('/pool/gitlab.com/foo')
-    expect(result).toContain('gitlab.com')
+  test('returns unknown for unrecognized patterns (not github.com or localhost)', () => {
+    expect(inferSource('/pool/gitlab.com/foo')).toBe('unknown')
+  })
+
+  test('extracts github.com org/repo when SKILL.md is at repo root', () => {
+    expect(inferSource('/pool/github.com/gstack')).toBe('github.com/gstack')
   })
 })
 

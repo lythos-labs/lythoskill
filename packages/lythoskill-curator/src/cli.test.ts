@@ -11,7 +11,8 @@ import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { inferSource, extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind } from './cli.ts'
+import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind } from './cli.ts'
+import { inferSource } from './curator-core'
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -38,6 +39,11 @@ describe('inferSource', () => {
   it('returns unknown for unrecognized layout', () => {
     const path = '/random/path/to/skill'
     expect(inferSource(path)).toBe('unknown')
+  })
+
+  it('extracts github.com org/repo when SKILL.md is at repo root', () => {
+    const path = '/home/user/.agents/skill-repos/github.com/gstack'
+    expect(inferSource(path)).toBe('github.com/gstack')
   })
 })
 
@@ -169,6 +175,52 @@ describe('scanSkill', () => {
     const emptyDir = join(tmpDir, 'no-skill')
     mkdirSync(emptyDir, { recursive: true })
     expect(scanSkill(emptyDir)).toBeNull()
+  })
+
+  it('sets status=parse_error and captures error when YAML is invalid', () => {
+    const dir = createSkillDir(tmpDir, 'bad-yaml', [
+      'name: bad-yaml',
+      'description:',
+      '  - unclosed: {{',
+      '',
+    ].join('\n'))
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('parse_error')
+    expect(meta!.parseError).not.toBeNull()
+    // Still derivable from path
+    expect(meta!.name).toBe('bad-yaml')
+  })
+
+  it('sets status=incomplete when description is empty', () => {
+    const dir = createSkillDir(tmpDir, 'bare-min', 'name: bare-min\nversion: "1.0.0"\n')
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('incomplete')
+    expect(meta!.description).toBe('')
+  })
+
+  it('sets status=parsed when version is missing but description exists', () => {
+    // Missing version is common (e.g. Anthropic skills), not a degradation
+    const dir = createSkillDir(tmpDir, 'no-version', 'name: no-ver\ndescription: Works fine.\n')
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('parsed')
+    expect(meta!.version).toBe('unknown')
+  })
+
+  it('sets status=parsed when frontmatter is clean', () => {
+    const dir = createSkillDir(tmpDir, 'clean', [
+      'name: clean-skill',
+      'description: Fully specified.',
+      'version: 2.0.0',
+      'type: flow',
+      '',
+    ].join('\n'))
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('parsed')
+    expect(meta!.parseError).toBeNull()
   })
 })
 

@@ -72,14 +72,16 @@ export function parseFrontmatter(text: string): { frontmatter: Record<string, un
 export function inferSource(path: string): string {
   const parts = path.split('/')
   const ghIdx = parts.indexOf('github.com')
-  if (ghIdx >= 0 && ghIdx + 2 < parts.length) {
-    return `github.com/${parts[ghIdx + 1]}/${parts[ghIdx + 2]}`
+  if (ghIdx >= 0 && ghIdx + 1 < parts.length) {
+    const org = parts[ghIdx + 1]
+    const repo = ghIdx + 2 < parts.length ? parts[ghIdx + 2] : null
+    return repo ? `github.com/${org}/${repo}` : `github.com/${org}`
   }
   const localhostIdx = parts.indexOf('localhost')
   if (localhostIdx >= 0) {
     return 'localhost'
   }
-  return parts.slice(0, -1).join('/') || 'unknown'
+  return 'unknown'
 }
 
 // ── Extract quoted phrases (for search indexing) ───────────────────────────
