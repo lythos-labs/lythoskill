@@ -41,12 +41,13 @@
 ### Skill Ecosystem Research
 | Deck | Skills | Use |
 |------|--------|-----|
-| [lythoskill-research-archaeo.toml](./lythoskill-research-archaeo.toml) | lythoskill-curator, find-skills, fact-checker, lythoskill-arena, deep-research, product-analysis, lythoskill-deck | Discover → verify → analyze → collect: cold pool archaeology, hub cross-ref, arena testing |
+| [lythoskill-research-archaeo.toml](./lythoskill-research-archaeo.toml) | lythoskill-curator, find-skills, fact-checker, lythoskill-arena, deep-research, product-analysis, lythoskill-deck | Discover → verify → analyze → collect: cold pool archaeology |
 
 ### Content & Promotion
 | Deck | Skills | Use |
 |------|--------|-----|
-| [lythoskill-promo.toml](./lythoskill-promo.toml) | positioning-basics, content-idea-generator, social-card-gen, tweet-draft-reviewer, de-ai-ify, voice-extractor, baoyu-post-to-x | Position → draft → review → publish: Twitter/LinkedIn promotion pipeline |
+| [lythoskill-promo.toml](./lythoskill-promo.toml) | positioning-basics, content-idea-generator, social-card-gen, tweet-draft-reviewer, de-ai-ify, voice-extractor, baoyu-post-to-x | Position → draft → review → publish: Twitter/LinkedIn promotion |
+| [lythoskill-site-content.toml](./lythoskill-site-content.toml) | positioning-basics, content-idea-generator, writing-fragments, writing-shape, writing-beats, edit-article, data-storytelling | Position → mine → structure → polish: long-form site content |
 
 ### Project Governance
 | Deck | Skills | Use |

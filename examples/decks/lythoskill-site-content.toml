@@ -1,0 +1,32 @@
+# lythoskill-site-content — Position → Mine → Structure → Polish → Publish
+# Discovered by ZK haiku subagent (curator SKILL.md only), 2026-05-20.
+# Repos: BrianRWagner/ai-marketing-skills, mattpocock/skills, rmyndharis/antigravity-skills
+[tool.deck]
+name = "lythoskill-site-content"
+
+# Stage 1: Strategy — nail positioning before writing
+[tool.skills.positioning-basics]
+path = "github.com/BrianRWagner/ai-marketing-skills/positioning-basics"
+
+[tool.skills.content-idea-generator]
+path = "github.com/BrianRWagner/ai-marketing-skills/content-idea-generator"
+
+# Stage 2: Mining — interview user for raw material
+[tool.skills.writing-fragments]
+path = "github.com/mattpocock/skills/skills/in-progress/writing-fragments"
+
+# Stage 3: Structure — shape fragments into article
+[tool.skills.writing-shape]
+path = "github.com/mattpocock/skills/skills/in-progress/writing-shape"
+
+# Stage 4: Narrative — refine as journey of beats
+[tool.skills.writing-beats]
+path = "github.com/mattpocock/skills/skills/in-progress/writing-beats"
+
+# Stage 5: Polish — edit for clarity, flow, compression
+[tool.skills.edit-article]
+path = "github.com/mattpocock/skills/skills/personal/edit-article"
+
+# Stage 6: Data — metrics and benchmarks → visual narrative
+[tool.skills.data-storytelling]
+path = "github.com/rmyndharis/antigravity-skills/skills/data-storytelling"

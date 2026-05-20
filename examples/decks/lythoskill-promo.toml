@@ -1,23 +1,31 @@
+# lythoskill-promo — Position → Draft → Review → Polish → Publish
+# Discovered by ZK haiku subagent (curator SKILL.md only), 2026-05-20.
+# Repos: BrianRWagner/ai-marketing-skills, JimLiu/baoyu-skills
 [tool.deck]
 name = "lythoskill-promo"
 
+# Stage 1: Strategy — define ICP, differentiation, value prop
 [tool.skills.positioning-basics]
 path = "github.com/BrianRWagner/ai-marketing-skills/positioning-basics"
 
 [tool.skills.content-idea-generator]
 path = "github.com/BrianRWagner/ai-marketing-skills/content-idea-generator"
 
+# Stage 2: Draft — one source → platform-optimized variants
 [tool.skills.social-card-gen]
 path = "github.com/BrianRWagner/ai-marketing-skills/social-card-gen"
 
+# Stage 3: Review — 8 voice rules quality check
 [tool.skills.tweet-draft-reviewer]
 path = "github.com/BrianRWagner/ai-marketing-skills/tweet-draft-reviewer"
 
+# Stage 4: Polish — remove AI jargon, restore human voice
 [tool.skills.de-ai-ify]
 path = "github.com/BrianRWagner/ai-marketing-skills/de-ai-ify"
 
 [tool.skills.voice-extractor]
 path = "github.com/BrianRWagner/ai-marketing-skills/voice-extractor"
 
+# Stage 5: Publish — Chrome browser → X/Twitter
 [tool.skills.baoyu-post-to-x]
 path = "github.com/JimLiu/baoyu-skills/skills/baoyu-post-to-x"
