@@ -6,6 +6,7 @@
 |--------|------|------|
 | backlog | 2026-05-20 | Created |
 | in_progress | 2026-05-20 | Fixing parse-deck.ts |
+| completed | 2026-05-20 | Closed via trailer |
 
 ## 背景与目标
 

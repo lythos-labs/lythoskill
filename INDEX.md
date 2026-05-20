@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/20 12:44:40
+> 自动生成于 2026/5/20 14:42:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 257 | 进行中: 0, 待验收: 0, 已完成: 220 |
+| Tasks | 258 | 进行中: 0, 待验收: 0, 已完成: 221 |
 | Epics | 38 | 活跃: 0, 已完成: 34, 悬置: 2, 已归档: 2 |
 | ADRs | 81 | 已接受: 78 |
 
@@ -81,7 +81,7 @@ _无_
 
 _无_
 
-### 已完成 (220)
+### 已完成 (221)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -303,6 +303,7 @@ _无_
 - ✅ ~~TASK-20260519164705587~~: D: missing-weekly 加入周完成度百分比 + 导航
 - ✅ ~~TASK-20260519205953163~~: deck remove does not clean up also_link_to targets
 - ✅ ~~TASK-20260519224838606~~: 实现 curator add --output 对齐与副作用显式声明
+- ✅ ~~TASK-20260520143950404~~: parse-deck.ts: [combo] section is prompt orchestration, not skill list
 
 ### 悬置 (1)
 
