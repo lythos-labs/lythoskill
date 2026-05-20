@@ -202,6 +202,53 @@ preserves niches column).
 **QA provenance schema**: every signal must carry `source_type`, `source_name`, and `signal_value`.
 No-provenance signals are rejected. See ADR-20260518123403810.
 
+### Niche Taxonomy — naming conventions for agent-written tags
+
+Niche tags follow a hierarchical prefix convention. When tagging, use these patterns:
+
+| Prefix | Pattern | Example | Meaning |
+|--------|---------|---------|---------|
+| `hub/` | `hub/<source>/trending/<date>` | `hub/skills-sh/trending/2026-05-20` | External hub trending reference |
+| `domain/` | `domain/<classification>` | `domain/data-engineering`, `domain/general` | Domain specialization level |
+| freeform | any string without prefix | `code-review`, `security` | Curator's personal classification |
+
+**To discover existing niches** (before tagging, know what's already there):
+```bash
+curator query "SELECT DISTINCT json_each.value FROM skills, json_each(niches) WHERE json_each.value NOT LIKE 'qa:%' ORDER BY 1"
+```
+
+### External Hub Cross-Reference Workflow
+
+Skills.sh, LobeHub, and other registries track install counts and trending metrics. Cross-reference their data into curator:
+
+```
+1. WebFetch <hub-url> → extract top N skill names + ranks + install counts
+2. For each name: curator find <name> → HIT or MISS?
+3. For HIT: curator tag <name> --niche "hub/<source>/trending/<date>" \
+     --qa '{"source_type":"hub/<source>","source_name":"<source>-<date>","source_url":"...","signal_type":"installs_alltime","signal_value":<n>,"rank":<r>}'
+4. Batch: use SQLite directly for bulk operations (see Gotchas)
+```
+
+**Real example** — skills.sh top 17 cross-referenced against 871-skill cold pool (2026-05-20):
+- 4 HITs: find-skills (#1, 1.6M), frontend-design (#2, 433K), web-design-guidelines (#5, 331K, antfu not vercel), skill-creator (#26, 219K)
+- 13 MISS: mostly Vercel/Microsoft/Azure skills not yet in cold pool
+- `web-design-guidelines` name collision: skills.sh tracks vercel-labs version, cold pool has antfu version — same capability slot, different ecosystems
+
+### Domain Tagging from Path Structure
+
+Some skill repos organize skills by domain (e.g., `plugins/<domain>/skills/<name>/`). Extract this:
+
+```bash
+# Discover domains embedded in path structure
+curator query "SELECT DISTINCT SUBSTR(path, INSTR(path, 'plugins/')+8, INSTR(SUBSTR(path, INSTR(path, 'plugins/')+8), '/')-1) as domain FROM skills WHERE path LIKE '%plugins/%/skills/%'"
+
+# Tag each skill with its domain
+# For wshobson-style repos (plugins/<domain>/skills/...): tag with "domain/<domain>"
+# For flat repos (skills/<name>/): tag with "domain/general"
+```
+
+This is how the 155 wshobson skills got `domain/data-engineering`, `domain/python-development`, etc., and 305 antigravity skills got `domain/general`.
+
 ### Query the index
 ```bash
 bunx @lythos/skill-curator@0.15.2 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
@@ -254,9 +301,24 @@ See Discovery SOP → Search Precision Ladder for fallback methods.
 ```
 
 **Ambiguity**: bare names are not unique — `fullstack-dev` exists in both MiniMax-AI/skills and
-ChatGLM/skills. When multiple matches exist, `find` lists all options with their full paths;
-the agent or user picks the right one. This is a feature, not a bug — it surfaces the
-ecosystem's natural diversity.
+ChatGLM/skills. When multiple matches exist, `find` lists all options with their full paths
+and any niche tags (hub references, domain classification) to help disambiguate:
+
+```
+⚠️  2 skills share the name "airflow-dag-patterns":
+
+  airflow-dag-patterns  →  ...antigravity-skills/...  (standard)  🏷️  domain/general
+  airflow-dag-patterns  →  ...wshobson/.../data-engineering/... (standard)  🏷️  domain/data-engineering
+
+Pick ONE and specify its full path with deck add:
+  bunx @lythos/skill-deck add airflow-dag-patterns --path ...antigravity-skills/...
+
+⚠️  deck link will fail if two skills have the same name. Choose one.
+```
+
+**Disambiguation heuristic**: prefer domain-specialized over `domain/general`, prefer hub-validated
+(skills.sh trending) over unvalidated. Name collision is a strong signal that multiple ecosystems
+implement the same capability slot — pick the one matching your context.
 
 ### Audit the index
 ```bash
@@ -397,6 +459,14 @@ in SQLite. Use `json_extract()` for element access.
 API adapters. Agent uses WebSearch/WebFetch/gh CLI for external discovery. Curator
 can maintain feed schemas (URL patterns, data shapes) as metadata — but the execution
 is agent-side. See ADR-20260508230803515.
+
+**Shell batch gotcha**: `$(bun ... 2>/dev/null)` in a loop corrupts PATH on subsequent
+iterations. For batch operations (bulk find, bulk tag), use SQLite directly via
+`curator query` or a Bun/Node script reading catalog.db. Single commands are safe.
+
+**Same-name deck link conflict**: `deck link` fails if two skills share a bare name.
+Use `curator find` first to detect collisions. Pick ONE — the path is what matters
+to deck, not the name. `deck add <name> --path <full-locator>` is explicit.
 
 ## Supporting References
 Read these **only when the specific topic arises**:
