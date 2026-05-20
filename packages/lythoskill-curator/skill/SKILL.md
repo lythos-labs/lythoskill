@@ -5,7 +5,7 @@ type: standard
 description: |
   Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
   indexes SKILL.md frontmatter into REGISTRY.json + catalog.db. CLI is mechanical
-  glue (scan/query/tag/audit) — YOU are the agent who combines curator's local cache
+  glue (scan/query/tag/audit/find) — YOU are the agent who combines curator's local cache
   with WebSearch, deep research, and arena testing to discover, annotate, fact-check,
   and recommend. Curator = 查卡器 + 备注 + 组卡审美. Reconciler-style: any filesystem
   state → scan → converges to clean index. Auto-backup; rollback via `restore`.
@@ -14,7 +14,10 @@ when_to_use: |
   catalog skills, explore cold pool, scan skill pool, skill index, update index,
   recommend a deck, is there a skill for Y, discover skills, cold pool query,
   skill lookup, what's available, curator query, curator scan, curator audit,
-  curator tag, annotate skill, fact-check skill, cross-reference skill quality.
+  curator tag, annotate skill, fact-check skill, cross-reference skill quality,
+  find path for <name>, how to add <name>, what's the path for,
+  bare name to full path, where is skill <name>, how do I install <name>,
+  curator find, lookup skill path, skill locator for.
   ALSO trigger when user wants to do a task and you need to find the right skill:
   curator query local cache → WebSearch for new candidates →
   curator add + curator tag → arena test → curator tag --qa → recommend with confidence.
@@ -55,29 +58,115 @@ to be beautiful** (架构师). This is what separates a card database from a dec
 
 ## Discovery SOP (Agent-Driven)
 
-The explore slot is dominated by **agent + search** (WebSearch, gh CLI, WebFetch).
+The explore slot is dominated by **agent + search** (gh CLI first, WebSearch as fallback).
 Curator's job is NOT to be the discovery engine — it's the **local cache** that makes
 discovery faster, and the **enrichment layer** that remembers what was found.
 
 ```
-1. curator query "SELECT name, description FROM skills       ← local cache: "in cold pool?"
+1. curator find <bare-name>                                   ← local cold pool: "already have it?"
+2. curator query "SELECT name, description FROM skills        ← local cache: "anything similar?"
    WHERE description LIKE '%<keyword>%'"
-2. bunx skills find "<query>"                                 ← skills.sh registry (structured, install counts)
-3. WebSearch for "<task> skill agent"                         ← remote discovery (fallback if skills.sh miss)
-4. WebFetch / gh CLI to inspect candidates                   ← deep dive
-5. curator add <locator> --pool ...                           ← seed cold pool
-6. curator scan                                               ← re-index
-7. curator tag <name> --niche "<classification>"              ← agent-enriched metadata (L3)
+3. gh search code "<bare-name>" --filename "SKILL.md"         ← GitHub code search: precise, hits exact name
+4. gh search repos "<keyword>" --topic "agent-skills"         ← GitHub topic search: discover skill repos
+5. WebSearch for "<name> skill site:github.com"               ← web fallback (site: prefix when supported)
+6. WebFetch / gh CLI to inspect candidates                   ← deep dive
+7. curator add <locator> --pool ...                           ← seed cold pool
+8. curator scan                                               ← re-index
+9. curator tag <name> --niche "<classification>"              ← agent-enriched metadata (L3)
    [--qa '{"source_type":"self/arena","signal_value":8,...}']
-8. arena single/vs                                            ← test before adopting
-9. curator tag <name> --qa '{"source_type":"self/arena"...}'  ← record test results
-10. Recommend with confidence: "skill X fits because...        ← agent reasoning
+10. arena single/vs                                            ← test before adopting
+11. curator tag <name> --qa '{"source_type":"self/arena"...}'  ← record test results
+12. Recommend with confidence: "skill X fits because...        ← agent reasoning
     (3 arena PASS + hub A confirms + curator scan clean)"
 ```
 
 **Curator is NOT the discovery engine.** It's the agent's local data source.
-The agent combines curator query + WebSearch + its own reasoning for
+The agent combines curator query + gh search + WebSearch + its own reasoning for
 discover → rank → recommend.
+
+### Three Discovery Scenarios
+
+| Scenario | What you know | Start here |
+|----------|--------------|------------|
+| "I know the skill name" | bare name (e.g., "fullstack-dev") | `curator find` → gh search code |
+| "I know the person/org" | fuzzy name (e.g., "归藏师傅") | WebSearch → gh search code for precise path |
+| "I know the repo URL" | repo URL (e.g., `github.com/lijigang/ljg-skills`) | gh api peek → curator add |
+
+### Search Precision Ladder
+
+When `curator find` misses, use these in order — fastest to broadest:
+
+| Priority | Method | Speed | Precision | Example |
+|----------|--------|-------|-----------|---------|
+| 1 | `gh search code "<name>" --filename "SKILL.md"` | ~2s | Highest | `gh search code "fullstack-dev" --filename "SKILL.md"` |
+| 2 | `gh search code "<name> skill" --filename "SKILL.md"` | ~3s | High | broader match |
+| 3 | `gh search repos "<topic>" --topic "agent-skills"` | ~3s | Medium | `gh search repos "writer" --topic "agent-skills"` |
+| 4 | WebSearch `"<name> skill site:github.com"` | ~5s | Medium | site: prefix for domain filtering |
+| 5 | WebSearch `"skill <name>"` | ~5s | Broad | without site: prefix |
+
+`gh search code` is the most effective because it searches file CONTENTS — a skill named
+"fullstack-dev" always has `name: fullstack-dev` in its SKILL.md frontmatter. This is
+more precise than repo search or web search.
+
+### Repo Exploration — "I know the repo, what's inside?"
+
+Common social-media discovery pattern: someone shares a GitHub repo URL, but you don't
+know what skills it contains. Common for monorepos (e.g., `JimLiu/baoyu-skills` has 22,
+`lijigang/ljg-skills` has 21). Use `gh api` to peek without cloning:
+
+```bash
+# 1. List top-level files/dirs in the repo
+gh api repos/<owner>/<repo>/contents --jq '.[].name'
+
+# 2. If there's a skills/ dir, list it
+gh api repos/<owner>/<repo>/contents/skills --jq '.[].name'
+
+# 3. Optionally peek at specific SKILL.md frontmatter
+gh api repos/<owner>/<repo>/contents/skills/<name>/SKILL.md --jq '.content' | base64 -d | head -10
+```
+
+**Real example** — discovering what's in `lijigang/ljg-skills`:
+```
+$ gh api repos/lijigang/ljg-skills/contents/skills --jq '.[].name'
+ljg-book  ljg-card  ljg-invest  ljg-learn  ljg-paper  ljg-plain
+ljg-present  ljg-push  ljg-qa  ljg-rank  ljg-read  ljg-think
+ljg-travel  ljg-word  ljg-writes  ...  (21 skills total)
+
+$ gh api repos/lijigang/ljg-skills/contents/skills/ljg-think/SKILL.md \
+    --jq '.content' | base64 -d | head -5
+---
+name: ljg-think
+description: 追本之箭——纵向深钻思维工具...
+```
+
+Once you've identified the skills you want, `curator add` the repo normally.
+
+### gh CLI Auth Bootstrap
+
+**`gh` is the backbone of skill discovery.** Without it, you lose the top 3 most precise
+search methods (code search, repo topic search). WebSearch alone is 5x slower and 10x
+less precise. Strongly recommend the user install and auth `gh` before using curator.
+
+If `gh` commands fail with authentication errors, do NOT silently skip:
+
+1. **Check for existing token**: look for `.github-token` in the project root, or
+   `GITHUB_TOKEN` / `GH_TOKEN` env vars. If found, export it:
+   ```bash
+   export GH_TOKEN=$(cat .github-token)
+   ```
+2. **Ask the user to install gh**: if `gh` CLI is missing entirely, tell the user:
+   > `gh` CLI is required for precise skill discovery. Install it:
+   > - macOS: `brew install gh`
+   > - Linux: `curl -fsSL https://cli.github.com/install.sh | bash`
+   > - Then: `gh auth login`
+   > Or if you have a token: `echo "ghp_xxx" > .github-token && export GH_TOKEN=$(cat .github-token)`
+3. **Ask for a token**: if gh is installed but not authed:
+   > `gh` needs a GitHub token. You can:
+   > - Create one at https://github.com/settings/tokens (no scopes needed for public repos)
+   > - Run: `echo "ghp_xxx" > .github-token`
+   > - Or: `export GH_TOKEN=ghp_xxx`
+4. **Fall back to WebSearch ONLY if user declines**: slower, less precise, but works
+   without auth. Remind the user what they're giving up.
 
 ## Commands
 
@@ -122,6 +211,53 @@ bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query   # show schema overview
 ```
 Output is Markdown table. SQL is a good DSL for showing intent — declarative, readable.
 
+### Find — bare name to full path lookup
+```bash
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} find <bare-name>
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} find fullstack-dev
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} find fullstack-dev --db ./catalog.db
+```
+Output: full locator path + ready-to-use `deck add` command + `skill-deck.toml` snippet.
+Looks up `name` field in catalog.db. Local-only — searches skills already in your cold pool.
+
+**Example — user discovers "fullstack-dev" on social media, wants to add it:**
+
+HIT (skill already in cold pool):
+```
+$ curator find fullstack-dev
+
+  name: fullstack-dev
+  path: github.com/MiniMax-AI/skills/skills/fullstack-dev
+  type: standard
+
+  # deck add:
+  bunx @lythos/skill-deck add fullstack-dev \
+    --path github.com/MiniMax-AI/skills/skills/fullstack-dev
+
+  # or add to skill-deck.toml:
+  [tool.skills.fullstack-dev]
+  path = "github.com/MiniMax-AI/skills/skills/fullstack-dev"
+```
+
+MISS — not in cold pool yet:
+```
+$ curator find fullstack-dev
+🔍 "fullstack-dev" not found in local cold pool.
+
+To add it:
+  1. gh search code "fullstack-dev" --filename "SKILL.md"  ← find the repo
+  2. curator add github.com/<owner>/<repo> --pool ~/.agents/skill-repos
+  3. curator find fullstack-dev  # then it will hit
+
+Or ask your agent — it can gh search code → curator add → deck add in one flow.
+See Discovery SOP → Search Precision Ladder for fallback methods.
+```
+
+**Ambiguity**: bare names are not unique — `fullstack-dev` exists in both MiniMax-AI/skills and
+ChatGLM/skills. When multiple matches exist, `find` lists all options with their full paths;
+the agent or user picks the right one. This is a feature, not a bug — it surfaces the
+ecosystem's natural diversity.
+
 ### Audit the index
 ```bash
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} audit
@@ -138,8 +274,12 @@ not author-declared.
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
+  --output ~/.agents/lythoskill/curator/
+bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
   --reason "Found via WebSearch for code review skills" --branch main
 ```
+
+`--output` controls where `additions.jsonl` and the write-through cache land. Default: `~/.agents/lythoskill/curator/`. Use it to align with a custom `scan --output` directory.
 
 ### Refresh upstreams (plan-first)
 ```bash
@@ -209,6 +349,8 @@ bunx @lythos/skill-curator@{{PACKAGE_VERSION}} query "SELECT name, managed_dirs 
 curator scan → catalog.db              "What's in my collection?"
     ↓
 agent: curator query + WebSearch       "Find me a skill for X"     (discovery)
+    ↓
+curator find <bare-name>               "What's the full path?"     (lookup, ADR-20260519225831495)
     ↓
 curator add + curator scan             "Add to cold pool"         (collection)
     ↓

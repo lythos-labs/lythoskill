@@ -539,6 +539,101 @@ function runQuery(argv: string[]) {
   }
 }
 
+// ── Find subcommand ──────────────────────────────────────────
+// ADR-20260519225831495: bare name → full path lookup
+
+export function runFind(argv: string[]) {
+  // Parse --db flag
+  let dbPath = join(process.env.HOME!, '.agents/lythoskill/curator/catalog.db')
+  for (let i = 0; i < argv.length; i++) {
+    if ((argv[i] === '--db' || argv[i] === '-d') && argv[i + 1]) {
+      dbPath = argv[++i]
+    }
+  }
+
+  const bareName = argv.find(a => !a.startsWith('-'))
+  if (!bareName) {
+    console.error('Usage: lythoskill-curator find <bare-name> [--db <path>]')
+    console.error('')
+    console.error('Look up a skill by its bare name in the local cold pool index.')
+    console.error('Returns full locator path + ready-to-use deck add command.')
+    console.error('')
+    console.error('Example:')
+    console.error('  lythoskill-curator find fullstack-dev')
+    process.exit(1)
+  }
+
+  if (!existsSync(dbPath)) {
+    console.error('❌ Catalog DB not found. Run `lythoskill-curator` first to scan the cold pool.')
+    process.exit(1)
+  }
+
+  const db = new CatalogDb(dbPath)
+  try {
+    // Read cold pool path from catalog meta to reconstruct locator paths
+    const poolPath = db.getMeta('pool_path') || ''
+
+    const matches = db.all<{ name: string; path: string; type: string; description: string }>(
+      `SELECT name, path, type, description FROM skills WHERE name = $name`,
+      { $name: bareName }
+    )
+
+    // Convert local filesystem paths to locator paths
+    const toLocator = (localPath: string): string => {
+      if (!poolPath) return localPath
+      // localPath = {poolPath}/github.com/owner/repo/... → github.com/owner/repo/...
+      let rel = localPath
+      if (rel.startsWith(poolPath + '/')) rel = rel.slice(poolPath.length + 1)
+      else if (rel.startsWith(poolPath)) rel = rel.slice(poolPath.length)
+      return rel
+    }
+
+    if (matches.length === 0) {
+      console.log(`🔍 "${bareName}" not found in local cold pool.`)
+      console.log('')
+      console.log('To add it:')
+      console.log(`  1. gh search code "${bareName}" --filename "SKILL.md"  ← find the repo`)
+      console.log(`  2. curator add github.com/<owner>/<repo> --pool ~/.agents/skill-repos`)
+      console.log(`  3. curator find ${bareName}  # then it will hit`)
+      console.log('')
+      console.log('Or ask your agent — it can gh search code → curator add → deck add in one flow.')
+      process.exit(0)
+    }
+
+    if (matches.length > 1) {
+      console.log(`⚠️  Multiple skills found for "${bareName}":`)
+      console.log('')
+      for (const m of matches) {
+        console.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})`)
+      }
+      console.log('')
+      console.log('Use the full path with deck add:')
+      console.log(`  bunx @lythos/skill-deck add ${matches[0].name} --path ${toLocator(matches[0].path)}`)
+      console.log('')
+      console.log('Or pick a different one and specify its path.')
+      process.exit(0)
+    }
+
+    const skill = matches[0]
+    const locatorPath = toLocator(skill.path)
+    console.log('')
+    console.log(`  name: ${skill.name}`)
+    console.log(`  path: ${locatorPath}`)
+    console.log(`  type: ${skill.type}`)
+    console.log('')
+    console.log('  # deck add:')
+    console.log(`  bunx @lythos/skill-deck add ${skill.name} \\`)
+    console.log(`    --path ${locatorPath}`)
+    console.log('')
+    console.log('  # or add to skill-deck.toml:')
+    console.log(`  [tool.skills.${skill.name}]`)
+    console.log(`  path = "${locatorPath}"`)
+    console.log('')
+  } finally {
+    db.close()
+  }
+}
+
 // ── Audit subcommand ─────────────────────────────────────────
 
 interface AuditCheck {
@@ -674,10 +769,9 @@ function getFlag(argv: string[], flag: string): string | undefined {
   return idx >= 0 && argv[idx + 1] ? argv[idx + 1] : undefined
 }
 
-/** Append a SkillAddition record to ~/.agents/lythoskill/curator/additions.jsonl */
-function writeAddition(_poolPath: string, record: ReturnType<typeof buildAdditionRecord>) {
-  // ADR-20260511210000000: consolidated to ~/.agents/lythoskill/curator/
-  const metaDir = join(`${process.env.HOME}/.agents/lythoskill/curator`)
+/** Append a SkillAddition record to {outputDir}/additions.jsonl */
+export function writeAddition(outputDir: string, record: ReturnType<typeof buildAdditionRecord>) {
+  const metaDir = outputDir
   mkdirSync(metaDir, { recursive: true })
   const file = join(metaDir, 'additions.jsonl')
   appendFileSync(file, JSON.stringify(record) + '\n')
@@ -778,11 +872,12 @@ async function runRefreshExecute(argv: string[]) {
 export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
-    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
+    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--output <dir>] [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
     process.exit(1)
   }
 
   const poolPath = getFlag(argv, '--pool')
+  const outputDir = getFlag(argv, '--output') || `${process.env.HOME}/.agents/lythoskill/curator`
   if (!poolPath) {
     console.error('Error: --pool <dir> is required.')
     console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir>')
@@ -795,6 +890,7 @@ export function runAdd(argv: string[]) {
   if (dryRun) {
     console.log(`🔎 Dry-run: curator add ${locator}`)
     console.log(`   Pool:   ${poolPath}`)
+    console.log(`   Output: ${outputDir}`)
     console.log(`   Repo:   ${plan.repoRoot}`)
     if (plan.skillPath) console.log(`   Skill:  ${plan.skillPath}`)
     console.log()
@@ -894,21 +990,20 @@ export function runAdd(argv: string[]) {
 
     // Persist decision record
     const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
-    writeAddition(poolPath, record)
+    writeAddition(outputDir, record)
 
     console.log(`✅ Skill added to cold pool: ${plan.relPath}`)
     console.log(`   Location: ${plan.targetPath}`)
     if (forkedFrom) console.log(`   Forked from: ${forkedFrom}`)
     if (reason) console.log(`   Reason: ${reason}`)
-    console.log(`\n💡 To use this skill in a project, run:`)
-    console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
+    console.log(`📝 Addition logged: ${join(outputDir, 'additions.jsonl')}`)
 
     // Write-through cache: index the new skill immediately (ADR-20260518123403810)
     // Curator scan is the reconciliation loop that fixes any drift later.
+    let dbUpdated = false
     try {
       const skillDirs = findSkillDirs(plan.repoPath)
       if (skillDirs.length > 0) {
-        const outputDir = `${process.env.HOME}/.agents/lythoskill/curator`
         mkdirSync(outputDir, { recursive: true })
         const dbPath = join(outputDir, 'catalog.db')
 
@@ -941,15 +1036,22 @@ export function runAdd(argv: string[]) {
                 $parse_error: null,
               })
               console.log(`   📇 Indexed: ${s.name}`)
+              dbUpdated = true
             } finally {
               db.close()
             }
           }
         }
       }
+      if (dbUpdated) {
+        console.log(`📇 Index updated:   ${join(outputDir, 'catalog.db')}`)
+      }
     } catch {
-      // Index update is best-effort — curator scan will catch up later
+      console.log(`   ⚠️  Index update skipped (will catch up on next scan)`)
     }
+
+    console.log(`\n💡 To use this skill in a project, run:`)
+    console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
   } catch (e: any) {
     // Clean up empty directory left by failed clone
     try {
@@ -1053,12 +1155,14 @@ if (import.meta.main) {
     console.log('       lythoskill-curator refresh-execute [--pool <dir>]')
     console.log('       lythoskill-curator query <SQL> [--db <path>]')
     console.log('       lythoskill-curator audit [--db <path>]')
+    console.log('       lythoskill-curator find <bare-name> [--db <path>]')
     console.log('       lythoskill-curator restore [--output <dir>]')
     console.log('')
     console.log('Commands:')
     console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
     console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
     console.log('                         --dry-run           Show plan without executing')
+    console.log('                         --output <dir>       Index output directory (default: ~/.agents/lythoskill/curator/)')
     console.log('                         --reason <text>      Why this skill was added')
     console.log('                         --forked-from <loc>  Original skill if this is a fork')
     console.log('                         --branch <name>      Specific branch (default: default branch)')
@@ -1072,6 +1176,8 @@ if (import.meta.main) {
     console.log('                         --pool <dir>        Cold pool path')
     console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
     console.log('  audit                 Run structural + legacy checks and output an audit report')
+    console.log('  find <bare-name>      Look up a skill by bare name, return full path + deck add command')
+    console.log('                         --db <path>      Use a specific catalog database')
     console.log('  restore               Roll back to the most recent backup')
     console.log('')
     console.log('Options:')
@@ -1093,6 +1199,8 @@ if (import.meta.main) {
     runQuery(args.slice(1))
   } else if (cmd === 'audit') {
     runAudit(args.slice(1))
+  } else if (cmd === 'find') {
+    runFind(args.slice(1))
   } else if (cmd === 'restore') {
     const { outputDir } = parseCuratorArgs(args.slice(1));
     restoreIndex(outputDir);

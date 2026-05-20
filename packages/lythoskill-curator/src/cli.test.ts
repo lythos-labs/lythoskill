@@ -7,11 +7,11 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach, spyOn } from 'bun:test'
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
+import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { inferSource, extractQuotedPhrases, scanSkill, runAdd } from './cli.ts'
+import { inferSource, extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind } from './cli.ts'
 
 // ── Helpers ──────────────────────────────────────────────────
 
@@ -245,5 +245,215 @@ describe('runAdd', () => {
 
     expect(errors.some(e => e.includes('Failed to clone'))).toBe(true)
     rmSync(poolDir, { recursive: true, force: true })
+  })
+
+  it('C5: --output is parsed and shown in dry-run', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-add-'))
+    const poolDir = join(tmpDir, 'pool')
+    const customOutput = join(tmpDir, 'my-index')
+    const logs: string[] = []
+    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
+
+    runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput, '--dry-run'])
+    expect(logs.some(l => l.includes(`Output: ${customOutput}`))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('C6: --output does not crash when skill already in cold pool', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-add-'))
+    const poolDir = join(tmpDir, 'pool')
+    const customOutput = join(tmpDir, 'my-index')
+    const targetDir = join(poolDir, 'github.com/foo/bar')
+    mkdirSync(targetDir, { recursive: true })
+    mkdirSync(join(targetDir, '.git'), { recursive: true })
+
+    const logs: string[] = []
+    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
+
+    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput]))
+    expect(logs.some(l => l.includes('already in cold pool'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── writeAddition ────────────────────────────────────────────
+
+describe('writeAddition', () => {
+  it('writes record to specified outputDir', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-write-'))
+    const outputDir = join(tmpDir, 'custom-index')
+    const record = { locator: 'github.com/foo/bar', addedAt: '2026-01-01T00:00:00Z', reason: 'test' }
+    writeAddition(outputDir, record as any)
+
+    const file = join(outputDir, 'additions.jsonl')
+    expect(existsSync(file)).toBe(true)
+    const lines = readFileSync(file, 'utf-8').trim().split('\n')
+    expect(lines.length).toBe(1)
+    const parsed = JSON.parse(lines[0])
+    expect(parsed.locator).toBe('github.com/foo/bar')
+    expect(parsed.reason).toBe('test')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('appends to existing additions.jsonl', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-write-'))
+    const outputDir = join(tmpDir, 'custom-index')
+    mkdirSync(outputDir, { recursive: true })
+    writeFileSync(join(outputDir, 'additions.jsonl'), JSON.stringify({ old: true }) + '\n')
+
+    writeAddition(outputDir, { locator: 'github.com/baz/qux', addedAt: '2026-01-02T00:00:00Z', reason: 'second' } as any)
+
+    const lines = readFileSync(join(outputDir, 'additions.jsonl'), 'utf-8').trim().split('\n')
+    expect(lines.length).toBe(2)
+    expect(JSON.parse(lines[1]).locator).toBe('github.com/baz/qux')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── runFind ────────────────────────────────────────────────────
+
+import { CatalogDb } from './catalog-db.ts'
+
+describe('runFind', () => {
+  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
+    const db = new CatalogDb(dbPath)
+    try {
+      for (const s of skills) {
+        db.insertSkill({
+          $name: s.name,
+          $description: s.description,
+          $type: s.type,
+          $version: '1.0.0',
+          $path: s.path,
+          $niches: '[]',
+          $managed_dirs: '[]',
+          $trigger_phrases: '[]',
+          $has_scripts: 0,
+          $has_examples: 0,
+          $body_preview: '',
+          $source: 'github.com/test/skills',
+          $when_to_use: '',
+          $allowed_tools: '[]',
+          $author: '',
+          $user_invocable: 1,
+          $tags: '[]',
+          $deck_dependencies: '[]',
+          $deck_skill_type: 'tool',
+          $content_hash: '',
+          $status: 'parsed',
+          $indexed_at: new Date().toISOString(),
+          $last_parsed_at: new Date().toISOString(),
+          $parse_error: '',
+        })
+      }
+    } finally {
+      db.close()
+    }
+  }
+
+  it('F1: finds a skill by bare name and outputs path + deck add command', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-find-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'fullstack-dev', path: 'github.com/anthropics/skills/skills/fullstack-dev', type: 'standard', description: 'Full-stack dev skill' },
+    ])
+
+    // Capture stdout
+    const lines: string[] = []
+    const orig = console.log
+    console.log = (msg: string) => { lines.push(msg) }
+
+    try {
+      runFind(['--db', dbPath, 'fullstack-dev'])
+    } finally {
+      console.log = orig
+    }
+
+    const output = lines.join('\n')
+    expect(output).toContain('name: fullstack-dev')
+    expect(output).toContain('path: github.com/anthropics/skills/skills/fullstack-dev')
+    expect(output).toContain('bunx @lythos/skill-deck add fullstack-dev')
+    expect(output).toContain('[tool.skills.fullstack-dev]')
+    expect(output).toContain('path = "github.com/anthropics/skills/skills/fullstack-dev"')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('F2: not found gives clear guidance + WebSearch hint', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-find-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, []) // empty db
+
+    const lines: string[] = []
+    const orig = console.log
+    console.log = (msg: string) => { lines.push(msg) }
+
+    try {
+      runFind(['--db', dbPath, 'nonexistent-skill'])
+    } finally {
+      console.log = orig
+    }
+
+    const output = lines.join('\n')
+    expect(output).toContain('not found')
+    expect(output).toContain('gh search code')
+    expect(output).toContain('curator add')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('F3: multiple matches shows all options with disambiguation', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-find-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'fullstack-dev', path: 'github.com/MiniMax-AI/skills/skills/fullstack-dev', type: 'standard', description: 'MiniMax fullstack' },
+      { name: 'fullstack-dev', path: 'github.com/ChatGLM/skills/skills/fullstack-dev', type: 'standard', description: 'ChatGLM fullstack' },
+    ])
+
+    const lines: string[] = []
+    const orig = console.log
+    console.log = (msg: string) => { lines.push(msg) }
+
+    try {
+      runFind(['--db', dbPath, 'fullstack-dev'])
+    } finally {
+      console.log = orig
+    }
+
+    const output = lines.join('\n')
+    expect(output).toContain('Multiple skills found')
+    expect(output).toContain('MiniMax-AI')
+    expect(output).toContain('ChatGLM')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('F4: rejects missing bare name', () => {
+    const errors: string[] = []
+    const orig = console.error
+    console.error = (msg: string) => { errors.push(msg) }
+
+    const origExit = process.exit
+    let exitCode: number | undefined
+    process.exit = ((code?: number) => {
+      exitCode = code ?? 0
+      throw new Error(`EXIT:${code}`)
+    }) as typeof process.exit
+
+    try {
+      runFind(['--db', '/tmp/fake.db'])
+    } catch (e: any) {
+      // expected
+    }
+
+    expect(exitCode).toBe(1)
+    expect(errors.some(e => e.includes('Usage'))).toBe(true)
+
+    process.exit = origExit
+    console.error = orig
   })
 })
