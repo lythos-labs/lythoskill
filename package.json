@@ -1,6 +1,6 @@
 {
   "name": "lythoskill-workspace",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "devDependencies": {
     "husky": "^9.1.7"
   },
