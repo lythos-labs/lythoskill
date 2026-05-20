@@ -16,7 +16,7 @@ export interface ParsedDeck {
   entries: ParsedSkillEntry[];
   deprecated: boolean;
   errors: string[];
-  comboPrompt?: string; // [combo] prompt — lightweight orchestration hint for agents
+  combos: Record<string, string>; // [combo.<name>] prompt — orchestration hints for agents
 }
 
 export function parseDeck(raw: string): ParsedDeck {
@@ -80,10 +80,20 @@ export function parseDeck(raw: string): ParsedDeck {
     }
   }
 
-  // ── [combo] prompt — lightweight orchestration hint, not a skill section ──
-  const comboPrompt = parsed.combo?.prompt && typeof parsed.combo.prompt === "string"
-    ? parsed.combo.prompt.trim()
-    : undefined;
+  // ── [combo.<name>] prompts — lightweight orchestration hints, not skill sections ──
+  const combos: Record<string, string> = {};
+  if (parsed.combo && typeof parsed.combo === "object") {
+    for (const [name, entry] of Object.entries(parsed.combo)) {
+      const e = entry as Record<string, unknown>;
+      if (e?.prompt && typeof e.prompt === "string") {
+        combos[name] = e.prompt.trim();
+      }
+    }
+  }
+  // Legacy: bare [combo] with prompt field → "default"
+  if (!combos.default && parsed.combo?.prompt && typeof parsed.combo.prompt === "string") {
+    combos.default = parsed.combo.prompt.trim();
+  }
 
-  return { entries, deprecated, errors, comboPrompt };
+  return { entries, deprecated, errors, combos };
 }

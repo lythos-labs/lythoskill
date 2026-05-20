@@ -6,7 +6,7 @@ Cold Pool (storage)           Declaration (intent)          Working Set (runtime
 ├── github.com/...            ├── [deck]                    ├── skill-a → (symlink)
 ├── gitlab.com/...            │   max_cards = 10            ├── skill-b → (symlink)
 └── localhost/...             ├── [innate] / [tool]         └── skill-c → (symlink)
-    │   [combo] prompt                        └── [transient.<name>]
+    │   [combo.<name>] prompt                 └── [transient.<name>]
 ```
 - **Cold Pool**: Local storage of all downloaded skills. Agent never scans here.
   Go-module-style paths: `host.tld/owner/repo/skills/skill-name/`.

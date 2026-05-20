@@ -3,7 +3,7 @@
 [deck]
 name = "lythoskill-research-archaeo"
 
-[combo]
+[combo.archaeo]
 prompt = """
 Pipeline: Discover → Verify → Analyze → Collect.
 1. Scan cold pool with lythoskill-curator, cross-ref external hubs with find-skills.

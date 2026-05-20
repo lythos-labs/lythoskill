@@ -3,7 +3,7 @@
 [deck]
 name = "lythoskill-site-content"
 
-[combo]
+[combo.site]
 prompt = """
 Pipeline: Position → Mine → Structure → Narrative → Polish → Data.
 1. Start with positioning-basics + content-idea-generator to nail strategy.

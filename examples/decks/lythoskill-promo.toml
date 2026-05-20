@@ -3,7 +3,7 @@
 [deck]
 name = "lythoskill-promo"
 
-[combo]
+[combo.promo]
 prompt = """
 Pipeline: Position → Draft → Review → Polish → Publish.
 1. When promoting a project, start with positioning-basics to define ICP + differentiation.
