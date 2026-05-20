@@ -206,13 +206,13 @@ In short: install the heavy adapter package + set the platform credential env va
 
 ## Schema Evolution Notes
 
-Per session 2026-05-08 user reflection: "player 是我一直点到但是确实随着演化细节在变化的概念" — the player concept has evolved across iterations. Current state (2026-05-08, v0.9.38):
+Per session 2026-05-08 user reflection: "player 是我一直点到但是确实随着演化细节在变化的概念" — the player concept has evolved across iterations. Current state (2026-05-20, v0.15.3):
 
 - **What's stable**: arena.toml schema (Zod-validated, ADR-20260502110308316), built-in platform names, `useAgent` resolution path, side env override surface
 - **What's evolving**: per-player `.toml` runtime integration (currently documentation-only), platform fingerprint format (`[verified.<date>]` pattern is a starting convention, not yet mature), `capabilities.unverified` freeform → may eventually become a structured Zod schema
 - **What's deliberately ambiguous**: where `players.toml` (registry) lives — root convention is fine but not load-bearing
 
-When evolving these schemas: bump arena.toml version field (not yet present, but reserved) before breaking changes; for player config, keep additive-only changes through 0.9.x.
+When evolving these schemas: bump arena.toml version field (not yet present, but reserved) before breaking changes; for player config, keep additive-only changes through 0.15.x.
 
 ## Related
 
