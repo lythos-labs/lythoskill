@@ -1,0 +1,18 @@
+{
+  "experiment": "tdd-skill",
+  "target": "github.com/mattpocock/skills/skills/engineering/tdd",
+  "self_claim": "Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD...",
+  "task": "Fix divide() bug using TDD approach",
+  "verdict": "PASS",
+  "checks": {
+    "existing_tests_pass": true,
+    "bug_fixed": true,
+    "red_phase_demonstrated": true,
+    "green_phase_demonstrated": true,
+    "refactor_phase_demonstrated": true,
+    "minimal_fix": true,
+    "decision_log_exists": true
+  },
+  "agent_notes": "Added failing test divide(7,2)===3.5 to expose bug. Removed Math.floor. All tests pass. Skill guidance sufficient; agent followed vertical slice principle.",
+  "timestamp": "2026-05-20T10:10:00+08:00"
+}

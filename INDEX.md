@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/19 21:02:53
+> 自动生成于 2026/5/19 22:59:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 255 | 进行中: 0, 待验收: 0, 已完成: 219 |
-| Epics | 36 | 活跃: 0, 已完成: 32, 悬置: 2, 已归档: 2 |
-| ADRs | 79 | 已接受: 77 |
+| Tasks | 257 | 进行中: 0, 待验收: 0, 已完成: 220 |
+| Epics | 37 | 活跃: 0, 已完成: 33, 悬置: 2, 已归档: 2 |
+| ADRs | 81 | 已接受: 78 |
 
 ---
 
@@ -52,6 +52,7 @@ _无_
 - ✅ **EPIC-20260518145235543**: Emergency: fix arena agent-adapter — claude defaults to SDK, deepseek available, codex in vs mode
 - ✅ **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
 - ✅ **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
+- ✅ **EPIC-20260519224747755**: curator add UX 专业性与副作用透明化
 
 ### 悬置
 
@@ -67,9 +68,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (1)
 
-_无_
+- [ ] **TASK-20260519224912252**: bare name to full path lookup for deck add
 
 ### 进行中 (0)
 
@@ -79,7 +80,7 @@ _无_
 
 _无_
 
-### 已完成 (219)
+### 已完成 (220)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -300,6 +301,7 @@ _无_
 - ✅ ~~TASK-20260519164702541~~: C: cortex-probe 改用 stats + 启发式过滤，只报告 actionable 项
 - ✅ ~~TASK-20260519164705587~~: D: missing-weekly 加入周完成度百分比 + 导航
 - ✅ ~~TASK-20260519205953163~~: deck remove does not clean up also_link_to targets
+- ✅ ~~TASK-20260519224838606~~: 实现 curator add --output 对齐与副作用显式声明
 
 ### 悬置 (1)
 
@@ -425,6 +427,8 @@ _无_
 - ✅ **ADR-20260519144500000** (02-accepted): Remove `LYTHOS_COLD_POOL` Environment Variable
 - ✅ **ADR-20260519153000000** (02-accepted): Scheduled Weekly Entropy Reduction
 - ✅ **ADR-20260519165746212** (02-accepted): cortex probe --suspicious 模式
+- ✅ **ADR-20260519224555402** (02-accepted): curator add 全局副作用显式化与 --output 对齐
+- 🤔 **ADR-20260519225831495** (01-proposed): curator find — bare name to full path lookup
 
 ---
 

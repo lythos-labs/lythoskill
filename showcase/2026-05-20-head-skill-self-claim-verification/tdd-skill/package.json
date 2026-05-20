@@ -1,0 +1,7 @@
+{
+  "name": "tdd-experiment",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test calculator.test.js"
+  }
+}

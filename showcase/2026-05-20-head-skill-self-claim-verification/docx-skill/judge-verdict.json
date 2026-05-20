@@ -1,0 +1,20 @@
+{
+  "experiment": "docx-skill",
+  "target": "github.com/anthropics/skills/skills/docx",
+  "self_claim": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents...",
+  "task": "Create report.docx with title, body, table, and page number footer",
+  "verdict": "PASS",
+  "checks": {
+    "report_docx_exists": true,
+    "valid_docx": true,
+    "title_present": true,
+    "body_present": true,
+    "table_present": true,
+    "page_number_present": true,
+    "library_from_skill": true,
+    "critical_rules_followed": true,
+    "decision_log_exists": true
+  },
+  "agent_notes": "Used docx-js as mandated. Followed all critical rules: DXA widths, Arial font, explicit page size, ShadingType.CLEAR, exact style IDs. One issue: global docx not on NODE_PATH, resolved with local npm install.",
+  "timestamp": "2026-05-20T10:10:00+08:00"
+}

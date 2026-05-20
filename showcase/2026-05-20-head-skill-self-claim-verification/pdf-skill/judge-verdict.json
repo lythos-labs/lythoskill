@@ -1,0 +1,16 @@
+{
+  "experiment": "pdf-skill",
+  "target": "github.com/anthropics/skills/skills/pdf",
+  "self_claim": "Use this skill whenever the user wants to do anything with PDF files... reading or extracting text/tables from PDFs...",
+  "task": "Extract table data from test-table.pdf and save as output.csv",
+  "verdict": "PASS",
+  "checks": {
+    "output_csv_exists": true,
+    "data_correct": true,
+    "columns_correct": true,
+    "library_from_skill": true,
+    "decision_log_exists": true
+  },
+  "agent_notes": "Used pdfplumber as recommended by skill. No difficulties. Skill guidance fully sufficient.",
+  "timestamp": "2026-05-20T10:08:00+08:00"
+}
