@@ -1,6 +1,6 @@
 ---
 name: lythoskill-curator
-version: 0.15.1
+version: 0.15.2
 type: standard
 description: |
   Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
@@ -22,12 +22,12 @@ when_to_use: |
   curator query local cache → WebSearch for new candidates →
   curator add + curator tag → arena test → curator tag --qa → recommend with confidence.
 allowed-tools:
-  - Bash(bunx @lythos/skill-curator@0.15.1 *)
+  - Bash(bunx @lythos/skill-curator@0.15.2 *)
   - WebSearch
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_managed_dirs:
-  - ~/.agents/lythoskill/curator/
+  - ~/.agents/skill-repos/.lythoskill-curator/
 ---
 
 # Skill Curator
@@ -172,25 +172,25 @@ If `gh` commands fail with authentication errors, do NOT silently skip:
 
 ### Index the cold pool (scan)
 ```bash
-bunx @lythos/skill-curator@0.15.1 [POOL_PATH]
+bunx @lythos/skill-curator@0.15.2 [POOL_PATH]
 # Defaults: POOL_PATH = ~/.agents/skill-repos
-#           Output    = ~/.agents/lythoskill/curator/
-bunx @lythos/skill-curator@0.15.1 ~/.agents/skill-repos --output /tmp/my-index/
+#           Output    = <pool>/.lythoskill-curator/
+bunx @lythos/skill-curator@0.15.2 ~/.agents/skill-repos --output /tmp/my-index/
 ```
 Reconciler-style: converges any state to a clean index. Auto-backup before rebuild.
 
 ### Tag — agent-enriched metadata (L3 买家秀)
 ```bash
 # Write niche tags (curator's personal classification)
-bunx @lythos/skill-curator@0.15.1 tag <skill-name> --niche "meta.governance.deck"
-bunx @lythos/skill-curator@0.15.1 tag <skill-name> --niche "code-review" --niche "security"
+bunx @lythos/skill-curator@0.15.2 tag <skill-name> --niche "meta.governance.deck"
+bunx @lythos/skill-curator@0.15.2 tag <skill-name> --niche "code-review" --niche "security"
 
 # Write QA signal with provenance (REQUIRED)
-bunx @lythos/skill-curator@0.15.1 tag <skill-name> \
+bunx @lythos/skill-curator@0.15.2 tag <skill-name> \
   --qa '{"source_type":"self/arena","source_name":"arena-single-2026-05-18","signal_type":"score","signal_value":8}'
 
 # Reference external hub assessment (L2, with provenance)
-bunx @lythos/skill-curator@0.15.1 tag <skill-name> \
+bunx @lythos/skill-curator@0.15.2 tag <skill-name> \
   --qa '{"source_type":"hub/agentskill.sh","source_url":"https://...","signal_type":"securityScore","signal_value":95}'
 ```
 
@@ -202,20 +202,67 @@ preserves niches column).
 **QA provenance schema**: every signal must carry `source_type`, `source_name`, and `signal_value`.
 No-provenance signals are rejected. See ADR-20260518123403810.
 
+### Niche Taxonomy — naming conventions for agent-written tags
+
+Niche tags follow a hierarchical prefix convention. When tagging, use these patterns:
+
+| Prefix | Pattern | Example | Meaning |
+|--------|---------|---------|---------|
+| `hub/` | `hub/<source>/trending/<date>` | `hub/skills-sh/trending/2026-05-20` | External hub trending reference |
+| `domain/` | `domain/<classification>` | `domain/data-engineering`, `domain/general` | Domain specialization level |
+| freeform | any string without prefix | `code-review`, `security` | Curator's personal classification |
+
+**To discover existing niches** (before tagging, know what's already there):
+```bash
+curator query "SELECT DISTINCT json_each.value FROM skills, json_each(niches) WHERE json_each.value NOT LIKE 'qa:%' ORDER BY 1"
+```
+
+### External Hub Cross-Reference Workflow
+
+Skills.sh, LobeHub, and other registries track install counts and trending metrics. Cross-reference their data into curator:
+
+```
+1. WebFetch <hub-url> → extract top N skill names + ranks + install counts
+2. For each name: curator find <name> → HIT or MISS?
+3. For HIT: curator tag <name> --niche "hub/<source>/trending/<date>" \
+     --qa '{"source_type":"hub/<source>","source_name":"<source>-<date>","source_url":"...","signal_type":"installs_alltime","signal_value":<n>,"rank":<r>}'
+4. Batch: use SQLite directly for bulk operations (see Gotchas)
+```
+
+**Real example** — skills.sh top 17 cross-referenced against 871-skill cold pool (2026-05-20):
+- 4 HITs: find-skills (#1, 1.6M), frontend-design (#2, 433K), web-design-guidelines (#5, 331K, antfu not vercel), skill-creator (#26, 219K)
+- 13 MISS: mostly Vercel/Microsoft/Azure skills not yet in cold pool
+- `web-design-guidelines` name collision: skills.sh tracks vercel-labs version, cold pool has antfu version — same capability slot, different ecosystems
+
+### Domain Tagging from Path Structure
+
+Some skill repos organize skills by domain (e.g., `plugins/<domain>/skills/<name>/`). Extract this:
+
+```bash
+# Discover domains embedded in path structure
+curator query "SELECT DISTINCT SUBSTR(path, INSTR(path, 'plugins/')+8, INSTR(SUBSTR(path, INSTR(path, 'plugins/')+8), '/')-1) as domain FROM skills WHERE path LIKE '%plugins/%/skills/%'"
+
+# Tag each skill with its domain
+# For wshobson-style repos (plugins/<domain>/skills/...): tag with "domain/<domain>"
+# For flat repos (skills/<name>/): tag with "domain/general"
+```
+
+This is how the 155 wshobson skills got `domain/data-engineering`, `domain/python-development`, etc., and 305 antigravity skills got `domain/general`.
+
 ### Query the index
 ```bash
-bunx @lythos/skill-curator@0.15.1 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
-bunx @lythos/skill-curator@0.15.1 query --db ./catalog.db "SELECT * FROM catalog_meta"
-bunx @lythos/skill-curator@0.15.1 query "PRAGMA table_info(skills)"
-bunx @lythos/skill-curator@0.15.1 query   # show schema overview
+bunx @lythos/skill-curator@0.15.2 query "SELECT name, type FROM skills WHERE description LIKE '%diagram%'"
+bunx @lythos/skill-curator@0.15.2 query --db ./catalog.db "SELECT * FROM catalog_meta"
+bunx @lythos/skill-curator@0.15.2 query "PRAGMA table_info(skills)"
+bunx @lythos/skill-curator@0.15.2 query   # show schema overview
 ```
 Output is Markdown table. SQL is a good DSL for showing intent — declarative, readable.
 
 ### Find — bare name to full path lookup
 ```bash
-bunx @lythos/skill-curator@0.15.1 find <bare-name>
-bunx @lythos/skill-curator@0.15.1 find fullstack-dev
-bunx @lythos/skill-curator@0.15.1 find fullstack-dev --db ./catalog.db
+bunx @lythos/skill-curator@0.15.2 find <bare-name>
+bunx @lythos/skill-curator@0.15.2 find fullstack-dev
+bunx @lythos/skill-curator@0.15.2 find fullstack-dev --db ./catalog.db
 ```
 Output: full locator path + ready-to-use `deck add` command + `skill-deck.toml` snippet.
 Looks up `name` field in catalog.db. Local-only — searches skills already in your cold pool.
@@ -254,14 +301,29 @@ See Discovery SOP → Search Precision Ladder for fallback methods.
 ```
 
 **Ambiguity**: bare names are not unique — `fullstack-dev` exists in both MiniMax-AI/skills and
-ChatGLM/skills. When multiple matches exist, `find` lists all options with their full paths;
-the agent or user picks the right one. This is a feature, not a bug — it surfaces the
-ecosystem's natural diversity.
+ChatGLM/skills. When multiple matches exist, `find` lists all options with their full paths
+and any niche tags (hub references, domain classification) to help disambiguate:
+
+```
+⚠️  2 skills share the name "airflow-dag-patterns":
+
+  airflow-dag-patterns  →  ...antigravity-skills/...  (standard)  🏷️  domain/general
+  airflow-dag-patterns  →  ...wshobson/.../data-engineering/... (standard)  🏷️  domain/data-engineering
+
+Pick ONE and specify its full path with deck add:
+  bunx @lythos/skill-deck add airflow-dag-patterns --path ...antigravity-skills/...
+
+⚠️  deck link will fail if two skills have the same name. Choose one.
+```
+
+**Disambiguation heuristic**: prefer domain-specialized over `domain/general`, prefer hub-validated
+(skills.sh trending) over unvalidated. Name collision is a strong signal that multiple ecosystems
+implement the same capability slot — pick the one matching your context.
 
 ### Audit the index
 ```bash
-bunx @lythos/skill-curator@0.15.1 audit
-bunx @lythos/skill-curator@0.15.1 audit --db ./catalog.db
+bunx @lythos/skill-curator@0.15.2 audit
+bunx @lythos/skill-curator@0.15.2 audit --db ./catalog.db
 ```
 
 Checks: missing frontmatter, type anomalies, orphan scripts, deck_skill_type coverage,
@@ -271,25 +333,25 @@ not author-declared.
 
 ### Add a skill to the cold pool
 ```bash
-bunx @lythos/skill-curator@0.15.1 add github.com/owner/repo --pool ~/.agents/skill-repos
-bunx @lythos/skill-curator@0.15.1 add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
-bunx @lythos/skill-curator@0.15.1 add github.com/owner/repo --pool ~/.agents/skill-repos \
-  --output ~/.agents/lythoskill/curator/
-bunx @lythos/skill-curator@0.15.1 add github.com/owner/repo --pool ~/.agents/skill-repos \
+bunx @lythos/skill-curator@0.15.2 add github.com/owner/repo --pool ~/.agents/skill-repos
+bunx @lythos/skill-curator@0.15.2 add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
+bunx @lythos/skill-curator@0.15.2 add github.com/owner/repo --pool ~/.agents/skill-repos \
+  --output /tmp/my-index/
+bunx @lythos/skill-curator@0.15.2 add github.com/owner/repo --pool ~/.agents/skill-repos \
   --reason "Found via WebSearch for code review skills" --branch main
 ```
 
-`--output` controls where `additions.jsonl` and the write-through cache land. Default: `~/.agents/lythoskill/curator/`. Use it to align with a custom `scan --output` directory.
+`--output` controls where `additions.jsonl` and the write-through cache land. Default: `<pool>/.lythoskill-curator/`. Use it to point to a different location.
 
 ### Refresh upstreams (plan-first)
 ```bash
-bunx @lythos/skill-curator@0.15.1 refresh-plan
-bunx @lythos/skill-curator@0.15.1 refresh-execute
+bunx @lythos/skill-curator@0.15.2 refresh-plan
+bunx @lythos/skill-curator@0.15.2 refresh-execute
 ```
 
 ### Rollback
 ```bash
-bunx @lythos/skill-curator@0.15.1 restore
+bunx @lythos/skill-curator@0.15.2 restore
 ```
 
 ## Fact-Check + Confidence Evaluation (记者)
@@ -334,14 +396,14 @@ Claim Z: CONTRADICTED (author says "fast", arena shows 30s timeout)
 ## Typical Queries
 ```bash
 # Skills by agent-enriched niche
-bunx @lythos/skill-curator@0.15.1 query "SELECT name, niches FROM skills WHERE niches LIKE '%agent-tagged%'"
+bunx @lythos/skill-curator@0.15.2 query "SELECT name, niches FROM skills WHERE niches LIKE '%agent-tagged%'"
 # Duplicate detection
-bunx @lythos/skill-curator@0.15.1 query \
+bunx @lythos/skill-curator@0.15.2 query \
   "SELECT name, path FROM skills WHERE name IN (SELECT name FROM skills GROUP BY name HAVING COUNT(*) > 1)"
 # Combo / transient / fork skills
-bunx @lythos/skill-curator@0.15.1 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
+bunx @lythos/skill-curator@0.15.2 query "SELECT name, deck_skill_type, source FROM skills WHERE deck_skill_type IS NOT NULL"
 # Managed directory overlaps
-bunx @lythos/skill-curator@0.15.1 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
+bunx @lythos/skill-curator@0.15.2 query "SELECT name, managed_dirs FROM skills WHERE managed_dirs LIKE '%cortex/%'"
 ```
 
 ## Curator + Deck + Arena Workflow
@@ -397,6 +459,14 @@ in SQLite. Use `json_extract()` for element access.
 API adapters. Agent uses WebSearch/WebFetch/gh CLI for external discovery. Curator
 can maintain feed schemas (URL patterns, data shapes) as metadata — but the execution
 is agent-side. See ADR-20260508230803515.
+
+**Shell batch gotcha**: `$(bun ... 2>/dev/null)` in a loop corrupts PATH on subsequent
+iterations. For batch operations (bulk find, bulk tag), use SQLite directly via
+`curator query` or a Bun/Node script reading catalog.db. Single commands are safe.
+
+**Same-name deck link conflict**: `deck link` fails if two skills share a bare name.
+Use `curator find` first to detect collisions. Pick ONE — the path is what matters
+to deck, not the name. `deck add <name> --path <full-locator>` is explicit.
 
 ## Supporting References
 Read these **only when the specific topic arises**:
