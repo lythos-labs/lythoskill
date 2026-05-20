@@ -6,12 +6,14 @@ Usage: lythoskill-curator [pool-path] [--output <dir>]
        lythoskill-curator refresh-execute [--pool <dir>]
        lythoskill-curator query <SQL> [--db <path>]
        lythoskill-curator audit [--db <path>]
+       lythoskill-curator find <bare-name> [--db <path>]
        lythoskill-curator restore [--output <dir>]
 
 Commands:
   (no args)             Scan cold pool and build REGISTRY.json + catalog.db
   add <locator>         Download a skill to cold pool (no install, no deck.toml)
                          --dry-run           Show plan without executing
+                         --output <dir>       Index output directory (default: ~/.agents/lythoskill/curator/)
                          --reason <text>      Why this skill was added
                          --forked-from <loc>  Original skill if this is a fork
                          --branch <name>      Specific branch (default: default branch)
@@ -25,6 +27,8 @@ Commands:
                          --pool <dir>        Cold pool path
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
   audit                 Run structural + legacy checks and output an audit report
+  find <bare-name>      Look up a skill by bare name, return full path + deck add command
+                         --db <path>      Use a specific catalog database
   restore               Roll back to the most recent backup
 
 Options:
