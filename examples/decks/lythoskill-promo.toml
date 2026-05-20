@@ -1,8 +1,17 @@
 # lythoskill-promo: Twitter/LinkedIn promotion pipeline.
-# Combo: Position → Draft → Review → Polish → Publish.
 # Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
 [deck]
 name = "lythoskill-promo"
+
+[combo]
+prompt = """
+Pipeline: Position → Draft → Review → Polish → Publish.
+1. When promoting a project, start with positioning-basics to define ICP + differentiation.
+2. Feed positioning output to content-idea-generator for content ideas.
+3. Draft platform variants with social-card-gen (Twitter/X, LinkedIn, Reddit).
+4. Review with tweet-draft-reviewer (8 voice rules). Polish with de-ai-ify + voice-extractor.
+5. Publish via baoyu-post-to-x (Chrome browser → X/Twitter).
+"""
 
 # Stage 1: Strategy — define ICP, differentiation, value prop
 [tool.skills.positioning-basics]

@@ -1,8 +1,18 @@
 # lythoskill-site-content: long-form site content pipeline.
-# Combo: Position → Mine → Structure → Narrative → Polish → Data.
 # Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
 [deck]
 name = "lythoskill-site-content"
+
+[combo]
+prompt = """
+Pipeline: Position → Mine → Structure → Narrative → Polish → Data.
+1. Start with positioning-basics + content-idea-generator to nail strategy.
+2. Interview user with writing-fragments to mine raw material.
+3. Shape fragments into article structure with writing-shape.
+4. Refine narrative flow with writing-beats.
+5. Edit for clarity with edit-article.
+6. For data-heavy sections, use data-storytelling to transform metrics into visual narrative.
+"""
 
 # Stage 1: Strategy — nail positioning before writing
 [tool.skills.positioning-basics]

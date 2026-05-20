@@ -1,8 +1,17 @@
 # lythoskill-research-archaeo: cold pool archaeology pipeline.
-# Combo: Discover → Verify → Analyze → Collect.
 # Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
 [deck]
 name = "lythoskill-research-archaeo"
+
+[combo]
+prompt = """
+Pipeline: Discover → Verify → Analyze → Collect.
+1. Scan cold pool with lythoskill-curator, cross-ref external hubs with find-skills.
+2. Verify SKILL.md claims with fact-checker against web sources.
+3. Test promising candidates with lythoskill-arena on real prompts.
+4. Gather structured evidence with deep-research, A/B compare with product-analysis.
+5. Link selected skills into a working deck with lythoskill-deck.
+"""
 
 # Stage 1: Discover — scan cold pool, find/query skills, cross-ref external hubs
 [tool.skills.lythoskill-curator]
