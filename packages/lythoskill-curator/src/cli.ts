@@ -659,12 +659,12 @@ export function runFind(argv: string[]) {
       return rel
     }
 
-    // Extract hub tags for display (non-qa niches from external sources)
-    const hubTags = (niches: string): string[] => {
+    // Extract metadata tags for display (hub references, domain classification)
+    const metaTags = (niches: string): string[] => {
       try {
         const parsed = JSON.parse(niches)
         if (!Array.isArray(parsed)) return []
-        return parsed.filter((n: string) => n.startsWith('hub/'))
+        return parsed.filter((n: string) => n.startsWith('hub/') || n.startsWith('domain/'))
       } catch { return [] }
     }
 
@@ -684,7 +684,7 @@ export function runFind(argv: string[]) {
       console.log(`⚠️  ${matches.length} skills share the name "${bareName}":`)
       console.log('')
       for (const m of matches) {
-        const tags = hubTags(m.niches)
+        const tags = metaTags(m.niches)
         const tagStr = tags.length > 0 ? `  🏷️  ${tags.join(', ')}` : ''
         console.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})${tagStr}`)
       }
@@ -703,7 +703,7 @@ export function runFind(argv: string[]) {
 
     const skill = matches[0]
     const locatorPath = toLocator(skill.path)
-    const tags = hubTags(skill.niches)
+    const tags = metaTags(skill.niches)
     console.log('')
     console.log(`  name: ${skill.name}`)
     console.log(`  path: ${locatorPath}`)
