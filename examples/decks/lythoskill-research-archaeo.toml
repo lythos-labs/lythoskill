@@ -1,13 +1,12 @@
-# lythoskill-research-archaeo — Discover → Verify → Analyze → Collect
-# Discovered by ZK haiku subagent (curator SKILL.md only), 2026-05-20.
-# Repos: vercel-labs/skills, daymade/claude-code-skills, lythoskill
-[tool.deck]
+# lythoskill-research-archaeo: cold pool archaeology pipeline.
+# Combo: Discover → Verify → Analyze → Collect.
+# Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
+[deck]
 name = "lythoskill-research-archaeo"
 
 # Stage 1: Discover — scan cold pool, find/query skills, cross-ref external hubs
 [tool.skills.lythoskill-curator]
 path = "github.com/lythos-labs/lythoskill/packages/lythoskill-curator/skill"
-
 [tool.skills.find-skills]
 path = "github.com/vercel-labs/skills/skills/find-skills"
 
@@ -22,7 +21,6 @@ path = "github.com/lythos-labs/lythoskill/packages/lythoskill-arena/skill"
 # Stage 4: Analyze — structured evidence gathering + A/B comparison
 [tool.skills.deep-research]
 path = "github.com/daymade/claude-code-skills/deep-research"
-
 [tool.skills.product-analysis]
 path = "github.com/daymade/claude-code-skills/product-analysis"
 

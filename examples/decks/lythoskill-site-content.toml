@@ -1,13 +1,12 @@
-# lythoskill-site-content — Position → Mine → Structure → Polish → Publish
-# Discovered by ZK haiku subagent (curator SKILL.md only), 2026-05-20.
-# Repos: BrianRWagner/ai-marketing-skills, mattpocock/skills, rmyndharis/antigravity-skills
-[tool.deck]
+# lythoskill-site-content: long-form site content pipeline.
+# Combo: Position → Mine → Structure → Narrative → Polish → Data.
+# Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
+[deck]
 name = "lythoskill-site-content"
 
 # Stage 1: Strategy — nail positioning before writing
 [tool.skills.positioning-basics]
 path = "github.com/BrianRWagner/ai-marketing-skills/positioning-basics"
-
 [tool.skills.content-idea-generator]
 path = "github.com/BrianRWagner/ai-marketing-skills/content-idea-generator"
 
@@ -15,18 +14,16 @@ path = "github.com/BrianRWagner/ai-marketing-skills/content-idea-generator"
 [tool.skills.writing-fragments]
 path = "github.com/mattpocock/skills/skills/in-progress/writing-fragments"
 
-# Stage 3: Structure — shape fragments into article
+# Stage 3: Structure — shape fragments into article, refine as beats
 [tool.skills.writing-shape]
 path = "github.com/mattpocock/skills/skills/in-progress/writing-shape"
-
-# Stage 4: Narrative — refine as journey of beats
 [tool.skills.writing-beats]
 path = "github.com/mattpocock/skills/skills/in-progress/writing-beats"
 
-# Stage 5: Polish — edit for clarity, flow, compression
+# Stage 4: Polish — edit for clarity, flow, compression
 [tool.skills.edit-article]
 path = "github.com/mattpocock/skills/skills/personal/edit-article"
 
-# Stage 6: Data — metrics and benchmarks → visual narrative
+# Stage 5: Data — metrics and benchmarks → visual narrative
 [tool.skills.data-storytelling]
 path = "github.com/rmyndharis/antigravity-skills/skills/data-storytelling"
