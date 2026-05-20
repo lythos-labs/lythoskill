@@ -211,7 +211,7 @@ arena single --deck examples/decks/deep-research.toml --brief "..."  # auto-isol
 
 | Your orchestration logic is… | Put it in… | Example |
 |------------------------------|------------|---------|
-| Light + conditional ("if X then Y") | `combo.prompt` in skill-deck.toml | "If git status shows conflicts, call merge-conflict" |
+| Light + conditional ("if X then Y") | `[combo.<name>] prompt` in skill-deck.toml | "If git status shows conflicts, call merge-conflict" |
 | Medium + reusable across projects | Standalone SKILL.md in cold pool | A complex workflow with branching logic |
 | Heavy + mechanical (filesystem, backup) | CLI npm package | `deck link`, `arena single` |
 

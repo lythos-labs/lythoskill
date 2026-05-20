@@ -22,18 +22,21 @@ skills = [
   "github.com/mattpocock/skills/skills/engineering/to-prd",
 ]
 ```
-## [combo] — Pipeline Orchestration Hint
-Lightweight playbook for the agent. NOT a skill section — `combo.prompt` gives the agent
-conditional routing logic ("if X then Y"). The agent is the orchestrator; combo.prompt is the playbook.
+## [combo.<name>] — Pipeline Orchestration Hints
+Lightweight playbooks for the agent. NOT skill sections — each `[combo.<name>] prompt`
+gives the agent conditional routing logic. One deck can declare multiple combos.
 ```toml
-[combo]
+[combo.promo]
 prompt = """
 Pipeline: Position → Draft → Review → Publish.
-1. If user asks to promote a project, start with positioning-basics to define ICP.
-2. When positioning is done, feed output to social-card-gen for platform variants.
-3. After drafting, run tweet-draft-reviewer for quality check.
-4. On LGTM, publish via baoyu-post-to-x.
+1. Start with positioning-basics to define ICP + differentiation.
+2. Feed output to social-card-gen for platform variants.
+3. Review with tweet-draft-reviewer. Polish with de-ai-ify + voice-extractor.
+4. Publish via baoyu-post-to-x.
 """
+
+[combo.research]
+prompt = "Pipeline: Discover → Verify → Analyze. Use curator → find-skills → arena → deck."
 ```
 ## [transient] — Temporary Workarounds
 Must declare `expires`. Design goal: shrink until removable.
@@ -60,7 +63,7 @@ skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 skills = [
   "github.com/someone/web-search",  "github.com/someone/design-doc-mermaid",
 ]
-[combo]
+[combo.report]
 prompt = "If generating a report: run deep-research first, then feed findings to docx for output."
 [transient.fix-encoding]
 path = ".claude/skills/_fix-encoding"
