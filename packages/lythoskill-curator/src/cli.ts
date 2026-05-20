@@ -227,10 +227,10 @@ function parseCuratorArgs(argv: string[]) {
     }
   }
 
-  // Default: personal environment scan, not cold pool metadata
-  // ADR-20260511210000000 consolidates curator output to ~/.agents/lythoskill/curator/
+  // Default output: co-located with pool (catalog follows pool).
+  // Use --output for an alternative location (e.g. ~/.agents/lythoskill/curator/).
   if (!outputDir) {
-    outputDir = `${process.env.HOME}/.agents/lythoskill/curator`;
+    outputDir = `${poolPath}/.lythoskill-curator`
   }
 
   return { poolPath, outputDir };
@@ -435,15 +435,26 @@ function resolveDbPath(argv: string[]): string | undefined {
     return './catalog.db'
   }
 
-  // Fallback: common locations
+  // Fallback: common locations. Catalog follows pool: pool-co-located first.
   const candidates = [
-    `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,
-    `${process.env.HOME}/.agents/lythoskill/curator/catalog.db`,
-    `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,  // legacy (pre-0.9.51)
+    `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,  // default pool co-located
+    `${process.env.HOME}/.agents/lythoskill/curator/catalog.db`,               // legacy global (ADR-20260511210000000)
+    `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,             // legacy (pre-0.9.51)
   ]
+  let fallback: string | undefined
   for (const c of candidates) {
-    if (existsSync(c)) { return c }
+    if (!existsSync(c)) continue
+    try {
+      const testDb = new CatalogDb(c)
+      const n = (testDb.query('SELECT COUNT(*) as n FROM skills').get() as { n: number } | null)?.n ?? 0
+      testDb.close()
+      if (n > 0) return c                               // first populated catalog wins
+      if (!fallback) fallback = c
+    } catch {
+      if (!fallback) fallback = c
+    }
   }
+  if (fallback) return fallback
 
   return undefined
 }
@@ -557,11 +568,35 @@ function runQuery(argv: string[]) {
 
 export function runFind(argv: string[]) {
   // Parse --db flag
-  let dbPath = join(process.env.HOME!, '.agents/lythoskill/curator/catalog.db')
+  let dbPath: string | undefined
   for (let i = 0; i < argv.length; i++) {
     if ((argv[i] === '--db' || argv[i] === '-d') && argv[i + 1]) {
       dbPath = argv[++i]
     }
+  }
+
+  // If no explicit --db, search canonical first, then legacy fallbacks.
+  // Prefer populated catalog over empty one (canonical may be empty if migration not done).
+  if (!dbPath) {
+    const candidates = [
+      `${process.env.HOME}/.agents/skill-repos/.lythoskill-curator/catalog.db`,  // default pool co-located
+      `${process.env.HOME}/.agents/lythoskill/curator/catalog.db`,               // legacy global
+      `${process.env.HOME}/.agents/lythos/skill-curator/catalog.db`,             // legacy (pre-0.9.51)
+    ]
+    let foundPath: string | undefined
+    for (const c of candidates) {
+      if (!existsSync(c)) continue
+      try {
+        const testDb = new CatalogDb(c)
+        const n = (testDb.query('SELECT COUNT(*) as n FROM skills').get() as { n: number } | null)?.n ?? 0
+        testDb.close()
+        if (n > 0) { foundPath = c; break }  // first populated catalog wins
+        if (!foundPath) foundPath = c          // empty catalog as last resort
+      } catch {
+        if (!foundPath) foundPath = c
+      }
+    }
+    dbPath = foundPath || candidates[0]
   }
 
   const bareName = argv.find(a => !a.startsWith('-'))
@@ -577,7 +612,10 @@ export function runFind(argv: string[]) {
   }
 
   if (!existsSync(dbPath)) {
-    console.error('❌ Catalog DB not found. Run `lythoskill-curator` first to scan the cold pool.')
+    console.error('❌ Catalog DB not found.')
+    console.error('')
+    console.error('Run `lythoskill-curator` first to scan the cold pool:')
+    console.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
     process.exit(1)
   }
 
@@ -585,6 +623,27 @@ export function runFind(argv: string[]) {
   try {
     // Read cold pool path from catalog meta to reconstruct locator paths
     const poolPath = db.getMeta('pool_path') || ''
+
+    // Detect empty catalog (0 skills = scan was never run or ran against empty pool)
+    const skillCount = (db.query('SELECT COUNT(*) as n FROM skills').get() as { n: number } | null)?.n ?? 0
+    if (skillCount === 0) {
+      console.error('⚠️  Catalog is empty (0 skills indexed).')
+      console.error('')
+      console.error('Run a full scan against your cold pool:')
+      console.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
+      process.exit(1)
+    }
+
+    // Show index freshness
+    const lastScan = db.getMeta('last_scan_at') || db.getMeta('generated_at')
+    if (lastScan) {
+      const age = Math.round((Date.now() - Number(lastScan)) / 86400000)
+      if (age > 3) {
+        console.error(`⚠️  Catalog last scanned ${age} days ago. Skills added since may not appear.`)
+        console.error(`  Re-scan: lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
+        console.error('')
+      }
+    }
 
     const matches = db.all<{ name: string; path: string; type: string; description: string }>(
       `SELECT name, path, type, description FROM skills WHERE name = $name`,
@@ -890,12 +949,12 @@ export function runAdd(argv: string[]) {
   }
 
   const poolPath = getFlag(argv, '--pool')
-  const outputDir = getFlag(argv, '--output') || `${process.env.HOME}/.agents/lythoskill/curator`
   if (!poolPath) {
     console.error('Error: --pool <dir> is required.')
     console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir>')
     process.exit(1)
   }
+  const outputDir = getFlag(argv, '--output') || `${poolPath}/.lythoskill-curator`
 
   const dryRun = argv.includes('--dry-run')
   const plan = buildAddPlan(locator, poolPath)
