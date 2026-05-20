@@ -1,6 +1,7 @@
 # lythoskill-promo: Twitter/LinkedIn promotion pipeline.
 # Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
 [deck]
+max_cards = 10
 name = "lythoskill-promo"
 
 [combo.promo]

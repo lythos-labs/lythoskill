@@ -183,6 +183,25 @@ if [ -d skills/ ]; then
   done
 fi
 
+# 2.6. Deck validation — validate staged examples/decks/*.toml
+#      Ensures ZK-generated and manually-authored decks have required fields
+#      (max_cards, valid locator paths) before they land on main.
+STAGED_DECKS=$(git diff --cached --name-only --diff-filter=ACM | grep '^examples/decks/.*\.toml$' || true)
+
+if [ -n "$STAGED_DECKS" ]; then
+  DECK_ERRORS=0
+  for deck in $STAGED_DECKS; do
+    if ! bun packages/lythoskill-deck/src/cli.ts validate --deck "$deck"; then
+      DECK_ERRORS=$((DECK_ERRORS + 1))
+    fi
+  done
+  if [ "$DECK_ERRORS" -gt 0 ]; then
+    echo ""
+    echo "❌ ${DECK_ERRORS} deck(s) failed validation"
+    exit 1
+  fi
+fi
+
 # 3. Cortex governance: Epic-ADR coupling + lane guard + in-progress reminder (TypeScript)
 #    → delegates to packages/lythoskill-project-cortex/src/hooks/pre-commit.ts (T2+T3)
 bun packages/lythoskill-project-cortex/src/hooks/pre-commit.ts

@@ -1,6 +1,7 @@
 # lythoskill-site-content: long-form site content pipeline.
 # Source: ZK haiku subagent (curator SKILL.md only), 2026-05-20.
 [deck]
+max_cards = 10
 name = "lythoskill-site-content"
 
 [combo.site]
