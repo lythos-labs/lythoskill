@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (51)
+## 📚 Patterns (52)
 
+- **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
 - **[2026-05-19]** [where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern](./01-patterns/2026-05-19-where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern.md)
 - **[2026-05-18]** [skill-incubator-sop-curator-driven-skill-creation-pipeline](./01-patterns/2026-05-18-skill-incubator-sop-curator-driven-skill-creation-pipeline.md)

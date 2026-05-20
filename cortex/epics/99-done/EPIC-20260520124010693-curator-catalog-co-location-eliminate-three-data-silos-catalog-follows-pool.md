@@ -15,6 +15,7 @@ checklist_skipped_reason: "automated: catalog co-location is a targeted fix with
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-20 | Created |
+| done | 2026-05-20 | Done |
 
 ## 背景故事
 

@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/19 22:59:31
+> 自动生成于 2026/5/20 12:44:40
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 257 | 进行中: 0, 待验收: 0, 已完成: 220 |
-| Epics | 37 | 活跃: 0, 已完成: 33, 悬置: 2, 已归档: 2 |
+| Epics | 38 | 活跃: 0, 已完成: 34, 悬置: 2, 已归档: 2 |
 | ADRs | 81 | 已接受: 78 |
 
 ---
@@ -53,6 +53,7 @@ _无_
 - ✅ **EPIC-20260518153034640**: Hardening deepseek adapter: robust daemon lifecycle — health-check discovery, not PID polling
 - ✅ **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
 - ✅ **EPIC-20260519224747755**: curator add UX 专业性与副作用透明化
+- ✅ **EPIC-20260520124010693**: curator catalog co-location: eliminate three data silos, catalog follows pool
 
 ### 悬置
 
