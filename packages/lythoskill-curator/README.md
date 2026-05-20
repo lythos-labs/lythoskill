@@ -16,28 +16,28 @@ As your skill ecosystem grows (GitHub trending, marketplace downloads, agent rec
 ```bash
 bun add -d @lythos/skill-curator
 # or use directly
-bunx @lythos/skill-curator@0.15.1 <command>
+bunx @lythos/skill-curator@0.15.2 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Scan cold pool and build index
-bunx @lythos/skill-curator@0.15.1
+bunx @lythos/skill-curator@0.15.2
 
 # Add a skill (with decision record)
-bunx @lythos/skill-curator@0.15.1 add github.com/foo/bar-skill \
+bunx @lythos/skill-curator@0.15.2 add github.com/foo/bar-skill \
   --pool ~/.agents/skill-repos \
   --reason "LobeHub trending, claims web scraping"
 
 # Fork an existing skill
-bunx @lythos/skill-curator@0.15.1 add github.com/you/better-scraper \
+bunx @lythos/skill-curator@0.15.2 add github.com/you/better-scraper \
   --pool ~/.agents/skill-repos \
   --forked-from github.com/foo/bar-skill \
   --reason "fork: fixed PDF extraction bug"
 
 # Query the catalog
-bunx @lythos/skill-curator@0.15.1 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
+bunx @lythos/skill-curator@0.15.2 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
 ```
 
 ## Commands
@@ -60,6 +60,7 @@ Commands:
                           --forked-from <loc>  Original skill if this is a fork
                           --branch <name>      Specific branch (default: default branch)
                           --full               Full clone (default: --depth 1 shallow)
+  find <bare-name>      Look up a skill by bare name (HIT: path + deck add; MISS: search guidance)
   query <SQL>           Query the catalog SQLite database (output: Markdown table)
   audit                 Run predefined checks and output an audit report
   restore               Roll back to the most recent backup
@@ -73,9 +74,9 @@ Commands:
                           --pool <dir>         Cold pool path (default: ~/.agents/skill-repos)
 
 Options:
-  --output, -o <dir>    Output directory (default: ~/.agents/lythoskill/curator)
-  --pool <dir>          Cold pool path for add (required)
-  --db, -d <path>       Database path for query/audit
+  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)
+  --pool <dir>          Cold pool path (default: ~/.agents/skill-repos)
+  --db, -d <path>       Database path for find/query/audit
 ```
 
 ## Architecture

@@ -27,7 +27,7 @@ allowed-tools:
   - WebFetch
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_managed_dirs:
-  - ~/.agents/lythoskill/curator/
+  - ~/.agents/skill-repos/.lythoskill-curator/
 ---
 
 # Skill Curator
@@ -174,7 +174,7 @@ If `gh` commands fail with authentication errors, do NOT silently skip:
 ```bash
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} [POOL_PATH]
 # Defaults: POOL_PATH = ~/.agents/skill-repos
-#           Output    = ~/.agents/lythoskill/curator/
+#           Output    = <pool>/.lythoskill-curator/
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} ~/.agents/skill-repos --output /tmp/my-index/
 ```
 Reconciler-style: converges any state to a clean index. Auto-backup before rebuild.
@@ -274,12 +274,12 @@ not author-declared.
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos --dry-run
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
-  --output ~/.agents/lythoskill/curator/
+  --output /tmp/my-index/
 bunx @lythos/skill-curator@{{PACKAGE_VERSION}} add github.com/owner/repo --pool ~/.agents/skill-repos \
   --reason "Found via WebSearch for code review skills" --branch main
 ```
 
-`--output` controls where `additions.jsonl` and the write-through cache land. Default: `~/.agents/lythoskill/curator/`. Use it to align with a custom `scan --output` directory.
+`--output` controls where `additions.jsonl` and the write-through cache land. Default: `<pool>/.lythoskill-curator/`. Use it to point to a different location.
 
 ### Refresh upstreams (plan-first)
 ```bash

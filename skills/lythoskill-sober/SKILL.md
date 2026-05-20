@@ -1,6 +1,6 @@
 ---
 name: lythoskill-sober
-version: 0.15.1
+version: 0.15.2
 type: standard
 description: |
   Stay clear-headed. Before you commit to a conclusion, check your basis.
