@@ -214,7 +214,9 @@ Niche tags follow a hierarchical prefix convention. When tagging, use these patt
 
 **To discover existing niches** (before tagging, know what's already there):
 ```bash
-curator query "SELECT DISTINCT json_each.value FROM skills, json_each(niches) WHERE json_each.value NOT LIKE 'qa:%' ORDER BY 1"
+# curator query doesn't support json_each(); use sqlite3 directly
+sqlite3 ~/.agents/skill-repos/.lythoskill-curator/catalog.db \
+  "SELECT DISTINCT json_each.value, COUNT(*) FROM skills, json_each(niches) WHERE json_each.value NOT LIKE 'qa:%' GROUP BY 1 ORDER BY 2 DESC"
 ```
 
 ### External Hub Cross-Reference Workflow
