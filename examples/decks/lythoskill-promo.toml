@@ -1,0 +1,23 @@
+[tool.deck]
+name = "lythoskill-promo"
+
+[tool.skills.positioning-basics]
+path = "github.com/BrianRWagner/ai-marketing-skills/positioning-basics"
+
+[tool.skills.content-idea-generator]
+path = "github.com/BrianRWagner/ai-marketing-skills/content-idea-generator"
+
+[tool.skills.social-card-gen]
+path = "github.com/BrianRWagner/ai-marketing-skills/social-card-gen"
+
+[tool.skills.tweet-draft-reviewer]
+path = "github.com/BrianRWagner/ai-marketing-skills/tweet-draft-reviewer"
+
+[tool.skills.de-ai-ify]
+path = "github.com/BrianRWagner/ai-marketing-skills/de-ai-ify"
+
+[tool.skills.voice-extractor]
+path = "github.com/BrianRWagner/ai-marketing-skills/voice-extractor"
+
+[tool.skills.baoyu-post-to-x]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-post-to-x"

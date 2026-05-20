@@ -1,0 +1,23 @@
+[tool.deck]
+name = "lythoskill-research-archaeo"
+
+[tool.skills.lythoskill-curator]
+path = "github.com/lythos-labs/lythoskill/packages/lythoskill-curator/skill"
+
+[tool.skills.find-skills]
+path = "github.com/vercel-labs/skills/skills/find-skills"
+
+[tool.skills.fact-checker]
+path = "github.com/daymade/claude-code-skills/fact-checker"
+
+[tool.skills.lythoskill-arena]
+path = "github.com/lythos-labs/lythoskill/packages/lythoskill-arena/skill"
+
+[tool.skills.deep-research]
+path = "github.com/daymade/claude-code-skills/deep-research"
+
+[tool.skills.product-analysis]
+path = "github.com/daymade/claude-code-skills/product-analysis"
+
+[tool.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/packages/lythoskill-deck/skill"

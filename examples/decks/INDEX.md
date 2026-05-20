@@ -38,6 +38,16 @@
 |------|--------|-----|
 | [site-builder.toml](./site-builder.toml) | find-skills, frontend-design, theme-factory, brand-guidelines, vitepress, web-design-guidelines, mermaid | Build documentation site with design taste + VitePress |
 
+### Skill Ecosystem Research
+| Deck | Skills | Use |
+|------|--------|-----|
+| [lythoskill-research-archaeo.toml](./lythoskill-research-archaeo.toml) | lythoskill-curator, find-skills, fact-checker, lythoskill-arena, deep-research, product-analysis, lythoskill-deck | Discover → verify → analyze → collect: cold pool archaeology, hub cross-ref, arena testing |
+
+### Content & Promotion
+| Deck | Skills | Use |
+|------|--------|-----|
+| [lythoskill-promo.toml](./lythoskill-promo.toml) | positioning-basics, content-idea-generator, social-card-gen, tweet-draft-reviewer, de-ai-ify, voice-extractor, baoyu-post-to-x | Position → draft → review → publish: Twitter/LinkedIn promotion pipeline |
+
 ### Project Governance
 | Deck | Skills | Use |
 |------|--------|-----|
