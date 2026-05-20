@@ -22,11 +22,18 @@ skills = [
   "github.com/mattpocock/skills/skills/engineering/to-prd",
 ]
 ```
-## [combo] — Router Skills
-Occupies one niche slot, delegates to multiple specialists by condition.
+## [combo] — Pipeline Orchestration Hint
+Lightweight playbook for the agent. NOT a skill section — `combo.prompt` gives the agent
+conditional routing logic ("if X then Y"). The agent is the orchestrator; combo.prompt is the playbook.
 ```toml
 [combo]
-skills = ["github.com/testdino-hq/playwright-skill"]
+prompt = """
+Pipeline: Position → Draft → Review → Publish.
+1. If user asks to promote a project, start with positioning-basics to define ICP.
+2. When positioning is done, feed output to social-card-gen for platform variants.
+3. After drafting, run tweet-draft-reviewer for quality check.
+4. On LGTM, publish via baoyu-post-to-x.
+"""
 ```
 ## [transient] — Temporary Workarounds
 Must declare `expires`. Design goal: shrink until removable.
@@ -54,7 +61,7 @@ skills = [
   "github.com/someone/web-search",  "github.com/someone/design-doc-mermaid",
 ]
 [combo]
-skills = ["report-generation-combo"]
+prompt = "If generating a report: run deep-research first, then feed findings to docx for output."
 [transient.fix-encoding]
 path = ".claude/skills/_fix-encoding"
 expires = "2026-05-01"
