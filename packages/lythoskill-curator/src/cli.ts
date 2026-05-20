@@ -645,19 +645,27 @@ export function runFind(argv: string[]) {
       }
     }
 
-    const matches = db.all<{ name: string; path: string; type: string; description: string }>(
-      `SELECT name, path, type, description FROM skills WHERE name = $name`,
+    const matches = db.all<{ name: string; path: string; type: string; description: string; niches: string }>(
+      `SELECT name, path, type, description, niches FROM skills WHERE name = $name`,
       { $name: bareName }
     )
 
     // Convert local filesystem paths to locator paths
     const toLocator = (localPath: string): string => {
       if (!poolPath) return localPath
-      // localPath = {poolPath}/github.com/owner/repo/... → github.com/owner/repo/...
       let rel = localPath
       if (rel.startsWith(poolPath + '/')) rel = rel.slice(poolPath.length + 1)
       else if (rel.startsWith(poolPath)) rel = rel.slice(poolPath.length)
       return rel
+    }
+
+    // Extract hub tags for display (non-qa niches from external sources)
+    const hubTags = (niches: string): string[] => {
+      try {
+        const parsed = JSON.parse(niches)
+        if (!Array.isArray(parsed)) return []
+        return parsed.filter((n: string) => n.startsWith('hub/'))
+      } catch { return [] }
     }
 
     if (matches.length === 0) {
@@ -673,25 +681,34 @@ export function runFind(argv: string[]) {
     }
 
     if (matches.length > 1) {
-      console.log(`⚠️  Multiple skills found for "${bareName}":`)
+      console.log(`⚠️  ${matches.length} skills share the name "${bareName}":`)
       console.log('')
       for (const m of matches) {
-        console.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})`)
+        const tags = hubTags(m.niches)
+        const tagStr = tags.length > 0 ? `  🏷️  ${tags.join(', ')}` : ''
+        console.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})${tagStr}`)
       }
       console.log('')
-      console.log('Use the full path with deck add:')
+      console.log('Pick ONE and specify its full path with deck add:')
       console.log(`  bunx @lythos/skill-deck add ${matches[0].name} --path ${toLocator(matches[0].path)}`)
+      if (matches.length > 2) {
+        for (let i = 1; i < Math.min(matches.length, 4); i++) {
+          console.log(`  # or: --path ${toLocator(matches[i].path)}`)
+        }
+      }
       console.log('')
-      console.log('Or pick a different one and specify its path.')
+      console.log('⚠️  deck link will fail if two skills have the same name. Choose one.')
       process.exit(0)
     }
 
     const skill = matches[0]
     const locatorPath = toLocator(skill.path)
+    const tags = hubTags(skill.niches)
     console.log('')
     console.log(`  name: ${skill.name}`)
     console.log(`  path: ${locatorPath}`)
     console.log(`  type: ${skill.type}`)
+    if (tags.length > 0) console.log(`  refs: ${tags.join(', ')}`)
     console.log('')
     console.log('  # deck add:')
     console.log(`  bunx @lythos/skill-deck add ${skill.name} \\`)
