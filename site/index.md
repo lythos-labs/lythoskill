@@ -24,7 +24,7 @@ features:
     link: /architecture#arena-empirical-validation
   - icon: 📚
     title: Curator Discovery
-    details: Scan cold pools, index metadata, query with SQL. Three-layer trust: description → ecosystem → your results.
+    details: Scan cold pools, index metadata, query with SQL. Three-layer trust: description &gt; ecosystem &gt; your results.
     link: /architecture#curator-discovery-with-trust
   - icon: 🔗
     title: Pipeline Combos
@@ -61,7 +61,7 @@ Everything exists        Selects what's active        Only what's declared
 
 ## Built by AI Agents
 
-Zero human-written code. Every line — 12 packages, 487+ tests, all CLI tools, all SKILL.md files — produced by AI agents under human direction. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
+Zero human-written code. Every line — 13 packages, 600+ tests, all CLI tools, all SKILL.md files — produced by AI agents under human direction. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
 
 This isn't a gimmick. It's proof that the governance model works: if agents couldn't reliably build and maintain this project using the very tools it provides, the tools would be broken.
 

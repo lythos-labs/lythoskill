@@ -62,3 +62,8 @@ test-results/*
 !test-results/README.md
 runs/
 cold-pool/
+
+# VitePress site local deps
+site/node_modules/
+site/package-lock.json
+site/.vitepress/cache/

@@ -1,9 +1,40 @@
-import { defineConfig } from 'vitepress'
-
-export default defineConfig({
+/**
+ * VitePress Site Configuration — lythoskill
+ *
+ * == Frontmatter Conventions (avoid YAML/vitepress parser bugs) ==
+ *
+ * 1. `→` (Unicode RIGHT ARROW U+2192) BREAKS YAML frontmatter parsing.
+ *    Use `>`, `-&gt;`, or `&#8594;` inside YAML blocks (--- delimited).
+ *    In markdown body (below frontmatter), `→` IS safe.
+ *
+ * 2. `import { defineConfig } from 'vitepress'` BREAKS local install
+ *    (ESM/CJS resolution conflict with esbuild). Use plain object export.
+ *
+ * 3. `features.details` values must NOT contain `:` followed by `→`.
+ *    "description → ecosystem" triggers YAML "incomplete explicit mapping pair".
+ *
+ * 4. Use `srcExclude: ['../**']` if running `vitepress dev` from project root
+ *    (prevents HMR watcher from parsing root .md files as Vue SFCs).
+ *
+ * 5. Static assets (favicon.svg etc.) go in `site/public/`, served at `/`.
+ *
+ * == Best practices ==
+ *
+ * - Copy this comment block when creating new VitePress site pages.
+ * - Prefer plain markdown (no YAML frontmatter) for content pages.
+ * - Only index.md (home layout) needs `---` frontmatter.
+ * - Test with `npx vitepress build .` before committing.
+ */
+const config = {
   title: 'lythoskill',
   description: 'Declarative skill governance for AI agents — deck, curate, validate, reconcile.',
   lang: 'en-US',
+
+  // Exclude markdown files outside the site/ directory.
+  // When vitepress dev runs from the project root, VitePress may pick up
+  // INDEX.md, README.md, AGENTS.md etc. at the repo root and attempt to
+  // parse them as Vue SFCs, triggering element-parsing errors.
+  srcExclude: ['../**'],
 
   head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
 
@@ -31,4 +62,6 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
     ],
   },
-})
+}
+
+export default config
