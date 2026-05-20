@@ -2,19 +2,19 @@
 Arena operations map directly to card game deck-building test play:
 | Card game operation | Arena equivalent | Mode |
 |---------------------|-----------------|------|
-| **Pick a card**: A or B? | `run --config examples/arena/research-compare/arena.toml` | declarative |
-| **Add a card**: Does C improve my deck? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
-| **Cut a card**: Is D dead weight? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/minus-pdf.toml"` | deck-compare |
-| **Swap a card**: E instead of F? | `--decks "https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/base.toml,https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/arena-add-remove/plus-research.toml"` | deck-compare |
-| **Deck duel**: lythos vs superpowers? | `--decks "lythos.toml,superpowers.toml"` | deck-compare |
+| **Pick a card**: A or B? | `arena vs --config arena.toml` | declarative |
+| **Add a card**: Does C improve my deck? | two-deck `arena.toml` (base vs +research) | vs |
+| **Cut a card**: Is D dead weight? | two-deck `arena.toml` (base vs -pdf) | vs |
+| **Swap a card**: E instead of F? | two-deck `arena.toml` (base vs +variant) | vs |
+| **Deck duel**: lythos vs superpowers? | `arena vs --config duel.toml` | vs |
 ## Key Distinction
-- **Single-card comparison** (Mode 1): "Which card is better in isolation?"
-  Controlled variable — same helper skills, same task, different test skill.
-- **Full-deck comparison** (deck-compare): "What is the marginal effect of adding/
+- **Single-deck test** (`arena single`): "Is this deck good for this task?"
+  One deck, one task — quick sanity check before committing.
+- **Multi-deck comparison** (`arena vs`): "What is the marginal effect of adding/
   removing/swapping a card in the context of this specific deck?"
   This is what experienced card game players actually optimize for.
 The same skill can have completely different marginal value in different
-deck contexts (deck synergy). Arena's `--decks` mode captures this.
+deck contexts (deck synergy). Arena's `vs --config arena.toml` captures this.
 ## Practical Test Play Workflow
 ```
 1. Start with a working deck (your current skill-deck.toml)
