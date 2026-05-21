@@ -16,6 +16,20 @@ Four phases: Discovery → Evaluation → Organization → Maintenance.
 - **One niche, one skill** in innate. Exception: combo.prompt routing
 - **Thickness layers**: heavy assets → npm/pip; dispatchers → Flow/combo.prompt; glue → SKILL.md + scripts
 - **Transient hardening**: repeated workaround → extract to package → skill keeps only the call
+## POSSE Fan-Out (`also_link_to`)
+
+`also_link_to` syncs the working set to multiple directories in one `deck link` run — one deck.toml as single source of truth, multiple consumers. This is the POSSE pattern (Publish On your Site, Syndicate Elsewhere): define your skill deck once, fan it out everywhere your agents look.
+
+```toml
+[deck]
+working_set = ".claude/skills"
+also_link_to = [".cursor/skills", ".kimi/skills", ".codex/skills"]
+```
+
+Common use case: multi-CLI support. Different coding agents (Claude Code, Cursor, Kimi, Codex) each expect skills in their own directory. With `also_link_to`, a single `deck link` populates all of them from the same deck definition.
+
+The field accepts a TOML array of directory paths (relative to the project root, or absolute). An old comma-separated string format is still parsed but emits a deprecation warning — always use the array form.
+
 ## 4. Maintenance
 - **Curator scan**: `lythoskill-curator` (default scan rebuilds index) after new downloads
 - **Audit**: `link` reports expired transients, directory overlaps
