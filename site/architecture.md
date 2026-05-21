@@ -2,22 +2,30 @@
 
 > Three pillars: Deck (govern), Arena (validate), Curator (discover).
 
-## Player-Deck Separation
+## Storage and Selection
 
-The TCG (Trading Card Game) analogy is not decorative — it's structural:
+Before governance, validation, or discovery can work, one structural problem must be solved: skills need a place to live, but not every skill should be active in every project.
+
+The default approach collapses storage and selection into the same directory. `~/.claude/skills/` is both — everything you have ever collected is visible to every agent session. More skills means more context consumed, more trigger conflicts, more unpredictable behavior.
+
+Lythoskill separates them:
+
+- **Cold pool** — where skills live. A directory of git-cloned skill repos. Store everything you might ever use. Nothing in the cold pool is automatically active.
+- **Working set** — what the agent sees. Symlinks in `.claude/skills/`. Only skills declared in `skill-deck.toml` appear here.
 
 ```
-Player (who plays)          Deck (what you play with)
-├─ Platform: claude-code    ├─ max_cards
-├─ Model: claude-opus-4-6   ├─ skills[]
-├─ Concurrency: 4 agents    └─ combos[]
-├─ Tool set
-└─ Native capabilities
+Cold Pool (~/.agents/skill-repos/)     Working Set (.claude/skills/)
+├── anthropic-superpowers/             ├── lythoskill-deck → ...
+├── mattpocock-skills/                 ├── lythoskill-arena → ...
+├── antigravity-skills/                ├── lythoskill-curator → ...
+├── vercel-labs-skills/                └── tdd → ...
+└── ...                                    (only what deck declares)
+    (all repos, indexed by curator)        (deny-by-default)
 ```
 
-**Same deck, different players, different results.** A deck given to Claude Code, Kimi, or Codex performs differently — not because the deck is wrong, but because players have different strengths. Arena measures this.
+**Pool and set are decoupled.** Curator indexes everything in the pool. Deck selects what enters the working set. This prevents the "everything installed everywhere" anti-pattern: store once, select per project.
 
-The separation enables **combinatorial reuse**: 3 players + 3 decks = 9 test configurations from 6 files, not 9 hand-maintained combinations.
+The three pillars — Deck, Arena, Curator — all operate on this foundation.
 
 ## The Three Pillars
 
@@ -53,7 +61,7 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 
 ### Arena — Empirical Validation
 
-"Does this skill actually work?" — the question that descriptions can't answer.
+"Does this skill actually work?" — the question that descriptions cannot answer.
 
 Arena spawns zero-knowledge subagents with different decks, runs them on the same task, and a judge scores the outputs. **Skin in the game**: only real-task performance counts, not marketing copy.
 
@@ -74,7 +82,7 @@ Three-layer trust model for finding skills:
 | L2 | Big V / ecosystem index | Community validation |
 | L3 | Private metadata + arena results | "买家秀" — what actually works for you |
 
-Curator scans cold pools, indexes frontmatter into SQLite, and enables structured queries. The three layers prevent "download and pray" — L1 tells you what exists, L2 tells you what's popular, L3 tells you what's real.
+Curator scans cold pools, indexes frontmatter into SQLite, and enables structured queries. The three layers prevent "download and pray" — L1 tells you what exists, L2 tells you what is popular, L3 tells you what is real.
 
 ## Combo Epistemology
 
@@ -92,19 +100,3 @@ Layer 1: Arena             → Empirical
 ```
 
 `[combo.<name>]` in deck.toml defines pipelines — multi-skill workflows orchestrated by a prompt. No new code, no state machine: the agent reads the combo prompt and orchestrates the skills.
-
-## Cold Pool Architecture
-
-Skills live in a **cold pool** (file system directory of git repos). The deck **selects** from the pool into the **working set** (symlinks in `.claude/skills/`).
-
-```
-Cold Pool (~/.agents/skill-repos/)     Working Set (.claude/skills/)
-├── anthropic-superpowers/             ├── lythoskill-deck → ...
-├── mattpocock-skills/                 ├── lythoskill-arena → ...
-├── antigravity-skills/                ├── lythoskill-curator → ...
-├── vercel-labs-skills/                └── tdd → ...
-└── ...                                    (only what deck declares)
-    (all repos, indexed by curator)        (deny-by-default)
-```
-
-**Pool and set are decoupled.** Curator indexes everything in the pool. Deck selects what enters the working set. This prevents the "everything installed everywhere" anti-pattern.

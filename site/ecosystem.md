@@ -38,7 +38,7 @@ L1 and L2 help you find candidates. **L3 is the activation authority** — only 
 
 ## Cold Pool as Filesystem-Native
 
-The cold pool is deliberately filesystem-native, not a database:
+The cold pool — where skills live, separate from the per-project working set — is deliberately filesystem-native, not a database:
 
 ```
 ~/.agents/skill-repos/

@@ -1,14 +1,18 @@
 # In Action Guide
 
-> A 6-level tour from "I have too many skills" to "I govern my skill ecosystem."
+> A 6-level tour: you already have skills. Here is how to organize them, test them, and share them.
 
-## Level 0: The Problem
+This guide is self-contained — start here with nothing installed and follow each level in order.
 
-You have 50+ skills in `~/.claude/skills/`. Some are symlinks from old tooling, some are manual installs, some are broken. Your agent sees everything — including conflicts. You don't know which skills are *supposed* to be active.
+## Level 0: You Already Have Skills
 
-**Symptom**: Agent behavior is inconsistent. Sometimes skill A fires, sometimes skill B fires on the same trigger. You can't reproduce results.
+You have been collecting skills. GitHub repos, Superpowers, a colleague's gist — skills accumulate. You probably have more than you realize.
 
-**Root cause**: No governance. Working set = accumulation, not selection.
+The problem is not that you have too many. The problem is that every skill you have ever installed is visible to every agent session. Context window fills. Triggers conflict. Behavior becomes inconsistent — the same prompt produces different results because different skills fire.
+
+**Symptom**: Agent behavior is unpredictable. You cannot reproduce results across sessions.
+
+**Root cause**: Your working set is accumulation, not selection. You need governance.
 
 ## Level 1: Your First Deck
 
@@ -27,11 +31,15 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 
 Run `deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
 
-**What changed**: Your agent now sees exactly 2 skills. Behavior is reproducible.
+**What changed**: Your agent now sees exactly 2 skills. Behavior is reproducible. One file declares what is active — share it, version it, switch it.
 
 ## Level 2: Discover More Skills
 
-You want more skills, but you don't want to browse GitHub manually.
+You want more skills, but you do not want to browse GitHub manually.
+
+::: tip Where do skills live?
+Your deck declares which skills are active (the **working set**). But where do the skills themselves live? This is the **cold pool** — a directory where you `git clone` skill repos. You store everything in the cold pool; your deck selects what enters the working set for each project. Storage and selection are separate concerns.
+:::
 
 ```bash
 curator scan                    # Index your cold pool
@@ -42,7 +50,7 @@ Curator returns locator paths. Add to deck, run `deck link`. Discovery → selec
 
 ## Level 3: Test Before You Trust
 
-A skill's README says it's great. Is it?
+A skill's README says it is great. Is it?
 
 ```bash
 arena single --deck skill-deck.toml --task "refactor this auth module"

@@ -38,10 +38,10 @@ const config = {
       description: 'Declarative skill governance for AI agents — deck, curate, validate, reconcile.',
       themeConfig: {
         nav: [
-          { text: 'Philosophy', link: '/philosophy' },
-          { text: 'Architecture', link: '/architecture' },
           { text: 'Guide', link: '/guide/' },
+          { text: 'Architecture', link: '/architecture' },
           { text: 'Ecosystem', link: '/ecosystem' },
+          { text: 'Philosophy', link: '/philosophy' },
           { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
 
@@ -69,10 +69,10 @@ const config = {
       description: 'AI agent 宣告式技能治理：牌組管理、策展、驗證、對帳。',
       themeConfig: {
         nav: [
-          { text: '哲學', link: '/zh/philosophy' },
-          { text: '架構', link: '/zh/architecture' },
           { text: '實戰指南', link: '/zh/guide/' },
+          { text: '架構', link: '/zh/architecture' },
           { text: '生態', link: '/zh/ecosystem' },
+          { text: '哲學', link: '/zh/philosophy' },
           { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
 

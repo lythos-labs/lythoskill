@@ -2,22 +2,30 @@
 
 > 三大支柱：Deck（治理）、Arena（驗證）、Curator（探索）。
 
-## 玩家與牌組分離
+## 儲存與選擇
 
-TCG（集換式卡牌遊戲）的類比不是裝飾——是結構性的：
+在治理、驗證或探索可以運作之前，有一個結構性問題必須先解決：技能需要一個地方存放，但不是每個技能都應該在每個專案中 active。
+
+預設的做法把儲存和選擇塞進同一個目錄。`~/.claude/skills/` 同時承擔兩個角色——你收集過的每一個技能都對每個 agent session 可見。更多技能意味著更多 context 被消耗、更多 trigger 衝突、更不可預測的行為。
+
+Lythoskill 將它們分開：
+
+- **冷池**——技能住的地方。一個放 git clone 技能 repo 的目錄。把所有你可能會用的技能放在這裡。冷池裡的東西不會自動 active。
+- **工作集**——agent 看到的東西。`.claude/skills/` 中的 symlink。只有 `skill-deck.toml` 宣告的技能才會出現在這裡。
 
 ```
-玩家（誰在玩）                    牌組（你用什麼玩）
-├─ 平台: claude-code             ├─ max_cards
-├─ 模型: claude-opus-4-6         ├─ skills[]
-├─ 並行數: 4 agents              └─ combos[]
-├─ 工具集
-└─ 原生能力
+冷池 (~/.agents/skill-repos/)       工作集 (.claude/skills/)
+├── anthropic-superpowers/            ├── lythoskill-deck → ...
+├── mattpocock-skills/                ├── lythoskill-arena → ...
+├── antigravity-skills/               ├── lythoskill-curator → ...
+├── vercel-labs-skills/               └── tdd → ...
+└── ...                                   （只有牌組宣告的）
+    （所有 repo，curator 全索引）           （預設拒絕）
 ```
 
-**同一副牌組，不同玩家，不同結果。** 同樣的 deck 交給 Claude Code、Kimi 或 Codex，表現不同——不是牌組有問題，而是玩家各有強項。Arena 負責量測這件事。
+**冷池與工作集是分離的。** Curator 索引冷池中所有內容。Deck 選擇什麼進入工作集。這防止了「所有東西到處安裝」的反模式：儲存一次，按專案選擇。
 
-分離使**組合式重用**成為可能：3 個玩家 + 3 副牌組 = 從 6 個檔案產出 9 種測試配置，而非 9 個手動維護的組合。
+三大支柱——Deck、Arena、Curator——都建立在這個基礎之上。
 
 ## 三大支柱
 
@@ -92,19 +100,3 @@ Curator 掃描冷池、將 frontmatter 索引到 SQLite、支援結構化查詢�
 ```
 
 `[combo.<name>]` 在 deck.toml 中定義管線——由 prompt 指揮的多技能工作流。沒有新程式碼、沒有狀態機：agent 讀取 combo prompt，然後指揮技能執行。
-
-## 冷池架構
-
-技能存在**冷池**（檔案系統目錄，放 git repo）。牌組從冷池**選擇**技能進入**工作集**（`.claude/skills/` 中的 symlink）。
-
-```
-冷池 (~/.agents/skill-repos/)       工作集 (.claude/skills/)
-├── anthropic-superpowers/            ├── lythoskill-deck → ...
-├── mattpocock-skills/                ├── lythoskill-arena → ...
-├── antigravity-skills/               ├── lythoskill-curator → ...
-├── vercel-labs-skills/               └── tdd → ...
-└── ...                                   （只有牌組宣告的）
-    （所有 repo，curator 全索引）           （預設拒絕）
-```
-
-**冷池與工作集是分離的。** Curator 索引冷池中所有內容。Deck 選擇什麼進入工作集。這防止了「所有東西到處安裝」的反模式。
