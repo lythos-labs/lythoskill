@@ -4,7 +4,7 @@
 
 ## 治理問題
 
-你的 `~/.claude/skills/` 會變成垃圾場。它是漸進發生的：
+你的 `~/.agents/skills/` 會變成垃圾場。它是漸進發生的：
 
 1. 你從 GitHub 裝一個技能——複製到你的技能目錄
 2. 你試了 Superpowers，又試了 skill-manager——各自留下自己的 symlink
@@ -20,14 +20,14 @@
 1. **儲存**——一個放所有你可能會用的技能的地方，跨所有專案
 2. **選擇**——*這個*專案現在應該 active 的特定技能集合
 
-當 `~/.claude/skills/` 同時承擔兩個角色時，你收集過的每一個技能都對每個 agent session 可見。更多技能在目錄裡意味著更多 context 被消耗、更多 trigger 衝突、更多不可預測的行為。
+當 `~/.agents/skills/` 同時承擔兩個角色時，你收集過的每一個技能都對每個 agent session 可見。更多技能在目錄裡意味著更多 context 被消耗、更多 trigger 衝突、更多不可預測的行為。
 
 ### 解法：把儲存跟選擇分開
 
 Lythoskill 引入兩個本來就該分開的概念：
 
 - **冷池**——技能住的地方。一個放 git clone 技能 repo 的目錄。把所有東西放在這裡。冷池裡的東西不會自動 active。
-- **工作集**——agent 看到的東西。`.claude/skills/` 中的 symlink 農場。只有牌組宣告的技能才會出現在這裡。
+- **工作集**——agent 看到的東西。`.agents/skills/` 中的 symlink 農場。只有牌組宣告的技能才會出現在這裡。
 
 作者截至 2026-05-20 的實際數字：冷池中有 **74 個 repo 共 871 個技能**——所有曾經收集的。但任何專案的工作集只有 **13 個技能**——與 `skill-deck.toml` 宣告的完全一致，不多不少。
 
@@ -77,8 +77,8 @@ lythoskill 的基礎分層：
 
 ```
 # 指令式（舊做法）
-cp -R cool-skill/ ~/.claude/skills/     # 安裝
-rm -rf ~/.claude/skills/cool-skill/     # 解除安裝（也許）
+cp -R cool-skill/ ~/.agents/skills/     # 安裝
+rm -rf ~/.agents/skills/cool-skill/     # 解除安裝（也許）
 
 # 宣告式（lythoskill）
 # 1. 在 skill-deck.toml 加一行

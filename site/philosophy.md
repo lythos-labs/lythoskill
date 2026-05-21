@@ -4,7 +4,7 @@
 
 ## The Governance Problem
 
-Your `~/.claude/skills/` becomes a garbage dump. It happens gradually:
+Your `~/.agents/skills/` becomes a garbage dump. It happens gradually:
 
 1. You install a skill from GitHub — copy it into your skills directory
 2. You try Superpowers, then skill-manager — each leaves its own symlinks
@@ -20,14 +20,14 @@ Two distinct needs are forced into one directory:
 1. **Storage** — a place to keep all the skills you might ever use, across all projects
 2. **Selection** — the specific skills that should be active for *this* project right now
 
-When `~/.claude/skills/` serves both roles, every skill you've ever collected is visible to every agent session. More skills in the directory means more context consumed, more trigger conflicts, and more unpredictable behavior.
+When `~/.agents/skills/` serves both roles, every skill you've ever collected is visible to every agent session. More skills in the directory means more context consumed, more trigger conflicts, and more unpredictable behavior.
 
 ### The fix: separate storage from selection
 
 Lythoskill introduces two concepts that should always have been separate:
 
 - **Cold pool** — where skills live. A directory of git-cloned skill repos. Put everything here. Nothing in the cold pool is automatically active.
-- **Working set** — what the agent sees. A symlink farm in `.claude/skills/`. Only skills declared in your deck appear here.
+- **Working set** — what the agent sees. A symlink farm in `.agents/skills/`. Only skills declared in your deck appear here.
 
 Real numbers from the author's setup as of 2026-05-20: **871 skills across 74 repos** in the cold pool — everything ever collected. But the working set for any given project is **13 skills** — exactly what `skill-deck.toml` declares, nothing more.
 
@@ -77,8 +77,8 @@ The thin pattern is **recursive**. Deck, arena, curator, coach — each is a thi
 
 ```
 # Imperative (the old way)
-cp -R cool-skill/ ~/.claude/skills/     # install
-rm -rf ~/.claude/skills/cool-skill/     # uninstall (maybe)
+cp -R cool-skill/ ~/.agents/skills/     # install
+rm -rf ~/.agents/skills/cool-skill/     # uninstall (maybe)
 
 # Declarative (lythoskill)
 # 1. Add one line to skill-deck.toml
