@@ -18,7 +18,7 @@ These fields exist in the [agentskills.io](https://agentskills.io) specification
 | `description` | ✅ | Core trigger mechanism (merged with `when_to_use`) |
 | `when_to_use` | ✅ | Additional trigger context; 1,536-char cap with description |
 | `version` | ✅ | Change tracking |
-| `type` | ✅ | Filter: `standard`, `flow`, `combo` |
+| `type` | ✅ | Filter: `standard`, `flow` (Agent Skills standard values) |
 | `allowed-tools` | ✅ | Permission audit; security-relevant |
 | `user-invocable` | ✅ | Distinguish user-visible vs background skills |
 | `tags` | ✅ | Category filtering (community alternative to `category` proposal) |

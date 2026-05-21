@@ -5,7 +5,7 @@ skills — filling the cold pool is your responsibility.
 | Method | Command | Best for |
 |--------|---------|----------|
 | git clone | `git clone https://github.com/owner/repo ~/.agents/skill-repos/github.com/owner/repo` | Any git repo |
-| Vercel skills | `npx skills add owner/repo -g --skill skill-name` | Vercel-compatible repos |
+| deck add | `bunx @lythos/skill-deck add github.com/owner/repo` | Clones into cold pool and declares in toml |
 | Manual copy | `cp -r ./my-skill ~/.agents/skill-repos/localhost/my-skill` | Local experiments |
 ## Directory Structure
 Go-module-style paths for global uniqueness and source traceability:

@@ -7,6 +7,15 @@
 | `max_cards` | No | Hard budget. Link refuses if total skills exceed this. |
 ## [innate] — Always-Active Skills
 Load every session. Consumes context permanently. Keep few and thin.
+
+> **Deprecated format**: The string-array `skills = ["..."]` format is deprecated. Run
+> `deck migrate-schema` to upgrade to the alias-as-key format:
+> ```toml
+> [innate.skills.lythoskill-deck]
+> path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+> ```
+
+**Legacy format** (still parsed, triggers deprecation warning):
 ```toml
 [innate]
 skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
@@ -14,6 +23,14 @@ skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
 **Rule**: Same-niche skills must not coexist in innate (causes silent blend).
 ## [tool] — On-Demand Skills
 Agent sees descriptions; full content loads only when relevant.
+
+> **Modern format** (preferred):
+> ```toml
+> [tool.skills.pdf]
+> path = "github.com/anthropics/skills/skills/pdf"
+> ```
+
+**Legacy format** (still parsed, triggers deprecation warning):
 ```toml
 [tool]
 skills = [
@@ -52,20 +69,44 @@ expires = "2026-05-01"
 | `"~/.agents/skill-repos"` | `"github.com/lythos-labs/lythoskill/skills/lythoskill-deck"` | `~/.agents/skill-repos/github.com/.../lythoskill-deck/` |
 | `"."` | `"lythoskill-deck"` | `./skills/lythoskill-deck/` |
 ## Full Example
-```toml
-[deck]
-working_set = ".claude/skills"
-cold_pool   = "~/.agents/skill-repos"
-max_cards   = 10
-[innate]
-skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
-[tool]
-skills = [
-  "github.com/someone/web-search",  "github.com/someone/design-doc-mermaid",
-]
-[combo.report]
-prompt = "If generating a report: run deep-research first, then feed findings to docx for output."
-[transient.fix-encoding]
-path = ".claude/skills/_fix-encoding"
-expires = "2026-05-01"
-```
+> **Modern format** (alias-as-key, preferred):
+> ```toml
+> [deck]
+> working_set = ".claude/skills"
+> cold_pool   = "~/.agents/skill-repos"
+> max_cards   = 10
+>
+> [innate.skills.lythoskill-deck]
+> path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+>
+> [tool.skills.web-search]
+> path = "github.com/someone/web-search"
+> [tool.skills.design-doc-mermaid]
+> path = "github.com/someone/design-doc-mermaid"
+>
+> [combo.report]
+> prompt = "If generating a report: run deep-research first, then feed findings to docx for output."
+>
+> [transient.fix-encoding]
+> path = ".claude/skills/_fix-encoding"
+> expires = "2026-05-01"
+> ```
+>
+> **Legacy format** (still parsed, triggers deprecation warning):
+> ```toml
+> [deck]
+> working_set = ".claude/skills"
+> cold_pool   = "~/.agents/skill-repos"
+> max_cards   = 10
+> [innate]
+> skills = ["github.com/lythos-labs/lythoskill/skills/lythoskill-deck"]
+> [tool]
+> skills = [
+>   "github.com/someone/web-search",  "github.com/someone/design-doc-mermaid",
+> ]
+> [combo.report]
+> prompt = "If generating a report: run deep-research first, then feed findings to docx for output."
+> [transient.fix-encoding]
+> path = ".claude/skills/_fix-encoding"
+> expires = "2026-05-01"
+> ```
