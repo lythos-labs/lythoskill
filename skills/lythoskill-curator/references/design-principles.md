@@ -18,10 +18,3 @@
    (reading this SKILL.md + project context + CLAUDE.md) combines index data
    with situational awareness to make informed recommendations.
    See [recommendation-workflow.md](./recommendation-workflow.md) for the agent-side workflow.
-
-## Future Enhancements
-- `--watch` mode: auto-reindex on skill directory changes
-- Registry version diffing for ecosystem drift detection
-- Export to skill-deck.toml format (structure, not recommendations)
-- Active vs cold analysis (scan `.claude/skills/` alongside cold pool)
-- `superseded_by` metadata propagation to prevent selecting deprecated skills

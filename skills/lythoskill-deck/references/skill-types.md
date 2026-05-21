@@ -26,7 +26,7 @@ Both are dispatchers — neither should contain heavy business logic:
 
 | Aspect | Flow (SKILL.md type) | Combo (deck section) |
 |--------|---------------------|---------------------|
-| Defined by | Mermaid/D2 graph in SKILL.md | Condition table in deck toml |
+| Defined by | Mermaid/D2 graph in SKILL.md | Prompt string in deck toml (`[combo.<name>] prompt`) |
 | Execution | Agent follows graph nodes | Route to specialist skill |
 | Scope | Multi-step orchestration | Same-niche delegation |
 

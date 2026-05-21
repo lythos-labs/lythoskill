@@ -37,7 +37,7 @@ stale ────git pull────┘
 | orphan | git-managed | `cd <skill-dir> && git init && git remote add origin <url> && git fetch` | Rescue orphan in-place |
 | detached | git-managed | `git remote add origin <url> && git fetch` | Re-attach to upstream |
 | diverged | git-managed | `git stash && git pull` | Preserve local changes or discard |
-| stale | git-managed | `bunx @lythos/skill-deck update` | Pulls all declared skills at once |
+| stale | git-managed | `bunx @lythos/skill-deck refresh --exec` | Pulls all declared skills at once |
 
 ## State Detection Commands
 
@@ -49,7 +49,7 @@ git remote get-url origin 2>/dev/null || echo "detached — no remote"
 
 # Check all declared skills
 cd /path/to/project
-bunx @lythos/skill-deck update
+bunx @lythos/skill-deck refresh
 # Reports: updated | up-to-date | skipped (localhost) | not-git (orphan)
 ```
 
@@ -73,8 +73,8 @@ Skill repositories organize their `SKILL.md` files in different ways. The locato
 
 | Symptom | Likely State | Fix |
 |---------|-------------|-----|
-| `deck update` says "Not a git repository" | orphan | Re-clone with `deck add` or `git clone` |
-| `deck update` says "skipped — localhost" | localhost (intentional) | No action needed; user-managed |
-| `deck update` fails with merge conflict | diverged | `cd <skill-dir> && git reset --hard HEAD && git pull` |
+| `deck refresh` says "Not a git repository" | orphan | Re-clone with `deck add` or `git clone` |
+| `deck refresh` says "skipped — localhost" | localhost (intentional) | No action needed; user-managed |
+| `deck refresh` fails with merge conflict | diverged | `cd <skill-dir> && git reset --hard HEAD && git pull` |
 | `deck link` says "Skill not found" | absent | `deck add <locator>` |
-| Agent uses outdated skill after `update` | working set stale | Run `deck link` after `update` |
+| Agent uses outdated skill after `refresh` | working set stale | Run `deck link` after `refresh` |

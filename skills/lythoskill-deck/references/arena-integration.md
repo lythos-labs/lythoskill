@@ -30,10 +30,15 @@ Arena does not pick a "winner." It outputs a score vector across dimensions
 (quality, token efficiency, maintainability) and identifies the **Pareto frontier** —
 non-dominated solutions where no option is strictly better than another across all dimensions.
 ## Full Deck Comparison
+Multi-deck A/B comparison is agent-orchestrated (not CLI). The agent spawns parallel
+subagents with different deck configurations and judges outputs. For the CLI path:
+
 ```bash
-bunx @lythos/skill-arena \
-  --task "Generate auth flow diagram" \  --decks "minimal.toml,rich.toml,superpowers.toml" \  --criteria "quality,token,maintainability"
+lythoskill-arena vs --config arena.toml
 ```
 
-`--decks` mode tests complete deck configurations (synergy effects).
+The `vs` subcommand uses a declarative `arena.toml` to define decks, tasks, and
+evaluation criteria. See `lythoskill-arena --help` for full options.
+
+Full deck comparison tests complete configurations (synergy effects).
 The same skill can have different marginal value in different deck contexts.

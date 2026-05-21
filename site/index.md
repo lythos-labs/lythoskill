@@ -24,7 +24,7 @@ features:
     link: /architecture#arena-empirical-validation
   - icon: 📚
     title: Curator Discovery
-    details: Scan cold pools, index metadata, query with SQL. Three-layer trust: description &gt; ecosystem &gt; your results.
+    details: "Scan cold pools, index metadata, query with SQL. Three-layer trust: description &gt; ecosystem &gt; your results."
     link: /architecture#curator-discovery-with-trust
   - icon: 🔗
     title: Pipeline Combos

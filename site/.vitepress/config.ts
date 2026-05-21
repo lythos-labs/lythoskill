@@ -26,41 +26,72 @@
  * - Test with `npx vitepress build .` before committing.
  */
 const config = {
-  title: 'lythoskill',
-  description: 'Declarative skill governance for AI agents — deck, curate, validate, reconcile.',
-  lang: 'en-US',
-
-  // Exclude markdown files outside the site/ directory.
-  // When vitepress dev runs from the project root, VitePress may pick up
-  // INDEX.md, README.md, AGENTS.md etc. at the repo root and attempt to
-  // parse them as Vue SFCs, triggering element-parsing errors.
+  // Shared across all locales
   srcExclude: ['../**'],
-
   head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
 
-  themeConfig: {
-    nav: [
-      { text: 'Philosophy', link: '/philosophy' },
-      { text: 'Architecture', link: '/architecture' },
-      { text: 'Guide', link: '/guide/' },
-      { text: 'Ecosystem', link: '/ecosystem' },
-      { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
-    ],
+  locales: {
+    root: {
+      label: 'English',
+      lang: 'en-US',
+      title: 'lythoskill',
+      description: 'Declarative skill governance for AI agents — deck, curate, validate, reconcile.',
+      themeConfig: {
+        nav: [
+          { text: 'Philosophy', link: '/philosophy' },
+          { text: 'Architecture', link: '/architecture' },
+          { text: 'Guide', link: '/guide/' },
+          { text: 'Ecosystem', link: '/ecosystem' },
+          { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
+        ],
 
-    sidebar: {
-      '/guide/': [
-        {
-          text: 'In Action Guide',
-          items: [
-            { text: 'Overview', link: '/guide/' },
+        sidebar: {
+          '/guide/': [
+            {
+              text: 'In Action Guide',
+              items: [
+                { text: 'Overview', link: '/guide/' },
+              ]
+            }
           ]
-        }
-      ]
+        },
+
+        socialLinks: [
+          { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
+        ],
+      },
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
-    ],
+    zh: {
+      label: '繁體中文',
+      lang: 'zh-TW',
+      title: 'lythoskill',
+      description: 'AI agent 宣告式技能治理：牌組管理、策展、驗證、對帳。',
+      themeConfig: {
+        nav: [
+          { text: '哲學', link: '/zh/philosophy' },
+          { text: '架構', link: '/zh/architecture' },
+          { text: '實戰指南', link: '/zh/guide/' },
+          { text: '生態', link: '/zh/ecosystem' },
+          { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
+        ],
+
+        sidebar: {
+          '/zh/guide/': [
+            {
+              text: '實戰指南',
+              items: [
+                { text: '總覽', link: '/zh/guide/' },
+              ]
+            }
+          ]
+        },
+
+        socialLinks: [
+          { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
+        ],
+      },
+    },
   },
 }
 
