@@ -165,8 +165,10 @@ if (!existsSync(DECK_PATH)) {
   console.error(`  cat > skill-deck.toml <<'EOF'`);
   console.error(`  [deck]`);
   console.error(`  max_cards = 10`);
-  console.error(`  \n  [tool]`);
-  console.error(`  skills = ["github.com/lythos-labs/lythoskill/lythoskill-deck"]`);
+  console.error(`  cold_pool = "~/.agents/skill-repos"`);
+  console.error(`  working_set = ".claude/skills"`);
+  console.error(`  \n  [innate.skills.lythoskill-deck]`);
+  console.error(`  path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"`);
   console.error(`  EOF`);
   console.error(`\nOr specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
   process.exit(1);
