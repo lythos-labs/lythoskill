@@ -21,6 +21,7 @@
 ```toml
 [deck]
 max_cards = 10
+working_set = ".claude/skills"  # Claude Code 預設路徑；Codex/Cursor 等請自行修改
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"

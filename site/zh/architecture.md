@@ -11,10 +11,10 @@
 Lythoskill 將它們分開：
 
 - **冷池**——技能住的地方。一個放 git clone 技能 repo 的目錄。把所有你可能會用的技能放在這裡。冷池裡的東西不會自動 active。
-- **工作集**——agent 看到的東西。`.agents/skills/` 中的 symlink。只有 `skill-deck.toml` 宣告的技能才會出現在這裡。
+- **工作集**——agent 看到的東西。預設在 `.claude/skills/` 中建立 symlink（可依平台設定）。只有 `skill-deck.toml` 宣告的技能才會出現在這裡。
 
 ```
-冷池 (~/.agents/skill-repos/)       工作集 (.agents/skills/)
+冷池 (~/.agents/skill-repos/)       工作集 (.<agent>/skills/)
 ├── anthropic-superpowers/            ├── lythoskill-deck → ...
 ├── mattpocock-skills/                ├── lythoskill-arena → ...
 ├── antigravity-skills/               ├── lythoskill-curator → ...

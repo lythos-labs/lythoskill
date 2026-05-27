@@ -57,7 +57,7 @@ cat > skill-deck.toml << 'EOF'
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".agents/skills"
+working_set = ".claude/skills"  # Claude Code 預設路徑；Codex/Cursor 等請自行修改
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -80,11 +80,11 @@ deck link
 Lythoskill 將它們分開：
 
 - **冷池**是技能住的地方——一個放 git clone repo 的目錄。儲存一切。這裡的東西不會自動 active。
-- **牌組**（`skill-deck.toml`）宣告哪些技能 active。`deck link` 將**工作集**（`.agents/skills/`）對帳到完全吻合——未宣告的技能會被移除。
+- **牌組**（`skill-deck.toml`）宣告哪些技能 active。`deck link` 將**工作集**（預設 `.claude/skills/`，可依平台設定）對帳到完全吻合——未宣告的技能會被移除。
 
 ```
 冷池                          牌組                        工作集
-(git repos)        ->    (skill-deck.toml)    ->    (.agents/skills/)
+(git repos)        ->    (skill-deck.toml)    ->    (.<agent>/skills/)
 儲存一切                   選擇哪些 active              只有宣告的才存在
 ```
 

@@ -11,10 +11,10 @@ The default approach collapses storage and selection into the same directory. `~
 Lythoskill separates them:
 
 - **Cold pool** — where skills live. A directory of git-cloned skill repos. Store everything you might ever use. Nothing in the cold pool is automatically active.
-- **Working set** — what the agent sees. Symlinks in `.agents/skills/`. Only skills declared in `skill-deck.toml` appear here.
+- **Working set** — what the agent sees. Symlinks in `.claude/skills/` by default (configurable per platform). Only skills declared in `skill-deck.toml` appear here.
 
 ```
-Cold Pool (~/.agents/skill-repos/)     Working Set (.agents/skills/)
+Cold Pool (~/.agents/skill-repos/)     Working Set (.<agent>/skills/)
 ├── anthropic-superpowers/             ├── lythoskill-deck → ...
 ├── mattpocock-skills/                 ├── lythoskill-arena → ...
 ├── antigravity-skills/                ├── lythoskill-curator → ...

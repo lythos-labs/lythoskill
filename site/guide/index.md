@@ -21,6 +21,7 @@ Create `skill-deck.toml`:
 ```toml
 [deck]
 max_cards = 10
+working_set = ".claude/skills"  # Claude Code default; change for Cursor/Codex/etc.
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"

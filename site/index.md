@@ -57,7 +57,7 @@ cat > skill-deck.toml << 'EOF'
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".agents/skills"
+working_set = ".claude/skills"  # Claude Code default; change for Cursor/Codex/etc.
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -80,11 +80,11 @@ You have two needs that default tools collapse into one directory: **storage** (
 Lythoskill separates them:
 
 - A **cold pool** is where skills live — a directory of git-cloned repos. Store everything. Nothing here is automatically active.
-- A **deck** (`skill-deck.toml`) declares what is active. `deck link` reconciles the **working set** (`.agents/skills/`) to match exactly — undeclared skills are removed.
+- A **deck** (`skill-deck.toml`) declares what is active. `deck link` reconciles the **working set** (default `.claude/skills/`, configurable per platform) to match exactly — undeclared skills are removed.
 
 ```
 Cold Pool                     Deck                      Working Set
-(git repos)        ->    (skill-deck.toml)    ->    (.agents/skills/)
+(git repos)        ->    (skill-deck.toml)    ->    (.<agent>/skills/)
 Store everything          Select what's active         Only what's declared
 ```
 

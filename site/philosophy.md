@@ -27,7 +27,7 @@ When `~/.agents/skills/` serves both roles, every skill you've ever collected is
 Lythoskill introduces two concepts that should always have been separate:
 
 - **Cold pool** — where skills live. A directory of git-cloned skill repos. Put everything here. Nothing in the cold pool is automatically active.
-- **Working set** — what the agent sees. A symlink farm in `.agents/skills/`. Only skills declared in your deck appear here.
+- **Working set** — what the agent sees. A symlink farm in `.claude/skills/` by default (configurable per platform). Only skills declared in your deck appear here.
 
 Real numbers from the author's setup as of 2026-05-20: **871 skills across 74 repos** in the cold pool — everything ever collected. But the working set for any given project is **13 skills** — exactly what `skill-deck.toml` declares, nothing more.
 
