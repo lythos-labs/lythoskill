@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/27 22:20:04
+> 自动生成于 2026/5/27 22:34:10
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 264 | 进行中: 0, 待验收: 1, 已完成: 222 |
+| Tasks | 265 | 进行中: 0, 待验收: 1, 已完成: 223 |
 | Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
 | ADRs | 81 | 已接受: 78 |
 
@@ -81,7 +81,7 @@ _无_
 
 - 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
 
-### 已完成 (222)
+### 已完成 (223)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -305,6 +305,7 @@ _无_
 - ✅ ~~TASK-20260519224838606~~: 实现 curator add --output 对齐与副作用显式声明
 - ✅ ~~TASK-20260520143950404~~: parse-deck.ts: [combo] section is prompt orchestration, not skill list
 - ✅ ~~TASK-20260527220921728~~: Fix P0 path narrative contradictions — remove 'sole location' language and align docs with code ground truth
+- ✅ ~~TASK-20260527222535526~~: Site path narrative audit and rewrite — align with path convention, preserve multi-platform, EN+ZH sync
 
 ### 悬置 (1)
 
