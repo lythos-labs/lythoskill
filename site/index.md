@@ -51,13 +51,14 @@ Every collector hits the same organizational challenges. Here's what people do �
 
 试试看？ A deck (`skill-deck.toml`) is a single file that declares exactly which skills are active — portable, shareable, reproducible.
 
-```bash
+::: code-group
+
+```bash [Claude Code]
 cat > skill-deck.toml << 'EOF'
-# skill-deck.toml — share it, version it, reproduce it
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"  # Claude Code default; change for Cursor/Codex/etc.
+working_set = ".claude/skills"
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -66,8 +67,44 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 EOF
 
-deck link
+bunx @lythos/skill-deck@latest link
 ```
+
+```bash [Codex]
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".agents/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+EOF
+
+bunx @lythos/skill-deck@latest link
+```
+
+```bash [Cursor]
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".cursor/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+EOF
+
+bunx @lythos/skill-deck@latest link
+```
+
+:::
 
 That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 

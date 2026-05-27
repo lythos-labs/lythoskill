@@ -18,10 +18,12 @@ The problem is not that you have too many. The problem is that every skill you h
 
 Create `skill-deck.toml`:
 
-```toml
+::: code-group
+
+```toml [Claude Code]
 [deck]
 max_cards = 10
-working_set = ".claude/skills"  # Claude Code default; change for Cursor/Codex/etc.
+working_set = ".claude/skills"
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -29,6 +31,32 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 ```
+
+```toml [Codex]
+[deck]
+max_cards = 10
+working_set = ".agents/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+```
+
+```toml [Cursor]
+[deck]
+max_cards = 10
+working_set = ".cursor/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+```
+
+:::
 
 Run `deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
 

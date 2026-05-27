@@ -51,13 +51,14 @@ features:
 
 試試看？一個 deck（`skill-deck.toml`）是單一檔案，宣告哪些技能是 active——可攜、可分享、可重現。
 
-```bash
+::: code-group
+
+```bash [Claude Code]
 cat > skill-deck.toml << 'EOF'
-# skill-deck.toml — 分享它、版本化它、重現它
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"  # Claude Code 預設路徑；Codex/Cursor 等請自行修改
+working_set = ".claude/skills"
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -66,8 +67,44 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 EOF
 
-deck link
+bunx @lythos/skill-deck@latest link
 ```
+
+```bash [Codex]
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".agents/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+EOF
+
+bunx @lythos/skill-deck@latest link
+```
+
+```bash [Cursor]
+cat > skill-deck.toml << 'EOF'
+[deck]
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".cursor/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+EOF
+
+bunx @lythos/skill-deck@latest link
+```
+
+:::
 
 就這樣。複製、貼上、執行。`cold_pool` 欄位告訴系統你的技能放在哪裡——一個放 git clone repo 的目錄。`working_set` 欄位告訴系統你的 agent 去哪裡找。`deck link` 把工作集對帳到與宣告完全吻合——未宣告的技能會被移除，已宣告的技能會被連結。這個檔案自我描述——不需要外部說明就能看懂它在做什麼。
 

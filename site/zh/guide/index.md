@@ -18,10 +18,12 @@
 
 建立 `skill-deck.toml`：
 
-```toml
+::: code-group
+
+```toml [Claude Code]
 [deck]
 max_cards = 10
-working_set = ".claude/skills"  # Claude Code 預設路徑；Codex/Cursor 等請自行修改
+working_set = ".claude/skills"
 
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
@@ -29,6 +31,32 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 ```
+
+```toml [Codex]
+[deck]
+max_cards = 10
+working_set = ".agents/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+```
+
+```toml [Cursor]
+[deck]
+max_cards = 10
+working_set = ".cursor/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnose]
+path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+```
+
+:::
 
 執行 `deck link`。現在工作集中只有 `tdd` 和 `diagnose`。其他全部消失。
 
