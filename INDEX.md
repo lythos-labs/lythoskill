@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/20 14:42:57
+> 自动生成于 2026/5/27 22:12:04
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 258 | 进行中: 0, 待验收: 0, 已完成: 221 |
-| Epics | 38 | 活跃: 0, 已完成: 34, 悬置: 2, 已归档: 2 |
+| Tasks | 264 | 进行中: 0, 待验收: 2, 已完成: 221 |
+| Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
 | ADRs | 81 | 已接受: 78 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260527212032856**: Site narrative stabilization and living documentation consolidation
 
 ### 已完成
 
@@ -77,9 +77,10 @@ _无_
 
 _无_
 
-### 待验收 (0)
+### 待验收 (2)
 
-_无_
+- 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
+- 🔍 **TASK-20260527220921728**: Fix P0 path narrative contradictions — remove 'sole location' language and align docs with code ground truth
 
 ### 已完成 (221)
 
@@ -309,7 +310,7 @@ _无_
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (34)
+### 终止 (38)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -345,6 +346,10 @@ _无_
 - 🛑 ~~TASK-20260518112246074~~: Refactor arena/preflight — IO separation
 - 🛑 ~~TASK-20260518112246109~~: Refactor cold-pool/validate-plan — IO separation
 - 🛑 ~~TASK-20260518112246144~~: Refactor curator/curator-core — IO separation
+- 🛑 ~~TASK-20260521113114794~~: Audit deck references — prune stale, update outdated (sober ZK agent)
+- 🛑 ~~TASK-20260521113125677~~: Audit curator references — prune stale, update outdated (sober ZK agent)
+- 🛑 ~~TASK-20260521115223592~~: Fix site narrative: cold pool/working set jargon without context — lead with universal pain (global vs project skills, cp reuse, context window limit) before introducing terminology
+- 🛑 ~~TASK-20260521120336482~~: Rewrite site narrative from correct starting point: deck as shareable reproducible skill gist, compare against real alternatives (global dir, cp, vercel skills add, marketplace), progressive disclosure from getting-started to philosophy
 
 ---
 

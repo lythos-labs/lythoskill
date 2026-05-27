@@ -14,7 +14,7 @@ cat > /tmp/sober-test-deck.toml << 'DECK'
 [deck]
 max_cards = 5
 cold_pool = "~/.agents/skill-repos"
-working_set = "skills"
+working_set = ".claude/skills"
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
@@ -39,7 +39,7 @@ cat > /tmp/sober-ab-journalist.toml << 'DECK'
 [deck]
 max_cards = 5
 cold_pool = "~/.agents/skill-repos"
-working_set = "skills"
+working_set = ".claude/skills"
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
@@ -52,7 +52,7 @@ cat > /tmp/sober-ab-sober.toml << 'DECK'
 [deck]
 max_cards = 5
 cold_pool = "~/.agents/skill-repos"
-working_set = "skills"
+working_set = ".claude/skills"
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
@@ -81,7 +81,7 @@ cat > /tmp/sober-meta-m1.toml << 'DECK'
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = "skills"
+working_set = ".claude/skills"
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"

@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (52)
+## 📚 Patterns (53)
 
 - **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
@@ -56,6 +56,7 @@
 - **[0000-00-00]** [cold-pool-evolutionary-rationale](./01-patterns/cold-pool-evolutionary-rationale.md)
 - **[0000-00-00]** [cold-pool-cli-boundary](./01-patterns/cold-pool-cli-boundary.md)
 - **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
+- **[0000-00-00]** [path-convention](./01-patterns/path-convention.md)
 
 ## ❓ FAQ (2)
 

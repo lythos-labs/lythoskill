@@ -38,7 +38,7 @@ deck_managed_dirs:
 
 ## Core Model
 
-`skill-deck.toml` declares desired state. `deck link` makes `.claude/skills/` match — creates symlinks for declared skills, removes everything else. Deny-by-default: undeclared skills do not exist in the agent's view.
+`skill-deck.toml` declares desired state. `deck link` makes the working set (default `.claude/skills/`) match — creates symlinks for declared skills, removes everything else. Deny-by-default: undeclared skills do not exist in the agent's view.
 
 ```
 Cold Pool (~/.agents/skill-repos/)  →  deck add  →  skill-deck.toml  →  deck link  →  .claude/skills/
@@ -130,8 +130,8 @@ Do NOT silently migrate.
 |---------|-----------|
 | Cold Pool | All downloaded skills (`~/.agents/skill-repos/`). Agent cannot see here. |
 | skill-deck.toml | Declares desired state. Alias-as-key dict format. |
-| deck link | Reconciler. Makes `.claude/skills/` match the declaration. |
-| Working Set | `.claude/skills/` — symlinks only. What the agent actually scans. |
+| deck link | Reconciler. Makes the working set match the declaration. |
+| Working Set | Symlinks only. What the agent actually scans. Default: `.claude/skills/` (configurable per platform). |
 | skill-deck.lock | Machine-generated snapshot: resolved paths, hashes, constraints. |
 
 ## Constraints
@@ -141,7 +141,7 @@ Do NOT silently migrate.
 - **link backs up real directories** — non-symlink entries archived to `.claude/skills.bak.*.tar.gz`
 - **transient expires** — past-due transients trigger warnings
 - **managed_dirs overlap** — two skills claiming same directory triggers warning
-- **Never manually create subdirectories in `.claude/skills/`** — use `deck link`
+- **Never manually create subdirectories in the working set directory** — use `deck link`
 - **deck does not run post-install steps** — API keys, env vars are the skill's own responsibility
 
 ## Locators — Always Fully-Qualified

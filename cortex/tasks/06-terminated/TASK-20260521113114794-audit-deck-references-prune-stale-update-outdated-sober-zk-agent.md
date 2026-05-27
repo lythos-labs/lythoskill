@@ -1,4 +1,4 @@
-# TASK-20260521113125677: Audit curator references — prune stale, update outdated (sober ZK agent)
+# TASK-20260521113114794: Audit deck references — prune stale, update outdated (sober ZK agent)
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-21 | Created |
+| terminated | 2026-05-27 | Terminated |
 
 ## 背景与目标
 <!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
@@ -32,7 +33,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260521113125677)
+feat(scope): description (TASK-20260521113114794)
 
 - Detail 1
 - Detail 2
