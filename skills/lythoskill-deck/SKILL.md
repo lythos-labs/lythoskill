@@ -94,8 +94,11 @@ bunx @lythos/skill-deck@0.15.4 add github.com/owner/repo/skill-name --alias my-s
 bunx @lythos/skill-deck@0.15.4 refresh              # plan-only scan for updates
 bunx @lythos/skill-deck@0.15.4 refresh --exec       # actually git pull
 bunx @lythos/skill-deck@0.15.4 remove <alias>       # remove from deck + working set
-bunx @lythos/skill-deck@0.15.4 validate             # check TOML schema
-bunx @lythos/skill-deck@0.15.4 validate --remote    # probe locators against GitHub
+bunx @lythos/skill-deck@0.15.4 validate                   # check current deck
+bunx @lythos/skill-deck@0.15.4 validate --deck <path>     # check specific deck
+bunx @lythos/skill-deck@0.15.4 validate --remote          # probe locators against GitHub
+# Cold-pool-missing skills warn (not error) — they may exist on GitHub.
+# HATEOAS output: each warning suggests curator add <locator> as next step.
 
 # ── Advanced ──
 
