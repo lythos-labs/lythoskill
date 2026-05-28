@@ -2,7 +2,7 @@
 last_consolidated: 2026-05-29
 sources:
   - "cortex/wiki/01-patterns/2026-05-28-agent-evaluation-arena-pattern.md"
-  - "cortex/adr/02-accepted/ADR-20260529002942317-cli-entry-io-injection-exemption.md"
+  - "cortex/adr/03-superseded/SUPERSEDED-ADR-20260529002942317-cli-entry-io-injection-exemption.md"
   - "Session: 2026-05-29 runAdd IO injection debate (Agent A vs Agent B)"
 zk_validated: false
 ---
@@ -128,6 +128,13 @@ The Moderator is critical: **it is not a judge picking sides — it is a bias de
 
 ## Real Example: runAdd IO Injection Debate
 
+> **Status: RESOLVED** (2026-05-29). The project adopted "unified style > exemption
+> complexity." All CLI entry points (`runAdd`, `runFind`, `runCurator`, `removeSkill`,
+> `toSymlinkSkill`, `toSnapshotSkill`) were refactored to use IO injection. The L1
+> Escape Hatch was removed from conventions.md; ADR-20260529002942317 was moved to
+> `03-superseded/`. This example is preserved as a historical record of the debate
+> that led to the unification decision.
+
 ### The Question
 
 Does `runAdd`'s use of `spyOn(console)` indicate:
@@ -138,7 +145,7 @@ Does `runAdd`'s use of `spyOn(console)` indicate:
 
 **Core argument**: `runAdd`'s `spyOn(console)` is explicitly allowed by conventions.md §5's L1 Escape Hatch. The function is thin glue (argv parse → dispatch → print), and adding IO injection would be pure boilerplate.
 
-**Evidence**: `cortex/wiki/04-ssot/conventions.md:L114-L116`
+**Evidence**: `cortex/wiki/04-ssot/conventions.md:L114-L116` (historical — this section no longer exists)
 ```md
 **When this exemption applies**:
 - `runAdd` in `packages/lythoskill-curator/src/cli.ts` — parses `--pool`, calls `buildAddPlan` + `git clone`, prints status. IO injection would add ~8 lines of boilerplate for zero new test coverage.
@@ -158,7 +165,7 @@ Plan/Execute layer has perfect IO injection. CLI layer is different by design.
 
 **Core argument**: `runAdd` has no IO injection interface — it directly calls `console.error`. The `spyOn` exists because there's no alternative, not because it's "design." Conventions.md's "exemption" is事后合理化, not first-principles derivation.
 
-**Evidence**: `packages/lythoskill-curator/src/cli.ts:L961-L966`
+**Evidence**: `packages/lythoskill-curator/src/cli.ts:L961-L966` (historical line numbers)
 ```ts
 export function runAdd(argv: string[]) {
   const locator = argv.find(a => !a.startsWith('-'))
@@ -168,7 +175,7 @@ export function runAdd(argv: string[]) {
   }
 ```
 
-**Evidence**: `packages/lythoskill-curator/src/cli.test.ts:L246-L252`
+**Evidence**: `packages/lythoskill-curator/src/cli.test.ts:L246-L252` (historical line numbers)
 ```ts
 beforeEach(() => {
   exitCode = undefined
@@ -188,7 +195,7 @@ If `runAdd` had `io: { error }`, this `spyOn` would be unnecessary.
 |-------|--------|--------|
 | `runAdd` has no IO injection parameter | `cli.ts:L961` | ✅ Verified by both |
 | `executeRefreshPlan` has `RefreshIO` | `refresh-plan.ts:L180` | ✅ Verified by both |
-| conventions.md has L1 Escape Hatch | `conventions.md:L104` | ✅ Verified by both |
+| conventions.md has L1 Escape Hatch | `conventions.md:L104` | ✅ Verified by both (historical) |
 | `runAdd` tests use `spyOn(console)` | `cli.test.ts:L249` | ✅ Verified by both |
 
 #### Interpretive Disputes
@@ -204,16 +211,29 @@ If `runAdd` had `io: { error }`, this `spyOn` would be unnecessary.
 - **Agent A**: "conventions.md allows it → so it's correct" — this is circular. The exemption was written because `runAdd` exists, not derived from first principles. Agent A did not ask "would I design this way from scratch?"
 - **Agent B**: "inconsistency = must fix" — did not quantify the cost of fixing. "Consistency" is not a free good; 8 lines of boilerplate × every CLI entry point = real complexity.
 
-#### Verdict
+#### Verdict (Original)
 
 **Both partial. The gap is real but the fix is unnecessary. Document as known exemption, do not hide behind "evaluator misread."**
 
+#### Resolution (2026-05-29)
+
+**User overrode the verdict**: "统一风格 > 豁免复杂度" — the cognitive tax of
+remembering when an exemption applies exceeds the cost of 60 lines of boilerplate.
+All CLI entry points were refactored to IO injection. Zero `spyOn(console)` remains.
+
+The original verdict was wrong not because the reasoning was flawed, but because it
+underestimated the **hidden cost of exemptions**: every agent reading the codebase
+must read the exemption docs, judge applicability, and risk misjudgment. Unification
+eliminates this tax entirely.
+
 #### Action Items
 
-- [x] Document exemption in conventions.md §5 "L1 Escape Hatch"
-- [x] Write ADR-20260529002942317 recording the decision
-- [x] Update pitfalls.md §10b to reference the exemption (prevents future false defenses)
-- [ ] If `runAdd` acquires complex branching (interactive prompts, conditional formatting), revoke exemption and add IO injection
+- [x] Document exemption in conventions.md §5 "L1 Escape Hatch" (historical — later removed)
+- [x] Write ADR-20260529002942317 recording the decision (later superseded)
+- [x] Update pitfalls.md §10b to reference the exemption (historical reference)
+- [x] **Refactor all CLI entry points to IO injection** (`CuratorIO`, `DeckIO`, `SymlinkSnapshotIO`)
+- [x] **Remove L1 Escape Hatch from conventions.md**
+- [x] **Move ADR-20260529002942317 to `03-superseded/`**
 
 ## Key Insight
 
@@ -230,4 +250,4 @@ The roundtable is not about "who wins." It is about **making the reasoning expli
 - `cortex/wiki/01-patterns/2026-05-28-agent-evaluation-arena-pattern.md` — External evaluation variant
 - `cortex/wiki/04-ssot/pitfalls.md` §10b — "Respect Current Code" bias
 - `cortex/wiki/04-ssot/conventions.md` §5 — Testing Layers + L1 Escape Hatch
-- `cortex/adr/02-accepted/ADR-20260529002942317-cli-entry-io-injection-exemption.md` — Example ADR output from roundtable
+- `cortex/adr/03-superseded/SUPERSEDED-ADR-20260529002942317-cli-entry-io-injection-exemption.md` — Example ADR output from roundtable (superseded)

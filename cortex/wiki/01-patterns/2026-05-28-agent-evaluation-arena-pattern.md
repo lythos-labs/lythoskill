@@ -237,14 +237,17 @@ Agent C (Moderator)
 - Factual: `runAdd` has no IO parameter. `executeRefreshPlan` has `RefreshIO`. Both are true.
 - Interpretive: Is this a violation or an exemption?
 - Bias check: Agent A assumed "docs say IO injection → code must comply" without checking if the code actually complies. Agent B assumed "no IO parameter → must be debt" without asking if the complexity is worth it.
-- Verdict: **Neither fully right**. The gap is real but the fix is not urgent. Document as known exemption (see ADR-20260529002942317), do not hide behind "evaluator misread."
+- Verdict: **Neither fully right**. The gap is real but the fix is not urgent. Document as known exemption (see ADR-20260529002942317, now superseded), do not hide behind "evaluator misread."
+> **Update (2026-05-29)**: User overrode this verdict — "unified style > exemption
+> complexity." All CLI entry points refactored to IO injection. ADR-20260529002942317
+> moved to `03-superseded/`.
 
 ## Related
 
 - `cortex/wiki/04-ssot/pitfalls.md` §10: External Evaluator Surface-Scan Failure Mode
 - `cortex/wiki/04-ssot/pitfalls.md` §10 "Also Critical": Project Agents Confuse "Respect Current Code" with "Current Code Is Correct"
 - `cortex/wiki/04-ssot/conventions.md` §5: Testing Layers (prevents "mock abuse" misreading)
-- `cortex/wiki/04-ssot/conventions.md` §5 "L1 Escape Hatch": When CLI Entry Points Skip IO Injection
+- `cortex/wiki/04-ssot/conventions.md` §5: Testing Layers (L1 Escape Hatch removed — unified style adopted)
 - `cortex/wiki/04-ssot/pitfalls.md` §9: Cross-Package Convention Change (prevents incomplete evaluation)
-- ADR-20260529002942317: CLI Entry Point IO Injection Exemption
+- ADR-20260529002942317: CLI Entry Point IO Injection Exemption (superseded, see `03-superseded/`)
 - ADR-20260518024500631: reproduce.sh BDD pattern (same IoC handoff principle)

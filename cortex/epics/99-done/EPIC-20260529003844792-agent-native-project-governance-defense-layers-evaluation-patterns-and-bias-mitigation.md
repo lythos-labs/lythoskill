@@ -70,14 +70,14 @@ checklist_skipped_reason: Batch creation in non-interactive context
 
 | ADR | 标题 | 状态 |
 |-----|------|------|
-| ADR-20260529002942317 | CLI Entry Point IO Injection Exemption | **待撤销** — 用户决策统一风格 |
+| ADR-20260529002942317 | CLI Entry Point IO Injection Exemption | **已撤销** — 移动到 `03-superseded/` |
 
 ## 关联任务
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
 | TASK-20260529003437287 | completed | Internal Roundtable 模式提取 |
-| TASK-20260529003742409 | backlog | CLI IO 注入统一（refactor） |
+| TASK-20260529003742409 | completed | CLI IO 注入统一（refactor） |
 
 ## 经验沉淀
 
@@ -91,6 +91,6 @@ checklist_skipped_reason: Batch creation in non-interactive context
 - [x] Agent Evaluation Arena 模式文档完成
 - [x] Internal Roundtable 模式文档完成
 - [x] Bias 识别记录完成
-- [ ] CLI IO 注入统一完成（TASK-20260529003742409）
-- [ ] ADR-20260529002942317 撤销
-- [ ] 所有测试全绿
+- [x] CLI IO 注入统一完成（TASK-20260529003742409）
+- [x] ADR-20260529002942317 撤销（已移动到 `03-superseded/`）
+- [x] 所有测试全绿

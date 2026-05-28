@@ -1104,6 +1104,14 @@ Three governance layers with distinct responsibilities:
 **Task = Subagent Bootloader:**
 A task card should be self-contained: frontmatter metadata + concise body + external references to ADRs/Epics/sibling tasks. A subagent reading only the task card + AGENTS.md should have enough context to implement the work. If the card needs to invent migrations not pre-decided by the user, that is a signal the card is incomplete.
 
+**ADR Immutability Rule:**
+ADRs are **never deleted** — not even when superseded or rejected. A reversed decision is as valuable as an accepted one:
+- It records the reasoning that led to the original choice
+- It prevents future agents from re-proposing the same rejected alternative
+- It documents the conditions that triggered the reversal
+
+When an ADR is overturned, use `cortex adr supersede ADR-xxx --by ADR-yyy` (or move to `03-superseded/` / `03-rejected/` if CLI is unavailable) and strip the content to a stub with a superseded notice. The original content remains in git history. **Deleting an ADR file destroys governance lineage.**
+
 **For full context on the project governance system, read `cortex/INDEX.md`.**
 
 ---

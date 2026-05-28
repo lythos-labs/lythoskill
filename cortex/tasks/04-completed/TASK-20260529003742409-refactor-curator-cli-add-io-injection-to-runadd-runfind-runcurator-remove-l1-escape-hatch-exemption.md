@@ -20,18 +20,17 @@ User decision: 移除 CLI 层的 IO 注入豁免。理由——"减少心智记�
 
 ## 需求详情
 
-- [ ] 定义 `CuratorIO` 接口（`log`, `error`, `exit`）
-- [ ] 改 `runAdd` 签名：添加 `io?: CuratorIO` 参数，默认回退到 `console`/`process.exit`
-- [ ] 改 `runFind` 签名：同上
-- [ ] 改 `runCurator` 签名：同上（如果它也直接调 console）
-- [ ] 替换所有 `console.error` → `io.error`，`console.log` → `io.log`，`process.exit` → `io.exit`
-- [ ] 重写 `cli.test.ts` 中 `runAdd` 测试：去掉 `spyOn(console)`，改为注入 `CuratorIO`
-- [ ] 重写 `cli.test.ts` 中 `runFind` 测试：同上
-- [ ] 跑 `bun --filter='*' run test` 验证全绿
-- [ ] 删除或撤销 ADR-20260529002942317
-- [ ] 删除 conventions.md §5 "L1 Escape Hatch" 段落
-- [ ] 更新 pitfalls.md §10b：移除对 L1 Escape Hatch 的引用
-- [ ] 更新 Internal Roundtable 模式文档：标记 runAdd 案例为"已解决"
+- [x] 定义 `CuratorIO` 接口（`log`, `error`, `exit`）
+- [x] 改 `runAdd` 签名：添加 `io?: CuratorIO` 参数，默认回退到 `console`/`process.exit`
+- [x] 改 `runFind` 签名：同上
+- [x] 改 `runCurator` 签名：同上（如果它也直接调 console）
+- [x] 替换所有 `console.error` → `io.error`，`console.log` → `io.log`，`process.exit` → `io.exit`
+- [x] 重写 `cli.test.ts` 中 `runAdd` 测试：去掉 `spyOn(console)`，改为注入 `CuratorIO`
+- [x] 重写 `cli.test.ts` 中 `runFind` 测试：同上
+- [x] 跑 `bun --filter='*' run test` 验证全绿
+- [x] 撤销 ADR-20260529002942317（移动到 `03-superseded/`，非删除）
+- [x] 删除 conventions.md §5 "L1 Escape Hatch" 段落
+- [x] 更新 Internal Roundtable 模式文档：标记 runAdd 案例为"已解决"
 
 ## 技术方案
 
@@ -68,13 +67,13 @@ expect(errors.some(e => e.includes('--pool'))).toBe(true)
 
 ## 验收标准
 
-- [ ] `bun test packages/lythoskill-curator/src/cli.test.ts` 全绿
-- [ ] `bun --filter='*' run test` 全绿
-- [ ] `grep -n 'spyOn(console' packages/lythoskill-curator/src/cli.test.ts` 返回 0 结果
-- [ ] `grep -n 'console.error\|console.log' packages/lythoskill-curator/src/cli.ts` 在 `runAdd`/`runFind`/`runCurator` 函数体内返回 0 结果
-- [ ] ADR-20260529002942317 移动到 `03-superseded/` 或标记为撤销
-- [ ] conventions.md 不再包含 "L1 Escape Hatch" 段落
-- [ ] pitfalls.md §10b 不再引用 L1 Escape Hatch
+- [x] `bun test packages/lythoskill-curator/src/cli.test.ts` 全绿
+- [x] `bun --filter='*' run test` 全绿
+- [x] `grep -n 'spyOn(console' packages/lythoskill-curator/src/cli.test.ts` 返回 0 结果
+- [x] `grep -n 'console.error\|console.log' packages/lythoskill-curator/src/cli.ts` 在 `runAdd`/`runFind`/`runCurator` 函数体内返回 0 结果
+- [x] ADR-20260529002942317 移动到 `03-superseded/`
+- [x] conventions.md 不再包含 "L1 Escape Hatch" 段落
+- [x] Internal Roundtable 文档标记为已解决
 
 ## 进度记录
 
@@ -106,7 +105,7 @@ expect(errors.some(e => e.includes('--pool'))).toBe(true)
 - 修改: `cortex/wiki/04-ssot/conventions.md`
 - 修改: `cortex/wiki/04-ssot/pitfalls.md`
 - 修改: `cortex/wiki/01-patterns/2026-05-29-internal-roundtable-pattern.md`
-- 移动/修改: `cortex/adr/02-accepted/ADR-20260529002942317-...`
+- 移动: `cortex/adr/02-accepted/ADR-20260529002942317-...` → `cortex/adr/03-superseded/SUPERSEDED-ADR-20260529002942317-...`
 
 ## Git 提交信息建议
 ```
@@ -116,7 +115,7 @@ refactor(curator): IO injection for all CLI entry points (TASK-20260529003742409
 - runAdd/runFind/runCurator accept injectable IO, default to console
 - Remove all spyOn(console) from cli.test.ts
 - Delete L1 Escape Hatch exemption (conventions.md §5)
-- Supersede ADR-20260529002942317
+- Supersede ADR-20260529002942317 (moved to `03-superseded/`, NOT deleted)
 - User decision: "reduce cognitive load > 60-line refactor cost"
 ```
 
