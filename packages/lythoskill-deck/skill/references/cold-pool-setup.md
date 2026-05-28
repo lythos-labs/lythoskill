@@ -6,7 +6,7 @@ skills — filling the cold pool is your responsibility.
 |--------|---------|----------|
 | git clone | `git clone https://github.com/owner/repo ~/.agents/skill-repos/github.com/owner/repo` | Any git repo |
 | deck add | `bunx @lythos/skill-deck add github.com/owner/repo` | Clones into cold pool and declares in toml |
-| Manual copy | `cp -r ./my-skill ~/.agents/skill-repos/localhost/my-skill` | Local experiments |
+| Manual copy | `cp -r ./my-skill ~/.agents/skill-repos/localhost/me/my-forked-skill` | Local experiments, personal forks |
 ## Directory Structure
 Go-module-style paths for global uniqueness and source traceability:
 ```

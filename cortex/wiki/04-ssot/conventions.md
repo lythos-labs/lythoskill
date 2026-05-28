@@ -39,11 +39,13 @@ Per ADR-20260502012643244. All skill locators use **fully-qualified format**:
 
 ```
 github.com/owner/repo[/skill-path]    # GitHub-hosted skill
-localhost/project-name[/skill-path]   # Local-only skill (self-bootstrap)
+localhost/owner/repo[/skill-path]     # Local-only skill (self-bootstrap, fork)
 ```
 
-**No bare names.** Never write `lythoskill-deck` as a locator -- must be `localhost/lythoskill-deck`
-or `github.com/Caltara/lythoskill/deck`.
+**No bare names.** Never write `lythoskill-deck` as a locator. Must be a full FQ path:
+`github.com/lythos-labs/lythoskill/skills/lythoskill-deck` or `localhost/me/my-forked-skill`.
+The `localhost/` prefix follows the same `host/owner/repo[/skill]` structure as GitHub —
+`localhost/me/<name>` for personal forks, `localhost/<project>/<name>` for project-local.
 
 **Why**: bare name resolution requires an implicit registry. FQ-only makes reconciliation,
 curator indexing, and deck link's symlink resolution deterministic. The enabling constraint

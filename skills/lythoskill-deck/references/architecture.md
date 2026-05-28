@@ -29,7 +29,7 @@ Cold Pool (storage)           Declaration (intent)          Working Set (runtime
 |---------|---------|---------|
 | `host/owner/repo/skills/name/` | `github.com/lythos-labs/lythoskill/skills/lythoskill-deck/` | Monorepo skill |
 | `host/owner/repo/` | `github.com/someone/standalone-skill/` | Standalone (repo root = skill) |
-| `localhost/name/` | `localhost/my-experiment/` | Local-only, no remote origin |
+| `localhost/owner/repo/` | `localhost/me/my-forked-skill/` | Local-only fork, no remote origin. Follows same host/owner/repo structure as GitHub. |
 ## Local Development Mode
 Set `cold_pool = "."` in your toml. The project root becomes a cold pool entry
 and `./skills/` is scanned for skill directories.
