@@ -1,11 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="coral" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#ee5a24"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#4ecdc4"/>
-      <stop offset="100%" style="stop-color:#ff6b6b"/>
+      <stop offset="100%" style="stop-color:#44bd9e"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffd93d"/>
+      <stop offset="100%" style="stop-color:#f0a500"/>
     </linearGradient>
   </defs>
-  <rect x="2" y="2" width="12" height="12" rx="2" fill="url(#g)" opacity=".9"/>
-  <rect x="18" y="2" width="12" height="12" rx="2" fill="url(#g)" opacity=".6"/>
-  <rect x="10" y="18" width="12" height="12" rx="2" fill="url(#g)" opacity=".75"/>
+  <!-- Deck: three stacked cards -->
+  <rect x="2" y="4" width="12" height="11" rx="1.5" fill="url(#mint)" opacity="0.85"/>
+  <rect x="9" y="10" width="12" height="11" rx="1.5" fill="url(#coral)" opacity="0.85"/>
+  <rect x="16" y="16" width="12" height="11" rx="1.5" fill="url(#amber)" opacity="0.85"/>
+  <!-- Deny-by-default slash -->
+  <line x1="4" y1="22" x2="14" y2="26" stroke="#2d3436" stroke-width="1.2" opacity="0.5"/>
+  <line x1="14" y1="22" x2="4" y2="26" stroke="#2d3436" stroke-width="1.2" opacity="0.5"/>
 </svg>
