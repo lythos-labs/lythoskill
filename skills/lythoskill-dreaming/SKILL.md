@@ -33,21 +33,36 @@ when_to_use: |
 
 ## Three-Phase Flow
 
-### Phase 1: Scan
+### Phase 1: Scan — Start from weekly, not from raw
+
+**Primary index: the weekly chain.** Weeklies (W17-W22) are pre-built importance-ranked summaries. Each weekly already contains:
+
+- `core_thread` — the 1-2 most important clusters per week
+- `docs_now_stale` — ADRs/wiki that became outdated each week
+- `decisions_accepted` — which ADRs landed when
+- Anomalies surfaced — CLI renames, missing ADRs, build-then-reject cycles
+
+Start from weekly, not from raw scan:
 
 ```bash
-bun packages/lythoskill-project-cortex/src/cli.ts probe   # Stale tasks, epic drift
-bun packages/lythoskill-project-cortex/src/cli.ts stats   # Task/ADR/wiki counts
-ls -lt cortex/adr/02-accepted/ | head -20                  # Recent decisions
-ls -lt cortex/wiki/01-patterns/ | head -20                 # Recent patterns
-ls -lt cortex/wiki/03-lessons/ | head -10                  # Recent lessons
-git log --since="30 days ago" --oneline -- cortex/wiki/ cortex/adr/  # What changed
+ls weekly/ | sort                          # Read all weeklies
+cat weekly/*.md | grep "docs_now_stale"    # Extract stale-doc index across all weeks
+cat weekly/*.md | grep "decisions_accepted" # Build ADR timeline from weekly
 ```
 
-Agent reads the probe output + file listings → identifies:
-- **Stale**: files referencing deprecated commands/paths/concepts
-- **Duplicate**: same insight in multiple wiki entries
-- **Contradictory**: ADR says X, wiki pattern says Y
+**Why this is better**: 81 ADRs + 54 wiki + 25 dailies ≈ impossible to scan cold. The weekly chain is 6 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
+
+**Fallback** (only when weeklies are missing or incomplete):
+```bash
+bun packages/lythoskill-project-cortex/src/cli.ts probe
+ls -lt cortex/adr/02-accepted/ | head -20
+git log --since="30 days ago" --oneline -- cortex/wiki/ cortex/adr/
+```
+
+Agent reads weekly chain → identifies:
+- **Already stale**: flagged in `docs_now_stale` across any weekly
+- **Superseded**: ADR mentioned in a later weekly's `decisions_accepted` that contradicts an earlier one
+- **Duplicate**: same insight appearing in multiple wiki entries
 - **Orphaned**: references to tasks/epics that no longer exist
 
 ### Phase 2: Consolidate
