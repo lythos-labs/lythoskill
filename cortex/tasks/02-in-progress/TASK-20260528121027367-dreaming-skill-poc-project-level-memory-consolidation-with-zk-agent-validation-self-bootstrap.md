@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-28 | Created — EPIC T6. ZK validation is our innovation over OpenClaw's dreaming |
+| in-progress | 2026-05-28 | Started |
 
 ## 背景与目标
 

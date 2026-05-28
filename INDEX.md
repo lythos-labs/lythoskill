@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/28 12:00:01
+> 自动生成于 2026/5/28 13:13:11
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 269 | 进行中: 0, 待验收: 2, 已完成: 225 |
+| Tasks | 270 | 进行中: 1, 待验收: 2, 已完成: 225 |
 | Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
-| ADRs | 82 | 已接受: 78 |
+| ADRs | 83 | 已接受: 78 |
 
 ---
 
@@ -73,9 +73,9 @@
 
 - [ ] **TASK-20260519224912252**: bare name to full path lookup for deck add
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260528121027367**: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
 
 ### 待验收 (2)
 
@@ -442,6 +442,7 @@ _无_
 - ✅ **ADR-20260519224555402** (02-accepted): curator add 全局副作用显式化与 --output 对齐
 - 🤔 **ADR-20260519225831495** (01-proposed): curator find — bare name to full path lookup
 - 🤔 **ADR-20260528113712898** (01-proposed): Site path narrative — two-path strategy (.claude/skills + .agents/skills) grounded in market reality
+- 🤔 **ADR-20260528120317143** (01-proposed): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
 
 ---
 
