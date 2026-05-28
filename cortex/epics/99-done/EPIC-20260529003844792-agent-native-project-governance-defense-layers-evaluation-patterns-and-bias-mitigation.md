@@ -18,6 +18,7 @@ checklist_skipped_reason: Batch creation in non-interactive context
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-28 | Created |
+| done | 2026-05-28 | Done |
 
 ## 背景故事
 

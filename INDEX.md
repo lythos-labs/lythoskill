@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/29 01:19:32
+> 自动生成于 2026/5/29 01:26:10
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 277 | 进行中: 0, 待验收: 0, 已完成: 235 |
-| Epics | 40 | 活跃: 1, 已完成: 35, 悬置: 2, 已归档: 2 |
+| Epics | 40 | 活跃: 0, 已完成: 36, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260529003844792**: Agent-native project governance: defense layers, evaluation patterns, and bias mitigation
+_无_
 
 ### 已完成
 
@@ -55,6 +55,7 @@
 - ✅ **EPIC-20260519224747755**: curator add UX 专业性与副作用透明化
 - ✅ **EPIC-20260520124010693**: curator catalog co-location: eliminate three data silos, catalog follows pool
 - ✅ **EPIC-20260527212032856**: Site narrative stabilization and living documentation consolidation
+- ✅ **EPIC-20260529003844792**: Agent-native project governance: defense layers, evaluation patterns, and bias mitigation
 
 ### 悬置
 
