@@ -124,7 +124,7 @@ Site（VitePress 站点）的角色因此升级：它不应只是「宣传页」
 | — Two-path strategy ADR + market research | proposed | ADR-20260528113712898 + market-position wiki — 支撑 site 叙事的事实基础 |
 | T3 — Wiki/ADR stale content audit | backlog | 逐篇审计 wiki/adr，过时归档，有效提取到 site |
 | T4 — Site information density optimization | backlog | 删除重复，合并分散，验证 progressive disclosure |
-| T6 — Dreaming skill PoC | backlog | 把文档睡眠记忆整理流程 skill 化（OpenClaw-style 三阶段 → project-level），self-bootstrap |
+| T6 — Dreaming skill PoC | backlog | ZK-validated memory consolidation — TASK-20260528121027367 |
 
 ## 经验沉淀
 
