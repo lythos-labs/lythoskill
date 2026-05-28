@@ -180,6 +180,8 @@ bunx @lythos/skill-deck@0.15.4 add github.com/owner/repo/skill
 
 lythos has no standalone orchestrator. **The deck IS the orchestrator entry point.** You (the agent) select the right pre-built deck for the user's task, link it in an isolated environment, and execute. The three-layer distribution: light orchestration in combo prompt, medium in SKILL.md, heavy mechanical in CLI.
 
+**When you encounter a deck with `[combo.<name>]` sections, READ the combo prompts.** They are the orchestration playbook — step-by-step instructions for multi-skill pipelines. The combo section is not optional metadata; it IS the orchestrator. Skipping it means executing skills in isolation without the coordination logic.
+
 ### Intent → Deck mapping
 
 | User says | Deck to use | Command |

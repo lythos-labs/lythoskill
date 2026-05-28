@@ -39,9 +39,11 @@ skills = [
   "github.com/mattpocock/skills/skills/engineering/to-prd",
 ]
 ```
-## [combo.<name>] — Pipeline Orchestration Hints
-Lightweight playbooks for the agent. NOT skill sections — each `[combo.<name>] prompt`
-gives the agent conditional routing logic. One deck can declare multiple combos.
+## [combo.<name>] — Pipeline Orchestration (READ THIS)
+
+> ⚠️ **Agent: when you encounter a deck, read its combo section.** Combo prompts are the orchestration playbook — step-by-step multi-skill pipeline instructions. They are not optional metadata. Skipping them means executing skills in isolation without the coordination logic.
+
+Lightweight playbooks for the agent. NOT skill sections — each `[combo.<name>] prompt` gives the agent conditional routing logic. One deck can declare multiple combos.
 ```toml
 [combo.promo]
 prompt = """
