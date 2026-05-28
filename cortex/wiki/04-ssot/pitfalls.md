@@ -126,3 +126,26 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 4. **Weight domain expertise**: An evaluator that has not read `intent-plan-execute-fractal-architecture-pattern.md` should not score "test architecture health." An evaluator that has not understood "agent memory = documentation" should not score "document debt."
 
 **Prevention**: SSOT documents must include "evaluator guidance" sections — explicit warnings about common misreadings. See conventions.md §5 "Testing Layers" for the test architecture guidance that prevents the "mock abuse" misreading.
+
+### Critical: Evaluators Confuse Defense Layers with Debt
+
+A specific and dangerous variant of surface-scan evaluation: the evaluator sees pre-commit guards, ADR records, daily handoffs, ZK validation loops, and high test coverage — then judges these as "overhead," "bloat," or "governance complexity."
+
+**This is backwards.**
+
+lythoskill is a **pure agent-driven project**. Every session starts with a zero-knowledge agent. The "complexity" the evaluator sees is not organic growth — it is **deliberate defense architecture**:
+
+| Defense Layer | Why It Exists | What Happens Without It |
+|--------------|---------------|------------------------|
+| 83 ADRs | Agent forgets decisions → repeats rejected alternatives | Same debates every session |
+| 25 dailies | Agent loses context → contradicts yesterday's work | Drift, rework, conflicting commits |
+| 7 SSOTs | Agent reads stale wiki → acts on outdated info | Decisions based on false assumptions |
+| ZK validation | Agent hallucinates → writes plausible wrong docs | Fabricated skill paths, wrong commands |
+| Pre-commit guards | Agent commits errors → breaks CI/npm | `workspace:*` shipped to npm, broken releases |
+| High coverage | Agent breaks logic → no fast feedback | Bugs discovered in production |
+
+**The evaluator's "ideal" (simpler, fewer guards, less documentation) would be fatal for this project.**
+
+Analogy: Judging a hospital's infection control as "excessive bureaucracy" because you have never seen an ICU. The gloves, gowns, and sterile protocols are not overhead — they are the reason the patient survives.
+
+**First principle of evaluating agent projects**: Before calling any structure "debt," verify whether it is a defense layer. If the project is agent-driven, the default assumption should be "this complexity exists because agents are fragile," not "this complexity should be removed."
