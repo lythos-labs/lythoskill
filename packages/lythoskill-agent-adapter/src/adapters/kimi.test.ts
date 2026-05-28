@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'bun:test'
-import { buildKimiCommand, parseKimiStreamJson } from './kimi'
+import { detectKimiBinary, buildKimiCommand, parseKimiStreamJson } from './kimi'
+
+describe('detectKimiBinary', () => {
+  it('returns a non-empty string when a kimi binary is available', () => {
+    const binary = detectKimiBinary()
+    // In CI or environments without kimi, this may be empty — skip assert
+    if (!binary) return
+    expect(binary === 'kimi-cli' || binary === 'kimi').toBe(true)
+  })
+})
 
 describe('buildKimiCommand', () => {
   it('builds kimi CLI args without shell wrapper', () => {
     const cmd = buildKimiCommand()
-    expect(cmd[0]).toBe('kimi')
+    expect(cmd[0]).toBeOneOf(['kimi-cli', 'kimi'])
     expect(cmd).toContain('--print')
-    expect(cmd).toContain('--afk')
     expect(cmd).toContain('--output-format')
     expect(cmd).toContain('stream-json')
   })

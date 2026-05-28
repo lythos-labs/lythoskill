@@ -7,12 +7,27 @@ import { registerAgent } from '../registry'
 
 // ── Pure functions (testable without CLI) ────────────────────────────────────
 
-/** Build kimi --print command args (no shell wrapper — safe from injection). */
+/** Detect which kimi binary to use. Prefers kimi-cli (legacy, v1.x) over kimi (kimi-code, v0.5+). */
+export function detectKimiBinary(): string {
+  // kimi-cli v1.x supports --print --output-format stream-json
+  // kimi v0.5.0 (kimi-code) does NOT support --print; it uses --prompt with different semantics
+  if (Bun.which('kimi-cli')) {
+    return 'kimi-cli'
+  }
+  if (Bun.which('kimi')) {
+    return 'kimi'
+  }
+  return ''
+}
+
+/** Build kimi CLI command args (no shell wrapper — safe from injection). */
 export function buildKimiCommand(_modelTier?: 'fast' | 'balanced' | 'deep'): string[] {
-  // Kimi CLI has no --model flag; model selection is via /model slash command,
-  // config.toml, or KIMI_MODEL_NAME env var. modelTier is accepted but unused
-  // — Kimi effectively provides one tier via coding plan.
-  return ['kimi', '--print', '--afk', '--output-format', 'stream-json']
+  const binary = detectKimiBinary()
+  if (!binary) {
+    throw new Error('No kimi binary found in PATH. Install: https://github.com/MoonshotAI/kimi-cli')
+  }
+  // Both kimi-cli and kimi (if it ever gains --print support) use the same flag set
+  return [binary, '--print', '--output-format', 'stream-json']
 }
 
 /**
@@ -127,7 +142,8 @@ const kimiAdapter: AgentAdapter = {
   name: 'kimi',
 
   async spawn(opts): Promise<AgentRunResult> {
-    if (!Bun.which('kimi')) {
+    const binary = detectKimiBinary()
+    if (!binary) {
       throw new Error('kimi not found in PATH. Install: https://github.com/MoonshotAI/kimi-cli')
     }
     return spawnKimi(opts)
