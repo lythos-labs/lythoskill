@@ -8,11 +8,21 @@
 
 REST's most controversial constraint — Hypermedia as the Engine of Application State — was also its least adopted. Roy Fielding's original vision: API responses carry hyperlinks telling the client what actions are available next. No out-of-band documentation. No hardcoded URL templates. The response IS the contract.
 
-**Why it failed:** The consumer was wrong. Humans don't navigate APIs by following links — they read documentation and hardcode URL patterns. Browsers navigate hypermedia (HTML pages link to other pages); API clients don't. The hypermedia consumer needs to be a program that can follow links autonomously — and REST API clients were written by humans who preferred predictability over discoverability.
+**Why it failed:** The consumer was TOO smart. Humans programming APIs prefer reading structured documentation and hardcoding URL patterns — predictable, stable, controllable. Browsers aren't that smart — they don't read API docs. They just follow `<a href>`. That's why hypermedia works on the web: the browser is the perfect consumer. Not intelligent, just faithful.
 
-The irony: HATEOAS was designed for the web, but the web's primary hypermedia consumer (the browser) already had it via HTML. The API layer — consumed by code, not browsers — was where HATEOAS died.
+The HATEOAS paradox: the web succeeded with hypermedia because the consumer (browser) was dumb enough to follow links without question. The API layer failed because the consumer (human programmer) was smart enough to prefer a reference manual over dynamic discovery.
 
-## 2. The Agent Environment: HATEOAS Finds Its Consumer
+## 2. The Intelligence Spectrum
+
+| Consumer | Intelligence | Follows links? | Outcome |
+|----------|-------------|----------------|---------|
+| **Browser** | Dumb — renders HTML, follows `<a href>` | Yes, faithfully | Web hypermedia works |
+| **Human programmer** | Smart — reads docs, hardcodes URLs | No — prefers structured reference | HATEOAS fails in APIs |
+| **Agent** | Just right — understands instructions, follows them | Yes, autonomously | HATEOAS works for the first time |
+
+The browser is too dumb to program an API. The human is too smart to follow links blindly. The agent is the Goldilocks consumer: smart enough to interpret structured instructions, but programmatic enough to actually follow them without demanding a reference manual.
+
+## 3. The Agent Environment: HATEOAS Finds Its Consumer
 
 In lythoskill's architecture, the consumer is an agent. And agents DO follow links.
 
@@ -30,7 +40,7 @@ HTTP REST:                                    Agent CLI:
 
 The difference: **the agent is a programmatic hypermedia consumer.** It reads structured output, recognizes actionable instructions, and executes them. It doesn't need out-of-band documentation. The error message IS the documentation. The CLI output IS the API response. The `<spawn subagent>` tag IS the hyperlink.
 
-## 3. Where Is "State"?
+## 4. Where Is "State"?
 
 In HTTP REST: state lives in the hypermedia responses. Each response tells the client what state transitions are available. The server doesn't hold client state between requests.
 
@@ -43,7 +53,7 @@ In agent HATEOAS: state lives in **two places**:
 
 Cortex is the state machine beyond context limits. When an agent's context window compacts, the agent forgets session state — but cortex retains the governance state. The agent re-reads cortex on next session and resumes where the state machine left off. **Cortex is HATEOAS state externalized** — the "engine of application state" lives in the filesystem, not in the agent's ephemeral memory.
 
-## 4. Security: The Dark Side of Hypermedia Trust
+## 5. Security: The Dark Side of Hypermedia Trust
 
 If shell stdout is a hypermedia document that agents trust and execute, then **untrusted tool output is a prompt injection vector.** This is structurally identical to:
 
@@ -67,7 +77,7 @@ The defense patterns are the same category of problem:
 
 The reproduce.sh pattern is powerful precisely because agents trust the `<spawn subagent>` marker — but that trust is the attack surface. Post-tool-use escaping/validation is the equivalent of HTML entity encoding for agent-facing output.
 
-## 5. Why This Matters for lythoskill
+## 6. Why This Matters for lythoskill
 
 1. **The reproduce.sh pattern is not just a BDD format — it's a hypermedia protocol.** Shell stdout IS the document. The agent IS the browser. The `<spawn subagent>` tag IS the hyperlink.
 
