@@ -5,7 +5,7 @@ sources:
   - "cortex/wiki/04-ssot/key-decisions.md"
   - "cortex/wiki/04-ssot/pitfalls.md"
   - "packages/lythoskill-dreaming/skill/SKILL.md"
-zk_validated: false
+zk_validated: true
 ---
 
 # Conventions -- How Things Are Done Here
@@ -90,8 +90,7 @@ Before claiming any piece of work "done" (from AGENTS.md SS "Before claiming don
 - [ ] If CLI surface changed: update `packages/<name>/README.md`
 - [ ] If new package: add to `scripts/publish.sh` PACKAGES array
 - [ ] If new/modified deck example: `deck validate --deck examples/decks/<name>.toml` passes
-- [ ] If producing documentation: run ZK validation -- spawn zero-knowledge subagent,
-      self-report understanding, revise unclear sections
+- [ ] If producing documentation: run ZK validation (see SS8 for full 4-step loop)
 - [ ] Commit with `Closes: TASK-xxx` trailer if task exists
 
 **For guard script changes** (`.husky/`, `scripts/pre-commit-*.ts`, `scripts/test-report.ts`,

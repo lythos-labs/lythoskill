@@ -8,7 +8,7 @@ sources:
   - "weekly/2026-W21.md"
   - "weekly/2026-W22.md"
   - "cortex/adr/02-accepted/ (81 ADR files on disk)"
-zk_validated: false
+zk_validated: true
 ---
 
 # Key Decisions -- Current State
@@ -218,6 +218,7 @@ Key decisions that solve specific governance tensions. A zero-knowledge agent se
 | `working_set` in deck.toml (not `skills`) | Was renamed to `skills` on May 17, reverted May 19 — collided with build output directory `skills/`. ADR-20260519144445916 locked in `working_set`. | Don't rename `working_set` — it's been tried and reverted. |
 | `skills/` directory committed to git | Build output — `packages/<name>/skill/` → `skills/<name>/`. Pre-commit auto-rebuilds. ADR-20260423124812645. | Don't gitignore `skills/` — it's committed build output, not cache. |
 | `bun packages/.../cli.ts` instead of `bunx @lythos/...` | In-repo dev uses source directly. External users use `bunx`. See AGENTS.md § Command Shorthand Convention. | Don't replace `bun packages/` with `bunx` in dev scripts — they're different audiences. |
+| Deleted/reverted code patterns (`feed-adapters`, `allowed-tools`, `leetcode-harness`) | 3 build-then-reject cycles in W18-W19. Each was built, tested, found wanting, and killed. | Don't resurrect rejected components from git history. These were deliberate kills, not abandoned experiments. |
 
 ---
 

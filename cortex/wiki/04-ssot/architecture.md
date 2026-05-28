@@ -11,7 +11,7 @@ sources:
   - ADR-20260508230803515 (curator no-feed-adapters)
   - ADR-20260517140421425 (CLI vs agent-orchestrated parity)
   - ADR-20260528120317143 (deck creation guide, agent-as-wizard)
-zk_validated: false
+zk_validated: true
 ---
 
 # Architecture
@@ -76,7 +76,9 @@ stores everything, `package.json` declares what this project uses.
 |  ==================== agent / CLI boundary ========================== |
 |                                                                       |
 |  deck link | arena single | curator scan | cold-pool fetch | ...      |
-|  Deterministic CLI operations. Zero intelligence. HATEOAS output.     |
+|  Deterministic CLI operations. Zero intelligence.                     |
+|  HATEOAS output: error messages tell the agent WHAT next, not just    |
+|  WHAT went wrong. "Skill not found → try curator add <locator>".      |
 +======================================================================+
 ```
 
@@ -266,14 +268,13 @@ Documented so future agents do not re-propose discarded alternatives.
 
 ## 8. Design Principles
 
-1. **Deny-by-default.** Empty working set = agent without immune system.
+1. **Deny-by-default.** Empty working set = agent without immune system. Proven May 7, 2026: an agent without deck context wrote 30+ rounds of unrequested debugging and modified source code. This incident is the existential justification — deny-by-default is not architectural preference, it is learned from damage.
 2. **Intelligence in agent, not tool.** CLI is glue. SKILL.md is guide. Agent decides.
 3. **Delegate to mature infra.** npm/pip for versions, git for distribution. No new registry.
 4. **Validate before trust.** Descriptions lie. Arena + curator QA are the truth signals.
 5. **Progressive disclosure.** Skills: ~100 tokens -> <5000 -> on-demand. Arena/Curator: L0-L3.
 6. **Build-then-reject is valid.** Experiment fast, kill decisively, document in ADRs.
-7. **Separate storage from selection.** Cold pool stores all; working set selects deliberately.
-8. **Orchestrator is distributed by weight, not centralized.** There is no single "orchestrator" component. Lightweight coordination lives in combo prompts (declarative), medium-weight in SKILL.md (agent-facing instructions), heavyweight in CLI (deterministic ops, HATEOAS output). The three layers communicate via well-defined message contracts (TOML, YAML frontmatter, HATEOAS) — actor-model style. An external evaluator searching for a centralized orchestrator won't find one; the coordination emerges from the message contracts, not from a container process.
+7. **Orchestrator is distributed by weight, not centralized.** There is no single "orchestrator" component. Lightweight coordination lives in combo prompts (declarative), medium-weight in SKILL.md (agent-facing instructions), heavyweight in CLI (deterministic ops, HATEOAS output). The three layers communicate via well-defined message contracts (TOML, YAML frontmatter, HATEOAS) — actor-model style. An external evaluator searching for a centralized orchestrator won't find one; the coordination emerges from the message contracts, not from a container process.
 
 ## 9. Anti-Patterns
 
@@ -285,8 +286,7 @@ Documented so future agents do not re-propose discarded alternatives.
 | **CLI as Wizard** | Interactive CLI prompts. Intelligence belongs in the agent. |
 | **Feed Adapters** | HTTP wrappers in curator. Agent has web fetch + search + gh. |
 | **Centralized Orchestrator** | Looking for a single "orchestrator" component (like CrewAI/LangGraph). Coordination is distributed across combo prompts + SKILL.md + CLI via message contracts. Agent IS the orchestrator. |
-| **Silent Activation** | Multiple same-niche innate skills. Deny-by-default prevents this. |
-| **Silent Activation** | Skills active without declaration. Violates deny-by-default. |
+| **Silent Activation** | Skills active without declaration. Violates deny-by-default (§8.1). |
 
 ## 10. Related Documents
 
