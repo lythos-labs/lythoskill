@@ -206,6 +206,18 @@ these rules, update them to the superseding ADR.
 | `allowed-tools` + `reference-triggers` | May 2 built, May 2 reverted | QA red team found critical issues in 4/6 skills. Same-session revert. |
 | Curator `feed-adapters` | May 5 built, May 8 ADR rejected, May 9 deleted | Agent web fetch beats hand-rolled API adapters. ADR-20260508230803515. |
 | `cortex/epics/02-done` rename to `99-done` | May 17 | Directory rename. Docs referencing `02-done` path are stale. |
+| **Publish-time `workspace:*` → `^version` rewrite** | May 11 (v0.10.0 jump exposed it) | v0.9.x used `workspace:*` innocently. At v0.10.0, `workspace:*` literal was published to npm — consumers couldn't resolve it. Two emergency bumps (v0.10.1, v0.10.2) before `publish.sh` rewrite pattern landed. Source stays `workspace:*`, publish-time rewrites, `git checkout` restores. W20 weekly covers the incident. |
+
+### ⚠️ ZK Agent Alert: These Look Like Bugs But Aren't
+
+Key decisions that solve specific governance tensions. A zero-knowledge agent seeing these for the first time might try to "fix" them. Don't.
+
+| If you see... | Why it's like that | Don't |
+|---------------|-------------------|-------|
+| `workspace:*` in source, `^0.15.4` on npm | **Publish-time rewrite.** Source stays `workspace:*` for local dev ergonomics (bun resolves live). `publish.sh` rewrites to `^version` before `npm publish`, then `git checkout` restores. Pre-commit rejects `^x.y.z` on internal deps. Only correct resolution for dual-audience: local dev needs live resolution, npm consumer needs fixed version. ADR-20260503170000000 + W20 release pipeline rescue. | Don't "fix" `workspace:*` to `^version` in source. Don't remove the publish-time rewrite. |
+| `working_set` in deck.toml (not `skills`) | Was renamed to `skills` on May 17, reverted May 19 — collided with build output directory `skills/`. ADR-20260519144445916 locked in `working_set`. | Don't rename `working_set` — it's been tried and reverted. |
+| `skills/` directory committed to git | Build output — `packages/<name>/skill/` → `skills/<name>/`. Pre-commit auto-rebuilds. ADR-20260423124812645. | Don't gitignore `skills/` — it's committed build output, not cache. |
+| `bun packages/.../cli.ts` instead of `bunx @lythos/...` | In-repo dev uses source directly. External users use `bunx`. See AGENTS.md § Command Shorthand Convention. | Don't replace `bun packages/` with `bunx` in dev scripts — they're different audiences. |
 
 ---
 
