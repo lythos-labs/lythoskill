@@ -9,8 +9,8 @@ max_cards = 8
 cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
-[tool.skills.baoyu-image-cards]
-path = "github.com/JimLiu/baoyu-skills/skills/baoyu-image-cards"
+[tool.skills.baoyu-xhs-images]
+path = "github.com/JimLiu/baoyu-skills/skills/baoyu-xhs-images"
 role = "Generate Xiaohongshu/WeChat image card series with 12 styles × 8 layouts × 3 palettes"
 
 [tool.skills.baoyu-cover-image]
