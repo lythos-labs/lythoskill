@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (54)
+## 📚 Patterns (51)
 
 - **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
@@ -38,14 +38,11 @@
 - **[2026-05-02]** [agent-skills-spec](./01-patterns/2026-05-02-agent-skills-spec.md)
 - **[2026-05-02]** [concurrent-subagent-map-reduce](./01-patterns/2026-05-02-concurrent-subagent-map-reduce.md)
 - **[2026-05-02]** [thin-skill-references-generation](./01-patterns/2026-05-02-thin-skill-references-generation.md)
-- **[2026-05-02]** [external-skill-governance-bridge](./01-patterns/2026-05-02-external-skill-governance-bridge.md)
 - **[2026-05-02]** [project-scope-and-ecosystem-paths](./01-patterns/2026-05-02-project-scope-and-ecosystem-paths.md)
 - **[2026-05-02]** [player-deck-separation-and-tcg-player-analogy](./01-patterns/2026-05-02-player-deck-separation-and-tcg-player-analogy.md)
 - **[2026-05-02]** [smart-agent-dumb-tools](./01-patterns/2026-05-02-smart-agent-dumb-tools.md)
-- **[2026-05-02]** [skill-selection-pipeline](./01-patterns/2026-05-02-skill-selection-pipeline.md)
 - **[2026-05-02]** [epic-granularity](./01-patterns/2026-05-02-epic-granularity.md)
 - **[2026-05-02]** [alpha-user-simulation-iteration](./01-patterns/2026-05-02-alpha-user-simulation-iteration.md)
-- **[2026-05-02]** [skill-combo-epistemology-and-tcg-analogy](./01-patterns/2026-05-02-skill-combo-epistemology-and-tcg-analogy.md)
 - **[2026-05-02]** [fence-variable-trick](./01-patterns/2026-05-02-fence-variable-trick.md)
 - **[2026-05-02]** [adr-to-lint-bridge](./01-patterns/2026-05-02-adr-to-lint-bridge.md)
 - **[2026-05-02]** [desc-preference-arena](./01-patterns/2026-05-02-desc-preference-arena.md)

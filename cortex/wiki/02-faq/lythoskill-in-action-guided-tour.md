@@ -13,6 +13,7 @@ category: faq
 **概念**: `deck` 就是给 Agent 配"装备栏"。装备不同，输出完全不同。
 
 ```bash
+# Quick install (or use bunx for individual steps)
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/install-deck.sh | bash
 ```
 
@@ -47,7 +48,7 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 [combo.fullstack]
-skills = ["tdd", "react"]
+cards = ["tdd", "react"]
 prompt = "TDD first, then components"
 ```
 
@@ -73,10 +74,13 @@ bunx @lythos/skill-creator@latest build my-skill
 **Arena = Agent 技能的 A/B 测试**。Stop arguing, start testing。
 
 ```bash
-bunx @lythos/skill-arena@latest run \
-  --decks "baseline.toml,baseline+design.toml" \
-  --task "Write a login page" \
-  --criteria "visual-quality,code-maintainability,token-efficiency"
+# A/B comparison: which deck performs better on the same task?
+bunx @lythos/skill-arena@latest vs \
+  --config arena-vs.toml
+# Single-deck validation:
+bunx @lythos/skill-arena@latest single \
+  --deck baseline.toml \
+  --brief "Write a login page"
 ```
 
 **产出**: Pareto 前沿对比报告 + L3 信任数据。

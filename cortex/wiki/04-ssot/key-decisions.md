@@ -87,7 +87,7 @@ Cold pool, curator, skill types, locator resolution, and the filesystem-native d
 | 27 | ADR-20260423124812645 | Build output: `packages/<name>/skill/` compiles to `skills/<name>/`. Eliminates `dist/` from git. **Build section holds.** | ✅ holds (build section only) |
 | 28 | ADR-20260501090811296 | Pre-commit hook ratified as formal solution for skill build validation. **Supersedes CI portion of ADR-20260423124812645.** | ✅ holds |
 | 29 | ADR-20260501092809000 | `skills` branch preserves directory prefix to avoid dual-locator standards. | ✅ holds |
-| 30 | ADR-20260501160000000 | Skill deck section semantics and innate re-attachment. `[skills]` section holds skills with innate/lazy loading. `[combo]` section semantics for combo were later evolved (see Combo Evolution trace). | ✅ holds (core mechanism); combo content evolved |
+| 30 | ADR-20260501160000000 | Skill deck section semantics and innate re-attachment. Core mechanism (innate/lazy loading) merged into current deck code. Combo section semantics fully superseded by ADR-20260506103209293; file moved to 03-superseded. | ⚠️ partially superseded (combo rules); core mechanism holds |
 | 31 | ADR-20260501170000000 | Description preference learning via arena pilot results. Hybrid desc format (calm + explicit triggers) wins both readability and activation. | ✅ holds |
 | 32 | ADR-20260424000744041 | Curator output is personal environment scan, not a project artifact. | ✅ holds |
 | 33 | ADR-20260518123403810 | Curator role re-derivation: from rigid indexer to agent-assisted discovery companion. 策展者/买家秀 = 查卡器 + 备注 + 组卡审美. | ✅ holds |

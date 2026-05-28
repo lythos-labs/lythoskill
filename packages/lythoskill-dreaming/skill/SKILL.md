@@ -1,35 +1,42 @@
 ---
 name: lythoskill-dreaming
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
-  Project memory consolidation — scan scattered wiki/ADR/daily content,
-  extract the currently-true state into SSOT, then ZK-validate readability.
-  Lythoskill's innovation over OpenClaw/Hermes dreaming: adds a verification
-  layer (zero-knowledge subagent reads the output → self-reports understanding).
+  夜有所梦 — project memory consolidation. Daily (scribe) captures raw
+  experience, weekly extracts patterns and anomalies, dreaming consolidates
+  the accumulated memory into SSOT. External review via ZK subagent (the
+  same de facto standard pattern used by Hermes Curator's forked-agent
+  review), with cross-model validation via arena for critical docs.
 when_to_use: |
   After major documentation changes, weekly cleanup, pre-onboarding prep,
   context pressure is high, wiki/ADR has grown stale, user says "做梦",
   "整理文档", "consolidate", "SSOT", "sleep on it", "memory consolidation".
 ---
 
-# Dreaming — Project Memory Consolidation
+# Dreaming — 夜有所梦
 
+> 日有所思（daily + weekly），夜有所梦（dreaming → SSOT）。
 > Scan → Consolidate → ZK Validate. Extract the "currently true" from scattered docs.
-> Differs from OpenClaw/Hermes: adds a zero-knowledge verification layer after output.
 
-## Why Dreaming Exists
+## The Project's Memory System
 
-1000+ commits produce documentation rot:
+Project documentation works like human memory:
 
-1. Agent reads old wiki → builds outdated assumption
-2. Agent writes new content carrying old assumption → creates drift
-3. Next agent reads new + old → context explosion, noise > signal
-4. Context pressure forces "scan" not "read" → "scan → learn poorly → fabricate"
+| Layer | Tool | What it does |
+|-------|------|-------------|
+| **日有所思** — 经历 | `scribe daily` | Raw session capture: what was done, what was decided, what went wrong |
+| **日有所思** — 复盘 | `scribe weekly` | Cross-session pattern extraction: core threads, anomalies, docs now stale |
+| **夜有所梦** — 巩固 | `dreaming` | Memory consolidation: extract "currently true" from accumulated docs → SSOT |
 
-**OpenClaw/Hermes dreaming** does memory consolidation (deterministic transition + LLM review) but has a blind spot: **no verification layer after output**. A dreaming output can be self-consistent to its author but unreadable to a fresh agent.
+Daily 不是流水账，weekly 不是 daily 的汇总。Daily 是 session 级 raw experience，weekly 是跨 session 的模式识别（core_thread、anomaly、docs_now_stale）——本质上是在反腐：发现漂移、标记腐烂、追踪 gap 收敛。Dreaming 是在积累了足够的 daily + weekly 之后，把分散在 wiki/ADR/daily 中尚未腐烂的有效信息提取为 SSOT——就像睡眠中大脑把短期记忆巩固为长期记忆。
 
-**Lythoskill's innovation**: Dream → ZK Validate → Revise loop. A zero-knowledge subagent reads the SSOT output → self-reports understanding → misunderstood sections get revised.
+## 第一原理
+
+这个模式是我们从 document rot 出发，从自己的 weekly 实践中自然长出来的。Weekly 已经在做反腐——跨 session 检测 anomalies、标记 docs_now_stale、追踪 gap 收敛。Dreaming 是 weekly 的自然延伸：weekly 发现了什么在腐烂，dreaming 把还没腐烂的提取出来固化。
+
+听说过 Hermes Curator 的 dreaming 机制，觉得我们在做的事类似，发起了田野调查——果然，独立交叉对到同一个答案。然后正确迁移到了项目文档管理场景。田野调研见 [`references/hermes-dreaming-field-notes.md`](./references/hermes-dreaming-field-notes.md)。
+
+**核心洞察：维护应该是独立周期，不嵌入每次任务。**
 
 ## Three-Phase Flow
 
@@ -77,7 +84,6 @@ Write to `cortex/wiki/04-ssot/`. One file per major topic area. Each SSOT file i
 Example SSOT topics:
 - `architecture.md` — current system architecture (not design history)
 - `conventions.md` — active code/doc conventions (not deprecated ones)
-- `active-quests.md` — what we're building now (from active epic + in-progress tasks)
 - `key-decisions.md` — ADRs that still hold (superseded ones noted but not replayed)
 - `pitfalls.md` — recurring failure modes and their fixes
 
@@ -139,6 +145,5 @@ zk_issues: 0
 
 | When you need to… | Read |
 |--------------------|------|
-| Understand the OpenClaw/Hermes baseline | [`references/hermes-dreaming-baseline.md`](./references/hermes-dreaming-baseline.md) |
+| Read the Hermes Curator field notes | [`references/hermes-dreaming-field-notes.md`](./references/hermes-dreaming-field-notes.md) |
 | See the ZK validation pattern in action | AGENTS.md § ZK Validation Pattern |
-| Full dreaming workflow example | [`references/dreaming-workflow-example.md`](./references/dreaming-workflow-example.md) |

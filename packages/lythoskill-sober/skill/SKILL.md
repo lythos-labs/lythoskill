@@ -1,7 +1,6 @@
 ---
 name: lythoskill-sober
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Stay clear-headed. Before you commit to a conclusion, check your basis.
   Is this evidence or assumption? Do the sources agree? What's the

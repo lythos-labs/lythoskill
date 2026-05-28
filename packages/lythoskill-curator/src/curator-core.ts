@@ -317,7 +317,7 @@ export function buildSkillMeta(frontmatter: Record<string, unknown>, path: strin
   const source = frontmatter.source ? str(frontmatter.source) : inferSource(path)
   const name = str(frontmatter.name)
   const description = str(frontmatter.description)
-  const type = (frontmatter.type as string) || 'standard'
+  const type = (frontmatter.type as string) || null
   // when_to_use is an agent-internal field used by some agent runtimes
   const whenToUse = str(frontmatter.whenToUse ?? frontmatter.when_to_use)
 

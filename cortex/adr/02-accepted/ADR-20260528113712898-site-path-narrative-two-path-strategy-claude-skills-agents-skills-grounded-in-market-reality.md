@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-28 | Created — market data validates two-path strategy; site narrative should reflect real usage patterns |
+| accepted | 2026-05-28 | Accepted |
 
 ## 背景
 

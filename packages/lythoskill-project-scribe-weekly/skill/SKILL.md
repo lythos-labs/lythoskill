@@ -1,7 +1,6 @@
 ---
 name: lythoskill-project-scribe-weekly
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Weekly synthesis writer. Distills the past 7 days' core thread + quest DAG
   into a frontmatter-rich short doc. Never replays git log or cortex INDEX

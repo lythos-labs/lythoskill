@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/28 13:13:11
+> 自动生成于 2026/5/28 22:26:38
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 270 | 进行中: 1, 待验收: 2, 已完成: 225 |
+| Tasks | 271 | 进行中: 0, 待验收: 4, 已完成: 225 |
 | Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
-| ADRs | 83 | 已接受: 78 |
+| ADRs | 83 | 已接受: 80 |
 
 ---
 
@@ -73,14 +73,16 @@
 
 - [ ] **TASK-20260519224912252**: bare name to full path lookup for deck add
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260528121027367**: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
+_无_
 
-### 待验收 (2)
+### 待验收 (4)
 
 - 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
 - 🔍 **TASK-20260528114758563**: Fix site command shorthands — ensure all code blocks use runnable commands, establish shorthand resolution convention in AGENTS.md
+- 🔍 **TASK-20260528121027367**: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
+- 🔍 **TASK-20260528221835812**: Wiki/ADR stale content audit — ZK cross-validate against dreaming SSOT, archive outdated, flag contradictions
 
 ### 已完成 (225)
 
@@ -370,7 +372,6 @@
 - ✅ **ADR-20260424013849984** (02-accepted): lythoskill as anti-corruption layer and meta-governance boundary
 - ✅ **ADR-20260424113352614** (02-accepted): project-scribe remains independent with optional skill cooperation
 - ✅ **ADR-20260424113917838** (02-accepted): red-green-release heredoc migration patch design
-- ✅ **ADR-20260424114401090** (02-accepted): combo skill as orchestration layer naming and emergence strategy
 - ✅ **ADR-20260424115621494** (02-accepted): virtual-evaluator-swarm adaptive concurrency skill design
 - ✅ **ADR-20260424120936541** (02-accepted): player-deck separation and deck boundary rationale
 - ✅ **ADR-20260424125637347** (02-accepted): handoff format migration from fixed file to daily-first
@@ -378,7 +379,6 @@
 - ✅ **ADR-20260501090811296** (02-accepted): CI consistency check abandoned in favor of pre-commit hook for skill build
 - ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
 - ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
-- ✅ **ADR-20260501160000000** (02-accepted): skill-deck.toml section semantics and innate skill re-attachment after context compaction
 - ✅ **ADR-20260501170000000** (02-accepted): Description Preference Learning via Arena — Pilot Results
 - ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
 - ✅ **ADR-20260502012643244** (02-accepted): FQ-only locator — 删除 bare-name 与隐式策略 fallback
@@ -422,7 +422,7 @@
 - ✅ **ADR-20260510233000000** (02-accepted): Centralized path-guard vs whack-a-mole for agent-generated path traversal bugs
 - ✅ **ADR-20260511000000000** (02-accepted): Deck skill sources — git-only FQ locators vs hub/marketplace integration
 - ✅ **ADR-20260511093900000** (02-accepted): skills.sh syntax sugar in deck add — boundary normalization, not protocol integration
-- ✅ **ADR-20260511210000000** (02-accepted): Consolidate curator output to `~/.agents/lythoskill/curator/`
+- 📦 **ADR-20260511210000000** (04-superseded): Consolidate curator output to `~/.agents/lythoskill/curator/`
 - ✅ **ADR-20260512002131099** (02-accepted): Pre-push semgrep + CI CodeQL split for automated QA gates
 - ✅ **ADR-20260513011442965** (02-accepted): Network proxy auto-discovery for resilient connectivity
 - ✅ **ADR-20260513041030769** (02-accepted): No cross-package relative imports in packages src
@@ -440,9 +440,11 @@
 - ✅ **ADR-20260519153000000** (02-accepted): Scheduled Weekly Entropy Reduction
 - ✅ **ADR-20260519165746212** (02-accepted): cortex probe --suspicious 模式
 - ✅ **ADR-20260519224555402** (02-accepted): curator add 全局副作用显式化与 --output 对齐
-- 🤔 **ADR-20260519225831495** (01-proposed): curator find — bare name to full path lookup
-- 🤔 **ADR-20260528113712898** (01-proposed): Site path narrative — two-path strategy (.claude/skills + .agents/skills) grounded in market reality
-- 🤔 **ADR-20260528120317143** (01-proposed): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
+- ✅ **ADR-20260519225831495** (02-accepted): curator find — bare name to full path lookup
+- ✅ **ADR-20260528113712898** (02-accepted): Site path narrative — two-path strategy (.claude/skills + .agents/skills) grounded in market reality
+- ✅ **ADR-20260528120317143** (02-accepted): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
+- ✅ **ADR-20260528153455764** (02-accepted): Combo `skills` field as visual annotation — human-readable, not parsed by code
+- ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
 
 ---
 

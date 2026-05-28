@@ -1,7 +1,6 @@
 ---
 name: lythoskill-arena
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Test play for skills and deck configurations. DEFAULT: agent reads
   config, spawns parallel subagents via native Agent tool, judges outputs.

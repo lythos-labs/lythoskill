@@ -65,3 +65,30 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 **Root cause**: Claude Code compaction drops session context silently. Agent doesn't know what it forgot.
 
 **Fix**: CLAUDE.md top banner + AGENTS.md Release & Auth warning at top. Before any release/auth/version command, re-read the workflow section. Daily handoff captures session state that compaction can't erase.
+
+## 6. Audit False Positive: Absent != Defective
+
+**Symptom**: Audit rules (coach, probe, ZK sweep) flag "missing field X" as an error when the field is optional by design. SKILL.md without `version` frontmatter, combo without `cards`, wiki without `updated` timestamp.
+
+**Root cause**: Audit logic treats schema fields as required unless explicitly marked optional. The absence of a field is interpreted as a defect, not a legitimate choice.
+
+**Fix**: Every audit rule must distinguish "field is missing" (structural concern, may be fine) from "field is needed" (functional concern, actual defect). Document optional vs required explicitly in schema references.
+**Real example**: Combo `cards` field — code doesn't parse it, ADR says it's visual annotation. Audit agents flagged "missing `cards`" as an error in 3 deck tomls.
+
+## 7. Excessive Self-Questioning
+
+**Symptom**: Agent enters anxiety loop — "should I do X? but what about Y? wait let me check Z first..." — burning tokens without progress.
+
+**Root cause**: Agent's uncertainty threshold is too low. It treats every ambiguity as requiring investigation, even when the cost of being wrong is near zero.
+
+**Fix**: 90% confidence threshold for autonomous smart-task execution (see auto-memory). If the action is low-impact + reversible, act without asking. Only pause for high-impact or irreversible decisions.
+**Real example**: Agent spent 12 messages debating whether to use `cards` or `skills` in a combo example — both are valid per ADR-20260528153455764, and either choice is trivially fixable.
+
+## 8. Arena as Rule Validator (ZK subagent)
+
+**Symptom**: New SKILL.md description rules or AGENTS.md conventions are written but never empirically tested. Author assumes they work for external readers.
+
+**Root cause**: "It reads clearly to me" = curse of knowledge. The author already has the mental model the doc is trying to build.
+
+**Fix**: Use arena single with ZK subagent to validate rules: spawn a zero-knowledge agent that reads only the doc under test → asks it to self-report understanding → compare against intended understanding. This is Level 1 of dreaming's ZK validation — same principle, applied to individual docs rather than full SSOT sweeps.
+**Real example**: coach rules about desc style were written, reviewed, and committed — but a ZK subagent later found 2 of 5 rules were ambiguous to a fresh reader. Arena single caught what human review missed.

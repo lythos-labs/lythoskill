@@ -1,7 +1,6 @@
 ---
 name: lythoskill-coach
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Analyzes SKILL.md files against Agent Skills best practices. Reviews
   body size, description quality, progressive disclosure, frontmatter
@@ -32,20 +31,34 @@ instructions and gotchas in the body.
 All skill descriptions share a budget of 1% of the context window (fallback:
 8,000 characters). With many skills, each gets very little space.
 
+**Community reality** (cold pool sample, May 2026): 579 skills scanned. `when_to_use`
+appears in 16 (2.8%) — all lythoskill's own. 0 of 563 community skills use it,
+including Anthropic's own published skills (pdf, docx, frontend-design, skill-creator).
+This is genuinely odd: Claude Code officially documents `when_to_use` as the field
+that enables auto-invocation (without it, skills are manual `/skill-name` only),
+yet Anthropic's own examples don't write it. Official docs are ahead of official
+practice.
+
+**Our position** (empirically validated):
+- We use `when_to_use` because the mechanism is real: Claude Code matches against
+  it for auto-invocation, and in practice it works — skills with populated
+  `when_to_use` (e.g. project-cortex, deck) trigger without the user typing `/`.
+  Anthropic documented it, we wrote it, and the agent does auto-invoke. That's
+  sufficient evidence regardless of adoption rate.
+- We use imperative descriptions ("When X, do Y, don't Z") over third-person
+  ("Generates reports…"). Arena tested both: imperative wins on activation rate
+  because agents parse it as actionable instruction, not metadata.
+
 Rules:
-- Third person ("Generates reports…" not "I generate…")
-- Front-load the primary use case (truncation cuts from the end)
-- Include natural trigger phrases
-- Use `when_to_use` for additional trigger context beyond description
+- **description**: What the skill does, imperative form. Front-load the primary use case
+- **when_to_use**: Trigger surface (Claude Code). List scenarios, keywords, user phrases.
+  Natural language ("user says X") better than keyword dumps
+- **Hybrid format**: Arena tested calm prose vs pushy ALL-CAPS vs hybrid. Hybrid wins
+  both activation and readability. See ADR-20260501170000000
 
-**Formula** (per Anthropic official guide): `[What it does] + [When to use it] + [Key capabilities]`
+**Formula**: `description` = [What it does] + [Key capabilities]. `when_to_use` = [When to activate] + [Trigger phrases].
 
-Anti-pattern is **not** "has narrative" — it's **burying the core verb** in clause depth
-("For teams that struggle with maintaining consistent deployment pipelines across
-environments, this skill provides…" → 核心动词 "automates deployments" 被埋在第 5 个词后).
-Good narrative: "Automates multi-environment deployments. Use when CI pipelines
-fail across staging/production drift. Supports rollback, canary, and blue-green."
-Bad narrative: "The pain point is that teams struggle with…" (front-loads problem, not solution).
+Anti-pattern: **burying the core verb** in clause depth. Front-load the action, not the problem.
 ### 3. Progressive Disclosure
 Three tiers of skill content:
 
@@ -78,18 +91,13 @@ Official Claude Code fields: name, description, when_to_use, argument-hint,
 arguments, disable-model-invocation, user-invocable, allowed-tools, model,
 effort, context, agent, hooks, paths, shell.
 
-**Critical: `type` field**
-- Must be `standard` or `flow` (Kimi CLI constraint)
-- Any other value (`innate`, `tool`, `combo`, `transient`) causes Kimi CLI to skip the skill silently
-- These are **deck governance sections**, not SKILL.md types
-
 Custom fields: use a consistent prefix (e.g. `deck_`). Custom fields are
 parsed but not injected into context — zero token cost.
 
-#### 5.1. Type Field (CRITICAL)
-- **Value**: MUST be `standard` or `flow`
-- **Why**: Kimi CLI validates `skill_type in ("standard", "flow")`; other values trigger `ValueError` and the skill is silently skipped
-- **Common mistake**: Using `type: tool` or `type: combo` — these are deck.toml section names, not SKILL.md types
+#### 5.1. Type Field
+- **Philosophy**: 如果你有 type，我就认，我不验证。Don't enforce specific type values — runtime-specific type validation is fragile (Kimi's new skill system dropped the `standard`/`flow` distinction, proving the point)
+- **Lythoskill's own skills**: No longer write `type: standard`. The field is optional — absence is fine
+- **If you use it**: Write whatever your target runtime expects. Coach won't flag it
 
 ### 6. One Skill, One Job
 A skill should do one thing well. If it has 3+ unrelated responsibilities,
@@ -98,7 +106,7 @@ split it. Exception: multiple topics sharing one operational workflow.
 ### 6.1. Thin Skill Principle
 - **Skill = Controller**, not Service. Heavy logic belongs in npm/pip/cli tools
 - **Skill thickness**: SKILL.md should be <500 lines. If it exceeds, move content to `references/` or extract to an external package
-- **Build pipeline**: `lythoskill build` compiles monorepo skill source → thin release directory (SKILL.md + scripts + references)
+- **Build pipeline**: `bunx @lythos/skill-creator build` compiles monorepo skill source → thin release directory (SKILL.md + scripts + references)
 - **Mental model**: "Fat agent + thin skill + mature infra" — agent does interpretive work, CLI does deterministic work
 
 ## 7. Factual Accuracy
@@ -181,7 +189,7 @@ instructions outperforms a 390-line skill full of gaps.
 | description + when_to_use cap | 1,536 characters | Skill listing |
 | All descriptions budget | 1% of context window (fallback: 8,000 chars) | Skill listing |
 | Budget override env var | `SLASH_COMMAND_TOOL_CHAR_BUDGET` | Claude Code config |
-| SKILL.md `type` | `standard` or `flow` only | Kimi CLI validator |
+| SKILL.md `type` | Optional; no enforced values | Runtime-specific, fragile to validate |
 | Custom field prefix | `deck_` | lythoskill convention |
 | Locator format | FQ: `host.tld/owner/repo/skill` | ADR-20260502012643244 |
 

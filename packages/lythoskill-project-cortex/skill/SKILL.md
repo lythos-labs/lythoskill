@@ -1,7 +1,6 @@
 ---
 name: project-cortex
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Register tasks BEFORE fixing bugs. Close epics when work is done.
   Always use CLI for state transitions — never mv files by hand.

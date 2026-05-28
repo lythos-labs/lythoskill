@@ -1,7 +1,6 @@
 ---
 name: lythoskill-project-scribe-weekly
-version: 0.15.4
-type: standard
+version: 0.15.5
 description: |
   Weekly synthesis writer. Distills the past 7 days' core thread + quest DAG
   into a frontmatter-rich short doc. Never replays git log or cortex INDEX
@@ -46,8 +45,8 @@ ls daily/*.md | sort | tail -7
 git log --since="7 days ago" --oneline
 
 # Cortex surface — what state changed?
-bunx @lythos/project-cortex@0.15.4 probe
-bunx @lythos/project-cortex@0.15.4 stats
+bunx @lythos/project-cortex@0.15.5 probe
+bunx @lythos/project-cortex@0.15.5 stats
 
 # ADR surface — what decisions were accepted this period?
 ls -lt cortex/adr/02-accepted/ | head -15
@@ -105,8 +104,8 @@ ls daily/*.md | sort | tail -7
 git log --since="7 days ago" --oneline
 
 # 3. Current cortex state
-bunx @lythos/project-cortex@0.15.4 index
-bunx @lythos/project-cortex@0.15.4 stats
+bunx @lythos/project-cortex@0.15.5 index
+bunx @lythos/project-cortex@0.15.5 stats
 
 # Cortex uses timestamp IDs (ADR-yyyyMMddHHmmssSSS, TASK-...,
 # EPIC-...). This lets you grep by date range:
@@ -194,7 +193,7 @@ Before relying on a weekly for planning, spot-check its claims against ground tr
 
 ```bash
 # Does the recorded epic/task status match reality?
-bunx @lythos/project-cortex@0.15.4 probe
+bunx @lythos/project-cortex@0.15.5 probe
 
 # Does the git activity match the claimed period?
 git log --since="2026-05-01" --until="2026-05-07" --oneline

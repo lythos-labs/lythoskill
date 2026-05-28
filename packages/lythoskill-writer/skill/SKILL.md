@@ -1,7 +1,6 @@
 ---
 name: lythoskill-writer
 version: 0.1.0
-type: standard
 description: |
   Human-first documentation writer and reviewer. Reviews README, wiki, ADR, daily handoff,
   showcase, and reference docs for information density, structural rhythm, and anti-template

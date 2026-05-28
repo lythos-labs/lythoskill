@@ -7,6 +7,7 @@
 | proposed | 2026-05-11 | Created — resolve vacillation from ADR-20260424000744041 |
 | accepted | 2026-05-17 | Accepted |
 | superseded | 2026-05-20 | Catalog location reverts to Pattern A (`<pool>/.lythoskill-curator/`). See EPIC-20260520124010693. |
+| superseded | 2026-05-28 | Superseded |
 
 ## 背景
 

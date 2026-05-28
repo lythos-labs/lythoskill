@@ -1,7 +1,6 @@
 ---
 name: lythoskill-curator
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
   indexes SKILL.md frontmatter into REGISTRY.json + catalog.db. CLI is mechanical

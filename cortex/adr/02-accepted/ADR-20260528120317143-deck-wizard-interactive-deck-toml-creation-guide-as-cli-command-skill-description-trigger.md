@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-28 | Created — thin-skill pattern: agent asks user, guide informs agent, CLI validates output |
+| accepted | 2026-05-28 | Accepted |
 
 ## 背景
 

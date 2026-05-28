@@ -1,7 +1,6 @@
 ---
 name: lythoskill-deck
 version: {{PACKAGE_VERSION}}
-type: standard
 description: |
   Declarative skill deck governance. `deck link` reconciles the working set
   to match skill-deck.toml — deny-by-default removes undeclared skills.

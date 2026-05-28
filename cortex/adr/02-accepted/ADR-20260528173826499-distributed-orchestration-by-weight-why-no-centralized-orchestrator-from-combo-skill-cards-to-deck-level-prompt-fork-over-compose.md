@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-28 | Created — ZK dreaming agent surfaced this as a key non-ADR decision warranting formal documentation |
+| accepted | 2026-05-28 | Accepted |
 
 ## 背景
 

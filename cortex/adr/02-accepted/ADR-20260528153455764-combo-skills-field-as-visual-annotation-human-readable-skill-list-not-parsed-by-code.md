@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-05-28 | Created — ZK sweep found combo skills field inconsistent across docs/schema/code |
+| accepted | 2026-05-28 | Accepted |
 
 ## 背景
 
