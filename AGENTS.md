@@ -118,6 +118,8 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 
 **Deck first — don't ask, dispatch.** When the user asks for research, analysis, QA, or audit work, reach for `arena single` with a pre-built deck from `examples/decks/` BEFORE asking "should I use X or do it manually?" This repo has 18 pre-built decks for common tasks. The conditioned reflex is: user says "调研" → `arena single --deck examples/decks/deep-research.toml`, user says "扫一下" → `arena single --deck examples/decks/qa-sweep.toml`. Do NOT ask "should I use the research skill or do it myself?" — just dispatch. The subagent works in parallel while you continue other work. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) for the full catalogue.
 
+**When using a deck, always read its `[combo.<name>]` sections.** Combo prompts are the orchestration playbook — step-by-step multi-skill pipeline instructions. They are not optional metadata. A deck with combos is an orchestrator node, not just a skill list.
+
 | User says | Deck to use | Command |
 |-----------|------------|---------|
 | 调研 / 研究 / 查一下 | `deep-research.toml` | `arena single --deck examples/decks/deep-research.toml --brief "..."` |
