@@ -92,3 +92,18 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 
 **Fix**: Use arena single with ZK subagent to validate rules: spawn a zero-knowledge agent that reads only the doc under test → asks it to self-report understanding → compare against intended understanding. This is Level 1 of dreaming's ZK validation — same principle, applied to individual docs rather than full SSOT sweeps.
 **Real example**: coach rules about desc style were written, reviewed, and committed — but a ZK subagent later found 2 of 5 rules were ambiguous to a fresh reader. Arena single caught what human review missed.
+
+## 9. Cross-Package Convention Change Without Consumer Sync
+
+**Symptom**: A convention or schema is deprecated/removed (e.g., `type` frontmatter in SKILL.md). CI passes locally because pre-commit only tests changed packages. But CI fails later because other packages still expect the old convention.
+
+**Root cause**: TDD/task planning treats convention change as a single-file edit. The "consumers" of that convention — tests, parsers, validators, other packages — are not identified and updated in the same task.
+
+**Real example**: ADR-20260506103209293 removed `type: standard|flow` from SKILL.md. Guard script (`adr-check.sh`) was updated in one commit, but `curator-core.test.ts` still expected `type: 'standard'` as default. Pre-commit skipped curator tests (only scripts/ changed). CI caught it — but only after the broken commit was pushed.
+
+**Fix**: When deprecating a convention, task must include:
+1. **Consumer audit**: `grep -rn "type.*standard\|type.*flow" packages/` to find all consumers
+2. **Synchronized update**: all consumers updated in the same commit or same PR
+3. **Full test run**: `bun --filter='*' run test` before claiming done — pre-commit's per-package filter is not enough for cross-cutting changes
+
+**Prevention**: Task template should have a "Cross-package impact" checkbox. Any change to schema, convention, or shared interface must explicitly list consumers and verify they're updated.
