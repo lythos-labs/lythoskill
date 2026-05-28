@@ -83,16 +83,36 @@ All content lives under `cortex/wiki/`. Site content is a build target sourced f
 **No `combo-` prefix on anything** -- combo is not a skill type, not a package namespace,
 not a file prefix. It is a `[combo.<name>]` TOML section containing a prompt template.
 
-## 5. Done Checklist
+## 5. Testing Layers (Three-Layer Separation)
+
+This project has three distinct test layers. Do not confuse them:
+
+| Layer | What | How | Speed | Mock Policy |
+|-------|------|-----|-------|-------------|
+| **L0: Unit Tests** | Pure functions: plan builders, parsers, validators | `bun test packages/<name>/src/*.test.ts` co-located with source | <1s per file | **No mock needed** — pure functions have no IO |
+| **L1: Integration Tests** | CLI routing, command dispatch, error messages | Same test runner, may `spyOn(console)` to capture output | <5s per file | `spyOn(console)` only — never spy on `fs`, `child_process`, or `execSync` |
+| **L2: Agent BDD** | End-to-end: agent reads skill → executes scenario → judge verdict | `reproduce.sh` in `showcase/` or `test/scenarios/` | 30s-5min per scenario | **No mock at all** — real agent spawn, real tool calls |
+
+**Key rule**: L0 tests pure logic. L1 tests command wiring. L2 tests agent comprehension.
+An external evaluator seeing `spyOn` or `mock` in test files must distinguish:
+- ✅ **IO interface injection** (`createMockExec()`, `mockFetch`) — architecture-compliant L0/L1
+- ✅ **Console output capture** (`spyOn(console, 'log')`) — L1 integration testing
+- ❌ **Direct system call interception** (`spyOn(execSync)`, `spyOn(fs)`) — violation of intent/plan/execute separation
+
+Current codebase: **zero violations of the third type**.
+
+## 6. Done Checklist
 
 Before claiming any piece of work "done" (from AGENTS.md SS "Before claiming done"):
 
-- [ ] Tests pass: `bun test packages/<name>/src/`
+- [ ] L0 tests pass: `bun test packages/<name>/src/`
+- [ ] If CLI surface changed: verify L1 behavior (output format, error messages)
+- [ ] If skill behavior changed: consider adding/updating L2 `reproduce.sh`
 - [ ] TypeScript compiles (Bun handles at test time)
 - [ ] If CLI surface changed: update `packages/<name>/README.md`
 - [ ] If new package: add to `scripts/publish.sh` PACKAGES array
 - [ ] If new/modified deck example: `deck validate --deck examples/decks/<name>.toml` passes
-- [ ] If producing documentation: run ZK validation (see SS8 for full 4-step loop)
+- [ ] If producing documentation: run ZK validation (see SS9 for full 4-step loop)
 - [ ] Commit with `Closes: TASK-xxx` trailer if task exists
 
 **For guard script changes** (`.husky/`, `scripts/pre-commit-*.ts`, `scripts/test-report.ts`,
@@ -150,7 +170,7 @@ cortex complete TASK-xxx      # any status -> completed (trailer-driven)
 **Close tasks you finish.** Do not leave tasks in `02-in-progress` after work is done.
 Run `cortex probe` before session end to catch inconsistencies.
 
-## 8. Agent Tool Delegation
+## 9. Agent Tool Delegation
 
 When to spawn subagents vs do it yourself:
 
@@ -165,7 +185,7 @@ When to spawn subagents vs do it yourself:
 
 **Pattern**: You define the question → agent gathers evidence → you judge → agent executes.
 
-## 9. Site & Doc Rules
+## 10. Site & Doc Rules
 
 ### Code Blocks
 
@@ -190,7 +210,7 @@ Every significant doc change requires a ZK validation pass before "done":
 
 For site pages, ADRs, SSOT files, and wiki entries that future agents onboard from.
 
-## 10. Daily Handoff Conventions
+## 11. Daily Handoff Conventions
 
 When session ends or context pressure is high:
 
@@ -200,7 +220,7 @@ When session ends or context pressure is high:
 4. Focus on what file exploration CANNOT recover: pitfalls, true working-tree state,
    specific next steps. Never replay git log or cortex INDEX.
 
-## 11. Site Positioning & External References
+## 12. Site Positioning & External References
 
 ### What lythoskill IS (must be reflected in site hero/tagline)
 - **A governance layer** for agent skills — not a skill collection, not a package manager, not a marketplace
@@ -219,7 +239,7 @@ Every external URL, repo name, and skill attribution in the site must be verifie
 - `canvas-design` → `anthropics/skills` (not `vercel-labs/agent-skills`)
 - When in doubt: `gh api repos/<owner>/<repo>` or `curl -sI <url>` to verify existence
 
-## 12. Related SSOT Documents
+## 13. Related SSOT Documents
 
 | Document | Answers | When to read |
 |----------|---------|-------------|
