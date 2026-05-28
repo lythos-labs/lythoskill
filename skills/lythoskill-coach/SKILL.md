@@ -144,7 +144,7 @@ A skill has **three surfaces** that must stay in sync:
 
 The only reliable way to detect drift is to **give a zero-context subagent the SKILL.md and a task**:
 
-> "You have no prior knowledge of this project. Use the skills in `.claude/skills/`
+> "You have no prior knowledge of this project. Use the skills in the working set directory
 > to [do X]. Read SKILL.md for instructions. Do not ask for help."
 
 If the subagent fails because SKILL.md told it to use a non-existent command,
