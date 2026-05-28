@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/28 11:45:53
+> 自动生成于 2026/5/28 12:00:01
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 268 | 进行中: 0, 待验收: 1, 已完成: 225 |
+| Tasks | 269 | 进行中: 0, 待验收: 2, 已完成: 225 |
 | Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
 | ADRs | 82 | 已接受: 78 |
 
@@ -77,9 +77,10 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (2)
 
 - 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
+- 🔍 **TASK-20260528114758563**: Fix site command shorthands — ensure all code blocks use runnable commands, establish shorthand resolution convention in AGENTS.md
 
 ### 已完成 (225)
 

@@ -6,6 +6,7 @@
 |--------|------|------|
 | backlog | 2026-05-28 | Created — prior agent-written site docs contain bare shorthands that aren't runnable |
 | in-progress | 2026-05-28 | Started |
+| review | 2026-05-28 | Deliverables committed |
 
 ## 背景与目标
 
