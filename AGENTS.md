@@ -492,9 +492,36 @@ Full checklist: see [Session Handoff Checklist](#session-handoff-checklist) belo
 - [ ] TypeScript compiles (Bun handles this at test time)
 - [ ] If CLI surface changed: update package README
 - [ ] If new package: add to `scripts/publish.sh` PACKAGES array
+- [ ] If new/modified deck example: `deck validate --deck examples/decks/<name>.toml` passes
 - [ ] Commit with `Closes: TASK-xxx` trailer if task exists
 
 ---
+
+---
+
+## Command Shorthand Convention
+
+Throughout this file and project docs, CLI commands are referenced by their **shorthand** (e.g. "deck link", "arena single", "cortex probe"). This is a convention for readability — the shorthand is NOT a runnable command.
+
+**Resolution rule** — every shorthand resolves to one of:
+
+| Shorthand | In-repo dev | External user (via npm) |
+|-----------|------------|------------------------|
+| `deck link` | `bun packages/lythoskill-deck/src/cli.ts link` | `bunx @lythos/skill-deck link` |
+| `deck add` | `bun packages/lythoskill-deck/src/cli.ts add` | `bunx @lythos/skill-deck add` |
+| `deck remove` | `bun packages/lythoskill-deck/src/cli.ts remove` | `bunx @lythos/skill-deck remove` |
+| `deck validate` | `bun packages/lythoskill-deck/src/cli.ts validate` | `bunx @lythos/skill-deck validate` |
+| `deck refresh` | `bun packages/lythoskill-deck/src/cli.ts refresh` | `bunx @lythos/skill-deck refresh` |
+| `arena single` | `bun packages/lythoskill-arena/src/cli.ts single` | `bunx @lythos/skill-arena single` |
+| `arena vs` | `bun packages/lythoskill-arena/src/cli.ts vs` | `bunx @lythos/skill-arena vs` |
+| `curator scan` | `bun packages/lythoskill-curator/src/cli.ts scan` | `bunx @lythos/curator scan` |
+| `curator add` | `bun packages/lythoskill-curator/src/cli.ts add` | `bunx @lythos/curator add` |
+| `curator query` | `bun packages/lythoskill-curator/src/cli.ts query` | `bunx @lythos/curator query` |
+| `cortex task` | `bun packages/lythoskill-project-cortex/src/cli.ts task` | `bunx @lythos/project-cortex task` |
+| `cortex adr` | `bun packages/lythoskill-project-cortex/src/cli.ts adr` | `bunx @lythos/project-cortex adr` |
+| `cortex probe` | `bun packages/lythoskill-project-cortex/src/cli.ts probe` | `bunx @lythos/project-cortex probe` |
+
+**For site/docs (external audience):** code blocks MUST use the `bunx` form — copy-paste must work. Prose may use shorthand AFTER the first occurrence establishes the full command: "`deck link` (via `bunx @lythos/skill-deck link`)". See `cortex/tasks/02-in-progress/TASK-20260528114758563-*.md` for the audit scope.
 
 ## Common Commands
 

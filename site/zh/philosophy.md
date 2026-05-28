@@ -82,7 +82,7 @@ rm -rf ~/.agents/skills/cool-skill/     # 解除安裝（也許）
 
 # 宣告式（lythoskill）
 # 1. 在 skill-deck.toml 加一行
-# 2. 執行 `deck link`
+# 2. 執行 `bunx @lythos/skill-deck link`
 # 3. 工作集與宣告完全吻合
 ```
 

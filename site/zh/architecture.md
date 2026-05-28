@@ -15,7 +15,7 @@ Lythoskill 將它們分開：
 
 ```
 冷池 (~/.agents/skill-repos/)       工作集 (.<agent>/skills/)
-├── anthropic-superpowers/            ├── lythoskill-deck → ...
+├── superpowers/                      ├── lythoskill-deck → ...
 ├── mattpocock-skills/                ├── lythoskill-arena → ...
 ├── antigravity-skills/               ├── lythoskill-curator → ...
 ├── vercel-labs-skills/               └── tdd → ...
@@ -48,7 +48,7 @@ Lythoskill 將它們分開：
 
 ### Deck 宣告式治理
 
-`skill-deck.toml` 是單一真相來源。`deck link` 將工作集對帳到完全吻合——未宣告的技能被移除，已宣告的技能被 symlink。預設拒絕。
+`skill-deck.toml` 是單一真相來源。`bunx @lythos/skill-deck link` 將工作集對帳到完全吻合——未宣告的技能被移除，已宣告的技能被 symlink。預設拒絕。
 
 ```toml
 [deck]
@@ -69,9 +69,9 @@ Arena 生成零知識子代理，各自載入不同牌組，執行相同任務�
 
 | 層級 | 問題 | 行動 |
 |------|------|------|
-| **L0** | 「這個技能能用嗎？」 | `arena single --deck <path> --brief "task"` |
-| **L1** | 「哪副牌組更好？」 | `arena vs --config arena.toml` |
-| **L2** | 「協議如何運作？」 | Agent ↔ CLI 控制權轉移：`prepare-workdir` → agent spawn → `archive` → `deck link` 恢復 |
+| **L0** | 「這個技能能用嗎？」 | `bunx @lythos/skill-arena single --deck <path> --brief "task"` |
+| **L1** | 「哪副牌組更好？」 | `bunx @lythos/skill-arena vs --config arena.toml` |
+| **L2** | 「協議如何運作？」 | Agent ↔ CLI 控制權轉移：`prepare-workdir` → agent spawn → `archive` → `bunx @lythos/skill-deck link` 恢復 |
 | **L3** | 「Pareto 前沿是什麼？」 | 多目標最佳化——一副便宜中等品質的牌組和一副昂貴高品質的牌組可以同時是非支配的 |
 
 ```
@@ -83,7 +83,7 @@ Arena 生成零知識子代理，各自載入不同牌組，執行相同任務�
 
 **關鍵設計決策：**
 
-- **在 `/tmp` 中執行，永遠不污染工作集。** 實驗沙箱是隔離的。每次執行後，`deck link` 恢復父牌組。不安裝、不污染工作集、不覆蓋牌組。
+- **在 `/tmp` 中執行，永遠不污染工作集。** 實驗沙箱是隔離的。每次執行後，`bunx @lythos/skill-deck link` 恢復父牌組。不安裝、不污染工作集、不覆蓋牌組。
 - **預設由 agent 指揮。** 對於同玩家牌組比較（95% 的使用場景），agent 透過 Agent 工具直接生成子代理——無需 CLI runner。跨玩家比較（kimi vs codex）是唯一需要 CLI runner 的場景。
 - **裁判是語義性的，不可腳本化。** Token 計數可以寫腳本；判斷「哪個輸出更適合場景」需要 LLM 推理。Arena 為此生成裁判子代理。
 - **心態驗證器，而非輸出檢查器。** 透過猜測得到正確輸出是 FAIL——技能的心智模型沒有轉移。Arena 在技能到達使用者之前捕捉心態缺口。
@@ -97,9 +97,9 @@ Curator 不是搜尋引擎——它是你在技能生態系中的**個人知識�
 
 | 層級 | 問題 | 行動 |
 |------|------|------|
-| **L0** | 「這個技能的路徑是什麼？」 | `curator find <bare-name>` — 裸名到完整定位路徑 |
-| **L1** | 「我有哪些技能？」 | `curator scan` + `curator query "SELECT ..."` — 索引並探索你的冷池 |
-| **L2** | 「我在 GitHub 上找到東西了」 | `curator add <locator>` + re-scan + tag — 種入你的收藏 |
+| **L0** | 「這個技能的路徑是什麼？」 | `bunx @lythos/curator find <bare-name>` — 裸名到完整定位路徑 |
+| **L1** | 「我有哪些技能？」 | `bunx @lythos/curator scan` + `bunx @lythos/curator query "SELECT ..."` — 索引並探索你的冷池 |
+| **L2** | 「我在 GitHub 上找到東西了」 | `bunx @lythos/curator add <locator>` + re-scan + tag — 種入你的收藏 |
 | **L3** | 「我該採用嗎？」 | curator → arena 測試 → `curator tag --qa` → 有信心的推薦 |
 
 **三層信任模型：**
@@ -114,7 +114,7 @@ Curator 不是搜尋引擎——它是你在技能生態系中的**個人知識�
 
 - **不是探索引擎。** Curator 不包裝外部 API，也不實作 HTTP 適配器。Agent 使用 `gh search code`、WebSearch、WebFetch 進行探索。Curator 是讓探索更快的本機快取，以及記住所發現內容的豐富層。
 - **Agent 豐富的 metadata。** L3 資料（niche 標籤、QA 訊號）來自 `curator tag`，而非 SKILL.md frontmatter。技能作者寫 L1（描述）。策展者寫 L3（分類 + 驗證）。這些是分離的資料層。重新掃描會保留 agent 寫入的標籤。
-- **對帳式索引。** 一次 `curator scan` 將任何檔案系統狀態收斂到乾淨索引。重建前自動備份。`curator restore` 可回滾。
+- **對帳式索引。** 一次 `bunx @lythos/curator scan` 將任何檔案系統狀態收斂到乾淨索引。重建前自動備份。`bunx @lythos/curator restore` 可回滾。
 - **資料飛輪。** 更多使用 → 更多 QA 資料 → 更好的 curator → 更好的推薦 → 更有針對性的測試 → 更多 QA 資料。Curator 的價值隨時間複利增長，而 deck/arena 提供的是穩態價值。
 - **QA 來源必須記錄。** 每個 QA 訊號都帶有 `source_type`、`source_name`、`signal_value`。無來源訊號會被拒收。事實查核使用多來源交叉比對，搭配結構化信心評級（HIGH / LOW / CONTRADICTED）。
 

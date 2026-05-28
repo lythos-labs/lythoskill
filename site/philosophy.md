@@ -82,7 +82,7 @@ rm -rf ~/.agents/skills/cool-skill/     # uninstall (maybe)
 
 # Declarative (lythoskill)
 # 1. Add one line to skill-deck.toml
-# 2. Run `deck link`
+# 2. Run `bunx @lythos/skill-deck link`
 # 3. Working set matches declaration exactly
 ```
 

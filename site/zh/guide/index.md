@@ -58,7 +58,7 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 
 :::
 
-執行 `deck link`。現在工作集中只有 `tdd` 和 `diagnose`。其他全部消失。
+執行 `bunx @lythos/skill-deck link`。現在工作集中只有 `tdd` 和 `diagnose`。其他全部消失。
 
 **改變了什麼**：你的 agent 現在只看見 2 個技能。行為可重現。一個檔案宣告什麼是 active——分享它、版本化它、切換它。
 
@@ -71,18 +71,18 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 :::
 
 ```bash
-curator scan                    # 索引你的冷池
-curator find "fact-check"      # 按名稱或關鍵字搜尋技能
+bunx @lythos/curator scan                     # 索引你的冷池
+bunx @lythos/curator find "fact-check"        # 按名稱或關鍵字搜尋技能
 ```
 
-Curator 回傳 locator 路徑。加到牌組，執行 `deck link`。探索 → 選擇 → 對帳，一個循環完成。
+Curator 回傳 locator 路徑。加到牌組，執行 `bunx @lythos/skill-deck link`。探索 → 選擇 → 對帳，一個循環完成。
 
 ## 第 3 級：先測試再信任
 
 一個技能的 README 說它很棒。真的嗎？
 
 ```bash
-arena single --deck skill-deck.toml --task "refactor this auth module"
+bunx @lythos/skill-arena single --deck skill-deck.toml --task "refactor this auth module"
 ```
 
 Arena 生成一個零知識子代理，載入你的任務和你的牌組。你看到的是輸出——不是行銷文案。
@@ -90,7 +90,7 @@ Arena 生成一個零知識子代理，載入你的任務和你的牌組。你�
 A/B 比較：
 
 ```bash
-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
+bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
 ```
 
 **改變了什麼**：技能採用是實證決策，不是信仰決策。
@@ -120,8 +120,8 @@ prompt = """
 - **生態意識**：Curator query 跨池查詢，揭露重疊、缺口與機會
 
 ```bash
-deck link --deck phase-dev.toml     # 切換到開發工具組
-deck link --deck phase-writing.toml # 切換到寫作工具組
+bunx @lythos/skill-deck link --deck phase-dev.toml     # 切換到開發工具組
+bunx @lythos/skill-deck link --deck phase-writing.toml # 切換到寫作工具組
 ```
 
 每次階段切換都重新對帳工作集。不用手動清理。不留殘留。

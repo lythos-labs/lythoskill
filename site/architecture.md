@@ -15,7 +15,7 @@ Lythoskill separates them:
 
 ```
 Cold Pool (~/.agents/skill-repos/)     Working Set (.<agent>/skills/)
-├── anthropic-superpowers/             ├── lythoskill-deck → ...
+├── superpowers/                       ├── lythoskill-deck → ...
 ├── mattpocock-skills/                 ├── lythoskill-arena → ...
 ├── antigravity-skills/                ├── lythoskill-curator → ...
 ├── vercel-labs-skills/                └── tdd → ...
@@ -48,7 +48,7 @@ The three pillars — Deck, Arena, Curator — all operate on this foundation.
 
 ### Deck — Declarative Governance
 
-`skill-deck.toml` is the single source of truth. `deck link` reconciles the working set to match — undeclared skills are removed, declared skills are symlinked. Deny-by-default.
+`skill-deck.toml` is the single source of truth. `bunx @lythos/skill-deck link` reconciles the working set to match — undeclared skills are removed, declared skills are symlinked. Deny-by-default.
 
 ```toml
 [deck]
@@ -69,9 +69,9 @@ Arena spawns zero-knowledge subagents with different decks, runs them on the sam
 
 | Level | Question | Action |
 |-------|----------|--------|
-| **L0** | "Does this skill work?" | `arena single --deck <path> --brief "task"` |
-| **L1** | "Which deck is better?" | `arena vs --config arena.toml` |
-| **L2** | "How does the protocol work?" | Agent ↔ CLI control transfer: `prepare-workdir` → agent spawn → `archive` → `deck link` restore |
+| **L0** | "Does this skill work?" | `bunx @lythos/skill-arena single --deck <path> --brief "task"` |
+| **L1** | "Which deck is better?" | `bunx @lythos/skill-arena vs --config arena.toml` |
+| **L2** | "How does the protocol work?" | Agent ↔ CLI control transfer: `prepare-workdir` → agent spawn → `archive` → `bunx @lythos/skill-deck link` restore |
 | **L3** | "What's the Pareto frontier?" | Multi-objective optimization — a cheap-medium-quality deck and an expensive-high-quality deck can both be non-dominated |
 
 ```
@@ -83,7 +83,7 @@ Task → [Deck A subagent] → Output A ─┐
 
 **Key design decisions:**
 
-- **Runs in `/tmp`, never pollutes your working set.** Experiment sandbox is isolated. After every run, `deck link` restores the parent deck. No install, no working-set pollution, no deck overwrite.
+- **Runs in `/tmp`, never pollutes your working set.** Experiment sandbox is isolated. After every run, `bunx @lythos/skill-deck link` restores the parent deck. No install, no working-set pollution, no deck overwrite.
 - **Agent-orchestrated by default.** For same-player deck comparisons (95% of use cases), the agent spawns subagents directly via the Agent tool — no CLI runner needed. Cross-player comparison (kimi vs codex) is the only case requiring the CLI runner.
 - **Judgment is semantic, not scriptable.** Token counting is scriptable; deciding "which output better fits the scenario" requires LLM inference. Arena spawns a judge subagent for this.
 - **Mindset validator, not output checker.** A correct output achieved by guessing is a FAIL — the skill's mental model did not transfer. Arena catches mindset gaps before skills reach users.
@@ -97,9 +97,9 @@ Curator is NOT a search engine — it is your **personal knowledge base** for th
 
 | Level | Question | Action |
 |-------|----------|--------|
-| **L0** | "What's the path for this skill?" | `curator find <bare-name>` — bare name to full locator |
-| **L1** | "What do I have?" | `curator scan` + `curator query "SELECT ..."` — index and explore your cold pool |
-| **L2** | "I found something on GitHub" | `curator add <locator>` + re-scan + tag — seed your collection |
+| **L0** | "What's the path for this skill?" | `bunx @lythos/curator find <bare-name>` — bare name to full locator |
+| **L1** | "What do I have?" | `bunx @lythos/curator scan` + `bunx @lythos/curator query "SELECT ..."` — index and explore your cold pool |
+| **L2** | "I found something on GitHub" | `bunx @lythos/curator add <locator>` + re-scan + tag — seed your collection |
 | **L3** | "Should I adopt this?" | curator -> arena test -> `curator tag --qa` -> recommend with confidence |
 
 **Three-layer trust model:**
@@ -114,7 +114,7 @@ Curator is NOT a search engine — it is your **personal knowledge base** for th
 
 - **Not a discovery engine.** Curator does NOT wrap external APIs or implement HTTP adapters. The agent uses `gh search code`, WebSearch, and WebFetch for discovery. Curator is the local cache that makes discovery faster, and the enrichment layer that remembers what was found.
 - **Agent-enriched metadata.** L3 data (niche tags, QA signals) comes from `curator tag`, not from SKILL.md frontmatter. Skill authors write L1 (description). The curator writes L3 (classification + verification). These are separate data layers. Re-scan preserves agent-written tags.
-- **Reconciler-style indexing.** One `curator scan` converges any filesystem state to a clean index. Auto-backup before rebuild. `curator restore` to roll back.
+- **Reconciler-style indexing.** One `bunx @lythos/curator scan` converges any filesystem state to a clean index. Auto-backup before rebuild. `bunx @lythos/curator restore` to roll back.
 - **Data flywheel.** More usage -> more QA data -> better curator -> better recommendations -> more targeted testing -> even more QA data. Curator's value compounds over time while deck/arena deliver steady-state value.
 - **QA provenance required.** Every QA signal carries `source_type`, `source_name`, and `signal_value`. No-provenance signals are rejected. Fact-checking uses multi-source cross-referencing with structured confidence (HIGH / LOW / CONTRADICTED).
 

@@ -28,7 +28,7 @@ features:
 
 ## 發現的樂趣
 
-你在 GitHub 上找到一個技能。可能是 Anthropic superpowers 裡的 `frontend-design`，可能是某人分享的 TDD 工作流。你把它丟進 `~/.agents/skills/`，試一個 prompt，它成功了。你很開心。
+你在 GitHub 上找到一個技能。可能是 [obra/superpowers](https://github.com/obra/superpowers) 裡的 `frontend-design` — `/plugin install` 就有了。可能是某人分享的 TDD 工作流 — `npx skills add` 就裝好了。你試一個 prompt，它成功了。你很開心。
 
 然後你又找到一個。再一個。你的收藏慢慢成長——這裡一個 PDF 閱讀器，那裡一個研究管線，同事 repo 裡一個文件格式化工具。每一個都能用。每一個都讓你的 agent 更聰明。
 
@@ -106,7 +106,7 @@ bunx @lythos/skill-deck@latest link
 
 :::
 
-就這樣。複製、貼上、執行。`cold_pool` 欄位告訴系統你的技能放在哪裡——一個放 git clone repo 的目錄。`working_set` 欄位告訴系統你的 agent 去哪裡找。`deck link` 把工作集對帳到與宣告完全吻合——未宣告的技能會被移除，已宣告的技能會被連結。這個檔案自我描述——不需要外部說明就能看懂它在做什麼。
+就這樣。複製、貼上、執行。`cold_pool` 欄位告訴系統你的技能放在哪裡——一個放 git clone repo 的目錄。`working_set` 欄位告訴系統你的 agent 去哪裡找。`bunx @lythos/skill-deck link` 把工作集對帳到與宣告完全吻合——未宣告的技能會被移除，已宣告的技能會被連結。這個檔案自我描述——不需要外部說明就能看懂它在做什麼。
 
 把這個檔案給隊友——同樣的設定。換另一個專案就切換另一個牌組——一個指令。不用手動清理、不留殘留、不會有「我忘了裝過那個」。
 
@@ -117,7 +117,7 @@ bunx @lythos/skill-deck@latest link
 Lythoskill 將它們分開：
 
 - **冷池**是技能住的地方——一個放 git clone repo 的目錄。儲存一切。這裡的東西不會自動 active。
-- **牌組**（`skill-deck.toml`）宣告哪些技能 active。`deck link` 將**工作集**（預設 `.claude/skills/`，可依平台設定）對帳到完全吻合——未宣告的技能會被移除。
+- **牌組**（`skill-deck.toml`）宣告哪些技能 active。`bunx @lythos/skill-deck link` 將**工作集**（預設 `.claude/skills/`，可依平台設定）對帳到完全吻合——未宣告的技能會被移除。
 
 ```
 冷池                          牌組                        工作集
@@ -129,9 +129,9 @@ Lythoskill 將它們分開：
 
 | 支柱 | 問題 | 工具 |
 |------|------|------|
-| **Deck** | 哪些是 active？ | `deck link` 對帳工作集 |
-| **Arena** | 它真的能用嗎？ | `arena vs` 執行 A/B 測試並評分 |
-| **Curator** | 外面有什麼？ | `curator find` 查詢已索引的冷池 |
+| **Deck** | 哪些是 active？ | `bunx @lythos/skill-deck link` 對帳工作集 |
+| **Arena** | 它真的能用嗎？ | `bunx @lythos/skill-arena vs` 執行 A/B 測試並評分 |
+| **Curator** | 外面有什麼？ | `bunx @lythos/curator find` 查詢已索引的冷池 |
 
 [完整架構 ->](/zh/architecture)
 

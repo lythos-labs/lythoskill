@@ -42,10 +42,10 @@ L1 和 L2 幫你找到候選者。**L3 是啟動權威**——只有你自己的
 
 ```
 ~/.agents/skill-repos/
-├── anthropic-superpowers/     # git clone
-├── mattpocock-skills/         # git clone
-├── antigravity-skills/        # git clone
-├── vercel-labs-skills/        # git clone
+├── superpowers/               # git clone https://github.com/obra/superpowers.git
+├── mattpocock-skills/         # git clone https://github.com/mattpocock/skills.git
+├── antigravity-skills/        # git clone https://github.com/sickn33/antigravity-awesome-skills.git
+├── vercel-labs-skills/        # git clone https://github.com/vercel-labs/skills.git
 └── .lythoskill-curator/       # curator 產出（catalog.db + metadata）
 ```
 

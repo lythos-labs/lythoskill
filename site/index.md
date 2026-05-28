@@ -28,7 +28,7 @@ features:
 
 ## The Joy of Discovery
 
-You find a skill on GitHub. Maybe it's `frontend-design` from Anthropic's superpowers, maybe it's a TDD workflow someone shared. You drop it into `~/.agents/skills/`, try a prompt, and it works. You're delighted.
+You find a skill on GitHub. Maybe it's `frontend-design` from [obra/superpowers](https://github.com/obra/superpowers) — `/plugin install` and it's there. Maybe it's a TDD workflow — `npx skills add` and it's yours. You try a prompt, and it works. You're delighted.
 
 Then you find another. And another. Your collection grows — a PDF reader here, a research pipeline there, a document formatter from a colleague's repo. Each one works. Each one makes your agent smarter.
 
@@ -106,7 +106,7 @@ bunx @lythos/skill-deck@latest link
 
 :::
 
-That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
+That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `bunx @lythos/skill-deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 
 Give this file to a teammate — same setup. Switch to a different deck for a different project — one command. No cleanup, no leftovers, no "I forgot I installed that."
 
@@ -117,7 +117,7 @@ You have two needs that default tools collapse into one directory: **storage** (
 Lythoskill separates them:
 
 - A **cold pool** is where skills live — a directory of git-cloned repos. Store everything. Nothing here is automatically active.
-- A **deck** (`skill-deck.toml`) declares what is active. `deck link` reconciles the **working set** (default `.claude/skills/`, configurable per platform) to match exactly — undeclared skills are removed.
+- A **deck** (`skill-deck.toml`) declares what is active. `bunx @lythos/skill-deck link` reconciles the **working set** (default `.claude/skills/`, configurable per platform) to match exactly — undeclared skills are removed.
 
 ```
 Cold Pool                     Deck                      Working Set
@@ -127,11 +127,11 @@ Store everything          Select what's active         Only what's declared
 
 **Three pillars** operate on this foundation:
 
-| Pillar | Question | Tool |
+| Pillar | Question | How (via `bunx`) |
 |--------|----------|------|
-| **Deck** | What's active? | `deck link` reconciles working set |
-| **Arena** | Does it work? | `arena vs` runs A/B tests with judge |
-| **Curator** | What's out there? | `curator find` queries indexed cold pools |
+| **Deck** | What's active? | `bunx @lythos/skill-deck link` reconciles working set |
+| **Arena** | Does it work? | `bunx @lythos/skill-arena vs` runs A/B tests with judge |
+| **Curator** | What's out there? | `bunx @lythos/curator find` queries indexed cold pools |
 
 [Full architecture ->](/architecture)
 

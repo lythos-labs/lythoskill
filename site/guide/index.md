@@ -58,7 +58,7 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 
 :::
 
-Run `deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
+Run `bunx @lythos/skill-deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
 
 **What changed**: Your agent now sees exactly 2 skills. Behavior is reproducible. One file declares what is active — share it, version it, switch it.
 
@@ -71,18 +71,18 @@ Your deck declares which skills are active (the **working set**). But where do t
 :::
 
 ```bash
-curator scan                    # Index your cold pool
-curator find "fact-check"      # Find skills by name or keyword
+bunx @lythos/curator scan                     # Index your cold pool
+bunx @lythos/curator find "fact-check"        # Find skills by name or keyword
 ```
 
-Curator returns locator paths. Add to deck, run `deck link`. Discovery → selection → reconciliation in one loop.
+Curator returns locator paths. Add to deck, run `bunx @lythos/skill-deck link`. Discovery → selection → reconciliation in one loop.
 
 ## Level 3: Test Before You Trust
 
 A skill's README says it is great. Is it?
 
 ```bash
-arena single --deck skill-deck.toml --task "refactor this auth module"
+bunx @lythos/skill-arena single --deck skill-deck.toml --task "refactor this auth module"
 ```
 
 Arena spawns a zero-knowledge subagent with your task and your deck. You see the output — not the marketing copy.
@@ -90,7 +90,7 @@ Arena spawns a zero-knowledge subagent with your task and your deck. You see the
 For A/B comparison:
 
 ```bash
-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
+bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
 ```
 
 **What changed**: Skill adoption is empirical, not faith-based.
@@ -120,8 +120,8 @@ With 15+ skills across multiple projects, you need:
 - **Ecosystem awareness**: Curator query across pools reveals overlap, gaps, and opportunities
 
 ```bash
-deck link --deck phase-dev.toml    # Switch to dev toolkit
-deck link --deck phase-writing.toml # Switch to writing toolkit
+bunx @lythos/skill-deck link --deck phase-dev.toml    # Switch to dev toolkit
+bunx @lythos/skill-deck link --deck phase-writing.toml # Switch to writing toolkit
 ```
 
 Each phase change reconciles the working set. No manual cleanup. No leftovers.

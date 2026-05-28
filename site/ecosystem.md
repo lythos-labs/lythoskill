@@ -42,10 +42,10 @@ The cold pool — where skills live, separate from the per-project working set �
 
 ```
 ~/.agents/skill-repos/
-├── anthropic-superpowers/     # git clone
-├── mattpocock-skills/         # git clone
-├── antigravity-skills/        # git clone
-├── vercel-labs-skills/        # git clone
+├── superpowers/               # git clone https://github.com/obra/superpowers.git
+├── mattpocock-skills/         # git clone https://github.com/mattpocock/skills.git
+├── antigravity-skills/        # git clone https://github.com/sickn33/antigravity-awesome-skills.git
+├── vercel-labs-skills/        # git clone https://github.com/vercel-labs/skills.git
 └── .lythoskill-curator/       # curator output (catalog.db + metadata)
 ```
 
