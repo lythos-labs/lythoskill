@@ -62,12 +62,12 @@ describe('parseFrontmatter', () => {
 describe('buildSkillMeta', () => {
   test('builds structured metadata from frontmatter', () => {
     const meta = buildSkillMeta(
-      { name: 'my-skill', description: 'A "test" skill', type: 'flow' },
+      { name: 'my-skill', description: 'A "test" skill' },
       '/pool/github.com/foo/bar/my-skill',
       'This is the body content for the skill.'
     )
     expect(meta.name).toBe('my-skill')
-    expect(meta.type).toBe('flow')
+    expect(meta.type).toBeNull()
     expect(meta.source).toBe('github.com/foo/bar')
     expect(meta.triggerPhrases).toContain('test')
     expect(meta.bodyPreview).toContain('This is the body')
@@ -76,7 +76,7 @@ describe('buildSkillMeta', () => {
   test('handles missing fields with defaults', () => {
     const meta = buildSkillMeta({}, '/tmp/test', 'body')
     expect(meta.version).toBe('unknown')
-    expect(meta.type).toBe('standard')
+    expect(meta.type).toBeNull()
     expect(meta.description).toBe('')
     expect(meta.allowedTools).toEqual([])
   })
