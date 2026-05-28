@@ -494,6 +494,24 @@ The daily file top section = ground truth (overwrite, not append). Next agent re
 
 Full checklist: see [Session Handoff Checklist](#session-handoff-checklist) below.
 
+### Weekly synthesis (scribe-weekly)
+
+When the user says "weekly", "周末复盘", or session spans a week boundary, run the prep-before-write flow:
+
+1. **Prep (gather, don't write from memory)**:
+   ```bash
+   ls daily/*.md | sort | tail -7
+   git log --since="7 days ago" --oneline
+   bun packages/lythoskill-project-cortex/src/cli.ts probe
+   ls -lt cortex/adr/02-accepted/ | head -15
+   ```
+2. **Surface anomalies**: superseded ADRs, CLI renames, reversed priorities, silent gaps, **missing ADRs** (significant code change with no corresponding ADR).
+3. **Simulated-annealing ranking**: dump all events → cluster → rank by "if a future agent missed this, how wrong?" → top 1-2 clusters = `core_thread`.
+4. **Show prep report to user before writing** — 5-line summary with `docs_now_stale` candidates.
+5. **Write weekly + ZK verify**: after writing, spawn a ZK subagent to verify the weekly against git/cortex ground truth. Run at least 2 independent passes; stop when finding <2 high-importance gaps.
+
+Full method: [`packages/lythoskill-project-scribe-weekly/skill/SKILL.md`](#) and [`references/weekly-format.md`](#). Never write a weekly from memory — the prep flow is mandatory.
+
 ### Before claiming "done"
 
 - [ ] Tests pass: `bun test packages/<name>/src/`
