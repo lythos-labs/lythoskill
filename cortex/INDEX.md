@@ -69,8 +69,8 @@ bunx @lythos/project-cortex index   # Regenerates INDEX.md and wiki/INDEX.md
 | `cortex/adr/02-accepted/ADR-20260423101938000-thin-skill-pattern.md` | Foundational architecture: why thin-skill pattern exists |
 | `cortex/adr/02-accepted/ADR-20260423124812645-should-dist-be-committed-to-git-or-ignored.md` | Why `skills/` is committed build output |
 | `cortex/adr/01-proposed/ADR-20260423182606313-skill-md-template-variable-substitution-and-cli-help-delegation.md` | How build-time template substitution works |
-| `cortex/wiki/01-patterns/thin-skill-pattern.md` | Practical guide to the thin-skill pattern |
-| `cortex/wiki/01-patterns/skill-loading-lifecycle.md` | How skill discovery works in Claude Code |
+| `cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md` | Practical guide to the thin-skill pattern |
+| `cortex/wiki/01-patterns/2026-05-02-skill-loading-lifecycle.md` | How skill discovery works in Claude Code |
 
 ---
 

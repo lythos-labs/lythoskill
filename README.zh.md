@@ -284,7 +284,7 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 - **Skill**：意图描述 + 薄路由。`bunx @lythos/<package> <command>`。
 - **Output**：构建产物提交到 Git。平台（Vercel、GitHub）直接消费。
 
-完整模式文档：[cortex/wiki/01-patterns/thin-skill-pattern.md](./cortex/wiki/01-patterns/thin-skill-pattern.md)
+完整模式文档：[cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md](./cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md)
 
 ---
 

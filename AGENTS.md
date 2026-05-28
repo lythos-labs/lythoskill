@@ -245,7 +245,7 @@ Analogy:
 - npm/pip package ≈ Spring Service (implementation layer, free to evolve)
 - Starter ≈ Spring Boot Starter (BOM + CLI entry)
 
-Full pattern documentation: [cortex/wiki/01-patterns/thin-skill-pattern.md](./cortex/wiki/01-patterns/thin-skill-pattern.md)
+Full pattern documentation: [cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md](./cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md)
 
 ---
 
