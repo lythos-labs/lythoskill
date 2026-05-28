@@ -68,6 +68,15 @@ Assessment results are curator QA data. `curator tag --qa` writes per-claim
 confidence with provenance. Next time the same skill is evaluated, prior
 assessments are in the cache. Your clear-headed work compounds.
 
+### 8. Ground documentation against ground truth
+When auditing documentation (site, README, wiki), always verify:
+- **Positioning**: does the hero/tagline describe what the project IS, not what it resembles? "Skill collection" ≠ governance layer.
+- **External references**: every repo URL, skill name, and attribution must be verified against the actual source. `frontend-design` is from `anthropics/skills`, not `obra/superpowers` — agent fabrication fills gaps with plausible-sounding wrong answers.
+- **Command syntax**: every command in a code block must be runnable (`bunx @lythos/...`, not bare shorthand).
+- **Path claims**: never imply a single path is the "sole" valid option. Cross-reference against `cortex/wiki/04-ssot/conventions.md`.
+
+These four checks are the minimum viable sober doc audit. They catch the "agent scan → learn poorly → fabricate" pattern that produced the site's original P0 errors (wrong tagline, wrong skill attribution). Run them on every doc change before claiming "done."
+
 ## When You Notice Yourself Drifting
 
 ```
