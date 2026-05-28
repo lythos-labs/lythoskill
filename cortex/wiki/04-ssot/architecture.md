@@ -140,7 +140,7 @@ Why: (1) npm/pip solve diamond deps -- no new registry; (2) skill layer immutabl
 long as interface is stable; (3) content-addressable via `bunx foo@sha256:...`;
 (4) release artifact = SKILL.md + scripts, optimal for context window budgets.
 
-**"Fat" packages are correct; "fat" SKILL.md is the anti-pattern.** Cortex is huge — embedded git-based Jira, state machine, 8 CLI commands, trailer-driven workflow. But its SKILL.md is thin: it tells the agent HOW to use cortex, not HOW cortex works internally. The community will see the package size and call it "fat skill." They're measuring the wrong layer. The thinness target is the SKILL.md — the agent's context window. The package layer can be as heavy as needed.
+**If you search the community, you may wonder: "fat skill" is often praised — rich capabilities, batteries included. Why does lythoskill pursue thin?** The two "fat" refer to different layers. A community "fat skill" is powerful because its npm package is heavy. A lythoskill "thin SKILL.md" is lean because the agent-facing surface is minimal. These are not contradictory. Cortex is the proof: embedded git-based Jira, state machine, 8 CLI commands, trailer-driven workflow — all in the npm package. Its SKILL.md remains thin: it tells the agent HOW to use cortex, not HOW cortex works internally. The capability is fat. The agent's context budget is protected. Both goals satisfied — fat package, thin SKILL.md.
 
 **Three control tiers, not two:**
 - **Strategy (agent)**: decides what to do. "This task should move to review. That ADR needs superseding."
@@ -293,7 +293,7 @@ Documented so future agents do not re-propose discarded alternatives.
 
 | Anti-Pattern | Why It Fails |
 |--------------|--------------|
-| **Fat Skill** | Source code + dependencies in the skill directory (SKILL.md layer). The anti-pattern is fat in the AGENT'S CONTEXT WINDOW. Fat package + thin SKILL.md is the correct pattern — put weight in npm/pip, keep the agent-facing layer minimal. |
+| **Fat SKILL.md** | Implementation details in the agent-facing file. The anti-pattern is putting weight in the AGENT'S CONTEXT WINDOW. A "fat" npm package (like cortex — state machine, git-based Jira) with a thin SKILL.md is the design target: capability-rich, context-lean. |
 | **New Registry** | Building a skill package manager. npm/pip already exist. |
 | **Code in SKILL.md** | Implementation in description file. Code belongs in npm/pip. |
 | **CLI as Wizard** | Interactive CLI prompts. Intelligence belongs in the agent. |
