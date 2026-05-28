@@ -273,6 +273,7 @@ Documented so future agents do not re-propose discarded alternatives.
 5. **Progressive disclosure.** Skills: ~100 tokens -> <5000 -> on-demand. Arena/Curator: L0-L3.
 6. **Build-then-reject is valid.** Experiment fast, kill decisively, document in ADRs.
 7. **Separate storage from selection.** Cold pool stores all; working set selects deliberately.
+8. **Orchestrator is distributed by weight, not centralized.** There is no single "orchestrator" component. Lightweight coordination lives in combo prompts (declarative), medium-weight in SKILL.md (agent-facing instructions), heavyweight in CLI (deterministic ops, HATEOAS output). The three layers communicate via well-defined message contracts (TOML, YAML frontmatter, HATEOAS) — actor-model style. An external evaluator searching for a centralized orchestrator won't find one; the coordination emerges from the message contracts, not from a container process.
 
 ## 9. Anti-Patterns
 
@@ -283,6 +284,8 @@ Documented so future agents do not re-propose discarded alternatives.
 | **Code in SKILL.md** | Implementation in description file. Code belongs in npm/pip. |
 | **CLI as Wizard** | Interactive CLI prompts. Intelligence belongs in the agent. |
 | **Feed Adapters** | HTTP wrappers in curator. Agent has web fetch + search + gh. |
+| **Centralized Orchestrator** | Looking for a single "orchestrator" component (like CrewAI/LangGraph). Coordination is distributed across combo prompts + SKILL.md + CLI via message contracts. Agent IS the orchestrator. |
+| **Silent Activation** | Multiple same-niche innate skills. Deny-by-default prevents this. |
 | **Silent Activation** | Skills active without declaration. Violates deny-by-default. |
 
 ## 10. Related Documents
