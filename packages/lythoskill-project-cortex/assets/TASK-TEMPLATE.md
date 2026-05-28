@@ -26,15 +26,41 @@ Why does this task exist? What problem does it solve?
 - Compatibility:
 - Constraints:
 
-## Technical Approach
+## Cross-Package Impact Checklist
 
-How should this be implemented?
+> Any change to schema, convention, or shared interface must explicitly
+> list consumers and verify they're updated. Pre-commit only tests
+> changed packages — cross-cutting changes need full test run.
 
-```
-Suggested code structure, algorithms, or approaches...
-```
+- [ ] Consumer audit: `grep -rn "<old_convention>" packages/` find all consumers
+- [ ] Synchronized update: all consumers in same PR / atomic commit
+- [ ] Full test: `bun --filter='*' run test` passes (per-package filter is not enough)
+
+## TDD Cycles
+
+> Vertical slices: one behavior → one test → one implementation.
+> Do NOT write all tests first, then all implementation. That's
+> horizontal slicing — produces tests of imagined behavior.
+>
+> See TDD skill: tracer bullet first, then incremental loop.
+
+### Cycle 1: [First behavior name]
+- **Test**: What behavior does this test?
+- **Expected output/state**: 
+- **Minimal implementation**:
+- **Status**: ⬜ RED / ⬜ GREEN / ⬜ Refactored
+
+### Cycle 2: [Second behavior name]
+- **Test**: 
+- **Expected output/state**: 
+- **Minimal implementation**:
+- **Status**: ⬜ RED / ⬜ GREEN / ⬜ Refactored
+
+### Cycle N: [...]
 
 ## Acceptance Criteria
+
+> Final verification — all cycles complete, full test suite passes.
 
 - [ ] Criterion 1 (specific, testable)
 - [ ] Criterion 2
