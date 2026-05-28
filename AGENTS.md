@@ -1130,8 +1130,8 @@ When a session is ending or context is about to compact, you MUST execute this h
 When entering this project with no prior context, read in this exact order:
 1. `AGENTS.md` (this file) — canonical project guidance, including [Release & Auth Workflow](#release--auth-workflow). **Re-read the workflow section if context has been compacted mid-session** — auth/version mistakes here are the most common regression.
 2. `daily/YYYY-MM-DD.md` (latest date file) — session handoff + work log, highest priority memory
-3. `daily/` history (recent 3 days) — project journal across sessions
-4. `skill-deck.toml`
+3. `weekly/` (latest 2-3 files) — pre-built index of what mattered each week, `docs_now_stale` flags. Weekly chain (W17-W22) is dreaming's map of content.
+4. `skill-deck.toml` — our own deck. Note the combos: `weekly-retro` (prep→write→verify) and `dream-consolidate` (scan→consolidate→ZK validate). Check deck health: `bun packages/lythoskill-deck/src/cli.ts validate --deck skill-deck.toml`
 5. `cortex/INDEX.md`
 6. `git log --oneline -10`
 
