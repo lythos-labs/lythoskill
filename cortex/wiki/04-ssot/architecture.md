@@ -79,6 +79,12 @@ stores everything, `package.json` declares what this project uses.
 |  Deterministic CLI operations. Zero intelligence.                     |
 |  HATEOAS output: error messages tell the agent WHAT next, not just    |
 |  WHAT went wrong. "Skill not found → try curator add <locator>".      |
+|                                                                       |
+|  The name is literal: shell stdout IS a hypermedia document.          |
+|  In reproduce.sh, `<spawn subagent to ...>` acts as a hypertext tag   |
+|  — the agent reads stdout, recognizes the marker, takes action.       |
+|  CLI output can adopt this pattern broadly: `<action>do X</action>`   |
+|  as an internal protocol that agents parse like browsers follow links. |
 +======================================================================+
 ```
 
