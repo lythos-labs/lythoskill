@@ -107,3 +107,22 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 3. **Full test run**: `bun --filter='*' run test` before claiming done — pre-commit's per-package filter is not enough for cross-cutting changes
 
 **Prevention**: Task template should have a "Cross-package impact" checkbox. Any change to schema, convention, or shared interface must explicitly list consumers and verify they're updated.
+
+## 10. External Evaluator Scans Surface, Judges Depth
+
+**Symptom**: An external agent (ZK evaluator, auditor, benchmark) scans the repo, produces a report with surface-level metrics and generic recommendations. The report contains factual errors: misreading test architecture as "mock abuse," counting terminated tasks as "failed epics," or calling agent memory infrastructure "document bloat."
+
+**Root cause**: The evaluator has no project context. It applies human-project heuristics to an agent-native codebase. It counts `spyOn` without distinguishing console capture from system call interception. It sees 39 terminated tasks and assumes "low completion rate" without reading the task bodies. It sees 7 SSOT files + 83 ADRs + 51 wiki patterns and calls it "inflation" without understanding that **agents have no memory — documentation IS the memory**.
+
+**Real example**: An independent agent audit of lythoskill (2026-05-28) gave the project 6.8/10. It claimed:
+- "14/46 test files use mock/spy" — actually 0 violations of IO injection architecture; all "mock" was either IO interface injection (compliant) or console capture (L1 integration testing)
+- "39 terminated tasks + 2 suspended epic = start-many-finish-few" — confused task with epic; actual epic completion rate is 36 done / 2 suspended = 94.7%
+- "Document-to-code ratio 1.5:1 = inflation" — failed to recognize that cortex (ADR + wiki + daily + weekly + SSOT) is a distributed memory system for zero-knowledge agents, not "extra documentation"
+
+**Fix**: When commissioning external evaluation:
+1. **Provide context upfront**: Give the evaluator AGENTS.md + architecture.md + conventions.md BEFORE it scans code. Do not let it form hypotheses from grep alone.
+2. **Require structured evidence**: Every claim must cite specific files + lines. "Mock abuse" must name which `spyOn` calls violate which architecture rule.
+3. **ZK validate the evaluation**: Spawn a second agent to read the evaluation report and cross-check its claims against the actual codebase. The evaluator is itself a source that needs verification.
+4. **Weight domain expertise**: An evaluator that has not read `intent-plan-execute-fractal-architecture-pattern.md` should not score "test architecture health." An evaluator that has not understood "agent memory = documentation" should not score "document debt."
+
+**Prevention**: SSOT documents must include "evaluator guidance" sections — explicit warnings about common misreadings. See conventions.md §5 "Testing Layers" for the test architecture guidance that prevents the "mock abuse" misreading.
