@@ -15,10 +15,10 @@ deck / curator / arena consume it instead of running `git clone` themselves.
 
 ```bash
 # Scan cold pool for unreferenced repos
-bunx @lythos/cold-pool@0.15.3 prune [--yes] [--dry-run]
+bunx @lythos/cold-pool@0.15.4 prune [--yes] [--dry-run]
 
 # Validate lock file against cold pool
-bunx @lythos/cold-pool@0.15.3 validate [--lock ./skill-deck.lock]
+bunx @lythos/cold-pool@0.15.4 validate [--lock ./skill-deck.lock]
 ```
 
 ## Architecture

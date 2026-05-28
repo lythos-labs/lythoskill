@@ -62,7 +62,7 @@ describe('validateDeck', () => {
     expect(report.errors.some(e => e.includes('deck.max_cards must be a positive integer'))).toBe(true)
   })
 
-  it('C4: skill not found in cold pool errors', async () => {
+  it('C4: skill not in cold pool warns (not errors)', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -75,8 +75,10 @@ describe('validateDeck', () => {
 
     const report = await buildDeckValidation(deckPath, projectDir)
 
-    expect(report.status).toBe('invalid')
-    expect(report.errors.some(e => e.includes('Skill not found'))).toBe(true)
+    // Missing from cold pool is a warning, not an error — skill may exist on GitHub
+    expect(report.status).toBe('valid')
+    expect(report.warnings.some(w => w.includes('Skill not in cold pool'))).toBe(true)
+    expect(report.errors.length).toBe(0)
   })
 
   it('C5: budget exceeded errors', async () => {

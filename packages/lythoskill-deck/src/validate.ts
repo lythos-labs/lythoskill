@@ -151,7 +151,16 @@ export async function buildDeckValidation(
         errors.push(`Remote check invalid: ${entry.path} (${remote.phase})`);
       }
     } else if (localStatus === 'missing') {
-      errors.push(`Skill not found in cold pool: ${entry.path} (${entry.type})`);
+      // Skill path not in cold pool — may exist on GitHub but not cloned yet.
+      // Warn instead of error: the reference could be valid, just needs cloning.
+      // Use --remote to verify existence on GitHub. Following HATEOAS principle:
+      // tell the agent what's wrong AND what to do next.
+      warnings.push(
+        `Skill not in cold pool: ${entry.path} (${entry.type})\n` +
+        `     → Verify: bunx @lythos/curator add ${entry.path}\n` +
+        `     → Or: git clone into ~/.agents/skill-repos/\n` +
+        `     → Run --remote to check if path exists on GitHub`
+      );
     }
 
     // ── Metadata drift check ──────────────────────────────────
@@ -251,7 +260,8 @@ function renderText(report: DeckValidationReport): void {
     for (const e of report.errors) console.error(`❌ ${e}`);
     console.error(`\n❌ Validation failed: ${report.errors.length} error(s)`);
   } else {
-    console.log(`✅ Validation passed: ${report.budget.declared} skill(s), max_cards = ${report.budget.max_cards}`);
+    const warnNote = report.warnings.length > 0 ? ` (${report.warnings.length} warning(s) — skills not in cold pool need cloning)` : '';
+    console.log(`✅ Validation passed: ${report.budget.declared} skill(s), max_cards = ${report.budget.max_cards}${warnNote}`);
   }
 }
 

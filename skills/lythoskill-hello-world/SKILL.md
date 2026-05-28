@@ -1,6 +1,6 @@
 ---
 name: lythoskill-hello-world
-version: 0.15.3
+version: 0.15.4
 type: standard
 description: |
   A minimal hello-world skill. No scripts, no dependencies.
