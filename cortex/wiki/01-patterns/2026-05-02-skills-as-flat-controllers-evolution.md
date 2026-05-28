@@ -385,7 +385,7 @@ graph TD
   GH1[github.com/owner1/repo1/skill-a]
   GL1[gitlab.com/owner2/repo2/skill-b]
   Self[self-hosted.tld/team/skill-c]
-  Local[localhost/my-skill]
+  Local[localhost/me/my-skill]
   GH1 --> Library[Library<br/>~/.agents/skill-repos/]
   GL1 --> Library
   Self --> Library
@@ -814,7 +814,7 @@ L3（买家秀）不只一种实现方式。同一个"用户主权 ground truth"
 |------|------|----------|----------|----------------|
 | L3-a **Curator private metadata** | 结构化字段（信任评分 / 标签 / provenance chain） | 跨 skill 的统一标注 / 个人信任体系 | 低-中（schema 驱动） | 不动 upstream |
 | L3-b **Combo skill 本地批注** | Combo skill 正文 prose | 团队 SOP + 对原始 skill 的"水分识别" | 中（自然语言更新） | 不动 upstream |
-| L3-c **Fork SKILL.md** | 直接复制 skill 到 `localhost/<my-fork>/` 改源 | 非公开场景 / 用户完全确定要重写 desc | 高（一次性）/ 低（之后） | **完全脱钩**（shadcn 模式） |
+| L3-c **Fork SKILL.md** | 直接复制 skill 到 `localhost/me/<my-fork>/` 改源 | 非公开场景 / 用户完全确定要重写 desc | 高（一次性）/ 低（之后） | **完全脱钩**（shadcn 模式） |
 
 **L3-b：Combo skill 作为本地批注载体**
 
@@ -831,9 +831,9 @@ Combo skill 原本承担"沉淀团队 SOP / 固定协作模式"的职责（ADR-2
 ```bash
 # 1. 用户认为 github.com/owner/foo-skill 的 SKILL.md desc 有水分
 cp -r ~/.agents/skill-repos/github.com/owner/foo-skill \
-      ~/.agents/skill-repos/localhost/my-foo-fork
-# 2. 改 localhost/my-foo-fork/SKILL.md 的 desc 反映 ground truth
-# 3. deck.toml: skills = ["localhost/my-foo-fork"]
+      ~/.agents/skill-repos/localhost/me/my-foo-fork
+# 2. 改 localhost/me/my-foo-fork/SKILL.md 的 desc 反映 ground truth
+# 3. deck.toml: skills = ["localhost/me/my-foo-fork"]
 # 4. deck link
 ```
 
