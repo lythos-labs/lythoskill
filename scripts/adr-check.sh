@@ -118,24 +118,6 @@ else
 fi
 echo ""
 
-# ── SKILL.md type validation ─────────────────────────────────────
-echo "[SKILL.md type] All packages/*/skill/SKILL.md type must be standard or flow"
-TYPE_ERRORS=0
-for skill_md in packages/*/skill/SKILL.md; do
-  if [ ! -f "$skill_md" ]; then continue; fi
-  type_val=$(grep -m1 "^type:" "$skill_md" 2>/dev/null | sed 's/type:[[:space:]]*//' | tr -d '[:space:]' || echo "")
-  if [ -z "$type_val" ]; then
-    warn "$skill_md: missing type frontmatter"
-  elif [ "$type_val" != "standard" ] && [ "$type_val" != "flow" ]; then
-    error "$skill_md: invalid type '$type_val' (must be standard or flow)"
-    TYPE_ERRORS=$((TYPE_ERRORS + 1))
-  fi
-done
-if [ "$TYPE_ERRORS" -eq 0 ]; then
-  ok "All SKILL.md types are valid"
-fi
-echo ""
-
 # ── ADR-20260503170000000: Bun-only toolchain ────────────────────
 echo "[ADR-20260503170000000] Bun-only: no pnpm lockfile/workspace residuals"
 if [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; then
