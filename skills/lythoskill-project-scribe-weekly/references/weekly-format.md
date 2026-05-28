@@ -28,7 +28,35 @@ All fields are optional but strongly recommended. Omit empty fields rather than 
 | `decisions_accepted` | string[] | ADRs or major decisions ratified this week. |
 | `retro_cells` | object | Four keys: `planned_done`, `planned_paused`, `emergent_done`, `emergent_paused` |
 | `project_lesson_candidates` | string[] | Patterns that might become wiki entries if they repeat. |
+| `docs_now_stale` | string[] | ADR/wiki entries that this week's decisions render outdated. Format: `ADR-xxx: reason` or `wiki path: reason`. Feeds dreaming skill priority queue. |
 | `references` | object | `daily: string[]`, `cortex_index: string` |
+
+## Pre-Write Verification (mandatory)
+
+**Do not write the weekly from memory.** Run these commands and compare against your mental timeline:
+
+```bash
+# 1. Daily files — which days actually had work?
+ls daily/*.md | sort | tail -7
+
+# 2. Git activity — what actually got committed?
+git log --since="7 days ago" --oneline
+
+# 3. Cortex state — what moved?
+bun packages/lythoskill-project-cortex/src/cli.ts probe
+bun packages/lythoskill-project-cortex/src/cli.ts stats
+
+# 4. ADR timeline — what decisions landed this week?
+ls -lt cortex/adr/02-accepted/ | head -15
+```
+
+**Simulated-annealing ranking**: list every event you can recall from the week. Then:
+1. **High temperature** — dump everything, don't filter
+2. **Cool** — group related events into clusters
+3. **Rank clusters** — which cluster, if a future agent missed it, would cause the most downstream confusion?
+4. **Freeze** — the top 1-2 clusters are your `core_thread`. Clusters that involve superseded docs go into `docs_now_stale`.
+
+**Test**: if a future ZK agent reads only this weekly + the daily files, can they correctly identify what changed and what's now stale? If the combo redefinition (May 6) would have been invisible to them, your weekly failed.
 
 ## Body Structure
 

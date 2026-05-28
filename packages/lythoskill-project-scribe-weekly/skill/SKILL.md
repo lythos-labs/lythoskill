@@ -32,6 +32,61 @@ If the next agent can find it via `ls daily/`, `git log`, or `cortex index` — 
 
 **Why this matters**: A future agent reading a weekly cold (no daily access) should get the *compressed representation* of the week's cognitive work — the pattern, not the commits. Without this, every agent must reconstruct the narrative from 6 daily files + 29 commits + 10 ADRs. Weekly offloads that reconstruction cost once, permanently.
 
+## Weekly Prep (like `cortex probe` — gather before you write)
+
+**Do NOT start writing from memory.** Run prep first. This is the write-side counterpart to onboarding's read-side: just as onboarding reads daily → verifies git → presents summary, weekly prep gathers all sources → surfaces anomalies → ranks importance.
+
+### Step 1: Gather (deterministic)
+
+```bash
+# Daily surface — which days had activity?
+ls daily/*.md | sort | tail -7
+
+# Git surface — what actually landed?
+git log --since="7 days ago" --oneline
+
+# Cortex surface — what state changed?
+bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe
+bunx @lythos/project-cortex@{{PACKAGE_VERSION}} stats
+
+# ADR surface — what decisions were accepted this period?
+ls -lt cortex/adr/02-accepted/ | head -15
+
+# Delta from last weekly — what's new since the last snapshot?
+ls weekly/ | sort | tail -1
+```
+
+### Step 2: Surface Anomalies
+
+Scan the gathered data for:
+- **Superseded decisions**: later ADR that contradicts an earlier one (e.g., combo redefinition May 6 superseded May 1 section semantics)
+- **Renamed/removed commands**: CLI surface changed (e.g., `agent-run` → `single`, `deck sync` → `deck to-symlink`)
+- **Reversed priorities**: a task/epic that was `priority_at_start` last week but never appeared in this week's dailies
+- **Silent gaps**: days with no daily file but git shows commits (someone committed outside agent session)
+
+### Step 3: Importance Ranking (simulated annealing)
+
+1. **High temperature**: dump every event you can recall. Don't filter. Include everything.
+2. **Cool**: group related events into clusters (e.g., "path convention fixes" = 5 commits, 2 ADRs, 1 ZK sweep)
+3. **Rank clusters** by downstream confusion cost: "if a future agent missed this cluster, how wrong would their decisions be?"
+4. **Freeze**: top 1-2 clusters → `core_thread`. Clusters that involve superseded docs → `docs_now_stale`.
+
+**Test**: can you identify the single most important decision of the week? If the combo redefinition (May 6) would be invisible in your weekly, you didn't rank correctly.
+
+### Step 4: Prep Report (show to user before writing)
+
+Present a 5-line summary:
+```
+📊 Weekly Prep — 2026-W22
+📄 Dailies: 2026-05-21, 2026-05-28 (gap May 22-27)
+🔀 ADRs: 3 proposed, 0 accepted this period
+⚠️  Anomalies: combo redefinition (May 6) not captured in any weekly
+💡 Top cluster: site documentation debt cleanup (P0 → done)
+📋 docs_now_stale candidates: ADR-20260501160000000, external-skill-governance-bridge.md
+```
+
+User confirms → proceed to write. User flags missing items → add to cluster list.
+
 ## When to Run
 
 - User explicitly asks for weekly synthesis
