@@ -58,8 +58,7 @@ export const DeckConfig = z.object({
   innate: z.record(SkillEntry).optional(),
   tool: z.record(SkillEntry).optional(),
   combo: z.record(z.object({
-    skills: z.array(z.string()).describe('Skill names in this combo'),
-    prompt: z.string().optional().describe('How these skills coordinate — agent reads this as instructions'),
+    prompt: z.string().describe('Natural-language orchestration instructions — agent reads this as the playbook'),
   })).optional(),
   transient: z.record(z.object({
     path: z.string().optional(),

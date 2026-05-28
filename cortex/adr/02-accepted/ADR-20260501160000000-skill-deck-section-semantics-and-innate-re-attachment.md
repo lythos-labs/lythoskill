@@ -1,5 +1,9 @@
 # ADR-20260501160000000: skill-deck.toml section semantics and innate skill re-attachment after context compaction
 
+> ⚠️ **Superseded by ADR-20260506103209293** (combo redefined as deck-level prompt, not separate skill type).
+> Combo is no longer a skill section; `combo-` prefix rule and max_cards inclusion no longer apply.
+> See `cortex/wiki/01-patterns/2026-05-19-where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern.md` for the current pattern.
+
 ## Status History
 
 | Status | Date | Note |

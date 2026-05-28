@@ -150,11 +150,11 @@ Arena runner code changed zero lines. One new adapter file. Pattern validated. S
 
 ## Use Case: Temporary Deck, Zero Workspace Modification
 
-Combining `/tmp` CWD isolation with `agent-run` enables a powerful pattern:
+Combining `/tmp` CWD isolation with `arena single` enables a powerful pattern:
 
 ```bash
 # Polish a document using skills without touching the project workspace
-bunx @lythos/skill-arena agent-run \
+bunx @lythos/skill-arena single \
   --task polish-article.md \
   --deck documents.toml \
   --out ./output

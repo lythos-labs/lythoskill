@@ -90,12 +90,12 @@ arena runner 一行代码没改。换 backend 就是实现一个 adapter，注�
 | bare deck | 2 global + 9 deck (父项目) | 2 global + 0 deck ✅ |
 | with-copy-skill | 2 global + 10 deck (9父+1) | 2 global + 1 deck ✅ |
 
-## agent-run：最简路径
+## arena single：最简路径
 
-从两天的探索中提取出的最简使用方式：
+从两天的探索中提取出的最简使用方式（`agent-run` 已在 0.10.0 重命名为 `single`）：
 
 ```bash
-bunx @lythos/skill-arena agent-run --task task.md --deck deck.toml
+bunx @lythos/skill-arena single --task task.md --deck deck.toml
 ```
 
 三个参数：deck + task + (可选的) player。agent 执行，judge 评估，结果落盘。比 `arena.toml` 的完整对比模式更轻量，适合快速验证。

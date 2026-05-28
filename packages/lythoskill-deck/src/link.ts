@@ -207,7 +207,7 @@ if (ALSO_LINK_TO_RESULT.deprecated) {
 interface DeclaredSkill {
   name: string;        // original path/name (for lock.source backward-compat)
   alias: string;       // working-set flat symlink name
-  type: "innate" | "tool" | "combo" | "transient";
+  type: "innate" | "tool" | "transient";
   sourcePath: string;
   mode?: 'symlink' | 'snapshot';
   expires?: string;

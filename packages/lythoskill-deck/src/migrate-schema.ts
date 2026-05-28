@@ -22,7 +22,7 @@ export function migrateSchema(deckPath: string, dryRun: boolean): MigrateResult 
 
   const parsed = parseToml(raw) as any;
 
-  for (const section of ["innate", "tool", "combo"] as const) {
+  for (const section of ["innate", "tool"] as const) {
     const skills = parsed[section]?.skills;
     if (!Array.isArray(skills)) continue;
 

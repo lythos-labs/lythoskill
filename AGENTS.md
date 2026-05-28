@@ -997,7 +997,7 @@ The `skill-deck.toml` file declares which skills are active per project. Key con
 - `working_set` — where skills are linked (`.claude/skills/` default; configure per agent)
 - `cold_pool` — where skills are downloaded (`~/.agents/skill-repos/` default)
 - `max_cards` — hard cap on total skills
-- Sections: `innate` (always loaded), `tool` (triggered), `combo` (multi-skill groups), `transient` (time-bounded)
+- Sections: `innate` (always loaded), `tool` (triggered), `combo` (prompt-driven orchestration), `transient` (time-bounded)
 
 ### Agent Skills path quick reference
 
