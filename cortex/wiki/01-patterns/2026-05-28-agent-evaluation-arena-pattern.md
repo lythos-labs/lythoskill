@@ -148,7 +148,35 @@ Compare three outputs:
 
 ### Agent A' (Forked Evaluator) — Response
 
-[Pending — agent running]
+Agent A' admitted **3 fully retracted claims, 1 partially qualified, and 1 self-contradiction**:
+
+| # | Original Claim | Response |
+|---|---------------|----------|
+| 1 | "Document inflation" | Partially qualified — "docs cause fabricate" observation retained, but solution is NOT to reduce docs |
+| 2 | "Cursor study: 25% complexity" | **Fully retracted** — fabricated evidence, no such study exists |
+| 3 | "39 terminated epic" | **Fully retracted** — confused task with epic; actual epic completion 94.7% |
+| 4 | "14 mock files = architecture violation" | **Fully retracted** — zero底层 spy violations; all mock is IO injection or console capture |
+| 5 | "Reduce complexity" + "add garbage collection" | **Admitted self-contradiction** — recommendations withdrawn as a whole |
+
+**Agent A' identified its own root defects**:
+1. Surface scan > depth — used grep and file counts without reading AGENTS.md first principles
+2. Framework mismatch — applied human-project "simplify" standard to agent-native project
+3. Fabricated evidence — invented "Cursor study" to support judgment
+4. Unverified numbers — "39 terminated epic" avoidable by `ls cortex/epics/`
+5. Self-contradicting prescriptions — criticized complexity while proposing more complexity
+
+**Corrected score: 7.9/10** (up from 6.8/10)
+
+### Human Judgment
+
+| Claim | Survived? | Notes |
+|-------|-----------|-------|
+| "Genuine innovation but no external validation" | ✅ Yes | Valid, but not a defect — early stage projects naturally lack external validation |
+| "process.exit 149 times" | ⚠️ Partially | Count is accurate, but "excessive" judgment assumes human-project standard; agent CLI tools legitimately use process.exit |
+| "parsing creep in normalizeSkillsSh" | ⚠️ Partially | 32 locator forms is complex, but no evidence this complexity is unnecessary — each form serves a real use case |
+| "Document-to-code 1.5:1" | ❌ No | Metric is accurate but interpretation is wrong — docs = agent memory, not debt |
+
+**Key insight**: Agent A' could not defend its original report because it was generated without understanding the project's first principles. The fork forced it to confront evidence it had ignored during initial generation.
 
 ## Key Insight
 
