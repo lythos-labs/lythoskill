@@ -85,9 +85,11 @@ Task → [Deck A subagent] → Output A ─┐
 
 - **Runs in `/tmp`, never pollutes your working set.** Experiment sandbox is isolated. After every run, `bunx @lythos/skill-deck link` restores the parent deck. No install, no working-set pollution, no deck overwrite.
 - **Agent-orchestrated by default.** For same-player deck comparisons (95% of use cases), the agent spawns subagents directly via the Agent tool — no CLI runner needed. Cross-player comparison (kimi vs codex) is the only case requiring the CLI runner.
+- **Execution substrate: `reproduce.sh`** — a shell scaffold that hands off to the agent via `<spawn subagent>` tags in stdout. Shell stdout IS a hypermedia document; the agent reads the tag and takes action. This is HATEOAS at its most literal: the CLI response carries the agent's next action.
 - **Judgment is semantic, not scriptable.** Token counting is scriptable; deciding "which output better fits the scenario" requires LLM inference. Arena spawns a judge subagent for this.
 - **Mindset validator, not output checker.** A correct output achieved by guessing is a FAIL — the skill's mental model did not transfer. Arena catches mindset gaps before skills reach users.
 - **Subagent-friendly.** Interrupted runs resume from saved state. Decision-log.jsonl from each subagent provides full observability into agent reasoning.
+- **HATEOAS error output.** CLI errors tell the agent WHAT next, not just WHAT went wrong. `"Skill not found → try: curator add <locator>"`. The consumer of CLI output is the agent, not the human at the terminal.
 
 ### Curator — Discovery with Trust
 
@@ -134,3 +136,5 @@ Layer 1: Arena             → Empirical
 ```
 
 `[combo.<name>]` in deck.toml defines pipelines — multi-skill workflows orchestrated by a prompt. No new code, no state machine: the agent reads the combo prompt and orchestrates the skills.
+
+**Distributed by weight.** There is no central orchestrator. Coordination lives in three layers: combo prompts (lightweight, declarative), SKILL.md instructions (medium, agent-facing), and CLI operations (heavy, deterministic). Together they form the orchestration system — external evaluators searching for a single "orchestrator" component miss this. The agent IS the orchestrator.
