@@ -12,7 +12,10 @@
     "test:report:bdd": "bun scripts/test-report.ts --bdd",
     "test:report:full": "bun scripts/test-report.ts --all",
     "test:bdd": "bun packages/lythoskill-project-cortex/test/runner.ts && bun packages/lythoskill-deck/test/runner.ts",
-    "test:all": "bun run test && bun run test:bdd"
+    "test:all": "bun run test && bun run test:bdd",
+    "site:dev": "cd site && bun run dev",
+    "site:build": "cd site && bun run build",
+    "site:preview": "cd site && bun run preview"
   },
   "workspaces": [
     "packages/*"
