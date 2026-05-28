@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "lythoskill"
-  text: "可分享、可重現的技能集合"
-  tagline: 就像給 AI agent 工具箱用的 gist。一個檔案、一個指令，跨專案跨團隊。
+  text: "AI agent 技能的宣告式治理層"
+  tagline: 一個檔案宣告哪些技能 active。未宣告的技能不可見。像 agent 工具箱的 gist——分享、版本化、切換。
   actions:
     - theme: brand
       text: 快速開始
@@ -28,7 +28,7 @@ features:
 
 ## 發現的樂趣
 
-你在 GitHub 上找到一個技能。可能是 [obra/superpowers](https://github.com/obra/superpowers) 裡的 `frontend-design` — `/plugin install` 就有了。可能是某人分享的 TDD 工作流 — `npx skills add` 就裝好了。你試一個 prompt，它成功了。你很開心。
+你在 GitHub 上找到一個技能。可能是 [anthropics/skills](https://github.com/anthropics/skills) 裡的 `frontend-design` — 放進 agent 的 skills 目錄就有了。可能是同事 gist 裡的 TDD 工作流。你試一個 prompt，它成功了。你很開心。
 
 然後你又找到一個。再一個。你的收藏慢慢成長——這裡一個 PDF 閱讀器，那裡一個研究管線，同事 repo 裡一個文件格式化工具。每一個都能用。每一個都讓你的 agent 更聰明。
 

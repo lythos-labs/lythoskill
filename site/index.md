@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "lythoskill"
-  text: "A shareable, reproducible skill collection"
-  tagline: Like a gist for your AI agent's toolkit. One file, one command, works across projects and teams.
+  text: "Declarative skill governance for AI agents"
+  tagline: One file declares what's active. Undeclared skills are invisible. Like a gist for your agent's toolkit — share it, version it, switch it.
   actions:
     - theme: brand
       text: Get Started
@@ -28,7 +28,7 @@ features:
 
 ## The Joy of Discovery
 
-You find a skill on GitHub. Maybe it's `frontend-design` from [obra/superpowers](https://github.com/obra/superpowers) — `/plugin install` and it's there. Maybe it's a TDD workflow — `npx skills add` and it's yours. You try a prompt, and it works. You're delighted.
+You find a skill on GitHub. Maybe it's `frontend-design` from [anthropics/skills](https://github.com/anthropics/skills) — drop it into your agent's skills directory and it's there. Maybe it's a TDD workflow from a colleague's gist. You try a prompt, and it works. You're delighted.
 
 Then you find another. And another. Your collection grows — a PDF reader here, a research pipeline there, a document formatter from a colleague's repo. Each one works. Each one makes your agent smarter.
 
