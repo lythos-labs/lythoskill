@@ -1,7 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.15.4
-type: standard
+version: 0.15.5
 description: |
   Session memory writer. Dumps what file exploration cannot recover —
   pitfalls, true working-tree state, uncommitted decisions, specific  next steps — into daily/YYYY-MM-DD.md. Forms CQRS write-side pair
@@ -28,7 +27,7 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.15.4 list
+bunx @lythos/project-cortex@0.15.5 list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
