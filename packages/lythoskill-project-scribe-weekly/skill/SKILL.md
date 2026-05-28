@@ -63,6 +63,7 @@ Scan the gathered data for:
 - **Renamed/removed commands**: CLI surface changed (e.g., `agent-run` → `single`, `deck sync` → `deck to-symlink`)
 - **Reversed priorities**: a task/epic that was `priority_at_start` last week but never appeared in this week's dailies
 - **Silent gaps**: days with no daily file but git shows commits (someone committed outside agent session)
+- **Missing ADRs**: significant code/architecture change in git log with no corresponding ADR accepted in the same window. A rename with 30+ commits and no ADR is a red flag.
 
 ### Step 3: Importance Ranking (simulated annealing)
 
