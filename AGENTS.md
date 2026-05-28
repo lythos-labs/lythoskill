@@ -36,6 +36,9 @@ lythoskill itself is built with the lythoskill pattern — it is its own first u
 | **Agent BDD** | `reproduce.sh` — IoC handoff pattern for agent scenario replay | § [Agent BDD (reproduce.sh)](#agent-bdd-reproducesh) below |
 | **Daily Handoff** | Session state recovery | `daily/YYYY-MM-DD.md` (latest date file) |
 | **Cortex Governance** | ADR, Epic, Task, Wiki | `cortex/INDEX.md` |
+| **SSOT / Dreaming** | 5 current-truth docs (architecture, decisions, conventions, pitfalls, reproduce.sh) | [`cortex/wiki/04-ssot/`](./cortex/wiki/04-ssot/) — read before making changes |
+| **`docs_now_stale`** | Weekly output: which ADRs/docs became outdated | § [Weekly synthesis](#weekly-synthesis-scribe-weekly) below |
+| **Conventions** | How to do it right — commands, naming, FQ-only | [`cortex/wiki/04-ssot/conventions.md`](./cortex/wiki/04-ssot/conventions.md) |
 
 ---
 
@@ -566,6 +569,7 @@ bun packages/lythoskill-creator/src/cli.ts build <skill-name>
 # Run deck CLI directly
 bun packages/lythoskill-deck/src/cli.ts link
 bun packages/lythoskill-deck/src/cli.ts link --deck <path>
+bun packages/lythoskill-deck/src/cli.ts validate --deck <path>
 
 # Run project-cortex CLI directly
 bun packages/lythoskill-project-cortex/src/cli.ts <command>
@@ -646,6 +650,8 @@ Patches use heredoc (`cat > file << 'EOF'`) for declarative state, not sed.
 ---
 
 ## Agent Runtime Behavior (Arena Operations)
+
+> 📖 **Reference section — used when debugging arena internals (monthly at most).** For everyday arena usage, see the [Deck-first table](#deck-first--dont-ask-dispatch) above. The HATEOAS error pattern in § [Annotation mindset](#annotation-mindset--代码即注解agent-是容器) is the part you'll actually use daily.
 
 > Arena runtime 规范 — 经验值来自多次 arena 运行调试（arena single / vs mode, claude/kimi player, bare/deck combo 对比）。
 
@@ -926,6 +932,8 @@ Session handoffs go to `daily/YYYY-MM-DD.md` (per **ADR-20260424125637347**). Th
 ---
 
 ## DeepSeek TUI Operational Notes
+
+> 📖 **Reference section — platform-specific, used only when working with DeepSeek adapter.** If you're running on Claude Code or another platform, skip this section.
 
 > **You are running inside DeepSeek TUI.** This section documents how the host platform works when used programmatically (Bun.spawn, arena, agent-bdd). Knowing this avoids wasted troubleshooting.
 
