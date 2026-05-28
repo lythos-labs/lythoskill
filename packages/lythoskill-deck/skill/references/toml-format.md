@@ -57,6 +57,40 @@ Pipeline: Position → Draft → Review → Publish.
 [combo.research]
 prompt = "Pipeline: Discover → Verify → Analyze. Use curator → find-skills → arena → deck."
 ```
+
+### Real-World Combo Example — lythoskill's Own Deck
+
+From [`skill-deck.toml`](../../skill-deck.toml) in the lythoskill repo itself:
+
+```toml
+# skills: scribe-weekly, cortex, git
+[combo.weekly-retro]
+prompt = """
+Weekly synthesis with prep-before-write:
+1. Gather: ls daily/ | tail -7, git log --since="7 days ago", cortex probe
+2. Surface anomalies: superseded ADRs, CLI renames, missing ADRs
+3. Simulated-annealing ranking: dump → cluster → rank by confusion cost → freeze top 2
+4. Show prep report to user, confirm, then write weekly
+5. ZK verify: spawn independent subagent to check weekly against git/cortex ground truth.
+   ≥2 passes until <2 high-importance gaps.
+Never write a weekly from memory. See AGENTS.md § Weekly synthesis.
+"""
+
+# skills: dreaming, cortex, scribe-weekly
+[combo.dream-consolidate]
+prompt = """
+Project memory consolidation via dreaming skill:
+1. Scan: start from weekly chain as pre-built index. Extract docs_now_stale across all weeklies.
+2. Consolidate: write SSOT to cortex/wiki/04-ssot/ — one file per topic, current state only.
+3. ZK Validate: spawn zero-knowledge subagent to read SSOT, self-report understanding.
+   Revise misunderstood sections.
+4. For critical docs: arena single --player kimi cross-model validation.
+See packages/lythoskill-dreaming/skill/SKILL.md for full flow.
+"""
+```
+
+These are real combos used to govern the lythoskill project itself. Notice: each combo defines a multi-step pipeline with specific tools, verification gates, and references to detailed docs. The agent reads the prompt and executes — no code, no state machine.
+```
 ## [transient] — Temporary Workarounds
 Must declare `expires`. Design goal: shrink until removable.
 If repeatedly needed, extract into a package and keep only a thin call.
