@@ -3,6 +3,12 @@
 **Status**: Accepted
 **Date**: 2026-05-17
 
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| accepted | 2026-05-17 | Accepted via ADR state transition |
+
 ## Context
 
 Arena needs cross-player comparison (Claude vs Kimi vs Codex vs DeepSeek) with reliable model selection per side. Two native subagent systems were evaluated and found unreliable:

@@ -1,7 +1,14 @@
 # ADR-20260509155630-DRAFT: deck_refs mode column — track symlink/snapshot per reference
 
 ## Status
-proposed（讨论草案，未实现）
+accepted
+
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-09 | Draft discussion, schema migration v6 prepared |
+| accepted | 2026-05-17 | Accepted |
 
 ## 背景
 
@@ -72,5 +79,3 @@ ADR-20260509144134332 在 deck_refs 表引入了 FSM（state = added/linked/remo
 查询和更新方法暂未补全（`addReference`/`reconcileDeckReferences` 不带 mode 参数）。
 等实际使用中发现 mode 级别区分需求时再补全。
 
-
-| accepted | 2026-05-17 | Accepted |

@@ -4,6 +4,12 @@
 **Date**: 2026-05-19
 **Supersedes**: Implicit assumption that agents understand working_set semantics
 
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| accepted | 2026-05-19 | Accepted via ADR state transition |
+
 ## Context
 
 The thin skill pattern defines three layers:

@@ -4,6 +4,12 @@
 **Date**: 2026-05-19
 **Supersedes**: Implicit early-scaffolding convention
 
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| accepted | 2026-05-19 | Accepted via ADR state transition |
+
 ## Context
 
 `LYTHOS_COLD_POOL` was introduced as scaffolding during early cold-pool CLI development (before `deck.toml` existed and before the `cold_pool` field was standardized). It allowed users to override the default cold pool path via environment variable:

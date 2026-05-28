@@ -1,7 +1,14 @@
 # ADR-20260517224131119: Multi-layer project context persistence — agent context architecture by volatility class
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-05-17
+
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-17 | Draft discussion, four-layer context architecture |
+| accepted | 2026-05-17 | Accepted via ADR state transition |
 
 ## 背景
 
@@ -205,5 +212,3 @@ Mnilax 12 条覆盖了单 agent 在单 session 内的编码行为。我们踩过
 - wiki: 2026-05-09-dormancy-property-test-for-fallback-hints
 - wiki: 2026-05-17-excessive-self-questioning-as-agent-anti-pattern
 
-
-| accepted | 2026-05-17 | Accepted |

@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/28 22:26:38
+> 自动生成于 2026/5/28 23:35:29
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 271 | 进行中: 0, 待验收: 4, 已完成: 225 |
-| Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
+| Tasks | 271 | 进行中: 0, 待验收: 0, 已完成: 229 |
+| Epics | 39 | 活跃: 0, 已完成: 35, 悬置: 2, 已归档: 2 |
 | ADRs | 83 | 已接受: 80 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260527212032856**: Site narrative stabilization and living documentation consolidation
+_无_
 
 ### 已完成
 
@@ -54,6 +54,7 @@
 - ✅ **EPIC-20260519164518898**: entropy-check CLI/agent边界清晰化 — 传感器只报告事实，不替agent做判断
 - ✅ **EPIC-20260519224747755**: curator add UX 专业性与副作用透明化
 - ✅ **EPIC-20260520124010693**: curator catalog co-location: eliminate three data silos, catalog follows pool
+- ✅ **EPIC-20260527212032856**: Site narrative stabilization and living documentation consolidation
 
 ### 悬置
 
@@ -77,14 +78,11 @@
 
 _无_
 
-### 待验收 (4)
+### 待验收 (0)
 
-- 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
-- 🔍 **TASK-20260528114758563**: Fix site command shorthands — ensure all code blocks use runnable commands, establish shorthand resolution convention in AGENTS.md
-- 🔍 **TASK-20260528121027367**: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
-- 🔍 **TASK-20260528221835812**: Wiki/ADR stale content audit — ZK cross-validate against dreaming SSOT, archive outdated, flag contradictions
+_无_
 
-### 已完成 (225)
+### 已完成 (229)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -307,10 +305,14 @@ _无_
 - ✅ ~~TASK-20260519205953163~~: deck remove does not clean up also_link_to targets
 - ✅ ~~TASK-20260519224838606~~: 实现 curator add --output 对齐与副作用显式声明
 - ✅ ~~TASK-20260520143950404~~: parse-deck.ts: [combo] section is prompt orchestration, not skill list
+- ✅ ~~TASK-20260527212829974~~: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
 - ✅ ~~TASK-20260527220921728~~: Fix P0 path narrative contradictions — remove 'sole location' language and align docs with code ground truth
 - ✅ ~~TASK-20260527222535526~~: Site path narrative audit and rewrite — align with path convention, preserve multi-platform, EN+ZH sync
 - ✅ ~~TASK-20260527223818020~~: Cross-platform quick-start design — VitePress tabs for Claude/Codex/Cursor working_set
 - ✅ ~~TASK-20260528111848232~~: Apply P1/P2 path-convention fixes: annotate deck tomls, install scripts, arena prompts per deviation report
+- ✅ ~~TASK-20260528114758563~~: Fix site command shorthands — ensure all code blocks use runnable commands, establish shorthand resolution convention in AGENTS.md
+- ✅ ~~TASK-20260528121027367~~: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
+- ✅ ~~TASK-20260528221835812~~: Wiki/ADR stale content audit — ZK cross-validate against dreaming SSOT, archive outdated, flag contradictions
 
 ### 悬置 (1)
 

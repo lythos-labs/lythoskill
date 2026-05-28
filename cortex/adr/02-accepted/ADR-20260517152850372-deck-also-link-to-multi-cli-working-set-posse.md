@@ -3,6 +3,12 @@
 **Status**: Accepted
 **Date**: 2026-05-17
 
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| accepted | 2026-05-17 | Accepted via ADR state transition |
+
 ## Context
 
 Deck currently supports one `working_set` per deck:

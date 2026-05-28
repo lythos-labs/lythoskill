@@ -5,6 +5,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-28 | Created |
+| terminated | 2026-05-28 | Terminated — task scope merged into broader research epic |
 
 ## 背景与目标
 

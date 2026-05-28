@@ -7,6 +7,7 @@
 | backlog | 2026-05-28 | Created — EPIC-20260527212032856 T3 |
 | in-progress | 2026-05-28 | Started |
 | review | 2026-05-28 | Deliverables committed |
+| completed | 2026-05-28 | Done |
 
 ## 背景与目标
 

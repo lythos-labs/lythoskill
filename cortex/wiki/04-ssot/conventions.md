@@ -150,7 +150,22 @@ cortex complete TASK-xxx      # any status -> completed (trailer-driven)
 **Close tasks you finish.** Do not leave tasks in `02-in-progress` after work is done.
 Run `cortex probe` before session end to catch inconsistencies.
 
-## 8. Site & Doc Rules
+## 8. Agent Tool Delegation
+
+When to spawn subagents vs do it yourself:
+
+| Scenario | Delegate to agent | Do yourself |
+|----------|-------------------|-------------|
+| Read >3 files to extract facts | ✅ Agent reads + returns structured summary | ❌ Don't burn context on file I/O |
+| Cross-directory verification | ✅ Agent scans + reports findings | ❌ Don't chase paths manually |
+| Pure execution (done/complete/probe) | ✅ Agent runs commands + reports output | ❌ Don't babysit CLI |
+| Judgment calls (does this meet acceptance?) | ❌ You decide | ✅ Agent cannot judge intent |
+| User asks "what do you think" | ❌ You reason | ✅ Agent has no taste |
+| Architecture / design decisions | ❌ You design | ✅ Agent lacks project context |
+
+**Pattern**: You define the question → agent gathers evidence → you judge → agent executes.
+
+## 9. Site & Doc Rules
 
 ### Code Blocks
 
@@ -175,7 +190,7 @@ Every significant doc change requires a ZK validation pass before "done":
 
 For site pages, ADRs, SSOT files, and wiki entries that future agents onboard from.
 
-## 9. Daily Handoff Conventions
+## 10. Daily Handoff Conventions
 
 When session ends or context pressure is high:
 
@@ -185,7 +200,7 @@ When session ends or context pressure is high:
 4. Focus on what file exploration CANNOT recover: pitfalls, true working-tree state,
    specific next steps. Never replay git log or cortex INDEX.
 
-## 10. Site Positioning & External References
+## 11. Site Positioning & External References
 
 ### What lythoskill IS (must be reflected in site hero/tagline)
 - **A governance layer** for agent skills — not a skill collection, not a package manager, not a marketplace
@@ -204,7 +219,7 @@ Every external URL, repo name, and skill attribution in the site must be verifie
 - `canvas-design` → `anthropics/skills` (not `vercel-labs/agent-skills`)
 - When in doubt: `gh api repos/<owner>/<repo>` or `curl -sI <url>` to verify existence
 
-## 11. Related SSOT Documents
+## 12. Related SSOT Documents
 
 | Document | Answers | When to read |
 |----------|---------|-------------|

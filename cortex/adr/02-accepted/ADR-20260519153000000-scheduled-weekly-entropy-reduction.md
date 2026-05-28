@@ -1,7 +1,14 @@
 # ADR-20260519153000000: Scheduled Weekly Entropy Reduction
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2026-05-19
+
+## Status History
+
+| Status | Date | Note |
+|--------|------|------|
+| proposed | 2026-05-19 | Draft discussion, cron + pre-commit + CI hybrid approach |
+| accepted | 2026-05-19 | Accepted via ADR state transition |
 
 ## Context
 
@@ -134,5 +141,3 @@ fi
 - Expand probe rules based on new failure modes discovered
 - Consider auto-fix for known patterns (e.g., working_set collision)
 
-
-| accepted | 2026-05-19 | Accepted |

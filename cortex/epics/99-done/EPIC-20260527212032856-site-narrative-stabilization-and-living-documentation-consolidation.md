@@ -18,6 +18,7 @@ checklist_skipped_reason: Epic creation; checklist will be filled after task bre
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-05-27 | Created; triggered by site path drift (`.claude/skills` vs `.agents/skills`) and wiki/adr context rot discovery |
+| done | 2026-05-28 | Done |
 
 ## 背景故事
 
