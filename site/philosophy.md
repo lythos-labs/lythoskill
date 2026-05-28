@@ -49,17 +49,21 @@ The foundational layering of lythoskill:
 └────────────┬────────────────────────────┘
              │ structured input / explicit commands
 ┌────────────▼────────────────────────────┐
-│  CLI (tool layer) — pure functions      │
+│  CLI (tool layer) — deterministic ops    │
 │  · Deterministic input → output         │
 │  · No LLM API calls                     │
-│  · No parser / state machine / branching│
-│  · No retained state                    │
+│  · No strategic decisions               │
+│  · State via filesystem / SQLite / git   │
 └─────────────────────────────────────────┘
 ```
 
-**Intelligence lives in SKILL.md.** The CLI is mechanical glue — scan, link, query. Every time a CLI grows a parser or state machine, it's duplicating what the agent already does better with full context.
+**Intelligence lives in SKILL.md.** The CLI handles deterministic operations — validation, state transitions, file I/O. A state machine like cortex's task FSM (backlog → in-progress → review → completed) is a perfect example of what belongs in tools: deterministic, auditable, prevents agent drift.
 
-This is why lythoskill packages are thin: `packages/lythoskill-deck/skill/SKILL.md` carries the intelligence, `packages/lythoskill-deck/src/` carries stable integration code, and the CLI wires them together. Three layers, one responsibility each.
+The boundary is planner vs executor. The agent decides strategy ("this task should move to review"). The CLI executes deterministically ("task moved, lockfile updated, follow-up commit created"). This is the same pattern as a frontend/backend split: the frontend handles user intent and adaptability; the backend handles deterministic workflows, persistence, and validation. State machines in the backend reduce hallucination, not increase complexity.
+
+Every time a CLI takes on a strategic decision — choosing which skill to use, interpreting ambiguous user intent — it's duplicating what the agent already does better. But a deterministic FSM that the agent commands? That's just good API design.
+
+This is why lythoskill packages are thin: `packages/lythoskill-deck/skill/SKILL.md` carries the intelligence, `packages/lythoskill-deck/src/` carries stable integration code (including state machines where appropriate), and the CLI wires them together. Three layers, one responsibility each.
 
 ## The Thin Pattern
 
