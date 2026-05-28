@@ -107,9 +107,11 @@ bunx lythoskill build my-skill
 
 ## 边界与反模式
 
+> "Thin" is about the agent-facing surface (SKILL.md), not about capability. A lythoskill package can be "fat" in the npm layer — cortex is an embedded git-based Jira with state machine + 8 commands. Its SKILL.md remains thin. The community distinction between "fat" and "thin" skills refers to the whole package; the lythoskill distinction is about which layer carries the weight.
+
 | 反模式 | 说明 |
 |--------|------|
-| **Fat Skill** | 把源码、依赖全塞进 skill 目录。导致 context window 膨胀，版本治理重复 |
+| **Fat SKILL.md** | 把实现细节塞进 agent 读的文件。导致 context window 膨胀。npm 包可以胖（cortex 证明了这一点），但 SKILL.md 必须瘦 |
 | **全新 Registry** | 为 skills 自建包管理器。Maven WAR/EAR 的历史教训 |
 | **Skill 里写实现** | SKILL.md 里塞大量代码。应该只描述意图，实现交给 npm/pip 包 |
 
