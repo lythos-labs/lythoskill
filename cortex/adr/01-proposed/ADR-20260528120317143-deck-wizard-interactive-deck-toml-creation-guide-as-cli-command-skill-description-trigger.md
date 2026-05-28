@@ -51,9 +51,13 @@ User: "帮我做一个安全审计用的 deck"
   ↓
 Agent (via SKILL.md description pushy trigger):
   → 读 references/deck-building-guide.md
-  → 问用户: "什么 agent 平台？最多几个 skill？"
+  → 确认主力 player: "Claude Code? Codex? 还是其他?"
+     Claude Code → .claude/skills/
+     Codex / Cursor / Kimi / etc. → .agents/skills/
+     小众/定制 agent → mapping 一下路径
+  → 问用户: "最多几个 skill？"
   → 查 examples/decks/INDEX.md: "qa-sweep.toml 匹配"  
-  → 写 skill-deck.toml
+  → 写 skill-deck.toml（格式正确、路径有效、注释齐全）
   → deck validate --deck ./skill-deck.toml
   ↓
 CLI (HATEOAS output):
@@ -61,6 +65,8 @@ CLI (HATEOAS output):
   或
   ❌ Skill not found: github.com/xxx → try: curator add <locator> first
 ```
+
+**确认主力 player 是自然的一步**——deck 需要知道 skill 链接到哪个 `working_set`。对于 Claude Code 和 Codex/社区标准，两路径策略已覆盖。对于小众/定制 agent，agent 引导用户 mapping 路径即可。这和 Vercel `skills add --agent <name>` 的心智一致：告诉工具你的主力 agent，路径自动对齐。
 
 三层各司其职：
 

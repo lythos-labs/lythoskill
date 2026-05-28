@@ -80,6 +80,31 @@ bunx lythoskill build my-skill
 #   └── scripts/
 ```
 
+## User-Agent-Skill-CLI 协作模型
+
+> "Smart agent, dumb tool." 这个项目的 CLI 不是给人用的交互式 UI——**agent 是用户的代理**，CLI 是 agent 的工具。
+
+类比银行柜员：
+
+```
+用户: "我要取钱"           → 说目标
+柜员(agent): 查账户、选操作   → 理解意图、翻译成系统操作
+银行系统(CLI): 执行交易       → 确定性操作、验证、返回结果
+柜员(agent): "取好了"        → 翻译回人话
+```
+
+| 层 | 做什么 | 智能化程度 |
+|----|--------|-----------|
+| **用户** | 说目标（自然语言） | — |
+| **Agent** | 理解意图、问问题、做决策、读 SKILL.md、选 skill、写 toml | **智能都在这里** |
+| **SKILL.md** | 告诉 agent 怎么用 CLI、什么场景选什么参数 | guide，不是 executor |
+| **CLI** | validate、link、add、scan——确定性操作，HATEOAS 输出 | **零智能，纯机械** |
+
+**CLI 不做的**：理解用户意图、推荐 skill、交互式问答、判断 "你该用什么 deck"。
+**Agent 不做的**：验证 locator 是否存在、解析 toml 格式、检查 max_cards——这些是 CLI 的护栏。
+
+反例：`deck init --wizard` 交互式引导——把 "理解用户需求、选什么 deck" 的智能塞进 CLI，违背 thin-skill 分层（see ADR-20260528120317143）。
+
 ## 边界与反模式
 
 | 反模式 | 说明 |
