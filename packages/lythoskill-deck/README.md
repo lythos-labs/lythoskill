@@ -27,7 +27,7 @@ bunx @lythos/skill-deck@0.15.4 link
 | `link` | `[--deck <path>] [--workdir <dir>]` | Sync working set. Removes undeclared skills. |
 | `add` | `<locator> [--alias] [--type] [--deck]` | Add skill to cold pool + deck.toml. Accepts skills.sh syntax and FQ locators. |
 | `refresh` | `[<alias>] [--deck] [--exec]` | Scan declared skills for upstream updates. Plan-only by default; add `--exec` to pull. |
-| `validate` | `[deck.toml] [--workdir]` | Validate deck config without modifying files. |
+| `validate` | `[--deck <path>] [--workdir] [--remote]` | Validate deck config. Cold-pool-missing skills warn (not error) with HATEOAS next-step suggestions. Use `--remote` to verify paths on GitHub. |
 | `remove` | `<alias> [--deck]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `to-symlink` | `<alias> [--deck] [--workdir]` | Switch a skill to symlink mode (live link, follows cold pool). |
 | `to-snapshot` | `<alias> [--deck] [--workdir]` | Switch a skill to snapshot mode (pinned copy of current HEAD). |
