@@ -27,8 +27,9 @@
  */
 const config = {
   // Shared across all locales
+  base: '/lythoskill/',
   srcExclude: ['../**'],
-  head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
+  head: [['link', { rel: 'icon', href: '/lythoskill/favicon.svg' }]],
 
   locales: {
     root: {
