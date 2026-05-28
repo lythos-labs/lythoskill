@@ -140,6 +140,13 @@ Why: (1) npm/pip solve diamond deps -- no new registry; (2) skill layer immutabl
 long as interface is stable; (3) content-addressable via `bunx foo@sha256:...`;
 (4) release artifact = SKILL.md + scripts, optimal for context window budgets.
 
+**"Fat" packages are correct; "fat" SKILL.md is the anti-pattern.** Cortex is huge — embedded git-based Jira, state machine, 8 CLI commands, trailer-driven workflow. But its SKILL.md is thin: it tells the agent HOW to use cortex, not HOW cortex works internally. The community will see the package size and call it "fat skill." They're measuring the wrong layer. The thinness target is the SKILL.md — the agent's context window. The package layer can be as heavy as needed.
+
+**Three control tiers, not two:**
+- **Strategy (agent)**: decides what to do. "This task should move to review. That ADR needs superseding."
+- **Tactics (SKILL.md)**: translates strategy into tool commands. "When user says done, run cortex complete. After commit, run deck validate."
+- **Micro-execution (CLI/package)**: deterministic operations. State transitions, file I/O, git operations. No decisions, just execution.
+
 Progressive disclosure: **Advertise** (~100 tokens) -> **Load** (<5000 tokens) ->
 **Read** (references/ on demand) -> **Run** (scripts/ -> `bunx` -> npm package).
 
@@ -286,7 +293,7 @@ Documented so future agents do not re-propose discarded alternatives.
 
 | Anti-Pattern | Why It Fails |
 |--------------|--------------|
-| **Fat Skill** | Source + deps in skill dir. Context bloat, duplicated versioning. |
+| **Fat Skill** | Source code + dependencies in the skill directory (SKILL.md layer). The anti-pattern is fat in the AGENT'S CONTEXT WINDOW. Fat package + thin SKILL.md is the correct pattern — put weight in npm/pip, keep the agent-facing layer minimal. |
 | **New Registry** | Building a skill package manager. npm/pip already exist. |
 | **Code in SKILL.md** | Implementation in description file. Code belongs in npm/pip. |
 | **CLI as Wizard** | Interactive CLI prompts. Intelligence belongs in the agent. |
