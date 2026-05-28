@@ -4,7 +4,7 @@
 
 ## The Governance Problem
 
-Your `~/.agents/skills/` becomes a garbage dump. It happens gradually:
+Your skills directory — `.claude/skills/` or `.agents/skills/` — becomes a garbage dump. It happens gradually:
 
 1. You install a skill from GitHub — copy it into your skills directory
 2. You try Superpowers, then skill-manager — each leaves its own symlinks
@@ -88,7 +88,7 @@ rm -rf ~/.agents/skills/cool-skill/     # uninstall (maybe)
 
 **Deny-by-default.** Skills not in the deck are physically absent from the working set. No silent accumulation. No "I forgot I installed that."
 
-This is the same insight that drove Kubernetes away from imperative `kubectl run` toward declarative YAML reconciliation. The desired state is the source of truth; the controller makes reality match.
+This is the same insight behind `package.json` + `npm install` — declare what you need, let the tool reconcile. It also drove Kubernetes away from imperative `kubectl run` toward declarative YAML reconciliation. The desired state is the source of truth; the controller makes reality match.
 
 ## Player-Deck Separation
 

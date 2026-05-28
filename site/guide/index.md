@@ -23,6 +23,7 @@ Create `skill-deck.toml`:
 ```toml [Claude Code]
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
 working_set = ".claude/skills"
 
 [tool.skills.tdd]
@@ -35,6 +36,7 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 ```toml [Codex]
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
 working_set = ".agents/skills"
 
 [tool.skills.tdd]
@@ -47,6 +49,7 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 ```toml [Cursor]
 [deck]
 max_cards = 10
+cold_pool = "~/.agents/skill-repos"
 working_set = ".cursor/skills"
 
 [tool.skills.tdd]
@@ -82,7 +85,7 @@ Curator returns locator paths. Add to deck, run `bunx @lythos/skill-deck link`. 
 A skill's README says it is great. Is it?
 
 ```bash
-bunx @lythos/skill-arena single --deck skill-deck.toml --task "refactor this auth module"
+bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this auth module"
 ```
 
 Arena spawns a zero-knowledge subagent with your task and your deck. You see the output — not the marketing copy.
@@ -90,7 +93,7 @@ Arena spawns a zero-knowledge subagent with your task and your deck. You see the
 For A/B comparison:
 
 ```bash
-bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
+bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --brief "write API docs"
 ```
 
 **What changed**: Skill adoption is empirical, not faith-based.

@@ -131,7 +131,7 @@ Store everything          Select what's active         Only what's declared
 |--------|----------|------|
 | **Deck** | What's active? | `bunx @lythos/skill-deck link` reconciles working set |
 | **Arena** | Does it work? | `bunx @lythos/skill-arena vs` runs A/B tests with judge |
-| **Curator** | What's out there? | `bunx @lythos/curator find` queries indexed cold pools |
+| **Curator** | What's out there? | `bunx @lythos/curator find` — your personal index of discovered skills |
 
 [Full architecture ->](/architecture)
 
@@ -163,7 +163,7 @@ This is not a gimmick. It is proof that the governance model works: if agents co
 
 ## Validated by Agents, Not Just Ours
 
-A zero-knowledge Kimi agent independently ran through the quick start — installed bun, created a deck, executed arena single-deck test with frontend-design, and performed 4 multi-deck switches. Clean install, clean results. No prior context, no hand-holding.
+We validate documentation the same way — **zero-knowledge (ZK) subagents** verify that a fresh reader can follow every instruction. A ZK Kimi agent independently ran through the quick start — installed bun, created a deck, executed arena single-deck test with frontend-design, and performed 4 multi-deck switches. Clean install, clean results. No prior context, no hand-holding.
 
 [Read the agent's handoff ->](https://rfdk364izj6ca.ok.kimi.link/)
 
