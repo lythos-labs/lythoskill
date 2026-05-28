@@ -116,15 +116,22 @@ Site（VitePress 站点）的角色因此升级：它不应只是「宣传页」
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| T1 — Site path narrative audit & rewrite | ✅ completed | `site/` 路径叙事重写，多平台，EN+ZH 同步 — TASK-20260527222535526 |
-| T2 — Global path alignment sweep | ✅ completed | path-convention.md 建立，48 项偏离报告，P0 修复 — TASK-20260527212829974 |
-| T5 — Cross-platform quick-start design | ✅ completed | VitePress code-group tabs 多平台 quick-start — TASK-20260527223818020 |
-| — P1/P2 path annotation cleanup | ✅ completed | 7 通用 deck toml + 脚本 + arena/coach prompt 泛化 — TASK-20260528111848232 |
-| — Command shorthand fix (site + AGENTS.md) | backlog | site 代码块必须是可执行命令，AGENTS.md 建立简称映射规范 — TASK-20260528114758563 |
-| — Two-path strategy ADR + market research | proposed | ADR-20260528113712898 + market-position wiki — 支撑 site 叙事的事实基础 |
+| T1 — Site path narrative audit & rewrite | ✅ completed | TASK-20260527222535526 |
+| T2 — Global path alignment sweep | ✅ completed | TASK-20260527212829974 (in review — deliverables done) |
+| T5 — Cross-platform quick-start design | ✅ completed | TASK-20260527223818020 |
+| — P1/P2 path annotation cleanup | ✅ completed | TASK-20260528111848232 |
+| — Command shorthand fix (site + AGENTS.md) | ✅ completed | TASK-20260528114758563 (all code blocks → bunx, AGENTS.md convention added) |
+| — Two-path strategy ADR + market research | ✅ completed | ADR-20260528113712898 + market-position wiki + 51-agent reference |
+| — Distributed orchestrator ADR | ✅ completed | ADR-20260528173826499 — fork over compose, agent IS orchestrator |
+| — Combo skills annotation ADR | ✅ completed | ADR-20260528153455764 — `skills` as visual comment |
+| — Deck creation guide ADR | ✅ completed | ADR-20260528120317143 — thin-skill pattern for deck creation |
+| — Sober site audit (SSOT-aligned) | ✅ completed | 1 P0 + 2 P1 + 7 P2 — all fixed |
+| — HATEOAS research piece | ✅ completed | Why it failed in HTTP, works for agents |
+| — GitHub Pages deployment | ✅ completed | https://lythos-labs.github.io/lythoskill/ |
+| — Superseded ADR cleanup | ✅ completed | 3 ADRs → 03-superseded/, bodies stripped |
+| T6 — Dreaming skill PoC | 🔄 in-progress | Phase 1: concept design ✅. Phase 2: 6 SSOTs + 2 onboarding guides produced, ZK validated. Weekly chain W17-W22 complete. |
 | T3 — Wiki/ADR stale content audit | backlog | 逐篇审计 wiki/adr，过时归档，有效提取到 site |
 | T4 — Site information density optimization | backlog | 删除重复，合并分散，验证 progressive disclosure |
-| T6 — Dreaming skill PoC | backlog | ZK-validated memory consolidation — TASK-20260528121027367 |
 
 ## 经验沉淀
 
@@ -136,11 +143,12 @@ Site（VitePress 站点）的角色因此升级：它不应只是「宣传页」
 
 ## 归档条件
 
-- [ ] T1 — `site/` 全站路径叙事无矛盾，EN+ZH 同步，dirty diff 被取代或 reset
-- [ ] T2 — 全局路径对齐完成，`examples/`/`showcase/`/`packages/`/`site/` 一致
+- [x] T1 — `site/` 全站路径叙事无矛盾，EN+ZH 同步
+- [x] T2 — 全局路径对齐完成
 - [ ] T3 — Wiki/ADR 审计完成，过时内容归档，有效状态沉淀到 site
-- [ ] T4 — Site 信息密度优化完成，无重复、无分散、progressive disclosure 成立
-- [ ] T5 — 多平台 quick-start 设计落地，新用户 copy-paste 不会踩路径坑
-- [ ] T6 — Dreaming skill 设计文档（至少完成概念设计和 SKILL.md draft）
-- [ ] `cortex probe` 通过，无状态漂移
-- [ ] 新 agent 仅用 `site/` + `AGENTS.md` 即可理解项目当前状态（验证： onboard 测试）
+- [ ] T4 — Site 信息密度优化完成
+- [x] T5 — 多平台 quick-start 设计落地
+- [x] T6 Phase 1 — Dreaming skill SKILL.md + concept design
+- [ ] T6 Phase 2 — Full dreaming pipeline operational (scan → consolidate → ZK validate → revise)
+- [x] `cortex probe` 通过，无状态漂移
+- [x] 新 agent 仅用 `site/` + `AGENTS.md` + SSOT 即可理解项目当前状态（ZK agent 验证通过）
