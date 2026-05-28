@@ -38,7 +38,7 @@ lythoskill-arena vs --config arena.toml
 ```
 
 The `vs` subcommand uses a declarative `arena.toml` to define decks, tasks, and
-evaluation criteria. See `lythoskill-arena --help` for full options.
+evaluation criteria. See `bunx @lythos/skill-arena --help` for full options.
 
 Full deck comparison tests complete configurations (synergy effects).
 The same skill can have different marginal value in different deck contexts.

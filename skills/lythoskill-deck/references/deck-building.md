@@ -4,7 +4,7 @@ Four phases: Discovery → Evaluation → Organization → Maintenance.
 - **Awesome lists**: awesome-agent-skills, Vercel skills showcase
 - **GitHub search**: `filename:SKILL.md your-keyword`
 - **Social discovery**: Check `cooperative_skills` in popular skills for ecosystem links
-- **Curator**: `lythoskill-curator query "SELECT name FROM skills WHERE ..."`
+- **Curator**: `bunx @lythos/curator query "SELECT name FROM skills WHERE ..."`
 ## 2. Evaluation
 - **Cold pool trial**: Clone to cold pool, add to deck temporarily, test in real tasks
 - **Arena comparison**: Same-niche skills → controlled-variable benchmark
