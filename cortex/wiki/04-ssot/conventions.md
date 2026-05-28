@@ -101,6 +101,34 @@ An external evaluator seeing `spyOn` or `mock` in test files must distinguish:
 
 Current codebase: **zero violations of the third type**.
 
+### L1 Escape Hatch: When CLI Entry Points Skip IO Injection
+
+The IO injection pattern is **required at the Plan/Execute layer** (`buildXPlan`, `executeXPlan`) — this is where business logic lives and where testability matters most.
+
+**CLI entry points** (`runAdd`, `runFind`, `runCurator`, etc.) are **explicitly exempt** from IO injection when all three conditions hold:
+
+1. **Thin glue only**: The function does nothing but parse argv → call Plan/Execute → print results. No business logic.
+2. **No branching worth testing**: Error paths are "missing required arg" and "not found" — trivial enough that `spyOn(console)` coverage is sufficient.
+3. **Adding IO injection would increase complexity without proportional benefit**: The function would need an `io: { log, error, exit }` parameter, every call site would need to pass it, and the only test benefit is replacing `spyOn(console)` with `io.log` — a cosmetic change.
+
+**When this exemption applies**:
+- `runAdd` in `packages/lythoskill-curator/src/cli.ts` — parses `--pool`, calls `buildAddPlan` + `git clone`, prints status. IO injection would add ~8 lines of boilerplate for zero new test coverage.
+- `runFind` in same file — parses `--db`, queries catalog, prints formatted output. Same reasoning.
+
+**When this exemption does NOT apply** (IO injection is required):
+- `executeRefreshPlan` — business logic (git pull orchestration, status aggregation, linkDeck trigger). Must accept `RefreshIO`.
+- `buildRefreshPlan` — pure function, no IO, but if it ever did IO it would need injection.
+- Any function that calls `execSync`, `spawn`, or `fs` operations beyond trivial `existsSync` checks.
+
+**Rule of thumb**: If refactoring the function to IO injection would let you test something you **cannot** test with `spyOn(console)`, then IO injection is required. If the only difference is `spyOn(console, 'log')` vs `io.log`, the exemption holds.
+
+**Audit guidance**: When an external evaluator flags `spyOn(console)` as "mock abuse," verify:
+1. Is the function at the CLI entry layer? → Check if it's named `runX` and only does argv parsing + dispatch.
+2. Does it delegate all business logic to Plan/Execute functions? → If yes, the exemption likely applies.
+3. Would IO injection enable new tests? → If no, the `spyOn(console)` is legitimate L1 testing.
+
+**Known debt** (recorded, not hidden): `runAdd` and `runFind` in curator CLI use `spyOn(console)` because they lack IO injection interfaces. This is a deliberate simplicity trade-off, not an architecture violation. If future requirements add complex branching (e.g., interactive prompts, conditional output formatting), IO injection becomes required and the exemption is revoked.
+
 ## 6. Done Checklist
 
 Before claiming any piece of work "done" (from AGENTS.md SS "Before claiming done"):

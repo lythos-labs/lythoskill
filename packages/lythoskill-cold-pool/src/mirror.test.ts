@@ -209,8 +209,8 @@ describe('probeConnectivity', () => {
     expect(execCalls[0].args).not.toContain('socks5://socks5://proxy.example.com:1080')
   })
 
-  // ── Vertical Slice 10: SOCKS proxy fails, direct via fetch succeeds ──
-  test('SOCKS proxy fails, fetch fallback succeeds', async () => {
+  // ── Vertical Slice 10: SOCKS proxy fails → no automatic unproxied fallback ──
+  test('SOCKS proxy fails → no automatic unproxied fallback', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
 
     const result = await probeConnectivity('https://example.com/skill', 3000, {
@@ -220,8 +220,10 @@ describe('probeConnectivity', () => {
       fetch: async () => new Response(null, { status: 200 }),
     })
 
-    // When SOCKS proxy is configured but curl fails, the direct probe fails.
-    // No automatic fallback to unproxied fetch — user explicitly chose proxy.
+    // Design choice: when SOCKS proxy is configured but curl fails, the direct
+    // probe fails. No automatic fallback to unproxied fetch — the user
+    // explicitly chose to route traffic through the proxy, so we honor that
+    // choice rather than silently bypassing it.
     expect(result).toBeUndefined()
   })
 

@@ -70,18 +70,18 @@ path = "github.com/test-org/test-skill"
 describe('toSymlinkSkill — snapshot → symlink', () => {
   test('switches real dir to symlink', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'snapshot' })
-    const originalCwd = process.cwd
-    const exit = process.exit
+
+    const io = {
+      cwd: () => project,
+      exit: (() => { throw new Error('exit') }) as any,
+      log: (_msg: string) => {},
+      error: (_msg: string) => {},
+    }
 
     try {
-      process.cwd = () => project
-      process.exit = (() => { throw new Error('exit') }) as any
-      toSymlinkSkill('test-skill', deckPath, project)
+      toSymlinkSkill('test-skill', deckPath, project, io)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
-    } finally {
-      process.cwd = originalCwd
-      process.exit = exit
     }
 
     const st = lstatSync(dest)
@@ -91,18 +91,18 @@ describe('toSymlinkSkill — snapshot → symlink', () => {
 
   test('no-op when already symlink', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'symlink' })
-    const originalCwd = process.cwd
-    const exit = process.exit
+
+    const io = {
+      cwd: () => project,
+      exit: (() => { throw new Error('exit') }) as any,
+      log: (_msg: string) => {},
+      error: (_msg: string) => {},
+    }
 
     try {
-      process.cwd = () => project
-      process.exit = (() => { throw new Error('exit') }) as any
-      toSymlinkSkill('test-skill', deckPath, project)
+      toSymlinkSkill('test-skill', deckPath, project, io)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
-    } finally {
-      process.cwd = originalCwd
-      process.exit = exit
     }
 
     const st = lstatSync(dest)
@@ -114,18 +114,18 @@ describe('toSymlinkSkill — snapshot → symlink', () => {
 describe('toSnapshotSkill — symlink → snapshot', () => {
   test('switches symlink to real dir', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'symlink' })
-    const originalCwd = process.cwd
-    const exit = process.exit
+
+    const io = {
+      cwd: () => project,
+      exit: (() => { throw new Error('exit') }) as any,
+      log: (_msg: string) => {},
+      error: (_msg: string) => {},
+    }
 
     try {
-      process.cwd = () => project
-      process.exit = (() => { throw new Error('exit') }) as any
-      toSnapshotSkill('test-skill', deckPath, project)
+      toSnapshotSkill('test-skill', deckPath, project, io)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
-    } finally {
-      process.cwd = originalCwd
-      process.exit = exit
     }
 
     const st = lstatSync(dest)
@@ -138,18 +138,18 @@ describe('toSnapshotSkill — symlink → snapshot', () => {
 
   test('no-op when already snapshot', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'snapshot' })
-    const originalCwd = process.cwd
-    const exit = process.exit
+
+    const io = {
+      cwd: () => project,
+      exit: (() => { throw new Error('exit') }) as any,
+      log: (_msg: string) => {},
+      error: (_msg: string) => {},
+    }
 
     try {
-      process.cwd = () => project
-      process.exit = (() => { throw new Error('exit') }) as any
-      toSnapshotSkill('test-skill', deckPath, project)
+      toSnapshotSkill('test-skill', deckPath, project, io)
     } catch (e: any) {
       if (e.message !== 'exit') throw e
-    } finally {
-      process.cwd = originalCwd
-      process.exit = exit
     }
 
     const st = lstatSync(dest)

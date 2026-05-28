@@ -227,45 +227,36 @@ describe('scanSkill', () => {
 // ── curator add CLI BDD ────────────────────────────────────
 
 describe('runAdd', () => {
-  let exitCode: number | undefined
-  let exitErrors: string[]
-  let origExit: typeof process.exit
-
-  beforeAll(() => {
-    origExit = process.exit
-    process.exit = ((code?: number) => {
-      exitCode = code ?? 0
-      throw new Error(`EXIT:${code}`)
-    }) as typeof process.exit
-  })
-
-  afterAll(() => {
-    process.exit = origExit
-  })
-
-  beforeEach(() => {
-    exitCode = undefined
-    exitErrors = []
-    spyOn(console, 'error').mockImplementation((msg: string) => {
-      exitErrors.push(String(msg))
-    })
-  })
-
   function catchExit(fn: () => void): number | undefined {
-    try { fn() } catch (e: any) { if (!String(e).includes('EXIT:')) throw e }
+    let exitCode: number | undefined
+    try { fn() } catch (e: any) {
+      if (!String(e).includes('EXIT:')) throw e
+      const m = String(e).match(/EXIT:(\d+)/)
+      if (m) exitCode = parseInt(m[1], 10)
+    }
     return exitCode
   }
 
   it('C1: rejects missing --pool', () => {
-    const code = catchExit(() => runAdd(['github.com/foo/bar']))
+    const errors: string[] = []
+    const code = catchExit(() => runAdd(['github.com/foo/bar'], {
+      error: (msg) => errors.push(String(msg)),
+      log: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
     expect(code).toBe(1)
-    expect(exitErrors.some(e => e.includes('--pool'))).toBe(true)
+    expect(errors.some(e => e.includes('--pool'))).toBe(true)
   })
 
   it('C2: rejects missing locator', () => {
-    const code = catchExit(() => runAdd([]))
+    const errors: string[] = []
+    const code = catchExit(() => runAdd([], {
+      error: (msg) => errors.push(String(msg)),
+      log: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
     expect(code).toBe(1)
-    expect(exitErrors.some(e => e.includes('Usage'))).toBe(true)
+    expect(errors.some(e => e.includes('Usage'))).toBe(true)
   })
 
   it('C3: detects already-existing skill in cold pool', () => {
@@ -276,9 +267,12 @@ describe('runAdd', () => {
     mkdirSync(join(targetDir, '.git'), { recursive: true }) // must have .git to be detected
 
     const logs: string[] = []
-    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
 
-    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir]))
+    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir], {
+      error: () => {},
+      log: (msg) => logs.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
     expect(logs.some(l => l.includes('already in cold pool'))).toBe(true)
 
     rmSync(tmpDir, { recursive: true, force: true })
@@ -287,12 +281,15 @@ describe('runAdd', () => {
   it('C4: clone failure exits with error', () => {
     const poolDir = mkdtempSync(join(tmpdir(), 'curator-add-'))
     const errors: string[] = []
-    spyOn(console, 'error').mockImplementation((msg: string) => errors.push(String(msg)))
 
     try {
-      runAdd(['github.com/nonexistent/repo', '--pool', poolDir])
+      runAdd(['github.com/nonexistent/repo', '--pool', poolDir], {
+        error: (msg) => errors.push(String(msg)),
+        log: () => {},
+        exit: (code) => { throw new Error(`EXIT:${code}`) },
+      })
     } catch (_) {
-      // runAdd calls process.exit(1) after git clone failure → our mock throws EXIT
+      // runAdd calls io.exit(1) after git clone failure → our mock throws EXIT
     }
 
     expect(errors.some(e => e.includes('Failed to clone'))).toBe(true)
@@ -304,9 +301,12 @@ describe('runAdd', () => {
     const poolDir = join(tmpDir, 'pool')
     const customOutput = join(tmpDir, 'my-index')
     const logs: string[] = []
-    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
 
-    runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput, '--dry-run'])
+    runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput, '--dry-run'], {
+      error: () => {},
+      log: (msg) => logs.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
     expect(logs.some(l => l.includes(`Output: ${customOutput}`))).toBe(true)
 
     rmSync(tmpDir, { recursive: true, force: true })
@@ -321,9 +321,12 @@ describe('runAdd', () => {
     mkdirSync(join(targetDir, '.git'), { recursive: true })
 
     const logs: string[] = []
-    spyOn(console, 'log').mockImplementation((msg: string) => logs.push(String(msg)))
 
-    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput]))
+    catchExit(() => runAdd(['github.com/foo/bar', '--pool', poolDir, '--output', customOutput], {
+      error: () => {},
+      log: (msg) => logs.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
     expect(logs.some(l => l.includes('already in cold pool'))).toBe(true)
 
     rmSync(tmpDir, { recursive: true, force: true })
@@ -414,15 +417,17 @@ describe('runFind', () => {
       { name: 'fullstack-dev', path: 'github.com/anthropics/skills/skills/fullstack-dev', type: 'standard', description: 'Full-stack dev skill' },
     ])
 
-    // Capture stdout
+    // Capture stdout via injected IO
     const lines: string[] = []
-    const orig = console.log
-    console.log = (msg: string) => { lines.push(msg) }
 
     try {
-      runFind(['--db', dbPath, 'fullstack-dev'])
-    } finally {
-      console.log = orig
+      runFind(['fullstack-dev', '--db', dbPath], {
+        error: () => {},
+        log: (msg: string) => { lines.push(msg) },
+        exit: (code) => { throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected: io.exit(0) throws EXIT:0
     }
 
     const output = lines.join('\n')
@@ -438,16 +443,21 @@ describe('runFind', () => {
   it('F2: not found gives clear guidance + WebSearch hint', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'curator-find-'))
     const dbPath = join(tmpDir, 'catalog.db')
-    seedDb(dbPath, []) // empty db
+    // Seed a skill so catalog is non-empty, but search for a different name
+    seedDb(dbPath, [
+      { name: 'some-other-skill', path: 'github.com/test/skills/some-other-skill', type: 'standard', description: 'Some other skill' },
+    ])
 
     const lines: string[] = []
-    const orig = console.log
-    console.log = (msg: string) => { lines.push(msg) }
 
     try {
-      runFind(['--db', dbPath, 'nonexistent-skill'])
-    } finally {
-      console.log = orig
+      runFind(['nonexistent-skill', '--db', dbPath], {
+        error: () => {},
+        log: (msg: string) => { lines.push(msg) },
+        exit: (code) => { throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected: io.exit(0) throws EXIT:0
     }
 
     const output = lines.join('\n')
@@ -467,17 +477,19 @@ describe('runFind', () => {
     ])
 
     const lines: string[] = []
-    const orig = console.log
-    console.log = (msg: string) => { lines.push(msg) }
 
     try {
-      runFind(['--db', dbPath, 'fullstack-dev'])
-    } finally {
-      console.log = orig
+      runFind(['fullstack-dev', '--db', dbPath], {
+        error: () => {},
+        log: (msg: string) => { lines.push(msg) },
+        exit: (code) => { throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected: io.exit(0) throws EXIT:0
     }
 
     const output = lines.join('\n')
-    expect(output).toContain('Multiple skills found')
+    expect(output).toContain('skills share the name')
     expect(output).toContain('MiniMax-AI')
     expect(output).toContain('ChatGLM')
 
@@ -486,26 +498,19 @@ describe('runFind', () => {
 
   it('F4: rejects missing bare name', () => {
     const errors: string[] = []
-    const orig = console.error
-    console.error = (msg: string) => { errors.push(msg) }
-
-    const origExit = process.exit
     let exitCode: number | undefined
-    process.exit = ((code?: number) => {
-      exitCode = code ?? 0
-      throw new Error(`EXIT:${code}`)
-    }) as typeof process.exit
 
     try {
-      runFind(['--db', '/tmp/fake.db'])
-    } catch (e: any) {
+      runFind([], {
+        error: (msg: string) => { errors.push(msg) },
+        log: () => {},
+        exit: (code) => { exitCode = code; throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
       // expected
     }
 
     expect(exitCode).toBe(1)
     expect(errors.some(e => e.includes('Usage'))).toBe(true)
-
-    process.exit = origExit
-    console.error = orig
   })
 })

@@ -189,9 +189,62 @@ The pattern is not about "catching the evaluator being wrong." It is about **und
 
 **The arena is the correction mechanism.**
 
+## Variant: Internal Roundtable (File-Level Debate)
+
+The same three-agent pattern applies **inside** the project — not just for external evaluation, but for any architectural decision where the project's own agents might have blind spots.
+
+### When to use Internal Roundtable
+
+- A single agent proposes a refactor, and you suspect "respect current code" bias
+- Two agents disagree on whether a pattern is debt or defense
+- A code review surfaces an ambiguity that the author agent cannot see
+- Any decision where "the agent who wrote it" and "the agent who reviews it" are the same pool
+
+### Format
+
+```
+Agent A (Proponent)
+  → reads the file + architecture docs
+  → argues "this is correct / this is debt / this should change"
+
+Agent B (Skeptic)
+  → reads the SAME file, does NOT see Agent A's argument
+  → argues the opposite position
+  → must cite specific lines as evidence
+
+Agent C (Moderator)
+  → sees both arguments
+  → identifies which claims are factual vs interpretive
+  → flags "respect current code" bias in either direction
+  → produces verdict: [adopt A / adopt B / both partial / need more info]
+```
+
+### Key difference from external evaluation
+
+| External Arena | Internal Roundtable |
+|----------------|---------------------|
+| Agent A is external, has no context | Agent A is internal, may have written the code |
+| Bias: surface-scan + generic heuristics | Bias: "respect current code" + "I wrote this so it's right" |
+| Fork forces admission | Moderator forces both sides to own their reasoning |
+
+### Real example: runAdd IO injection debate
+
+**Agent A (Proponent)**: "`runAdd`'s `spyOn(console)` is L1 integration testing. The architecture docs say IO injection is correct, and our tests inject IO at the Plan/Execute layer. The evaluator misread."
+
+**Agent B (Skeptic)**: "`runAdd` directly calls `console.error` — it has no IO injection interface. The architecture docs require IO injection, but `runAdd` doesn't follow it. The `spyOn` exists because of a real gap, not because the pattern is complete."
+
+**Agent C (Moderator)**: 
+- Factual: `runAdd` has no IO parameter. `executeRefreshPlan` has `RefreshIO`. Both are true.
+- Interpretive: Is this a violation or an exemption?
+- Bias check: Agent A assumed "docs say IO injection → code must comply" without checking if the code actually complies. Agent B assumed "no IO parameter → must be debt" without asking if the complexity is worth it.
+- Verdict: **Neither fully right**. The gap is real but the fix is not urgent. Document as known exemption (see ADR-20260529002942317), do not hide behind "evaluator misread."
+
 ## Related
 
 - `cortex/wiki/04-ssot/pitfalls.md` §10: External Evaluator Surface-Scan Failure Mode
+- `cortex/wiki/04-ssot/pitfalls.md` §10 "Also Critical": Project Agents Confuse "Respect Current Code" with "Current Code Is Correct"
 - `cortex/wiki/04-ssot/conventions.md` §5: Testing Layers (prevents "mock abuse" misreading)
+- `cortex/wiki/04-ssot/conventions.md` §5 "L1 Escape Hatch": When CLI Entry Points Skip IO Injection
 - `cortex/wiki/04-ssot/pitfalls.md` §9: Cross-Package Convention Change (prevents incomplete evaluation)
+- ADR-20260529002942317: CLI Entry Point IO Injection Exemption
 - ADR-20260518024500631: reproduce.sh BDD pattern (same IoC handoff principle)

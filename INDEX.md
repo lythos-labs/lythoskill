@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/28 23:35:29
+> 自动生成于 2026/5/29 01:19:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 271 | 进行中: 0, 待验收: 0, 已完成: 229 |
-| Epics | 39 | 活跃: 0, 已完成: 35, 悬置: 2, 已归档: 2 |
-| ADRs | 83 | 已接受: 80 |
+| Tasks | 277 | 进行中: 0, 待验收: 0, 已完成: 235 |
+| Epics | 40 | 活跃: 1, 已完成: 35, 悬置: 2, 已归档: 2 |
+| ADRs | 84 | 已接受: 81 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260529003844792**: Agent-native project governance: defense layers, evaluation patterns, and bias mitigation
 
 ### 已完成
 
@@ -82,7 +82,7 @@ _无_
 
 _无_
 
-### 已完成 (229)
+### 已完成 (235)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -313,6 +313,12 @@ _无_
 - ✅ ~~TASK-20260528114758563~~: Fix site command shorthands — ensure all code blocks use runnable commands, establish shorthand resolution convention in AGENTS.md
 - ✅ ~~TASK-20260528121027367~~: Dreaming skill PoC — project-level memory consolidation with ZK agent validation, self-bootstrap
 - ✅ ~~TASK-20260528221835812~~: Wiki/ADR stale content audit — ZK cross-validate against dreaming SSOT, archive outdated, flag contradictions
+- ✅ ~~TASK-20260529003437287~~: Internal Roundtable pattern: extract core mechanism from Agent Evaluation Arena
+- ✅ ~~TASK-20260529003742409~~: Refactor curator CLI: add IO injection to runAdd/runFind/runCurator, remove L1 Escape Hatch exemption
+- ✅ ~~TASK-20260529010457419~~: ZK audit: curator CLI tests for hidden design defects (argument order, mock magic, false positives)
+- ✅ ~~TASK-20260529010924654~~: Fix remove.test.ts: add IO injection to removeSkill, remove direct process.exit assignment
+- ✅ ~~TASK-20260529010926067~~: Fix to-symlink-snapshot.test.ts: add IO injection, remove process.cwd/process.exit direct assignment
+- ✅ ~~TASK-20260529010927780~~: Fix mirror.test.ts: clarify SOCKS fallback test title/comment mismatch
 
 ### 悬置 (1)
 
@@ -447,6 +453,7 @@ _无_
 - ✅ **ADR-20260528120317143** (02-accepted): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
 - ✅ **ADR-20260528153455764** (02-accepted): Combo `skills` field as visual annotation — human-readable, not parsed by code
 - ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
+- ✅ **ADR-20260529002942317** (02-accepted): CLI Entry Point IO Injection Exemption
 
 ---
 

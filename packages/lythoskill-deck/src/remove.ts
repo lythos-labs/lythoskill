@@ -15,16 +15,30 @@ import { ColdPool } from "@lythos/cold-pool";
 import { homedir } from "node:os";
 import { validateAlias } from "./path-guard.js";
 
-export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: string): void {
+export interface DeckIO {
+  error: (msg: string) => void;
+  exit: (code?: number) => never;
+  warn: (msg: string) => void;
+  log: (msg: string) => void;
+}
+
+const defaultIO: DeckIO = {
+  error: (msg: string) => console.error(msg),
+  exit: (code?: number) => process.exit(code ?? 0),
+  warn: (msg: string) => console.warn(msg),
+  log: (msg: string) => console.log(msg),
+};
+
+export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: string, io: DeckIO = defaultIO): void {
   const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
   const DECK_PATH = cliDeck
     ? resolve(cliDeck)
     : findDeckToml(process.cwd()) || resolve("skill-deck.toml");
 
   if (!existsSync(DECK_PATH)) {
-    console.error(`❌ skill-deck.toml not found in ${process.cwd()}`);
-    console.error(`\nCreate one or specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
-    process.exit(1);
+    io.error(`❌ skill-deck.toml not found in ${process.cwd()}`);
+    io.error(`\nCreate one or specify a path: bunx @lythos/skill-deck link --deck /path/to/deck.toml`);
+    io.exit(1);
   }
 
   const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
@@ -36,7 +50,7 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
   const ALSO_LINK_TO_RESULT = parseAlsoLinkTo(deck.deck?.also_link_to, PROJECT_DIR);
   const ALSO_LINK_TO = ALSO_LINK_TO_RESULT.targets;
   if (ALSO_LINK_TO_RESULT.deprecated) {
-    console.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
+    io.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
   }
 
   // ── 定位目标 ────────────────────────────────────────────────
@@ -47,12 +61,12 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
   const match = parsedEntries.find(e => e.alias === target || e.path === target);
 
   if (!match) {
-    console.error(`❌ Skill not found in deck: ${target}`);
+    io.error(`❌ Skill not found in deck: ${target}`);
     const aliases = parsedEntries.map(e => e.alias);
     if (aliases.length > 0) {
-      console.error(`   Declared aliases: ${aliases.join(", ")}`);
+      io.error(`   Declared aliases: ${aliases.join(", ")}`);
     }
-    process.exit(1);
+    io.exit(1);
   }
 
   // ── 删 deck.toml 条目 ───────────────────────────────────────
@@ -62,9 +76,9 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   // Validate alias before using as path component (CWE-22)
   try { validateAlias(alias) } catch (e: any) {
-    console.error(`❌ Invalid alias in deck.toml: ${e.message}`)
-    console.error(`   Fix skill-deck.toml before re-running.`)
-    process.exit(1)
+    io.error(`❌ Invalid alias in deck.toml: ${e.message}`)
+    io.error(`   Fix skill-deck.toml before re-running.`)
+    io.exit(1)
   }
 
   if (deck[section]?.skills) {
@@ -91,16 +105,16 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
   }
 
   writeFileSync(DECK_PATH, stringifyToml(deck));
-  console.log(`📝 Removed "${alias}" from [${section}.skills] in ${DECK_PATH}`);
+  io.log(`📝 Removed "${alias}" from [${section}.skills] in ${DECK_PATH}`);
 
   // ── 删 working set symlink ──────────────────────────────────
 
   const symlinkPath = join(WORKING_SET, alias);
   if (existsSync(symlinkPath)) {
     rmSync(symlinkPath, { recursive: true, force: true });
-    console.log(`  🗑️  Removed symlink: ${symlinkPath}`);
+    io.log(`  🗑️  Removed symlink: ${symlinkPath}`);
   } else {
-    console.log(`  ⚠️  Symlink not found: ${symlinkPath}`);
+    io.log(`  ⚠️  Symlink not found: ${symlinkPath}`);
   }
 
   // ── 删 also_link_to symlinks ─────────────────────────────────
@@ -109,9 +123,9 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     const linkPath = join(target, alias);
     if (existsSync(linkPath)) {
       rmSync(linkPath, { recursive: true, force: true });
-      console.log(`  🗑️  Removed also_link_to symlink: ${linkPath}`);
+      io.log(`  🗑️  Removed also_link_to symlink: ${linkPath}`);
     } else {
-      console.log(`  ⚠️  also_link_to symlink not found: ${linkPath}`);
+      io.log(`  ⚠️  also_link_to symlink not found: ${linkPath}`);
     }
   }
 
@@ -126,9 +140,8 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     const pool = new ColdPool(coldPoolPath);
     pool.metadata.removeReference(match.path, DECK_PATH);
   } catch (e: any) {
-    console.warn(`⚠️  Metadata cleanup skipped: ${e.message}`);
+    io.warn(`⚠️  Metadata cleanup skipped: ${e.message}`);
   }
 
-  console.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/cold-pool prune' to GC unreferenced repos.`);
+  io.log(`\n💡 Cold pool untouched. Run 'bunx @lythos/cold-pool prune' to GC unreferenced repos.`);
 }
-

@@ -2,8 +2,10 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (51)
+## 📚 Patterns (53)
 
+- **[2026-05-29]** [internal-roundtable-pattern](./01-patterns/2026-05-29-internal-roundtable-pattern.md)
+- **[2026-05-28]** [agent-evaluation-arena-pattern](./01-patterns/2026-05-28-agent-evaluation-arena-pattern.md)
 - **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
 - **[2026-05-19]** [where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern](./01-patterns/2026-05-19-where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern.md)

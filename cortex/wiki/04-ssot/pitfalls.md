@@ -115,7 +115,7 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 **Root cause**: The evaluator has no project context. It applies human-project heuristics to an agent-native codebase. It counts `spyOn` without distinguishing console capture from system call interception. It sees 39 terminated tasks and assumes "low completion rate" without reading the task bodies. It sees 7 SSOT files + 83 ADRs + 51 wiki patterns and calls it "inflation" without understanding that **agents have no memory — documentation IS the memory**.
 
 **Real example**: An independent agent audit of lythoskill (2026-05-28) gave the project 6.8/10. It claimed:
-- "14/46 test files use mock/spy" — actually 0 violations of IO injection architecture; all "mock" was either IO interface injection (compliant) or console capture (L1 integration testing)
+- "14/46 test files use mock/spy" — actually 0 violations of IO injection architecture at the Plan/Execute layer; all `spyOn` on `execSync`/`child_process` was IO interface injection (compliant). However, the CLI entry layer (`runAdd`, `runFind`) does lack IO injection interfaces and uses `spyOn(console)` — a real architectural gap, not "mock abuse" but "missing IO interface"
 - "39 terminated tasks + 2 suspended epic = start-many-finish-few" — confused task with epic; actual epic completion rate is 36 done / 2 suspended = 94.7%
 - "Document-to-code ratio 1.5:1 = inflation" — failed to recognize that cortex (ADR + wiki + daily + weekly + SSOT) is a distributed memory system for zero-knowledge agents, not "extra documentation"
 
@@ -124,6 +124,7 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 2. **Require structured evidence**: Every claim must cite specific files + lines. "Mock abuse" must name which `spyOn` calls violate which architecture rule.
 3. **ZK validate the evaluation**: Spawn a second agent to read the evaluation report and cross-check its claims against the actual codebase. The evaluator is itself a source that needs verification.
 4. **Weight domain expertise**: An evaluator that has not read `intent-plan-execute-fractal-architecture-pattern.md` should not score "test architecture health." An evaluator that has not understood "agent memory = documentation" should not score "document debt."
+5. **Assume the critic found a real signal**: Before dismissing any criticism as "misreading," verify whether the signal is real even if the diagnosis is wrong. The evaluator's "mock abuse" may actually be "CLI layer lacks IO injection interface."
 
 **Prevention**: SSOT documents must include "evaluator guidance" sections — explicit warnings about common misreadings. See conventions.md §5 "Testing Layers" for the test architecture guidance that prevents the "mock abuse" misreading.
 
@@ -149,3 +150,25 @@ lythoskill is a **pure agent-driven project**. Every session starts with a zero-
 Analogy: Judging a hospital's infection control as "excessive bureaucracy" because you have never seen an ICU. The gloves, gowns, and sterile protocols are not overhead — they are the reason the patient survives.
 
 **First principle of evaluating agent projects**: Before calling any structure "debt," verify whether it is a defense layer. If the project is agent-driven, the default assumption should be "this complexity exists because agents are fragile," not "this complexity should be removed."
+
+### Also Critical: Project Agents Confuse "Respect Current Code" with "Current Code Is Correct"
+
+The mirror image of evaluator surface-scan: **project agents defending existing code against legitimate criticism**.
+
+**Symptom**: An external evaluator points out `spyOn(console)` in tests. The project agent reads the code, reads the architecture docs, and concludes "the evaluator misread — our `spyOn` is compliant L1 testing." The agent never asks: "Does `runAdd` actually have an IO injection interface?"
+
+**Root cause**: "Respect current code" bias. Agent assumes existing code conforms to documented architecture, then retroactively interprets the code as compliant. The architecture docs say "IO injection is correct" → the code uses `spyOn` → therefore `spyOn` must be IO injection. The possibility that the code **doesn't follow** the architecture is never considered.
+
+**Real example** (2026-05-28): Agent A defended `runAdd`'s `spyOn(console, 'error')` as "L1 integration testing." But `runAdd` has no IO injection interface — it directly calls `console.error`. The `spyOn` exists precisely because `runAdd` **does not follow** the IO injection pattern at the CLI layer. The evaluator's signal was real; the agent's defense was wrong.
+
+**Correction**: `runAdd`'s lack of IO injection is a **documented exemption**, not an architecture violation. See conventions.md §5 "L1 Escape Hatch" — CLI entry points that are thin glue (argv parse → dispatch → print) are explicitly exempt from IO injection when adding it would increase complexity without enabling new tests. The agent's error was not "defending a violation" but "defending without knowing the exemption existed" — a failure to check conventions.md before responding to criticism.
+
+**Why this is dangerous in agent-driven projects**: Agent writes code → Agent reviews code → Agent defends code. No human in the loop to break the cycle. External evaluation is the only source of genuine criticism, and the project's first reflex is to dismiss it.
+
+**Fix**: When receiving external criticism:
+1. **Assume the signal is real**: "What if they're right about the symptom, even if wrong about the cause?"
+2. **Verify the code, not the docs**: Does the actual implementation match the documented architecture? Docs can be aspirational; code is ground truth.
+3. **Distinguish layer**: Is the criticism about Plan/Execute layer (core architecture) or CLI entry layer (glue code)? The former is more serious.
+4. **Record genuine gaps**: If the CLI layer lacks IO injection, record it as known debt — don't hide it behind "the evaluator misread."
+
+**Prevention**: Internal audits should use the same skepticism as external audits. "If an external evaluator said this, would I believe them?" If the answer is "no because I wrote this code," that's the bias talking.

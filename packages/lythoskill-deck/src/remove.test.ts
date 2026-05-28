@@ -5,7 +5,7 @@
  * Run: bun test packages/lythoskill-deck/src/remove.test.ts
  */
 
-import { describe, it, expect, afterEach, spyOn } from 'bun:test'
+import { describe, it, expect, afterEach } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, symlinkSync, lstatSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -96,27 +96,22 @@ describe('removeSkill', () => {
     writeFileSync(deckPath, deckContent)
 
     const errors: string[] = []
-    const errorSpy = spyOn(console, 'error').mockImplementation((msg: string) => {
-      errors.push(String(msg))
-    })
-
-    const originalExit = process.exit
     let exitCode: number | undefined
-    process.exit = ((code?: number) => {
-      exitCode = code ?? 0
-      throw new Error(`EXIT:${code}`)
-    }) as typeof process.exit
+
+    const io = {
+      error: (msg: string) => errors.push(String(msg)),
+      exit: (code?: number) => { exitCode = code ?? 0; throw new Error(`EXIT:${code}`) },
+      warn: (_msg: string) => {},
+      log: (_msg: string) => {},
+    }
 
     try {
       const { removeSkill } = await import('./remove.ts')
-      removeSkill('not-in-deck', deckPath, projectDir)
+      removeSkill('not-in-deck', deckPath, projectDir, io)
       expect(false).toBe(true)
     } catch (err: any) {
       expect(exitCode).toBe(1)
       expect(errors.some(e => e.includes('Skill not found in deck'))).toBe(true)
-    } finally {
-      process.exit = originalExit
-      errorSpy.mockRestore()
     }
   })
 

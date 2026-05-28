@@ -43,6 +43,18 @@ interface SkillMeta {
   parseError: string | null; // error message if YAML.parse threw
 }
 
+export interface CuratorIO {
+  log?: (msg: string) => void
+  error?: (msg: string) => void
+  exit?: (code: number) => never
+}
+
+const defaultCuratorIO: Required<CuratorIO> = {
+  log: console.log,
+  error: console.error,
+  exit: (code: number) => { process.exit(code) },
+}
+
 
 function toString(val: any): string {
   if (typeof val === 'string') return val;
@@ -293,7 +305,7 @@ function restoreIndex(outputDir: string) {
   }
 }
 
-export function runCurator(argv: string[]) {
+export function runCurator(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const { poolPath, outputDir } = parseCuratorArgs(argv);
 
   const skillDirs = findSkillDirs(poolPath);
@@ -311,17 +323,17 @@ export function runCurator(argv: string[]) {
   }
 
   const degraded = skills.filter(s => s.status !== 'parsed')
-  console.log(`🧠 Skill Curator — Indexed ${skills.length} skills`);
+  io.log(`🧠 Skill Curator — Indexed ${skills.length} skills`);
   if (degraded.length > 0) {
-    console.log(`⚠️  ${degraded.length} skill(s) indexed with degraded status:`);
+    io.log(`⚠️  ${degraded.length} skill(s) indexed with degraded status:`);
     for (const s of degraded) {
       const tag = s.status === 'parse_error' ? 'YAML' : s.status === 'incomplete' ? 'MISSING' : s.status;
-      console.log(`   [${tag}] ${s.path}${s.parseError ? ` — ${s.parseError}` : ''}`);
+      io.log(`   [${tag}] ${s.path}${s.parseError ? ` — ${s.parseError}` : ''}`);
     }
   }
   if (skipped.length > 0) {
-    console.log(`🚫 ${skipped.length} skill(s) skipped (unreadable):`);
-    for (const s of skipped) console.log(`   [${s.reason}] ${s.path}`);
+    io.log(`🚫 ${skipped.length} skill(s) skipped (unreadable):`);
+    for (const s of skipped) io.log(`   [${s.reason}] ${s.path}`);
   }
 
   const byType: Record<string, SkillMeta[]> = {};
@@ -337,15 +349,15 @@ export function runCurator(argv: string[]) {
       byDeckSkillType[s.deckSkillType].push(s);
     }
   }
-  console.log(`\n📊 Types: ${Object.entries(byType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+  io.log(`\n📊 Types: ${Object.entries(byType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
   if (Object.keys(byNiche).length > 0) {
-    console.log(`\n🏷️  Niches: ${Object.entries(byNiche).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+    io.log(`\n🏷️  Niches: ${Object.entries(byNiche).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
   }
   if (Object.keys(byDeckSkillType).length > 0) {
-    console.log(`\n🔖 Deck skill types: ${Object.entries(byDeckSkillType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
+    io.log(`\n🔖 Deck skill types: ${Object.entries(byDeckSkillType).map(([t, i]) => `${t}:${i.length}`).join(', ')}`);
   }
-  console.log(`\n📂 Dir overlap:`);
-  Object.entries(byManagedDir).filter(([_, n]) => n.length > 1).forEach(([d, n]) => console.log(`   ${d}: ${n.join(', ')}`));
+  io.log(`\n📂 Dir overlap:`);
+  Object.entries(byManagedDir).filter(([_, n]) => n.length > 1).forEach(([d, n]) => io.log(`   ${d}: ${n.join(', ')}`));
 
   mkdirSync(outputDir, { recursive: true });
 
@@ -354,11 +366,11 @@ export function runCurator(argv: string[]) {
 
   const outPath = join(outputDir, 'REGISTRY.json');
   writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir, byNiche, byDeckSkillType } }, null, 2));
-  console.log(`\n💾 Registry: ${outPath}`);
+  io.log(`\n💾 Registry: ${outPath}`);
 
   const dbPath = join(outputDir, 'catalog.db');
   writeCatalogDb(dbPath, poolPath, skills);
-  console.log(`💾 Catalog DB: ${dbPath}`);
+  io.log(`💾 Catalog DB: ${dbPath}`);
 }
 
 // ── Markdown table formatter ─────────────────────────────────
@@ -566,7 +578,7 @@ function runQuery(argv: string[]) {
 // ── Find subcommand ──────────────────────────────────────────
 // ADR-20260519225831495: bare name → full path lookup
 
-export function runFind(argv: string[]) {
+export function runFind(argv: string[], io: CuratorIO = defaultCuratorIO) {
   // Parse --db flag
   let dbPath: string | undefined
   for (let i = 0; i < argv.length; i++) {
@@ -601,22 +613,22 @@ export function runFind(argv: string[]) {
 
   const bareName = argv.find(a => !a.startsWith('-'))
   if (!bareName) {
-    console.error('Usage: lythoskill-curator find <bare-name> [--db <path>]')
-    console.error('')
-    console.error('Look up a skill by its bare name in the local cold pool index.')
-    console.error('Returns full locator path + ready-to-use deck add command.')
-    console.error('')
-    console.error('Example:')
-    console.error('  lythoskill-curator find fullstack-dev')
-    process.exit(1)
+    io.error('Usage: lythoskill-curator find <bare-name> [--db <path>]')
+    io.error('')
+    io.error('Look up a skill by its bare name in the local cold pool index.')
+    io.error('Returns full locator path + ready-to-use deck add command.')
+    io.error('')
+    io.error('Example:')
+    io.error('  lythoskill-curator find fullstack-dev')
+    io.exit(1)
   }
 
   if (!existsSync(dbPath)) {
-    console.error('❌ Catalog DB not found.')
-    console.error('')
-    console.error('Run `lythoskill-curator` first to scan the cold pool:')
-    console.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
-    process.exit(1)
+    io.error('❌ Catalog DB not found.')
+    io.error('')
+    io.error('Run `lythoskill-curator` first to scan the cold pool:')
+    io.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
+    io.exit(1)
   }
 
   const db = new CatalogDb(dbPath)
@@ -627,11 +639,11 @@ export function runFind(argv: string[]) {
     // Detect empty catalog (0 skills = scan was never run or ran against empty pool)
     const skillCount = (db.query('SELECT COUNT(*) as n FROM skills').get() as { n: number } | null)?.n ?? 0
     if (skillCount === 0) {
-      console.error('⚠️  Catalog is empty (0 skills indexed).')
-      console.error('')
-      console.error('Run a full scan against your cold pool:')
-      console.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
-      process.exit(1)
+      io.error('⚠️  Catalog is empty (0 skills indexed).')
+      io.error('')
+      io.error('Run a full scan against your cold pool:')
+      io.error(`  lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
+      io.exit(1)
     }
 
     // Show index freshness
@@ -639,9 +651,9 @@ export function runFind(argv: string[]) {
     if (lastScan) {
       const age = Math.round((Date.now() - Number(lastScan)) / 86400000)
       if (age > 3) {
-        console.error(`⚠️  Catalog last scanned ${age} days ago. Skills added since may not appear.`)
-        console.error(`  Re-scan: lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
-        console.error('')
+        io.error(`⚠️  Catalog last scanned ${age} days ago. Skills added since may not appear.`)
+        io.error(`  Re-scan: lythoskill-curator ${process.env.HOME}/.agents/skill-repos`)
+        io.error('')
       }
     }
 
@@ -669,55 +681,55 @@ export function runFind(argv: string[]) {
     }
 
     if (matches.length === 0) {
-      console.log(`🔍 "${bareName}" not found in local cold pool.`)
-      console.log('')
-      console.log('To add it:')
-      console.log(`  1. gh search code "${bareName}" --filename "SKILL.md"  ← find the repo`)
-      console.log(`  2. curator add github.com/<owner>/<repo> --pool ~/.agents/skill-repos`)
-      console.log(`  3. curator find ${bareName}  # then it will hit`)
-      console.log('')
-      console.log('Or ask your agent — it can gh search code → curator add → deck add in one flow.')
-      process.exit(0)
+      io.log(`🔍 "${bareName}" not found in local cold pool.`)
+      io.log('')
+      io.log('To add it:')
+      io.log(`  1. gh search code "${bareName}" --filename "SKILL.md"  ← find the repo`)
+      io.log(`  2. curator add github.com/<owner>/<repo> --pool ~/.agents/skill-repos`)
+      io.log(`  3. curator find ${bareName}  # then it will hit`)
+      io.log('')
+      io.log('Or ask your agent — it can gh search code → curator add → deck add in one flow.')
+      io.exit(0)
     }
 
     if (matches.length > 1) {
-      console.log(`⚠️  ${matches.length} skills share the name "${bareName}":`)
-      console.log('')
+      io.log(`⚠️  ${matches.length} skills share the name "${bareName}":`)
+      io.log('')
       for (const m of matches) {
         const tags = metaTags(m.niches)
         const tagStr = tags.length > 0 ? `  🏷️  ${tags.join(', ')}` : ''
-        console.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})${tagStr}`)
+        io.log(`  ${m.name}  →  ${toLocator(m.path)}  (${m.type})${tagStr}`)
       }
-      console.log('')
-      console.log('Pick ONE and specify its full path with deck add:')
-      console.log(`  bunx @lythos/skill-deck add ${matches[0].name} --path ${toLocator(matches[0].path)}`)
+      io.log('')
+      io.log('Pick ONE and specify its full path with deck add:')
+      io.log(`  bunx @lythos/skill-deck add ${matches[0].name} --path ${toLocator(matches[0].path)}`)
       if (matches.length > 2) {
         for (let i = 1; i < Math.min(matches.length, 4); i++) {
-          console.log(`  # or: --path ${toLocator(matches[i].path)}`)
+          io.log(`  # or: --path ${toLocator(matches[i].path)}`)
         }
       }
-      console.log('')
-      console.log('⚠️  deck link will fail if two skills have the same name. Choose one.')
-      process.exit(0)
+      io.log('')
+      io.log('⚠️  deck link will fail if two skills have the same name. Choose one.')
+      io.exit(0)
     }
 
     const skill = matches[0]
     const locatorPath = toLocator(skill.path)
     const tags = metaTags(skill.niches)
-    console.log('')
-    console.log(`  name: ${skill.name}`)
-    console.log(`  path: ${locatorPath}`)
-    console.log(`  type: ${skill.type}`)
-    if (tags.length > 0) console.log(`  refs: ${tags.join(', ')}`)
-    console.log('')
-    console.log('  # deck add:')
-    console.log(`  bunx @lythos/skill-deck add ${skill.name} \\`)
-    console.log(`    --path ${locatorPath}`)
-    console.log('')
-    console.log('  # or add to skill-deck.toml:')
-    console.log(`  [tool.skills.${skill.name}]`)
-    console.log(`  path = "${locatorPath}"`)
-    console.log('')
+    io.log('')
+    io.log(`  name: ${skill.name}`)
+    io.log(`  path: ${locatorPath}`)
+    io.log(`  type: ${skill.type}`)
+    if (tags.length > 0) io.log(`  refs: ${tags.join(', ')}`)
+    io.log('')
+    io.log('  # deck add:')
+    io.log(`  bunx @lythos/skill-deck add ${skill.name} \\`)
+    io.log(`    --path ${locatorPath}`)
+    io.log('')
+    io.log('  # or add to skill-deck.toml:')
+    io.log(`  [tool.skills.${skill.name}]`)
+    io.log(`  path = "${locatorPath}"`)
+    io.log('')
   } finally {
     db.close()
   }
@@ -958,18 +970,18 @@ async function runRefreshExecute(argv: string[]) {
   console.log(`🎉 Refresh complete: ${done} pulled, ${skipped} skipped`)
 }
 
-export function runAdd(argv: string[]) {
+export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const locator = argv.find(a => !a.startsWith('-'))
   if (!locator) {
-    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--output <dir>] [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
-    process.exit(1)
+    io.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir> [--output <dir>] [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
+    io.exit(1)
   }
 
   const poolPath = getFlag(argv, '--pool')
   if (!poolPath) {
-    console.error('Error: --pool <dir> is required.')
-    console.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir>')
-    process.exit(1)
+    io.error('Error: --pool <dir> is required.')
+    io.error('Usage: lythoskill-curator add <github.com/owner/repo> --pool <dir>')
+    io.exit(1)
   }
   const outputDir = getFlag(argv, '--output') || `${poolPath}/.lythoskill-curator`
 
@@ -977,41 +989,41 @@ export function runAdd(argv: string[]) {
   const plan = buildAddPlan(locator, poolPath)
 
   if (dryRun) {
-    console.log(`🔎 Dry-run: curator add ${locator}`)
-    console.log(`   Pool:   ${poolPath}`)
-    console.log(`   Output: ${outputDir}`)
-    console.log(`   Repo:   ${plan.repoRoot}`)
-    if (plan.skillPath) console.log(`   Skill:  ${plan.skillPath}`)
-    console.log()
+    io.log(`🔎 Dry-run: curator add ${locator}`)
+    io.log(`   Pool:   ${poolPath}`)
+    io.log(`   Output: ${outputDir}`)
+    io.log(`   Repo:   ${plan.repoRoot}`)
+    if (plan.skillPath) io.log(`   Skill:  ${plan.skillPath}`)
+    io.log()
 
     // Checkpoint 1: Repo status
     if (existsSync(join(plan.repoPath, '.git'))) {
-      console.log(`📂 Repo status: already cloned`)
+      io.log(`📂 Repo status: already cloned`)
       if (plan.skillPath) {
         const skillMd = join(plan.repoPath, plan.skillPath, 'SKILL.md')
         if (existsSync(skillMd)) {
-          console.log(`📄 Skill path:  valid — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+          io.log(`📄 Skill path:  valid — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
         } else {
-          console.log(`⚠️  Skill path:  NOT FOUND — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
-          console.log(`\n💡 Check repo layout: ls ${plan.repoPath}/`)
+          io.log(`⚠️  Skill path:  NOT FOUND — ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+          io.log(`\n💡 Check repo layout: ls ${plan.repoPath}/`)
         }
       }
     } else if (existsSync(plan.repoPath)) {
-      console.log(`🧹 Repo status: partial clone residue (dir exists but no .git) — would auto-clean`)
-      console.log(`📦 Would clone: https://${plan.repoRoot}.git`)
+      io.log(`🧹 Repo status: partial clone residue (dir exists but no .git) — would auto-clean`)
+      io.log(`📦 Would clone: https://${plan.repoRoot}.git`)
     } else {
-      console.log(`📂 Repo status: not in cold pool`)
-      console.log(`📦 Would clone: https://${plan.repoRoot}.git --depth 1`)
+      io.log(`📂 Repo status: not in cold pool`)
+      io.log(`📦 Would clone: https://${plan.repoRoot}.git --depth 1`)
     }
 
     // Checkpoint 2: Addition record preview
     const reason = getFlag(argv, '--reason') || '(none)'
     const forkedFrom = getFlag(argv, '--forked-from')
-    console.log(`\n📝 Would write additions record:`)
-    console.log(`   reason:      ${reason}`)
-    console.log(`   forkedFrom:  ${forkedFrom || '(none)'}`)
-    console.log(`   status:      ${forkedFrom ? 'forked' : 'added'}`)
-    console.log(`\n💡 Remove --dry-run to execute.`)
+    io.log(`\n📝 Would write additions record:`)
+    io.log(`   reason:      ${reason}`)
+    io.log(`   forkedFrom:  ${forkedFrom || '(none)'}`)
+    io.log(`   status:      ${forkedFrom ? 'forked' : 'added'}`)
+    io.log(`\n💡 Remove --dry-run to execute.`)
     return
   }
 
@@ -1023,18 +1035,18 @@ export function runAdd(argv: string[]) {
     // Repo is cloned. If this is a monorepo skill, verify its path.
     if (plan.skillPath) {
       if (existsSync(join(plan.repoPath, plan.skillPath, 'SKILL.md'))) {
-        console.log(`✅ Skill already in cold pool: ${plan.relPath}`)
-        console.log(`   Repo: ${plan.repoRoot}`)
-        console.log(`   Skill: ${plan.skillPath}`)
+        io.log(`✅ Skill already in cold pool: ${plan.relPath}`)
+        io.log(`   Repo: ${plan.repoRoot}`)
+        io.log(`   Skill: ${plan.skillPath}`)
         return
       }
-      console.error(`❌ Repo exists (${plan.repoRoot}) but skill path not found:`)
-      console.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
-      console.error(`\n💡 The repo structure may have changed. Check the actual layout:`)
-      console.error(`   ls ${plan.repoPath}/`)
-      process.exit(1)
+      io.error(`❌ Repo exists (${plan.repoRoot}) but skill path not found:`)
+      io.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+      io.error(`\n💡 The repo structure may have changed. Check the actual layout:`)
+      io.error(`   ls ${plan.repoPath}/`)
+      io.exit(1)
     }
-    console.log(`✅ Repo already in cold pool: ${plan.relPath}`)
+    io.log(`✅ Repo already in cold pool: ${plan.relPath}`)
     return
   }
 
@@ -1042,7 +1054,7 @@ export function runAdd(argv: string[]) {
     // Directory exists but no .git — partial clone residue. Clean up.
     // Validate path stays within cold pool before rmSync (CWE-22)
     const safePath = validateInColdPool(plan.repoPath, poolPath)
-    console.log(`🧹 Cleaning up partial clone: ${safePath}`)
+    io.log(`🧹 Cleaning up partial clone: ${safePath}`)
     rmSync(safePath, { recursive: true, force: true })
   }
 
@@ -1055,9 +1067,9 @@ export function runAdd(argv: string[]) {
   const branchFlag = branch ? `--branch ${branch}` : ''
 
   const cloneUrl = `https://${plan.repoRoot}.git`
-  console.log(`📦 Cloning: ${cloneUrl}${fullClone ? '' : ' (--depth 1)'}`)
+  io.log(`📦 Cloning: ${cloneUrl}${fullClone ? '' : ' (--depth 1)'}`)
   if (plan.skillPath) {
-    console.log(`   Skill path inside repo: ${plan.skillPath}`)
+    io.log(`   Skill path inside repo: ${plan.skillPath}`)
   }
 
   try {
@@ -1070,22 +1082,22 @@ export function runAdd(argv: string[]) {
 
     // Verify the skill path exists within the cloned repo
     if (plan.skillPath && !existsSync(join(plan.repoPath, plan.skillPath, 'SKILL.md'))) {
-      console.error(`❌ Cloned ${plan.repoRoot} but skill path not found:`)
-      console.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
-      console.error(`\n💡 Check the actual repo structure:`)
-      try { console.error(safeGit(["-C", plan.repoPath, "ls-files"], { timeout: 5000 })) } catch {}
-      process.exit(1)
+      io.error(`❌ Cloned ${plan.repoRoot} but skill path not found:`)
+      io.error(`   ${plan.repoPath}/${plan.skillPath}/SKILL.md`)
+      io.error(`\n💡 Check the actual repo structure:`)
+      try { io.error(safeGit(["-C", plan.repoPath, "ls-files"], { timeout: 5000 })) } catch {}
+      io.exit(1)
     }
 
     // Persist decision record
     const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
     writeAddition(outputDir, record)
 
-    console.log(`✅ Skill added to cold pool: ${plan.relPath}`)
-    console.log(`   Location: ${plan.targetPath}`)
-    if (forkedFrom) console.log(`   Forked from: ${forkedFrom}`)
-    if (reason) console.log(`   Reason: ${reason}`)
-    console.log(`📝 Addition logged: ${join(outputDir, 'additions.jsonl')}`)
+    io.log(`✅ Skill added to cold pool: ${plan.relPath}`)
+    io.log(`   Location: ${plan.targetPath}`)
+    if (forkedFrom) io.log(`   Forked from: ${forkedFrom}`)
+    if (reason) io.log(`   Reason: ${reason}`)
+    io.log(`📝 Addition logged: ${join(outputDir, 'additions.jsonl')}`)
 
     // Write-through cache: index the new skill immediately (ADR-20260518123403810)
     // Curator scan is the reconciliation loop that fixes any drift later.
@@ -1124,7 +1136,7 @@ export function runAdd(argv: string[]) {
                 $last_parsed_at: new Date().toISOString(),
                 $parse_error: null,
               })
-              console.log(`   📇 Indexed: ${s.name}`)
+              io.log(`   📇 Indexed: ${s.name}`)
               dbUpdated = true
             } finally {
               db.close()
@@ -1133,14 +1145,14 @@ export function runAdd(argv: string[]) {
         }
       }
       if (dbUpdated) {
-        console.log(`📇 Index updated:   ${join(outputDir, 'catalog.db')}`)
+        io.log(`📇 Index updated:   ${join(outputDir, 'catalog.db')}`)
       }
     } catch {
-      console.log(`   ⚠️  Index update skipped (will catch up on next scan)`)
+      io.log(`   ⚠️  Index update skipped (will catch up on next scan)`)
     }
 
-    console.log(`\n💡 To use this skill in a project, run:`)
-    console.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
+    io.log(`\n💡 To use this skill in a project, run:`)
+    io.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
   } catch (e: any) {
     // Clean up empty directory left by failed clone
     try {
@@ -1150,8 +1162,8 @@ export function runAdd(argv: string[]) {
     } catch {
       // cleanup is best-effort — non-critical if it fails
     }
-    console.error(`❌ Failed to clone: ${e.message}`)
-    process.exit(1)
+    io.error(`❌ Failed to clone: ${e.message}`)
+    io.exit(1)
   }
 }
 
