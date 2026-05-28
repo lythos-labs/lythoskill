@@ -1,7 +1,7 @@
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"
+working_set = ".claude/skills"  # Claude Code default; or .agents/skills (community standard)
 
 # Site Builder Deck — documentation site design + narrative + UX
 # Discovered via: find-skills (skills.sh) → curator query → quality verify → deck add
@@ -26,8 +26,9 @@ path = "github.com/antfu/skills/skills/vitepress"
 [tool.skills.web-design-guidelines]
 path = "github.com/antfu/skills/skills/web-design-guidelines"
 
-[tool.skills.mermaid]
-path = "github.com/anthropics/skills/skills/mermaid"
+# TODO: add when available in cold pool
+# [tool.skills.mermaid]
+# path = "github.com/anthropics/skills/skills/mermaid"
 
 # TODO: add when available in cold pool
 # [tool.skills.librarian]

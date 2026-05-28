@@ -1,7 +1,7 @@
 [deck]
 max_cards = 10
 cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"
+working_set = ".claude/skills"  # Claude Code default; or .agents/skills (community standard)
 
 # QA Security Sweep Deck — 7 security audit skills
 # Usage: arena single --deck qa-sweep.toml --brief "audit <target>"

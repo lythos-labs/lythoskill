@@ -116,11 +116,14 @@ Site（VitePress 站点）的角色因此升级：它不应只是「宣传页」
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| T1 — Site path narrative audit & rewrite | backlog | 重写 `site/` 8 个文件的路径叙事，保留多平台，EN+ZH 同步 |
-| T2 — Global path alignment sweep | backlog | grep 全仓 `working_set`/`cold_pool`/`\.claude/skills`/`\.agents/skills`，建立规范，修正偏离 |
+| T1 — Site path narrative audit & rewrite | ✅ completed | `site/` 路径叙事重写，多平台，EN+ZH 同步 — TASK-20260527222535526 |
+| T2 — Global path alignment sweep | ✅ completed | path-convention.md 建立，48 项偏离报告，P0 修复 — TASK-20260527212829974 |
+| T5 — Cross-platform quick-start design | ✅ completed | VitePress code-group tabs 多平台 quick-start — TASK-20260527223818020 |
+| — P1/P2 path annotation cleanup | ✅ completed | 7 通用 deck toml + 脚本 + arena/coach prompt 泛化 — TASK-20260528111848232 |
+| — Command shorthand fix (site + AGENTS.md) | backlog | site 代码块必须是可执行命令，AGENTS.md 建立简称映射规范 — TASK-20260528114758563 |
+| — Two-path strategy ADR + market research | proposed | ADR-20260528113712898 + market-position wiki — 支撑 site 叙事的事实基础 |
 | T3 — Wiki/ADR stale content audit | backlog | 逐篇审计 wiki/adr，过时归档，有效提取到 site |
 | T4 — Site information density optimization | backlog | 删除重复，合并分散，验证 progressive disclosure |
-| T5 — Cross-platform quick-start design | backlog | 设计 VitePress tabs/code-group 或注释形式的多平台 quick-start |
 | T6 — Dreaming skill PoC | backlog | 把文档睡眠记忆整理流程 skill 化（OpenClaw-style 三阶段 → project-level），self-bootstrap |
 
 ## 经验沉淀

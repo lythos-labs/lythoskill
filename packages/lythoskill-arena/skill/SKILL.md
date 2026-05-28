@@ -172,7 +172,7 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} prepare-workdir \
 ### 2. Preflight self-check (BEFORE dispatch)
 
 ```bash
-pwd && ls .claude/skills/ && touch .arena-write-test && rm .arena-write-test && echo "OK"
+pwd && ls .claude/skills/ 2>/dev/null || ls .agents/skills/ 2>/dev/null && touch .arena-write-test && rm .arena-write-test && echo "OK"
 ```
 
 If ANY fail → fix before proceeding.
@@ -192,7 +192,7 @@ subagent prompt:
 
 All subagents run in PARALLEL. Each writes to its own isolated workdir. No file conflicts.
 
-> **Platform note**: `run_in_background` (or your platform's async spawn equivalent) keeps parent unblocked. Subagent inherits parent CWD — include `"Your working directory is {workDir}"` in the prompt so it cd's to the right place. Subagent skills load from `.claude/skills/` in that workdir.
+> **Platform note**: `run_in_background` (or your platform's async spawn equivalent) keeps parent unblocked. Subagent inherits parent CWD — include `"Your working directory is {workDir}"` in the prompt so it cd's to the right place. Subagent skills load from the working set directory in that workdir (default `.claude/skills/`).
 
 ### 4. Collect + Judge + Report + Archive
 

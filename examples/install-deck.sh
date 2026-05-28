@@ -26,5 +26,5 @@ echo "🔗 Linking skills..."
 bunx @lythos/skill-deck link
 
 echo ""
-echo "✅ Done. Active skills in .claude/skills/:"
+echo "✅ Done. Active skills in working set (default .claude/skills/; check your skill-deck.toml):"
 ls -1 .claude/skills/ 2>/dev/null || echo "  (none yet — add missing skills with: bunx @lythos/skill-deck add <path>)"

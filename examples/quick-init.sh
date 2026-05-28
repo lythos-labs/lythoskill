@@ -10,7 +10,7 @@
 #   1. Checks/installs Bun
 #   2. Creates skill-deck.toml with declared skills
 #   3. Runs deck link (download → cold pool → symlink → working set)
-#   4. Self-checks: ls .claude/skills/ to verify
+#   4. Self-checks: ls working_set (default .claude/skills/) to verify
 
 set -euo pipefail
 
@@ -70,7 +70,8 @@ bunx @lythos/skill-deck@latest link
 
 # 4. Self-check (sober pattern: verify what you just did)
 echo ""
-echo "🔍 Self-check: what does the agent see?"
+echo "🔍 Self-check: what does the agent see in the working set?"
+echo "   (default: .claude/skills/; configure working_set in skill-deck.toml for other agents)"
 if [ -d ".claude/skills" ]; then
   SKILL_COUNT=$(find .claude/skills -maxdepth 1 -not -name '.claude' -not -name '.' | wc -l | tr -d ' ')
   echo "   .claude/skills/ contains $SKILL_COUNT item(s):"

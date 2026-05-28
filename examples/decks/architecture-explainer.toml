@@ -13,7 +13,7 @@
 [deck]
 max_cards = 12
 cold_pool = "~/.agents/skill-repos"
-working_set = ".claude/skills"
+working_set = ".claude/skills"  # Claude Code default; or .agents/skills (community standard)
 
 [innate.skills.lythoskill-deck]
 path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"

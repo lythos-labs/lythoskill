@@ -11,7 +11,7 @@
 # lythoskill-deck's references/toml-format.md
 # ============================================================
 [deck]
-working_set = ".claude/skills"        # Agent scans here (symlinks only)
+working_set = ".claude/skills"        # Claude Code default; or .agents/skills (community standard)
 cold_pool   = "~/.agents/skill-repos" # All downloaded skills (agent can't see)
 max_cards   = 10                      # Hard limit. Link refuses if exceeded.
 # Always-active. Loads every session. Keep few and thin.

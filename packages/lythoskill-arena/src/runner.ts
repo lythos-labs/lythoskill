@@ -84,7 +84,7 @@ export function buildArenaPrompt(opts: {
     'ROBUSTNESS — If any command or script fails, read the error output, fix the issue, and retry.',
     'Do not stop on the first error. Ensure all required output files exist before finishing.',
     '',
-    'TOOLS — Use the skills already linked in .claude/skills/ (check with `ls .claude/skills/`).',
+    'TOOLS — Use the skills already linked in your working set (check with `ls .claude/skills/` or your configured path).',
     'They are available and tested. Only write alternative scripts if the linked skills explicitly',
     'cannot handle the task.',
   ]

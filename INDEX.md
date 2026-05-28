@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/27 22:41:48
+> 自动生成于 2026/5/28 11:45:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 266 | 进行中: 0, 待验收: 1, 已完成: 224 |
+| Tasks | 268 | 进行中: 0, 待验收: 1, 已完成: 225 |
 | Epics | 39 | 活跃: 1, 已完成: 34, 悬置: 2, 已归档: 2 |
-| ADRs | 81 | 已接受: 78 |
+| ADRs | 82 | 已接受: 78 |
 
 ---
 
@@ -81,7 +81,7 @@ _无_
 
 - 🔍 **TASK-20260527212829974**: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
 
-### 已完成 (224)
+### 已完成 (225)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -307,12 +307,13 @@ _无_
 - ✅ ~~TASK-20260527220921728~~: Fix P0 path narrative contradictions — remove 'sole location' language and align docs with code ground truth
 - ✅ ~~TASK-20260527222535526~~: Site path narrative audit and rewrite — align with path convention, preserve multi-platform, EN+ZH sync
 - ✅ ~~TASK-20260527223818020~~: Cross-platform quick-start design — VitePress tabs for Claude/Codex/Cursor working_set
+- ✅ ~~TASK-20260528111848232~~: Apply P1/P2 path-convention fixes: annotate deck tomls, install scripts, arena prompts per deviation report
 
 ### 悬置 (1)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (38)
+### 终止 (39)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -352,6 +353,7 @@ _无_
 - 🛑 ~~TASK-20260521113125677~~: Audit curator references — prune stale, update outdated (sober ZK agent)
 - 🛑 ~~TASK-20260521115223592~~: Fix site narrative: cold pool/working set jargon without context — lead with universal pain (global vs project skills, cp reuse, context window limit) before introducing terminology
 - 🛑 ~~TASK-20260521120336482~~: Rewrite site narrative from correct starting point: deck as shareable reproducible skill gist, compare against real alternatives (global dir, cp, vercel skills add, marketplace), progressive disclosure from getting-started to philosophy
+- 🛑 ~~TASK-20260528112402418~~: Research: Agents Skills ABC in 2026 — .agents/skills community standard scan-path landscape
 
 ---
 
@@ -438,6 +440,7 @@ _无_
 - ✅ **ADR-20260519165746212** (02-accepted): cortex probe --suspicious 模式
 - ✅ **ADR-20260519224555402** (02-accepted): curator add 全局副作用显式化与 --output 对齐
 - 🤔 **ADR-20260519225831495** (01-proposed): curator find — bare name to full path lookup
+- 🤔 **ADR-20260528113712898** (01-proposed): Site path narrative — two-path strategy (.claude/skills + .agents/skills) grounded in market reality
 
 ---
 

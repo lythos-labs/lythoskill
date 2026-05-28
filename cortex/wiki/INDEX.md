@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (53)
+## 📚 Patterns (54)
 
 - **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
@@ -51,6 +51,7 @@
 - **[2026-05-02]** [desc-preference-arena](./01-patterns/2026-05-02-desc-preference-arena.md)
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
+- **[0000-00-00]** [agent-skills-path-reference](./01-patterns/agent-skills-path-reference.md)
 - **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
 - **[0000-00-00]** [agents-md-bootloader-pattern](./01-patterns/agents-md-bootloader-pattern.md)
 - **[0000-00-00]** [cold-pool-evolutionary-rationale](./01-patterns/cold-pool-evolutionary-rationale.md)

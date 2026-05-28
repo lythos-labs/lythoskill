@@ -12,7 +12,7 @@
 | Context | Rule |
 |---------|------|
 | **Default** | `.claude/skills` — Claude Code is the primary audience and skill concept originator. |
-| **Codex-specific** | `.agents/skills` — use **only** in `codex/` subdirectories or explicitly multi-platform examples. |
+| **Community standard** | `.agents/skills` — the **community-recognized** path respected by Codex, Cursor, Kimi, Pi-Tui, Windsurf, OpenClaw, and others. Use in `codex/` subdirectories or explicitly multi-platform examples. |
 | **`also_link_to`** | May include `.agents/skills`, `.kimi/skills`, `.cursor/skills`, `.codex/skills`, `.windsurf/skills`, `.github/skills` — multi-platform fan-out is encouraged. |
 | **User-facing examples** (`site/`, `examples/decks/*.toml`, `examples/*.sh`) | **MUST** include a comment or note that `working_set` is configurable per platform. The default is not the only choice. |
 | **Code / tests** (`packages/`) | Use `.claude/skills` as the runtime default, but **must not** hardcode it as the *only* valid path in error messages, prompts, or documentation that agents consume. |
@@ -32,12 +32,12 @@
 ```toml
 # ✅ Correct — default with configurability note
 [deck]
-working_set = ".claude/skills"  # Configure per platform: .agents/skills, .cursor/skills, ...
+working_set = ".claude/skills"  # Claude Code default; or .agents/skills (community standard)
 cold_pool   = "~/.agents/skill-repos"
 
-# ✅ Correct — Codex-specific subdirectory
+# ✅ Correct — community-standard path in Codex example
 # examples/decks/codex/documents.toml
-working_set = ".agents/skills"  # Codex CLI default scan path
+working_set = ".agents/skills"  # Community standard — Codex, Cursor, Kimi, Pi-Tui, etc.
 
 # ✅ Correct — multi-platform fan-out
 also_link_to = [".agents/skills", ".cursor/skills"]
@@ -79,7 +79,7 @@ working_set = "skills"
 |------|------|---------|----------|----------|--------|
 | `examples/install-deck.sh` | 29–30 | `echo "✅ Done. Active skills in .claude/skills/:"` + `ls -1 .claude/skills/` | Add note: "(or your configured `working_set`)" | **P1** | `annotate` |
 | `examples/quick-init.sh` | 74–86 | Self-check block hardcodes `.claude/skills/` throughout | Add configurability comment at top of self-check section | **P1** | `annotate` |
-| `examples/decks/vanilla.toml` | 10 | `working_set = ".claude/skills"` (no comment) | Add `# Claude Code default; change for Cursor/Codex` | **P1** | `annotate` |
+| `examples/decks/vanilla.toml` | 10 | `working_set = ".claude/skills"` (no comment) | Add `# Claude Code default; or .agents/skills (community standard)` | **P1** | `annotate` |
 | `examples/decks/engineering.toml` | 11 | `working_set = ".claude/skills"` (no comment) | Add platform configurability comment | **P1** | `annotate` |
 | `examples/decks/documents.toml` | 11 | `working_set = ".claude/skills"` (no comment) | Add platform configurability comment | **P1** | `annotate` |
 | `examples/decks/full-stack.toml` | 11 | `working_set = ".claude/skills"` (no comment) | Add platform configurability comment | **P1** | `annotate` |
@@ -167,7 +167,7 @@ working_set = "skills"
 1. **`showcase/sober-journalist-evolution/reproduce.sh` uses `working_set = "skills"`** — This violates ADR-20260519144445916 (working_set must not alias build output directory). It was likely written before the ADR was accepted and never updated.
 2. **Built skill output (`skills/lythoskill-deck/SKILL.md`) contains "sole location" language** — The skill that agents read claims `.claude/skills/` is the *only* valid working set. This directly contradicts the multi-platform `also_link_to` feature the same skill implements. The source (`packages/lythoskill-deck/skill/SKILL.md`) needs the same fix.
 3. **Glossary references repeat the "sole location" claim** — Both `packages/lythoskill-deck/skill/references/glossary.md` and `skills/lythoskill-deck/references/glossary.md` define Working Set as "The sole location the agent scans for skills." This is factually false.
-4. **`examples/*.sh` scripts hardcode `.claude/skills/` in success messages** — `install-deck.sh` and `quick-init.sh` tell the user to check `.claude/skills/` without mentioning the path is configurable. Codex users following these scripts will look in the wrong place.
+4. **`examples/*.sh` scripts hardcode `.claude/skills/` in success messages** — `install-deck.sh` and `quick-init.sh` tell the user to check `.claude/skills/` without mentioning the path is configurable. Users of Codex, Cursor, Kimi, or any CLI that respects `.agents/skills` (the community standard) will look in the wrong place.
 5. **Most `examples/decks/*.toml` lack platform configurability comments** — 20 of 22 deck toml files use `.claude/skills` without a comment. Only `codex/*.toml` variants and `INDEX.md` are compliant.
 6. **Arena prompts hardcode `.claude/skills/`** — `packages/lythoskill-arena/src/runner.ts` and `preflight.ts` tell subagents to check `.claude/skills/`. If the user is running with `.agents/skills`, the subagent will look in the wrong directory.
 
@@ -177,7 +177,7 @@ working_set = "skills"
 
 1. **Fix P0 in `skills/` and `packages/lythoskill-deck/skill/`** — Update SKILL.md and glossary to remove "sole location" language and genericize path references. Re-run `lythoskill build` to sync built output.
 2. **Fix `showcase/sober-journalist-evolution/reproduce.sh`** — Change `working_set = "skills"` to `working_set = ".claude/skills"` (or add a comment explaining the intentional collision if this is a negative test).
-3. **Batch-annotate `examples/decks/*.toml`** — Add `# Claude Code default; change for Cursor/Codex/etc.` to all standard deck files.
+3. **Batch-annotate `examples/decks/*.toml`** — Add `# Claude Code default; or .agents/skills (community standard)` to all standard deck files.
 4. **Fix `examples/install-deck.sh` and `examples/quick-init.sh`** — Add configurability note and genericize verification logic.
 5. **T1: Fix `site/` deviations** — `site/index.md`, `site/zh/index.md`, `site/guide/index.md`, `site/architecture.md` need platform configurability notes.
 6. **Fix Arena prompts** — Genericize `.claude/skills/` references in `runner.ts` and `preflight.ts` to "working set" or mention configurability.

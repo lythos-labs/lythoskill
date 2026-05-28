@@ -964,6 +964,12 @@ The `skill-deck.toml` file declares which skills are active per project. Key con
 - `max_cards` — hard cap on total skills
 - Sections: `innate` (always loaded), `tool` (triggered), `combo` (multi-skill groups), `transient` (time-bounded)
 
+### Agent Skills path quick reference
+
+> **`.claude/skills/`** is Claude Code's default (skill concept originator). **`.agents/skills/`** is the community standard — Vercel skills.sh uses it as universal target, and 14+ agents (Kimi, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode...) share it. Both choices are valid; never imply `.claude/skills/` is the sole path.
+>
+> Full agent→path table: [`cortex/wiki/01-patterns/agent-skills-path-reference.md`](./cortex/wiki/01-patterns/agent-skills-path-reference.md). Convention rules: [`cortex/wiki/01-patterns/path-convention.md`](./cortex/wiki/01-patterns/path-convention.md).
+
 The `lythoskill-deck` tool reconciles the declared deck against the cold pool by creating symlinks (default) or snapshots (`--mode snapshot`) in the working set. It generates a `skill-deck.lock` file tracking the resolved state including per-skill mode (`"symlink" | "snapshot"`).
 
 **Pre-built decks** live in `examples/decks/` — `deck link --deck <url>` bootstraps a workspace in one command. See the project README for the full table.
