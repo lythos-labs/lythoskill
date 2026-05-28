@@ -183,7 +183,26 @@ When session ends or context pressure is high:
 4. Focus on what file exploration CANNOT recover: pitfalls, true working-tree state,
    specific next steps. Never replay git log or cortex INDEX.
 
-## 10. Related SSOT Documents
+## 10. Site Positioning & External References
+
+### What lythoskill IS (must be reflected in site hero/tagline)
+- **A governance layer** for agent skills — not a skill collection, not a package manager, not a marketplace
+- **Deny-by-default** — undeclared skills are physically absent. This is the core differentiator
+- **Declarative** — `skill-deck.toml` is the single source of truth, like `package.json`
+- **Three pillars** — Deck (govern), Arena (validate), Curator (discover)
+
+### What lythoskill IS NOT (must NOT appear in site positioning)
+- ❌ "A shareable skill collection" — this describes a package manager, not a governance layer
+- ❌ "A skill marketplace" — curator is a personal index, not a public registry
+- ❌ "An orchestrator" — there is no central orchestrator component (distribution by weight)
+
+### External reference verification
+Every external URL, repo name, and skill attribution in the site must be verified against the actual source. Agent fabrication fills gaps with plausible-sounding wrong answers:
+- `frontend-design` → `anthropics/skills` (not `obra/superpowers`)
+- `canvas-design` → `anthropics/skills` (not `vercel-labs/agent-skills`)
+- When in doubt: `gh api repos/<owner>/<repo>` or `curl -sI <url>` to verify existence
+
+## 11. Related SSOT Documents
 
 | Document | Answers | When to read |
 |----------|---------|-------------|
