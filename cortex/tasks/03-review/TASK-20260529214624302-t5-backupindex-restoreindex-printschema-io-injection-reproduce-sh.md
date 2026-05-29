@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-05-29 | Created |
 | in-progress | 2026-05-29 | Started |
+| review | 2026-05-29 | Deliverables committed |
 
 ## 背景与目标
 
