@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/29 22:21:19
+> 自动生成于 2026/5/29 22:32:38
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 285 | 进行中: 0, 待验收: 5, 已完成: 238 |
+| Tasks | 285 | 进行中: 0, 待验收: 6, 已完成: 238 |
 | Epics | 41 | 活跃: 1, 已完成: 36, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
@@ -71,19 +71,20 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260529214622541**: T4: runRefreshPlan/runRefreshExecute IO injection + behind count fix + reproduce.sh
+_无_
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (5)
+### 待验收 (6)
 
 - 🔍 **TASK-20260529214616879**: T1: runQuery IO injection + unit tests + reproduce.sh
 - 🔍 **TASK-20260529214618391**: T2: runAudit IO injection + unit tests + reproduce.sh
 - 🔍 **TASK-20260529214620383**: T3: runTag IO injection + unit tests + reproduce.sh
+- 🔍 **TASK-20260529214622541**: T4: runRefreshPlan/runRefreshExecute IO injection + behind count fix + reproduce.sh
 - 🔍 **TASK-20260529214624302**: T5: backupIndex/restoreIndex/printSchema IO injection + reproduce.sh
 - 🔍 **TASK-20260529214626313**: T6: --help entry IO injection + reproduce.sh
 

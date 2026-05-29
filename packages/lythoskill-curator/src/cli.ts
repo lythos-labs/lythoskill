@@ -888,45 +888,50 @@ function getPoolPath(argv: string[]): string {
   return getFlag(argv, '--pool') || `${process.env.HOME}/.agents/skill-repos`
 }
 
-async function runRefreshPlan(argv: string[]) {
+export async function runRefreshPlan(argv: string[], io: CuratorIO = defaultCuratorIO) {
+  const { log, error, exit } = { ...defaultCuratorIO, ...io }
   const poolPath = getPoolPath(argv)
   const metaDir = join(poolPath, '.lythoskill-curator')
   mkdirSync(metaDir, { recursive: true })
 
-  console.log(`🔍 Scanning cold pool for git repos...`)
+  log(`🔍 Scanning cold pool for git repos...`)
   const plan = buildRefreshPlan(poolPath)
-  console.log(`   Found ${plan.items.length} repo(s) in ${poolPath}`)
+  log(`   Found ${plan.items.length} repo(s) in ${poolPath}`)
 
   // Fetch remotes to check behind counts (network IO)
-  console.log(`\n📡 Checking upstreams...`)
+  log(`\n📡 Checking upstreams...`)
   for (const item of plan.items) {
     try {
       safeGit(["-C", item.path, "remote", "update"], { timeout: 15000 })
-      const count = safeGit(["-C", item.path, "rev-list", "HEAD...@{upstream}", "--count"], { timeout: 5000 })
+      // Two-dot range: HEAD..@{upstream} — commits in upstream not in HEAD
+      // Three-dot HEAD...@{upstream} includes commits in HEAD not in upstream too,
+      // which is wrong for "behind" count (we only care what we're missing).
+      const count = safeGit(["-C", item.path, "rev-list", "HEAD..@{upstream}", "--count"], { timeout: 5000 })
       item.behind = count ? parseInt(count) : 0
     } catch {
       item.behind = -1 // unreachable
     }
     const status = item.behind > 0 ? `${item.behind} behind` : item.behind === 0 ? 'up to date' : 'unreachable'
-    console.log(`   ${item.locator}: ${status}`)
+    log(`   ${item.locator}: ${status}`)
   }
 
   // Write TODO file
   const planPath = join(metaDir, 'refresh-plan.md')
   writeFileSync(planPath, formatRefreshPlan(plan))
   const pending = plan.items.filter(i => i.behind > 0).length
-  console.log(`\n📋 Refresh plan written: ${planPath}`)
-  console.log(`   ${pending} repo(s) behind, ${plan.items.length - pending} up to date`)
-  console.log(`\n💡 To execute: bunx @lythos/skill-curator refresh-execute --pool ${poolPath}`)
+  log(`\n📋 Refresh plan written: ${planPath}`)
+  log(`   ${pending} repo(s) behind, ${plan.items.length - pending} up to date`)
+  log(`\n💡 To execute: bunx @lythos/skill-curator refresh-execute --pool ${poolPath}`)
 }
 
-async function runRefreshExecute(argv: string[]) {
+export async function runRefreshExecute(argv: string[], io: CuratorIO = defaultCuratorIO) {
+  const { log, error, exit } = { ...defaultCuratorIO, ...io }
   const poolPath = getPoolPath(argv)
   const planPath = join(poolPath, '.lythoskill-curator', 'refresh-plan.md')
 
   if (!existsSync(planPath)) {
-    console.error('No refresh plan found. Run refresh-plan first.')
-    process.exit(1)
+    error('No refresh plan found. Run refresh-plan first.')
+    exit(1)
   }
 
   const plan = buildRefreshPlan(poolPath)
@@ -934,7 +939,8 @@ async function runRefreshExecute(argv: string[]) {
   // Check behind counts again (may have changed)
   for (const item of plan.items) {
     try {
-      const count = safeGit(["-C", item.path, "rev-list", "HEAD...@{upstream}", "--count"], { timeout: 5000 })
+      // Two-dot range: HEAD..@{upstream} (see runRefreshPlan comment)
+      const count = safeGit(["-C", item.path, "rev-list", "HEAD..@{upstream}", "--count"], { timeout: 5000 })
       item.behind = count ? parseInt(count) : 0
     } catch {
       item.behind = -1
@@ -943,26 +949,26 @@ async function runRefreshExecute(argv: string[]) {
 
   const pending = plan.items.filter(i => i.behind > 0)
   if (pending.length === 0) {
-    console.log('✅ All repos up to date.')
+    log('✅ All repos up to date.')
     return
   }
 
-  console.log(`📦 ${pending.length} repo(s) to pull:\n`)
+  log(`📦 ${pending.length} repo(s) to pull:\n`)
   for (const item of pending) {
-    console.log(`   ${item.locator} (${item.behind} behind)`)
+    log(`   ${item.locator} (${item.behind} behind)`)
   }
-  console.log()
+  log('')
 
   // Pull one by one, marking progress
   for (const item of pending) {
     try {
-      console.log(`🔄 Pulling: ${item.locator}...`)
+      log(`🔄 Pulling: ${item.locator}...`)
       safeGit(["-C", item.path, "pull", "--ff-only"], { stdio: 'inherit', timeout: 30000 })
       item.status = 'done'
-      console.log(`   ✅ Done\n`)
+      log(`   ✅ Done\n`)
     } catch {
       item.status = 'skip'
-      console.log(`   ⚠️  Failed, skipped\n`)
+      log(`   ⚠️  Failed, skipped\n`)
     }
     // Rewrite plan after each pull (progress marker)
     writeFileSync(planPath, formatRefreshPlan(plan))
@@ -970,7 +976,7 @@ async function runRefreshExecute(argv: string[]) {
 
   const done = plan.items.filter(i => i.status === 'done').length
   const skipped = plan.items.filter(i => i.status === 'skip').length
-  console.log(`🎉 Refresh complete: ${done} pulled, ${skipped} skipped`)
+  log(`🎉 Refresh complete: ${done} pulled, ${skipped} skipped`)
 }
 
 export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
@@ -1296,9 +1302,9 @@ if (import.meta.main) {
   }
 
   if (cmd === 'refresh-plan') {
-    runRefreshPlan(args.slice(1))
+    await runRefreshPlan(args.slice(1))
   } else if (cmd === 'refresh-execute') {
-    runRefreshExecute(args.slice(1))
+    await runRefreshExecute(args.slice(1))
   } else if (cmd === 'add') {
     runAdd(args.slice(1))
   } else if (cmd === 'tag') {

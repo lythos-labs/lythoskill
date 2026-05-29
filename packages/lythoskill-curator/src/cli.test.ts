@@ -6,12 +6,12 @@
  * Run: bun test packages/lythoskill-curator/src/cli.test.ts
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, spyOn } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery, runAudit, runTag, backupIndex, restoreIndex, printHelp } from './cli.ts'
+import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery, runAudit, runTag, backupIndex, restoreIndex, printHelp, runRefreshPlan, runRefreshExecute } from './cli.ts'
 import { inferSource } from './curator-core'
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -28,6 +28,65 @@ function useDb<T>(dbPath: string, fn: (db: CatalogDb) => T): T {
   const db = new CatalogDb(dbPath)
   try {
     return fn(db)
+  } finally {
+    db.close()
+  }
+}
+
+/** Catch EXIT:<code> thrown by mock io.exit — returns code or undefined */
+function catchExit(fn: () => void): number | undefined {
+  let exitCode: number | undefined
+  try { fn() } catch (e: any) {
+    if (!String(e).includes('EXIT:')) throw e
+    const m = String(e).match(/EXIT:(\d+)/)
+    if (m) exitCode = parseInt(m[1], 10)
+  }
+  return exitCode
+}
+
+interface SeedSkill {
+  name: string
+  path: string
+  type: string
+  description: string
+  when_to_use?: string
+  version?: string
+}
+
+/** Seed skills into a catalog DB for testing. Closes db after. */
+function seedDb(dbPath: string, skills: SeedSkill[]) {
+  const db = new CatalogDb(dbPath)
+  try {
+    for (const s of skills) {
+      db.insertSkill({
+        $name: s.name,
+        $description: s.description,
+        $type: s.type,
+        $version: s.version || '1.0.0',
+        $path: s.path,
+        $niches: '[]',
+        $managed_dirs: '[]',
+        $trigger_phrases: '[]',
+        $has_scripts: 0,
+        $has_examples: 0,
+        $body_preview: '',
+        $source: 'github.com/test/skills',
+        $when_to_use: s.when_to_use || 'Use it.',
+        $allowed_tools: '[]',
+        $author: '',
+        $user_invocable: 1,
+        $tags: '[]',
+        $deck_dependencies: '[]',
+        $deck_skill_type: 'tool',
+        $content_hash: '',
+        $status: 'parsed',
+        $indexed_at: new Date().toISOString(),
+        $last_parsed_at: new Date().toISOString(),
+        $parse_error: '',
+      })
+    }
+    // Force lazy-open even with 0 skills so the file exists on disk
+    db.query('SELECT 1').get()
   } finally {
     db.close()
   }
@@ -237,16 +296,6 @@ describe('scanSkill', () => {
 // ── curator add CLI BDD ────────────────────────────────────
 
 describe('runAdd', () => {
-  function catchExit(fn: () => void): number | undefined {
-    let exitCode: number | undefined
-    try { fn() } catch (e: any) {
-      if (!String(e).includes('EXIT:')) throw e
-      const m = String(e).match(/EXIT:(\d+)/)
-      if (m) exitCode = parseInt(m[1], 10)
-    }
-    return exitCode
-  }
-
   it('C1: rejects missing --pool', () => {
     const errors: string[] = []
     const code = catchExit(() => runAdd(['github.com/foo/bar'], {
@@ -384,42 +433,6 @@ describe('writeAddition', () => {
 import { CatalogDb } from './catalog-db.ts'
 
 describe('runFind', () => {
-  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
-    const db = new CatalogDb(dbPath)
-    try {
-      for (const s of skills) {
-        db.insertSkill({
-          $name: s.name,
-          $description: s.description,
-          $type: s.type,
-          $version: '1.0.0',
-          $path: s.path,
-          $niches: '[]',
-          $managed_dirs: '[]',
-          $trigger_phrases: '[]',
-          $has_scripts: 0,
-          $has_examples: 0,
-          $body_preview: '',
-          $source: 'github.com/test/skills',
-          $when_to_use: '',
-          $allowed_tools: '[]',
-          $author: '',
-          $user_invocable: 1,
-          $tags: '[]',
-          $deck_dependencies: '[]',
-          $deck_skill_type: 'tool',
-          $content_hash: '',
-          $status: 'parsed',
-          $indexed_at: new Date().toISOString(),
-          $last_parsed_at: new Date().toISOString(),
-          $parse_error: '',
-        })
-      }
-    } finally {
-      db.close()
-    }
-  }
-
   it('F1: finds a skill by bare name and outputs path + deck add command', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'curator-find-'))
     const dbPath = join(tmpDir, 'catalog.db')
@@ -528,52 +541,6 @@ describe('runFind', () => {
 // ── runQuery ───────────────────────────────────────────────────
 
 describe('runQuery', () => {
-  function catchExit(fn: () => void): number | undefined {
-    let exitCode: number | undefined
-    try { fn() } catch (e: any) {
-      if (!String(e).includes('EXIT:')) throw e
-      const m = String(e).match(/EXIT:(\d+)/)
-      if (m) exitCode = parseInt(m[1], 10)
-    }
-    return exitCode
-  }
-
-  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
-    const db = new CatalogDb(dbPath)
-    try {
-      for (const s of skills) {
-        db.insertSkill({
-          $name: s.name,
-          $description: s.description,
-          $type: s.type,
-          $version: '1.0.0',
-          $path: s.path,
-          $niches: '[]',
-          $managed_dirs: '[]',
-          $trigger_phrases: '[]',
-          $has_scripts: 0,
-          $has_examples: 0,
-          $body_preview: '',
-          $source: 'github.com/test/skills',
-          $when_to_use: '',
-          $allowed_tools: '[]',
-          $author: '',
-          $user_invocable: 1,
-          $tags: '[]',
-          $deck_dependencies: '[]',
-          $deck_skill_type: 'tool',
-          $content_hash: '',
-          $status: 'parsed',
-          $indexed_at: new Date().toISOString(),
-          $last_parsed_at: new Date().toISOString(),
-          $parse_error: '',
-        })
-      }
-    } finally {
-      db.close()
-    }
-  }
-
   it('Q1: No SQL + DB exists → schema output in io.log', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'curator-query-'))
     const dbPath = join(tmpDir, 'catalog.db')
@@ -652,54 +619,6 @@ describe('runQuery', () => {
 // ── runAudit ─────────────────────────────────────────────────
 
 describe('runAudit', () => {
-  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string; when_to_use?: string; version?: string }[]) {
-    const db = new CatalogDb(dbPath)
-    try {
-      for (const s of skills) {
-        db.insertSkill({
-          $name: s.name,
-          $description: s.description,
-          $type: s.type,
-          $version: s.version || '1.0.0',
-          $path: s.path,
-          $niches: '[]',
-          $managed_dirs: '[]',
-          $trigger_phrases: '[]',
-          $has_scripts: 0,
-          $has_examples: 0,
-          $body_preview: '',
-          $source: 'github.com/test/skills',
-          $when_to_use: s.when_to_use || 'Use it.',
-          $allowed_tools: '[]',
-          $author: '',
-          $user_invocable: 1,
-          $tags: '[]',
-          $deck_dependencies: '[]',
-          $deck_skill_type: 'tool',
-          $content_hash: '',
-          $status: 'parsed',
-          $indexed_at: new Date().toISOString(),
-          $last_parsed_at: new Date().toISOString(),
-          $parse_error: '',
-        })
-      }
-      // Force lazy-open even with 0 skills so the file exists on disk
-      db.query('SELECT 1').get()
-    } finally {
-      db.close()
-    }
-  }
-
-  function catchExit(fn: () => void): number | undefined {
-    let exitCode: number | undefined
-    try { fn() } catch (e: any) {
-      if (!String(e).includes('EXIT:')) throw e
-      const m = String(e).match(/EXIT:(\d+)/)
-      if (m) exitCode = parseInt(m[1], 10)
-    }
-    return exitCode
-  }
-
   it('A1: normal audit → log contains Summary and score', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'curator-audit-'))
     const dbPath = join(tmpDir, 'catalog.db')
@@ -756,54 +675,6 @@ describe('runAudit', () => {
 // ── runTag ───────────────────────────────────────────────────
 
 describe('runTag', () => {
-  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
-    const db = new CatalogDb(dbPath)
-    try {
-      for (const s of skills) {
-        db.insertSkill({
-          $name: s.name,
-          $description: s.description,
-          $type: s.type,
-          $version: '1.0.0',
-          $path: s.path,
-          $niches: '[]',
-          $managed_dirs: '[]',
-          $trigger_phrases: '[]',
-          $has_scripts: 0,
-          $has_examples: 0,
-          $body_preview: '',
-          $source: 'github.com/test/skills',
-          $when_to_use: 'Use it.',
-          $allowed_tools: '[]',
-          $author: '',
-          $user_invocable: 1,
-          $tags: '[]',
-          $deck_dependencies: '[]',
-          $deck_skill_type: 'tool',
-          $content_hash: '',
-          $status: 'parsed',
-          $indexed_at: new Date().toISOString(),
-          $last_parsed_at: new Date().toISOString(),
-          $parse_error: '',
-        })
-      }
-      // Force lazy-open even with 0 skills so the file exists on disk
-      db.query('SELECT 1').get()
-    } finally {
-      db.close()
-    }
-  }
-
-  function catchExit(fn: () => void): number | undefined {
-    let exitCode: number | undefined
-    try { fn() } catch (e: any) {
-      if (!String(e).includes('EXIT:')) throw e
-      const m = String(e).match(/EXIT:(\d+)/)
-      if (m) exitCode = parseInt(m[1], 10)
-    }
-    return exitCode
-  }
-
   it('T1: tag niche → skill niches updated', () => {
     const tmpDir = mkdtempSync(join(tmpdir(), 'curator-tag-'))
     const dbPath = join(tmpDir, 'catalog.db')
@@ -966,6 +837,137 @@ describe('restoreIndex', () => {
 
     expect(exitCode).toBe(1)
     expect(errors.some(e => e.includes('No backup'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── runRefreshPlan / runRefreshExecute ─────────────────────
+
+describe('runRefreshPlan', () => {
+  it('R1: empty pool → plan with 0 items', async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-'))
+    const poolDir = join(tmpDir, 'pool')
+    mkdirSync(poolDir, { recursive: true })
+
+    const logs: string[] = []
+    await runRefreshPlan(['--pool', poolDir], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('Found 0 repo(s)')
+    expect(output).toContain('Refresh plan written')
+
+    // Verify plan file was written
+    const planPath = join(poolDir, '.lythoskill-curator', 'refresh-plan.md')
+    expect(existsSync(planPath)).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('R2: pool with git repo → plan includes repo', async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-'))
+    const poolDir = join(tmpDir, 'pool')
+    const repoDir = join(poolDir, 'github.com', 'test', 'repo')
+    mkdirSync(repoDir, { recursive: true })
+
+    // Init git repo
+    const { execSync } = await import('node:child_process')
+    execSync('git init', { cwd: repoDir })
+    execSync('git config user.email "test@test.com"', { cwd: repoDir })
+    execSync('git config user.name "Test"', { cwd: repoDir })
+    writeFileSync(join(repoDir, 'SKILL.md'), '---\nname: test-skill\n---\n')
+    execSync('git add .', { cwd: repoDir })
+    execSync('git commit -m "init"', { cwd: repoDir })
+
+    const logs: string[] = []
+    await runRefreshPlan(['--pool', poolDir], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('Found 1 repo(s)')
+    expect(output).toContain('github.com/test/repo')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('R3: uses HEAD..@{upstream} (two-dot) not HEAD...@{upstream} (three-dot)', async () => {
+    // This test verifies the git range syntax is correct.
+    // The two-dot range counts commits in upstream not in HEAD.
+    // The three-dot range would also count commits in HEAD not in upstream,
+    // giving an inflated "behind" count when local commits exist.
+    // We verify by checking safeGit calls use the correct syntax.
+    const cliSource = readFileSync(join(__dirname, 'cli.ts'), 'utf-8')
+    // Find all safeGit calls and verify they use two-dot range
+    const safeGitCalls = [...cliSource.matchAll(/safeGit\(\[([^\]]+)\]/g)]
+    const revListCalls = safeGitCalls.filter(m => m[1].includes('rev-list'))
+    expect(revListCalls.length).toBeGreaterThan(0)
+    for (const call of revListCalls) {
+      expect(call[1]).toContain('"HEAD..@{upstream}"')
+      expect(call[1]).not.toContain('"HEAD...@{upstream}"')
+    }
+  })
+})
+
+describe('runRefreshExecute', () => {
+  it('R4: no plan file → error + exit(1)', async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-'))
+    const poolDir = join(tmpDir, 'pool')
+    mkdirSync(poolDir, { recursive: true })
+
+    const errors: string[] = []
+    let exitCode: number | undefined
+    try {
+      await runRefreshExecute(['--pool', poolDir], {
+        log: () => {},
+        error: (msg) => errors.push(String(msg)),
+        exit: (code) => { exitCode = code; throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected
+    }
+
+    expect(exitCode).toBe(1)
+    expect(errors.some(e => e.includes('No refresh plan'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('R5: all up to date → success message', async () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-'))
+    const poolDir = join(tmpDir, 'pool')
+    const repoDir = join(poolDir, 'github.com', 'test', 'repo')
+    mkdirSync(repoDir, { recursive: true })
+
+    // Init git repo
+    const { execSync } = await import('node:child_process')
+    execSync('git init', { cwd: repoDir })
+    execSync('git config user.email "test@test.com"', { cwd: repoDir })
+    execSync('git config user.name "Test"', { cwd: repoDir })
+    writeFileSync(join(repoDir, 'SKILL.md'), '---\nname: test-skill\n---\n')
+    execSync('git add .', { cwd: repoDir })
+    execSync('git commit -m "init"', { cwd: repoDir })
+
+    // Write a plan file (simulate refresh-plan output)
+    const metaDir = join(poolDir, '.lythoskill-curator')
+    mkdirSync(metaDir, { recursive: true })
+    writeFileSync(join(metaDir, 'refresh-plan.md'), '# Curator Refresh Plan\n\n- [ ] github.com/test/repo (unchecked)\n')
+
+    const logs: string[] = []
+    await runRefreshExecute(['--pool', poolDir], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('All repos up to date')
 
     rmSync(tmpDir, { recursive: true, force: true })
   })
