@@ -23,12 +23,18 @@ export function findGitRoot(dir: string, coldPool: string): string | null {
   return result.gitRoot ?? null
 }
 
-/** Quick behind-count probe for a single git root. Pure, no mutation. */
+/** Quick behind-count probe for a single git root. Pure, no mutation.
+ *
+ * Uses `HEAD..@{upstream}` (two-dot) instead of `HEAD...@{upstream}` (three-dot)
+ * because shallow clones (--depth=1) break the symmetric difference semantics
+ * of three-dot notation. Two-dot only counts commits reachable from upstream
+ * but not from HEAD — exactly what "behind" means.
+ */
 async function probeBehindCount(gitRoot: string): Promise<number | undefined> {
   try {
     const { execSync } = await import("node:child_process");
     execSync("git fetch --depth=1 origin", { cwd: gitRoot, timeout: 5000, stdio: "pipe" });
-    const count = execSync("git rev-list HEAD...@{upstream} --count", {
+    const count = execSync("git rev-list --count HEAD..@{upstream}", {
       cwd: gitRoot, timeout: 3000, encoding: "utf-8", stdio: "pipe",
     }).trim();
     return parseInt(count, 10);

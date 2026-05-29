@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/29 01:26:10
+> 自动生成于 2026/5/29 14:11:50
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 277 | 进行中: 0, 待验收: 0, 已完成: 235 |
+| Tasks | 279 | 进行中: 1, 待验收: 0, 已完成: 236 |
 | Epics | 40 | 活跃: 0, 已完成: 36, 悬置: 2, 已归档: 2 |
-| ADRs | 84 | 已接受: 81 |
+| ADRs | 83 | 已接受: 80 |
 
 ---
 
@@ -73,17 +73,17 @@ _无_
 
 ### 待办 (1)
 
-- [ ] **TASK-20260519224912252**: bare name to full path lookup for deck add
+- [ ] **TASK-20260529132806774**: deck refresh reproduce.sh with mock-git isolation
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260529132734903**: deck refresh: behind count accuracy + monorepo report clarity
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (235)
+### 已完成 (236)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -305,6 +305,7 @@ _无_
 - ✅ ~~TASK-20260519164705587~~: D: missing-weekly 加入周完成度百分比 + 导航
 - ✅ ~~TASK-20260519205953163~~: deck remove does not clean up also_link_to targets
 - ✅ ~~TASK-20260519224838606~~: 实现 curator add --output 对齐与副作用显式声明
+- ✅ ~~TASK-20260519224912252~~: bare name to full path lookup for deck add
 - ✅ ~~TASK-20260520143950404~~: parse-deck.ts: [combo] section is prompt orchestration, not skill list
 - ✅ ~~TASK-20260527212829974~~: Global path alignment sweep — establish working_set/cold_pool usage convention across repo
 - ✅ ~~TASK-20260527220921728~~: Fix P0 path narrative contradictions — remove 'sole location' language and align docs with code ground truth
@@ -454,7 +455,6 @@ _无_
 - ✅ **ADR-20260528120317143** (02-accepted): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
 - ✅ **ADR-20260528153455764** (02-accepted): Combo `skills` field as visual annotation — human-readable, not parsed by code
 - ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
-- ✅ **ADR-20260529002942317** (02-accepted): CLI Entry Point IO Injection Exemption
 
 ---
 

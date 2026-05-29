@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-29 | Created from external agent report (playground/lythoskill-improvement-proposal.md) |
+| in-progress | 2026-05-29 | Started |
 
 ## 背景与目标
 
@@ -19,43 +20,47 @@ Source: `playground/lythoskill-improvement-proposal.md` (2026-05-28)
 
 ## 需求详情
 
-- [ ] Fix behind count accuracy (P1)
-  - Option A: `--left-only` flag on `rev-list` (verify shallow-clone behavior)
-  - Option B: Remove `--depth=1` (performance impact)
-  - Option C: UI approximation `~N behind` (lowest risk, short-term)
-- [ ] Improve monorepo report clarity (P2)
-  - Group output by git root (repo)
-  - Show "repo updated → N skills synced" instead of per-skill "Up-to-date" for monorepo siblings
-- [ ] Add reproduce.sh for refresh (plan-only or mock-git, NEVER touch user's real cold pool)
+- [x] Fix behind count accuracy (P1)
+  - **Solution**: `HEAD..@{upstream}` (two-dot) instead of `HEAD...@{upstream}` (three-dot)
+  - Three-dot symmetric difference breaks on shallow clones; two-dot only counts upstream-ahead commits
+- [x] Improve monorepo report clarity (P2)
+  - Group git results by `gitRoot` in `executeRefreshPlan`
+  - Show `repo/name (N skills)` header with skill list
+- [x] Add reproduce.sh for refresh (plan-only + exec, isolated cold pool)
 - [ ] Update `probeBehindCount` tests to cover shallow-clone scenario
 
 ## 技术方案
 
-### Behind count
+### Behind count — FIXED
 
 ```typescript
-// Current (refresh.ts:27-38)
-execSync("git fetch --depth=1 origin", ...);
+// BEFORE (broken on shallow clones):
 const count = execSync("git rev-list HEAD...@{upstream} --count", ...);
+// Three-dot = symmetric difference. Shallow boundary included → overcount.
 
-// Option A (to verify):
-const count = execSync("git rev-list --left-only HEAD...@{upstream} --count", ...);
-
-// Option C (UI-only, immediate):
-const behindStr = t.behind === undefined ? '?' : t.behind > 0 ? `~${t.behind} behind` : 'up to date';
+// AFTER (correct):
+const count = execSync("git rev-list --count HEAD..@{upstream}", ...);
+// Two-dot = upstream-only. Only counts commits reachable from upstream but not HEAD.
 ```
 
-### Monorepo report
+**Root cause**: `git fetch --depth=1` creates a shallow boundary. `HEAD...@{upstream}` (three-dot, symmetric difference) includes the shallow boundary itself in the count. `HEAD..@{upstream}` (two-dot, asymmetric) only counts "upstream ahead of HEAD" — exactly what "behind" means.
 
-Group `plan.targets` by `gitRoot` before executing/reporting:
+**Verification**: `git rev-list --count HEAD..origin/main` returns 1 for 1 new commit, even after `fetch --depth=1`.
+
+### Monorepo report — FIXED
+
+Group `git` results by `gitRoot` in `executeRefreshPlan`. Non-git results still printed individually.
 
 ```
-📦 Skill Refresh Report — 8 skill(s) in 4 repo(s)
-   Repos updated: 4 | Skills synced: 8 | Skipped: 0 | Failed: 0
-
-   lythos-labs/lythoskill (3 skills): 🔄 Updated
-     └─ lythoskill-deck, lythoskill-curator, lythoskill-coach
+📦 Skill Refresh Report — 2 skill(s) checked
+   Updated: 1 | Up-to-date: 1 | Skipped: 0 | Failed: 0
+🔄 test-org/test-repo (2 skills)
+   └─ skill-a, skill-b
+      skill-b: Already up to date.
 ```
+
+Previously: `🔄 skill-a / ✅ skill-b` — looked like 1 updated, 1 skipped.
+Now: `🔄 test-org/test-repo (2 skills) / └─ skill-a, skill-b` — clearly same repo.
 
 ### Reproduce.sh
 
@@ -63,15 +68,19 @@ Use `git init` + `git commit` in TMPDIR to create isolated repos. NEVER use `~/.
 
 ## 验收标准
 
-- [ ] `deck refresh` (plan-only) shows `~N behind` or accurate count for shallow-cloned repos
-- [ ] `deck refresh --exec` groups monorepo skills under repo header
-- [ ] `bun --filter='*' run test` all green
-- [ ] reproduce.sh for refresh: plan-only mode, mock git repos, no user cold pool touched
+- [x] `deck refresh` (plan-only) shows accurate count for shallow-cloned repos (1 commit → "1 behind")
+- [x] `deck refresh --exec` groups monorepo skills under repo header
+- [x] `bun --filter='*' run test` all green
+- [x] reproduce.sh for refresh: 13/13 PASS, isolated cold pool
 - [ ] ZK validation: external agent reads output and self-reports understanding
 
 ## 进度记录
 
-<!-- 执行时更新，带时间戳 -->
+**2026-05-29**: 
+- Fixed behind count: `HEAD...@{upstream}` → `HEAD..@{upstream}` (refresh.ts)
+- Fixed monorepo report: group by gitRoot in executeRefreshPlan (refresh-plan.ts)
+- reproduce.sh updated: 13/13 PASS, removed known-issue workarounds
+- All tests green: `bun --filter='*' run test` 13/13 packages
 
 ## 关联文件
 - 修改: `packages/lythoskill-deck/src/refresh.ts`

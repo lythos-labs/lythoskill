@@ -215,14 +215,47 @@ export function executeRefreshPlan(plan: RefreshPlan, io?: RefreshIO): RefreshRe
     }
   }
 
-  // Report phase
+  // Report phase — group by git root for monorepo clarity
   const scope = plan.targets.length === plan.allDeclared.length
     ? `${plan.allDeclared.length} skill(s)`
     : 'single skill'
   log(`\n📦 Skill Refresh Report — ${scope} checked`)
   log(`   Updated: ${updated} | Up-to-date: ${upToDate} | Skipped: ${skipped} | Failed: ${failed}`)
 
-  for (const r of results) {
+  // Group git results by repo root to show monorepo relationships
+  const gitResults = results.filter(r => {
+    const target = plan.targets.find(t => t.alias === r.alias)
+    return target?.type === 'git'
+  })
+  const nonGitResults = results.filter(r => {
+    const target = plan.targets.find(t => t.alias === r.alias)
+    return target?.type !== 'git'
+  })
+
+  // Group git results by gitRoot
+  const byRepo = new Map<string, typeof gitResults>()
+  for (const r of gitResults) {
+    const target = plan.targets.find(t => t.alias === r.alias)
+    const root = target?.gitRoot ?? 'unknown'
+    if (!byRepo.has(root)) byRepo.set(root, [])
+    byRepo.get(root)!.push(r)
+  }
+
+  // Print grouped repo output
+  for (const [root, repoResults] of byRepo) {
+    const repoName = root.split('/').slice(-2).join('/') // last two segments
+    const repoUpdated = repoResults.some(r => r.status === 'updated')
+    const repoIcon = repoUpdated ? '🔄' : '✅'
+    const skillNames = repoResults.map(r => r.alias).join(', ')
+    log(`${repoIcon} ${repoName} (${repoResults.length} skill${repoResults.length > 1 ? 's' : ''})`)
+    log(`   └─ ${skillNames}`)
+    for (const r of repoResults) {
+      if (r.message) log(`      ${r.alias}: ${r.message}`)
+    }
+  }
+
+  // Print non-git results individually
+  for (const r of nonGitResults) {
     const icon = r.status === 'updated' ? '🔄' : r.status === 'up-to-date' ? '✅' :
       r.status === 'skipped' ? '⏭️' : r.status === 'not-git' ? '📁' : '❌'
     log(`${icon} ${r.alias}`)

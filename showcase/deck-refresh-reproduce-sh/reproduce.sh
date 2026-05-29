@@ -127,24 +127,19 @@ PLAN_OUTPUT=$(cd "$PROJECT" && bun "$DECK_CLI" refresh 2>&1 || true)
 echo "$PLAN_OUTPUT"
 
 # Both skills should show "1 behind" (same repo, same behind count)
-# KNOWN ISSUE: shallow fetch causes overcount. See TASK-20260529132734903.
-# Currently reports "2 behind" for 1 commit. This test documents the bug.
 BEHIND_A=$(echo "$PLAN_OUTPUT" | grep "skill-a" | grep -o '[0-9]\+ behind' | grep -o '[0-9]\+' || echo "0")
 BEHIND_B=$(echo "$PLAN_OUTPUT" | grep "skill-b" | grep -o '[0-9]\+ behind' | grep -o '[0-9]\+' || echo "0")
 
 if [ "$BEHIND_A" = "1" ]; then
   pass "skill-a shows correct 1 behind"
 else
-  # Document known issue instead of failing
-  echo "   ⚠️  KNOWN: skill-a behind count = $BEHIND_A (expected 1, see TASK-20260529132734903)"
-  pass "skill-a behind count documented (known issue: overcount)"
+  fail "skill-a behind count != 1 (got: $BEHIND_A)"
 fi
 
 if [ "$BEHIND_B" = "1" ]; then
   pass "skill-b shows correct 1 behind"
 else
-  echo "   ⚠️  KNOWN: skill-b behind count = $BEHIND_B (expected 1, see TASK-20260529132734903)"
-  pass "skill-b behind count documented (known issue: overcount)"
+  fail "skill-b behind count != 1 (got: $BEHIND_B)"
 fi
 
 # ── Step 7: Exec refresh — apply updates ─────────────────────────────────
@@ -167,9 +162,7 @@ else
   fail "Exec output missing 'Updated:'"
 fi
 
-# Both skills should be updated (monorepo: same repo)
-# KNOWN ISSUE: monorepo reporting shows 1 Updated + 1 Up-to-date for same repo.
-# See TASK-20260529132734903. This test documents the current behavior.
+# Both skills should be mentioned in monorepo group output
 if echo "$EXEC_OUTPUT" | grep -q "skill-a"; then
   pass "skill-a mentioned in exec output"
 else
@@ -182,11 +175,11 @@ else
   fail "skill-b missing from exec output"
 fi
 
-# Document monorepo reporting behavior
-if echo "$EXEC_OUTPUT" | grep -A2 "skill-a" | grep -q "Updated\|🔄"; then
-  if echo "$EXEC_OUTPUT" | grep -A2 "skill-b" | grep -q "Up-to-date"; then
-    echo "   ⚠️  KNOWN: monorepo shows 1 Updated + 1 Up-to-date (same repo, see TASK-20260529132734903)"
-  fi
+# Verify monorepo grouping: same repo skills grouped together
+if echo "$EXEC_OUTPUT" | grep -q "test-org/test-repo.*2 skill"; then
+  pass "Monorepo skills grouped by repo"
+else
+  fail "Monorepo skills not grouped"
 fi
 
 # ── Step 8: Verify working set still valid after refresh ─────────────────
