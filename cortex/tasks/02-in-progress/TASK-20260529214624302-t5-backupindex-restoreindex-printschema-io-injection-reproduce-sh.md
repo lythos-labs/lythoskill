@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-29 | Created |
+| in-progress | 2026-05-29 | Started |
 
 ## 背景与目标
 

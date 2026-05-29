@@ -11,7 +11,7 @@ import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery } from './cli.ts'
+import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery, runAudit, runTag, backupIndex, restoreIndex, printHelp } from './cli.ts'
 import { inferSource } from './curator-core'
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -21,6 +21,16 @@ function createSkillDir(base: string, name: string, frontmatter: string, body = 
   mkdirSync(dir, { recursive: true })
   writeFileSync(join(dir, 'SKILL.md'), `---\n${frontmatter}---\n\n${body}`)
   return dir
+}
+
+/** Use a CatalogDb within a scope — opened before fn, closed after */
+function useDb<T>(dbPath: string, fn: (db: CatalogDb) => T): T {
+  const db = new CatalogDb(dbPath)
+  try {
+    return fn(db)
+  } finally {
+    db.close()
+  }
 }
 
 // ── inferSource ──────────────────────────────────────────────
@@ -636,5 +646,353 @@ describe('runQuery', () => {
     expect(errors.some(e => e.includes('only SELECT'))).toBe(true)
 
     rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── runAudit ─────────────────────────────────────────────────
+
+describe('runAudit', () => {
+  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string; when_to_use?: string; version?: string }[]) {
+    const db = new CatalogDb(dbPath)
+    try {
+      for (const s of skills) {
+        db.insertSkill({
+          $name: s.name,
+          $description: s.description,
+          $type: s.type,
+          $version: s.version || '1.0.0',
+          $path: s.path,
+          $niches: '[]',
+          $managed_dirs: '[]',
+          $trigger_phrases: '[]',
+          $has_scripts: 0,
+          $has_examples: 0,
+          $body_preview: '',
+          $source: 'github.com/test/skills',
+          $when_to_use: s.when_to_use || 'Use it.',
+          $allowed_tools: '[]',
+          $author: '',
+          $user_invocable: 1,
+          $tags: '[]',
+          $deck_dependencies: '[]',
+          $deck_skill_type: 'tool',
+          $content_hash: '',
+          $status: 'parsed',
+          $indexed_at: new Date().toISOString(),
+          $last_parsed_at: new Date().toISOString(),
+          $parse_error: '',
+        })
+      }
+      // Force lazy-open even with 0 skills so the file exists on disk
+      db.query('SELECT 1').get()
+    } finally {
+      db.close()
+    }
+  }
+
+  function catchExit(fn: () => void): number | undefined {
+    let exitCode: number | undefined
+    try { fn() } catch (e: any) {
+      if (!String(e).includes('EXIT:')) throw e
+      const m = String(e).match(/EXIT:(\d+)/)
+      if (m) exitCode = parseInt(m[1], 10)
+    }
+    return exitCode
+  }
+
+  it('A1: normal audit → log contains Summary and score', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-audit-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'skill-a', path: 'github.com/test/skills/skill-a', type: 'standard', description: 'A skill' },
+    ])
+
+    const logs: string[] = []
+    runAudit(['--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('Summary:')
+    expect(output).toContain('Audit score:')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('A2: empty DB → 0 issues, score 100', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-audit-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [])
+
+    const logs: string[] = []
+    runAudit(['--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('0 issue')
+    expect(output).toContain('100/100')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('A3: DB not found → error + exit(1)', () => {
+    const errors: string[] = []
+    const code = catchExit(() => runAudit(['--db', '/nonexistent/db'], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('not found'))).toBe(true)
+  })
+})
+
+// ── runTag ───────────────────────────────────────────────────
+
+describe('runTag', () => {
+  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
+    const db = new CatalogDb(dbPath)
+    try {
+      for (const s of skills) {
+        db.insertSkill({
+          $name: s.name,
+          $description: s.description,
+          $type: s.type,
+          $version: '1.0.0',
+          $path: s.path,
+          $niches: '[]',
+          $managed_dirs: '[]',
+          $trigger_phrases: '[]',
+          $has_scripts: 0,
+          $has_examples: 0,
+          $body_preview: '',
+          $source: 'github.com/test/skills',
+          $when_to_use: 'Use it.',
+          $allowed_tools: '[]',
+          $author: '',
+          $user_invocable: 1,
+          $tags: '[]',
+          $deck_dependencies: '[]',
+          $deck_skill_type: 'tool',
+          $content_hash: '',
+          $status: 'parsed',
+          $indexed_at: new Date().toISOString(),
+          $last_parsed_at: new Date().toISOString(),
+          $parse_error: '',
+        })
+      }
+      // Force lazy-open even with 0 skills so the file exists on disk
+      db.query('SELECT 1').get()
+    } finally {
+      db.close()
+    }
+  }
+
+  function catchExit(fn: () => void): number | undefined {
+    let exitCode: number | undefined
+    try { fn() } catch (e: any) {
+      if (!String(e).includes('EXIT:')) throw e
+      const m = String(e).match(/EXIT:(\d+)/)
+      if (m) exitCode = parseInt(m[1], 10)
+    }
+    return exitCode
+  }
+
+  it('T1: tag niche → skill niches updated', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-tag-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'skill-a', path: 'github.com/test/skills/skill-a', type: 'standard', description: 'A skill' },
+    ])
+
+    const logs: string[] = []
+    runTag(['skill-a', '--niche', 'test-niche', '--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    expect(logs.some(l => l.includes('Tagged skill-a'))).toBe(true)
+
+    useDb(dbPath, (db) => {
+      const row = db.get<{ niches: string }>(`SELECT niches FROM skills WHERE name = $name`, { $name: 'skill-a' })
+      expect(row).not.toBeNull()
+      const niches = JSON.parse(row!.niches)
+      expect(niches).toContain('test-niche')
+    })
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('T2: tag qa signal → niches contains qa: prefix', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-tag-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'skill-a', path: 'github.com/test/skills/skill-a', type: 'standard', description: 'A skill' },
+    ])
+
+    const logs: string[] = []
+    runTag(['skill-a', '--qa', '{"source_type":"self","signal_value":8}', '--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    expect(logs.some(l => l.includes('1 signal(s)'))).toBe(true)
+
+    useDb(dbPath, (db) => {
+      const row = db.get<{ niches: string }>(`SELECT niches FROM skills WHERE name = $name`, { $name: 'skill-a' })
+      expect(row).not.toBeNull()
+      const niches = JSON.parse(row!.niches)
+      expect(niches.some((n: string) => n.startsWith('qa:'))).toBe(true)
+    })
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('T3: skill not found → error + exit(1)', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-tag-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'skill-a', path: 'github.com/test/skills/skill-a', type: 'standard', description: 'A skill' },
+    ])
+
+    const errors: string[] = []
+    const code = catchExit(() => runTag(['nonexistent', '--niche', 'test', '--db', dbPath], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('not found'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('T4: missing --niche and --qa → error + exit(1)', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-tag-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'skill-a', path: 'github.com/test/skills/skill-a', type: 'standard', description: 'A skill' },
+    ])
+
+    const errors: string[] = []
+    const code = catchExit(() => runTag(['skill-a', '--db', dbPath], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('At least one'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── backupIndex / restoreIndex ───────────────────────────────
+
+describe('backupIndex', () => {
+  it('B1: backup created → log contains Backup created', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-backup-'))
+    writeFileSync(join(tmpDir, 'REGISTRY.json'), '{}')
+    writeFileSync(join(tmpDir, 'catalog.db'), 'sqlite')
+
+    const logs: string[] = []
+    const result = backupIndex(tmpDir, {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    expect(result).not.toBeNull()
+    expect(logs.some(l => l.includes('Backup created'))).toBe(true)
+    expect(existsSync(result!.registryBak)).toBe(true)
+    expect(existsSync(result!.dbBak)).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+describe('restoreIndex', () => {
+  it('B2: restore from backup → log contains Restored', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-restore-'))
+    const registryPath = join(tmpDir, 'REGISTRY.json')
+    const dbPath = join(tmpDir, 'catalog.db')
+    writeFileSync(registryPath, '{"original":true}')
+    writeFileSync(dbPath, 'original-db')
+
+    // Create backup files
+    const registryBak = `${registryPath}.bak.2026-01-01-00-00-00`
+    const dbBak = `${dbPath}.bak.2026-01-01-00-00-00`
+    writeFileSync(registryBak, '{"backup":true}')
+    writeFileSync(dbBak, 'backup-db')
+
+    const logs: string[] = []
+    restoreIndex(tmpDir, {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    expect(logs.some(l => l.includes('Restored REGISTRY.json'))).toBe(true)
+    expect(readFileSync(registryPath, 'utf-8')).toContain('backup')
+    expect(readFileSync(dbPath, 'utf-8')).toContain('backup-db')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('B3: no backup → error + exit(1)', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-restore-'))
+
+    const errors: string[] = []
+    let exitCode: number | undefined
+    try {
+      restoreIndex(tmpDir, {
+        log: () => {},
+        error: (msg) => errors.push(String(msg)),
+        exit: (code) => { exitCode = code; throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected
+    }
+
+    expect(exitCode).toBe(1)
+    expect(errors.some(e => e.includes('No backup'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+})
+
+// ── printHelp ────────────────────────────────────────────────
+
+describe('printHelp', () => {
+  it('H1: help output contains key commands', () => {
+    const logs: string[] = []
+    let exitCode: number | undefined
+    try {
+      printHelp({
+        log: (msg) => logs.push(String(msg)),
+        error: () => {},
+        exit: (code) => { exitCode = code; throw new Error(`EXIT:${code}`) },
+      })
+    } catch {
+      // expected: io.exit(0) throws EXIT:0
+    }
+
+    const output = logs.join('\n')
+    expect(output).toContain('add')
+    expect(output).toContain('tag')
+    expect(output).toContain('query')
+    expect(output).toContain('audit')
+    expect(output).toContain('find')
+    expect(exitCode).toBe(0)
   })
 })

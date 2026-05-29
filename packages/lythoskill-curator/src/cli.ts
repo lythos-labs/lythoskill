@@ -252,7 +252,7 @@ function parseCuratorArgs(argv: string[]) {
 
 // ── Backup & Restore ─────────────────────────────────────────
 
-function backupIndex(outputDir: string): { registryBak: string; dbBak: string } | null {
+export function backupIndex(outputDir: string, io: CuratorIO = defaultCuratorIO): { registryBak: string; dbBak: string } | null {
   const timestamp = new Date().toISOString().replace(/[:T]/g, '-').split('.')[0];
   const registryPath = join(outputDir, 'REGISTRY.json');
   const dbPath = join(outputDir, 'catalog.db');
@@ -270,14 +270,14 @@ function backupIndex(outputDir: string): { registryBak: string; dbBak: string } 
   }
 
   if (registryBak || dbBak) {
-    console.log(`🛡️  Backup created:`);
-    if (registryBak) console.log(`   REGISTRY.json → ${basename(registryBak)}`);
-    if (dbBak) console.log(`   catalog.db → ${basename(dbBak)}`);
+    io.log!(`🛡️  Backup created:`);
+    if (registryBak) io.log!(`   REGISTRY.json → ${basename(registryBak)}`);
+    if (dbBak) io.log!(`   catalog.db → ${basename(dbBak)}`);
   }
   return registryBak || dbBak ? { registryBak: registryBak || '', dbBak: dbBak || '' } : null;
 }
 
-function restoreIndex(outputDir: string) {
+export function restoreIndex(outputDir: string, io: CuratorIO = defaultCuratorIO) {
   const registryPath = join(outputDir, 'REGISTRY.json');
   const dbPath = join(outputDir, 'catalog.db');
 
@@ -291,17 +291,17 @@ function restoreIndex(outputDir: string) {
   const dbBak = entries.find(e => e.name.startsWith('catalog.db.bak.'));
 
   if (!regBak && !dbBak) {
-    console.error('❌ No backup found to restore.');
-    process.exit(1);
+    io.error!('❌ No backup found to restore.');
+    io.exit!(1);
   }
 
   if (regBak) {
     writeFileSync(registryPath, readFileSync(regBak.path, 'utf-8'));
-    console.log(`✅ Restored REGISTRY.json from ${regBak.name}`);
+    io.log!(`✅ Restored REGISTRY.json from ${regBak.name}`);
   }
   if (dbBak) {
     writeFileSync(dbPath, readFileSync(dbBak.path));
-    console.log(`✅ Restored catalog.db from ${dbBak.name}`);
+    io.log!(`✅ Restored catalog.db from ${dbBak.name}`);
   }
 }
 
@@ -362,7 +362,7 @@ export function runCurator(argv: string[], io: CuratorIO = defaultCuratorIO) {
   mkdirSync(outputDir, { recursive: true });
 
   // Backup before rebuild (reconciler hygiene: never destroy without backup)
-  backupIndex(outputDir);
+  backupIndex(outputDir, io);
 
   const outPath = join(outputDir, 'REGISTRY.json');
   writeFileSync(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), poolPath, totalSkills: skills.length, skills, index: { byType, byManagedDir, byNiche, byDeckSkillType } }, null, 2));
@@ -774,20 +774,20 @@ function checkLegacyPatterns(db: CatalogDb): { name: string; path: string; patte
   return results
 }
 
-function runAudit(argv: string[]) {
+export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const dbPath = resolveDbPath(argv)
 
   if (!dbPath || !existsSync(dbPath)) {
-    console.error('❌ Catalog DB not found.')
-    console.error('')
-    console.error('Searched:')
-    console.error('  ./catalog.db')
-    console.error('  ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
-    console.error('  ~/.agents/lythoskill/curator/catalog.db')
-    console.error('  ~/.agents/lythos/skill-curator/catalog.db')
-    console.error('')
-    console.error('Run `lythoskill-curator` first to build the index.')
-    process.exit(1)
+    io.error!('❌ Catalog DB not found.')
+    io.error!('')
+    io.error!('Searched:')
+    io.error!('  ./catalog.db')
+    io.error!('  ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
+    io.error!('  ~/.agents/lythoskill/curator/catalog.db')
+    io.error!('  ~/.agents/lythos/skill-curator/catalog.db')
+    io.error!('')
+    io.error!('Run `lythoskill-curator` first to build the index.')
+    io.exit!(1)
   }
 
   const db = new CatalogDb(dbPath)
@@ -841,11 +841,11 @@ function runAudit(argv: string[]) {
     // Output report
     let totalIssues = 0
     for (const check of checks) {
-      console.log(`\n### ${check.title}: ${check.count} issue${check.count === 1 ? '' : 's'}`)
+      io.log!(`\n### ${check.title}: ${check.count} issue${check.count === 1 ? '' : 's'}`)
       if (check.rows.length > 0) {
-        console.log(formatMarkdownTable(check.rows))
+        io.log!(formatMarkdownTable(check.rows))
       } else {
-        console.log('*None found.*')
+        io.log!('*None found.*')
       }
       if (!check.title.includes('coverage')) {
         totalIssues += check.count
@@ -853,13 +853,13 @@ function runAudit(argv: string[]) {
     }
 
     const score = Math.max(0, 100 - Math.round((totalIssues / Math.max(total, 1)) * 100))
-    console.log(`\n---`)
-    console.log(`**Summary:** ${total} skills scanned, ${totalIssues} issue${totalIssues === 1 ? '' : 's'} found.`)
-    console.log(`**Audit score:** ${score}/100`)
+    io.log!(`\n---`)
+    io.log!(`**Summary:** ${total} skills scanned, ${totalIssues} issue${totalIssues === 1 ? '' : 's'} found.`)
+    io.log!(`**Audit score:** ${score}/100`)
 
   } catch (e: any) {
-    console.error(`❌ Audit error: ${e.message}`)
-    process.exit(1)
+    io.error!(`❌ Audit error: ${e.message}`)
+    io.exit!(1)
   } finally {
     db.close()
   }
@@ -1172,25 +1172,25 @@ export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
 
 // ── Tag: agent-enriched metadata ──────────────────────────────
 
-function runTag(argv: string[]) {
+export function runTag(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const skillName = argv.find(a => !a.startsWith('-'))
   if (!skillName) {
-    console.error('Usage: lythoskill-curator tag <skill-name> [--niche <value>] [--qa <json>] [--db <path>]')
-    console.error('')
-    console.error('Agent-enriched metadata layer. Writes curator\'s personal annotations')
-    console.error('(L3 买家秀) separate from skill author\'s frontmatter (L1 卖家秀).')
-    console.error('')
-    console.error('Options:')
-    console.error('  --niche <value>    Niche tag (repeatable)')
-    console.error('  --qa <json>        QA signal: {"source_type":"self/arena","signal_value":8,...}')
-    console.error('  --db, -d <path>    Database path')
-    process.exit(1)
+    io.error!('Usage: lythoskill-curator tag <skill-name> [--niche <value>] [--qa <json>] [--db <path>]')
+    io.error!('')
+    io.error!('Agent-enriched metadata layer. Writes curator\'s personal annotations')
+    io.error!('(L3 买家秀) separate from skill author\'s frontmatter (L1 卖家秀).')
+    io.error!('')
+    io.error!('Options:')
+    io.error!('  --niche <value>    Niche tag (repeatable)')
+    io.error!('  --qa <json>        QA signal: {"source_type":"self/arena","signal_value":8,...}')
+    io.error!('  --db, -d <path>    Database path')
+    io.exit!(1)
   }
 
   const dbPath = resolveDbPath(argv)
   if (!dbPath || !existsSync(dbPath)) {
-    console.error('❌ Catalog DB not found. Run `lythoskill-curator` first.')
-    process.exit(1)
+    io.error!('❌ Catalog DB not found. Run `lythoskill-curator` first.')
+    io.exit!(1)
   }
 
   const niches: string[] = []
@@ -1204,8 +1204,8 @@ function runTag(argv: string[]) {
   }
 
   if (niches.length === 0 && qaSignals.length === 0) {
-    console.error('❌ At least one --niche or --qa is required.')
-    process.exit(1)
+    io.error!('❌ At least one --niche or --qa is required.')
+    io.exit!(1)
   }
 
   const db = new CatalogDb(dbPath)
@@ -1215,9 +1215,9 @@ function runTag(argv: string[]) {
       { $name: skillName }
     )
     if (!existing) {
-      console.error(`❌ Skill not found: ${skillName}`)
-      console.error('   Run `lythoskill-curator query "SELECT name FROM skills"` to list indexed skills.')
-      process.exit(1)
+      io.error!(`❌ Skill not found: ${skillName}`)
+      io.error!('   Run `lythoskill-curator query "SELECT name FROM skills"` to list indexed skills.')
+      io.exit!(1)
     }
 
     const currentNiches: string[] = (() => {
@@ -1236,10 +1236,10 @@ function runTag(argv: string[]) {
       $name: skillName,
     })
 
-    console.log(`✅ Tagged ${skillName}`)
-    if (niches.length > 0) console.log(`   niches: ${niches.join(', ')}`)
-    if (qaSignals.length > 0) console.log(`   qa: ${qaSignals.length} signal(s)`)
-    console.log(`   total niches: ${merged.length}`)
+    io.log!(`✅ Tagged ${skillName}`)
+    if (niches.length > 0) io.log!(`   niches: ${niches.join(', ')}`)
+    if (qaSignals.length > 0) io.log!(`   qa: ${qaSignals.length} signal(s)`)
+    io.log!(`   total niches: ${merged.length}`)
   } finally {
     db.close()
   }
@@ -1247,48 +1247,52 @@ function runTag(argv: string[]) {
 
 // ── Main Entry ───────────────────────────────────────────────
 
+export function printHelp(io: CuratorIO = defaultCuratorIO) {
+  io.log!('Usage: lythoskill-curator [pool-path] [--output <dir>]')
+  io.log!('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
+  io.log!('       lythoskill-curator tag <skill-name> --niche <value> [--qa <json>]')
+  io.log!('       lythoskill-curator refresh-plan [--pool <dir>]')
+  io.log!('       lythoskill-curator refresh-execute [--pool <dir>]')
+  io.log!('       lythoskill-curator query <SQL> [--db <path>]')
+  io.log!('       lythoskill-curator audit [--db <path>]')
+  io.log!('       lythoskill-curator find <bare-name> [--db <path>]')
+  io.log!('       lythoskill-curator restore [--output <dir>]')
+  io.log!('')
+  io.log!('Commands:')
+  io.log!('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
+  io.log!('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
+  io.log!('                         --dry-run           Show plan without executing')
+  io.log!('                         --output <dir>       Index output directory (default: ~/.agents/lythoskill/curator/)')
+  io.log!('                         --reason <text>      Why this skill was added')
+  io.log!('                         --forked-from <loc>  Original skill if this is a fork')
+  io.log!('                         --branch <name>      Specific branch (default: default branch)')
+  io.log!('                         --full              Full clone (default: --depth 1 shallow)')
+  io.log!('  tag <skill-name>      Write agent-enriched metadata (niche + QA) to indexed skill')
+  io.log!('                         --niche <value>      Niche tag (repeatable)')
+  io.log!('                         --qa <json>          QA signal with provenance')
+  io.log!('  refresh-plan          Scan cold pool for git repos, check upstreams, write TODO')
+  io.log!('                         --pool <dir>        Cold pool path')
+  io.log!('  refresh-execute       Pull behind repos one by one, marking progress in plan')
+  io.log!('                         --pool <dir>        Cold pool path')
+  io.log!('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
+  io.log!('  audit                 Run structural + legacy checks and output an audit report')
+  io.log!('  find <bare-name>      Look up a skill by bare name, return full path + deck add command')
+  io.log!('                         --db <path>      Use a specific catalog database')
+  io.log!('  restore               Roll back to the most recent backup')
+  io.log!('')
+  io.log!('Options:')
+  io.log!('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
+  io.log!('  --pool <dir>          Cold pool path for add (default: ~/.agents/skill-repos)')
+  io.log!('  --db, -d <path>       Database path for query/audit/tag (default: ./catalog.db)')
+  io.exit!(0)
+}
+
 if (import.meta.main) {
   const args = process.argv.slice(2)
   const cmd = args[0]
 
   if (cmd === '--help' || cmd === '-h') {
-    console.log('Usage: lythoskill-curator [pool-path] [--output <dir>]')
-    console.log('       lythoskill-curator add <github.com/owner/repo> --pool <dir> [--reason <text>] [--forked-from <locator>] [--branch <name>] [--full]')
-    console.log('       lythoskill-curator tag <skill-name> --niche <value> [--qa <json>]')
-    console.log('       lythoskill-curator refresh-plan [--pool <dir>]')
-    console.log('       lythoskill-curator refresh-execute [--pool <dir>]')
-    console.log('       lythoskill-curator query <SQL> [--db <path>]')
-    console.log('       lythoskill-curator audit [--db <path>]')
-    console.log('       lythoskill-curator find <bare-name> [--db <path>]')
-    console.log('       lythoskill-curator restore [--output <dir>]')
-    console.log('')
-    console.log('Commands:')
-    console.log('  (no args)             Scan cold pool and build REGISTRY.json + catalog.db')
-    console.log('  add <locator>         Download a skill to cold pool (no install, no deck.toml)')
-    console.log('                         --dry-run           Show plan without executing')
-    console.log('                         --output <dir>       Index output directory (default: ~/.agents/lythoskill/curator/)')
-    console.log('                         --reason <text>      Why this skill was added')
-    console.log('                         --forked-from <loc>  Original skill if this is a fork')
-    console.log('                         --branch <name>      Specific branch (default: default branch)')
-    console.log('                         --full              Full clone (default: --depth 1 shallow)')
-    console.log('  tag <skill-name>      Write agent-enriched metadata (niche + QA) to indexed skill')
-    console.log('                         --niche <value>      Niche tag (repeatable)')
-    console.log('                         --qa <json>          QA signal with provenance')
-    console.log('  refresh-plan          Scan cold pool for git repos, check upstreams, write TODO')
-    console.log('                         --pool <dir>        Cold pool path')
-    console.log('  refresh-execute       Pull behind repos one by one, marking progress in plan')
-    console.log('                         --pool <dir>        Cold pool path')
-    console.log('  query <SQL>           Query the catalog SQLite database (output: Markdown table)')
-    console.log('  audit                 Run structural + legacy checks and output an audit report')
-    console.log('  find <bare-name>      Look up a skill by bare name, return full path + deck add command')
-    console.log('                         --db <path>      Use a specific catalog database')
-    console.log('  restore               Roll back to the most recent backup')
-    console.log('')
-    console.log('Options:')
-    console.log('  --output, -o <dir>    Output directory (default: <pool>/.lythoskill-curator/)')
-    console.log('  --pool <dir>          Cold pool path for add (default: ~/.agents/skill-repos)')
-    console.log('  --db, -d <path>       Database path for query/audit/tag (default: ./catalog.db)')
-    process.exit(0)
+    printHelp(defaultCuratorIO)
   }
 
   if (cmd === 'refresh-plan') {
@@ -1307,7 +1311,7 @@ if (import.meta.main) {
     runFind(args.slice(1))
   } else if (cmd === 'restore') {
     const { outputDir } = parseCuratorArgs(args.slice(1));
-    restoreIndex(outputDir);
+    restoreIndex(outputDir, defaultCuratorIO);
   } else {
     runCurator(args)
   }

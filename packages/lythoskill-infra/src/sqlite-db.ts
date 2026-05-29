@@ -75,4 +75,18 @@ export abstract class SqliteDb {
     this._db?.close()
     this._db = null
   }
+
+  /**
+   * Symbol.dispose — enables `using` declaration (TC39 Stage 3, Bun-supported).
+   *
+   * Example:
+   *   using db = new CatalogDb(path);
+   *   db.query(...)
+   *   // db.close() called automatically at end of block
+   *
+   * For test scopes or callback-style, see `useDb()` helper in consumer packages.
+   */
+  [Symbol.dispose](): void {
+    this.close()
+  }
 }
