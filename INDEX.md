@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/5/29 14:11:50
+> 自动生成于 2026/5/29 14:13:27
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 279 | 进行中: 1, 待验收: 0, 已完成: 236 |
+| Tasks | 279 | 进行中: 0, 待验收: 0, 已完成: 238 |
 | Epics | 40 | 活跃: 0, 已完成: 36, 悬置: 2, 已归档: 2 |
 | ADRs | 83 | 已接受: 80 |
 
@@ -71,19 +71,19 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (0)
 
-- [ ] **TASK-20260529132806774**: deck refresh reproduce.sh with mock-git isolation
+_无_
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260529132734903**: deck refresh: behind count accuracy + monorepo report clarity
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (236)
+### 已完成 (238)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -321,6 +321,8 @@ _无_
 - ✅ ~~TASK-20260529010924654~~: Fix remove.test.ts: add IO injection to removeSkill, remove direct process.exit assignment
 - ✅ ~~TASK-20260529010926067~~: Fix to-symlink-snapshot.test.ts: add IO injection, remove process.cwd/process.exit direct assignment
 - ✅ ~~TASK-20260529010927780~~: Fix mirror.test.ts: clarify SOCKS fallback test title/comment mismatch
+- ✅ ~~TASK-20260529132734903~~: deck refresh: behind count accuracy + monorepo report clarity
+- ✅ ~~TASK-20260529132806774~~: deck refresh reproduce.sh with mock-git isolation
 
 ### 悬置 (1)
 

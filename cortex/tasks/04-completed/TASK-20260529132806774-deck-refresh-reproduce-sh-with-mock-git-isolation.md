@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-29 | Created as sub-task of refresh UX improvements |
+| completed | 2026-05-29 | Closed via trailer |
 
 ## 背景与目标
 
