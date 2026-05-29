@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/5/29 14:13:27
+> 自动生成于 2026/5/29 22:00:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 279 | 进行中: 0, 待验收: 0, 已完成: 238 |
-| Epics | 40 | 活跃: 0, 已完成: 36, 悬置: 2, 已归档: 2 |
-| ADRs | 83 | 已接受: 80 |
+| Tasks | 285 | 进行中: 0, 待验收: 1, 已完成: 238 |
+| Epics | 41 | 活跃: 1, 已完成: 36, 悬置: 2, 已归档: 2 |
+| ADRs | 84 | 已接受: 80 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260529214429614**: Curator CLI IO injection + BDD coverage
 
 ### 已完成
 
@@ -71,17 +71,21 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (5)
 
-_无_
+- [ ] **TASK-20260529214618391**: T2: runAudit IO injection + unit tests + reproduce.sh
+- [ ] **TASK-20260529214620383**: T3: runTag IO injection + unit tests + reproduce.sh
+- [ ] **TASK-20260529214622541**: T4: runRefreshPlan/runRefreshExecute IO injection + behind count fix + reproduce.sh
+- [ ] **TASK-20260529214624302**: T5: backupIndex/restoreIndex/printSchema IO injection + reproduce.sh
+- [ ] **TASK-20260529214626313**: T6: --help entry IO injection + reproduce.sh
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260529214616879**: T1: runQuery IO injection + unit tests + reproduce.sh
 
 ### 已完成 (238)
 
@@ -457,6 +461,7 @@ _无_
 - ✅ **ADR-20260528120317143** (02-accepted): Deck creation guide — formalize "agent is the wizard, CLI is the guardrail"
 - ✅ **ADR-20260528153455764** (02-accepted): Combo `skills` field as visual annotation — human-readable, not parsed by code
 - ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
+- 🤔 **ADR-20260529215906255** (01-proposed): Curator catalog resolution context — deck-aware vs independent discovery
 
 ---
 

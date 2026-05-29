@@ -396,12 +396,13 @@ function formatMarkdownTable(rows: Record<string, any>[]): string {
 
 // ── Query subcommand ─────────────────────────────────────────
 
-function printSchema(db: CatalogDb) {
-  console.log('## catalog.db schema\n')
+function printSchema(db: CatalogDb): string {
+  const out: string[] = []
+  out.push('## catalog.db schema\n')
 
   const tables = db.query("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as { name: string }[]
   for (const { name } of tables) {
-    console.log(`### Table: \`${name}\``)
+    out.push(`### Table: \`${name}\``)
     const cols = db.query(`PRAGMA table_info(${name})`).all() as { cid: number; name: string; type: string; notnull: number; dflt_value: any; pk: number }[]
     const rows = cols.map(c => ({
       column: c.name,
@@ -410,16 +411,17 @@ function printSchema(db: CatalogDb) {
       default: c.dflt_value ?? '',
       pk: c.pk ? 'PK' : '',
     }))
-    console.log(formatMarkdownTable(rows))
-    console.log('')
+    out.push(formatMarkdownTable(rows))
+    out.push('')
   }
 
-  console.log('### Example queries')
-  console.log('```bash')
-  console.log('lythoskill-curator query "SELECT name, type FROM skills WHERE deck_skill_type = \'combo\'"')
-  console.log('lythoskill-curator query "SELECT name, niches FROM skills WHERE niches LIKE \'%agent-tagged%\'"')
-  console.log('lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
-  console.log('```')
+  out.push('### Example queries')
+  out.push('```bash')
+  out.push('lythoskill-curator query "SELECT name, type FROM skills WHERE deck_skill_type = \'combo\'"')
+  out.push('lythoskill-curator query "SELECT name, niches FROM skills WHERE niches LIKE \'%agent-tagged%\'"')
+  out.push('lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
+  out.push('```')
+  return out.join('\n')
 }
 
 function resolveDbPath(argv: string[]): string | undefined {
@@ -471,7 +473,8 @@ function resolveDbPath(argv: string[]): string | undefined {
   return undefined
 }
 
-function runQuery(argv: string[]) {
+export function runQuery(argv: string[], io: CuratorIO = defaultCuratorIO) {
+  const { log, error, exit } = { ...defaultCuratorIO, ...io }
   let sql: string | undefined
   const positional: string[] = []
 
@@ -495,16 +498,16 @@ function runQuery(argv: string[]) {
 
   if (!sql || sql.trim() === '') {
     if (!dbPath || !existsSync(dbPath)) {
-      console.error('Usage: lythoskill-curator query <SQL> [--db <path>]')
-      console.error('')
-      console.error('Examples:')
-      console.error('  lythoskill-curator query "SELECT name, type FROM skills"')
-      console.error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
-      process.exit(1)
+      error('Usage: lythoskill-curator query <SQL> [--db <path>]')
+      error('')
+      error('Examples:')
+      error('  lythoskill-curator query "SELECT name, type FROM skills"')
+      error('  lythoskill-curator query --db ./catalog.db "SELECT * FROM catalog_meta"')
+      exit(1)
     }
     const db = new CatalogDb(dbPath)
     try {
-      printSchema(db)
+      log(printSchema(db))
     } finally {
       db.close()
     }
@@ -512,29 +515,29 @@ function runQuery(argv: string[]) {
   }
 
   if (!dbPath || !existsSync(dbPath)) {
-    console.error('❌ Catalog DB not found.')
-    console.error('')
+    error('❌ Catalog DB not found.')
+    error('')
     if (dbPath) {
-      console.error(`  Searched: ${dbPath}`)
+      error(`  Searched: ${dbPath}`)
     } else {
-      console.error('  Searched default locations:')
-      console.error('    ./catalog.db')
-      console.error('    ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
-      console.error('    ~/.agents/lythoskill/curator/catalog.db')
-      console.error('    ~/.agents/lythos/skill-curator/catalog.db')
+      error('  Searched default locations:')
+      error('    ./catalog.db')
+      error('    ~/.agents/skill-repos/.lythoskill-curator/catalog.db')
+      error('    ~/.agents/lythoskill/curator/catalog.db')
+      error('    ~/.agents/lythos/skill-curator/catalog.db')
     }
-    console.error('')
-    console.error('This usually means:')
-    console.error('  1. You have not run curator scan yet')
-    console.error('  2. The index was generated in a different location')
-    console.error('')
-    console.error('To fix:')
-    console.error('  lythoskill-curator                          # scan default cold pool')
-    console.error('  lythoskill-curator <pool> --output <dir>    # custom pool / output')
-    console.error('')
-    console.error('Or specify the exact db path:')
-    console.error(`  lythoskill-curator query --db ./catalog.db "${sql || 'SELECT * FROM skills'}"`)
-    process.exit(1)
+    error('')
+    error('This usually means:')
+    error('  1. You have not run curator scan yet')
+    error('  2. The index was generated in a different location')
+    error('')
+    error('To fix:')
+    error('  lythoskill-curator                          # scan default cold pool')
+    error('  lythoskill-curator <pool> --output <dir>    # custom pool / output')
+    error('')
+    error('Or specify the exact db path:')
+    error(`  lythoskill-curator query --db ./catalog.db "${sql || 'SELECT * FROM skills'}"`)
+    exit(1)
   }
 
   const db = new CatalogDb(dbPath)
@@ -545,31 +548,31 @@ function runQuery(argv: string[]) {
       if (generatedRow?.value) {
         const ageMs = Date.now() - new Date(generatedRow.value).getTime()
         const ageDays = ageMs / (1000 * 60 * 60 * 24)
-        console.error(`ℹ️  Index generated at: ${generatedRow.value}`)
+        error(`ℹ️  Index generated at: ${generatedRow.value}`)
         if (ageDays > 7) {
-          console.error(`⚠️  Index is ${Math.floor(ageDays)} days old. Consider refreshing:`)
-          console.error('   lythoskill-curator')
+          error(`⚠️  Index is ${Math.floor(ageDays)} days old. Consider refreshing:`)
+          error('   lythoskill-curator')
         }
-        console.error('')
+        error('')
       }
     } catch {
       // DB query for index freshness failed — non-fatal, index may be stale
     }
 
     if (!isReadOnlyQuery(sql)) {
-      console.error('❌ Query rejected: only SELECT and PRAGMA statements are allowed.')
-      console.error('   Use curator scan/audit for write operations.')
-      process.exit(1)
+      error('❌ Query rejected: only SELECT and PRAGMA statements are allowed.')
+      error('   Use curator scan/audit for write operations.')
+      exit(1)
     }
     const rows = db.query(sql).all() as Record<string, any>[]
-    console.log(formatMarkdownTable(rows))
+    log(formatMarkdownTable(rows))
   } catch (e: any) {
-    console.error(`❌ SQL error: ${e.message}`)
-    console.error('')
-    console.error('Hint: check available tables and columns:')
-    console.error(`  lythoskill-curator query --db ${dbPath} "PRAGMA table_info(skills)"`)
-    console.error(`  lythoskill-curator query --db ${dbPath} "SELECT name FROM sqlite_master WHERE type='table'"`)
-    process.exit(1)
+    error(`❌ SQL error: ${e.message}`)
+    error('')
+    error('Hint: check available tables and columns:')
+    error(`  lythoskill-curator query --db ${dbPath} "PRAGMA table_info(skills)"`)
+    error(`  lythoskill-curator query --db ${dbPath} "SELECT name FROM sqlite_master WHERE type='table'"`)
+    exit(1)
   } finally {
     db.close()
   }

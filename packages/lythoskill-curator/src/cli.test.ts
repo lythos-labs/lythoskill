@@ -11,7 +11,7 @@ import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind } from './cli.ts'
+import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery } from './cli.ts'
 import { inferSource } from './curator-core'
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -512,5 +512,129 @@ describe('runFind', () => {
 
     expect(exitCode).toBe(1)
     expect(errors.some(e => e.includes('Usage'))).toBe(true)
+  })
+})
+
+// ── runQuery ───────────────────────────────────────────────────
+
+describe('runQuery', () => {
+  function catchExit(fn: () => void): number | undefined {
+    let exitCode: number | undefined
+    try { fn() } catch (e: any) {
+      if (!String(e).includes('EXIT:')) throw e
+      const m = String(e).match(/EXIT:(\d+)/)
+      if (m) exitCode = parseInt(m[1], 10)
+    }
+    return exitCode
+  }
+
+  function seedDb(dbPath: string, skills: { name: string; path: string; type: string; description: string }[]) {
+    const db = new CatalogDb(dbPath)
+    try {
+      for (const s of skills) {
+        db.insertSkill({
+          $name: s.name,
+          $description: s.description,
+          $type: s.type,
+          $version: '1.0.0',
+          $path: s.path,
+          $niches: '[]',
+          $managed_dirs: '[]',
+          $trigger_phrases: '[]',
+          $has_scripts: 0,
+          $has_examples: 0,
+          $body_preview: '',
+          $source: 'github.com/test/skills',
+          $when_to_use: '',
+          $allowed_tools: '[]',
+          $author: '',
+          $user_invocable: 1,
+          $tags: '[]',
+          $deck_dependencies: '[]',
+          $deck_skill_type: 'tool',
+          $content_hash: '',
+          $status: 'parsed',
+          $indexed_at: new Date().toISOString(),
+          $last_parsed_at: new Date().toISOString(),
+          $parse_error: '',
+        })
+      }
+    } finally {
+      db.close()
+    }
+  }
+
+  it('Q1: No SQL + DB exists → schema output in io.log', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-query-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'test-skill', path: 'github.com/test/skills/test-skill', type: 'standard', description: 'Test skill' },
+    ])
+
+    const logs: string[] = []
+    runQuery(['--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('catalog.db schema')
+    expect(output).toContain('Table: `skills`')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('Q2: SELECT query → markdown table in io.log', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-query-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'alpha-skill', path: 'github.com/test/skills/alpha-skill', type: 'standard', description: 'Alpha skill' },
+    ])
+
+    const logs: string[] = []
+    runQuery(['SELECT name, type FROM skills', '--db', dbPath], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    const output = logs.join('\n')
+    expect(output).toContain('alpha-skill')
+    expect(output).toContain('standard')
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('Q3: DB not found → io.error contains "not found", io.exit(1)', () => {
+    const errors: string[] = []
+    const code = catchExit(() => runQuery(['SELECT * FROM skills', '--db', '/nonexistent/catalog.db'], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('not found'))).toBe(true)
+  })
+
+  it('Q4: Non-SELECT query (e.g. DELETE) → io.error contains "only SELECT", io.exit(1)', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-query-'))
+    const dbPath = join(tmpDir, 'catalog.db')
+    seedDb(dbPath, [
+      { name: 'test-skill', path: 'github.com/test/skills/test-skill', type: 'standard', description: 'Test skill' },
+    ])
+
+    const errors: string[] = []
+    const code = catchExit(() => runQuery(['DELETE FROM skills', '--db', dbPath], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('only SELECT'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
   })
 })
