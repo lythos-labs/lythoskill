@@ -794,23 +794,34 @@ export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const checks: AuditCheck[] = []
 
   try {
-    // 1. Missing frontmatter
-    const missingFrontmatter = db.query(`
-      SELECT name, path, version, description, when_to_use FROM skills
-      WHERE version = '' OR version IS NULL OR version = 'unknown'
-         OR description = '' OR description IS NULL
-         OR when_to_use = '' OR when_to_use IS NULL
+    // 1. Critical missing frontmatter — blocks agent discovery
+    // Minimal viable: name + description. Without these the skill is invisible.
+    const criticalMissing = db.query(`
+      SELECT name, path, description FROM skills
+      WHERE description = '' OR description IS NULL
     `).all() as Record<string, any>[]
-    checks.push({ title: 'Missing frontmatter (version, description, or when_to_use)', rows: missingFrontmatter, count: missingFrontmatter.length })
+    checks.push({ title: 'Critical: missing description (skill invisible to agents)', rows: criticalMissing, count: criticalMissing.length })
 
-    // 2. Type anomalies
+    // 2. Recommended frontmatter — impacts quality but not discovery
+    // Community standard: name + description (minimal)
+    // Best practice: + when_to_use + type
+    const recommendedMissing = db.query(`
+      SELECT name, path, version, when_to_use, type FROM skills
+      WHERE when_to_use = '' OR when_to_use IS NULL
+         OR type = '' OR type IS NULL OR type = 'unknown'
+    `).all() as Record<string, any>[]
+    checks.push({ title: 'Recommended: missing when_to_use or type (quality gap)', rows: recommendedMissing, count: recommendedMissing.length })
+
+    // 3. Type anomalies — null/unknown is acceptable (community minimal standard)
+    // Only flag explicitly wrong types (not null, not unknown, not standard/flow)
     const typeAnomalies = db.query(`
       SELECT name, path, type FROM skills
-      WHERE type NOT IN ('standard', 'flow')
+      WHERE type IS NOT NULL AND type != '' AND type != 'unknown'
+         AND type NOT IN ('standard', 'flow')
     `).all() as Record<string, any>[]
-    checks.push({ title: 'Type anomalies (not standard or flow)', rows: typeAnomalies, count: typeAnomalies.length })
+    checks.push({ title: 'Type anomalies (non-standard type values)', rows: typeAnomalies, count: typeAnomalies.length })
 
-    // 3. Orphan scripts (has_scripts=1 but no scripts/ dir on disk)
+    // 4. Orphan scripts (has_scripts=1 but no scripts/ dir on disk)
     const scriptPaths = db.query(`
       SELECT name, path FROM skills WHERE has_scripts = 1
     `).all() as { name: string; path: string }[]
@@ -822,7 +833,7 @@ export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
     }
     checks.push({ title: 'Orphan scripts (has_scripts=true but no scripts/ dir)', rows: orphanScripts, count: orphanScripts.length })
 
-    // 4. dao_shu_qi_yong coverage (deck_skill_type)
+    // 5. dao_shu_qi_yong coverage (deck_skill_type)
     const coverage = db.query(`
       SELECT CASE WHEN deck_skill_type IS NULL OR deck_skill_type = '' THEN '(unset)' ELSE deck_skill_type END AS deck_skill_type, COUNT(*) AS count
       FROM skills
@@ -830,7 +841,7 @@ export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
     `).all() as Record<string, any>[]
     checks.push({ title: 'dao_shu_qi_yong coverage (deck_skill_type)', rows: coverage, count: 0 })
 
-    // 5. Legacy pattern check (mechanical detection, agent judges)
+    // 6. Legacy pattern check (mechanical detection, agent judges)
     const legacyIssues = checkLegacyPatterns(db)
     checks.push({ title: 'Legacy patterns (deprecated references in SKILL.md body)', rows: legacyIssues, count: legacyIssues.length })
 
@@ -839,7 +850,8 @@ export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
     const total = totalResult?.total || 0
 
     // Output report
-    let totalIssues = 0
+    let criticalIssues = 0
+    let recommendedIssues = 0
     for (const check of checks) {
       io.log!(`\n### ${check.title}: ${check.count} issue${check.count === 1 ? '' : 's'}`)
       if (check.rows.length > 0) {
@@ -847,15 +859,25 @@ export function runAudit(argv: string[], io: CuratorIO = defaultCuratorIO) {
       } else {
         io.log!('*None found.*')
       }
-      if (!check.title.includes('coverage')) {
-        totalIssues += check.count
+      if (check.title.startsWith('Critical')) {
+        criticalIssues += check.count
+      } else if (check.title.startsWith('Recommended')) {
+        recommendedIssues += check.count
+      } else if (!check.title.includes('coverage')) {
+        criticalIssues += check.count
       }
     }
 
-    const score = Math.max(0, 100 - Math.round((totalIssues / Math.max(total, 1)) * 100))
+    // Score: critical issues weigh 3x more than recommended
+    const weightedIssues = criticalIssues * 3 + recommendedIssues
+    const maxIssues = total * 3
+    const score = Math.max(0, 100 - Math.round((weightedIssues / Math.max(maxIssues, 1)) * 100))
     io.log!(`\n---`)
-    io.log!(`**Summary:** ${total} skills scanned, ${totalIssues} issue${totalIssues === 1 ? '' : 's'} found.`)
+    io.log!(`**Summary:** ${total} skills scanned`)
+    io.log!(`**Critical issues:** ${criticalIssues} (blocks agent discovery)`)
+    io.log!(`**Recommended gaps:** ${recommendedIssues} (quality improvements)`)
     io.log!(`**Audit score:** ${score}/100`)
+    io.log!(`\n*Note: Score weights critical issues 3x more than recommended gaps. Community minimal standard = name + description. Best practice = + when_to_use + type.*`)
 
   } catch (e: any) {
     io.error!(`❌ Audit error: ${e.message}`)

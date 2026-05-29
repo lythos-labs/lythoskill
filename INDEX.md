@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/5/29 22:42:21
+> 自动生成于 2026/5/29 23:13:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 285 | 进行中: 0, 待验收: 0, 已完成: 244 |
-| Epics | 41 | 活跃: 0, 已完成: 37, 悬置: 2, 已归档: 2 |
+| Tasks | 289 | 进行中: 1, 待验收: 0, 已完成: 244 |
+| Epics | 42 | 活跃: 1, 已完成: 37, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 
 ### 已完成
 
@@ -72,13 +72,15 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (3)
 
-_无_
+- [ ] **TASK-20260529231326545**: Search and add niche skills (security, testing, data-quality, a11y)
+- [ ] **TASK-20260529231326576**: Tag all added skills with domain/hub/qa tags via WebSearch research
+- [ ] **TASK-20260529231326608**: Audit tagged skills and generate quality report
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260529231326513**: Search and add hot community skills (claude-skills, awesome-agent-skills, mattpocock/skills)
 
 ### 待验收 (0)
 
