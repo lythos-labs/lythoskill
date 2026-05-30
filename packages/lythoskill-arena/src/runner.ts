@@ -17,6 +17,42 @@ import { aggregateAllStats } from './stats'
 import type { SideStats } from './stats'
 import { buildCopyPlan } from './preflight'
 
+// ── ArenaIO interface (Intent/Plan/Execute fractal pattern) ───────────────
+
+export interface ArenaIO {
+  log?: (msg: string) => void
+  mkdir?: (path: string, opts?: { recursive?: boolean }) => void
+  writeFile?: (path: string, data: string) => void
+  readFile?: (path: string) => string
+  readdir?: (path: string) => string[]
+  cp?: (src: string, dest: string, opts?: { recursive?: boolean }) => void
+  spawn?: (cmd: string[], opts: { cwd: string; env?: Record<string, string> }) => Promise<{ exitCode: number | null; stderr: string }>
+  agentSpawn?: (opts: { player: string; cwd: string; brief: string; timeoutMs: number }) => Promise<{ stdout: string; stderr: string; durationMs: number }>
+  exists?: (path: string) => boolean
+  chdir?: (cwd: string) => void
+}
+
+export const defaultArenaIO: ArenaIO = {
+  log: (msg: string) => { console.log(msg) },
+  mkdir: (path: string, opts?: { recursive?: boolean }) => mkdirSync(path, opts),
+  writeFile: (path: string, data: string) => writeFileSync(path, data, 'utf-8'),
+  readFile: (path: string) => readFileSync(path, 'utf-8'),
+  readdir: (path: string) => readdirSync(path),
+  cp: (src: string, dest: string, opts?: { recursive?: boolean }) => cpSync(src, dest, opts),
+  spawn: async (cmd: string[], opts: { cwd: string; env?: Record<string, string> }) => {
+    const proc = Bun.spawn(cmd, { cwd: opts.cwd, env: opts.env })
+    await proc.exited
+    const stderr = await new Response(proc.stderr).text()
+    return { exitCode: proc.exitCode, stderr }
+  },
+  agentSpawn: async (opts: { player: string; cwd: string; brief: string; timeoutMs: number }) => {
+    const agent = useAgent(opts.player)
+    return agent.spawn({ cwd: opts.cwd, brief: opts.brief, timeoutMs: opts.timeoutMs })
+  },
+  exists: (path: string) => existsSync(path),
+  chdir: (cwd: string) => { process.chdir(cwd) },
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 function stamp(): string {
@@ -33,18 +69,18 @@ export interface ArenaResult {
 
 // ── Task + judge text resolution (no parsing — natural language) ──────────
 
-function resolveTaskText(toml: ArenaToml, configDir?: string): string {
+function resolveTaskText(toml: ArenaToml, io: Required<Pick<ArenaIO, 'exists' | 'readFile'>>, configDir?: string): string {
   const p = toml.arena.task
   const candidate = configDir ? resolve(configDir, p) : resolve(p)
-  if (existsSync(candidate)) return readFileSync(candidate, 'utf-8')
+  if (io.exists(candidate)) return io.readFile(candidate)
   return p
 }
 
-function resolveJudgeText(toml: ArenaToml, configDir?: string): string | null {
+function resolveJudgeText(toml: ArenaToml, io: Required<Pick<ArenaIO, 'exists' | 'readFile'>>, configDir?: string): string | null {
   if (toml.arena.judge) {
     const p = toml.arena.judge
     const candidate = configDir ? resolve(configDir, p) : resolve(p)
-    if (existsSync(candidate)) return readFileSync(candidate, 'utf-8')
+    if (io.exists(candidate)) return io.readFile(candidate)
     return p
   }
   if (toml.arena.criteria && toml.arena.criteria.length > 0) {
@@ -116,8 +152,14 @@ export async function runArenaFromToml(opts: {
   dryRun?: boolean
   log?: (msg: string) => void
   configDir?: string
+  io?: ArenaIO
 }): Promise<ArenaResult | { plan: ReturnType<typeof buildExecutionPlan> }> {
   const { toml, taskPath, outDir, dryRun, log, configDir } = opts
+  const io: ArenaIO = {
+    ...defaultArenaIO,
+    ...opts.io,
+    log: log ?? opts.io?.log ?? defaultArenaIO.log,
+  }
 
   const resolvePath = (p: string) => {
     if (p.startsWith('/')) return p
@@ -125,7 +167,19 @@ export async function runArenaFromToml(opts: {
     return resolve(p)
   }
 
-  const taskText = resolveTaskText(toml, configDir)
+  const ioWithDefaults = {
+    exists: io.exists!,
+    readFile: io.readFile!,
+    writeFile: io.writeFile!,
+    mkdir: io.mkdir!,
+    readdir: io.readdir!,
+    cp: io.cp!,
+    spawn: io.spawn!,
+    agentSpawn: io.agentSpawn!,
+    chdir: io.chdir!,
+  }
+
+  const taskText = resolveTaskText(toml, ioWithDefaults, configDir)
   const resolvedToml: ArenaToml = {
     ...toml,
     side: toml.side.map(s => ({ ...s, deck: resolvePath(s.deck) })),
@@ -134,7 +188,7 @@ export async function runArenaFromToml(opts: {
   const plan = buildExecutionPlan(resolvedToml)
 
   if (dryRun) {
-    for (const line of formatPlanOutput(plan)) log?.(line)
+    for (const line of formatPlanOutput(plan)) io.log?.(line)
     return { plan }
   }
 
@@ -158,29 +212,29 @@ export async function runArenaFromToml(opts: {
     status: 'running',
   })
 
-  mkdirSync(artifactsDir, { recursive: true })
-  writeFileSync(join(artifactsDir, 'arena.json'), JSON.stringify(manifest, null, 2) + '\n')
+  ioWithDefaults.mkdir(artifactsDir, { recursive: true })
+  ioWithDefaults.writeFile(join(artifactsDir, 'arena.json'), JSON.stringify(manifest, null, 2) + '\n')
 
-  const judgeText = resolveJudgeText(resolvedToml, configDir)
+  const judgeText = resolveJudgeText(resolvedToml, ioWithDefaults, configDir)
   const judgeInput: JudgeInput | undefined = judgeText
     ? { criteria: judgeText, task_context: taskText.slice(0, 500) }
     : undefined
 
-  // ── Per-cell: agent.spawn directly, no AgentScenario/parseAgentMd ────
+  // ── Per-cell: agent.spawn via IO injection ─────────────────────────────
   const verdictsBySide = new Map<string, JudgeVerdict[]>()
 
   for (const cell of plan.cells) {
     const cellDir = join(artifactsDir, 'runs', cell.side, `run-${cell.run}`)
-    mkdirSync(cellDir, { recursive: true })
+    ioWithDefaults.mkdir(cellDir, { recursive: true })
 
     const workDir = join(artifactsDir, 'work', cell.side)
-    mkdirSync(workDir, { recursive: true })
+    ioWithDefaults.mkdir(workDir, { recursive: true })
     const originalCwd = process.cwd()
 
     try {
       // Setup: deck + AGENTS.md + link
-      writeFileSync(join(workDir, 'skill-deck.toml'), readFileSync(cell.deck, 'utf-8'))
-      writeFileSync(join(workDir, 'AGENTS.md'), [
+      ioWithDefaults.writeFile(join(workDir, 'skill-deck.toml'), ioWithDefaults.readFile(cell.deck))
+      ioWithDefaults.writeFile(join(workDir, 'AGENTS.md'), [
         '# Arena Test Environment',
         `**Side**: ${cell.side}`, `**Player**: ${cell.player}`, `**Run**: ${cell.run}`,
         '## How This Works',
@@ -188,55 +242,54 @@ export async function runArenaFromToml(opts: {
         '- Complete the task using available skills. Output to this directory.',
         '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
       ].join('\n'))
-      const linkProc = Bun.spawn(
+      const linkProc = await ioWithDefaults.spawn(
         ['bunx', '@lythos/skill-deck', 'link'],
         { cwd: workDir, env: { ...process.env, HOME: process.env.HOME! } },
       )
-      await linkProc.exited
-      log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
+      io.log?.(`[arena] deck link for ${cell.side}: exit ${linkProc.exitCode}`)
 
-      process.chdir(workDir)
+      ioWithDefaults.chdir(workDir)
 
-      // Direct agent.spawn (no parseAgentMd, no AgentScenario)
-      const agent = useAgent(resolvePlayer(cell.player))
+      // Agent spawn via IO injection
       const fullPrompt = buildArenaPrompt({
         brief: taskText,
         cwd: workDir,
         deckPath: cell.deck,
         outputDir: workDir,
       })
-      const agentResult = await agent.spawn({
+      const agentResult = await ioWithDefaults.agentSpawn({
+        player: resolvePlayer(cell.player),
         cwd: workDir,
         brief: fullPrompt,
         timeoutMs: 300000,
       })
 
-      process.chdir(originalCwd)
+      ioWithDefaults.chdir(originalCwd)
 
       // Persist agent output
       const sanitizer = createSanitizer({ projectRoot: process.cwd(), homeDir: homedir(), workDir })
-      writeFileSync(join(cellDir, 'agent-stdout.txt'), sanitizer.sanitize(agentResult.stdout), 'utf-8')
-      if (agentResult.stderr) writeFileSync(join(cellDir, 'agent-stderr.txt'), sanitizer.sanitize(agentResult.stderr), 'utf-8')
+      ioWithDefaults.writeFile(join(cellDir, 'agent-stdout.txt'), sanitizer.sanitize(agentResult.stdout))
+      if (agentResult.stderr) ioWithDefaults.writeFile(join(cellDir, 'agent-stderr.txt'), sanitizer.sanitize(agentResult.stderr))
 
       // Copy artifacts
       const skipSet = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock', 'AGENTS.md'])
       try {
-        const entries = readdirSync(workDir)
+        const entries = ioWithDefaults.readdir(workDir)
         const copyPlan = buildCopyPlan(workDir, cellDir, entries, skipSet)
         for (const { src, dest, name } of copyPlan) {
-          try { cpSync(src, dest, { recursive: true }) } catch (e) {
-            log?.(`⚠️ Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
+          try { ioWithDefaults.cp(src, dest, { recursive: true }) } catch (e) {
+            io.log?.(`⚠️ Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
           }
         }
       } catch (e) {
-        log?.(`⚠️ Failed to read agent workdir for copy: ${e instanceof Error ? e.message : e}`)
+        io.log?.(`⚠️ Failed to read agent workdir for copy: ${e instanceof Error ? e.message : e}`)
       }
 
       // Evidence
       const checkpoints = readCheckpoints(workDir)
       let artifactFiles: string[] = []
       try {
-        for (const e of readdirSync(workDir)) {
+        for (const e of ioWithDefaults.readdir(workDir)) {
           if (!e.startsWith('.') && !skipSet.has(e) && e !== 'agent-stdout.txt' && e !== 'agent-stderr.txt' && e !== 'judge-verdict.json' && e !== '_checkpoints') {
             artifactFiles.push(e)
           }
@@ -259,7 +312,7 @@ export async function runArenaFromToml(opts: {
         v = { verdict: 'ERROR' as const, reason: 'No judge criteria provided', criteria: [] }
       }
 
-      writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify({
+      ioWithDefaults.writeFile(join(cellDir, 'judge-verdict.json'), JSON.stringify({
         ...v,
         agent_stdout: agentResult.stdout.slice(0, 5000),
         agent_stderr: agentResult.stderr.slice(0, 1000),
@@ -274,7 +327,7 @@ export async function runArenaFromToml(opts: {
         reason: `Runner exception: ${e instanceof Error ? e.message : String(e)}`,
         criteria: [],
       }
-      writeFileSync(join(cellDir, 'judge-verdict.json'), JSON.stringify(errVerdict, null, 2) + '\n')
+      ioWithDefaults.writeFile(join(cellDir, 'judge-verdict.json'), JSON.stringify(errVerdict, null, 2) + '\n')
       if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
       verdictsBySide.get(cell.side)!.push(errVerdict)
     }
@@ -288,10 +341,10 @@ export async function runArenaFromToml(opts: {
   }
   const judge = useAgent(resolved[0]?.platform ?? 'claude')
   const report = await runComparativeJudge({ manifest, verdicts: flatVerdicts, judge, workdir: artifactsDir })
-  writeReport(artifactsDir, manifest, report, stats)
+  writeReport(artifactsDir, manifest, report, stats, ioWithDefaults)
 
   const finalManifest = ArenaManifest.parse({ ...manifest, status: 'completed' })
-  writeFileSync(join(artifactsDir, 'arena.json'), JSON.stringify(finalManifest, null, 2) + '\n')
+  ioWithDefaults.writeFile(join(artifactsDir, 'arena.json'), JSON.stringify(finalManifest, null, 2) + '\n')
 
   return { manifest: finalManifest, report, stats, artifactsDir }
 }
@@ -319,7 +372,7 @@ export async function runArena(opts: {
 
 // ── Report ────────────────────────────────────────────────────────────────
 
-function writeReport(dir: string, manifest: ArenaManifestType, report: any, stats: SideStats[]): void {
+function writeReport(dir: string, manifest: ArenaManifestType, report: any, stats: SideStats[], io: Required<Pick<ArenaIO, 'writeFile'>>): void {
   const lines: string[] = [
     `# Arena Report: ${manifest.id}`, '',
     `**Task**: ${manifest.task}`,
@@ -331,7 +384,7 @@ function writeReport(dir: string, manifest: ArenaManifestType, report: any, stat
     '## Key Findings', '', ...(report.key_findings ?? []).map((f: string) => `- ${f}`), '',
     '## Recommendations', '', ...(report.recommendations ?? []).map((r: any) => `- **${r.audience}**: ${r.recommendation}`),
   ]
-  writeFileSync(join(dir, 'report.md'), lines.join('\n') + '\n')
+  io.writeFile(join(dir, 'report.md'), lines.join('\n') + '\n')
 }
 
 function renderStatsTable(stats: SideStats[]): string {

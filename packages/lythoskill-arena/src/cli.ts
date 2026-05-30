@@ -8,6 +8,22 @@ import { parseArenaToml, buildExecutionPlan } from './arena-toml'
 import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckSkills } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
 
+// ─── ArenaCliIO interface (injected for testability) ───────────────────────
+
+export interface ArenaCliIO {
+  log?: (msg: string) => void
+  error?: (msg: string) => void
+  warn?: (msg: string) => void
+  exit?: (code: number) => never
+}
+
+export const defaultArenaCliIO: Required<ArenaCliIO> = {
+  log: console.log,
+  error: console.error,
+  warn: console.warn,
+  exit: (code) => { process.exit(code) },
+}
+
 // ─── fetchWithProxy (infra dependency, no package boundary) ─────────────────
 
 async function fetchWithProxy(url: string, init?: RequestInit): Promise<Response> {
@@ -82,9 +98,10 @@ function validateLinkResult(exitCode: number | null, stderr: string): { ok: bool
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-export async function main(args: string[] = process.argv.slice(2)) {
+export async function main(args: string[] = process.argv.slice(2), io: ArenaCliIO = defaultArenaCliIO) {
+  const { log, exit } = { ...defaultArenaCliIO, ...io }
   if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
-    console.log(`lythoskill-arena — skill evaluation CLI
+    log(`lythoskill-arena — skill evaluation CLI
 
 Usage:
   lythoskill-arena single|vs|viz <options>
@@ -103,28 +120,30 @@ Examples:
   lythoskill-arena prepare-workdir --deck ./decks/scout.toml --out /tmp/arena-20260517-side-a
   lythoskill-arena archive --from /tmp/arena-20260517 --to playground/arena-20260517 --sides side-a,side-b
 `)
-    process.exit(0)
+    exit(0)
   }
-  return cli(args)
+  return cli(args, io)
 }
 
-function cli(args: string[]) {
+function cli(args: string[], io: ArenaCliIO) {
   const cmd = args[0]
   const rest = args.slice(1)
 
-  if (cmd === 'vs' || cmd === 'compare') return vsRun(rest)
-  if (cmd === 'single' || cmd === 'run') return singleRun(rest)
-  if (cmd === 'viz') return vizRun(rest)
-  if (cmd === 'prepare-workdir') return prepareWorkdir(rest)
-  if (cmd === 'archive') return archiveRun(rest)
+  if (cmd === 'vs' || cmd === 'compare') return vsRun(rest, io)
+  if (cmd === 'single' || cmd === 'run') return singleRun(rest, io)
+  if (cmd === 'viz') return vizRun(rest, io)
+  if (cmd === 'prepare-workdir') return prepareWorkdir(rest, io)
+  if (cmd === 'archive') return archiveRun(rest, io)
 
-  console.error(`Unknown command: ${cmd}`)
-  process.exit(1)
+  const { error, exit } = { ...defaultArenaCliIO, ...io }
+  error(`Unknown command: ${cmd}`)
+  exit(1)
 }
 
 // ── single: single-player deck test (exec shortcut) ──────────────────────
 
-async function singleRun(args: string[]) {
+async function singleRun(args: string[], io: ArenaCliIO) {
+  const { log, error, warn, exit } = { ...defaultArenaCliIO, ...io }
   const opts: Record<string, string | undefined> = {}
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--task' || args[i] === '-t') opts.task = args[++i]
@@ -136,7 +155,7 @@ async function singleRun(args: string[]) {
   }
 
   if (!opts.deck) {
-    console.error(`❌ --deck <path|url> is required.
+    error(`❌ --deck <path|url> is required.
    --deck accepts local paths and http/https URLs (auto-fetched).
 
    Example (no local file needed — URL is auto-fetched):
@@ -146,10 +165,10 @@ async function singleRun(args: string[]) {
 
    Or with a local deck file you already have:
      lythoskill-arena single --deck ./examples/decks/scout.toml --brief "your task"`)
-    process.exit(1)
+    exit(1)
   }
   if (!opts.task && (!opts.brief || !opts.brief.trim())) {
-    console.error(`❌ --task <path> or --brief "<text>" is required.
+    error(`❌ --task <path> or --brief "<text>" is required.
    --task reads a .agent.md scenario file; --brief takes inline text.
 
    Example (no local file needed — URL is auto-fetched):
@@ -159,24 +178,24 @@ async function singleRun(args: string[]) {
 
    Or with a local deck file:
      lythoskill-arena single --deck ./examples/decks/scout.toml --brief "your task"`)
-    process.exit(1)
+    exit(1)
   }
 
   let resolvedTaskPath: string | undefined
   if (opts.task) {
     resolvedTaskPath = resolve(opts.task)
     if (!existsSync(resolvedTaskPath)) {
-      console.error(`❌ Task file not found: ${resolvedTaskPath}
+      error(`❌ Task file not found: ${resolvedTaskPath}
    Use --brief for inline tasks, or point --task to an existing .agent.md file.
    Format: name + description + Given/When/Then sections.
 
    Example (URL):  lythoskill-arena single --brief "your task" --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
    Or (local):     lythoskill-arena single --brief "your task" --deck ./examples/decks/scout.toml`)
-      process.exit(1)
+      exit(1)
     }
     const raw = readFileSync(resolvedTaskPath, 'utf-8')
     if (!raw.startsWith('---')) {
-      console.error(`❌ Invalid .agent.md: missing frontmatter (must start with "---")
+      error(`❌ Invalid .agent.md: missing frontmatter (must start with "---")
    Correct format:
    ---
    name: my-scenario
@@ -189,13 +208,13 @@ async function singleRun(args: string[]) {
    ...
    ## Then
    ...`)
-      process.exit(1)
+      exit(1)
     }
     if (!raw.includes('## When')) {
-      console.error(`❌ Invalid .agent.md: missing "## When" section.
+      error(`❌ Invalid .agent.md: missing "## When" section.
    The ## When section defines what the agent should do.
    See template: playground/arena-one-shot/TASK-arena.agent.md`)
-      process.exit(1)
+      exit(1)
     }
   }
 
@@ -213,7 +232,7 @@ async function singleRun(args: string[]) {
     }
     const { mirrorUrls, isLikelyGitHubBlock } = await import('../../lythoskill-cold-pool/src/mirror.js')
     const dest = resolve(process.cwd(), 'arena-deck.toml')
-    console.log(`📥 Fetching arena deck: ${url}`)
+    log(`📥 Fetching arena deck: ${url}`)
     let res: Response | undefined
     let allFailed = true
 
@@ -222,7 +241,7 @@ async function singleRun(args: string[]) {
     if (!res?.ok) {
       for (const mirrorUrl of mirrorUrls(url)) {
         try {
-          console.log(`   ↳ trying mirror: ${mirrorUrl}`)
+          log(`   ↳ trying mirror: ${mirrorUrl}`)
           const r = await fetchWithProxy(mirrorUrl, { signal: AbortSignal.timeout(30_000) })
           if (r.ok) { res = r; allFailed = false; break }
         } catch {}
@@ -231,21 +250,21 @@ async function singleRun(args: string[]) {
 
     if (!res?.ok) {
       const errorDetail = res ? `HTTP ${res.status}` : 'unreachable'
-      console.error(`❌ Cannot reach ${url} (${errorDetail})`)
-      if (allFailed) console.error('   Set LYTHOS_GH_MIRROR to use a custom mirror.')
-      console.error('   Or download manually and reference the local file.')
-      process.exit(1)
+      error(`❌ Cannot reach ${url} (${errorDetail})`)
+      if (allFailed) error('   Set LYTHOS_GH_MIRROR to use a custom mirror.')
+      error('   Or download manually and reference the local file.')
+      exit(1)
     }
 
     deckWrite(dest, await res.text())
-    console.log(`   → saved to ${dest}`)
+    log(`   → saved to ${dest}`)
     deckPath = dest
   } else {
     deckPath = resolve(opts.deck)
-    if (!deckExists(deckPath)) { console.error(`❌ Deck file not found: ${deckPath}
+    if (!deckExists(deckPath)) { error(`❌ Deck file not found: ${deckPath}
    Make sure the path is correct, or use a URL:
      --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
-   (URLs are auto-fetched — no local file needed)`); process.exit(1) }
+   (URLs are auto-fetched — no local file needed)`); exit(1) }
   }
 
   const { useAgent } = await import('@lythos/test-utils/agents')
@@ -263,9 +282,9 @@ async function singleRun(args: string[]) {
   // Markdown is for LLM agents; task text is read/stored as a raw string.
   const taskText = resolvedTaskPath ? readFileSync(resolvedTaskPath, 'utf-8') : opts.brief!
 
-  console.log(`🤖 agent-run: ${player} × ${deckPath}`)
-  if (opts.task) console.log(`📋 task: ${resolve(opts.task!)}`)
-  else console.log(`📋 brief: ${opts.brief!.slice(0, 60)}...`)
+  log(`🤖 agent-run: ${player} × ${deckPath}`)
+  if (opts.task) log(`📋 task: ${resolve(opts.task!)}`)
+  else log(`📋 brief: ${opts.brief!.slice(0, 60)}...`)
 
   // Setup workdir
   const agentWorkdir = join(tmpdir(), `arena-single-${Date.now()}`)
@@ -298,11 +317,11 @@ async function singleRun(args: string[]) {
     const linkStderr = await new Response(linkProc.stderr).text()
     const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
     if (!linkResult.ok) {
-      console.error(`❌ ${linkResult.error}`)
-      process.exit(1)
+      error(`❌ ${linkResult.error}`)
+      exit(1)
     }
   } else {
-    console.log('ℹ️  No skills declared in deck — skipping link')
+    log('ℹ️  No skills declared in deck — skipping link')
   }
 
   const { existsSync: es } = await import('node:fs')
@@ -313,10 +332,10 @@ async function singleRun(args: string[]) {
     const skills = parseDeckSkills(deckParsed)
     const checks = checkSkillExistence(skills, coldPoolDir, es)
     for (const warning of formatSkillWarnings(checks)) {
-      console.warn(`⚠️  ${warning}`)
+      warn(`⚠️  ${warning}`)
     }
   } catch (e) {
-    console.warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
+    warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
   }
 
   // Template injection: brief is the {task} variable, template carries fixed contract
@@ -345,23 +364,24 @@ async function singleRun(args: string[]) {
       const plan = buildCopyPlan(agentWorkdir, outDir, entries, skipSet)
       for (const { src, dest, name } of plan) {
         try { cpSync(src, dest, { recursive: true }) } catch (e) {
-          console.warn(`⚠️  Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
+          warn(`⚠️  Failed to copy agent output: ${name} — ${e instanceof Error ? e.message : e}`)
         }
       }
     } catch (e) {
-      console.warn(`⚠️  Failed to copy agent output: ${e instanceof Error ? e.message : e}`)
+      warn(`⚠️  Failed to copy agent output: ${e instanceof Error ? e.message : e}`)
     }
   }
 
   // Summary (no judge — single mode is execution-only)
-  console.log(`\n✅ Agent run complete → ${outDir}`)
-  console.log(`   deck: ${deckPath}`)
-  console.log(`   player: ${player}`)
+  log(`\n✅ Agent run complete → ${outDir}`)
+  log(`   deck: ${deckPath}`)
+  log(`   player: ${player}`)
 }
 
 // ── vs: arena.toml-driven comparison ──────────────────────────────────────
 
-async function vsRun(args: string[]) {
+async function vsRun(args: string[], io: ArenaCliIO) {
+  const { log, error, exit } = { ...defaultArenaCliIO, ...io }
   // Native TOML parser is simpler than adding smol-toml dependency
   const opts: Record<string, string | undefined> = {}
   for (let i = 0; i < args.length; i++) {
@@ -372,14 +392,14 @@ async function vsRun(args: string[]) {
   }
 
   if (!opts.config) {
-    console.error('❌ arena.toml path required: lythoskill-arena vs --config arena.toml')
-    process.exit(1)
+    error('❌ arena.toml path required: lythoskill-arena vs --config arena.toml')
+    exit(1)
   }
 
   const configPath = resolve(opts.config)
   if (!existsSync(configPath)) {
-    console.error(`❌ Config file not found: ${configPath}`)
-    process.exit(1)
+    error(`❌ Config file not found: ${configPath}`)
+    exit(1)
   }
 
   const toml = parseArenaToml(readFileSync(configPath, 'utf-8'))
@@ -395,11 +415,11 @@ async function vsRun(args: string[]) {
   const isDryRun = opts.dryRun === 'true'
 
   if (isDryRun) {
-    console.log(`🔍 Scanning arena.toml: ${configPath}`)
+    log(`🔍 Scanning arena.toml: ${configPath}`)
   } else {
-    console.log(`🏟  Arena VS: ${configPath}`)
-    console.log(`   sides: ${toml.side.length}`)
-    console.log(`   runs per side: ${toml.arena.runs_per_side}`)
+    log(`🏟  Arena VS: ${configPath}`)
+    log(`   sides: ${toml.side.length}`)
+    log(`   runs per side: ${toml.arena.runs_per_side}`)
   }
 
   const { runArenaFromToml } = await import('./runner')
@@ -408,38 +428,40 @@ async function vsRun(args: string[]) {
     taskPath,
     outDir: opts.out ? resolve(opts.out) : undefined,
     dryRun: isDryRun,
-    log: console.log,
+    log: log,
     configDir: resolve(configPath, '..'),
   })
 
   if ('plan' in result) {
-    if (!isDryRun) console.log('📋 Execution plan (dry-run):')
-    for (const line of formatPlanOutput(result.plan)) console.log(line)
+    if (!isDryRun) log('📋 Execution plan (dry-run):')
+    for (const line of formatPlanOutput(result.plan)) log(line)
   } else if ('manifest' in result) {
     const r = result
-    console.log(`\n📊 Arena complete: ${r.manifest.id}`)
-    console.log(`   report: ${r.artifactsDir}/report.md`)
-    console.log(`   participants: ${r.manifest.participants.map(p => p.name).join(', ')}`)
+    log(`\n📊 Arena complete: ${r.manifest.id}`)
+    log(`   report: ${r.artifactsDir}/report.md`)
+    log(`   participants: ${r.manifest.participants.map(p => p.name).join(', ')}`)
   }
 }
 
 // ── viz: generate HTML report from arena.json ─────────────────────────────
 
-async function vizRun(args: string[]) {
+async function vizRun(args: string[], io: ArenaCliIO) {
+  const { error, exit, log } = { ...defaultArenaCliIO, ...io }
   const runsDir = args.find(a => !a.startsWith('-'))
-  if (!runsDir) { console.error('❌ runs/<arena-id> path required: lythoskill-arena viz runs/arena-20260504'); process.exit(1) }
+  if (!runsDir) { error('❌ runs/<arena-id> path required: lythoskill-arena viz runs/arena-20260504'); exit(1) }
 
   const arenaJsonPath = resolve(runsDir, 'arena.json')
-  if (!existsSync(arenaJsonPath)) { console.error(`❌ arena.json not found in: ${runsDir}`); process.exit(1) }
+  if (!existsSync(arenaJsonPath)) { error(`❌ arena.json not found in: ${runsDir}`); exit(1) }
 
-  console.log(`📈 Arena HTML report not yet implemented. See report.md in ${runsDir}/`)
+  log(`📈 Arena HTML report not yet implemented. See report.md in ${runsDir}/`)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── prepare-workdir: reusable workdir setup (used by both CLI and agent) ──
 // Intent: create an isolated arena workdir with deck linked and ready to run
 
-async function prepareWorkdir(args: string[]) {
+async function prepareWorkdir(args: string[], io: ArenaCliIO) {
+  const { log, error, warn, exit } = { ...defaultArenaCliIO, ...io }
   const opts: Record<string, string | undefined> = {}
   let dryRun = false
   for (let i = 0; i < args.length; i++) {
@@ -450,15 +472,15 @@ async function prepareWorkdir(args: string[]) {
   }
 
   if (!opts.deck) {
-    console.error(`❌ --deck <path> is required.
+    error(`❌ --deck <path> is required.
    lythoskill-arena prepare-workdir --deck ./skill-deck.toml --out /tmp/arena-side-a`)
-    process.exit(1)
+    exit(1)
   }
 
   const deckPath = resolve(opts.deck)
   if (!existsSync(deckPath)) {
-    console.error(`❌ Deck file not found: ${deckPath}`)
-    process.exit(1)
+    error(`❌ Deck file not found: ${deckPath}`)
+    exit(1)
   }
 
   const workDir = opts.out
@@ -475,16 +497,16 @@ async function prepareWorkdir(args: string[]) {
     brief: opts.brief,
   })
 
-  console.log('📋 Prepare plan:')
-  console.log(`   deck:    ${plan.deckPath}`)
-  console.log(`   workdir: ${plan.workDir}`)
-  console.log(`   skills:  ${plan.skills.length} declared (${plan.skills.map(s => s.name).join(', ') || 'none'})`)
-  console.log(`   link:    ${plan.hasSkills ? 'Bun.spawn deck link' : 'skip (no skills)'}`)
-  console.log(`   AGENTS.md: write (${plan.agentsMd.split('\n').length} lines)`)
-  if (opts.brief) console.log(`   brief:   ${opts.brief!.slice(0, 60)}...`)
+  log('📋 Prepare plan:')
+  log(`   deck:    ${plan.deckPath}`)
+  log(`   workdir: ${plan.workDir}`)
+  log(`   skills:  ${plan.skills.length} declared (${plan.skills.map(s => s.name).join(', ') || 'none'})`)
+  log(`   link:    ${plan.hasSkills ? 'Bun.spawn deck link' : 'skip (no skills)'}`)
+  log(`   AGENTS.md: write (${plan.agentsMd.split('\n').length} lines)`)
+  if (opts.brief) log(`   brief:   ${opts.brief!.slice(0, 60)}...`)
 
   if (dryRun) {
-    console.log(`\n🏁 Dry-run complete (no files created). Remove --dry-run to execute.`)
+    log(`\n🏁 Dry-run complete (no files created). Remove --dry-run to execute.`)
     return
   }
 
@@ -506,11 +528,11 @@ async function prepareWorkdir(args: string[]) {
     const linkStderr = await new Response(linkProc.stderr).text()
     const linkResult = validateLinkResult(linkProc.exitCode, linkStderr)
     if (!linkResult.ok) {
-      console.error(`❌ ${linkResult.error}`)
-      process.exit(1)
+      error(`❌ ${linkResult.error}`)
+      exit(1)
     }
   } else {
-    console.log('ℹ️  No skills declared in deck — skipping link')
+    log('ℹ️  No skills declared in deck — skipping link')
   }
 
   // Skill existence check
@@ -519,22 +541,23 @@ async function prepareWorkdir(args: string[]) {
     const coldPoolDir = resolveColdPoolDir(Bun.TOML.parse(deckContent)?.deck?.cold_pool, homedir(), coldPoolDefault)
     const checks = checkSkillExistence(plan.skills, coldPoolDir, existsSync)
     for (const warning of formatSkillWarnings(checks)) {
-      console.warn(`⚠️  ${warning}`)
+      warn(`⚠️  ${warning}`)
     }
   } catch (e) {
-    console.warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
+    warn('⚠️  Could not check skill existence:', e instanceof Error ? e.message : e)
   }
 
-  console.log(`✅ Workdir ready → ${workDir}`)
-  console.log(`   deck: ${deckPath}`)
-  if (opts.brief) console.log(`   brief: ${opts.brief!.slice(0, 60)}...`)
+  log(`✅ Workdir ready → ${workDir}`)
+  log(`   deck: ${deckPath}`)
+  if (opts.brief) log(`   brief: ${opts.brief!.slice(0, 60)}...`)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── archive: copy agent outputs from workdir(s) to outDir ─────────────────
 // Intent: same copy behavior as CLI singleRun, reusable for agent-orchestrated
 
-async function archiveRun(args: string[]) {
+async function archiveRun(args: string[], io: ArenaCliIO) {
+  const { log, error, warn, exit } = { ...defaultArenaCliIO, ...io }
   const opts: Record<string, string | undefined> = {}
   let dryRun = false
   for (let i = 0; i < args.length; i++) {
@@ -546,9 +569,9 @@ async function archiveRun(args: string[]) {
   }
 
   if (!opts.from || !opts.to) {
-    console.error(`❌ --from <workdir> and --to <outdir> are required.
+    error(`❌ --from <workdir> and --to <outdir> are required.
    lythoskill-arena archive --from /tmp/arena-20260517 --to playground/arena-20260517 --sides side-a,side-b --report ./report.md`)
-    process.exit(1)
+    exit(1)
   }
 
   const fromDir = resolve(opts.from)
@@ -558,18 +581,18 @@ async function archiveRun(args: string[]) {
   const plan = buildArchiveSidePlan(fromDir, sides, existsSync)
 
   // ── Plan output (always shown, also serves as dry-run) ──────────────────
-  console.log('📋 Archive plan:')
+  log('📋 Archive plan:')
   for (const pe of plan) {
     if (!pe.found) {
-      console.log(`   ⚠️  ${pe.side}: not found (${pe.sourceDir}) — will skip`)
+      log(`   ⚠️  ${pe.side}: not found (${pe.sourceDir}) — will skip`)
     } else if (pe.sourceDir === fromDir && pe.side !== '.') {
-      console.log(`   ${pe.side}: ${pe.sourceDir} (fallback → root) → ${join(outDir, pe.side)}`)
+      log(`   ${pe.side}: ${pe.sourceDir} (fallback → root) → ${join(outDir, pe.side)}`)
     } else {
-      console.log(`   ${pe.side}: ${pe.sourceDir} → ${join(outDir, pe.side)}`)
+      log(`   ${pe.side}: ${pe.sourceDir} → ${join(outDir, pe.side)}`)
     }
   }
   if (dryRun) {
-    console.log(`\n🏁 Dry-run complete (no files copied). Remove --dry-run to execute.`)
+    log(`\n🏁 Dry-run complete (no files copied). Remove --dry-run to execute.`)
     return
   }
 
@@ -579,7 +602,7 @@ async function archiveRun(args: string[]) {
   if (opts.report && existsSync(resolve(opts.report))) {
     const { cpSync: cpR } = await import('node:fs')
     cpR(resolve(opts.report), join(outDir, 'report.md'))
-    console.log(`📄 report.md → ${outDir}/report.md`)
+    log(`📄 report.md → ${outDir}/report.md`)
   }
 
   const { cpSync, readdirSync } = await import('node:fs')
@@ -587,7 +610,7 @@ async function archiveRun(args: string[]) {
 
   for (const planEntry of plan) {
     if (!planEntry.found) {
-      console.warn(`⚠️  Side workdir not found: ${planEntry.sourceDir}`)
+      warn(`⚠️  Side workdir not found: ${planEntry.sourceDir}`)
       continue
     }
 
@@ -601,14 +624,14 @@ async function archiveRun(args: string[]) {
       const dest = join(sideOutDir, entry.name)
       try {
         cpSync(src, dest, { recursive: entry.isDirectory() })
-        console.log(`   ${planEntry.side}/${entry.name} → ${dest}`)
+        log(`   ${planEntry.side}/${entry.name} → ${dest}`)
       } catch (e) {
-        console.warn(`⚠️  Failed to copy ${planEntry.side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
+        warn(`⚠️  Failed to copy ${planEntry.side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
       }
     }
   }
 
-  console.log(`✅ Archive complete → ${outDir}`)
+  log(`✅ Archive complete → ${outDir}`)
 }
 
 // ── Entry point ────────────────────────────────────────────────────────────
