@@ -91,13 +91,15 @@ This project has three distinct test layers. Do not confuse them:
 |-------|------|-----|-------|-------------|
 | **L0: Unit Tests** | Pure functions: plan builders, parsers, validators | `bun test packages/<name>/src/*.test.ts` co-located with source | <1s per file | **No mock needed** — pure functions have no IO |
 | **L1: Integration Tests** | CLI routing, command dispatch, error messages | Same test runner, may `spyOn(console)` to capture output | <5s per file | `spyOn(console)` only — never spy on `fs`, `child_process`, or `execSync` |
-| **L2: Agent BDD** | End-to-end: agent reads skill → executes scenario → judge verdict | `reproduce.sh` in `showcase/` or `test/scenarios/` | 30s-5min per scenario | **No mock at all** — real agent spawn, real tool calls |
+| **L2: Agent BDD** | End-to-end: agent reads skill → executes scenario → judge verdict | `reproduce.sh` in `packages/<name>/test/scenarios/` | 30s-5min per scenario | **No mock at all** — real agent spawn, real tool calls |
 
 **Key rule**: L0 tests pure logic. L1 tests command wiring. L2 tests agent comprehension.
 An external evaluator seeing `spyOn` or `mock` in test files must distinguish:
 - ✅ **IO interface injection** (`createMockExec()`, `mockFetch`) — architecture-compliant L0/L1
 - ✅ **Console output capture** (`spyOn(console, 'log')`) — L1 integration testing
 - ❌ **Direct system call interception** (`spyOn(execSync)`, `spyOn(fs)`) — violation of intent/plan/execute separation
+
+**Directory distinction**: `test/scenarios/` is the canonical location for BDD `reproduce.sh` scenes (per-package, versioned with code). `showcase/` is for **curated demonstrations** — selected high-value runs with write-ups, not bulk BDD output. Do not dump every BDD scene into `showcase/`.
 
 Current codebase: **zero violations of the third type**.
 
