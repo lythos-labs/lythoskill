@@ -16,6 +16,8 @@ The problem is not that you have too many. The problem is that every skill you h
 
 ## Level 1: Your First Deck
 
+**Prerequisite**: [install bun](https://bun.sh) — the only runtime you need.
+
 Create `skill-deck.toml`:
 
 ::: code-group
@@ -62,6 +64,8 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 :::
 
 Run `bunx @lythos/skill-deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
+
+**How it works**: `link` reads `github.com/...` paths from your deck and automatically clones repos into `cold_pool` — no manual setup needed. `max_cards` is a safety limit: if your deck exceeds it, `link` warns before making changes.
 
 **What changed**: Your agent now sees exactly 2 skills. Behavior is reproducible. One file declares what is active — share it, version it, switch it.
 

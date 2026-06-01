@@ -157,9 +157,9 @@ bunx @lythos/skill-deck@latest link
 
 ## Built by AI Agents
 
-Zero human-written code. Every line — 13 packages, 600+ tests, all CLI tools, all SKILL.md files — produced by AI agents under human direction. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
+Agent-driven from day one. Every line — 13 packages, 600+ tests, all CLI tools — written by AI agents under human architecture and review. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
 
-This is not a gimmick. It is proof that the governance model works: if agents could not reliably build and maintain this project using the very tools it provides, the tools would be broken.
+This is not a gimmick. It is proof that the governance model works: if agents could not reliably build and maintain this project using the very tools it provides, the tools would be broken. The human sets direction; the agents execute with guardrails.
 
 ## Validated by Agents, Not Just Ours
 

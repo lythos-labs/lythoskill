@@ -16,6 +16,8 @@
 
 ## 第 1 級：你的第一副牌組
 
+**前置條件**：[安裝 bun](https://bun.sh) — 唯一需要的執行環境。
+
 建立 `skill-deck.toml`：
 
 ::: code-group
@@ -59,6 +61,8 @@ path = "github.com/mattpocock/skills/skills/engineering/diagnose"
 :::
 
 執行 `bunx @lythos/skill-deck link`。現在工作集中只有 `tdd` 和 `diagnose`。其他全部消失。
+
+**背後原理**：`link` 讀取 `github.com/...` 路徑，自動 clone repo 到 `cold_pool`——不用手動設定。`max_cards` 是安全限制：超過時 `link` 會先警告再執行。
 
 **改變了什麼**：你的 agent 現在只看見 2 個技能。行為可重現。一個檔案宣告什麼是 active——分享它、版本化它、切換它。
 
