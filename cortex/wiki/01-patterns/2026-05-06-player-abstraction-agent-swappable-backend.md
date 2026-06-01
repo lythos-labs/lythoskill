@@ -63,5 +63,5 @@ baseDir: join(tmpdir(), `arena-${arenaId}`, cell.side)
 
 - ADR-20260506021112492 (Kimi default decision)
 - ADR-20260424120936541 (Player-deck separation)
-- `cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md`
+- `cortex/wiki/03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md`
 - `packages/lythoskill-test-utils/src/agents/`

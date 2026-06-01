@@ -995,8 +995,8 @@ bun packages/lythoskill-deck/test/runner.ts --agent --player kimi
 |--------------------|------|
 | Understand why DeepSeek TUI > Kimi/Claude for Bun.spawn | [`cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md`](./cortex/wiki/03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md) |
 | Compare all four agent CLI backends (DeepSeek/Kimi/Claude/OpenCode) | Same wiki entry — §8 scoring matrix |
-| Understand the Kimi adapter pattern (reference for new adapters) | [`cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md`](./cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md) |
-| See the AgentAdapter interface + player abstraction design | [`cortex/wiki/01-patterns/player-abstraction-agent-swappable-backend.md`](./cortex/wiki/01-patterns/player-abstraction-agent-swappable-backend.md) |
+| Understand the Kimi adapter pattern (reference for new adapters) | [`cortex/wiki/03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md`](./cortex/wiki/03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md) |
+| See the AgentAdapter interface + player abstraction design | [`cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md`](./cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md) |
 | Learn the `.agent.md` format (Given/When/Then/Judge) | [`packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md`](./packages/lythoskill-deck/test/scenarios/skills-introspection.agent.md) — canonical example |
 | Write a new Agent BDD scenario | Copy an existing `.agent.md`, follow `## Given` / `## When` / `## Then` / `## Judge` sections |
 | Run Agent BDD scenarios locally | `bun packages/lythoskill-deck/test/runner.ts --agent --player <name>` |
@@ -1031,7 +1031,7 @@ The `skill-deck.toml` file declares which skills are active per project. Key con
 
 > **`.claude/skills/`** is Claude Code's default (skill concept originator). **`.agents/skills/`** is the community standard — Vercel skills.sh uses it as universal target, and 14+ agents (Kimi, Codex, Cursor, Gemini CLI, GitHub Copilot, OpenCode...) share it. Both choices are valid; never imply `.claude/skills/` is the sole path.
 >
-> Full agent→path table: [`cortex/wiki/01-patterns/agent-skills-path-reference.md`](./cortex/wiki/01-patterns/agent-skills-path-reference.md). Convention rules: [`cortex/wiki/01-patterns/path-convention.md`](./cortex/wiki/01-patterns/path-convention.md).
+> Full agent→path table: [`cortex/wiki/01-patterns/2026-05-28-agent-skills-path-reference.md`](./cortex/wiki/01-patterns/2026-05-28-agent-skills-path-reference.md). Convention rules: [`cortex/wiki/01-patterns/2026-05-27-path-convention.md`](./cortex/wiki/01-patterns/2026-05-27-path-convention.md).
 
 The `lythoskill-deck` tool reconciles the declared deck against the cold pool by creating symlinks (default) or snapshots (`--mode snapshot`) in the working set. It generates a `skill-deck.lock` file tracking the resolved state including per-skill mode (`"symlink" | "snapshot"`).
 

@@ -125,7 +125,7 @@ useAgent('kimi')   // default: reliable
 useAgent('claude') // secondary: known issues
 ```
 
-Arena runner code changed zero lines. One new adapter file. Pattern validated. See [player-abstraction-agent-swappable-backend.md](./player-abstraction-agent-swappable-backend.md) for full story.
+Arena runner code changed zero lines. One new adapter file. Pattern validated. See [2026-05-06-player-abstraction-agent-swappable-backend.md](./2026-05-06-player-abstraction-agent-swappable-backend.md) for full story.
 
 ## When to Apply
 

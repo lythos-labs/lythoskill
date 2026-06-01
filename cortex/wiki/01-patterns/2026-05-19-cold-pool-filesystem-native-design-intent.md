@@ -8,7 +8,7 @@ category: pattern
 
 > 回答一个问题：cold pool 管理大量 git repo，天然让人联想到 gitea、npm registry、Maven Central。它们都像，但都不 fit。那条共同的分界线是什么？
 >
-> 来源：与项目作者的费曼对话（gitea 视角追问）、[`cold-pool-evolutionary-rationale.md`](./cold-pool-evolutionary-rationale.md)、ADR-20260507021957847、ADR-20260508230803515、ADR-20260517152850372（POSSE）。
+> 来源：与项目作者的费曼对话（gitea 视角追问）、[`2026-05-07-cold-pool-evolutionary-rationale.md`](./2026-05-07-cold-pool-evolutionary-rationale.md)、ADR-20260507021957847、ADR-20260508230803515、ADR-20260517152850372（POSSE）。
 
 ---
 
@@ -57,7 +57,7 @@ cold pool 的核心行为——管理一组 git 仓库、从 remote 拉取、在
 
 **分界线**：中心化权威 vs 本地文件系统真源。
 
-> 参见 [`cold-pool-evolutionary-rationale.md`](./cold-pool-evolutionary-rationale.md) 第 6 节：Maven 的 companion file 机制可借鉴，但 cold pool 不引入 coordinate 系统或 Merkle tree。
+> 参见 [`2026-05-07-cold-pool-evolutionary-rationale.md`](./2026-05-07-cold-pool-evolutionary-rationale.md) 第 6 节：Maven 的 companion file 机制可借鉴，但 cold pool 不引入 coordinate 系统或 Merkle tree。
 
 ---
 
@@ -72,7 +72,7 @@ cold pool 的核心行为——管理一组 git 仓库、从 remote 拉取、在
 
 **分界线**：持续运行的 controller vs 一次性的 CLI 收敛。
 
-> 参见 [`cold-pool-evolutionary-rationale.md`](./cold-pool-evolutionary-rationale.md) 第 4 节：K8s reconciliation 是心智模型，不是实现复制。
+> 参见 [`2026-05-07-cold-pool-evolutionary-rationale.md`](./2026-05-07-cold-pool-evolutionary-rationale.md) 第 4 节：K8s reconciliation 是心智模型，不是实现复制。
 
 ---
 
@@ -151,7 +151,7 @@ cold pool 可以**与**这类系统共存（例如，你可以用 gitea 托管 s
 
 ## 交叉引用
 
-- 演进理性（checksum + K8s 心智模型）：[`cold-pool-evolutionary-rationale.md`](./cold-pool-evolutionary-rationale.md)
+- 演进理性（checksum + K8s 心智模型）：[`2026-05-07-cold-pool-evolutionary-rationale.md`](./2026-05-07-cold-pool-evolutionary-rationale.md)
 - POSSE 模式：[`2026-05-05-multi-agent-posse-syndication.md`](./2026-05-05-multi-agent-posse-syndication.md)
 - 文档站点认知拓扑 lesson：[`../02-research/2026-05-19-documentation-site-cognitive-topology-lesson.md`](../02-research/2026-05-19-documentation-site-cognitive-topology-lesson.md)
 - reconcile-plan 中 `behind` 的预留 hook：`../../packages/lythoskill-cold-pool/src/reconcile-plan.ts`

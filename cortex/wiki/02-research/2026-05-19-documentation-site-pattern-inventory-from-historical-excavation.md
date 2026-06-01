@@ -51,7 +51,7 @@ The defining feature. Undeclared skills are physically absent. No "disable" butt
 
 ### 6. Cold Pool → Declaration → Working Set
 
-**Source:** README.md, ADR-20260507021957847, wiki/cold-pool-evolutionary-rationale.md
+**Source:** README.md, ADR-20260507021957847, wiki/2026-05-07-cold-pool-evolutionary-rationale.md
 
 Go module-style directory layout. K8s reconciliation model: declarative desired state ↔ filesystem actual state. No central registry, no auth server, no daemon.
 

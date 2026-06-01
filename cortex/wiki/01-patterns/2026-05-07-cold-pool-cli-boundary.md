@@ -69,4 +69,4 @@ Prune 是冷池空间回收，靠 metadata DB 的 `deck_refs` 引用计数来判
 - ADR-20260507110332770: Prune as audit heredoc
 - ADR-20260507110332805: Refresh discover-then-apply
 - EPIC-20260507191713917: Cold-pool reconcile + dual-mode
-- wiki: `cold-pool-unified-facility-design.md`
+- wiki: `2026-05-07-cold-pool-unified-facility-design.md`

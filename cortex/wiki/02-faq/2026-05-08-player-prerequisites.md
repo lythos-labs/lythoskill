@@ -65,4 +65,4 @@ bun -e "import { listAgents } from '@lythos/agent-adapter'; console.log(listAgen
 
 - [Agent Adapter as Actor Pattern](../../wiki/01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - [Player-Deck Separation](../../wiki/01-patterns/2026-05-02-player-deck-separation-and-tcg-player-analogy.md)
-- [lythoskill in Action Guided Tour](./lythoskill-in-action-guided-tour.md)
+- [lythoskill in Action Guided Tour](./2026-05-08-lythoskill-in-action-guided-tour.md)

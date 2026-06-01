@@ -48,6 +48,6 @@ Radar dimensions scored: Taste 9.2, Nutrition 5.5, Difficulty 3.0, Time 4.5, Cos
 
 ## Related
 
-- wiki: `cold-pool-cli-boundary.md` — deck vs cold-pool separation
+- wiki: `2026-05-07-cold-pool-cli-boundary.md` — deck vs cold-pool separation
 - wiki: `expected-coverage-gaps-*.md` — coverage strategy
 - TASK-20260507224228837 — graduation exam task definition

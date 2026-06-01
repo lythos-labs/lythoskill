@@ -164,5 +164,5 @@ Both benefit from the same 3-part template. No dual maintenance needed.
 
 - `ADR-20260515204135649` — Agent self-healing environment (L2 inline hints)
 - `ADR-20260507014124191` — Agent-friendly CLI error as decision tree
-- `cortex/wiki/01-patterns/cold-pool-unified-facility-design.md` — L1 SKILL.md as tool registry
+- `cortex/wiki/01-patterns/2026-05-07-cold-pool-unified-facility-design.md` — L1 SKILL.md as tool registry
 - Spring Framework IoC documentation — the original annotation mindset

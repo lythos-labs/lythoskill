@@ -35,4 +35,4 @@ Sources: AI Coding.Info (9,000+ repos), GlobalData, Requesty.ai, Morphllm.
 - **`.agents/skills/` via `also_link_to`** — covers the community standard adopted by Codex and 14+ agents. One `also_link_to` entry reaches the rest of the ecosystem.
 - **Other branded paths** — users who need them can configure. No need for the tool or examples to enumerate every possibility; the pattern is self-explanatory.
 
-This validates the current `path-convention.md` design: Claude Code default + community standard fan-out, without claiming exclusivity for either.
+This validates the current `2026-05-27-path-convention.md` design: Claude Code default + community standard fan-out, without claiming exclusivity for either.

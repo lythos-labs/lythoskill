@@ -9,7 +9,7 @@ author: research skill (dogfood session)
 
 > 回答两个问题: (1) 为什么 cold pool 是 URI-based、human-readable locator? (2) Go module checksum / Maven SHA1 哪些机制适合我们、哪些不适合?
 >
-> 来源: ADR-20260502012643244、ADR-20260507021957847、`cold-pool-unified-facility-design.md`、`project_cold_pool_metadata_layer_research.md`、real-world repo structure survey。
+> 来源: ADR-20260502012643244、ADR-20260507021957847、`2026-05-07-cold-pool-unified-facility-design.md`、`project_cold_pool_metadata_layer_research.md`、real-world repo structure survey。
 
 ---
 

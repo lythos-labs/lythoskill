@@ -114,7 +114,7 @@ bunx @lythos/skill-arena single --task task.md --deck deck.toml
 
 ## 相关
 
-- `cortex/wiki/03-lessons/kimi-vs-claude-cli-headless-comparison.md` (技术对比报告)
-- `cortex/wiki/01-patterns/player-abstraction-agent-swappable-backend.md` (Player 模式)
+- `cortex/wiki/03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md` (技术对比报告)
+- `cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md` (Player 模式)
 - ADR-20260506021112492 (Kimi 默认决策)
 - `packages/lythoskill-test-utils/src/agents/kimi.ts` (Kimi adapter 实现)

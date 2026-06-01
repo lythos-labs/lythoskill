@@ -50,18 +50,18 @@
 - **[2026-05-02]** [desc-preference-arena](./01-patterns/2026-05-02-desc-preference-arena.md)
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
-- **[0000-00-00]** [agent-skills-path-reference](./01-patterns/agent-skills-path-reference.md)
-- **[0000-00-00]** [player-abstraction-agent-swappable-backend](./01-patterns/player-abstraction-agent-swappable-backend.md)
-- **[0000-00-00]** [agents-md-bootloader-pattern](./01-patterns/agents-md-bootloader-pattern.md)
-- **[0000-00-00]** [cold-pool-evolutionary-rationale](./01-patterns/cold-pool-evolutionary-rationale.md)
-- **[0000-00-00]** [cold-pool-cli-boundary](./01-patterns/cold-pool-cli-boundary.md)
-- **[0000-00-00]** [cold-pool-unified-facility-design](./01-patterns/cold-pool-unified-facility-design.md)
-- **[0000-00-00]** [path-convention](./01-patterns/path-convention.md)
+- **[2026-05-28]** [2026-05-28-agent-skills-path-reference](./01-patterns/2026-05-28-agent-skills-path-reference.md)
+- **[2026-05-06]** [2026-05-06-player-abstraction-agent-swappable-backend](./01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md)
+- **[2026-05-08]** [2026-05-08-agents-md-bootloader-pattern](./01-patterns/2026-05-08-agents-md-bootloader-pattern.md)
+- **[2026-05-07]** [2026-05-07-cold-pool-evolutionary-rationale](./01-patterns/2026-05-07-cold-pool-evolutionary-rationale.md)
+- **[2026-05-07]** [2026-05-07-cold-pool-cli-boundary](./01-patterns/2026-05-07-cold-pool-cli-boundary.md)
+- **[2026-05-07]** [2026-05-07-cold-pool-unified-facility-design](./01-patterns/2026-05-07-cold-pool-unified-facility-design.md)
+- **[2026-05-27]** [2026-05-27-path-convention](./01-patterns/2026-05-27-path-convention.md)
 
 ## ❓ FAQ (2)
 
-- **[0000-00-00]** [lythoskill-in-action-guided-tour](./02-faq/lythoskill-in-action-guided-tour.md)
-- **[0000-00-00]** [player-prerequisites](./02-faq/player-prerequisites.md)
+- **[2026-05-08]** [2026-05-08-lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
+- **[2026-05-08]** [2026-05-08-player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
 ## 📖 Lessons (23)
 
@@ -87,7 +87,7 @@
 - **[2026-05-02]** [hermes-agent-skill-evolution-and-deck-governance](./03-lessons/2026-05-02-hermes-agent-skill-evolution-and-deck-governance.md)
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
-- **[0000-00-00]** [kimi-vs-claude-cli-headless-comparison](./03-lessons/kimi-vs-claude-cli-headless-comparison.md)
+- **[2026-05-06]** [2026-05-06-kimi-vs-claude-cli-headless-comparison](./03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md)
 
 ## 🗄️ Legacy (0)
 

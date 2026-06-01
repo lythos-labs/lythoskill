@@ -96,6 +96,6 @@ The 4 hidden-dir skills are intentionally excluded (`d.name.startsWith('.')` fil
 
 ## Related
 
-- `cortex/wiki/01-patterns/cold-pool-unified-facility-design.md` — cold pool layout conventions
+- `cortex/wiki/01-patterns/2026-05-07-cold-pool-unified-facility-design.md` — cold pool layout conventions
 - `cortex/wiki/03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md` — 5 repo layout patterns
 - ADR-20260502012643244 (FQ-only locator) — locator precision that makes this fix safe
