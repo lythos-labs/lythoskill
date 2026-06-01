@@ -9,20 +9,27 @@
 | in-progress | 2026-05-29 | Started |
 
 ## 背景与目标
-<!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
+
+社区技能池已注册 alirezarezvani/claude-skills (338 skills)、mattpocock/skills (20+)、VoltAgent/awesome-agent-skills (索引)。但只有少量被 curator scan 发现。需要识别热门高质量技能，clone 入库，打 tag。
 
 ## 需求详情
-<!-- ⚠️ REQUIRED: 列出具体需求。保留占位符 = 空壳。 -->
-- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_1
-- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_2
+- [x] WebSearch 识别社区热门/高 star 技能（top 5-10）
+- [x] Clone 热门技能到 cold pool
+- [ ] curator scan 入库（DB 路径不一致，需修复）
+- [ ] curator tag 打 domain/QA 标签
+- [ ] 记录到 REGISTRY.json
 
 ## 技术方案
-<!-- ⚠️ REQUIRED: 实现方案、关键决策、参考资源。不填会被 probe 拦截。 -->
+
+1. WebSearch 搜索 "best claude skills 2026" + 浏览 awesome-agent-skills 索引
+2. curator add <locator> 逐个入库
+3. curator scan 刷新索引
+4. curator tag 标注领域
 
 ## 验收标准
-<!-- ⚠️ REQUIRED: 可测试的验收标准。保留占位符 = 空壳。 -->
-- [ ] ⚠️ PLACEHOLDER_CRITERION_1
-- [ ] ⚠️ PLACEHOLDER_CRITERION_2
+- [ ] 至少 5 个新热门技能进入 cold pool
+- [ ] curator scan 可见
+- [ ] domain tag 已标注
 
 ## 进度记录
 <!-- 执行时更新，带时间戳 -->
