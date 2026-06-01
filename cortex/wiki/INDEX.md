@@ -6,6 +6,8 @@
 
 - **[2026-05-29]** [internal-roundtable-pattern](./01-patterns/2026-05-29-internal-roundtable-pattern.md)
 - **[2026-05-28]** [agent-evaluation-arena-pattern](./01-patterns/2026-05-28-agent-evaluation-arena-pattern.md)
+- **[2026-05-28]** [agent-skills-path-reference](./01-patterns/2026-05-28-agent-skills-path-reference.md)
+- **[2026-05-27]** [path-convention](./01-patterns/2026-05-27-path-convention.md)
 - **[2026-05-20]** [skill-ecosystem-epistemic-gaps-arena-correction](./01-patterns/2026-05-20-skill-ecosystem-epistemic-gaps-arena-correction.md)
 - **[2026-05-19]** [cold-pool-filesystem-native-design-intent](./01-patterns/2026-05-19-cold-pool-filesystem-native-design-intent.md)
 - **[2026-05-19]** [where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern](./01-patterns/2026-05-19-where-is-the-orchestrator-combo-prompt-as-lightweight-orchestrator-pattern.md)
@@ -25,11 +27,16 @@
 - **[2026-05-10]** [cold-pool-metadata-filesystem-ground-truth](./01-patterns/2026-05-10-cold-pool-metadata-filesystem-ground-truth.md)
 - **[2026-05-09]** [cold-pool-architecture-deck-decoupling-with-fsm-reference-counting](./01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md)
 - **[2026-05-09]** [dormancy-property-test-for-fallback-hints](./01-patterns/2026-05-09-dormancy-property-test-for-fallback-hints.md)
+- **[2026-05-08]** [agents-md-bootloader-pattern](./01-patterns/2026-05-08-agents-md-bootloader-pattern.md)
 - **[2026-05-08]** [agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends](./01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - **[2026-05-08]** [curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery](./01-patterns/2026-05-08-curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery.md)
 - **[2026-05-08]** [agents-md-as-network-native-agent-bootloader](./01-patterns/2026-05-08-agents-md-as-network-native-agent-bootloader.md)
 - **[2026-05-07]** [graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx](./01-patterns/2026-05-07-graduation-exam-end-to-end-agent-pipeline-deck-arena-multi-skill-orchestration-radar-chart-docx.md)
+- **[2026-05-07]** [cold-pool-evolutionary-rationale](./01-patterns/2026-05-07-cold-pool-evolutionary-rationale.md)
+- **[2026-05-07]** [cold-pool-cli-boundary](./01-patterns/2026-05-07-cold-pool-cli-boundary.md)
 - **[2026-05-07]** [expected-coverage-gaps-intent-plan-execute-coverage-strategy](./01-patterns/2026-05-07-expected-coverage-gaps-intent-plan-execute-coverage-strategy.md)
+- **[2026-05-07]** [cold-pool-unified-facility-design](./01-patterns/2026-05-07-cold-pool-unified-facility-design.md)
+- **[2026-05-06]** [player-abstraction-agent-swappable-backend](./01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md)
 - **[2026-05-05]** [multi-agent-posse-syndication](./01-patterns/2026-05-05-multi-agent-posse-syndication.md)
 - **[2026-05-04]** [intent-plan-execute-fractal-architecture-pattern](./01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md)
 - **[2026-05-03]** [github-actions-bun-ci-cd-配置模式](./01-patterns/2026-05-03-github-actions-bun-ci-cd-配置模式.md)
@@ -50,18 +57,11 @@
 - **[2026-05-02]** [desc-preference-arena](./01-patterns/2026-05-02-desc-preference-arena.md)
 - **[2026-05-02]** [project-cortex-porting-guide](./01-patterns/2026-05-02-project-cortex-porting-guide.md)
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
-- **[2026-05-28]** [2026-05-28-agent-skills-path-reference](./01-patterns/2026-05-28-agent-skills-path-reference.md)
-- **[2026-05-06]** [2026-05-06-player-abstraction-agent-swappable-backend](./01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md)
-- **[2026-05-08]** [2026-05-08-agents-md-bootloader-pattern](./01-patterns/2026-05-08-agents-md-bootloader-pattern.md)
-- **[2026-05-07]** [2026-05-07-cold-pool-evolutionary-rationale](./01-patterns/2026-05-07-cold-pool-evolutionary-rationale.md)
-- **[2026-05-07]** [2026-05-07-cold-pool-cli-boundary](./01-patterns/2026-05-07-cold-pool-cli-boundary.md)
-- **[2026-05-07]** [2026-05-07-cold-pool-unified-facility-design](./01-patterns/2026-05-07-cold-pool-unified-facility-design.md)
-- **[2026-05-27]** [2026-05-27-path-convention](./01-patterns/2026-05-27-path-convention.md)
 
 ## ❓ FAQ (2)
 
-- **[2026-05-08]** [2026-05-08-lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
-- **[2026-05-08]** [2026-05-08-player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
+- **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
+- **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
 ## 📖 Lessons (23)
 
@@ -76,6 +76,7 @@
 - **[2026-05-07]** [real-world-skill-repo-structure-survey](./03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md)
 - **[2026-05-06]** [deepseek-tui-headless-programmatic-analysis](./03-lessons/2026-05-06-deepseek-tui-headless-programmatic-analysis.md)
 - **[2026-05-06]** [agent-spawn-reliability-journey-kimi-player-cwd-isolation](./03-lessons/2026-05-06-agent-spawn-reliability-journey-kimi-player-cwd-isolation.md)
+- **[2026-05-06]** [kimi-vs-claude-cli-headless-comparison](./03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md)
 - **[2026-05-04]** [agent-verification-leetcode-shape-llm-judge](./03-lessons/2026-05-04-agent-verification-leetcode-shape-llm-judge.md)
 - **[2026-05-03]** [hermes-self-evolving-skill-field-notes](./03-lessons/2026-05-03-hermes-self-evolving-skill-field-notes.md)
 - **[2026-05-03]** [hermes-deck-future-proposals](./03-lessons/2026-05-03-hermes-deck-future-proposals.md)
@@ -87,7 +88,6 @@
 - **[2026-05-02]** [hermes-agent-skill-evolution-and-deck-governance](./03-lessons/2026-05-02-hermes-agent-skill-evolution-and-deck-governance.md)
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
-- **[2026-05-06]** [2026-05-06-kimi-vs-claude-cli-headless-comparison](./03-lessons/2026-05-06-kimi-vs-claude-cli-headless-comparison.md)
 
 ## 🗄️ Legacy (0)
 
