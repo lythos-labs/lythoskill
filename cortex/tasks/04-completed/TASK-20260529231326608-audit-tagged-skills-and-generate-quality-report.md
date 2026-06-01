@@ -1,4 +1,4 @@
-# TASK-20260529231326545: Search and add niche skills (security, testing, data-quality, a11y)
+# TASK-20260529231326608: Audit tagged skills and generate quality report
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-29 | Created |
+| completed | 2026-06-01 | Closed via trailer |
 
 ## 背景与目标
 <!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
@@ -32,7 +33,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260529231326545)
+feat(scope): description (TASK-20260529231326608)
 
 - Detail 1
 - Detail 2

@@ -1,11 +1,12 @@
-# TASK-20260529231326576: Tag all added skills with domain/hub/qa tags via WebSearch research
+# TASK-20260601162858384: T3: fix agent-run→single stale references + broken cross-ref to archived file
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
-| backlog | 2026-05-29 | Created |
+| backlog | 2026-06-01 | Created |
+| completed | 2026-06-01 | Closed via trailer |
 
 ## 背景与目标
 <!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
@@ -32,7 +33,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260529231326576)
+feat(scope): description (TASK-20260601162858384)
 
 - Detail 1
 - Detail 2

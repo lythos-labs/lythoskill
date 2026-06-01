@@ -1,4 +1,4 @@
-# TASK-20260601162859848: T3: fix wiki naming — 10 bare-name files + 02-faq/02-research collision + INDEX.md gap
+# TASK-20260601162901076: T3: consolidate cold pool patterns — 6 files with 30-40% overlap into 3-4
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-06-01 | Created |
+| completed | 2026-06-01 | Closed via trailer |
 
 ## 背景与目标
 <!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
@@ -32,7 +33,7 @@
 
 ## Git 提交信息建议
 ```
-feat(scope): description (TASK-20260601162859848)
+feat(scope): description (TASK-20260601162901076)
 
 - Detail 1
 - Detail 2

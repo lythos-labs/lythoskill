@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/6/1 17:04:58
+> 自动生成于 2026/6/1 17:08:50
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 295 | 进行中: 0, 待验收: 0, 已完成: 248 |
-| Epics | 43 | 活跃: 1, 已完成: 38, 悬置: 2, 已归档: 2 |
+| Tasks | 295 | 进行中: 0, 待验收: 0, 已完成: 254 |
+| Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
+_无_
 
 ### 已完成
 
@@ -57,6 +57,7 @@
 - ✅ **EPIC-20260527212032856**: Site narrative stabilization and living documentation consolidation
 - ✅ **EPIC-20260529003844792**: Agent-native project governance: defense layers, evaluation patterns, and bias mitigation
 - ✅ **EPIC-20260529214429614**: Curator CLI IO injection + BDD coverage
+- ✅ **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 - ✅ **EPIC-20260530135721111**: Arena IO Injection Sweep — CLI and Runner Layers
 
 ### 悬置
@@ -73,14 +74,9 @@
 
 ## 📄 Tasks
 
-### 待办 (6)
+### 待办 (0)
 
-- [ ] **TASK-20260529231326545**: Search and add niche skills (security, testing, data-quality, a11y)
-- [ ] **TASK-20260529231326576**: Tag all added skills with domain/hub/qa tags via WebSearch research
-- [ ] **TASK-20260529231326608**: Audit tagged skills and generate quality report
-- [ ] **TASK-20260601162858384**: T3: fix agent-run→single stale references + broken cross-ref to archived file
-- [ ] **TASK-20260601162859848**: T3: fix wiki naming — 10 bare-name files + 02-faq/02-research collision + INDEX.md gap
-- [ ] **TASK-20260601162901076**: T3: consolidate cold pool patterns — 6 files with 30-40% overlap into 3-4
+_无_
 
 ### 进行中 (0)
 
@@ -90,7 +86,7 @@ _无_
 
 _无_
 
-### 已完成 (248)
+### 已完成 (254)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -337,9 +333,15 @@ _无_
 - ✅ ~~TASK-20260529214624302~~: T5: backupIndex/restoreIndex/printSchema IO injection + reproduce.sh
 - ✅ ~~TASK-20260529214626313~~: T6: --help entry IO injection + reproduce.sh
 - ✅ ~~TASK-20260529231326513~~: Search and add hot community skills (claude-skills, awesome-agent-skills, mattpocock/skills)
+- ✅ ~~TASK-20260529231326545~~: Search and add niche skills (security, testing, data-quality, a11y)
+- ✅ ~~TASK-20260529231326576~~: Tag all added skills with domain/hub/qa tags via WebSearch research
+- ✅ ~~TASK-20260529231326608~~: Audit tagged skills and generate quality report
 - ✅ ~~TASK-20260530135707211~~: Arena CLI IO injection — extract ArenaCliIO interface and inject into main/singleRun/vsRun/vizRun/prepareWorkdir/archiveRun
 - ✅ ~~TASK-20260530135721111~~: Arena runner IO injection — extract ArenaIO for spawn/fs/agent operations
 - ✅ ~~TASK-20260530135730555~~: Arena BDD reproduce.sh for CLI and runner IO injection
+- ✅ ~~TASK-20260601162858384~~: T3: fix agent-run→single stale references + broken cross-ref to archived file
+- ✅ ~~TASK-20260601162859848~~: T3: fix wiki naming — 10 bare-name files + 02-faq/02-research collision + INDEX.md gap
+- ✅ ~~TASK-20260601162901076~~: T3: consolidate cold pool patterns — 6 files with 30-40% overlap into 3-4
 
 ### 悬置 (1)
 
