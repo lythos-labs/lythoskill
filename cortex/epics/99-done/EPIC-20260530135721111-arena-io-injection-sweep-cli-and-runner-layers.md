@@ -19,6 +19,7 @@ checklist_skipped_reason: non-interactive agent session
 |--------|------|------|
 | active | 2026-05-30 | Created, 3 tasks registered |
 | active | 2026-05-30 | All 3 tasks completed, tests green (143 pass), committed 8eb3628 |
+| done | 2026-06-01 | Done |
 
 ## 背景故事
 

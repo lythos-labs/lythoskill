@@ -1057,7 +1057,7 @@ stateDiagram-v2
 ## 相关
 
 - [thin-skill-pattern.md](./thin-skill-pattern.md) — 三层分离（Skill = Controller / npm = Service / Starter = BOM）
-- [skill-combo-epistemology-and-tcg-analogy.md](./skill-combo-epistemology-and-tcg-analogy.md) — 三层 combo 认识论（显式 / curator / arena）
+- [skill-combo-epistemology-and-tcg-analogy.md](../05-archived/2026-05-02-skill-combo-epistemology-and-tcg-analogy.md) — 三层 combo 认识论（显式 / curator / arena）[已归档]
 - [player-deck-separation-and-tcg-player-analogy.md](./player-deck-separation-and-tcg-player-analogy.md) — Player / Deck 分离设计
 - ADR-20260502012643544 — Skills as Flat Controllers（本文为其深度展开）
 - ADR-20260502012643244 — FQ-only locator（去中心化 locator 的工程落地）
