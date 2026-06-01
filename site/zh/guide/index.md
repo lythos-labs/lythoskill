@@ -4,27 +4,30 @@
 
 本指南是自足的——從零開始，依序按照每個級別操作。
 
-## 第 0 級：你已經有技能了
+## 第 0 級：快速開始
 
-你一直在收集技能。GitHub repos、Superpowers、同事的 gist——技能會累積。你可能比想像中擁有更多。
+複製、貼上、執行。這一段腳本會安裝 bun、建立冷池、啟用你的前兩個技能。
 
-問題不是你擁有太多。問題是每一個你裝過的技能都對每個 agent session 可見。Context window 被塞滿。Trigger 互相衝突。行為變得不可預測——同樣的 prompt 產生不同結果，因為不同的技能被觸發。
+```bash
+# 1. 安裝 bun（macOS / Linux / WSL）
+curl -fsSL https://bun.sh/install | bash
 
-**症狀**：Agent 行為不一致。你無法跨 session 重現結果。
+# 在中國大陸，取消下面這行的註解以使用 npm 鏡像源：
+# export BUN_CONFIG_REGISTRY=https://registry.npmmirror.com
 
-**根源**：工作集是累積，不是選擇。你需要治理。
+# 2. 建立冷池——技能 repo 存放的地方
+mkdir -p ~/.agents/skill-repos
 
-## 第 1 級：你的第一副牌組
-
-**前置條件**：[安裝 bun](https://bun.sh) — 唯一需要的執行環境。
-
-建立 `skill-deck.toml`：
-
-::: code-group
-
-```toml [Claude Code]
+# 3. 建立你的第一副牌組
+cat > skill-deck.toml << 'TOML'
 [deck]
+# 安全上限 + 心理強制力：選一個數字，守住它。每個技能都消耗
+# context，這個硬上限逼你做取捨——這才是它的意義。
 max_cards = 10
+# 冷池：git-cloned 技能 repo 的共享目錄。link 會自動 clone
+# github.com 路徑的 repo——不用手動設定。
+cold_pool = "~/.agents/skill-repos"
+# Agent 尋找技能的位置。依 agent 更換：
 working_set = ".claude/skills"
 
 [tool.skills.tdd]
@@ -32,37 +35,27 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+TOML
+
+# 4. Link：對帳工作集與牌組
+#    自動從 github.com 路徑 clone repo 到冷池。
+bunx @lythos/skill-deck@latest link
 ```
 
-```toml [Codex]
-[deck]
-max_cards = 10
-working_set = ".agents/skills"
+你的 agent 現在只看見 2 個技能。工作集中其他所有東西都消失了——因為它們不在牌組裡。
 
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
+**前置條件**：[bun](https://bun.sh) 是唯一需要的執行環境。如果你偏好 npm：`npx @lythos/skill-deck@latest link` 也可以，但 `bunx` 更快。
 
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
-```
+## 第 1 級：理解你的牌組
 
-```toml [Cursor]
-[deck]
-max_cards = 10
-working_set = ".cursor/skills"
+`skill-deck.toml` 每個欄位的意義：
 
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
-```
-
-:::
-
-執行 `bunx @lythos/skill-deck link`。現在工作集中只有 `tdd` 和 `diagnose`。其他全部消失。
-
-**背後原理**：`link` 讀取 `github.com/...` 路徑，自動 clone repo 到 `cold_pool`——不用手動設定。`max_cards` 是安全限制：超過時 `link` 會先警告再執行。
+| 欄位 | 作用 |
+|-------|-------------|
+| `max_cards` | 安全上限 + 心理強制力。`link` 會在超過時警告你。重點不是技術限制——是心理上的：每個技能消耗 context，硬數字逼你做取捨。 |
+| `cold_pool` | 技能 repo 的 git clone 位置。`link` 會自動 clone `github.com/...` 路徑到這裡。 |
+| `working_set` | Agent 尋找技能的位置。`.claude/skills/` 給 Claude Code，`.agents/skills/` 給 Codex 等。 |
+| `[tool.skills.<alias>]` | 宣告一個技能。`path` 可以是任何 FQ locator——`github.com/owner/repo`、`localhost/me/my-fork`。 |
 
 **改變了什麼**：你的 agent 現在只看見 2 個技能。行為可重現。一個檔案宣告什麼是 active——分享它、版本化它、切換它。
 

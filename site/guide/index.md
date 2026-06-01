@@ -4,28 +4,30 @@
 
 This guide is self-contained — start here with nothing installed and follow each level in order.
 
-## Level 0: You Already Have Skills
+## Level 0: Quick Start
 
-You have been collecting skills. GitHub repos, Superpowers, a colleague's gist — skills accumulate. You probably have more than you realize.
+Copy, paste, run. This single script sets up bun, creates the cold pool, and activates your first two skills.
 
-The problem is not that you have too many. The problem is that every skill you have ever installed is visible to every agent session. Context window fills. Triggers conflict. Behavior becomes inconsistent — the same prompt produces different results because different skills fire.
+```bash
+# 1. Install bun (macOS / Linux / WSL)
+curl -fsSL https://bun.sh/install | bash
 
-**Symptom**: Agent behavior is unpredictable. You cannot reproduce results across sessions.
+# If you are in China, uncomment this line for the npm mirror:
+# export BUN_CONFIG_REGISTRY=https://registry.npmmirror.com
 
-**Root cause**: Your working set is accumulation, not selection. You need governance.
+# 2. Create the cold pool — where skill repos live
+mkdir -p ~/.agents/skill-repos
 
-## Level 1: Your First Deck
-
-**Prerequisite**: [install bun](https://bun.sh) — the only runtime you need.
-
-Create `skill-deck.toml`:
-
-::: code-group
-
-```toml [Claude Code]
+# 3. Create your first deck
+cat > skill-deck.toml << 'TOML'
 [deck]
+# Safety limit + forcing function. Skills work best in small numbers —
+# default 10–15. If you hit the cap, ask: do I really need all of these right now?
 max_cards = 10
+# Cold pool: a shared directory of git-cloned skill repos. link auto-clones
+# repos from github.com paths — no manual setup.
 cold_pool = "~/.agents/skill-repos"
+# Where your agent looks for skills. Change per agent:
 working_set = ".claude/skills"
 
 [tool.skills.tdd]
@@ -33,39 +35,29 @@ path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
 path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+TOML
+
+# 4. Link: reconciles working set to match your deck
+#    Clones repos from github.com paths into cold_pool automatically.
+bunx @lythos/skill-deck@latest link
 ```
 
-```toml [Codex]
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".agents/skills"
+Your agent now sees exactly 2 skills. Everything else that was in your working set is gone — because it was not in the deck.
 
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
+**Prerequisite**: [bun](https://bun.sh) is the only runtime. If you prefer npm: `npx @lythos/skill-deck@latest link` works too, but `bunx` is faster.
 
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
-```
+## Level 1: Understand Your Deck
 
-```toml [Cursor]
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".cursor/skills"
+## Level 1: Understand Your Deck
 
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
+Each field in `skill-deck.toml`:
 
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
-```
-
-:::
-
-Run `bunx @lythos/skill-deck link`. Only `tdd` and `diagnose` are in your working set. Everything else is gone.
-
-**How it works**: `link` reads `github.com/...` paths from your deck and automatically clones repos into `cold_pool` — no manual setup needed. `max_cards` is a safety limit: if your deck exceeds it, `link` warns before making changes.
+| Field | What it does |
+|-------|-------------|
+| `max_cards` | Safety limit + forcing function. `link` warns if your deck exceeds this number. Default 10–15. If you hit the cap, the right question is not "raise the limit" — it is "do I really need all of these at once?" |
+| `cold_pool` | Where skill repos are git-cloned. `link` auto-clones `github.com/...` paths here. |
+| `working_set` | Where your agent looks for skills. `.claude/skills/` for Claude Code, `.agents/skills/` for Codex and others. |
+| `[tool.skills.<alias>]` | Declare a skill. `path` can be any FQ locator — `github.com/owner/repo`, `localhost/me/my-fork`. |
 
 **What changed**: Your agent now sees exactly 2 skills. Behavior is reproducible. One file declares what is active — share it, version it, switch it.
 
