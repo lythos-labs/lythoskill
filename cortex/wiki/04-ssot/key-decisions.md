@@ -1,5 +1,5 @@
 ---
-last_consolidated: 2026-05-28
+last_consolidated: 2026-06-01
 sources:
   - "weekly/2026-W17.md"
   - "weekly/2026-W18.md"
@@ -7,7 +7,8 @@ sources:
   - "weekly/2026-W20.md"
   - "weekly/2026-W21.md"
   - "weekly/2026-W22.md"
-  - "cortex/adr/02-accepted/ (81 ADR files on disk)"
+  - "weekly/2026-W23.md"
+  - "cortex/adr/02-accepted/ (82 ADR files on disk)"
 zk_validated: true
 ---
 
@@ -146,6 +147,7 @@ Key non-ADR decisions in this domain:
 |---|-----|----------|--------|
 | 55 | ADR-20260528113712898 | Two-path strategy: `.claude/skills/` + `.agents/skills/`. Grounded in market evidence, not a compromise -- reality-driven architecture. | ✅ holds |
 | 56 | ADR-20260528120317143 | Deck creation guide (thin-skill wizard pattern). Agent is wizard; CLI is guardrail. Describes systemic "agent scan → learn poorly → fabricate" failure mode and structural fix. | ✅ holds |
+| 57 | ADR-20260529215906255 | Curator catalog resolution: deck-aware vs independent discovery. Determines how curator resolves skill locators in context of active deck. | ✅ holds |
 
 ---
 

@@ -1,10 +1,11 @@
 ---
-last_consolidated: 2026-05-28
+last_consolidated: 2026-06-01
 sources:
   - "AGENTS.md"
   - "cortex/wiki/04-ssot/key-decisions.md"
   - "cortex/wiki/04-ssot/pitfalls.md"
   - "packages/lythoskill-dreaming/skill/SKILL.md"
+  - "weekly/2026-W23.md"
 zk_validated: true
 ---
 
@@ -106,7 +107,7 @@ Current codebase: **zero violations of the third type**.
 > **Historical note**: A previous "L1 Escape Hatch" exemption for CLI entry points
 > (`runAdd`, `runFind`, etc.) was proposed in ADR-20260529002942317 and later
 > superseded. The project adopted "unified style > exemption complexity": all CLI
-> entry points now use IO injection (`CuratorIO`, `DeckIO`, `SymlinkSnapshotIO`).
+> entry points now use IO injection (`CuratorIO`, `DeckIO`, `ArenaCliIO`/`ArenaIO`, `SymlinkSnapshotIO`).
 > See `cortex/adr/03-superseded/SUPERSEDED-ADR-20260529002942317-*.md`.
 
 ## 6. Done Checklist

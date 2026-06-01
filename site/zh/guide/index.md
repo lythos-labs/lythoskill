@@ -82,7 +82,7 @@ Curator 回傳 locator 路徑。加到牌組，執行 `bunx @lythos/skill-deck l
 一個技能的 README 說它很棒。真的嗎？
 
 ```bash
-bunx @lythos/skill-arena single --deck skill-deck.toml --task "refactor this auth module"
+bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this auth module"
 ```
 
 Arena 生成一個零知識子代理，載入你的任務和你的牌組。你看到的是輸出——不是行銷文案。
@@ -90,7 +90,7 @@ Arena 生成一個零知識子代理，載入你的任務和你的牌組。你�
 A/B 比較：
 
 ```bash
-bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --task "write API docs"
+bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --brief "write API docs"
 ```
 
 **改變了什麼**：技能採用是實證決策，不是信仰決策。

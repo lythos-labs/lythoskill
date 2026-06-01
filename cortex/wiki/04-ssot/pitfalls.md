@@ -1,6 +1,6 @@
 ---
-last_consolidated: 2026-05-28
-sources: ["daily/2026-05-28.md", "daily/2026-05-21.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
+last_consolidated: 2026-06-01
+sources: ["daily/2026-05-28.md", "daily/2026-06-01.md", "weekly/2026-W23.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
 zk_validated: true
 zk_issues: 0
 zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure clean, concrete examples ground each pattern'"
@@ -161,7 +161,7 @@ The mirror image of evaluator surface-scan: **project agents defending existing 
 
 **Real example** (2026-05-28): Agent A defended `runAdd`'s `spyOn(console, 'error')` as "L1 integration testing." But `runAdd` has no IO injection interface — it directly calls `console.error`. The `spyOn` exists precisely because `runAdd` **does not follow** the IO injection pattern at the CLI layer. The evaluator's signal was real; the agent's defense was wrong.
 
-**Correction**: `runAdd`'s lack of IO injection is a **documented exemption**, not an architecture violation. See conventions.md §5 "L1 Escape Hatch" — CLI entry points that are thin glue (argv parse → dispatch → print) are explicitly exempt from IO injection when adding it would increase complexity without enabling new tests. The agent's error was not "defending a violation" but "defending without knowing the exemption existed" — a failure to check conventions.md before responding to criticism.
+**Correction** (updated 2026-06-01): `runAdd`'s lack of IO injection at the time (2026-05-28) was a real gap. The "L1 Escape Hatch" exemption (ADR-20260529002942317) was proposed as a temporary patch but later **superseded** — the project chose unified style over exemption complexity. As of v0.15.7, all CLI entry points across curator, deck, and arena now use IO injection (`CuratorIO`, `DeckIO`, `ArenaCliIO`/`ArenaIO`). The agent's original error was "defending without knowing the exemption existed"; the updated takeaway is that **temporary exemptions should be closed, not documented as permanent** — they rot into contradictions between SSOT files (this entry itself was such a rot until this edit). See conventions.md §5 historical note for the current state.
 
 **Why this is dangerous in agent-driven projects**: Agent writes code → Agent reviews code → Agent defends code. No human in the loop to break the cycle. External evaluation is the only source of genuine criticism, and the project's first reflex is to dismiss it.
 
@@ -172,3 +172,18 @@ The mirror image of evaluator surface-scan: **project agents defending existing 
 4. **Record genuine gaps**: If the CLI layer lacks IO injection, record it as known debt — don't hide it behind "the evaluator misread."
 
 **Prevention**: Internal audits should use the same skepticism as external audits. "If an external evaluator said this, would I believe them?" If the answer is "no because I wrote this code," that's the bias talking.
+
+## 11. SSOT Amplifier Effect — Wrong Fact → Cascading Errors
+
+**Symptom**: An SSOT file documents a wrong fact. Multiple downstream consumers (BDD归档、site content、agent onboarding) act on that wrong fact. Fix requires multiple commits across multiple subsystems.
+
+**Root cause**: SSOT is designed to be an amplifier — write once, consume everywhere. But amplification is symmetric: correct facts amplify benefit, incorrect facts amplify damage. Unlike code bugs (which CI catches), documentation bugs have no automated guard.
+
+**Real example** (2026-05-29→06-01): SSOT conventions wrote `showcase/` as a valid BDD save location (because both showcase and BDD use `reproduce.sh`). Result: 8 BDD scenes archived to `showcase/` instead of `packages/<name>/test/scenarios/`. Fix required two commits: migration (441ebe0) + cleanup (2d721dd) + conventions.md correction.
+
+**Fix**:
+1. SSOT modifications should have a review step — ZK subagent or arena cross-model — not single-agent direct write
+2. When an SSOT fact is corrected, audit all downstream consumers: `grep -rn "old-fact" packages/ site/ cortex/`
+3. Distinguish "SSOT is the authority" from "SSOT is infallible" — the former is architecture, the latter is hubris
+
+**Prevention**: When another agent creates or bulk-updates SSOT, run a ZK subagent pass specifically checking factual claims against ground truth (git log, file system, actual CLI behavior). The agent that wrote the SSOT cannot be the one that validates it.
