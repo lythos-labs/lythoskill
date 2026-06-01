@@ -252,8 +252,10 @@ Every external URL, repo name, and skill attribution in the site must be verifie
 
 | Document | Answers | When to read |
 |----------|---------|-------------|
+| `agent-onboarding-guide.md` | How to onboard a new agent to this project | Before your first session on this project |
+| `agent-onboarding-guide.zh.md` | 中文版入职指南 | 中文 agent 入职时 |
 | `architecture.md` | Why the system is shaped this way | Understanding design rationale |
 | `key-decisions.md` | What was decided and which ADRs still hold | Before proposing architecture changes; read SS ZK Agent Alert before touching `workspace:*`, `working_set`, `skills/`, or `bun packages/` paths |
 | `pitfalls.md` | What failure modes keep recurring | Before generating docs or site content |
 | `conventions.md` (this file) | How to do things right | Before writing code, commits, docs, or site content |
-| `active-quests.md` | What we're building now | Before starting new work |
+| `reproduce-sh-bdd.md` | reproduce.sh BDD pattern — hypertext orchestration | Before writing or modifying BDD scenarios |

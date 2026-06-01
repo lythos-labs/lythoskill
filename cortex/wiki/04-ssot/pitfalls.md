@@ -31,7 +31,7 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 
 ## 2. Context Pressure → Stale Docs → More Pressure
 
-**Symptom**: 81 ADRs + 54 wiki patterns + 25 dailies. Agent can't read everything → skims → builds wrong assumptions → writes wrong docs. Cycle accelerates.
+**Symptom**: 84 ADRs + 53 wiki patterns + 27 dailies. Agent can't read everything → skims → builds wrong assumptions → writes wrong docs. Cycle accelerates.
 
 **Root cause**: Documents accumulate without garbage collection. Old ADRs reference deprecated commands, old wiki patterns describe removed features.
 
@@ -139,7 +139,7 @@ lythoskill is a **pure agent-driven project**. Every session starts with a zero-
 | Defense Layer | Why It Exists | What Happens Without It |
 |--------------|---------------|------------------------|
 | 83 ADRs | Agent forgets decisions → repeats rejected alternatives | Same debates every session |
-| 25 dailies | Agent loses context → contradicts yesterday's work | Drift, rework, conflicting commits |
+| 27 dailies | Agent loses context → contradicts yesterday's work | Drift, rework, conflicting commits |
 | 7 SSOTs | Agent reads stale wiki → acts on outdated info | Decisions based on false assumptions |
 | ZK validation | Agent hallucinates → writes plausible wrong docs | Fabricated skill paths, wrong commands |
 | Pre-commit guards | Agent commits errors → breaks CI/npm | `workspace:*` shipped to npm, broken releases |
@@ -161,7 +161,7 @@ The mirror image of evaluator surface-scan: **project agents defending existing 
 
 **Real example** (2026-05-28): Agent A defended `runAdd`'s `spyOn(console, 'error')` as "L1 integration testing." But `runAdd` has no IO injection interface — it directly calls `console.error`. The `spyOn` exists precisely because `runAdd` **does not follow** the IO injection pattern at the CLI layer. The evaluator's signal was real; the agent's defense was wrong.
 
-**Correction** (updated 2026-06-01): `runAdd`'s lack of IO injection at the time (2026-05-28) was a real gap. The "L1 Escape Hatch" exemption (ADR-20260529002942317) was proposed as a temporary patch but later **superseded** — the project chose unified style over exemption complexity. As of v0.15.7, all CLI entry points across curator, deck, and arena now use IO injection (`CuratorIO`, `DeckIO`, `ArenaCliIO`/`ArenaIO`). The agent's original error was "defending without knowing the exemption existed"; the updated takeaway is that **temporary exemptions should be closed, not documented as permanent** — they rot into contradictions between SSOT files (this entry itself was such a rot until this edit). See conventions.md §5 historical note for the current state.
+**Correction** (updated 2026-06-01): `runAdd`'s lack of IO injection at the time (2026-05-28) was a real gap. The "L1 Escape Hatch" exemption (ADR-20260529002942317) was proposed as a temporary patch but later **superseded** — the project chose unified style over exemption complexity. As of v0.15.7, all CLI entry points across curator, deck, and arena now use IO injection (`CuratorIO`, `DeckIO`, `ArenaCliIO`/`ArenaIO`, `SymlinkSnapshotIO`). The agent's original error was "defending without knowing the exemption existed"; the updated takeaway is that **temporary exemptions should be closed, not documented as permanent** — they rot into contradictions between SSOT files (this entry itself was such a rot until this edit). See conventions.md §5 historical note for the current state.
 
 **Why this is dangerous in agent-driven projects**: Agent writes code → Agent reviews code → Agent defends code. No human in the loop to break the cycle. External evaluation is the only source of genuine criticism, and the project's first reflex is to dismiss it.
 
