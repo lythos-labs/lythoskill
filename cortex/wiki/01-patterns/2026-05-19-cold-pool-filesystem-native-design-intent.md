@@ -155,3 +155,7 @@ cold pool 可以**与**这类系统共存（例如，你可以用 gitea 托管 s
 - POSSE 模式：[`2026-05-05-multi-agent-posse-syndication.md`](./2026-05-05-multi-agent-posse-syndication.md)
 - 文档站点认知拓扑 lesson：[`../02-research/2026-05-19-documentation-site-cognitive-topology-lesson.md`](../02-research/2026-05-19-documentation-site-cognitive-topology-lesson.md)
 - reconcile-plan 中 `behind` 的预留 hook：`../../packages/lythoskill-cold-pool/src/reconcile-plan.ts`
+
+---
+
+> **Cold pool family**: 6 related pattern files. See index at [cold-pool-cli-boundary](./2026-05-07-cold-pool-cli-boundary.md) for full cross-reference list.

@@ -202,3 +202,7 @@ declarative desired state ↔ filesystem actual state ↔ ColdPool 内部 reconc
 - `ADR-20260507021957847`: `@lythos/cold-pool` as dedicated resource-holder package + k8s reconciliation 心智 —— 包结构与粒度边界来源
 - `cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md`: 操作 pattern 来源
 - `cortex/wiki/03-lessons/2026-05-07-real-world-skill-repo-structure-survey.md`: detectedPaths 推断的证据基础
+
+---
+
+> **Cold pool family**: 6 related pattern files. See index at [cold-pool-cli-boundary](./2026-05-07-cold-pool-cli-boundary.md) for full cross-reference list.

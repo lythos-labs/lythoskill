@@ -126,3 +126,7 @@ CREATE TABLE evaluations (
 - [Cold Pool Architecture — Deck Decoupling with FSM Reference Counting](./2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md)
 - [Cold Pool Unified Facility Design](./2026-05-07-cold-pool-unified-facility-design.md)
 - ADR-20260509170343037 — DB data fingerprint proposal
+
+---
+
+> **Cold pool family**: 6 related pattern files. See index at [cold-pool-cli-boundary](./2026-05-07-cold-pool-cli-boundary.md) for full cross-reference list.

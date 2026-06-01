@@ -220,3 +220,7 @@ CREATE TABLE references (skill_locator, deck_path, declared_alias);
 4. **local-only trust**。用户是信任根。不追求跨用户 tamper-evidence。
 5. **SQLite 优于 JSON sidecar**。 curator 已验证 `catalog.db` 模式。原子事务 + JOIN 查询。
 6. **两层粒度不混淆**。`skill-deck.lock` = working-set per-skill。cold-pool metadata = repo+ref 粒度。
+
+---
+
+> **Cold pool family**: 6 related pattern files. See index at [cold-pool-cli-boundary](./2026-05-07-cold-pool-cli-boundary.md) for full cross-reference list.

@@ -70,3 +70,12 @@ Prune 是冷池空间回收，靠 metadata DB 的 `deck_refs` 引用计数来判
 - ADR-20260507110332805: Refresh discover-then-apply
 - EPIC-20260507191713917: Cold-pool reconcile + dual-mode
 - wiki: `2026-05-07-cold-pool-unified-facility-design.md`
+
+---
+
+> **Cold pool family**: This is one of 6 cold pool pattern files. See also:
+> - [evolutionary-rationale](./2026-05-07-cold-pool-evolutionary-rationale.md) — why URI-based, why not checksum
+> - [unified-facility-design](./2026-05-07-cold-pool-unified-facility-design.md) — architectural record of `@lythos/cold-pool`
+> - [architecture-deck-decoupling](./2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md) — FSM + reference counting
+> - [metadata-filesystem-ground-truth](./2026-05-10-cold-pool-metadata-filesystem-ground-truth.md) — filesystem as authority, DB as cache
+> - [filesystem-native-design-intent](./2026-05-19-cold-pool-filesystem-native-design-intent.md) — why filesystem, not registry/hub

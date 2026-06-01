@@ -241,3 +241,7 @@ bunx @lythos/cold-pool validate --lock skill-deck.lock
 - ADR-20260507021957847 — cold pool as dedicated resource holder
 - ADR-20260507143241493 — metadata layer SQLite design
 - ADR-20260424013849984 — lythoskill anti-corruption layer
+
+---
+
+> **Cold pool family**: 6 related pattern files. See index at [cold-pool-cli-boundary](./2026-05-07-cold-pool-cli-boundary.md) for full cross-reference list.
