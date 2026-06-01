@@ -23,7 +23,7 @@ The `@anthropic-ai/claude-agent-sdk` npm package is a **programming interface** 
 
 ```bash
 npm i -g @anthropic-ai/claude-code
-claude --version  # must succeed before arena agent-run works with claude-sdk player
+claude --version  # must succeed before arena single works with claude-sdk player
 ```
 
 ## kimi

@@ -14,7 +14,7 @@ category: pattern
 
 ```
 deck.toml (docx + mermaid + research, 6 skills)
-  → arena agent-run link deck (symlink skills to .claude/skills/)
+  → arena single (spawn agent with deck-linked skills)
   → kimi spawn (fresh context, reads skills)
   → agent orchestration (multi-skill: docx write + research + charting)
   → output: .docx with embedded radar chart
@@ -23,7 +23,9 @@ deck.toml (docx + mermaid + research, 6 skills)
 
 ## Key orchestration pattern
 
-arena `agent-run` 自动处理"重新开"问题——`deck link` 创建 symlink 后 spawn 新 agent 进程，skills 自然可见。不需要手动切换上下文或重启 session。
+`arena single` 自动处理上下文隔离——每次运行 spawn 新 agent 进程，通过 deck link 的 symlink 让 skills 自然可见。不需要手动切换上下文或重启 session。这是 agent-orchestrated 模式的核心机制（区别于 runner 层的跨 player CLI spawn）。
+
+> **Historical note**: 本文撰写时（2026-05-07），Arena CLI 子命令为 `agent-run`，v0.10.0 重命名为 `single`（ADR-20260509104832428）。管线逻辑未变，仅命令名更新。
 
 ## Results (2026-05-07, first run — passed)
 
