@@ -15,9 +15,10 @@
 ## 需求详情
 - [x] WebSearch 识别社区热门/高 star 技能（top 5-10）
 - [x] Clone 热门技能到 cold pool
-- [ ] curator scan 入库（DB 路径不一致，需修复）
-- [ ] curator tag 打 domain/QA 标签
-- [ ] 记录到 REGISTRY.json
+- [x] curator scan 入库（修复 deck-aware DB resolution）
+- [x] curator tag 打 domain/QA 标签
+- [x] 记录到 REGISTRY.json
+- [x] 修复 resolveDbPath: 实现 ADR-20260529215906255 方案A（deck-aware discovery）
 
 ## 技术方案
 

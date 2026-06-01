@@ -424,6 +424,42 @@ function printSchema(db: CatalogDb): string {
   return out.join('\n')
 }
 
+/**
+ * Walk up from `startDir` looking for skill-deck.toml, extract cold_pool,
+ * return `<cold_pool>/.lythoskill-curator/catalog.db` if found and exists.
+ * Per ADR-20260529215906255 (方案A: deck-aware discovery).
+ */
+function findDeckColdPoolDb(startDir: string): string | undefined {
+  let dir = startDir
+  for (let i = 0; i < 20; i++) {
+    const deckPath = join(dir, 'skill-deck.toml')
+    if (existsSync(deckPath)) {
+      try {
+        const raw = readFileSync(deckPath, 'utf-8')
+        const match = raw.match(/cold_pool\s*=\s*"([^"]+)"/)
+        if (match) {
+          let poolPath = match[1]
+          if (poolPath.startsWith('~/') || poolPath === '~') {
+            poolPath = join(process.env.HOME || '/', poolPath.slice(poolPath[0] === '~' ? 1 : 0))
+          }
+          if (!poolPath.startsWith('/')) {
+            poolPath = join(dir, poolPath)
+          }
+          const dbPath = join(poolPath, '.lythoskill-curator', 'catalog.db')
+          if (existsSync(dbPath)) return dbPath
+        }
+      } catch {
+        // Deck toml unreadable — skip
+      }
+      break // Found deck.toml, don't recurse past it
+    }
+    const parent = join(dir, '..')
+    if (parent === dir) break
+    dir = parent
+  }
+  return undefined
+}
+
 function resolveDbPath(argv: string[]): string | undefined {
   let dbPath: string | undefined
   const positional: string[] = []
@@ -448,6 +484,11 @@ function resolveDbPath(argv: string[]): string | undefined {
   if (existsSync('./catalog.db')) {
     return './catalog.db'
   }
+
+  // Deck-aware: read skill-deck.toml → cold_pool → <pool>/.lythoskill-curator/catalog.db
+  // Per ADR-20260529215906255 (方案A)
+  const deckDb = findDeckColdPoolDb(process.cwd())
+  if (deckDb) return deckDb
 
   // Fallback: common locations. Catalog follows pool: pool-co-located first.
   const candidates = [
