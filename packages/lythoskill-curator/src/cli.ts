@@ -16,7 +16,7 @@ import { createHash } from 'node:crypto'
 import { CatalogDb } from './catalog-db.js'
 import YAML from 'yaml'
 import { inferSource, extractQuotedPhrases, parseFrontmatter, buildSkillMeta, findSkillDirs, buildAddPlan, buildAdditionRecord, formatMarkdownTable, buildRefreshPlan, formatRefreshPlan } from './curator-core'
-import { gitClone } from '@lythos/cold-pool'
+import { executeFetchPlan, type FetchIO, type Locator } from '@lythos/cold-pool'
 import { validateInColdPool, isReadOnlyQuery, safeGit, safeRmSync } from './guard.js'
 
 // ── Types ────────────────────────────────────────────────────
@@ -47,7 +47,7 @@ export interface CuratorIO {
   log?: (msg: string) => void
   error?: (msg: string) => void
   exit?: (code: number) => never
-  gitClone?: typeof gitClone
+  fetchIO?: FetchIO
 }
 
 const defaultCuratorIO: Required<CuratorIO> = {
@@ -1134,26 +1134,32 @@ export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
   // ── Checkpoint 2: Clone repo root (not skill-specific URL) ────────
   const reason = getFlag(argv, '--reason') || ''
   const forkedFrom = getFlag(argv, '--forked-from')
-  const fullClone = argv.includes('--full')
   const branch = getFlag(argv, '--branch')
-  const depthFlag = fullClone ? '' : '--depth 1'
-  const branchFlag = branch ? `--branch ${branch}` : ''
 
-  const cloneUrl = `https://${plan.repoRoot}.git`
-  io.log(`📦 Cloning: ${cloneUrl}${fullClone ? '' : ' (--depth 1)'}`)
-  if (plan.skillPath) {
-    io.log(`   Skill path inside repo: ${plan.skillPath}`)
+  // ── Execute: clone via cold-pool's FetchIO-injected executeFetchPlan ──
+  // Build a minimal fetch plan from the add plan. The locator we pass is
+  // lightweight (no parseLocator needed — executeFetchPlan only reads
+  // isLocalhost and targetDir).
+  const fetchLocator: Locator = { raw: plan.repoRoot, host: 'github.com', owner: '', repo: '', skill: null, ref: null, isLocalhost: false }
+  const fetchPlan = {
+    locator: fetchLocator,
+    cloneUrl: `https://${plan.repoRoot}.git`,
+    targetDir: plan.repoPath,
+    ref: branch || undefined,
+    alreadyExists: false,
+  }
+  const fetchIO: FetchIO = {
+    log: io.log,
+    ...io.fetchIO,
+  }
+  const result = executeFetchPlan(fetchPlan, fetchIO)
+  if (result.status === 'failed') {
+    io.error(`❌ Failed to clone ${plan.repoRoot}`)
+    if (result.message) io.error(`   ${result.message}`)
+    io.exit(1)
   }
 
-  try {
-    mkdirSync(plan.repoPath, { recursive: true })
-    const clone = io.gitClone ?? gitClone
-    clone(cloneUrl, plan.repoPath, {
-      depth: fullClone ? 0 : 1,
-      ref: branch,
-      stdio: 'inherit',
-    })
-
+  if (result.status === 'cloned') {
     // Verify the skill path exists within the cloned repo
     if (plan.skillPath && !existsSync(join(plan.repoPath, plan.skillPath, 'SKILL.md'))) {
       io.error(`❌ Cloned ${plan.repoRoot} but skill path not found:`)
@@ -1162,83 +1168,73 @@ export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
       try { io.error(safeGit(["-C", plan.repoPath, "ls-files"], { timeout: 5000 })) } catch {}
       io.exit(1)
     }
+  }
 
-    // Persist decision record
-    const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
-    writeAddition(outputDir, record)
+  if (result.status === 'already-present') {
+    io.log(`✅ Already in cold pool: ${plan.relPath}`)
+  }
 
-    io.log(`✅ Skill added to cold pool: ${plan.relPath}`)
-    io.log(`   Location: ${plan.targetPath}`)
-    if (forkedFrom) io.log(`   Forked from: ${forkedFrom}`)
-    if (reason) io.log(`   Reason: ${reason}`)
-    io.log(`📝 Addition logged: ${join(outputDir, 'additions.jsonl')}`)
+  // Persist decision record
+  const record = buildAdditionRecord(locator, plan.feed, reason, forkedFrom)
+  writeAddition(outputDir, record)
 
-    // Write-through cache: index the new skill immediately (ADR-20260518123403810)
-    // Curator scan is the reconciliation loop that fixes any drift later.
-    let dbUpdated = false
-    try {
-      const skillDirs = findSkillDirs(plan.repoPath)
-      if (skillDirs.length > 0) {
-        mkdirSync(outputDir, { recursive: true })
-        const dbPath = join(outputDir, 'catalog.db')
+  io.log(`✅ Skill added to cold pool: ${plan.relPath}`)
+  io.log(`   Location: ${plan.targetPath}`)
+  if (forkedFrom) io.log(`   Forked from: ${forkedFrom}`)
+  if (reason) io.log(`   Reason: ${reason}`)
+  io.log(`📝 Addition logged: ${join(outputDir, 'additions.jsonl')}`)
 
-        // Scan new skills and write to existing index (merge, not rebuild)
-        for (const skillDir of skillDirs) {
-          const s = scanSkill(skillDir)
-          if (s) {
-            const db = new CatalogDb(dbPath)
-            try {
-              db.insertSkill({
-                $name: s.name, $description: s.description, $type: s.type,
-                $version: s.version, $path: s.path,
-                $niches: JSON.stringify([]),
-                $managed_dirs: JSON.stringify(s.managedDirs),
-                $trigger_phrases: JSON.stringify(s.triggerPhrases),
-                $has_scripts: s.hasScripts ? 1 : 0,
-                $has_examples: s.hasExamples ? 1 : 0,
-                $body_preview: s.bodyPreview,
-                $source: s.source, $when_to_use: s.whenToUse,
-                $allowed_tools: JSON.stringify(s.allowedTools),
-                $author: s.author,
-                $user_invocable: s.userInvocable != null ? (s.userInvocable ? 1 : 0) : null,
-                $tags: JSON.stringify(s.tags),
-                $deck_dependencies: JSON.stringify(s.deckDependencies),
-                $deck_skill_type: s.deckSkillType,
-                $content_hash: s.contentHash,
-                $status: 'parsed',
-                $indexed_at: new Date().toISOString(),
-                $last_parsed_at: new Date().toISOString(),
-                $parse_error: null,
-              })
-              io.log(`   📇 Indexed: ${s.name}`)
-              dbUpdated = true
-            } finally {
-              db.close()
-            }
+  // Write-through cache: index the new skill immediately (ADR-20260518123403810)
+  let dbUpdated = false
+  try {
+    const skillDirs = findSkillDirs(plan.repoPath)
+    if (skillDirs.length > 0) {
+      mkdirSync(outputDir, { recursive: true })
+      const dbPath = join(outputDir, 'catalog.db')
+      for (const skillDir of skillDirs) {
+        const s = scanSkill(skillDir)
+        if (s) {
+          const db = new CatalogDb(dbPath)
+          try {
+            db.insertSkill({
+              $name: s.name, $description: s.description, $type: s.type,
+              $version: s.version, $path: s.path,
+              $niches: JSON.stringify([]),
+              $managed_dirs: JSON.stringify(s.managedDirs),
+              $trigger_phrases: JSON.stringify(s.triggerPhrases),
+              $has_scripts: s.hasScripts ? 1 : 0,
+              $has_examples: s.hasExamples ? 1 : 0,
+              $body_preview: s.bodyPreview,
+              $source: s.source, $when_to_use: s.whenToUse,
+              $allowed_tools: JSON.stringify(s.allowedTools),
+              $author: s.author,
+              $user_invocable: s.userInvocable != null ? (s.userInvocable ? 1 : 0) : null,
+              $tags: JSON.stringify(s.tags),
+              $deck_dependencies: JSON.stringify(s.deckDependencies),
+              $deck_skill_type: s.deckSkillType,
+              $content_hash: s.contentHash,
+              $status: 'parsed',
+              $indexed_at: new Date().toISOString(),
+              $last_parsed_at: new Date().toISOString(),
+              $parse_error: null,
+            })
+            io.log(`   📇 Indexed: ${s.name}`)
+            dbUpdated = true
+          } finally {
+            db.close()
           }
         }
       }
-      if (dbUpdated) {
-        io.log(`📇 Index updated:   ${join(outputDir, 'catalog.db')}`)
-      }
-    } catch {
-      io.log(`   ⚠️  Index update skipped (will catch up on next scan)`)
     }
-
-    io.log(`\n💡 To use this skill in a project, run:`)
-    io.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
-  } catch (e: any) {
-    // Clean up empty directory left by failed clone
-    try {
-      if (existsSync(plan.repoPath) && readdirSync(plan.repoPath).length === 0) {
-        safeRmSync(plan.repoPath, poolPath)
-      }
-    } catch {
-      // cleanup is best-effort — non-critical if it fails
+    if (dbUpdated) {
+      io.log(`📇 Index updated:   ${join(outputDir, 'catalog.db')}`)
     }
-    io.error(`❌ Failed to clone: ${e.message}`)
-    io.exit(1)
+  } catch {
+    io.log(`   ⚠️  Index update skipped (will catch up on next scan)`)
   }
+
+  io.log(`\n💡 To use this skill in a project, run:`)
+  io.log(`   bunx @lythos/skill-deck add ${plan.relPath} --as <alias>`)
 }
 
 // ── Tag: agent-enriched metadata ──────────────────────────────

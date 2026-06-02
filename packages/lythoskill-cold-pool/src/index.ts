@@ -17,6 +17,7 @@ export type {
 
 export { getMirror, rewriteUrl, mirrorUrls } from './mirror.js'
 export { parseLocator, formatLocator } from './parse-locator.js'
+export type { Locator } from './types.js'
 export type { DirEntry, ListPlan, ListPlanEntry } from './cold-pool.js'
 export { ColdPool, DEFAULT_COLD_POOL_PATH, buildListPlan } from './cold-pool.js'
 
@@ -37,6 +38,7 @@ export type { GitCloneOptions, GitPullResult, GitRootResult } from './git-io.js'
 export { gitClone, gitPull, detectGitRoot } from './git-io.js'
 
 export { buildFetchPlan, executeFetchPlan } from './fetch-plan.js'
+export type { FetchIO, FetchPlan, FetchResult } from './types.js'
 
 export { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'
 

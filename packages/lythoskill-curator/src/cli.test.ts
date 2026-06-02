@@ -346,7 +346,7 @@ describe('runAdd', () => {
         error: (msg) => errors.push(String(msg)),
         log: () => {},
         exit: (code) => { throw new Error(`EXIT:${code}`) },
-        gitClone: () => { throw new Error('mock clone failure') },
+        fetchIO: { gitClone: () => { throw new Error('mock clone failure') } },
       })
     } catch (_) {
       // runAdd calls io.exit(1) after git clone failure → our mock throws EXIT
