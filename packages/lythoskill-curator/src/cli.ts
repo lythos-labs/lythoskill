@@ -47,6 +47,7 @@ export interface CuratorIO {
   log?: (msg: string) => void
   error?: (msg: string) => void
   exit?: (code: number) => never
+  gitClone?: typeof gitClone
 }
 
 const defaultCuratorIO: Required<CuratorIO> = {
@@ -1146,7 +1147,8 @@ export function runAdd(argv: string[], io: CuratorIO = defaultCuratorIO) {
 
   try {
     mkdirSync(plan.repoPath, { recursive: true })
-    gitClone(cloneUrl, plan.repoPath, {
+    const clone = io.gitClone ?? gitClone
+    clone(cloneUrl, plan.repoPath, {
       depth: fullClone ? 0 : 1,
       ref: branch,
       stdio: 'inherit',
