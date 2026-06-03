@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { simpleGit } from 'simple-git'
-import { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd } from './git-hash.js'
+import { getRepoHeadRef, getSkillBlobHash, getSkillTreeHash, hashSkillMd, parseTreeHash, computeSha256, buildSkillPath } from './git-hash.js'
 
 let repoDir: string
 let canGit = false
@@ -90,6 +90,63 @@ describe('getSkillBlobHash', () => {
     expect(root).not.toBe(nested)
   })
 })
+
+// ── Pure functions (L0 — no git, no fs) ─────────────────────────
+
+describe('parseTreeHash', () => {
+  test('extracts hash from ls-tree output', () => {
+    // Real git ls-tree output format: <mode> <type> <hash>\t<path>
+    const line = '100644 blob abc123def456789012345678901234567890abcd\tSKILL.md'
+    expect(parseTreeHash(line)).toBe('abc123def456789012345678901234567890abcd')
+  })
+
+  test('extracts tree hash from tree entry', () => {
+    const line = '040000 tree def456abc789012345678901234567890abcd123\tpdf'
+    expect(parseTreeHash(line)).toBe('def456abc789012345678901234567890abcd123')
+  })
+
+  test('handles output with leading/trailing whitespace', () => {
+    const line = '  100644 blob aaa111bbb222ccc333ddd444eee555fff666777888\tfile.md  '
+    expect(parseTreeHash(line)).toBe('aaa111bbb222ccc333ddd444eee555fff666777888')
+  })
+
+  test('throws on empty output', () => {
+    expect(() => parseTreeHash('')).toThrow('Empty ls-tree output')
+    expect(() => parseTreeHash('   ')).toThrow('Empty ls-tree output')
+  })
+
+  test('throws on unparseable output', () => {
+    expect(() => parseTreeHash('garbage')).toThrow('Could not parse tree hash')
+  })
+})
+
+describe('computeSha256', () => {
+  test('computes deterministic hash', () => {
+    expect(computeSha256('hello')).toBe(computeSha256('hello'))
+  })
+
+  test('produces 64-char hex string', () => {
+    const hash = computeSha256('test content')
+    expect(hash.length).toBe(64)
+    expect(/^[a-f0-9]{64}$/.test(hash)).toBe(true)
+  })
+
+  test('different content → different hash', () => {
+    expect(computeSha256('a')).not.toBe(computeSha256('b'))
+  })
+})
+
+describe('buildSkillPath', () => {
+  test('appends SKILL.md to subpath', () => {
+    expect(buildSkillPath('skills/pdf')).toBe('skills/pdf/SKILL.md')
+  })
+
+  test('returns just SKILL.md for empty subpath', () => {
+    expect(buildSkillPath('')).toBe('SKILL.md')
+  })
+})
+
+// ── IO functions (L1 — real git in temp repo) ───────────────────
 
 describe('getSkillTreeHash', () => {
   it('returns tree hash for subdirectory', async () => {
