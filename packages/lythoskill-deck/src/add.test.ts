@@ -5,7 +5,7 @@
  * Run: bun test packages/lythoskill-deck/src/add.test.ts
  */
 
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'

@@ -149,6 +149,15 @@ describe('validateWorkingSet', () => {
     expect(() => validateWorkingSet('/home', cwd)).toThrow('forbidden system path')
   })
 
+  test('accepts hidden directory outside project (agent convention)', () => {
+    // Hidden-dir check: basename starts with '.' → allowed outside project.
+    // Note: only checks the LAST segment. /tmp/.claude/skills would fail
+    // (last segment = 'skills'). This is a known limitation — real-world
+    // working_set values like '.claude/skills' are always inside the project
+    // dir and pass via the project-dir check, not this branch.
+    expect(() => validateWorkingSet('/tmp/.agents', '/home/user/project')).not.toThrow()
+  })
+
   test('rejects non-hidden dir outside project', () => {
     expect(() => validateWorkingSet('/tmp/my-skills', '/home/user/project')).toThrow('not a hidden directory')
   })
