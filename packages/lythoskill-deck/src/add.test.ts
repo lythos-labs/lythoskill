@@ -10,7 +10,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 import * as childProcess from 'node:child_process'
-import { findSkillDir, normalizeSkillsSh } from './add.ts'
+import { findSkillDir, buildSkillDirCandidates, normalizeSkillsSh } from './add.ts'
 
 // Control homedir() return value for tests that need default cold_pool under tmpdir
 let mockHomeDir = '/tmp'
@@ -52,6 +52,49 @@ describe('findSkillDir', () => {
     const repo = makeRepo()
     expect(findSkillDir(repo, null)).toBeNull()
     rmSync(repo, { recursive: true, force: true })
+  })
+
+  it('finds single skill in skills/ dir when no name hint', () => {
+    const repo = makeRepo()
+    makeSkillDir(repo, 'skills/my-skill')
+    expect(findSkillDir(repo, null)).toBe(join(repo, 'skills/my-skill'))
+    rmSync(repo, { recursive: true, force: true })
+  })
+
+  it('finds skill by flat scan in repo root subdirs', () => {
+    const repo = makeRepo()
+    makeSkillDir(repo, 'some-skill')
+    expect(findSkillDir(repo, null)).toBe(join(repo, 'some-skill'))
+    rmSync(repo, { recursive: true, force: true })
+  })
+
+  it('returns null when skills/ has multiple subdirs (ambiguous)', () => {
+    const repo = makeRepo()
+    makeSkillDir(repo, 'skills/skill-a')
+    makeSkillDir(repo, 'skills/skill-b')
+    expect(findSkillDir(repo, null)).toBeNull()
+    rmSync(repo, { recursive: true, force: true })
+  })
+
+  it('finds skill at direct path when name provided', () => {
+    const repo = makeRepo()
+    makeSkillDir(repo, 'my-skill')
+    expect(findSkillDir(repo, 'my-skill')).toBe(join(repo, 'my-skill'))
+    rmSync(repo, { recursive: true, force: true })
+  })
+})
+
+// ── buildSkillDirCandidates (pure) ──────────────────────────────
+
+describe('buildSkillDirCandidates', () => {
+  test('with skill name: returns skills/<name> then direct', () => {
+    const candidates = buildSkillDirCandidates('/repo', 'my-skill')
+    expect(candidates).toEqual(['/repo/skills/my-skill', '/repo/my-skill'])
+  })
+
+  test('without skill name: returns repo root then skills/', () => {
+    const candidates = buildSkillDirCandidates('/repo', null)
+    expect(candidates).toEqual(['/repo', '/repo/skills'])
   })
 })
 

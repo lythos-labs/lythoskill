@@ -32,12 +32,25 @@ import { probeConnectivity } from '@lythos/cold-pool/src/mirror.js'
 import { findDeckToml, expandHome } from './link.js'
 import { validateAlias } from './path-guard.js'
 
+/**
+ * Build candidate paths for skill discovery within a cloned repo.
+ * Pure path math — no IO. Separated so tests can verify the search
+ * order without setting up real directories.
+ */
+export function buildSkillDirCandidates(repoPath: string, skill: string | null): string[] {
+  if (skill) {
+    return [join(repoPath, 'skills', skill), join(repoPath, skill)]
+  }
+  // No skill hint — try repo root, then skills/ subdir, then flat scan
+  return [repoPath, join(repoPath, 'skills')]
+}
+
 export function findSkillDir(repoPath: string, skill: string | null): string | null {
   if (skill) {
-    const inSkills = join(repoPath, 'skills', skill)
-    if (existsSync(join(inSkills, 'SKILL.md'))) return inSkills
-    const direct = join(repoPath, skill)
-    if (existsSync(join(direct, 'SKILL.md'))) return direct
+    const candidates = buildSkillDirCandidates(repoPath, skill)
+    for (const c of candidates) {
+      if (existsSync(join(c, 'SKILL.md'))) return c
+    }
     return null
   }
   if (existsSync(join(repoPath, 'SKILL.md'))) return repoPath

@@ -51,8 +51,12 @@ export function validateAlias(alias: string): string {
  * 2. If root exists on disk, resolve symlinks (realpath) for both
  * 3. Verify the resolved path stays within the resolved root
  */
-export function safeResolveInDir(root: string, segment: string): string {
-  // Pre-check: reject segments that are obviously malicious before resolve()
+/**
+ * Validate a path segment before resolution. Pure — no IO.
+ * Separate from safeResolveInDir so L0 tests can cover all edge cases
+ * without touching the filesystem.
+ */
+export function validatePathSegment(segment: string): void {
   if (segment.includes('\0')) {
     throw new Error('Path segment contains null byte')
   }
@@ -62,30 +66,39 @@ export function safeResolveInDir(root: string, segment: string): string {
   if (segment.startsWith('/') || /^[A-Za-z]:/.test(segment)) {
     throw new Error('Path segment is absolute')
   }
+}
+
+/**
+ * Check whether a resolved candidate path stays inside root.
+ * Pure string prefix check — no IO. The caller (safeResolveInDir) feeds
+ * it realpath() results or raw resolve() results depending on IO availability.
+ */
+export function isPathInsideRoot(candidate: string, root: string): boolean {
+  return candidate.startsWith(root + '/') || candidate === root
+}
+
+export function safeResolveInDir(root: string, segment: string): string {
+  validatePathSegment(segment)
 
   const resolved = resolve(root, segment)
 
-  // If root exists, use realpath for symlink-aware boundary check
   if (existsSync(root)) {
     const realRoot = realpathSync(root)
     let realPath: string
     try {
       realPath = realpathSync(resolved)
     } catch {
-      // Path doesn't exist yet (e.g. mkdir first) — resolve is sufficient
-      // since we already rejected '../' and absolute paths
-      if (!resolved.startsWith(resolve(root) + '/') && resolved !== resolve(root)) {
+      if (!isPathInsideRoot(resolved, resolve(root))) {
         throw new Error(`Path traversal blocked: ${segment} resolves outside ${root}`)
       }
       return resolved
     }
-    if (!realPath.startsWith(realRoot + '/') && realPath !== realRoot) {
+    if (!isPathInsideRoot(realPath, realRoot)) {
       throw new Error(`Path traversal blocked: ${segment} resolves outside ${root}`)
     }
     return realPath
   }
 
-  // Root doesn't exist yet — trust resolve() since we pre-checked segments
   return resolved
 }
 
