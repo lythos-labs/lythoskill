@@ -58,22 +58,24 @@ function parseFuncs(filePath: string): FuncMeta[] {
   while ((m = re.exec(src)) !== null) {
     const name = m[1]
     const params = m[2]
-    const hasIOParam = /\bio\?\s*:/.test(params) || /\bio\s*:/.test(params)
-    // A function is a plan if it does NOT have an IO param and its name doesn't start with exec verbs
+    const hasIOParam = /\bio\?\s*:/.test(params) || /\bio\s*:\s*\w+/.test(params)
     const nameStem = name.toLowerCase()
-    const isExecVerb = EXEC_NAMES.has(nameStem) ||
-      EXEC_NAMES.has(nameStem.replace(/^run|^execute/, '').toLowerCase()) ||
-      nameStem.startsWith('execute') || nameStem.startsWith('run')
-    // If it has an IO param, it's definitely an executor
-    // If it has an exec-verb name AND no IO param, it might be a plan-builder for that execute phase (e.g. buildRefreshPlan)
-    const isExec = hasIOParam
-    const isPlan = !hasIOParam && (nameStem.startsWith('build') || nameStem.startsWith('parse') ||
+    const isExecVerb = nameStem.startsWith('execute') || nameStem.startsWith('run') ||
+      nameStem.startsWith('add') || nameStem.startsWith('remove') ||
+      nameStem.startsWith('refresh') || nameStem.startsWith('link') ||
+      nameStem.startsWith('sync') || nameStem.startsWith('fetch') ||
+      nameStem.startsWith('clone') || nameStem.startsWith('spawn') ||
+      nameStem.startsWith('prune') || nameStem.startsWith('archive')
+    const isPlanPrefix = nameStem.startsWith('build') || nameStem.startsWith('parse') ||
       nameStem.startsWith('resolve') || nameStem.startsWith('validate') ||
       nameStem.startsWith('find') || nameStem.startsWith('format') ||
       nameStem.startsWith('normalize') || nameStem.startsWith('detect') ||
       nameStem.startsWith('expand') || nameStem.startsWith('migrate') ||
-      nameStem.startsWith('is') || nameStem === 'schema' ||
-      (!isExecVerb && !hasIOParam))
+      nameStem.startsWith('is')
+    // If it has an IO param, it's definitely an executor
+    // built plan-builders (buildRefreshPlan etc.) are plans even if their siblings are executors
+    const isExec = hasIOParam || (isExecVerb && !isPlanPrefix)
+    const isPlan = !hasIOParam && (isPlanPrefix || (!isExecVerb && !hasIOParam))
     funcs.push({ name, file: basename(filePath), isPlan, isExec, hasIOParam })
   }
   return funcs
@@ -120,10 +122,10 @@ async function main() {
     .map(e => join(PKG_DIR, e.name))
     .filter(p => !filterPkg || p.includes(filterPkg))
 
-  const srcDirs = pkgDirs.filter(p => existsSync(join(p, 'src')))
-  const args = srcDirs.map(p => join(p, 'src')).join(' ')
-  const result = await $`bun test --coverage ${args}`.nothrow().quiet()
-  const covText = result.stderr.toString() + result.stdout.toString()
+  const srcDirs = pkgDirs.filter(p => existsSync(join(p, 'src'))).map(p => join(p, 'src'))
+  const testArgs = ['test', '--coverage', ...srcDirs]
+  const result = Bun.spawnSync({ cmd: ['bun', ...testArgs], stdout: 'pipe', stderr: 'pipe' })
+  const covText = new TextDecoder().decode(result.stdout) + new TextDecoder().decode(result.stderr)
 
   const coverage = parseCoverage(covText)
 

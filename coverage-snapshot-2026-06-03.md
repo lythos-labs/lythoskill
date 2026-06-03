@@ -52,3 +52,39 @@ L2 Agent BDD (`reproduce.sh` spawning a real agent) is not captured.
 2. **Covered by L2 BDD** (10 `reproduce.sh` scenes across 3 packages) — real agent spawn, real tool calls, judge verdict. These are the most valuable tests (they catch the bugs L1 misses) but invisible to `bun test --coverage`.
 
 **Bottom line**: Deck's 62.5% is a mix. `remove` and `to-symlink-snapshot` have proper BDD coverage. But `add`, `refresh`, `validate`, and main `link` path have zero BDD scenes — their low coverage IS a real gap. Arena is clean: cli.ts 33% L1 but the IO-injected path is fully BDD-covered. Curator has 10 BDD scenes covering every major command.
+
+## Intent/Plan/Execute Breakdown (via scripts/intent-plan-coverage.ts)
+
+### Real gaps — plan functions below 80% (need L0 tests)
+
+| File | Plan funcs | Stmt% | Gap |
+|------|-----------|-------|-----|
+| deck/add.ts | findSkillDir, normalizeSkillsSh | 17% | Pure plan logic almost untested |
+| cold-pool/git-hash.ts | getRepoHeadRef, getSkillBlobHash, hashSkillMd, getSkillTreeHash | 20% | Git hash primitives — IO-heavy but plan-layer logic exists |
+| deck/path-guard.ts | validateAlias, safeResolveInDir, validateWorkingSet | 33% | Path safety functions — easy to test, not tested |
+| deck/refresh.ts | findGitRoot | 33% | Plan function, L0-testable |
+| agent-adapter-codex | buildCodexCommand, parseCodexJsonl | 40% | CLI command builders |
+| deck/validate.ts | buildDeckValidation | 50% | **Plan builder** — should be 90%+ |
+| curator/guard.ts | isReadOnlyQuery, safeGit, validateInColdPool, safeRmSync | 50% | Safety wrappers — easy to test |
+| deck/link.ts | findDeckToml, expandHome, parseAlsoLinkTo, findSource | 58% | Multiple pure plan functions |
+| arena/runner.ts | buildArenaPrompt, formatPlanOutput | 59% | Plan builders, should be 80%+ |
+| agent-adapter/claude-cli.ts | buildCleanEnv, buildClaudeCommand | 57% | CLI command builders |
+| infra/config-fetch.ts | resolveConfigPath | 0% | Simple path resolver |
+
+### Executors without IO injection (architectural gaps)
+
+| Function | Package | File |
+|----------|---------|------|
+| addSkill | deck | add.ts |
+| refreshDeck | deck | refresh.ts |
+| linkDeck | deck | link.ts |
+| runArenaFromToml, runArena, runComparativeJudge | arena | runner.ts, comparative-judge.ts |
+| fetchConfigFromUrl, fetchWithProxy | infra | config-fetch.ts, fetch-with-proxy.ts |
+| executeReconcilePlan, fetchRepoTree | cold-pool | reconcile-plan.ts, github-tree.ts |
+
+### Clean (plan coverage ≥80% or fully BDD-gated)
+
+- cold-pool: 91.3% overall (git-hash only outlier)
+- test-utils: 95.3% overall
+- project-cortex: 86.7% overall
+- curator: 73.6% + 10 BDD scenes covering all 11 executors
