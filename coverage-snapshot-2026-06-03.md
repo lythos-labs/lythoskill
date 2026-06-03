@@ -36,11 +36,11 @@ L2 Agent BDD (`reproduce.sh` spawning a real agent) is not captured.
 
 | Low-coverage file | Stmt% | BDD scene? | Root cause |
 |---|---|---|---|
-| deck/add.ts | 16.7 | ❌ | Real git clone + deck.toml write → untestable at L1 |
-| deck/refresh.ts | 33.3 | ❌ | git pull + cold pool scan → plan is pure, execute is IO |
-| deck/validate.ts | 50.0 | ❌ | Reads cold pool fs → plan builder tested, executor not |
+| deck/add.ts | 16.7 | ❌ no BDD | Real git clone + deck.toml write — plan builder covered, execute not |
+| deck/refresh.ts | 33.3 | ❌ no BDD | git pull + cold pool scan — plan builder 87%, execute 0% |
+| deck/validate.ts | 50.0 | ❌ no BDD | Reads cold pool fs — buildDeckValidation tested, validateDeck not |
 | deck/remove.ts | 44.4 | ✅ deck-remove-bdd | BDD covers the execute path, Bun can't see it |
-| deck/link.ts | 58.3 | ❌ | Symlink reconciliation → IO-heavy execute phase |
+| deck/link.ts | 58.3 | ⚠️ also-link-to only | also-link-to-bdd covers sub-feature; main link path has no BDD |
 | arena/cli.ts | 33.3 | ✅ arena-cli-io-injection-bdd | CLI routing all IO-injected, BDD covers real spawn |
 | curator/guard.ts | 50.0 | ❌ | fs + git safety wrappers → simple code, low coverage false alarm |
 | infra/config-fetch.ts | 0.0 | ❌ | Network fetch → no L0/L1, tested manually |
@@ -51,4 +51,4 @@ L2 Agent BDD (`reproduce.sh` spawning a real agent) is not captured.
 1. **Intent is tested, Execute is not** (intent/plan/execute fractal) — plan builders at 90%+, executors at 10-50%. This is by design: executors are IO glue that L0 can't test.
 2. **Covered by L2 BDD** (10 `reproduce.sh` scenes across 3 packages) — real agent spawn, real tool calls, judge verdict. These are the most valuable tests (they catch the bugs L1 misses) but invisible to `bun test --coverage`.
 
-**Bottom line**: 62.5% on deck is not a coverage gap — the 37.5% uncovered is `link`/`add`/`refresh` execute paths exercised by BDD. Same for arena/cli.ts (33% L1, 100% BDD-covered via IO-injected CLI path).
+**Bottom line**: Deck's 62.5% is a mix. `remove` and `to-symlink-snapshot` have proper BDD coverage. But `add`, `refresh`, `validate`, and main `link` path have zero BDD scenes — their low coverage IS a real gap. Arena is clean: cli.ts 33% L1 but the IO-injected path is fully BDD-covered. Curator has 10 BDD scenes covering every major command.
