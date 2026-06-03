@@ -16,8 +16,17 @@ describe('validateAlias', () => {
     expect(validateAlias(long)).toBe(long)
   })
 
-  test('rejects empty', () => {
+  test('rejects empty string', () => {
     expect(() => validateAlias('')).toThrow('must not be empty')
+  })
+
+  test('throws on null (TypeScript guard)', () => {
+    // validateAlias has a falsy guard: if (!alias ...) throw
+    expect(() => validateAlias(null as unknown as string)).toThrow()
+  })
+
+  test('throws on undefined (TypeScript guard)', () => {
+    expect(() => validateAlias(undefined as unknown as string)).toThrow()
   })
 
   test('rejects too long', () => {
@@ -103,6 +112,23 @@ describe('isPathInsideRoot', () => {
 //   4. Forbidden system paths → always rejected
 
 describe('validateWorkingSet', () => {
+  const cwd = process.cwd()
+
+  // ── Positive: should accept ──
+
+  test('accepts working set under project dir', () => {
+    // When working_set is under the project (resolved against cwd),
+    // and cwd === project dir, it should pass.
+    expect(() => validateWorkingSet('.claude/skills', cwd)).not.toThrow()
+  })
+
+  test('accepts working set as subdirectory of project', () => {
+    // Must be a real subdirectory so resolve() produces <cwd>/subdir
+    expect(() => validateWorkingSet('src', cwd)).not.toThrow()
+  })
+
+  // ── Negative: should reject ──
+
   test('rejects forbidden system root /', () => {
     expect(() => validateWorkingSet('/', '/home/user/project')).toThrow('forbidden system path')
   })
@@ -119,9 +145,11 @@ describe('validateWorkingSet', () => {
     expect(() => validateWorkingSet('/tmp', '/home/user/project')).toThrow('forbidden system path')
   })
 
+  test('rejects forbidden /home', () => {
+    expect(() => validateWorkingSet('/home', cwd)).toThrow('forbidden system path')
+  })
+
   test('rejects non-hidden dir outside project', () => {
-    // validateWorkingSet resolves against cwd, so use an absolute path
-    // where the last segment doesn't start with '.' and is outside any project
     expect(() => validateWorkingSet('/tmp/my-skills', '/home/user/project')).toThrow('not a hidden directory')
   })
 })

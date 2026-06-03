@@ -5,18 +5,11 @@
  * Run: bun test packages/lythoskill-deck/src/add.test.ts
  */
 
-import { describe, it, expect, afterEach, spyOn, mock } from 'bun:test'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, existsSync, cpSync } from 'node:fs'
+import { describe, it, expect, afterEach } from 'bun:test'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import * as childProcess from 'node:child_process'
 import { findSkillDir, buildSkillDirCandidates, normalizeSkillsSh } from './add.ts'
-
-// Control homedir() return value for tests that need default cold_pool under tmpdir
-let mockHomeDir = '/tmp'
-mock.module('node:os', () => ({
-  homedir: () => mockHomeDir,
-}))
 
 // ── findSkillDir ───────────────────────────────────────────────
 
