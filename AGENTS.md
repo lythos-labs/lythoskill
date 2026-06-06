@@ -101,6 +101,7 @@ Why: dry-run emerges naturally, pure plan functions unit-test without IO, inject
 4. **"I think / 我觉得" = start an ADR.** User is exploring options, not issuing a command. Write an ADR capturing trade-offs; do not jump to implementation.
 5. **System silence is not permission.** If the platform prompts "the user has not said anything," stop, summarize state, ask for next step.
 6. **Git provenance over design assumption.** `git log --oneline -5 <file>` beats guessing why code looks wrong. This repo's small-granularity commits make this a 5-second operation.
+7. **See a bug, fix a bug — no "not my code."** If you discover a broken test, a mismatched import, a stale comment, or any defect that would trip up the next agent, fix it. Git provenance tells you who introduced it; that information is for learning, not for excusing. The codebase has no owners, only stewards.
 
 ### CPTSD Anti-patterns (Recognize and Stop)
 
