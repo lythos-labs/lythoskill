@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { mkdtempSync, mkdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -8,7 +8,7 @@ import { buildFetchPlan, executeFetchPlan } from './fetch-plan'
 import type { FetchIO } from './types'
 
 describe('buildFetchPlan', () => {
-  test('builds targetDir + cloneUrl from locator', () => {
+  it('builds targetDir + cloneUrl from locator', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/anthropics/skills/skills/pdf')!
     const plan = buildFetchPlan(pool, loc)
@@ -17,7 +17,7 @@ describe('buildFetchPlan', () => {
     expect(plan.alreadyExists).toBe(false)
   })
 
-  test('alreadyExists reflects fs presence', () => {
+  it('alreadyExists reflects fs presence', () => {
     const root = mkdtempSync(join(tmpdir(), 'fetch-plan-test-'))
     mkdirSync(join(root, 'github.com/owner/repo'), { recursive: true })
     const pool = new ColdPool(root)
@@ -26,7 +26,7 @@ describe('buildFetchPlan', () => {
     expect(plan.alreadyExists).toBe(true)
   })
 
-  test('localhost locator gets empty cloneUrl + uniform <host>/<owner>/<repo> path', () => {
+  it('localhost locator gets empty cloneUrl + uniform <host>/<owner>/<repo> path', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('localhost/me/my-skill')!
     const plan = buildFetchPlan(pool, loc)
@@ -34,7 +34,7 @@ describe('buildFetchPlan', () => {
     expect(plan.targetDir).toBe('/cold/localhost/me/my-skill')
   })
 
-  test('passes ref through', () => {
+  it('passes ref through', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/o/r')!
     const plan = buildFetchPlan(pool, loc, { ref: 'v1.2.3' })
@@ -43,7 +43,7 @@ describe('buildFetchPlan', () => {
 })
 
 describe('executeFetchPlan', () => {
-  test('alreadyExists path → already-present, no clone called', () => {
+  it('alreadyExists path → already-present, no clone called', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/o/r')!
     const plan = { ...buildFetchPlan(pool, loc), alreadyExists: true }
@@ -57,7 +57,7 @@ describe('executeFetchPlan', () => {
     expect(cloneCalls).toBe(0)
   })
 
-  test('clones when target absent', () => {
+  it('clones when target absent', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/o/r')!
     const plan = buildFetchPlan(pool, loc)
@@ -73,7 +73,7 @@ describe('executeFetchPlan', () => {
     expect(cloneArgs[0].dir).toBe('/cold/github.com/o/r')
   })
 
-  test('clone error → failed result with message', () => {
+  it('clone error → failed result with message', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/o/r')!
     const plan = buildFetchPlan(pool, loc)
@@ -86,7 +86,7 @@ describe('executeFetchPlan', () => {
     expect(result.message).toContain('boom')
   })
 
-  test('localhost locator refuses to fetch', () => {
+  it('localhost locator refuses to fetch', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('localhost/me/x')!
     const plan = buildFetchPlan(pool, loc)
@@ -101,7 +101,7 @@ describe('executeFetchPlan', () => {
     expect(cloneCalls).toBe(0)
   })
 
-  test('log IO is invoked', () => {
+  it('log IO is invoked', () => {
     const pool = new ColdPool('/cold')
     const loc = parseLocator('github.com/o/r')!
     const plan = buildFetchPlan(pool, loc)

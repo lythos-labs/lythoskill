@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { parseArenaToml, buildExecutionPlan, ArenaToml } from './arena-toml'
 import { formatPlanOutput } from './runner'
 
@@ -63,7 +63,7 @@ working_dir = "/workspace"
 `
 
 describe('parseArenaToml', () => {
-  test('parses minimal two-side arena with criteria', () => {
+  it('parses minimal two-side arena with criteria', () => {
     const result = parseArenaToml(minimalToml)
     expect(result.arena.task).toBe('Test task')
     expect(result.arena.criteria).toEqual(['a', 'b'])
@@ -75,14 +75,14 @@ describe('parseArenaToml', () => {
     expect(result.side[0].control).toBe(false)
   })
 
-  test('parses arena with judge field (preferred over criteria)', () => {
+  it('parses arena with judge field (preferred over criteria)', () => {
     const result = parseArenaToml(judgeToml)
     expect(result.arena.judge).toContain('Evaluate completeness')
     expect(result.arena.criteria).toBeUndefined()
     expect(result.side).toHaveLength(2)
   })
 
-  test('parses full arena with runs_per_side and control', () => {
+  it('parses full arena with runs_per_side and control', () => {
     const result = parseArenaToml(fullToml)
     expect(result.arena.runs_per_side).toBe(3)
     expect(result.side).toHaveLength(3)
@@ -90,7 +90,7 @@ describe('parseArenaToml', () => {
     expect(result.side[2].control).toBe(true)
   })
 
-  test('parses side env block', () => {
+  it('parses side env block', () => {
     const result = parseArenaToml(fullToml)
     const env = result.side[2].env
     expect(env.container).toBe('node:20-alpine')
@@ -99,47 +99,47 @@ describe('parseArenaToml', () => {
     expect(env.env_vars).toEqual({})
   })
 
-  test('rejects fewer than 2 sides', () => {
+  it('rejects fewer than 2 sides', () => {
     const bad = `[arena]\ntask = "x"\ncriteria = ["a"]\n\n[[side]]\nname = "only"\nplayer = "c"\ndeck = "x.toml"`
     expect(() => parseArenaToml(bad)).toThrow()
   })
 
-  test('rejects neither judge nor criteria provided', () => {
+  it('rejects neither judge nor criteria provided', () => {
     const bad = `[arena]\ntask = "x"\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     expect(() => parseArenaToml(bad)).toThrow()
   })
 
-  test('accepts judge without criteria (either is sufficient)', () => {
+  it('accepts judge without criteria (either is sufficient)', () => {
     const toml = `[arena]\ntask = "x"\njudge = "Evaluate this."\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     expect(() => parseArenaToml(toml)).not.toThrow()
   })
 
-  test('rejects empty criteria and no judge', () => {
+  it('rejects empty criteria and no judge', () => {
     const bad = `[arena]\ntask = "x"\ncriteria = []\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     expect(() => parseArenaToml(bad)).toThrow()
   })
 
-  test('rejects non-object input', () => {
+  it('rejects non-object input', () => {
     expect(() => ArenaToml.parse('not valid')).toThrow()
   })
 
-  test('rejects missing arena section', () => {
+  it('rejects missing arena section', () => {
     expect(() => parseArenaToml('[[side]]\nname = "a"')).toThrow()
   })
 
-  test('rejects runs_per_side = 0', () => {
+  it('rejects runs_per_side = 0', () => {
     const bad = `[arena]\ntask = "x"\ncriteria = ["a"]\nruns_per_side = 0\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     expect(() => parseArenaToml(bad)).toThrow()
   })
 
-  test('parses integer and boolean values correctly', () => {
+  it('parses integer and boolean values correctly', () => {
     const toml = `[arena]\ntask = "x"\ncriteria = ["a"]\nruns_per_side = 2\nmax_participants = 5\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     const result = parseArenaToml(toml)
     expect(result.arena.runs_per_side).toBe(2)
     expect(result.arena.max_participants).toBe(5)
   })
 
-  test('comments are stripped', () => {
+  it('comments are stripped', () => {
     const toml = `[arena]\n# this is a comment\ntask = "x"\ncriteria = ["a"]\n\n[[side]]\nname = "a"\nplayer = "c"\ndeck = "a.toml"\n\n[[side]]\nname = "b"\nplayer = "c"\ndeck = "b.toml"`
     const result = parseArenaToml(toml)
     expect(result.arena.task).toBe('x')
@@ -147,7 +147,7 @@ describe('parseArenaToml', () => {
 })
 
 describe('buildExecutionPlan', () => {
-  test('generates plan: 2 sides × 1 run = 2 cells', () => {
+  it('generates plan: 2 sides × 1 run = 2 cells', () => {
     const toml = parseArenaToml(minimalToml)
     const plan = buildExecutionPlan(toml)
     expect(plan.task).toBe('Test task')
@@ -156,20 +156,20 @@ describe('buildExecutionPlan', () => {
     expect(plan.total_runs).toBe(2)
   })
 
-  test('generates plan with judge field populated', () => {
+  it('generates plan with judge field populated', () => {
     const toml = parseArenaToml(judgeToml)
     const plan = buildExecutionPlan(toml)
     expect(plan.judge).toContain('Evaluate completeness')
   })
 
-  test('generates plan: 3 sides × 3 runs = 9 cells', () => {
+  it('generates plan: 3 sides × 3 runs = 9 cells', () => {
     const toml = parseArenaToml(fullToml)
     const plan = buildExecutionPlan(toml)
     expect(plan.cells).toHaveLength(9)
     expect(plan.total_runs).toBe(9)
   })
 
-  test('control flag preserved in plan cells', () => {
+  it('control flag preserved in plan cells', () => {
     const toml = parseArenaToml(fullToml)
     const plan = buildExecutionPlan(toml)
     const baselineCells = plan.cells.filter(c => c.side === 'baseline')
@@ -177,7 +177,7 @@ describe('buildExecutionPlan', () => {
     expect(baselineCells.every(c => c.control)).toBe(true)
   })
 
-  test('dry-run: plan is pure data, no side effects', () => {
+  it('dry-run: plan is pure data, no side effects', () => {
     const toml = parseArenaToml(fullToml)
     const plan = buildExecutionPlan(toml)
     expect(plan.total_runs).toBeGreaterThan(0)

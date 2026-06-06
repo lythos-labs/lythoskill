@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
+import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -34,7 +34,7 @@ describe('buildReconcilePlan — pure classification', () => {
     rmSync(root, { recursive: true, force: true })
   })
 
-  test('empty desired + empty cold pool → all empty', () => {
+  it('empty desired + empty cold pool → all empty', () => {
     const desired: ReconcileDesiredState = { deckPath: '/project/skill-deck.toml', skills: [] }
     const plan = buildReconcilePlan(pool, desired)
     expect(plan.missing).toEqual([])
@@ -42,7 +42,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra).toEqual([])
   })
 
-  test('desired skill missing from cold pool → reported as missing', () => {
+  it('desired skill missing from cold pool → reported as missing', () => {
     const desired: ReconcileDesiredState = {
       deckPath: '/project/skill-deck.toml',
       skills: [{ locator: 'github.com/lythos-labs/tdd', alias: 'tdd' }],
@@ -57,7 +57,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra).toEqual([])
   })
 
-  test('desired skill exists in cold pool with metadata → reported as behind', () => {
+  it('desired skill exists in cold pool with metadata → reported as behind', () => {
     seedRepo(root, 'github.com', 'owner', 'repo-a')
     pool.metadata.recordRepoRef('github.com', 'owner', 'repo-a', 'abc123def')
 
@@ -73,7 +73,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra).toEqual([])
   })
 
-  test('desired skill exists but no metadata → not flagged (manual clone)', () => {
+  it('desired skill exists but no metadata → not flagged (manual clone)', () => {
     seedRepo(root, 'github.com', 'owner', 'repo-b')
 
     const desired: ReconcileDesiredState = {
@@ -86,7 +86,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra).toEqual([])
   })
 
-  test('monorepo skill path → extracts correct repo root', () => {
+  it('monorepo skill path → extracts correct repo root', () => {
     seedRepo(root, 'github.com', 'owner', 'monorepo')
     pool.metadata.recordRepoRef('github.com', 'owner', 'monorepo', 'def456')
 
@@ -100,7 +100,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.behind[0].repo).toBe('monorepo')
   })
 
-  test('extra repo in cold pool not in desired → reported as extra', () => {
+  it('extra repo in cold pool not in desired → reported as extra', () => {
     seedRepo(root, 'github.com', 'someone', 'orphan-repo')
 
     const desired: ReconcileDesiredState = {
@@ -113,7 +113,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra[0].repo).toBe('orphan-repo')
   })
 
-  test('multiple skills in same repo → single repo entry', () => {
+  it('multiple skills in same repo → single repo entry', () => {
     seedRepo(root, 'github.com', 'owner', 'shared-repo')
     pool.metadata.recordRepoRef('github.com', 'owner', 'shared-repo', 'ghi789')
 
@@ -130,7 +130,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.behind[0].aliases).toEqual(['alpha', 'beta'])
   })
 
-  test('localhost skill in desired, exists in pool', () => {
+  it('localhost skill in desired, exists in pool', () => {
     seedRepo(root, 'localhost', 'me', 'local-skill')
 
     const desired: ReconcileDesiredState = {
@@ -144,7 +144,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.extra).toEqual([])
   })
 
-  test('unrecognized locator format → reported as missing', () => {
+  it('unrecognized locator format → reported as missing', () => {
     const desired: ReconcileDesiredState = {
       deckPath: '/project/skill-deck.toml',
       skills: [{ locator: 'bare-name', alias: 'bare' }],
@@ -154,7 +154,7 @@ describe('buildReconcilePlan — pure classification', () => {
     expect(plan.missing[0].reason).toContain('Unrecognized')
   })
 
-  test('mixed: missing + behind + extra all populated', () => {
+  it('mixed: missing + behind + extra all populated', () => {
     // Seed two repos that exist
     seedRepo(root, 'github.com', 'owner', 'exists-behind')
     pool.metadata.recordRepoRef('github.com', 'owner', 'exists-behind', 'abc')
@@ -185,12 +185,12 @@ describe('buildReconcilePlan — pure classification', () => {
 })
 
 describe('executeReconcilePlan — plan-first reporting', () => {
-  test('empty plan → all zero count', () => {
+  it('empty plan → all zero count', () => {
     const results = executeReconcilePlan({ missing: [], behind: [], extra: [] })
     expect(results).toEqual([])
   })
 
-  test('missing entry → failed status', () => {
+  it('missing entry → failed status', () => {
     const plan = {
       missing: [{ host: 'github.com', owner: 'o', repo: 'r', repoPath: '/pool/github.com/o/r', reason: 'Not found', aliases: ['r'] }],
       behind: [],
@@ -201,7 +201,7 @@ describe('executeReconcilePlan — plan-first reporting', () => {
     expect(results[0].status).toBe('failed')
   })
 
-  test('behind entry → skipped status', () => {
+  it('behind entry → skipped status', () => {
     const plan = {
       missing: [],
       behind: [{ host: 'github.com', owner: 'o', repo: 'r', repoPath: '/pool/github.com/o/r', reason: 'HEAD mismatch', aliases: ['r'] }],
@@ -211,7 +211,7 @@ describe('executeReconcilePlan — plan-first reporting', () => {
     expect(results[0].status).toBe('skipped')
   })
 
-  test('extra entry → extra-reported status', () => {
+  it('extra entry → extra-reported status', () => {
     const plan = {
       missing: [],
       behind: [],
@@ -221,7 +221,7 @@ describe('executeReconcilePlan — plan-first reporting', () => {
     expect(results[0].status).toBe('extra-reported')
   })
 
-  test('io.log captures output', () => {
+  it('io.log captures output', () => {
     const lines: string[] = []
     const plan = {
       missing: [{ host: 'github.com', owner: 'o', repo: 'r', repoPath: '/p/github.com/o/r', reason: 'X', aliases: ['r'] }],

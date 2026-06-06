@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
+import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync, symlinkSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -68,7 +68,7 @@ path = "github.com/test-org/test-skill"
 }
 
 describe('toSymlinkSkill — snapshot → symlink', () => {
-  test('switches real dir to symlink', () => {
+  it('switches real dir to symlink', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'snapshot' })
 
     const io = {
@@ -89,7 +89,7 @@ describe('toSymlinkSkill — snapshot → symlink', () => {
     rmSync(project, { recursive: true, force: true })
   })
 
-  test('no-op when already symlink', () => {
+  it('no-op when already symlink', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'symlink' })
 
     const io = {
@@ -112,7 +112,7 @@ describe('toSymlinkSkill — snapshot → symlink', () => {
 })
 
 describe('toSnapshotSkill — symlink → snapshot', () => {
-  test('switches symlink to real dir', () => {
+  it('switches symlink to real dir', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'symlink' })
 
     const io = {
@@ -136,7 +136,7 @@ describe('toSnapshotSkill — symlink → snapshot', () => {
     rmSync(project, { recursive: true, force: true })
   })
 
-  test('no-op when already snapshot', () => {
+  it('no-op when already snapshot', () => {
     const { deckPath, dest, project } = setupProject({ mode: 'snapshot' })
 
     const io = {

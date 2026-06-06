@@ -1,8 +1,8 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { formatLocator, parseLocator } from './parse-locator'
 
 describe('parseLocator — accepted forms', () => {
-  test('host.tld/owner/repo/skill (monorepo)', () => {
+  it('host.tld/owner/repo/skill (monorepo)', () => {
     const loc = parseLocator('github.com/anthropics/skills/skills/pdf')
     expect(loc).toEqual({
       raw: 'github.com/anthropics/skills/skills/pdf',
@@ -15,19 +15,19 @@ describe('parseLocator — accepted forms', () => {
     })
   })
 
-  test('host.tld/owner/repo/skill (nested skill subpath)', () => {
+  it('host.tld/owner/repo/skill (nested skill subpath)', () => {
     const loc = parseLocator('github.com/mattpocock/skills/skills/engineering/tdd')
     expect(loc?.skill).toBe('skills/engineering/tdd')
     expect(loc?.repo).toBe('skills')
   })
 
-  test('host.tld/owner/repo/skill (flat repo, single skill segment)', () => {
+  it('host.tld/owner/repo/skill (flat repo, single skill segment)', () => {
     const loc = parseLocator('github.com/daymade/claude-code-skills/skill-creator')
     expect(loc?.skill).toBe('skill-creator')
     expect(loc?.repo).toBe('claude-code-skills')
   })
 
-  test('host.tld/owner/repo (standalone — skill = null)', () => {
+  it('host.tld/owner/repo (standalone — skill = null)', () => {
     const loc = parseLocator('github.com/SpillwaveSolutions/design-doc-mermaid')
     expect(loc).toEqual({
       raw: 'github.com/SpillwaveSolutions/design-doc-mermaid',
@@ -40,12 +40,12 @@ describe('parseLocator — accepted forms', () => {
     })
   })
 
-  test('host.tld/owner/repo/skill (arbitrary subdir name)', () => {
+  it('host.tld/owner/repo/skill (arbitrary subdir name)', () => {
     const loc = parseLocator('github.com/Cocoon-AI/architecture-diagram-generator/architecture-diagram')
     expect(loc?.skill).toBe('architecture-diagram')
   })
 
-  test('localhost/<owner>/<repo> (canonical local skill, same shape as remote)', () => {
+  it('localhost/<owner>/<repo> (canonical local skill, same shape as remote)', () => {
     const loc = parseLocator('localhost/me/my-skill')
     expect(loc).toEqual({
       raw: 'localhost/me/my-skill',
@@ -58,42 +58,42 @@ describe('parseLocator — accepted forms', () => {
     })
   })
 
-  test('non-github host accepted', () => {
+  it('non-github host accepted', () => {
     const loc = parseLocator('gitlab.com/owner/repo/skill-x')
     expect(loc?.host).toBe('gitlab.com')
     expect(loc?.skill).toBe('skill-x')
   })
 
-  test('input is trimmed', () => {
+  it('input is trimmed', () => {
     const loc = parseLocator('  github.com/owner/repo  ')
     expect(loc?.repo).toBe('repo')
   })
 })
 
 describe('parseLocator — rejected forms (per ADR-20260502012643244 FQ-only)', () => {
-  test('empty string', () => {
+  it('empty string', () => {
     expect(parseLocator('')).toBeNull()
     expect(parseLocator('   ')).toBeNull()
   })
 
-  test('single segment', () => {
+  it('single segment', () => {
     expect(parseLocator('my-skill')).toBeNull()
   })
 
-  test('bare owner/repo (no host) is rejected — must be FQ', () => {
+  it('bare owner/repo (no host) is rejected — must be FQ', () => {
     expect(parseLocator('daymade/claude-code-skills')).toBeNull()
     expect(parseLocator('owner/repo/skill')).toBeNull()
   })
 
-  test('host without dot is treated as bare', () => {
+  it('host without dot is treated as bare', () => {
     expect(parseLocator('foo/bar/baz')).toBeNull()
   })
 
-  test('host.tld/owner without repo segment', () => {
+  it('host.tld/owner without repo segment', () => {
     expect(parseLocator('github.com/owner')).toBeNull()
   })
 
-  test('localhost with multi-segment path (skill subpath beyond owner/repo)', () => {
+  it('localhost with multi-segment path (skill subpath beyond owner/repo)', () => {
     const loc = parseLocator('localhost/me/skills/my-skill')
     expect(loc).toEqual({
       raw: 'localhost/me/skills/my-skill',
@@ -106,17 +106,17 @@ describe('parseLocator — rejected forms (per ADR-20260502012643244 FQ-only)', 
     })
   })
 
-  test('localhost alone (no owner/repo) is rejected', () => {
+  it('localhost alone (no owner/repo) is rejected', () => {
     expect(parseLocator('localhost')).toBeNull()
   })
 
-  test('localhost/<name> (2 segments) is rejected — use localhost/me/<skill> for quick local form', () => {
+  it('localhost/<name> (2 segments) is rejected — use localhost/me/<skill> for quick local form', () => {
     expect(parseLocator('localhost/my-skill')).toBeNull()
   })
 })
 
 describe('formatLocator — round-trips', () => {
-  test.each([
+  it.each([
     'github.com/anthropics/skills/skills/pdf',
     'github.com/SpillwaveSolutions/design-doc-mermaid',
     'github.com/mattpocock/skills/skills/engineering/tdd',

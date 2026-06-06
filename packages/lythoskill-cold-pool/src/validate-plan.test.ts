@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { buildValidationPlan, executeValidationPlan, type ValidationCheck, type ValidationIO } from './validate-plan'
 import type { FetchFn, TreeEntry } from './github-tree'
 
@@ -18,25 +18,25 @@ const treeFor = (paths: string[]): TreeEntry[] =>
 const ioWith = (fetch: FetchFn): ValidationIO => ({ fetch })
 
 describe('buildValidationPlan', () => {
-  test('parses input and stores defaults', () => {
+  it('parses input and stores defaults', () => {
     const plan = buildValidationPlan('github.com/owner/repo')
     expect(plan.locator?.repo).toBe('repo')
     expect(plan.checks).toEqual(['syntax', 'remote', 'path'])
   })
 
-  test('parse failure → locator null', () => {
+  it('parse failure → locator null', () => {
     const plan = buildValidationPlan('bad-name')
     expect(plan.locator).toBeNull()
   })
 
-  test('honors custom checks', () => {
+  it('honors custom checks', () => {
     const plan = buildValidationPlan('localhost/me/x', { checks: ['syntax'] })
     expect(plan.checks).toEqual(['syntax'])
   })
 })
 
 describe('executeValidationPlan — syntax phase', () => {
-  test('parse failure → invalid + suggested fix', async () => {
+  it('parse failure → invalid + suggested fix', async () => {
     const plan = buildValidationPlan('bad-name')
     const report = await executeValidationPlan(plan)
     expect(report.status).toBe('invalid')
@@ -45,7 +45,7 @@ describe('executeValidationPlan — syntax phase', () => {
     expect(report.suggestedFixes.length).toBe(1)
   })
 
-  test('localhost short-circuits — no remote fetch', async () => {
+  it('localhost short-circuits — no remote fetch', async () => {
     const plan = buildValidationPlan('localhost/me/my-skill')
     let fetched = false
     const io = ioWith(async () => {
@@ -59,7 +59,7 @@ describe('executeValidationPlan — syntax phase', () => {
 })
 
 describe('executeValidationPlan — remote phase', () => {
-  test('404 → invalid (repo-existence)', async () => {
+  it('404 → invalid (repo-existence)', async () => {
     const plan = buildValidationPlan('github.com/nope/nope')
     const report = await executeValidationPlan(plan, ioWith(mockFetch(() => ({ status: 404 }))))
     expect(report.status).toBe('invalid')
@@ -67,7 +67,7 @@ describe('executeValidationPlan — remote phase', () => {
     expect(report.findings.repoExists).toBe(false)
   })
 
-  test('rate-limit → ambiguous', async () => {
+  it('rate-limit → ambiguous', async () => {
     const plan = buildValidationPlan('github.com/owner/repo')
     const report = await executeValidationPlan(
       plan,
@@ -77,7 +77,7 @@ describe('executeValidationPlan — remote phase', () => {
     expect(report.phase).toBe('repo-existence')
   })
 
-  test('private repo → ambiguous with hint', async () => {
+  it('private repo → ambiguous with hint', async () => {
     const plan = buildValidationPlan('github.com/owner/repo')
     const report = await executeValidationPlan(plan, ioWith(mockFetch(() => ({ status: 403 }))))
     expect(report.status).toBe('ambiguous')
@@ -86,7 +86,7 @@ describe('executeValidationPlan — remote phase', () => {
 })
 
 describe('executeValidationPlan — path phase', () => {
-  test('standalone (skill=null) with SKILL.md at root → valid', async () => {
+  it('standalone (skill=null) with SKILL.md at root → valid', async () => {
     const plan = buildValidationPlan('github.com/owner/standalone')
     const fetch = mockFetch(() => ({
       status: 200,
@@ -98,7 +98,7 @@ describe('executeValidationPlan — path phase', () => {
     expect(report.findings.skillMdFound).toBe(true)
   })
 
-  test('standalone but skills exist in subdirs → invalid + qualified-locator suggestions', async () => {
+  it('standalone but skills exist in subdirs → invalid + qualified-locator suggestions', async () => {
     const plan = buildValidationPlan('github.com/owner/repo')
     const fetch = mockFetch(() => ({
       status: 200,
@@ -113,7 +113,7 @@ describe('executeValidationPlan — path phase', () => {
     ])
   })
 
-  test('skill subpath matches → valid', async () => {
+  it('skill subpath matches → valid', async () => {
     const plan = buildValidationPlan('github.com/anthropics/skills/skills/pdf')
     const fetch = mockFetch(() => ({
       status: 200,
@@ -123,7 +123,7 @@ describe('executeValidationPlan — path phase', () => {
     expect(report.status).toBe('valid')
   })
 
-  test('skill subpath wrong → invalid + corrected suggestion', async () => {
+  it('skill subpath wrong → invalid + corrected suggestion', async () => {
     const plan = buildValidationPlan('github.com/anthropics/skills/pdf')  // missing skills/ prefix
     const fetch = mockFetch(() => ({
       status: 200,
@@ -135,7 +135,7 @@ describe('executeValidationPlan — path phase', () => {
     expect(report.suggestedFixes.some((f) => f.newLocator === 'github.com/anthropics/skills/skills/pdf')).toBe(true)
   })
 
-  test('repo with no SKILL.md anywhere → invalid + web-search hint', async () => {
+  it('repo with no SKILL.md anywhere → invalid + web-search hint', async () => {
     const plan = buildValidationPlan('github.com/owner/random-repo')
     const fetch = mockFetch(() => ({
       status: 200,
@@ -148,7 +148,7 @@ describe('executeValidationPlan — path phase', () => {
 })
 
 describe('executeValidationPlan — scoped checks', () => {
-  test('checks: ["syntax"] — no remote fetch even for non-localhost', async () => {
+  it('checks: ["syntax"] — no remote fetch even for non-localhost', async () => {
     const plan = buildValidationPlan('github.com/o/r', { checks: ['syntax'] })
     let fetched = false
     const io = ioWith(async () => {

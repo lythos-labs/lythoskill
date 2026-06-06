@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { aggregateSideStats, aggregateAllStats } from './stats'
 import type { JudgeVerdict } from '@lythos/test-utils/schema'
 
@@ -14,7 +14,7 @@ function makeVerdict(overrides?: Partial<JudgeVerdict>): JudgeVerdict {
 // ── aggregateSideStats ─────────────────────────────────────────────────────
 
 describe('aggregateSideStats', () => {
-  test('single run: passRate=1, no variance', () => {
+  it('single run: passRate=1, no variance', () => {
     const stats = aggregateSideStats('test', [makeVerdict()])
     expect(stats.sideName).toBe('test')
     expect(stats.runs).toBe(1)
@@ -23,7 +23,7 @@ describe('aggregateSideStats', () => {
     expect(stats.errorRate).toBe(0)
   })
 
-  test('3 runs: 2 PASS, 1 FAIL', () => {
+  it('3 runs: 2 PASS, 1 FAIL', () => {
     const verdicts = [
       makeVerdict(),
       makeVerdict(),
@@ -34,7 +34,7 @@ describe('aggregateSideStats', () => {
     expect(stats.failRate).toBeCloseTo(1 / 3)
   })
 
-  test('confidence: mean across runs', () => {
+  it('confidence: mean across runs', () => {
     const verdicts = [
       makeVerdict({ confidence: 90 }),
       makeVerdict({ confidence: 80 }),
@@ -45,13 +45,13 @@ describe('aggregateSideStats', () => {
     expect(stats.confidenceVariance).toBeCloseTo(100) // (100+0+100)/2 = 100
   })
 
-  test('confidence: null when no verdict has it', () => {
+  it('confidence: null when no verdict has it', () => {
     const stats = aggregateSideStats('test', [makeVerdict(), makeVerdict()])
     expect(stats.meanConfidence).toBeNull()
     expect(stats.confidenceVariance).toBeNull()
   })
 
-  test('per-criterion pass rate', () => {
+  it('per-criterion pass rate', () => {
     const verdicts = [
       makeVerdict({ criteria: [{ name: 'accuracy', passed: true }] }),
       makeVerdict({ criteria: [{ name: 'accuracy', passed: false }] }),
@@ -63,7 +63,7 @@ describe('aggregateSideStats', () => {
     expect(stats.criteria[0].mean).toBeCloseTo(2 / 3)
   })
 
-  test('per-criterion scores: mean and variance', () => {
+  it('per-criterion scores: mean and variance', () => {
     const verdicts = [
       makeVerdict({ scores: { coverage: 5, relevance: 4 } }),
       makeVerdict({ scores: { coverage: 3, relevance: 4 } }),
@@ -75,14 +75,14 @@ describe('aggregateSideStats', () => {
     expect(stats.scoreByCriterion.relevance.variance).toBe(0) // all 4s
   })
 
-  test('zero runs: all zeros', () => {
+  it('zero runs: all zeros', () => {
     const stats = aggregateSideStats('empty', [])
     expect(stats.runs).toBe(0)
     expect(stats.passRate).toBe(0)
     expect(stats.meanConfidence).toBeNull()
   })
 
-  test('handles ERROR verdicts correctly', () => {
+  it('handles ERROR verdicts correctly', () => {
     const verdicts = [
       makeVerdict(),
       makeVerdict({ verdict: 'ERROR', reason: 'parse failed' }),
@@ -96,7 +96,7 @@ describe('aggregateSideStats', () => {
 // ── aggregateAllStats ──────────────────────────────────────────────────────
 
 describe('aggregateAllStats', () => {
-  test('aggregates multiple sides', () => {
+  it('aggregates multiple sides', () => {
     const map = new Map<string, JudgeVerdict[]>()
     map.set('side-a', [makeVerdict(), makeVerdict()])
     map.set('side-b', [makeVerdict({ verdict: 'FAIL', reason: 'nope' })])

@@ -1,53 +1,53 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { validateAlias, validatePathSegment, isPathInsideRoot, validateWorkingSet } from './path-guard.js'
 
 // ── validateAlias ──────────────────────────────────────────────
 
 describe('validateAlias', () => {
-  test('accepts simple alphanumeric', () => {
+  it('accepts simple alphanumeric', () => {
     expect(validateAlias('tdd')).toBe('tdd')
     expect(validateAlias('my-skill')).toBe('my-skill')
     expect(validateAlias('skill_v2')).toBe('skill_v2')
     expect(validateAlias('A-B-C')).toBe('A-B-C')
   })
 
-  test('accepts max-length alias', () => {
+  it('accepts max-length alias', () => {
     const long = 'a'.repeat(128)
     expect(validateAlias(long)).toBe(long)
   })
 
-  test('rejects empty string', () => {
+  it('rejects empty string', () => {
     expect(() => validateAlias('')).toThrow('must not be empty')
   })
 
-  test('throws on null (TypeScript guard)', () => {
+  it('throws on null (TypeScript guard)', () => {
     // validateAlias has a falsy guard: if (!alias ...) throw
     expect(() => validateAlias(null as unknown as string)).toThrow()
   })
 
-  test('throws on undefined (TypeScript guard)', () => {
+  it('throws on undefined (TypeScript guard)', () => {
     expect(() => validateAlias(undefined as unknown as string)).toThrow()
   })
 
-  test('rejects too long', () => {
+  it('rejects too long', () => {
     const long = 'a'.repeat(129)
     expect(() => validateAlias(long)).toThrow('too long')
   })
 
-  test('rejects dots', () => {
+  it('rejects dots', () => {
     expect(() => validateAlias('skill.name')).toThrow('Invalid alias')
   })
 
-  test('rejects slashes (path traversal)', () => {
+  it('rejects slashes (path traversal)', () => {
     expect(() => validateAlias('../etc')).toThrow('Invalid alias')
     expect(() => validateAlias('a/b')).toThrow('Invalid alias')
   })
 
-  test('rejects backslashes', () => {
+  it('rejects backslashes', () => {
     expect(() => validateAlias('a\\b')).toThrow('Invalid alias')
   })
 
-  test('rejects special characters', () => {
+  it('rejects special characters', () => {
     expect(() => validateAlias('skill!')).toThrow('Invalid alias')
     expect(() => validateAlias('skill$')).toThrow('Invalid alias')
   })
@@ -56,27 +56,27 @@ describe('validateAlias', () => {
 // ── validatePathSegment ─────────────────────────────────────────
 
 describe('validatePathSegment', () => {
-  test('accepts normal segments', () => {
+  it('accepts normal segments', () => {
     expect(() => validatePathSegment('skill-dir')).not.toThrow()
     expect(() => validatePathSegment('foo/bar/baz')).not.toThrow()
     expect(() => validatePathSegment('.hidden-dir')).not.toThrow()
   })
 
-  test('rejects null byte', () => {
+  it('rejects null byte', () => {
     expect(() => validatePathSegment('foo\0bar')).toThrow('null byte')
   })
 
-  test('rejects parent traversal', () => {
+  it('rejects parent traversal', () => {
     expect(() => validatePathSegment('..')).toThrow('parent traversal')
     expect(() => validatePathSegment('../etc')).toThrow('parent traversal')
     expect(() => validatePathSegment('foo/../../bar')).toThrow('parent traversal')
   })
 
-  test('rejects absolute path', () => {
+  it('rejects absolute path', () => {
     expect(() => validatePathSegment('/etc/passwd')).toThrow('absolute')
   })
 
-  test('rejects Windows absolute path', () => {
+  it('rejects Windows absolute path', () => {
     expect(() => validatePathSegment('C:\\Windows')).toThrow('absolute')
   })
 })
@@ -84,20 +84,20 @@ describe('validatePathSegment', () => {
 // ── isPathInsideRoot ────────────────────────────────────────────
 
 describe('isPathInsideRoot', () => {
-  test('path under root is inside', () => {
+  it('path under root is inside', () => {
     expect(isPathInsideRoot('/root/sub', '/root')).toBe(true)
     expect(isPathInsideRoot('/a/b/c/d', '/a')).toBe(true)
   })
 
-  test('path equal to root is inside', () => {
+  it('path equal to root is inside', () => {
     expect(isPathInsideRoot('/root', '/root')).toBe(true)
   })
 
-  test('path outside root is blocked', () => {
+  it('path outside root is blocked', () => {
     expect(isPathInsideRoot('/other', '/root')).toBe(false)
   })
 
-  test('path that is prefix but not ancestor is blocked', () => {
+  it('path that is prefix but not ancestor is blocked', () => {
     expect(isPathInsideRoot('/root-other/sub', '/root')).toBe(false)
     expect(isPathInsideRoot('/ro', '/root')).toBe(false)
   })
@@ -116,40 +116,40 @@ describe('validateWorkingSet', () => {
 
   // ── Positive: should accept ──
 
-  test('accepts working set under project dir', () => {
+  it('accepts working set under project dir', () => {
     // When working_set is under the project (resolved against cwd),
     // and cwd === project dir, it should pass.
     expect(() => validateWorkingSet('.claude/skills', cwd)).not.toThrow()
   })
 
-  test('accepts working set as subdirectory of project', () => {
+  it('accepts working set as subdirectory of project', () => {
     // Must be a real subdirectory so resolve() produces <cwd>/subdir
     expect(() => validateWorkingSet('src', cwd)).not.toThrow()
   })
 
   // ── Negative: should reject ──
 
-  test('rejects forbidden system root /', () => {
+  it('rejects forbidden system root /', () => {
     expect(() => validateWorkingSet('/', '/home/user/project')).toThrow('forbidden system path')
   })
 
-  test('rejects forbidden /etc', () => {
+  it('rejects forbidden /etc', () => {
     expect(() => validateWorkingSet('/etc', '/home/user/project')).toThrow('forbidden system path')
   })
 
-  test('rejects forbidden /usr', () => {
+  it('rejects forbidden /usr', () => {
     expect(() => validateWorkingSet('/usr', '/home/user/project')).toThrow('forbidden system path')
   })
 
-  test('rejects forbidden /tmp', () => {
+  it('rejects forbidden /tmp', () => {
     expect(() => validateWorkingSet('/tmp', '/home/user/project')).toThrow('forbidden system path')
   })
 
-  test('rejects forbidden /home', () => {
+  it('rejects forbidden /home', () => {
     expect(() => validateWorkingSet('/home', cwd)).toThrow('forbidden system path')
   })
 
-  test('accepts hidden directory outside project (agent convention)', () => {
+  it('accepts hidden directory outside project (agent convention)', () => {
     // Hidden-dir check: basename starts with '.' → allowed outside project.
     // Note: only checks the LAST segment. /tmp/.claude/skills would fail
     // (last segment = 'skills'). This is a known limitation — real-world
@@ -158,7 +158,7 @@ describe('validateWorkingSet', () => {
     expect(() => validateWorkingSet('/tmp/.agents', '/home/user/project')).not.toThrow()
   })
 
-  test('rejects non-hidden dir outside project', () => {
+  it('rejects non-hidden dir outside project', () => {
     expect(() => validateWorkingSet('/tmp/my-skills', '/home/user/project')).toThrow('not a hidden directory')
   })
 })

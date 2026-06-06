@@ -1,8 +1,8 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { fetchWithProxy } from './fetch-with-proxy.js'
 
 describe('fetchWithProxy', () => {
-  test('no proxy: delegates to native fetch', async () => {
+  it('no proxy: delegates to native fetch', async () => {
     const mockFetch = async () => new Response('direct-body')
     const res = await fetchWithProxy('https://example.com', undefined, {
       fetch: mockFetch,
@@ -11,7 +11,7 @@ describe('fetchWithProxy', () => {
     expect(await res.text()).toBe('direct-body')
   })
 
-  test('with LYTHOS_SOCKS_PROXY: routes to curl via execFileSync', async () => {
+  it('with LYTHOS_SOCKS_PROXY: routes to curl via execFileSync', async () => {
     const calls: Array<{ cmd: string; args: string[] }> = []
     const mockExec = (cmd: string, args: string[]) => {
       calls.push({ cmd, args })
@@ -31,7 +31,7 @@ describe('fetchWithProxy', () => {
     expect(calls[0].args).toContain('https://example.com')
   })
 
-  test('proxy without socks5:// prefix: auto-prefixes', async () => {
+  it('proxy without socks5:// prefix: auto-prefixes', async () => {
     const calls: Array<{ args: string[] }> = []
     const mockExec = (_cmd: string, args: string[]) => {
       calls.push({ args })

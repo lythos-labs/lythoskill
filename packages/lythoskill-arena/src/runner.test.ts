@@ -1,9 +1,9 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { buildArenaPrompt, formatPlanOutput, runArenaFromToml, type ArenaIO } from './runner'
 import { buildExecutionPlan, parseArenaToml } from './arena-toml'
 
 describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
-  test('includes CWD, Deck, and output directory', () => {
+  it('includes CWD, Deck, and output directory', () => {
     const prompt = buildArenaPrompt({
       brief: 'Write a hello world function',
       cwd: '/tmp/arena-cell',
@@ -14,7 +14,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).toContain('Produce output to: /tmp/arena-cell/')
   })
 
-  test('includes decision-log.jsonl mandatory instructions', () => {
+  it('includes decision-log.jsonl mandatory instructions', () => {
     const prompt = buildArenaPrompt({
       brief: 'test',
       cwd: '/tmp/arena-cell',
@@ -27,7 +27,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).toContain('reason (why)')
   })
 
-  test('includes robustness and tools instructions', () => {
+  it('includes robustness and tools instructions', () => {
     const prompt = buildArenaPrompt({
       brief: 'test',
       cwd: '/tmp/arena-cell',
@@ -38,7 +38,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).toContain('.claude/skills/')
   })
 
-  test('task brief appears at the end', () => {
+  it('task brief appears at the end', () => {
     const prompt = buildArenaPrompt({
       brief: 'Generate a dark-mode CSS theme',
       cwd: '/tmp/arena-cell',
@@ -54,7 +54,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(briefIdx).toBeGreaterThan(toolsIdx)
   })
 
-  test('outputDir overrides default output path', () => {
+  it('outputDir overrides default output path', () => {
     const prompt = buildArenaPrompt({
       brief: 'test',
       cwd: '/tmp/arena-cell',
@@ -64,7 +64,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).toContain('Produce output to: /custom/output/')
   })
 
-  test('preflightReport included when provided', () => {
+  it('preflightReport included when provided', () => {
     const prompt = buildArenaPrompt({
       brief: 'test',
       cwd: '/tmp/arena-cell',
@@ -75,7 +75,7 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).toContain('✅ 3 skills linked, 0 missing')
   })
 
-  test('no preflight section when report not provided', () => {
+  it('no preflight section when report not provided', () => {
     const prompt = buildArenaPrompt({
       brief: 'test',
       cwd: '/tmp/arena-cell',
@@ -84,14 +84,14 @@ describe('buildArenaPrompt — plan-mode (pure, no IO)', () => {
     expect(prompt).not.toContain('Preflight:')
   })
 
-  test('prompt is deterministic — same inputs = same output', () => {
+  it('prompt is deterministic — same inputs = same output', () => {
     const opts = { brief: 'test', cwd: '/tmp/a', deckPath: '/tmp/d.toml' }
     expect(buildArenaPrompt(opts)).toBe(buildArenaPrompt(opts))
   })
 })
 
 describe('runArenaFromToml — dry-run mode (no fs/spawn/agent calls)', () => {
-  test('returns plan without executing cells', async () => {
+  it('returns plan without executing cells', async () => {
     const toml = parseArenaToml(`
 [arena]
 task = "Write a hello world function"
@@ -125,7 +125,7 @@ deck = "/tmp/deck.toml"
     expect(logs.some(l => l.includes('Dry-run'))).toBe(true)
   })
 
-  test('dry-run does not call io.mkdir or io.agentSpawn', async () => {
+  it('dry-run does not call io.mkdir or io.agentSpawn', async () => {
     const toml = parseArenaToml(`
 [arena]
 task = "Write a hello world function"
@@ -164,7 +164,7 @@ deck = "/tmp/deck.toml"
 })
 
 describe('runArenaFromToml — single cell execution with mock agentSpawn', () => {
-  test('executes one cell and writes outputs via io', async () => {
+  it('executes one cell and writes outputs via io', async () => {
     const toml = parseArenaToml(`
 [arena]
 task = "Write a hello world function"
@@ -234,7 +234,7 @@ deck = "/tmp/deck.toml"
 })
 
 describe('runArenaFromToml — error recovery path', () => {
-  test('cell exception produces ERROR verdict and continues', async () => {
+  it('cell exception produces ERROR verdict and continues', async () => {
     const toml = parseArenaToml(`
 [arena]
 task = "Write a hello world function"
@@ -296,7 +296,7 @@ deck = "/tmp/deck.toml"
     expect(verdict.reason).toContain('Agent spawn failed')
   })
 
-  test('spawn non-zero exit logs warning but continues', async () => {
+  it('spawn non-zero exit logs warning but continues', async () => {
     const toml = parseArenaToml(`
 [arena]
 task = "Write a hello world function"

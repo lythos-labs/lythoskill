@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { fetchRepoTree, type FetchFn, type TreeEntry } from './github-tree'
 
 function mockFetch(impl: (url: string, init?: RequestInit) => {
@@ -18,7 +18,7 @@ function mockFetch(impl: (url: string, init?: RequestInit) => {
 }
 
 describe('fetchRepoTree', () => {
-  test('200 → ok with entries', async () => {
+  it('200 → ok with entries', async () => {
     const entries: TreeEntry[] = [
       { path: 'README.md', type: 'blob', sha: 'a' },
       { path: 'skills/pdf/SKILL.md', type: 'blob', sha: 'b' },
@@ -34,7 +34,7 @@ describe('fetchRepoTree', () => {
     expect(res.truncated).toBe(false)
   })
 
-  test('200 with truncated', async () => {
+  it('200 with truncated', async () => {
     const fetch = mockFetch(() => ({
       status: 200,
       body: { tree: [], truncated: true },
@@ -43,14 +43,14 @@ describe('fetchRepoTree', () => {
     expect(res.truncated).toBe(true)
   })
 
-  test('404 → not-found', async () => {
+  it('404 → not-found', async () => {
     const fetch = mockFetch(() => ({ status: 404 }))
     const res = await fetchRepoTree('github.com', 'nope', 'nope', 'HEAD', fetch)
     expect(res.status).toBe('not-found')
     expect(res.httpStatus).toBe(404)
   })
 
-  test('403 with X-RateLimit-Remaining: 0 → rate-limited', async () => {
+  it('403 with X-RateLimit-Remaining: 0 → rate-limited', async () => {
     const fetch = mockFetch(() => ({
       status: 403,
       headers: { 'X-RateLimit-Remaining': '0' },
@@ -59,26 +59,26 @@ describe('fetchRepoTree', () => {
     expect(res.status).toBe('rate-limited')
   })
 
-  test('403 without rate-limit headers → private', async () => {
+  it('403 without rate-limit headers → private', async () => {
     const fetch = mockFetch(() => ({ status: 403 }))
     const res = await fetchRepoTree('github.com', 'o', 'r', 'HEAD', fetch)
     expect(res.status).toBe('private')
   })
 
-  test('network error → network-error', async () => {
+  it('network error → network-error', async () => {
     const fetch = mockFetch(() => ({ status: 0, error: new Error('ENOTFOUND') }))
     const res = await fetchRepoTree('github.com', 'o', 'r', 'HEAD', fetch)
     expect(res.status).toBe('network-error')
     expect(res.message).toContain('ENOTFOUND')
   })
 
-  test('non-github host → unsupported-host', async () => {
+  it('non-github host → unsupported-host', async () => {
     const fetch = mockFetch(() => ({ status: 200 })) // would be ok if fetched
     const res = await fetchRepoTree('gitlab.com', 'o', 'r', 'HEAD', fetch)
     expect(res.status).toBe('unsupported-host')
   })
 
-  test('default ref is HEAD', async () => {
+  it('default ref is HEAD', async () => {
     let capturedUrl = ''
     const fetch = mockFetch((url) => {
       capturedUrl = url
@@ -88,7 +88,7 @@ describe('fetchRepoTree', () => {
     expect(capturedUrl).toContain('/trees/HEAD?recursive=1')
   })
 
-  test('explicit ref is honored', async () => {
+  it('explicit ref is honored', async () => {
     let capturedUrl = ''
     const fetch = mockFetch((url) => {
       capturedUrl = url

@@ -80,12 +80,12 @@ describe('findSkillDir', () => {
 // ── buildSkillDirCandidates (pure) ──────────────────────────────
 
 describe('buildSkillDirCandidates', () => {
-  test('with skill name: returns skills/<name> then direct', () => {
+  it('with skill name: returns skills/<name> then direct', () => {
     const candidates = buildSkillDirCandidates('/repo', 'my-skill')
     expect(candidates).toEqual(['/repo/skills/my-skill', '/repo/my-skill'])
   })
 
-  test('without skill name: returns repo root then skills/', () => {
+  it('without skill name: returns repo root then skills/', () => {
     const candidates = buildSkillDirCandidates('/repo', null)
     expect(candidates).toEqual(['/repo', '/repo/skills'])
   })

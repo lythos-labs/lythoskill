@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'bun:test'
 import { fetchDeckUrl, type FetchDeckIO } from './resolve-deck.js'
 
 describe('fetchDeckUrl', () => {
@@ -19,14 +19,14 @@ describe('fetchDeckUrl', () => {
     written.length = 0
   })
 
-  test('fetch happy path: writes file on success', async () => {
+  it('fetch happy path: writes file on success', async () => {
     const io = createMockIO()
     await fetchDeckUrl('https://example.com/deck.toml', io)
     expect(written).toHaveLength(1)
     expect(written[0].content).toBe('deck content')
   })
 
-  test('with proxy: intercepts through fetch deps', async () => {
+  it('with proxy: intercepts through fetch deps', async () => {
     const io = createMockIO({
       fetch: async () => new Response('proxy deck content'),
     })
@@ -35,7 +35,7 @@ describe('fetchDeckUrl', () => {
     expect(written[0].content).toBe('proxy deck content')
   })
 
-  test('file already exists: refuses to overwrite', async () => {
+  it('file already exists: refuses to overwrite', async () => {
     const io = createMockIO({ existsSync: () => true })
     await expect(fetchDeckUrl('https://example.com/deck.toml', io)).rejects.toThrow(
       /Refusing to overwrite/,

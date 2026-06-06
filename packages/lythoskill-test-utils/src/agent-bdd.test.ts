@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { mkdirSync, writeFileSync, rmSync, existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parseAgentMd, runAgentScenario } from './agent-bdd'
@@ -6,7 +6,7 @@ import type { AgentAdapter } from './agents/types'
 import type { JudgeInput } from './schema'
 
 describe('parseAgentMd', () => {
-  test('parses frontmatter fields (name, description, timeout)', () => {
+  it('parses frontmatter fields (name, description, timeout)', () => {
     const content = `---
 name: "Test scenario"
 description: A sample scenario
@@ -23,7 +23,7 @@ Do something useful.
     expect(result.when).toBe('Do something useful.')
   })
 
-  test('defaults for missing frontmatter fields', () => {
+  it('defaults for missing frontmatter fields', () => {
     const content = `---
 ---
 
@@ -36,15 +36,15 @@ Just do it.
     expect(result.timeout).toBe(30000)
   })
 
-  test('throws on missing frontmatter', () => {
+  it('throws on missing frontmatter', () => {
     expect(() => parseAgentMd('# Not frontmatter\n\n## When\n')).toThrow('Invalid .agent.md: missing frontmatter')
   })
 
-  test('throws on unclosed frontmatter', () => {
+  it('throws on unclosed frontmatter', () => {
     expect(() => parseAgentMd('---\nname: test\n## When\n')).toThrow('Invalid .agent.md: frontmatter not closed')
   })
 
-  test('throws on missing ## When section', () => {
+  it('throws on missing ## When section', () => {
     const content = `---
 name: test
 ---
@@ -55,7 +55,7 @@ Some setup
     expect(() => parseAgentMd(content)).toThrow('Invalid .agent.md: missing ## When')
   })
 
-  test('## Judge section is IGNORED (no longer regex-extracted)', () => {
+  it('## Judge section is IGNORED (no longer regex-extracted)', () => {
     const content = `---
 name: Judged scenario
 ---
@@ -78,7 +78,7 @@ Verify the output is correct.
     expect(result.then).toEqual(['Result should be correct'])
   })
 
-  test('empty judge (always — ## Judge not parsed)', () => {
+  it('empty judge (always — ## Judge not parsed)', () => {
     const content = `---
 name: No judge
 ---
@@ -91,7 +91,7 @@ Just run it.
     expect(result.then).toEqual([])
   })
 
-  test('parses tool skills from ## Given with alias (localhost) syntax', () => {
+  it('parses tool skills from ## Given with alias (localhost) syntax', () => {
     const content = `---
 name: Localhost test
 ---
@@ -110,7 +110,7 @@ Do stuff.
     expect(tool['other-skill']).toEqual({ path: 'github.com/foo/bar/other-skill' })
   })
 
-  test('parses tool skills from ## Given without alias', () => {
+  it('parses tool skills from ## Given without alias', () => {
     const content = `---
 name: Simple test
 ---
@@ -142,7 +142,7 @@ describe('runAgentScenario', () => {
     },
   }
 
-  test('runs scenario end-to-end with mock agent, no judge (no scenario.judge)', async () => {
+  it('runs scenario end-to-end with mock agent, no judge (no scenario.judge)', async () => {
     const baseDir = join('/tmp', 'agent-bdd-test-' + Date.now())
     const agentMdPath = join(baseDir, 'test.agent.md')
     mkdirSync(baseDir, { recursive: true })
@@ -185,7 +185,7 @@ Please say "task completed".
     rmSync(baseDir, { recursive: true, force: true })
   })
 
-  test('runs scenario with judgeInput override (external, from arena.toml)', async () => {
+  it('runs scenario with judgeInput override (external, from arena.toml)', async () => {
     const baseDir = join('/tmp', 'agent-bdd-judge-override-' + Date.now())
     const agentMdPath = join(baseDir, 'judge-test.agent.md')
     mkdirSync(baseDir, { recursive: true })

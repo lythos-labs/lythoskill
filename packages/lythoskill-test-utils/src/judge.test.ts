@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { buildJudgePrompt, runLLMJudge } from './judge'
 import type { JudgeInput, Evidence } from './schema'
 import type { AgentAdapter } from './agents/types'
@@ -27,7 +27,7 @@ function makeCheckpoints(): CheckpointEntry[] {
 }
 
 describe('buildJudgePrompt', () => {
-  test('includes role boundary, TASK CONTEXT (not invocation), criteria, and evidence', () => {
+  it('includes role boundary, TASK CONTEXT (not invocation), criteria, and evidence', () => {
     const prompt = buildJudgePrompt(makeInput(), makeEvidence(), makeCheckpoints())
 
     expect(prompt).toContain('TEST JUDGE')
@@ -39,7 +39,7 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('output.html')
   })
 
-  test('handles empty task_context', () => {
+  it('handles empty task_context', () => {
     const prompt = buildJudgePrompt(
       makeInput({ task_context: '' }),
       makeEvidence(),
@@ -48,7 +48,7 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('(no additional context)')
   })
 
-  test('handles empty criteria', () => {
+  it('handles empty criteria', () => {
     const prompt = buildJudgePrompt(
       makeInput({ criteria: '' }),
       makeEvidence(),
@@ -59,7 +59,7 @@ describe('buildJudgePrompt', () => {
 
   // Gap I fixed: precisely assert stdout truncation at 8000 chars
   // Uses 'Q' to avoid false positives from template text ('executor', 'extra', 'text', 'sandbox')
-  test('truncates large stdout to 8000 characters', () => {
+  it('truncates large stdout to 8000 characters', () => {
     const long = 'Q'.repeat(10000)
     const prompt = buildJudgePrompt(
       makeInput(),
@@ -71,7 +71,7 @@ describe('buildJudgePrompt', () => {
   })
 
   // Gap H fixed: negative test — task invocation text must NOT reach judge prompt
-  test('NEVER contains task invocation text (scenario.when)', () => {
+  it('NEVER contains task invocation text (scenario.when)', () => {
     // Even if criteria or task_context were accidentally contaminated with
     // a typical task instruction pattern, the prompt structure itself prevents
     // the "TASK UNDER EVALUATION" framing that caused the T6 hijacking bug.
@@ -89,7 +89,7 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('DEFENSE')
   })
 
-  test('artifact_files list rendered in prompt', () => {
+  it('artifact_files list rendered in prompt', () => {
     const prompt = buildJudgePrompt(
       makeInput(),
       makeEvidence({ artifact_files: ['out.html', 'src/data.json'] }),
@@ -99,7 +99,7 @@ describe('buildJudgePrompt', () => {
     expect(prompt).toContain('src/data.json')
   })
 
-  test('empty artifact_files shows no-files message', () => {
+  it('empty artifact_files shows no-files message', () => {
     const prompt = buildJudgePrompt(
       makeInput(),
       makeEvidence({ artifact_files: [] }),
@@ -110,7 +110,7 @@ describe('buildJudgePrompt', () => {
 })
 
 describe('runLLMJudge', () => {
-  test('parses PASS verdict from JSON output', async () => {
+  it('parses PASS verdict from JSON output', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -129,7 +129,7 @@ describe('runLLMJudge', () => {
     expect(result.error).toBeUndefined()
   })
 
-  test('parses FAIL verdict from JSON output', async () => {
+  it('parses FAIL verdict from JSON output', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -146,7 +146,7 @@ describe('runLLMJudge', () => {
     expect(result.verdict!.verdict).toBe('FAIL')
   })
 
-  test('extracts JSON from markdown fences', async () => {
+  it('extracts JSON from markdown fences', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -163,7 +163,7 @@ describe('runLLMJudge', () => {
     expect(result.verdict!.verdict).toBe('PASS')
   })
 
-  test('returns ERROR verdict for unparseable output', async () => {
+  it('returns ERROR verdict for unparseable output', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -182,7 +182,7 @@ describe('runLLMJudge', () => {
     expect(result.verdict!.error).toBeTruthy()
   })
 
-  test('returns ERROR verdict for invalid verdict value', async () => {
+  it('returns ERROR verdict for invalid verdict value', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -201,7 +201,7 @@ describe('runLLMJudge', () => {
   })
 
   // Gap J: normalizeVerdictJson branch coverage — notes → reason
-  test('normalizes notes field into reason', async () => {
+  it('normalizes notes field into reason', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -220,7 +220,7 @@ describe('runLLMJudge', () => {
   })
 
   // Gap J: normalizeVerdictJson branch coverage — summary → reason
-  test('normalizes summary field into reason', async () => {
+  it('normalizes summary field into reason', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {
@@ -238,7 +238,7 @@ describe('runLLMJudge', () => {
   })
 
   // Gap J: normalizeVerdictJson branch coverage — criteria object → array
-  test('converts nested criteria object into array', async () => {
+  it('converts nested criteria object into array', async () => {
     const adapter: AgentAdapter = {
       name: 'mock',
       async spawn() {

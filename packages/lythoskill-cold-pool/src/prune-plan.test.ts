@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, writeFileSync, rmSync, mkdtempSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -48,20 +48,20 @@ describe('buildPrunePlan — plan-mode (IO via ColdPool + test filesystem)', () 
     rmSync(root, { recursive: true, force: true })
   })
 
-  test('identifies unreferenced repos as prune candidates', () => {
+  it('identifies unreferenced repos as prune candidates', () => {
     const plan = buildPrunePlan(root)
     expect(plan.candidates.length).toBe(1)
     expect(plan.candidates[0].repoRel).toBe('github.com/org/repo-b')
   })
 
-  test('does NOT flag actively referenced repos', () => {
+  it('does NOT flag actively referenced repos', () => {
     const plan = buildPrunePlan(root)
     const rels = plan.candidates.map(c => c.repoRel)
     expect(rels).not.toContain('github.com/org/repo-a')
     expect(rels).not.toContain('github.com/org/repo-c')
   })
 
-  test('empty cold pool → empty plan', () => {
+  it('empty cold pool → empty plan', () => {
     const emptyDir = mkdtempSync(join(tmpdir(), 'prune-empty-'))
     const plan = buildPrunePlan(emptyDir)
     expect(plan.candidates).toEqual([])
@@ -69,7 +69,7 @@ describe('buildPrunePlan — plan-mode (IO via ColdPool + test filesystem)', () 
     rmSync(emptyDir, { recursive: true, force: true })
   })
 
-  test('plan includes coldPoolPath and totalSize', () => {
+  it('plan includes coldPoolPath and totalSize', () => {
     const plan = buildPrunePlan(root)
     expect(plan.coldPoolPath).toBe(root)
     expect(plan.totalSize).toBeGreaterThan(0)
@@ -77,7 +77,7 @@ describe('buildPrunePlan — plan-mode (IO via ColdPool + test filesystem)', () 
 })
 
 describe('executePrunePlan — plan-mode (IO injected)', () => {
-  test('calls delete for each candidate', () => {
+  it('calls delete for each candidate', () => {
     const deleted: string[] = []
     const plan = {
       coldPoolPath: '/pool',
@@ -97,7 +97,7 @@ describe('executePrunePlan — plan-mode (IO injected)', () => {
     expect(results[1].deleted).toBe(true)
   })
 
-  test('logs count and total size', () => {
+  it('logs count and total size', () => {
     const logs: string[] = []
     executePrunePlan({
       coldPoolPath: '/pool',
@@ -112,7 +112,7 @@ describe('executePrunePlan — plan-mode (IO injected)', () => {
     expect(joined).toContain('500')
   })
 
-  test('skips delete when candidates array empty', () => {
+  it('skips delete when candidates array empty', () => {
     let called = false
     const results = executePrunePlan(
       { coldPoolPath: '/pool', candidates: [], totalSize: 0 },

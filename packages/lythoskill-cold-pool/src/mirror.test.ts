@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
 import { probeConnectivity } from './mirror.js'
 
 describe('probeConnectivity', () => {
@@ -51,7 +51,7 @@ describe('probeConnectivity', () => {
   }
 
   // ── Tracer Bullet ──
-  test('direct reachable → returns direct path', async () => {
+  it('direct reachable → returns direct path', async () => {
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 200 })],
@@ -68,7 +68,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 2 ──
-  test('direct fails, user mirror ok → returns mirror path', async () => {
+  it('direct fails, user mirror ok → returns mirror path', async () => {
     process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     mockFetch(
       new Map([
@@ -87,7 +87,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 3 ──
-  test('all paths fail → returns undefined', async () => {
+  it('all paths fail → returns undefined', async () => {
     mockFetch(new Map())
 
     const result = await probeConnectivity('https://example.com/skill')
@@ -96,7 +96,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 4 ──
-  test('404 is treated as reachable (server alive)', async () => {
+  it('404 is treated as reachable (server alive)', async () => {
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 404 })],
@@ -109,7 +109,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 5: Racing behavior ──
-  test('probes race concurrently, not sequentially', async () => {
+  it('probes race concurrently, not sequentially', async () => {
     process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     const start = performance.now()
 
@@ -131,7 +131,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 6: No user mirror set → only probes direct ──
-  test('without user mirror, only probes direct', async () => {
+  it('without user mirror, only probes direct', async () => {
     mockFetch(
       new Map([
         ['https://example.com/skill', new Response(null, { status: 200 })],
@@ -146,7 +146,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 7: Timeout honored ──
-  test('timeout aborts slow probes', async () => {
+  it('timeout aborts slow probes', async () => {
     globalThis.fetch = async (_input, init?) => {
       return new Promise((_, reject) => {
         const timer = setTimeout(
@@ -169,7 +169,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 8: SOCKS proxy routing ──
-  test('SOCKS proxy set, curl succeeds → returns direct path', async () => {
+  it('SOCKS proxy set, curl succeeds → returns direct path', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
     const execCalls: Array<{ file: string; args: string[] }> = []
 
@@ -193,7 +193,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 9: SOCKS proxy with socks5:// prefix ──
-  test('SOCKS proxy already has socks5:// prefix → does not double-prefix', async () => {
+  it('SOCKS proxy already has socks5:// prefix → does not double-prefix', async () => {
     process.env.LYTHOS_SOCKS_PROXY = 'socks5://proxy.example.com:1080'
     const execCalls: Array<{ file: string; args: string[] }> = []
 
@@ -210,7 +210,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 10: SOCKS proxy fails → no automatic unproxied fallback ──
-  test('SOCKS proxy fails → no automatic unproxied fallback', async () => {
+  it('SOCKS proxy fails → no automatic unproxied fallback', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
 
     const result = await probeConnectivity('https://example.com/skill', 3000, {
@@ -228,7 +228,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Vertical Slice 11: SOCKS proxy only affects direct, mirror still works ──
-  test('SOCKS proxy fails but mirror succeeds', async () => {
+  it('SOCKS proxy fails but mirror succeeds', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
     process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
     const execCalls: Array<{ file: string; args: string[] }> = []
@@ -253,7 +253,7 @@ describe('probeConnectivity', () => {
   })
 
   // ── Backward compat: legacy env var name still works ──
-  test('LYTHOSKILL_GH_MIRROR (legacy) still works with deprecation warning', async () => {
+  it('LYTHOSKILL_GH_MIRROR (legacy) still works with deprecation warning', async () => {
     // Ensure new name is not set
     delete process.env.LYTHOS_GH_MIRROR
     process.env.LYTHOSKILL_GH_MIRROR = 'https://legacy-mirror.example.com'

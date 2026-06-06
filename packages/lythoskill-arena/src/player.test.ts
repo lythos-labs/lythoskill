@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { resolvePlayer, resolveSides, groupBySide, totalRuns } from './player'
 import { parseArenaToml } from './arena-toml'
 
@@ -20,29 +20,29 @@ deck = "./decks/rich.toml"
 `)
 
 describe('resolvePlayer', () => {
-  test('maps claude-code → claude', () => {
+  it('maps claude-code → claude', () => {
     expect(resolvePlayer('claude-code')).toBe('claude-sdk')
   })
 
-  test('maps Claude → claude (case insensitive)', () => {
+  it('maps Claude → claude (case insensitive)', () => {
     expect(resolvePlayer('Claude')).toBe('claude-sdk')
   })
 
-  test('maps kimi → kimi', () => {
+  it('maps kimi → kimi', () => {
     expect(resolvePlayer('kimi')).toBe('kimi')
   })
 
-  test('passes through unknown player names', () => {
+  it('passes through unknown player names', () => {
     expect(resolvePlayer('expert-architect')).toBe('expert-architect')
   })
 
-  test('trims whitespace', () => {
+  it('trims whitespace', () => {
     expect(resolvePlayer('  claude-code  ')).toBe('claude-sdk')
   })
 })
 
 describe('resolveSides', () => {
-  test('resolves all sides in arena.toml', () => {
+  it('resolves all sides in arena.toml', () => {
     const sides = resolveSides(toml)
     expect(sides).toHaveLength(2)
     expect(sides[0].platform).toBe('claude-sdk')
@@ -50,7 +50,7 @@ describe('resolveSides', () => {
     expect(sides[0].playerName).toBe('claude-code')
   })
 
-  test('preserves side config', () => {
+  it('preserves side config', () => {
     const sides = resolveSides(toml)
     expect(sides[0].side.name).toBe('minimal')
     expect(sides[0].side.deck).toBe('./decks/minimal.toml')
@@ -58,7 +58,7 @@ describe('resolveSides', () => {
 })
 
 describe('groupBySide', () => {
-  test('groups by side name with run count', () => {
+  it('groups by side name with run count', () => {
     const groups = groupBySide(toml)
     expect(groups).toHaveLength(2)
     expect(groups[0].runs).toBe(3) // runs_per_side
@@ -66,7 +66,7 @@ describe('groupBySide', () => {
     expect(groups[0].platform).toBe('claude-sdk')
   })
 
-  test('control flag preserved', () => {
+  it('control flag preserved', () => {
     const controlToml = parseArenaToml(`
 [arena]
 task = "x"
@@ -89,7 +89,7 @@ control = true
 })
 
 describe('totalRuns', () => {
-  test('calculates sides × runs_per_side', () => {
+  it('calculates sides × runs_per_side', () => {
     expect(totalRuns(toml)).toBe(6) // 2 sides × 3 runs
   })
 })

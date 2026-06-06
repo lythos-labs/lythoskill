@@ -1,10 +1,10 @@
-import { describe, test, expect, spyOn } from 'bun:test'
+import { describe, it, expect, spyOn } from 'bun:test'
 import { useAgent } from './agents'
 import { buildToolPrompt, buildClaudeCommand, buildCleanEnv, extractJson, type SpawnCommand } from './agents/claude'
 import { runCli } from './bdd-runner'
 
 describe('runCli with injectable spawn', () => {
-  test('uses mock spawn to verify command building', () => {
+  it('uses mock spawn to verify command building', () => {
     const captured: { cmd: string; args: string[]; cwd: string }[] = []
     const mockSpawn = (cmd: string, args: string[], opts: { cwd: string }) => {
       captured.push({ cmd, args, cwd: opts.cwd })
@@ -20,7 +20,7 @@ describe('runCli with injectable spawn', () => {
     expect(captured[0].cwd).toBe('/tmp/test')
   })
 
-  test('mock spawn can simulate errors', () => {
+  it('mock spawn can simulate errors', () => {
     const mockSpawn = () => ({ status: 1, stdout: '', stderr: 'command failed' })
     const result = runCli('/tmp', ['bad-command'], mockSpawn)
     expect(result.code).toBe(1)
@@ -29,7 +29,7 @@ describe('runCli with injectable spawn', () => {
 })
 
 describe('buildClaudeCommand', () => {
-  test('produces shell command with redirect: claude -p --output-format json ... < promptfile', () => {
+  it('produces shell command with redirect: claude -p --output-format json ... < promptfile', () => {
     const cmd = buildClaudeCommand({ brief: 'say ok', cwd: '/tmp' })
     expect(cmd.cmd).toBe('sh')
     expect(cmd.args[0]).toBe('-c')
@@ -47,33 +47,33 @@ describe('buildClaudeCommand', () => {
     expect(cmd.cwd).toBe('/tmp')
   })
 
-  test('brief text is stored in stdin field (written to promptFile at spawn time)', () => {
+  it('brief text is stored in stdin field (written to promptFile at spawn time)', () => {
     const cmd = buildClaudeCommand({ brief: 'write hello world', cwd: '/tmp' })
     expect(cmd.stdin).toBe('write hello world')
   })
 
-  test('env always includes FORCE_COLOR=0', () => {
+  it('env always includes FORCE_COLOR=0', () => {
     const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp' })
     expect(cmd.env.FORCE_COLOR).toBe('0')
   })
 
-  test('env merges caller-supplied env vars over FORCE_COLOR', () => {
+  it('env merges caller-supplied env vars over FORCE_COLOR', () => {
     const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp', env: { FORCE_COLOR: '1', DEBUG: '1' } })
     expect(cmd.env.FORCE_COLOR).toBe('1')  // overridden
     expect(cmd.env.DEBUG).toBe('1')         // merged
   })
 
-  test('default timeoutMs is 60000', () => {
+  it('default timeoutMs is 60000', () => {
     const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp' })
     expect(cmd.timeoutMs).toBe(60000)
   })
 
-  test('explicit timeoutMs overrides default', () => {
+  it('explicit timeoutMs overrides default', () => {
     const cmd = buildClaudeCommand({ brief: 'x', cwd: '/tmp', timeoutMs: 30000 })
     expect(cmd.timeoutMs).toBe(30000)
   })
 
-  test('command structure is valid for Bun.spawn', () => {
+  it('command structure is valid for Bun.spawn', () => {
     const cmd = buildClaudeCommand({ brief: 'say hi', cwd: '/tmp/test' })
     // Verify every field Bun.spawn needs is present and well-typed
     expect(typeof cmd.cmd).toBe('string')
@@ -94,76 +94,76 @@ describe('buildClaudeCommand', () => {
 })
 
 describe('buildCleanEnv', () => {
-  test('strips CLAUDECODE', () => {
+  it('strips CLAUDECODE', () => {
     const env = buildCleanEnv()
     expect(env.CLAUDECODE).toBeUndefined()
   })
 
-  test('strips CLAUDE_CODE_* prefixed vars', () => {
+  it('strips CLAUDE_CODE_* prefixed vars', () => {
     const env = buildCleanEnv()
     expect(env.CLAUDE_CODE_ENTRYPOINT).toBeUndefined()
     expect(env.CLAUDE_CODE_SESSION).toBeUndefined()
     expect(env.CLAUDE_CODE_PARENT_SESSION).toBeUndefined()
   })
 
-  test('preserves essential vars like PATH and HOME', () => {
+  it('preserves essential vars like PATH and HOME', () => {
     const env = buildCleanEnv()
     expect(env.PATH).toBeDefined()
     expect(env.HOME).toBeDefined()
   })
 
-  test('includes FORCE_COLOR=0 by default', () => {
+  it('includes FORCE_COLOR=0 by default', () => {
     const env = buildCleanEnv()
     expect(env.FORCE_COLOR).toBe('0')
   })
 
-  test('merges extra env vars', () => {
+  it('merges extra env vars', () => {
     const env = buildCleanEnv({ DEBUG: '1' })
     expect(env.DEBUG).toBe('1')
   })
 })
 
 describe('extractJson', () => {
-  test('parses raw JSON string', () => {
+  it('parses raw JSON string', () => {
     expect(extractJson('{"a":1}')).toEqual({ a: 1 })
   })
 
-  test('extracts JSON from ```json fence', () => {
+  it('extracts JSON from ```json fence', () => {
     expect(extractJson('```json\n{"b":2}\n```')).toEqual({ b: 2 })
   })
 
-  test('extracts JSON from bare ``` fence', () => {
+  it('extracts JSON from bare ``` fence', () => {
     expect(extractJson('```\n{"c":3}\n```')).toEqual({ c: 3 })
   })
 
-  test('extracts JSON from fence with surrounding text', () => {
+  it('extracts JSON from fence with surrounding text', () => {
     const raw = 'Here is the result:\n```json\n{"verdict":"PASS"}\n```\nHope that helps.'
     expect(extractJson(raw)).toEqual({ verdict: 'PASS' })
   })
 
-  test('throws on non-JSON input', () => {
+  it('throws on non-JSON input', () => {
     expect(() => extractJson('not json')).toThrow()
   })
 
-  test('handles nested JSON objects', () => {
+  it('handles nested JSON objects', () => {
     expect(extractJson('```json\n{"criteria":[{"name":"a","passed":true}]}\n```'))
       .toEqual({ criteria: [{ name: 'a', passed: true }] })
   })
 })
 
 describe('useAgent', () => {
-  test('returns claude adapter', () => {
+  it('returns claude adapter', () => {
     const adapter = useAgent('claude')
     expect(adapter).toBeDefined()
     expect(adapter.name).toBe('claude')
     expect(typeof adapter.spawn).toBe('function')
   })
 
-  test('throws for unknown agent', () => {
+  it('throws for unknown agent', () => {
     expect(() => useAgent('gpt-5')).toThrow('Unknown agent: "gpt-5"')
   })
 
-  test('error message lists available agents', () => {
+  it('error message lists available agents', () => {
     try {
       useAgent('cursor')
     } catch (e) {
@@ -173,7 +173,7 @@ describe('useAgent', () => {
 })
 
 describe('claude adapter spawn', () => {
-  test('handles missing claude binary gracefully', async () => {
+  it('handles missing claude binary gracefully', async () => {
     // If claude is not installed, spawn should throw a clear error
     const adapter = useAgent('claude')
     const hasClaude = !!Bun.which('claude')
@@ -185,7 +185,7 @@ describe('claude adapter spawn', () => {
     }
   })
 
-  test('enforces timeout with spawn', async () => {
+  it('enforces timeout with spawn', async () => {
     // This test validates the timeout mechanism works.
     // We can't easily mock Bun.spawn in bun:test, so we verify the adapter
     // structure and that it propagates timeoutMs to the CLI.
@@ -199,7 +199,7 @@ describe('claude adapter spawn', () => {
 })
 
 describe('buildToolPrompt', () => {
-  test('includes tool name, description, and schema', () => {
+  it('includes tool name, description, and schema', () => {
     const prompt = buildToolPrompt(
       { name: 'test_tool', description: 'A test tool', input_schema: { type: 'object', properties: {} } },
       'Please use the tool.'
@@ -210,7 +210,7 @@ describe('buildToolPrompt', () => {
     expect(prompt).toContain('"type": "object"')
   })
 
-  test('includes JSON Schema in output', () => {
+  it('includes JSON Schema in output', () => {
     const prompt = buildToolPrompt(
       { name: 'judge', description: 'Submit verdict', input_schema: { verdict: 'object' } },
       'Evaluate.'

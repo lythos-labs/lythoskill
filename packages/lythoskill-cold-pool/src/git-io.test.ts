@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
+import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -26,23 +26,23 @@ describe('detectGitRoot', () => {
   const orphanDir = join(root, 'pool/orphan')
   mkdirSync(orphanDir, { recursive: true })
 
-  test('finds .git at the same dir', () => {
+  it('finds .git at the same dir', () => {
     const r = detectGitRoot(repoDir)
     expect(r.gitRoot).toBe(resolve(repoDir))
   })
 
-  test('walks up to find .git', () => {
+  it('walks up to find .git', () => {
     const r = detectGitRoot(subDir)
     expect(r.gitRoot).toBe(resolve(repoDir))
   })
 
-  test('returns not-found when no .git in walk', () => {
+  it('returns not-found when no .git in walk', () => {
     const r = detectGitRoot(orphanDir)
     expect(r.gitRoot).toBeNull()
     expect(r.reason).toBe('not-found')
   })
 
-  test('respects coldPool boundary — outside-cold-pool when crossing out', () => {
+  it('respects coldPool boundary — outside-cold-pool when crossing out', () => {
     const isolated = mkdtempSync(join(tmpdir(), 'git-root-isolated-'))
     const inner = join(isolated, 'inner')
     const coldPool = join(isolated, 'pool')
@@ -53,7 +53,7 @@ describe('detectGitRoot', () => {
     expect(r.reason).toBe('outside-cold-pool')
   })
 
-  test('coldPool given, walking up within cold pool finds .git', () => {
+  it('coldPool given, walking up within cold pool finds .git', () => {
     const r = detectGitRoot(subDir, join(root, 'pool'))
     expect(r.gitRoot).toBe(resolve(repoDir))
   })
@@ -70,7 +70,7 @@ describe('gitClone — SOCKS proxy args', () => {
     delete process.env.LYTHOS_SOCKS_PROXY
   })
 
-  test('without LYTHOS_SOCKS_PROXY: no proxy flags in git args', () => {
+  it('without LYTHOS_SOCKS_PROXY: no proxy flags in git args', () => {
     const { mockExec, calls } = createMockExec()
     gitClone('https://github.com/example/repo.git', '/tmp/repo', undefined, mockExec)
     const call = calls.find((c) => c.args.includes('clone'))
@@ -79,7 +79,7 @@ describe('gitClone — SOCKS proxy args', () => {
     expect(call!.args).not.toContain('http.proxy')
   })
 
-  test('with LYTHOS_SOCKS_PROXY: injects -c http.proxy and -c https.proxy', () => {
+  it('with LYTHOS_SOCKS_PROXY: injects -c http.proxy and -c https.proxy', () => {
     process.env.LYTHOS_SOCKS_PROXY = 'proxy.example.com:1080'
     const { mockExec, calls } = createMockExec()
     gitClone('https://github.com/example/repo.git', '/tmp/repo', undefined, mockExec)
@@ -90,7 +90,7 @@ describe('gitClone — SOCKS proxy args', () => {
     expect(call!.args).toContain('https.proxy=socks5://proxy.example.com:1080')
   })
 
-  test('with LYTHOS_SOCKS_PROXY already including socks5://: does not double-prefix', () => {
+  it('with LYTHOS_SOCKS_PROXY already including socks5://: does not double-prefix', () => {
     process.env.LYTHOS_SOCKS_PROXY = 'socks5://proxy.example.com:1080'
     const { mockExec, calls } = createMockExec()
     gitClone('https://github.com/example/repo.git', '/tmp/repo', undefined, mockExec)
@@ -99,7 +99,7 @@ describe('gitClone — SOCKS proxy args', () => {
     expect(call!.args).not.toContain('http.proxy=socks5://socks5://proxy.example.com:1080')
   })
 
-  test('ref checkout also receives proxy flags', () => {
+  it('ref checkout also receives proxy flags', () => {
     process.env.LYTHOS_SOCKS_PROXY = 'proxy.example.com:1080'
     const { mockExec, calls } = createMockExec()
     gitClone('https://github.com/example/repo.git', '/tmp/repo', { ref: 'v1.0.0' }, mockExec)
@@ -118,7 +118,7 @@ describe('gitPull — SOCKS proxy args', () => {
     delete process.env.LYTHOS_SOCKS_PROXY
   })
 
-  test('with LYTHOS_SOCKS_PROXY: injects proxy flags', () => {
+  it('with LYTHOS_SOCKS_PROXY: injects proxy flags', () => {
     process.env.LYTHOS_SOCKS_PROXY = 'proxy.example.com:1080'
     const { mockExec, calls } = createMockExec()
     gitPull('/tmp/repo', 30000, mockExec)

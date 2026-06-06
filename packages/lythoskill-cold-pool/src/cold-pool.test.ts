@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { mkdirSync, mkdtempSync, writeFileSync, existsSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -9,12 +9,12 @@ function dir(relPath: string): DirEntry { return { relPath, isDirectory: true } 
 function file(relPath: string): DirEntry { return { relPath, isDirectory: false } }
 
 describe('ColdPool — constructor', () => {
-  test('default path when none given', () => {
+  it('default path when none given', () => {
     const pool = new ColdPool()
     expect(pool.path).toBe(DEFAULT_COLD_POOL_PATH)
   })
 
-  test('custom path is stored verbatim', () => {
+  it('custom path is stored verbatim', () => {
     const pool = new ColdPool('/tmp/custom-pool')
     expect(pool.path).toBe('/tmp/custom-pool')
   })
@@ -23,18 +23,18 @@ describe('ColdPool — constructor', () => {
 describe('ColdPool.resolveDir — pure path computation', () => {
   const pool = new ColdPool('/cold')
 
-  test('host/owner/repo', () => {
+  it('host/owner/repo', () => {
     const loc = parseLocator('github.com/anthropics/skills')!
     expect(pool.resolveDir(loc)).toBe('/cold/github.com/anthropics/skills')
   })
 
-  test('host/owner/repo/skill — skill subpath does NOT extend the dir', () => {
+  it('host/owner/repo/skill — skill subpath does NOT extend the dir', () => {
     // resolveDir returns repo dir, not skill dir. Skill subpath is for findSkillDir later.
     const loc = parseLocator('github.com/anthropics/skills/skills/pdf')!
     expect(pool.resolveDir(loc)).toBe('/cold/github.com/anthropics/skills')
   })
 
-  test('localhost form — uniform <pool>/<host>/<owner>/<repo>, no special-case', () => {
+  it('localhost form — uniform <pool>/<host>/<owner>/<repo>, no special-case', () => {
     const loc = parseLocator('localhost/me/my-skill')!
     expect(pool.resolveDir(loc)).toBe('/cold/localhost/me/my-skill')
   })
@@ -56,22 +56,22 @@ describe('ColdPool — fs-backed read accessors', () => {
 
   const pool = new ColdPool(root)
 
-  test('has() returns true for existing repo', () => {
+  it('has() returns true for existing repo', () => {
     const loc = parseLocator('github.com/owner/repo-a')!
     expect(pool.has(loc)).toBe(true)
   })
 
-  test('has() returns false for missing repo', () => {
+  it('has() returns false for missing repo', () => {
     const loc = parseLocator('github.com/owner/missing')!
     expect(pool.has(loc)).toBe(false)
   })
 
-  test('has() works for localhost form (uniform <host>/<owner>/<repo>)', () => {
+  it('has() works for localhost form (uniform <host>/<owner>/<repo>)', () => {
     const loc = parseLocator('localhost/me/skill-x')!
     expect(pool.has(loc)).toBe(true)
   })
 
-  test('list() enumerates uniform host/owner/repo across all hosts, skips hidden', () => {
+  it('list() enumerates uniform host/owner/repo across all hosts, skips hidden', () => {
     const entries = pool.list().sort()
     expect(entries).toEqual([
       join(root, 'github.com/owner/repo-a'),
@@ -80,7 +80,7 @@ describe('ColdPool — fs-backed read accessors', () => {
     ].sort())
   })
 
-  test('list() includes legacy drift entries (depth-2 SKILL.md, missing repo level) for cleanup awareness', () => {
+  it('list() includes legacy drift entries (depth-2 SKILL.md, missing repo level) for cleanup awareness', () => {
     const driftRoot = mkdtempSync(join(tmpdir(), 'cold-pool-drift-'))
     mkdirSync(join(driftRoot, 'github.com/o/r'), { recursive: true })
     mkdirSync(join(driftRoot, 'localhost/me/canonical'), { recursive: true })
@@ -99,7 +99,7 @@ describe('ColdPool — fs-backed read accessors', () => {
     expect(entries).toContain(join(driftRoot, 'localhost/legacy-name'))
   })
 
-  test('list() returns [] when path does not exist', () => {
+  it('list() returns [] when path does not exist', () => {
     const empty = new ColdPool('/no/such/path')
     expect(empty.list()).toEqual([])
   })
@@ -108,7 +108,7 @@ describe('ColdPool — fs-backed read accessors', () => {
 describe('buildListPlan — pure classification (no IO)', () => {
   const root = '/pool'
 
-  test('canonical 3-segment: host/owner/repo', () => {
+  it('canonical 3-segment: host/owner/repo', () => {
     const entries: DirEntry[] = [
       dir('github.com'),
       dir('github.com/owner'),
@@ -121,7 +121,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     ])
   })
 
-  test('skips hidden dirs', () => {
+  it('skips hidden dirs', () => {
     const entries: DirEntry[] = [
       dir('.git'),
       dir('github.com'),
@@ -136,7 +136,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     ])
   })
 
-  test('legacy depth-1: host/SKILL.md (missing owner+repo)', () => {
+  it('legacy depth-1: host/SKILL.md (missing owner+repo)', () => {
     const entries: DirEntry[] = [
       dir('legacy-skill'),
       file('legacy-skill/SKILL.md'),
@@ -147,7 +147,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     ])
   })
 
-  test('legacy depth-2: localhost/name/SKILL.md (missing repo)', () => {
+  it('legacy depth-2: localhost/name/SKILL.md (missing repo)', () => {
     const entries: DirEntry[] = [
       dir('localhost'),
       dir('localhost/legacy-name'),
@@ -159,7 +159,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     ])
   })
 
-  test('mixed canonical + legacy in same pool', () => {
+  it('mixed canonical + legacy in same pool', () => {
     const entries: DirEntry[] = [
       dir('github.com'),
       dir('github.com/owner'),
@@ -175,7 +175,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     expect(plan.entries).toContainEqual({ path: '/pool/localhost/old-skill', kind: 'legacy-depth2' })
   })
 
-  test('multiple repos under same owner', () => {
+  it('multiple repos under same owner', () => {
     const entries: DirEntry[] = [
       dir('github.com'),
       dir('github.com/owner'),
@@ -191,7 +191,7 @@ describe('buildListPlan — pure classification (no IO)', () => {
     expect(plan.entries.every(e => e.kind === 'canonical')).toBe(true)
   })
 
-  test('multiple hosts', () => {
+  it('multiple hosts', () => {
     const entries: DirEntry[] = [
       dir('github.com'),
       dir('github.com/a'),
@@ -210,11 +210,11 @@ describe('buildListPlan — pure classification (no IO)', () => {
     ])
   })
 
-  test('returns empty when root has no entries', () => {
+  it('returns empty when root has no entries', () => {
     expect(buildListPlan(root, []).entries).toEqual([])
   })
 
-  test('returns empty for hidden-only entries', () => {
+  it('returns empty for hidden-only entries', () => {
     const entries: DirEntry[] = [dir('.git'), dir('.hidden/.nested')]
     expect(buildListPlan(root, entries).entries).toEqual([])
   })
@@ -224,7 +224,7 @@ describe('ColdPool.metadata — MetadataDB integration', () => {
   const root = mkdtempSync(join(tmpdir(), 'cold-pool-meta-test-'))
   const pool = new ColdPool(root)
 
-  test('metadata is auto-created on first access (lazy-open)', () => {
+  it('metadata is auto-created on first access (lazy-open)', () => {
     expect(pool.metadata).toBeDefined()
     // Lazy-open: DB file is NOT created until first method call.
     expect(existsSync(join(root, '.cold-pool-meta.db'))).toBe(false)
@@ -233,7 +233,7 @@ describe('ColdPool.metadata — MetadataDB integration', () => {
     expect(existsSync(join(root, '.cold-pool-meta.db'))).toBe(true)
   })
 
-  test('metadata records survive round-trip', () => {
+  it('metadata records survive round-trip', () => {
     pool.metadata.recordRepoRef('github.com', 'lythos-labs', 'lythoskill', '9645fdb')
     expect(pool.metadata.getRepoRef('github.com', 'lythos-labs', 'lythoskill')).toBe('9645fdb')
   })

@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import {
   JudgeVerdict, JudgeCriterion, CheckpointEntry, AgentScenario,
   ArenaManifest, ComparativeReport, Player, DeckConfig, Metrics,
@@ -8,7 +8,7 @@ import {
 // ── JudgeVerdict ───────────────────────────────────────────────────────────
 
 describe('JudgeVerdict', () => {
-  test('round-trip: real PASS verdict from frozen artifact', () => {
+  it('round-trip: real PASS verdict from frozen artifact', () => {
     const data = {
       verdict: 'PASS' as const,
       reason: 'Checkpoint correctly reports 2 skills.',
@@ -26,7 +26,7 @@ describe('JudgeVerdict', () => {
     expect(parsed.criteria[0].passed).toBe(true)
   })
 
-  test('round-trip: real ERROR path (API noise in raw_output)', () => {
+  it('round-trip: real ERROR path (API noise in raw_output)', () => {
     const data = {
       verdict: 'ERROR' as const,
       reason: 'Judge failed after 2 attempts: parse error',
@@ -40,24 +40,24 @@ describe('JudgeVerdict', () => {
     expect(parsed.error).toBeTruthy()
   })
 
-  test('rejects non-JSON string input', () => {
+  it('rejects non-JSON string input', () => {
     expect(() => JudgeVerdict.parse('not an object')).toThrow()
   })
 
-  test('rejects invalid verdict value', () => {
+  it('rejects invalid verdict value', () => {
     expect(() => JudgeVerdict.parse({
       verdict: 'MAYBE',
       reason: 'unsure',
     })).toThrow()
   })
 
-  test('rejects missing required field (reason)', () => {
+  it('rejects missing required field (reason)', () => {
     expect(() => JudgeVerdict.parse({
       verdict: 'PASS',
     })).toThrow()
   })
 
-  test('accepts verdict with confidence score', () => {
+  it('accepts verdict with confidence score', () => {
     const parsed = JudgeVerdict.parse({
       verdict: 'PASS',
       reason: 'All good.',
@@ -67,7 +67,7 @@ describe('JudgeVerdict', () => {
     expect(parsed.confidence).toBe(95)
   })
 
-  test('rejects confidence out of range (>100)', () => {
+  it('rejects confidence out of range (>100)', () => {
     expect(() => JudgeVerdict.parse({
       verdict: 'PASS',
       reason: 'x',
@@ -79,14 +79,14 @@ describe('JudgeVerdict', () => {
 // ── JudgeCriterion ─────────────────────────────────────────────────────────
 
 describe('JudgeCriterion', () => {
-  test('round-trip from frozen artifact', () => {
+  it('round-trip from frozen artifact', () => {
     const data = { name: 'Check shape', passed: false, note: 'missing field' }
     const parsed = JudgeCriterion.parse(data)
     expect(parsed.name).toBe('Check shape')
     expect(parsed.passed).toBe(false)
   })
 
-  test('note defaults to empty string', () => {
+  it('note defaults to empty string', () => {
     const parsed = JudgeCriterion.parse({ name: 'test', passed: true })
     expect(parsed.note).toBe('')
   })
@@ -95,7 +95,7 @@ describe('JudgeCriterion', () => {
 // ── CheckpointEntry ────────────────────────────────────────────────────────
 
 describe('CheckpointEntry', () => {
-  test('round-trip: real introspection checkpoint', () => {
+  it('round-trip: real introspection checkpoint', () => {
     const data = {
       step: 'deck.introspection',
       tool: 'read',
@@ -107,7 +107,7 @@ describe('CheckpointEntry', () => {
     expect(parsed.final_state.tool_skill_count).toBe(2)
   })
 
-  test('optional fields accepted', () => {
+  it('optional fields accepted', () => {
     const data = {
       step: 'deck.add',
       tool: 'bunx @lythos/skill-deck add skill-a --cold-pool ./cold-pool',
@@ -124,7 +124,7 @@ describe('CheckpointEntry', () => {
     expect(parsed.fs_mutations![0].action).toBe('create')
   })
 
-  test('args defaults to empty array', () => {
+  it('args defaults to empty array', () => {
     const parsed = CheckpointEntry.parse({ step: 'x', tool: 'y' })
     expect(parsed.args).toEqual([])
   })
@@ -133,7 +133,7 @@ describe('CheckpointEntry', () => {
 // ── AgentScenario ──────────────────────────────────────────────────────────
 
 describe('AgentScenario', () => {
-  test('round-trip: minimal valid scenario', () => {
+  it('round-trip: minimal valid scenario', () => {
     const data = {
       name: 'Test scenario',
       when: 'Do something.',
@@ -144,11 +144,11 @@ describe('AgentScenario', () => {
     expect(parsed.given.deck).toEqual({})
   })
 
-  test('rejects missing when field', () => {
+  it('rejects missing when field', () => {
     expect(() => AgentScenario.parse({ name: 'x' })).toThrow()
   })
 
-  test('round-trip: scenario with deck config', () => {
+  it('round-trip: scenario with deck config', () => {
     const data = {
       name: 'Deck test',
       when: 'Run deck add.',
@@ -171,7 +171,7 @@ describe('AgentScenario', () => {
 // ── Arena Manifest ─────────────────────────────────────────────────────────
 
 describe('ArenaManifest', () => {
-  test('round-trip: real arena.json from playground', () => {
+  it('round-trip: real arena.json from playground', () => {
     const data = {
       id: 'arena-bdd-research-20260504',
       created_at: '2026-05-04T13:10:00+08:00',
@@ -189,7 +189,7 @@ describe('ArenaManifest', () => {
     expect(parsed.mode).toBe('decks')
   })
 
-  test('rejects fewer than 2 participants', () => {
+  it('rejects fewer than 2 participants', () => {
     expect(() => ArenaManifest.parse({
       id: 'x',
       created_at: '2026-01-01T00:00:00Z',
@@ -205,7 +205,7 @@ describe('ArenaManifest', () => {
 // ── Comparative Report ─────────────────────────────────────────────────────
 
 describe('ComparativeReport', () => {
-  test('round-trip: minimal valid report', () => {
+  it('round-trip: minimal valid report', () => {
     const data = {
       arena_id: 'arena-test-001',
       generated_at: '2026-05-04T00:00:00Z',
@@ -215,7 +215,7 @@ describe('ComparativeReport', () => {
     expect(parsed.score_matrix).toEqual([])
   })
 
-  test('round-trip: full report with scores and pareto', () => {
+  it('round-trip: full report with scores and pareto', () => {
     const data = {
       arena_id: 'arena-test-001',
       generated_at: '2026-05-04T00:00:00Z',
@@ -240,7 +240,7 @@ describe('ComparativeReport', () => {
 // ── Player ─────────────────────────────────────────────────────────────────
 
 describe('Player', () => {
-  test('round-trip: minimal player', () => {
+  it('round-trip: minimal player', () => {
     const parsed = Player.parse({ platform: 'claude-code' })
     expect(parsed.platform).toBe('claude-code')
     expect(parsed.concurrent).toBe(1) // default
@@ -250,12 +250,12 @@ describe('Player', () => {
 // ── Deck Config ────────────────────────────────────────────────────────────
 
 describe('DeckConfig', () => {
-  test('round-trip: empty deck', () => {
+  it('round-trip: empty deck', () => {
     const parsed = DeckConfig.parse({})
     expect(parsed).toEqual({})
   })
 
-  test('round-trip: deck with tool skills', () => {
+  it('round-trip: deck with tool skills', () => {
     const data = {
       tool: {
         'skill-a': { path: 'github.com/foo/bar/skill-a', role: 'BDD toolkit' },
@@ -271,7 +271,7 @@ describe('DeckConfig', () => {
 // ── Metrics ────────────────────────────────────────────────────────────────
 
 describe('Metrics', () => {
-  test('round-trip: budget DAG metrics', () => {
+  it('round-trip: budget DAG metrics', () => {
     const data = {
       scenario: 'add-skill',
       budget: { idle_timeout_ms: 30000, total_timeout_ms: 300000, max_retries: 1 },
@@ -287,7 +287,7 @@ describe('Metrics', () => {
 // ── CriterionDef ────────────────────────────────────────────────────────────
 
 describe('CriterionDef', () => {
-  test('parses full structured criterion with rubric', () => {
+  it('parses full structured criterion with rubric', () => {
     const data = {
       id: 'correctness',
       label: '功能正确性',
@@ -307,7 +307,7 @@ describe('CriterionDef', () => {
     expect(parsed.rubric![0].score).toBe(5)
   })
 
-  test('defaults for minimal fields', () => {
+  it('defaults for minimal fields', () => {
     const data = { id: 'efficiency', label: '代码效率' }
     const parsed = CriterionDef.parse(data)
     expect(parsed.description).toBe('')
@@ -316,13 +316,13 @@ describe('CriterionDef', () => {
     expect(parsed.persona).toBeUndefined()
   })
 
-  test('rejects invalid weight', () => {
+  it('rejects invalid weight', () => {
     const data = { id: 'x', label: 'X', weight: 150 }
     const result = CriterionDef.safeParse(data)
     expect(result.success).toBe(false)
   })
 
-  test('rejects rubric score out of 1-5 range', () => {
+  it('rejects rubric score out of 1-5 range', () => {
     const data = {
       id: 'x', label: 'X',
       rubric: [{ score: 0, label: 'bad', description: 'nope' }],
@@ -335,12 +335,12 @@ describe('CriterionDef', () => {
 // ── CriterionRubricLevel ────────────────────────────────────────────────────
 
 describe('CriterionRubricLevel', () => {
-  test('parses valid rubric level', () => {
+  it('parses valid rubric level', () => {
     const parsed = CriterionRubricLevel.parse({ score: 4, label: '良好', description: '大部分正确' })
     expect(parsed.score).toBe(4)
   })
 
-  test('rejects score < 1', () => {
+  it('rejects score < 1', () => {
     const result = CriterionRubricLevel.safeParse({ score: 0, label: 'x', description: 'x' })
     expect(result.success).toBe(false)
   })
@@ -349,7 +349,7 @@ describe('CriterionRubricLevel', () => {
 // ── CriteriaField (union type, backward-compatible) ─────────────────────────
 
 describe('CriteriaField', () => {
-  test('bare string auto-upgrades to default CriterionDef', () => {
+  it('bare string auto-upgrades to default CriterionDef', () => {
     const result = CriteriaField.parse('correctness')
     expect(result.id).toBe('correctness')
     expect(result.label).toBe('correctness')
@@ -357,7 +357,7 @@ describe('CriteriaField', () => {
     expect(result.weight).toBeUndefined()
   })
 
-  test('structured object passes through unchanged', () => {
+  it('structured object passes through unchanged', () => {
     const data = {
       id: 'maintainability',
       label: '可维护性',
@@ -373,7 +373,7 @@ describe('CriteriaField', () => {
     expect(result.rubric).toHaveLength(1)
   })
 
-  test('rejects non-string non-object input', () => {
+  it('rejects non-string non-object input', () => {
     const result = CriteriaField.safeParse(42)
     expect(result.success).toBe(false)
   })

@@ -1,12 +1,12 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { claudeSdkAdapter } from './index'
 
 describe('@lythos/agent-adapter-claude-sdk', () => {
-  test('adapter has correct name', () => {
+  it('adapter has correct name', () => {
     expect(claudeSdkAdapter.name).toBe('claude')
   })
 
-  test('spawn throws clear error when auth is missing', async () => {
+  it('spawn throws clear error when auth is missing', async () => {
     const hasAuth = !!process.env.ANTHROPIC_API_KEY || !!process.env.CLAUDE_CODE_SSO_TOKEN || !!process.env.CLAUDECODE
     if (!hasAuth) {
       await expect(
@@ -15,7 +15,7 @@ describe('@lythos/agent-adapter-claude-sdk', () => {
     }
   })
 
-  test('invokeTool is not implemented', async () => {
+  it('invokeTool is not implemented', async () => {
     await expect(
       claudeSdkAdapter.invokeTool?.({
         tool: { name: 'test', description: 'test', input_schema: {} },

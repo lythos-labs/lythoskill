@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { resolveRefreshConfig, detectGitRoot, buildRefreshPlan, executeRefreshPlan, type RefreshPlan, type RefreshTarget } from './refresh-plan'
@@ -15,46 +15,46 @@ path = "localhost/me/skill-b"
 `
 
 describe('resolveRefreshConfig', () => {
-  test('returns strings without throwing when no opts', () => {
+  it('returns strings without throwing when no opts', () => {
     const cfg = resolveRefreshConfig()
     expect(typeof cfg.deckPath).toBe('string')
     expect(typeof cfg.workdir).toBe('string')
     expect(typeof cfg.coldPool).toBe('string')
   })
 
-  test('resolves explicit deckPath', () => {
+  it('resolves explicit deckPath', () => {
     const cfg = resolveRefreshConfig({ deckPath: '/tmp/test-deck.toml' })
     expect(cfg.deckPath).toBe('/tmp/test-deck.toml')
   })
 
-  test('workdir falls back to deckPath dirname', () => {
+  it('workdir falls back to deckPath dirname', () => {
     const cfg = resolveRefreshConfig({ deckPath: '/tmp/my-deck.toml' })
     expect(cfg.workdir).toBe('/tmp')
   })
 
-  test('explicit workdir overrides fallback', () => {
+  it('explicit workdir overrides fallback', () => {
     const cfg = resolveRefreshConfig({ deckPath: '/tmp/my-deck.toml', workdir: '/custom/workdir' })
     expect(cfg.workdir).toBe('/custom/workdir')
   })
 
-  test('explicit coldPool resolved', () => {
+  it('explicit coldPool resolved', () => {
     const cfg = resolveRefreshConfig({ coldPool: '/custom/cold-pool' })
     expect(cfg.coldPool).toBe('/custom/cold-pool')
   })
 })
 
 describe('detectGitRoot', () => {
-  test('localhost skill → localhost type', () => {
+  it('localhost skill → localhost type', () => {
     const result = detectGitRoot('/pool/localhost/skill-a', '/pool')
     expect(result.type).toBe('localhost')
   })
 
-  test('localhost as root → localhost type', () => {
+  it('localhost as root → localhost type', () => {
     const result = detectGitRoot('/pool/localhost', '/pool')
     expect(result.type).toBe('localhost')
   })
 
-  test('git: directory with .git directly present', () => {
+  it('git: directory with .git directly present', () => {
     const dir = join('/tmp', 'refresh-test-git-' + Date.now())
     mkdirSync(join(dir, '.git'), { recursive: true })
     const result = detectGitRoot(dir, '/tmp')
@@ -63,7 +63,7 @@ describe('detectGitRoot', () => {
     rmSync(dir, { recursive: true, force: true })
   })
 
-  test('not-git: directory without .git', () => {
+  it('not-git: directory without .git', () => {
     const dir = join('/tmp', 'refresh-test-no-git-' + Date.now())
     mkdirSync(dir, { recursive: true })
     const result = detectGitRoot(dir, '/tmp')
@@ -73,13 +73,13 @@ describe('detectGitRoot', () => {
 })
 
 describe('buildRefreshPlan', () => {
-  test('builds plan from alias-dict deck', () => {
+  it('builds plan from alias-dict deck', () => {
     const plan = buildRefreshPlan(deckAliasDict, { coldPool: '/tmp/test-cold-pool' })
     expect(plan.targets).toHaveLength(2)
     expect(plan.allDeclared).toHaveLength(2)
   })
 
-  test('filters by alias when target specified', () => {
+  it('filters by alias when target specified', () => {
     const plan = buildRefreshPlan(deckAliasDict, {
       coldPool: '/tmp/test-cold-pool',
       target: 'skill-a',
@@ -88,7 +88,7 @@ describe('buildRefreshPlan', () => {
     expect(plan.targets[0].alias).toBe('skill-a')
   })
 
-  test('filters by path when target specified', () => {
+  it('filters by path when target specified', () => {
     const plan = buildRefreshPlan(deckAliasDict, {
       coldPool: '/tmp/test-cold-pool',
       target: 'github.com/foo/bar/skill-a',
@@ -97,7 +97,7 @@ describe('buildRefreshPlan', () => {
     expect(plan.targets[0].path).toBe('github.com/foo/bar/skill-a')
   })
 
-  test('unknown target → empty plan', () => {
+  it('unknown target → empty plan', () => {
     const plan = buildRefreshPlan(deckAliasDict, {
       coldPool: '/tmp/test-cold-pool',
       target: 'nonexistent',
@@ -105,7 +105,7 @@ describe('buildRefreshPlan', () => {
     expect(plan.targets).toHaveLength(0)
   })
 
-  test('localhost skill is in plan as declared', () => {
+  it('localhost skill is in plan as declared', () => {
     const plan = buildRefreshPlan(deckAliasDict, { coldPool: '/tmp/test-cold-pool' })
     const localhost = plan.targets.find(t => t.alias === 'skill-b')
     // Without a real cold pool, source resolution may fail → 'missing'
@@ -114,18 +114,18 @@ describe('buildRefreshPlan', () => {
     expect(localhost!.path).toBe('localhost/me/skill-b')
   })
 
-  test('derives coldPool from deck toml when not in opts', () => {
+  it('derives coldPool from deck toml when not in opts', () => {
     const plan = buildRefreshPlan(deckAliasDict, { workdir: '/custom/work' })
     expect(plan.workdir).toBe('/custom/work')
     expect(plan.coldPool).toBe('/custom/work/cold-pool')
   })
 
-  test('explicit coldPool in opts overrides deck toml', () => {
+  it('explicit coldPool in opts overrides deck toml', () => {
     const plan = buildRefreshPlan(deckAliasDict, { coldPool: '/explicit/pool' })
     expect(plan.coldPool).toBe('/explicit/pool')
   })
 
-  test('paths are resolved through config', () => {
+  it('paths are resolved through config', () => {
     const plan = buildRefreshPlan(deckAliasDict, {
       deckPath: '/custom/deck.toml',
       workdir: '/custom/work',
@@ -135,7 +135,7 @@ describe('buildRefreshPlan', () => {
     expect(plan.workdir).toBe('/custom/work')
     expect(plan.coldPool).toBe('/custom/pool')
   })
-  test('plan-mode: all declared skills appear in plan structure', () => {
+  it('plan-mode: all declared skills appear in plan structure', () => {
     const plan = buildRefreshPlan(deckAliasDict, { coldPool: '/pool' })
     expect(plan.allDeclared).toHaveLength(2)
     expect(plan.targets.length).toBeGreaterThanOrEqual(0)
@@ -144,7 +144,7 @@ describe('buildRefreshPlan', () => {
     // those cases are covered by detectGitRoot tests above.
   })
 
-  test('plan-mode: plan carries correct config paths through', () => {
+  it('plan-mode: plan carries correct config paths through', () => {
     const plan = buildRefreshPlan(deckAliasDict, {
       deckPath: '/custom/deck.toml',
       workdir: '/custom/work',
@@ -181,7 +181,7 @@ function makePlan(targets: RefreshTarget[]): RefreshPlan {
 }
 
 describe('executeRefreshPlan', () => {
-  test('git up-to-date: reports correctly, does not call linkDeck', () => {
+  it('git up-to-date: reports correctly, does not call linkDeck', () => {
     const plan = makePlan([makeTarget()])
     const logs: string[] = []
     let linkCalled = false
@@ -198,7 +198,7 @@ describe('executeRefreshPlan', () => {
     expect(linkCalled).toBe(false)
   })
 
-  test('git updated: triggers linkDeck', () => {
+  it('git updated: triggers linkDeck', () => {
     const plan = makePlan([makeTarget()])
     let linkCalled = false
 
@@ -212,7 +212,7 @@ describe('executeRefreshPlan', () => {
     expect(linkCalled).toBe(true)
   })
 
-  test('git failed: reports failed, does not call linkDeck', () => {
+  it('git failed: reports failed, does not call linkDeck', () => {
     const plan = makePlan([makeTarget()])
     let linkCalled = false
 
@@ -226,7 +226,7 @@ describe('executeRefreshPlan', () => {
     expect(linkCalled).toBe(false)
   })
 
-  test('localhost: skipped with user-managed message', () => {
+  it('localhost: skipped with user-managed message', () => {
     const plan = makePlan([makeTarget({ type: 'localhost', gitRoot: undefined })])
 
     const results = executeRefreshPlan(plan, { log: () => {} })
@@ -236,7 +236,7 @@ describe('executeRefreshPlan', () => {
     expect(results[0].message).toContain('user-managed')
   })
 
-  test('not-git: skipped with not-a-git-repository message', () => {
+  it('not-git: skipped with not-a-git-repository message', () => {
     const plan = makePlan([makeTarget({ type: 'not-git', gitRoot: undefined })])
 
     const results = executeRefreshPlan(plan, { log: () => {} })
@@ -245,7 +245,7 @@ describe('executeRefreshPlan', () => {
     expect(results[0].message).toContain('not a git repository')
   })
 
-  test('missing: failed with not-found message', () => {
+  it('missing: failed with not-found message', () => {
     const plan = makePlan([makeTarget({ type: 'missing', gitRoot: undefined, sourcePath: '' })])
 
     const results = executeRefreshPlan(plan, { log: () => {} })
@@ -254,7 +254,7 @@ describe('executeRefreshPlan', () => {
     expect(results[0].message).toContain('not found')
   })
 
-  test('multiple targets: counts each status', () => {
+  it('multiple targets: counts each status', () => {
     const logs: string[] = []
     const plan = makePlan([
       makeTarget({ alias: 'up', type: 'git', gitRoot: '/pool/a' }),
@@ -275,7 +275,7 @@ describe('executeRefreshPlan', () => {
     expect(logs.some(l => l.includes('Updated: 1') && l.includes('Up-to-date: 1') && l.includes('Skipped: 2'))).toBe(true)
   })
 
-  test('single target in plan ≠ allDeclared → reports "single skill" scope', () => {
+  it('single target in plan ≠ allDeclared → reports "single skill" scope', () => {
     const plan = makePlan([makeTarget()])
     plan.allDeclared = [
       { alias: 'skill-a', path: 'github.com/owner/repo/skill-a', type: 'tool' },

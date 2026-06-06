@@ -10,7 +10,7 @@
  *   formatSkillWarnings  — warning string generation
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import {
   parseDeckSkills,
   checkSkillExistence,
@@ -26,15 +26,15 @@ import {
 
 describe('parseDeckSkills', () => {
 
-  test('empty deck → empty array', () => {
+  it('empty deck → empty array', () => {
     expect(parseDeckSkills({})).toEqual([])
   })
 
-  test('deck with no skill sections → empty array', () => {
+  it('deck with no skill sections → empty array', () => {
     expect(parseDeckSkills({ deck: { max_cards: 10 } })).toEqual([])
   })
 
-  test('inline-table format: single tool skill with path', () => {
+  it('inline-table format: single tool skill with path', () => {
     const parsed = {
       tool: {
         skills: {
@@ -47,7 +47,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('inline-table format: multiple skills', () => {
+  it('inline-table format: multiple skills', () => {
     const parsed = {
       tool: {
         skills: {
@@ -62,7 +62,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('array format: skills = ["a", "b"]', () => {
+  it('array format: skills = ["a", "b"]', () => {
     const parsed = {
       tool: {
         skills: ['web-search', 'docx']
@@ -74,7 +74,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('innate section parsed separately', () => {
+  it('innate section parsed separately', () => {
     const parsed = {
       innate: {
         skills: {
@@ -93,7 +93,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('transient section parsed', () => {
+  it('transient section parsed', () => {
     const parsed = {
       transient: {
         skills: {
@@ -106,7 +106,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('object entry without path → path=null', () => {
+  it('object entry without path → path=null', () => {
     const parsed = {
       tool: {
         skills: {
@@ -119,7 +119,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('object entry with non-string path → path=null', () => {
+  it('object entry with non-string path → path=null', () => {
     const parsed = {
       tool: {
         skills: {
@@ -132,7 +132,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('array entry that is not a string → skipped', () => {
+  it('array entry that is not a string → skipped', () => {
     const parsed = {
       tool: { skills: ['valid', 123, null, 'also-valid'] }
     }
@@ -142,7 +142,7 @@ describe('parseDeckSkills', () => {
     ])
   })
 
-  test('all three sections populated → ordered innate, tool, transient', () => {
+  it('all three sections populated → ordered innate, tool, transient', () => {
     const parsed = {
       innate: { skills: { a: { path: '/a' } } },
       tool: { skills: { b: { path: '/b' } } },
@@ -162,12 +162,12 @@ describe('parseDeckSkills', () => {
 
 describe('checkSkillExistence', () => {
 
-  test('empty skills → empty array', () => {
+  it('empty skills → empty array', () => {
     const exists = (_: string) => true
     expect(checkSkillExistence([], '/cold', exists)).toEqual([])
   })
 
-  test('skill with explicit path → resolves <coldPool>/<path>/SKILL.md', () => {
+  it('skill with explicit path → resolves <coldPool>/<path>/SKILL.md', () => {
     const exists = (p: string) => p === '/cold/github.com/owner/repo/skills/my-skill/SKILL.md'
     const skills = [{ name: 'my-skill', path: 'github.com/owner/repo/skills/my-skill', section: 'tool' }]
     const result = checkSkillExistence(skills, '/cold', exists)
@@ -176,7 +176,7 @@ describe('checkSkillExistence', () => {
     ])
   })
 
-  test('skill without path (array format) → resolves <coldPool>/<name>/SKILL.md', () => {
+  it('skill without path (array format) → resolves <coldPool>/<name>/SKILL.md', () => {
     const exists = (p: string) => p === '/cold/web-search/SKILL.md'
     const skills = [{ name: 'web-search', path: null, section: 'tool' }]
     const result = checkSkillExistence(skills, '/cold', exists)
@@ -185,7 +185,7 @@ describe('checkSkillExistence', () => {
     ])
   })
 
-  test('HTTP path → uses name as fallback for path resolution', () => {
+  it('HTTP path → uses name as fallback for path resolution', () => {
     const exists = (p: string) => p === '/cold/my-skill/SKILL.md'
     const skills = [{ name: 'my-skill', path: 'https://example.com/deck.toml', section: 'tool' }]
     const result = checkSkillExistence(skills, '/cold', exists)
@@ -194,7 +194,7 @@ describe('checkSkillExistence', () => {
     ])
   })
 
-  test('all found → all found=true', () => {
+  it('all found → all found=true', () => {
     const exists = (_: string) => true
     const skills = [
       { name: 'a', path: '/a', section: 'tool' },
@@ -206,7 +206,7 @@ describe('checkSkillExistence', () => {
     ])
   })
 
-  test('some missing → mixed found/not-found', () => {
+  it('some missing → mixed found/not-found', () => {
     const exists = (p: string) => p.includes('a')
     const skills = [
       { name: 'a', path: '/a', section: 'tool' },
@@ -218,7 +218,7 @@ describe('checkSkillExistence', () => {
     ])
   })
 
-  test('different coldPoolDir → different expectedPath prefix', () => {
+  it('different coldPoolDir → different expectedPath prefix', () => {
     const exists = (_: string) => true
     const skills = [{ name: 'x', path: 'github.com/x', section: 'tool' }]
     const a = checkSkillExistence(skills, '/home/user/.agents/skill-repos', exists)
@@ -234,35 +234,35 @@ describe('checkSkillExistence', () => {
 
 describe('validateLinkResult', () => {
 
-  test('exitCode 0 → ok', () => {
+  it('exitCode 0 → ok', () => {
     expect(validateLinkResult(0, '')).toEqual({ ok: true })
   })
 
-  test('exitCode 0 with stderr → still ok (stderr is not always errors)', () => {
+  it('exitCode 0 with stderr → still ok (stderr is not always errors)', () => {
     expect(validateLinkResult(0, 'some warning output')).toEqual({ ok: true })
   })
 
-  test('exitCode 1 → not ok, error contains snippet', () => {
+  it('exitCode 1 → not ok, error contains snippet', () => {
     const result = validateLinkResult(1, 'something went wrong')
     expect(result.ok).toBe(false)
     expect(result.error).toContain('exit 1')
     expect(result.error).toContain('something went wrong')
   })
 
-  test('exitCode null → not ok (null !== 0)', () => {
+  it('exitCode null → not ok (null !== 0)', () => {
     const result = validateLinkResult(null, 'process killed')
     expect(result.ok).toBe(false)
     expect(result.error).toContain('exit null')
   })
 
-  test('stderr truncated to 300 chars in error message', () => {
+  it('stderr truncated to 300 chars in error message', () => {
     const longStderr = 'x'.repeat(500)
     const result = validateLinkResult(1, longStderr)
     expect(result.ok).toBe(false)
     expect(result.error!.length).toBeLessThan(350) // "Deck link failed (exit 1): " + 300 chars
   })
 
-  test('exitCode 0, empty stderr → ok with no error field', () => {
+  it('exitCode 0, empty stderr → ok with no error field', () => {
     const result = validateLinkResult(0, '')
     expect(result.ok).toBe(true)
     expect(result.error).toBeUndefined()
@@ -275,16 +275,16 @@ describe('validateLinkResult', () => {
 
 describe('buildCopyPlan', () => {
 
-  test('empty entries → empty plan', () => {
+  it('empty entries → empty plan', () => {
     expect(buildCopyPlan('/work', '/out', [], new Set())).toEqual([])
   })
 
-  test('all skipped → empty plan', () => {
+  it('all skipped → empty plan', () => {
     const skip = new Set(['.claude', 'skill-deck.toml'])
     expect(buildCopyPlan('/work', '/out', ['.claude', 'skill-deck.toml'], skip)).toEqual([])
   })
 
-  test('normal entries → mapped to outDir', () => {
+  it('normal entries → mapped to outDir', () => {
     const skip = new Set<string>()
     expect(buildCopyPlan('/work', '/out', ['output.md', 'report.docx'], skip)).toEqual([
       { src: '/work/output.md', dest: '/out/output.md', name: 'output.md' },
@@ -292,7 +292,7 @@ describe('buildCopyPlan', () => {
     ])
   })
 
-  test('mixed skip and non-skip → only non-skipped', () => {
+  it('mixed skip and non-skip → only non-skipped', () => {
     const skip = new Set(['.claude', 'skill-deck.toml', 'skill-deck.lock'])
     const entries = ['.claude', 'output.md', 'skill-deck.toml', 'report.docx', 'skill-deck.lock']
     expect(buildCopyPlan('/work', '/out', entries, skip)).toEqual([
@@ -301,13 +301,13 @@ describe('buildCopyPlan', () => {
     ])
   })
 
-  test('preserves entry order', () => {
+  it('preserves entry order', () => {
     const skip = new Set<string>()
     const entries = ['c', 'a', 'b']
     expect(buildCopyPlan('/w', '/o', entries, skip).map(e => e.name)).toEqual(['c', 'a', 'b'])
   })
 
-  test('nested paths work (agent-produced subdirectories)', () => {
+  it('nested paths work (agent-produced subdirectories)', () => {
     const skip = new Set<string>()
     expect(buildCopyPlan('/work', '/out', ['subdir/output.pdf'], skip)).toEqual([
       { src: '/work/subdir/output.pdf', dest: '/out/subdir/output.pdf', name: 'subdir/output.pdf' },
@@ -321,30 +321,30 @@ describe('buildCopyPlan', () => {
 
 describe('resolveColdPoolDir', () => {
 
-  test('explicit absolute path → returned as-is', () => {
+  it('explicit absolute path → returned as-is', () => {
     expect(resolveColdPoolDir('/opt/cold', '/home/user', '/fallback')).toBe('/opt/cold')
   })
 
-  test('explicit relative path → returned as-is', () => {
+  it('explicit relative path → returned as-is', () => {
     expect(resolveColdPoolDir('my-cold-pool', '/home/user', '/fallback')).toBe('my-cold-pool')
   })
 
-  test('tilde path → expanded with homeDir', () => {
+  it('tilde path → expanded with homeDir', () => {
     expect(resolveColdPoolDir('~/.agents/skill-repos', '/home/user', '/fallback'))
       .toBe('/home/user/.agents/skill-repos')
   })
 
-  test('tilde at start only → expanded; tilde elsewhere not expanded', () => {
+  it('tilde at start only → expanded; tilde elsewhere not expanded', () => {
     expect(resolveColdPoolDir('path/with~/tilde', '/home/user', '/fallback'))
       .toBe('path/with~/tilde')
   })
 
-  test('undefined → uses fallback', () => {
+  it('undefined → uses fallback', () => {
     expect(resolveColdPoolDir(undefined, '/home/user', '/default/cold'))
       .toBe('/default/cold')
   })
 
-  test('empty string → uses fallback (|| operator)', () => {
+  it('empty string → uses fallback (|| operator)', () => {
     expect(resolveColdPoolDir('', '/home/user', '/default/cold'))
       .toBe('/default/cold')
   })
@@ -356,7 +356,7 @@ describe('resolveColdPoolDir', () => {
 
 describe('formatSkillWarnings', () => {
 
-  test('all found → empty array', () => {
+  it('all found → empty array', () => {
     const checks = [
       { name: 'a', expectedPath: '/p/a/SKILL.md', found: true, section: 'tool' },
       { name: 'b', expectedPath: '/p/b/SKILL.md', found: true, section: 'tool' },
@@ -364,7 +364,7 @@ describe('formatSkillWarnings', () => {
     expect(formatSkillWarnings(checks)).toEqual([])
   })
 
-  test('some missing → one warning per missing skill', () => {
+  it('some missing → one warning per missing skill', () => {
     const checks = [
       { name: 'pdf', expectedPath: '/cold/pdf/SKILL.md', found: false, section: 'tool' },
       { name: 'docx', expectedPath: '/cold/docx/SKILL.md', found: true, section: 'tool' },
@@ -374,7 +374,7 @@ describe('formatSkillWarnings', () => {
     ])
   })
 
-  test('all missing → warning for each', () => {
+  it('all missing → warning for each', () => {
     const checks = [
       { name: 'a', expectedPath: '/p/a/SKILL.md', found: false, section: 'innate' },
       { name: 'b', expectedPath: '/p/b/SKILL.md', found: false, section: 'tool' },
@@ -382,11 +382,11 @@ describe('formatSkillWarnings', () => {
     expect(formatSkillWarnings(checks)).toHaveLength(2)
   })
 
-  test('empty array → empty array', () => {
+  it('empty array → empty array', () => {
     expect(formatSkillWarnings([])).toEqual([])
   })
 
-  test('section name appears in warning string', () => {
+  it('section name appears in warning string', () => {
     const checks = [
       { name: 'x', expectedPath: '/p/x', found: false, section: 'transient' },
     ]
@@ -411,14 +411,14 @@ const TMP = '/tmp/arena-test'
 
 describe('buildArchiveSidePlan', () => {
 
-  test('default: sides=["."] maps to fromDir', () => {
+  it('default: sides=["."] maps to fromDir', () => {
     const plan = buildArchiveSidePlan(TMP, ['.'], _p => true)
     expect(plan).toEqual([
       { side: '.', sourceDir: TMP, found: true },
     ])
   })
 
-  test('single side, subdirectory exists → source = fromDir/side', () => {
+  it('single side, subdirectory exists → source = fromDir/side', () => {
     const exists = (p: string) => p === pathJoin(TMP, 'side-a')
     const plan = buildArchiveSidePlan(TMP, ['side-a'], exists)
     expect(plan).toEqual([
@@ -426,14 +426,14 @@ describe('buildArchiveSidePlan', () => {
     ])
   })
 
-  test('single side, subdirectory MISSING → fallback to fromDir root', () => {
+  it('single side, subdirectory MISSING → fallback to fromDir root', () => {
     const plan = buildArchiveSidePlan(TMP, ['side-a'], _p => false)
     expect(plan).toEqual([
       { side: 'side-a', sourceDir: TMP, found: true },
     ])
   })
 
-  test('multi side, all subdirectories exist', () => {
+  it('multi side, all subdirectories exist', () => {
     const exists = (p: string) =>
       p === pathJoin(TMP, 'side-a') || p === pathJoin(TMP, 'side-b')
     const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b'], exists)
@@ -443,7 +443,7 @@ describe('buildArchiveSidePlan', () => {
     ])
   })
 
-  test('multi side, one missing → found=false (caller handles warn+skip)', () => {
+  it('multi side, one missing → found=false (caller handles warn+skip)', () => {
     const exists = (p: string) => p === pathJoin(TMP, 'side-a')
     const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b'], exists)
     expect(plan).toEqual([
@@ -452,19 +452,19 @@ describe('buildArchiveSidePlan', () => {
     ])
   })
 
-  test('"." side does NOT trigger fallback when missing (found=false)', () => {
+  it('"." side does NOT trigger fallback when missing (found=false)', () => {
     const plan = buildArchiveSidePlan(TMP, ['.'], _p => false)
     expect(plan).toEqual([
       { side: '.', sourceDir: TMP, found: false },
     ])
   })
 
-  test('empty sides array → empty plan', () => {
+  it('empty sides array → empty plan', () => {
     const plan = buildArchiveSidePlan(TMP, [], _p => true)
     expect(plan).toEqual([])
   })
 
-  test('three sides, middle missing', () => {
+  it('three sides, middle missing', () => {
     const exists = (p: string) =>
       p === pathJoin(TMP, 'side-a') || p === pathJoin(TMP, 'side-c')
     const plan = buildArchiveSidePlan(TMP, ['side-a', 'side-b', 'side-c'], exists)
@@ -509,7 +509,7 @@ path = "github.com/anthropics/skills/skills/pdf"
 
 describe('buildPreparePlan', () => {
 
-  test('single skill deck → plan with 1 skill, hasSkills=true', () => {
+  it('single skill deck → plan with 1 skill, hasSkills=true', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/test-deck.toml',
       deckContent: DECK_ONE_SKILL,
@@ -524,7 +524,7 @@ describe('buildPreparePlan', () => {
     expect(plan.deckPath).toBe('/tmp/test-deck.toml')
   })
 
-  test('empty deck → skills=[], hasSkills=false', () => {
+  it('empty deck → skills=[], hasSkills=false', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/empty.toml',
       deckContent: DECK_EMPTY,
@@ -535,7 +535,7 @@ describe('buildPreparePlan', () => {
     expect(plan.hasSkills).toBe(false)
   })
 
-  test('two skills (innate + tool) → both parsed with correct sections', () => {
+  it('two skills (innate + tool) → both parsed with correct sections', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/two.toml',
       deckContent: DECK_TWO_SKILLS,
@@ -548,7 +548,7 @@ describe('buildPreparePlan', () => {
     expect(plan.hasSkills).toBe(true)
   })
 
-  test('AGENTS.md contains mandatory sections', () => {
+  it('AGENTS.md contains mandatory sections', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/d.toml',
       deckContent: DECK_ONE_SKILL,
@@ -561,7 +561,7 @@ describe('buildPreparePlan', () => {
     expect(plan.agentsMd).toContain('skill-deck.toml')
   })
 
-  test('invalid TOML → skills=[], hasSkills=false (no crash)', () => {
+  it('invalid TOML → skills=[], hasSkills=false (no crash)', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/bad.toml',
       deckContent: 'this is not toml {{{',
@@ -572,7 +572,7 @@ describe('buildPreparePlan', () => {
     expect(plan.hasSkills).toBe(false)
   })
 
-  test('deckContent is preserved in plan', () => {
+  it('deckContent is preserved in plan', () => {
     const plan = buildPreparePlan({
       deckPath: '/tmp/d.toml',
       deckContent: DECK_ONE_SKILL,

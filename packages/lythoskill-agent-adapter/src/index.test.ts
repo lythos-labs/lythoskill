@@ -1,30 +1,30 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { useAgent, registerAgent, listAgents, type AgentAdapter } from './index'
 
 describe('@lythos/agent-adapter', () => {
-  test('built-in adapters are auto-registered on import', () => {
+  it('built-in adapters are auto-registered on import', () => {
     const agents = listAgents()
     expect(agents).toContain('kimi')
     expect(agents).toContain('claude')
     expect(agents).toContain('claude-cli')
   })
 
-  test('useAgent returns kimi adapter', () => {
+  it('useAgent returns kimi adapter', () => {
     const adapter = useAgent('kimi')
     expect(adapter.name).toBe('kimi')
     expect(typeof adapter.spawn).toBe('function')
   })
 
-  test('useAgent returns claude-cli adapter', () => {
+  it('useAgent returns claude-cli adapter', () => {
     const adapter = useAgent('claude-cli')
     expect(adapter.name).toBe('claude')
   })
 
-  test('useAgent throws for unknown agent', () => {
+  it('useAgent throws for unknown agent', () => {
     expect(() => useAgent('gpt-5')).toThrow('Unknown agent: "gpt-5"')
   })
 
-  test('registerAgent adds custom adapter', () => {
+  it('registerAgent adds custom adapter', () => {
     const mockAdapter: AgentAdapter = {
       name: 'mock',
       async spawn(opts) {
@@ -36,7 +36,7 @@ describe('@lythos/agent-adapter', () => {
     expect(useAgent('mock').name).toBe('mock')
   })
 
-  test('spawn throws clear error when binary is missing', async () => {
+  it('spawn throws clear error when binary is missing', async () => {
     const adapter = useAgent('kimi')
     const hasKimi = !!Bun.which('kimi')
     if (!hasKimi) {

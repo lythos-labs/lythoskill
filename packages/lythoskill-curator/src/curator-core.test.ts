@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -10,49 +10,49 @@ import {
 } from './curator-core'
 
 describe('inferSource', () => {
-  test('extracts github.com/owner/repo from path', () => {
+  it('extracts github.com/owner/repo from path', () => {
     expect(inferSource('/pool/github.com/lythos-labs/lythoskill/skills/deck'))
       .toBe('github.com/lythos-labs/lythoskill')
   })
 
-  test('detects localhost source', () => {
+  it('detects localhost source', () => {
     expect(inferSource('/pool/localhost/my-skill')).toBe('localhost')
   })
 
-  test('returns unknown for unrecognized patterns (not github.com or localhost)', () => {
+  it('returns unknown for unrecognized patterns (not github.com or localhost)', () => {
     expect(inferSource('/pool/gitlab.com/foo')).toBe('unknown')
   })
 
-  test('extracts github.com org/repo when SKILL.md is at repo root', () => {
+  it('extracts github.com org/repo when SKILL.md is at repo root', () => {
     expect(inferSource('/pool/github.com/gstack')).toBe('github.com/gstack')
   })
 })
 
 describe('extractQuotedPhrases', () => {
-  test('extracts double-quoted phrases', () => {
+  it('extracts double-quoted phrases', () => {
     expect(extractQuotedPhrases('Use for "BDD testing" and "agent governance"'))
       .toEqual(['BDD testing', 'agent governance'])
   })
 
-  test('deduplicates identical phrases', () => {
+  it('deduplicates identical phrases', () => {
     expect(extractQuotedPhrases('"test" repeated "test" again'))
       .toEqual(['test'])
   })
 
-  test('returns empty array for no quoted phrases', () => {
+  it('returns empty array for no quoted phrases', () => {
     expect(extractQuotedPhrases('plain text without quotes')).toEqual([])
   })
 })
 
 describe('parseFrontmatter', () => {
-  test('extracts frontmatter and body', () => {
+  it('extracts frontmatter and body', () => {
     const md = '---\nname: Test\n---\n\n# Body content'
     const { frontmatter, body } = parseFrontmatter(md)
     expect(frontmatter._raw).toBe('name: Test')
     expect(body).toBe('# Body content')
   })
 
-  test('returns empty frontmatter when none present', () => {
+  it('returns empty frontmatter when none present', () => {
     const { frontmatter, body } = parseFrontmatter('# Just markdown')
     expect(frontmatter._raw).toBeUndefined()
     expect(body).toBe('# Just markdown')
@@ -60,7 +60,7 @@ describe('parseFrontmatter', () => {
 })
 
 describe('buildSkillMeta', () => {
-  test('builds structured metadata from frontmatter', () => {
+  it('builds structured metadata from frontmatter', () => {
     const meta = buildSkillMeta(
       { name: 'my-skill', description: 'A "test" skill' },
       '/pool/github.com/foo/bar/my-skill',
@@ -73,7 +73,7 @@ describe('buildSkillMeta', () => {
     expect(meta.bodyPreview).toContain('This is the body')
   })
 
-  test('handles missing fields with defaults', () => {
+  it('handles missing fields with defaults', () => {
     const meta = buildSkillMeta({}, '/tmp/test', 'body')
     expect(meta.version).toBe('unknown')
     expect(meta.type).toBeNull()
@@ -81,7 +81,7 @@ describe('buildSkillMeta', () => {
     expect(meta.allowedTools).toEqual([])
   })
 
-  test('parses inline array allowed-tools', () => {
+  it('parses inline array allowed-tools', () => {
     const meta = buildSkillMeta(
       { name: 'x', 'allowed-tools': '[Read, Write, Bash]' },
       '/tmp/x', ''
@@ -90,7 +90,7 @@ describe('buildSkillMeta', () => {
     expect(meta.allowedTools).toContain('Write')
   })
 
-  test('handles userInvocable explicitly', () => {
+  it('handles userInvocable explicitly', () => {
     const t = buildSkillMeta({ name: 'x', 'user-invocable': true }, '/tmp/x', '')
     expect(t.userInvocable).toBe(true)
     const f = buildSkillMeta({ name: 'x' }, '/tmp/x', '')
@@ -99,7 +99,7 @@ describe('buildSkillMeta', () => {
 })
 
 describe('formatMarkdownTable', () => {
-  test('formats rows as markdown table', () => {
+  it('formats rows as markdown table', () => {
     const result = formatMarkdownTable([
       { name: 'skill-a', type: 'standard' },
       { name: 'skill-b', type: 'flow' },
@@ -111,13 +111,13 @@ describe('formatMarkdownTable', () => {
     expect(result).toContain('---')
   })
 
-  test('returns placeholder for empty array', () => {
+  it('returns placeholder for empty array', () => {
     expect(formatMarkdownTable([])).toBe('*No results.*')
   })
 })
 
 describe('buildCuratorPlan', () => {
-  test('creates plan with cold pool path', () => {
+  it('creates plan with cold pool path', () => {
     const plan = buildCuratorPlan('/tmp/cold-pool')
     expect(plan.coldPool.path).toBe('/tmp/cold-pool')
     expect(plan.skillDirs).toEqual([])
@@ -125,38 +125,38 @@ describe('buildCuratorPlan', () => {
 })
 
 describe('buildAddPlan', () => {
-  test('computes target path from github locator', () => {
+  it('computes target path from github locator', () => {
     const plan = buildAddPlan('github.com/foo/bar', '/tmp/pool')
     expect(plan.feed.type).toBe('github')
     expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
     expect(plan.relPath).toBe('github.com/foo/bar')
   })
 
-  test('accepts explicit feedType override', () => {
+  it('accepts explicit feedType override', () => {
     const plan = buildAddPlan('https://example.com/skill.git', '/tmp/pool', 'url')
     expect(plan.feed.type).toBe('url')
     expect(plan.relPath).toBe('example.com/skill')
   })
 
-  test('strips https:// prefix from locator', () => {
+  it('strips https:// prefix from locator', () => {
     const plan = buildAddPlan('https://github.com/foo/bar', '/tmp/pool')
     expect(plan.relPath).toBe('github.com/foo/bar')
     expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
   })
 
-  test('strips .git suffix from locator', () => {
+  it('strips .git suffix from locator', () => {
     const plan = buildAddPlan('github.com/foo/bar.git', '/tmp/pool')
     expect(plan.relPath).toBe('github.com/foo/bar')
     expect(plan.targetPath).toBe('/tmp/pool/github.com/foo/bar')
   })
 
-  test('auto-detects url type for non-github locators', () => {
+  it('auto-detects url type for non-github locators', () => {
     const plan = buildAddPlan('gitlab.com/foo/bar', '/tmp/pool')
     expect(plan.feed.type).toBe('url')
     expect(plan.relPath).toBe('gitlab.com/foo/bar')
   })
 
-  test('accepts npm feedType', () => {
+  it('accepts npm feedType', () => {
     const plan = buildAddPlan('my-skill', '/tmp/pool', 'npm')
     expect(plan.feed.type).toBe('npm')
     expect(plan.relPath).toBe('my-skill')
@@ -164,7 +164,7 @@ describe('buildAddPlan', () => {
 })
 
 describe('buildAdditionRecord', () => {
-  test('creates addition record with feed and reason', () => {
+  it('creates addition record with feed and reason', () => {
     const feed = { type: 'github' as const, locator: 'github.com/foo/bar', label: 'GitHub' }
     const record = buildAdditionRecord('github.com/foo/bar', feed, 'Looks promising for web scraping')
     expect(record.locator).toBe('github.com/foo/bar')
@@ -176,14 +176,14 @@ describe('buildAdditionRecord', () => {
     expect(record.forkedFrom).toBeNull()
   })
 
-  test('sets status to forked when forkedFrom is provided', () => {
+  it('sets status to forked when forkedFrom is provided', () => {
     const feed = { type: 'github' as const, locator: 'github.com/foo/bar', label: 'GH' }
     const record = buildAdditionRecord('localhost/my-fix', feed, 'Fixed PDF bug', 'github.com/foo/bar')
     expect(record.status).toBe('forked')
     expect(record.forkedFrom).toBe('github.com/foo/bar')
   })
 
-  test('defaults to added status without forkedFrom', () => {
+  it('defaults to added status without forkedFrom', () => {
     const feed = { type: 'lobehub' as const, locator: 'https://lobehub.com/skill/123', label: 'LobeHub trending' }
     const record = buildAdditionRecord('github.com/foo/bar', feed, 'Trending #3')
     expect(record.status).toBe('added')
@@ -197,13 +197,13 @@ describe('scanColdPool', () => {
   beforeAll(() => { tmpDir = mkdtempSync(join(tmpdir(), 'curator-scan-')) })
   afterAll(() => { rmSync(tmpDir, { recursive: true, force: true }) })
 
-  test('returns empty array for empty pool', () => {
+  it('returns empty array for empty pool', () => {
     const emptyDir = join(tmpDir, 'empty')
     mkdirSync(emptyDir, { recursive: true })
     expect(scanColdPool(emptyDir)).toEqual([])
   })
 
-  test('finds skill dirs in flat pool', () => {
+  it('finds skill dirs in flat pool', () => {
     const poolDir = join(tmpDir, 'flat-pool')
     const skillDir = join(poolDir, 'my-skill')
     mkdirSync(skillDir, { recursive: true })
@@ -214,7 +214,7 @@ describe('scanColdPool', () => {
     expect(items[0].relPath).toBe('my-skill')
   })
 
-  test('infers source from Go-mod style paths', () => {
+  it('infers source from Go-mod style paths', () => {
     const poolDir = join(tmpDir, 'go-mod-pool')
     const skillDir = join(poolDir, 'github.com/owner/repo')
     mkdirSync(skillDir, { recursive: true })
@@ -224,7 +224,7 @@ describe('scanColdPool', () => {
     expect(items[0].source).toBe('github.com/owner/repo')
   })
 
-  test('skips directories without SKILL.md', () => {
+  it('skips directories without SKILL.md', () => {
     const poolDir = join(tmpDir, 'skip-no-skill')
     mkdirSync(join(poolDir, 'not-a-skill'), { recursive: true })
     mkdirSync(join(poolDir, 'also-not'), { recursive: true })
@@ -237,14 +237,14 @@ describe('buildRefreshPlan', () => {
   beforeAll(() => { tmpDir = mkdtempSync(join(tmpdir(), 'curator-refresh-')) })
   afterAll(() => { rmSync(tmpDir, { recursive: true, force: true }) })
 
-  test('returns empty plan for empty pool', () => {
+  it('returns empty plan for empty pool', () => {
     const emptyDir = join(tmpDir, 'empty')
     mkdirSync(emptyDir, { recursive: true })
     const plan = buildRefreshPlan(emptyDir)
     expect(plan.items).toEqual([])
   })
 
-  test('finds git repos with SKILL.md in cold pool', () => {
+  it('finds git repos with SKILL.md in cold pool', () => {
     const poolDir = join(tmpDir, 'pool')
     const skillDir = join(poolDir, 'github.com/owner/repo')
     mkdirSync(skillDir, { recursive: true })
@@ -259,7 +259,7 @@ describe('buildRefreshPlan', () => {
     expect(plan.items[0].behind).toBe(-1) // not yet checked
   })
 
-  test('deduplicates repos with multiple skills', () => {
+  it('deduplicates repos with multiple skills', () => {
     const poolDir = join(tmpDir, 'multi-skill')
     const repoDir = join(poolDir, 'github.com/owner/repo')
     mkdirSync(join(repoDir, 'skills', 'skill-a'), { recursive: true })
@@ -274,7 +274,7 @@ describe('buildRefreshPlan', () => {
 })
 
 describe('formatRefreshPlan', () => {
-  test('formats plan as markdown checklist', () => {
+  it('formats plan as markdown checklist', () => {
     const plan = {
       items: [
         { locator: 'github.com/foo/bar', path: '/tmp/pool/github.com/foo/bar', behind: 3, status: 'pending' as const },
