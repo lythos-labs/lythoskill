@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-06-06 | Created |
 | in-progress | 2026-06-06 | Started |
+| completed | 2026-06-06 | Closed via trailer |
 
 ## 背景与目标
 `packages/lythoskill-agent-adapter/src/adapters/kimi.test.ts` fails in CI because `buildKimiCommand()` calls `detectKimiBinary()`, which relies on `Bun.which('kimi-cli')` / `Bun.which('kimi')`. In the GitHub Actions Ubuntu runner, neither binary is installed, so `buildKimiCommand()` throws:
