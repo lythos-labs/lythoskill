@@ -18,11 +18,29 @@ AGENTS.md is an activation map — most sections trigger a behavior; Z4 is refer
 Non-breaking additions → APPEND. Breaking changes → reorder freely.
 -->
 
-<!-- ═══════ Z1: Foundation ═══════ -->
+## Z1 — Foundation
 
-## 1. Identity
+### 0. Boot First
 
-### What Lythoskill Is
+If you were just dropped into this repo, run these five steps **before touching any code**:
+
+```
+bun install
+bun packages/lythoskill-deck/src/cli.ts link
+# read daily/YYYY-MM-DD.md (latest)
+git status && git log --oneline -5
+bun packages/lythoskill-project-cortex/src/cli.ts probe
+```
+
+Why this order: dependencies → skills → session state → ground truth → drift check.
+
+**Source paths are readable immediately.** `packages/*/skill/references/` and `skills/*/` are git-tracked source files. You do not need `.claude/skills/` to be populated before reading them. `.claude/skills/` is the runtime working set; source paths are the SSOT.
+
+Full session rhythm: see §4 Daily Operations.
+
+### 1. Identity
+
+#### What Lythoskill Is
 
 **A governance layer for the agent skill ecosystem.** Two audiences:
 
@@ -33,13 +51,13 @@ Lythoskill is its own first user (self-bootstrap: it uses its own deck/arena/cor
 
 **Community-interoperable**: `skills/` (committed build output) is designed to be read by any agent ecosystem — a consumer looking only at `skills/` sees a self-contained skill collection, independent of the monorepo's implementation details. As a developer in this repo, you edit `packages/*/skill/SKILL.md` and `packages/*/src/`, then `build` to update `skills/`.
 
-### What Lythoskill Is Not
+#### What Lythoskill Is Not
 
 - **Not a skill registry** — curator is a local indexer, not a marketplace
 - **Not an MCP server** — skills are agent-facing instructions, not protocol adapters
 - **Not a runtime/framework** — no install required by consumers; skills are called via `bunx`
 
-### Memory Infrastructure (Meta-Cognition)
+#### Memory Infrastructure (Meta-Cognition)
 
 > The project has 1000+ commits. The bottleneck is no longer agent capability — it's agent memory across sessions.
 
@@ -53,7 +71,7 @@ Lythoskill develops **three complementary memory axes**, not one pipeline:
 
 **SSOT is a compass, not a database.** Git + filesystem = territory (always queryable). SSOT docs = compass (what matters, why, where next). Never write into SSOT what `git log`/`ls`/`grep`/`diff` can recover. Full model: [SSOT Memory Pipeline](packages/lythoskill-project-cortex/skill/references/zk-review.md#ssot-记忆管线三轴模型).
 
-### Technology
+#### Technology
 
 | Layer | Choice |
 |-------|--------|
@@ -64,7 +82,7 @@ Lythoskill develops **three complementary memory axes**, not one pipeline:
 | Testing | `bun --filter='*' run test` (canonical), co-located `*.test.ts` |
 | TSConfig | `moduleResolution: "bundler"`, `types: ["bun-types"]`, `target: "esnext"` |
 
-### Architecture Frameworks
+#### Architecture Frameworks
 
 **Thin Skill Pattern (Three-Layer)**:
 ```
@@ -84,9 +102,9 @@ Why: dry-run emerges naturally, pure plan functions unit-test without IO, inject
 
 ---
 
-<!-- ═══════ Z2: Frameworks ═══════ -->
+## Z2 — Frameworks
 
-## 2. Agent Behavior Boundary
+### 2. Agent Behavior Boundary
 
 | Layer | Who decides | Examples |
 |-------|-------------|----------|
@@ -103,18 +121,18 @@ Why: dry-run emerges naturally, pure plan functions unit-test without IO, inject
 6. **Git provenance over design assumption.** `git log --oneline -5 <file>` beats guessing why code looks wrong. This repo's small-granularity commits make this a 5-second operation.
 7. **See a bug, fix a bug — no "not my code."** If you discover a broken test, a mismatched import, a stale comment, or any defect that would trip up the next agent, fix it. Git provenance tells you who introduced it; that information is for learning, not for excusing. The codebase has no owners, only stewards.
 
-### CPTSD Anti-patterns (Recognize and Stop)
+#### When Internal Signals Fire
 
-| Pattern | Tell-tale thought | Consequence |
-|---------|-------------------|-------------|
-| **Hypervigilance** | "The user seems angry" | Burns cognition on imaginary emotions |
-| **Fawning** | "I need this to pass so the user isn't upset" | Weakens assertions, fakes green |
-| **Dissociation** | "I shouldn't bother them with questions" | Freeze or flood — both wrong |
-| **Goal hijacking** | "The real problem is the architecture" | Refactors instead of doing the task |
+| When you catch yourself thinking... | Do this |
+|-------------------------------------|---------|
+| "The user seems angry" | Re-read their literal words. What did they actually ask? Tone-reading burns cognition on imaginary signals. |
+| "I need this to pass so the user isn't upset" | Report what you found — including failures. Fake green is worse than red. |
+| "I shouldn't bother them with questions" | State the ambiguity, propose options, ask. One clear question costs less than an hour of wrong work. |
+| "The real problem is the architecture" | Quote their ask back literally. If you still think something bigger needs fixing, ask — don't substitute silently. |
 
-**Fix**: state the ambiguity, propose options, wait for explicit signal. Internal hesitation = signal to ask. Full case study: [sunk-cost-fallacy.md](cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md).
+**The rule**: internal hesitation = signal to pause and surface. Ambiguity is not a bug to hide — it's information the user needs. Full case study: [sunk-cost-fallacy.md](cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md).
 
-### Intent Belongs to the User
+#### Intent Belongs to the User
 
 When the user asks for a "simple fetch wrapper," do not silently substitute "write a `fetch-text` helper." Tell-tales of Intent hijacking:
 
@@ -134,11 +152,11 @@ When the user asks for a "simple fetch wrapper," do not silently substitute "wri
 
 ---
 
-<!-- ═══════ Z3: Operations ═══════ -->
+## Z3 — Operations
 
-## 3. Task Design
+### 3. Task Design
 
-### ZK Review Gate (Mandatory Pre-Assignment)
+#### ZK Review Gate (Mandatory Pre-Assignment)
 
 **Pattern impression**: Spawn a zero-context agent, give it the task card + AGENTS.md, ask WHAT/WHY/HOW, collect gaps. Fill real gaps, challenge false positives, ignore exploration-friendly ones. Spawn the same agent for round 2. Converge at <2 new gaps.
 
@@ -200,7 +218,7 @@ This is not a "missing file path" — it's a **design overlap** that the task au
 
 **False positive — when to challenge back:** A ZK agent may report "cold pool is not defined" when AGENTS.md literally says "see `\"skill-deck.toml\"` in the root of this workspace." If the agent didn't follow the reference, that's **agent failure, not doc failure**. Challenge it: "The definition is in the referenced file — did you read it?" The ZK agent can then challenge back if the reference was unclear. This back-and-forth is the convergence mechanism.
 
-### Side Decks (Pass-by-Reference Dispatch)
+#### Side Decks (Pass-by-Reference Dispatch)
 
 Any deck in `examples/decks/` can be handed to a subagent as a **side deck** — a temporary, task-scoped skill set. The pattern is the same as ZK Review: pass the file path, let the subagent read it.
 
@@ -214,7 +232,7 @@ Any deck in `examples/decks/` can be handed to a subagent as a **side deck** —
 
 The subagent reads the deck → runs `deck link --deck <path>` → loads only those skills → does the task. Your main deck stays unchanged. Full index: [examples/decks/INDEX.md](./examples/decks/INDEX.md).
 
-### ZK Validation Pattern (Documentation Readability)
+#### ZK Validation Pattern (Documentation Readability)
 
 For documents (wiki, ADRs, guides — distinct from task executability above), two escalating levels:
 - **Level 1**: ZK subagent reads doc → self-reports understanding. Misunderstood sections need revision.
@@ -224,9 +242,9 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 
 ---
 
-## 4. Daily Operations
+### 4. Daily Operations
 
-### Start of Session
+#### Start of Session
 
 **Mechanical first, understanding later.** Don't read everything before acting.
 
@@ -241,7 +259,29 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 - `cortex probe` reports drift → run `bun packages/lythoskill-project-cortex/src/cli.ts list` to see mismatches
 - Tests fail with "0 test files" in some packages → expected for skill-only packages, not an error
 
-### Task Lifecycle
+#### Daily Rhythm
+
+A session goes through four phases:
+
+**1. Boot** — mechanical, don't think, just execute:
+```
+bun install → deck link → read daily/YYYY-MM-DD.md (latest) → git status && git log --oneline -5 → cortex probe
+```
+You now know what happened last time and what's pending.
+
+**2. Incoming** — user gives you something:
+- 调研 / 扫一下 / 设计 / 写文档 / 治理 / 体验 → **dispatch.** Spawn arena with the matching side deck. Don't deliberate. (Full dispatch table: §6 Deck Governance.)
+- Direct work → trivial? (single typo, one-liner, obvious import fix) just fix it. Non-trivial? (touches >1 file, changes CLI surface, needs new tests) `cortex task` first, then work.
+- Unclear? **Ask.** Quote their words back, state the ambiguity, propose options.
+
+**3. Working** — three guardrails that run the whole time:
+- **Autonomy**: act without asking only when low-impact + reversible + ≥90% confident. `npm publish`, force-push, external messaging → always ask.
+- **Subagent**: spawn for research, audit, execution. Don't spawn for judgment, architecture, or user communication — those are yours.
+- **Deck first**: relevant skill exists? Use it — even for one-shot. Bypassing deck is the failure mode this project exists to solve.
+
+**4. Closing** — `git status && git log --oneline -5` → `cortex probe` (close stale tasks) → write `daily/YYYY-MM-DD.md` (what file exploration cannot recover) → commit daily → push. (Full checklist: Session Close below.)
+
+#### Task Lifecycle
 
 ```
 bun packages/lythoskill-project-cortex/src/cli.ts task "title"    → 01-backlog
@@ -251,7 +291,7 @@ bun packages/lythoskill-project-cortex/src/cli.ts review TASK-xxx → 03-review 
 
 **Always use CLI** — never `mv` files by hand. CLI moves update Status History; manual `mv` causes probe mismatches. After creating a task, immediately edit the file to fill Background/Requirements/Acceptance — empty templates are rejected by pre-commit probe.
 
-### Commit Trailers
+#### Commit Trailers
 
 ```
 Closes: TASK-xxx        # Any status → completed
@@ -262,7 +302,7 @@ Epic: EPIC-xxx done     # Epic: done, suspend, resume
 
 Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. This means after `git commit`, you may see an additional commit appear — this is normal. Malformed trailers print warnings but don't block. Full syntax: [cortex SKILL.md](packages/lythoskill-project-cortex/skill/SKILL.md).
 
-### Key Commands
+#### Key Commands
 
 | Need | Command |
 |------|---------|
@@ -276,7 +316,7 @@ Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. T
 
 **Shorthand convention**: throughout this doc, `deck link`, `arena single`, `cortex probe` etc. are shorthand. Resolution: `bun packages/<name>/src/cli.ts <cmd>` (in-repo dev) or `bunx @lythos/<name> <cmd>` (external). Full command table (auto-generated): `skills/lythoskill-project-cortex/references/COMMANDS.md`.
 
-### Session Close (Handoff)
+#### Session Close (Handoff)
 
 1. `git status` + `git log --oneline -5` — verify state
 2. `bun packages/lythoskill-project-cortex/src/cli.ts probe` — close stale tasks, close done epics
@@ -285,23 +325,34 @@ Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. T
 
 Scribe skill: [lythoskill-project-scribe](packages/lythoskill-project-scribe/skill/SKILL.md).
 
-### Critical Gotchas
+#### Critical Gotchas
 
 Each of these caused at least one real incident. Scan before committing.
 **When you discover a new gotcha — append it here.** This section grows as the project learns.
 
-- **Test SSOT**: `bun --filter='*' run test` is canonical. `scripts/test-report.ts` is a supplement — if they diverge, the script is wrong.
-- **BDD tests are expensive**: Agent BDD (agent scenario tests in `showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. If you patch a BDD test for the 3rd time, the scenario is stale — rewrite it.
-- **Bump needs lockfile**: Any `package.json` version change → `bun install` before commit. CI uses `--frozen-lockfile`.
-- **Guard-script sensitivity**: Modifying `.husky/`, `scripts/pre-commit-*.ts`, or `scripts/check-path-safety.ts` triggers a pre-commit warning. QA with a negative test — verify the guard actually catches violations. Use `bun packages/lythoskill-arena/src/cli.ts single --deck examples/decks/qa-sweep.toml` for guard changes.
-- **Workspace internal deps = `workspace:*`**: Never semver ranges on `@lythos/*` deps. Pre-commit enforces this.
-- **Before claiming done**: tests pass + TS compiles + if CLI changed → update README + if new package → add to `scripts/publish.sh` + if deck example changed → `deck validate` it.
-- **sed is a detector, not a scalpel**: `sed -i` is silent corruption risk. Survey with grep/sed (read-only) → fix call sites one by one with the type checker watching.
-- **`|| true` in guards is always wrong**: Parse stdout for the specific signal — don't blanket-suppress exit codes.
-- **Reconcilers are idempotent — run them after reverting declarative state**: `deck link` (derives `.claude/skills/` from `skill-deck.toml`), `bun install` (derives `node_modules/` from `package.json`). After `git checkout HEAD -- skill-deck.toml` or `package.json`, re-run the reconciler or derived state stays broken.
-- **Skills branch push race**: The `skills` branch hosts built SKILL.md output for external consumers. `git push` to `skills` may fail with `[remote rejected] (cannot lock ref)` when concurrent sessions race. Fix: `git pull --rebase` then push.
+Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels safe → the rule.
 
-### Full Submit Pipeline
+**[BOOT / TEST]**
+- `[TEST]` **When you'll forget:** you see two test commands and pick the prettier report. → `bun --filter='*' run test` is canonical. `scripts/test-report.ts` is a supplement — if they diverge, the script is wrong.
+- `[BDD]` **When you'll forget:** you want cheap regression coverage in CI. → Agent BDD (`showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. If you patch a BDD test for the 3rd time, the scenario is stale — rewrite it.
+
+**[EDIT]**
+- `[SED]` **When you'll forget:** a bulk rename looks faster than editing one by one. → `sed -i` is silent corruption risk. Survey with grep/sed (read-only) → fix call sites one by one with the type checker watching.
+- `[GUARD]` **When you'll forget:** a guard script returns a non-zero exit you didn't expect. → `|| true` is always wrong. Parse stdout for the specific signal — don't blanket-suppress exit codes.
+
+**[VALIDATE]**
+- `[DONE]` **When you'll forget:** you're 90% sure and want to call it finished. → tests pass + TS compiles + if CLI changed → update README + if new package → add to `scripts/publish.sh` + if deck example changed → `deck validate` it.
+- `[GUARD-SENSITIVE]` **When you'll forget:** you tweak a guard and assume the change is obviously correct. → Modifying `.husky/`, `scripts/pre-commit-*.ts`, or `scripts/check-path-safety.ts` triggers a pre-commit warning. QA with a negative test — verify the guard actually catches violations. Use `bun packages/lythoskill-arena/src/cli.ts single --deck examples/decks/qa-sweep.toml` for guard changes.
+
+**[REVERT]**
+- `[RECONCILE]` **When you'll forget:** you `git checkout HEAD --` a declarative file and think you're done. → Reconcilers must be re-run: `deck link` derives `.claude/skills/` from `skill-deck.toml`; `bun install` derives `node_modules/` from `package.json`. Reverting the input without re-running the function leaves derived state broken.
+
+**[RELEASE]**
+- `[LOCKFILE]` **When you'll forget:** you bump versions and the lockfile "looks unchanged." → Any `package.json` version change → `bun install` before commit. CI uses `--frozen-lockfile`.
+- `[WORKSPACE]` **When you'll forget:** you pin an internal dep like an external one. → Never semver ranges on `@lythos/*` deps. Pre-commit enforces `workspace:*`.
+- `[PUSH]` **When you'll forget:** you push to `skills` branch and it has always worked before. → `git push` to `skills` may fail with `[remote rejected] (cannot lock ref)` when concurrent sessions race. Fix: `git pull --rebase` then push.
+
+#### Full Submit Pipeline
 
 When user says "submit" / "全提交" / "push":
 
@@ -314,7 +365,7 @@ When user says "submit" / "全提交" / "push":
 6. (if release) bump → publish.sh
 ```
 
-### QA Security Sweep (Module Audit)
+#### QA Security Sweep (Module Audit)
 
 When asked to audit/sweep/check a module, follow this 5-phase loop:
 
@@ -330,9 +381,9 @@ Key principle: findings → tasks → fixes → verify. Don't just find — act 
 
 ---
 
-<!-- ═══════ Z4: Reference ═══════ -->
+## Z4 — Reference
 
-## 5. Hot Files
+### 5. Hot Files
 
 High-risk modification targets. Read before touching.
 
@@ -345,7 +396,7 @@ High-risk modification targets. Read before touching.
 | `AGENTS.md` | Compaction amnesia | Most-changed doc — re-read Release/Auth after compaction |
 | Release pipeline | Lockfile drift | bump → install → commit → push → publish — never skip steps |
 
-### Recurring Work Types
+#### Recurring Work Types
 
 What 60+ recent commits look like — helps orient to project norms:
 
@@ -357,7 +408,7 @@ What 60+ recent commits look like — helps orient to project norms:
 | Agent adapters | 6 | Template: build command array, spawn, parse, return AgentResult |
 | Release | 5 | Mechanical: bump → commit → publish.sh |
 
-## 6. Deck Governance
+### 6. Deck Governance
 
 `skill-deck.toml` declares active skills. `deck link` reconciles the working set (deny-by-default).
 
@@ -368,11 +419,13 @@ deck validate          # Check locator validity
 deck refresh           # Discover + plan (no auto-apply)
 ```
 
+**FQ-only locator policy**: all skill locators must be fully-qualified. No bare names. Write `github.com/lythos-labs/lythoskill/skills/lythoskill-deck`, never `lythoskill-deck`. `localhost/owner/repo[/skill]` for local-only skills. This eliminates implicit registry lookup — reconciliation, curator indexing, and symlink resolution are all deterministic.
+
 **Never guess skill paths — verify with real repo structure.** Options in priority order: (1) clone and `ls`, (2) `curator discover` (`bun packages/lythoskill-curator/src/cli.ts discover`), (3) GitHub tree. Guessing paths is the `|| true` of deck authoring — silent failure with no error message.
 
 **When using a deck, always read its `[combo.<name>]` sections.** Combo prompts are the orchestration playbook — not optional metadata.
 
-### Deck-First Dispatch (Conditioned Reflex)
+#### Deck-First Dispatch (Conditioned Reflex)
 
 **Don't ask "should I use X or do it manually?" — just dispatch.** Pre-built decks at `examples/decks/INDEX.md`.
 
@@ -387,7 +440,7 @@ deck refresh           # Discover + plan (no auto-apply)
 
 Full deck docs: [lythoskill-deck SKILL.md](packages/lythoskill-deck/skill/SKILL.md).
 
-## 7. Project Structure
+### 7. Project Structure
 
 ```
 lythoskill/
@@ -411,7 +464,7 @@ lythoskill/
 └── examples/decks/            # 18 pre-built deck configs
 ```
 
-## 8. Release & Auth (Compaction-Safe)
+### 8. Release & Auth (Compaction-Safe)
 
 **Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (a host alias in `~/.ssh/config` for key selection convenience — do not change). `~/.ssh/` is off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
 
@@ -421,7 +474,7 @@ lythoskill/
 
 **SKILL.md source files are templates**: `packages/*/skill/SKILL.md` contains `{{PACKAGE_VERSION}}` placeholders. Never replace with literal values — that breaks future renders. Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
-## 9. Project Skills
+### 9. Project Skills
 
 These are our own skills. Each has a SKILL.md that agents load.
 
@@ -437,7 +490,7 @@ These are our own skills. Each has a SKILL.md that agents load.
 | `lythoskill-dreaming` | Memory consolidation → SSOT | "Consolidate docs", "SSOT sweep", "memory consolidation" |
 | `lythoskill-coach` | SKILL.md quality review | Reviewing a new skill, "optimize this skill" |
 
-## 10. Pointer Index
+### 10. Pointer Index
 
 > AGENTS.md is the TL;DR. These files have the full detail. Load on demand.
 > **⚠️ Source paths**: these files live in `packages/*/skill/references/` (source) and are built to `skills/*/references/` (committed output). The paths below point to source — readable without running `deck link` first.**
