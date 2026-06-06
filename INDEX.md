@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/6 22:25:08
+> 自动生成于 2026/6/6 23:32:37
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 300 | 进行中: 0, 待验收: 0, 已完成: 259 |
+| Tasks | 301 | 进行中: 0, 待验收: 0, 已完成: 260 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
@@ -86,7 +86,7 @@ _无_
 
 _无_
 
-### 已完成 (259)
+### 已完成 (260)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -347,6 +347,7 @@ _无_
 - ✅ ~~TASK-20260606200108703~~: Update AGENTS.md task-design section to link ZK Review pattern as mandatory pre-assignment gate
 - ✅ ~~TASK-20260606220626030~~: AGENTS.md v2 refactor: ZK Review methodology + pass-by-reference + source-path references
 - ✅ ~~TASK-20260606222341617~~: bun test exit code 0 on 'Unhandled error between tests' — silent test failures
+- ✅ ~~TASK-20260606231034968~~: AGENTS.md BIOS-layer hardening: Z-zone visible headers, Daily Rhythm routing, CPTSD rewrite, FQ-only policy
 
 ### 悬置 (1)
 
