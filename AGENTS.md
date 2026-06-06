@@ -249,7 +249,7 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 **Mechanical first, understanding later.** Don't read everything before acting.
 
 0. **Ensure the environment works**: `bun install` (at the root of this workspace — Bun workspaces)
-1. **Ensure skills are loaded**: confirm `skill-deck.toml` exists, then `bun packages/lythoskill-deck/src/cli.ts link` → populates `.claude/skills/` from cold pool. If `.claude/skills/` is already populated but stale from a prior session, run `deck link` anyway — it's idempotent.
+1. **Ensure skills are loaded**: confirm `skill-deck.toml` exists, then `bun packages/lythoskill-deck/src/cli.ts link` → populates `.claude/skills/` from cold pool. If `.claude/skills/` is already populated but stale from a prior session, run `bun packages/lythoskill-deck/src/cli.ts link` anyway — it's idempotent.
 2. Read `daily/YYYY-MM-DD.md` (latest) → session handoff
 3. `git status` + `git log --oneline -5` → verify freshness against handoff's git_commit
 4. `bun packages/lythoskill-project-cortex/src/cli.ts probe` → check for state drift
@@ -265,7 +265,7 @@ A session goes through four phases:
 
 **1. Boot** — mechanical, don't think, just execute:
 ```
-bun install → deck link → read daily/YYYY-MM-DD.md (latest) → git status && git log --oneline -5 → cortex probe
+bun install → bun packages/lythoskill-deck/src/cli.ts link → read daily/YYYY-MM-DD.md (latest) → git status && git log --oneline -5 → bun packages/lythoskill-project-cortex/src/cli.ts probe
 ```
 You now know what happened last time and what's pending.
 
