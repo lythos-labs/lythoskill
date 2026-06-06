@@ -1,0 +1,58 @@
+# lythoskill-consumer-bootstrap
+# Bootstrap lythoskill governance for any workspace — not a skill monorepo,
+# just a regular project that wants declarative agent tooling.
+#
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/lythoskill-consumer-bootstrap.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+#   # Then ask your agent to execute the [combo.bootstrap] playbook below.
+
+[deck]
+name = "lythoskill-consumer-bootstrap"
+max_cards = 10
+cold_pool = "~/.agents/skill-repos"
+working_set = ".claude/skills"
+
+# Governance skills are innate — they teach the agent how to work in this repo.
+[innate.skills.lythoskill-deck]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
+
+[innate.skills.lythoskill-project-cortex]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex"
+
+[innate.skills.lythoskill-project-scribe]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe"
+
+[innate.skills.lythoskill-project-onboarding]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding"
+
+[innate.skills.lythoskill-writer]
+path = "github.com/lythos-labs/lythoskill/skills/lythoskill-writer"
+
+[combo.bootstrap]
+prompt = """
+You are bootstrapping lythoskill governance for this workspace.
+This deck has loaded the governance skills you need; read their SKILL.md files before acting.
+
+Phase 1 — Declare
+- If this directory does not have a skill-deck.toml, create one that imports this deck.
+- Run: bunx @lythos/skill-deck@latest link
+
+Phase 2 — Initialize governance infrastructure
+- If cortex/ does not exist, run: bunx @lythos/project-cortex@latest init
+- If daily/ does not exist, run: mkdir -p daily
+
+Phase 3 — Generate project docs (use loaded skills, do NOT write by hand)
+- Read lythoskill-project-scribe/skill/SKILL.md and write daily/YYYY-MM-DD.md for today's session.
+- Read lythoskill-writer/skill/SKILL.md and create AGENTS.md + CLAUDE.md in the project root.
+  - Use https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/templates/AGENTS.md
+    and https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/templates/CLAUDE.md
+    as source material, but adapt them to this project's name and tech stack.
+
+Phase 4 — Validate
+- Run: bunx @lythos/skill-deck@latest validate
+- Run: bunx @lythos/project-cortex@latest probe
+- Commit the new files with message: "chore: bootstrap lythoskill governance"
+
+Do not ask the user for clarification. Execute and report what you created.
+"""

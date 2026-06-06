@@ -14,36 +14,34 @@
 
 If you were just dropped into this repo, run these steps **before touching any code**.
 
-### First-time activation (when `cortex/` does not exist)
+This project uses **lythoskill** for declarative agent skill governance.
+The source of truth is `skill-deck.toml` in the root of this workspace.
+
+### If this is the first time lythoskill is being adopted
+
+Download the bootstrap deck and reconcile the working set:
 
 ```bash
-# 1. Install dependencies
-bun install
-
-# 2. Link the lythoskill skill deck into your agent working set
-bunx @lythos/skill-deck link
-
-# 3. Initialize project-cortex governance
-bunx @lythos/project-cortex init
-
-# 4. Create the daily journal directory
-mkdir -p daily
-
-# 5. Write an initial daily skeleton (today's date: YYYY-MM-DD.md)
-#    Include: repo state, open questions, next actions.
+curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/lythoskill-consumer-bootstrap.toml > skill-deck.toml
+bunx @lythos/skill-deck@latest link
 ```
 
-### Daily boot (when `cortex/` already exists)
+Then execute the `[combo.bootstrap]` playbook from the loaded deck:
+- It will initialize `cortex/` via `bunx @lythos/project-cortex@latest init` if needed.
+- It will create `daily/` and use the loaded `lythoskill-project-scribe` skill to write the first handoff.
+- It will use the loaded `lythoskill-writer` skill to adapt `AGENTS.md` and `CLAUDE.md` to this project.
+- It will validate with `deck validate` and `cortex probe`.
+
+### Daily boot (after bootstrap)
 
 ```bash
-bun install
-bunx @lythos/skill-deck link
+bunx @lythos/skill-deck@latest link
 # read daily/YYYY-MM-DD.md (latest)
 git status && git log --oneline -5
-bunx @lythos/project-cortex probe
+bunx @lythos/project-cortex@latest probe
 ```
 
-Why this order: dependencies → skills → session state → ground truth → drift check.
+Why this order: skills → session state → ground truth → drift check.
 
 ---
 
@@ -57,10 +55,10 @@ A **lythoskill consumer project**: it uses lythoskill governance tools (`skill-d
 
 | Layer | Choice |
 |-------|--------|
-| Runtime | **Bun** |
-| Language | **TypeScript** (ESM-only) |
-| Package manager | **Bun** |
 | Agent governance | **lythoskill** (`@lythos/skill-deck`, `@lythos/project-cortex`) |
+| Runtime for lythoskill CLIs | **Bun** (`bunx`) |
+
+The rest of the stack — language, package manager, framework — is whatever this repo already uses.
 
 ---
 
@@ -89,11 +87,10 @@ A session goes through four phases.
 ### 1. Boot — mechanical, don't think, just execute
 
 ```bash
-bun install
-bunx @lythos/skill-deck link
+bunx @lythos/skill-deck@latest link
 # read daily/YYYY-MM-DD.md (latest)
 git status && git log --oneline -5
-bunx @lythos/project-cortex probe
+bunx @lythos/project-cortex@latest probe
 ```
 
 You now know what happened last time and what's pending.
@@ -115,7 +112,7 @@ You now know what happened last time and what's pending.
 
 ```bash
 git status && git log --oneline -5
-bunx @lythos/project-cortex probe
+bunx @lythos/project-cortex@latest probe
 # write daily/YYYY-MM-DD.md (what file exploration cannot recover)
 # commit daily, push
 ```
@@ -126,13 +123,13 @@ bunx @lythos/project-cortex probe
 
 | Need | Command |
 |------|---------|
-| **Load skills (do first)** | `bunx @lythos/skill-deck link` |
-| Probe state | `bunx @lythos/project-cortex probe` |
-| Create task | `bunx @lythos/project-cortex task "title"` |
-| Start task | `bunx @lythos/project-cortex start TASK-xxx` |
-| Review task | `bunx @lythos/project-cortex review TASK-xxx` |
-| Arena quick run | `bunx @lythos/skill-arena single --deck <path> --brief "prompt"` |
-| Curator skill index | `bunx @lythos/skill-curator discover` |
+| **Load skills (do first)** | `bunx @lythos/skill-deck@latest link` |
+| Probe state | `bunx @lythos/project-cortex@latest probe` |
+| Create task | `bunx @lythos/project-cortex@latest task "title"` |
+| Start task | `bunx @lythos/project-cortex@latest start TASK-xxx` |
+| Review task | `bunx @lythos/project-cortex@latest review TASK-xxx` |
+| Arena quick run | `bunx @lythos/skill-arena@latest single --deck <path> --brief "prompt"` |
+| Curator skill index | `bunx @lythos/skill-curator@latest discover` |
 
 All commands resolve to published npm packages:
 `@lythos/skill-deck`, `@lythos/skill-arena`, `@lythos/project-cortex`, `@lythos/skill-curator`.
@@ -144,15 +141,15 @@ All commands resolve to published npm packages:
 Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels safe → the rule.
 
 **[BOOT]**
-- `[INSTALL]` **When you'll forget:** you ran `bunx` without `bun install` first. → Always `bun install` before `bunx @lythos/*` in a fresh clone or after `package.json` changes.
+- `[DECK]` **When you'll forget:** you edited `skill-deck.toml` and didn't re-link. → After any deck change, run `bunx @lythos/skill-deck@latest link` before assuming skills are correct.
 - `[DAILY]` **When you'll forget:** you skip reading `daily/` because the file name isn't today's date. → Read the **latest** `daily/YYYY-MM-DD.md`, not today's date necessarily.
 
 **[EDIT]**
-- `[DECLARATIVE]` **When you'll forget:** you edited `skill-deck.toml` or `package.json` and didn't re-run the reconciler. → After changing declarative state, run `bunx @lythos/skill-deck link` or `bun install` again.
+- `[DECLARATIVE]` **When you'll forget:** you edited `skill-deck.toml` and didn't re-run the reconciler. → `skill-deck.toml` is declarative; `deck link` is the reconciler. Run it after deck edits.
 - `[LOCAL_PATH]` **When you'll forget:** you copied a command from the upstream lythoskill repo that uses `packages/lythoskill-*/src/cli.ts`. → Consumer projects use `bunx @lythos/...` only.
 
 **[VALIDATE]**
-- `[PROBE]` **When you'll forget:** you committed before running `cortex probe`. → Run `bunx @lythos/project-cortex probe` before claiming a task done; it catches status-history drift.
+- `[PROBE]` **When you'll forget:** you committed before running `cortex probe`. → Run `bunx @lythos/project-cortex@latest probe` before claiming a task done; it catches status-history drift.
 - `[TASK_TEMPLATE]` **When you'll forget:** you created a task with the CLI but left the template empty. → Fill Background, Requirements, and Acceptance immediately; empty templates are rejected by probe.
 
 **[CLOSE]**
