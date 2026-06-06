@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/7 00:38:01
+> 自动生成于 2026/6/7 00:40:01
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 304 | 进行中: 1, 待验收: 0, 已完成: 262 |
+| Tasks | 304 | 进行中: 0, 待验收: 0, 已完成: 263 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
@@ -78,15 +78,15 @@ _无_
 
 _无_
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260607003719576**: Create lythoskill-consumer-bootstrap deck aligned with site mental model
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (262)
+### 已完成 (263)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -350,6 +350,7 @@ _无_
 - ✅ ~~TASK-20260606231034968~~: AGENTS.md BIOS-layer hardening: Z-zone visible headers, Daily Rhythm routing, CPTSD rewrite, FQ-only policy
 - ✅ ~~TASK-20260607000945113~~: Fix agent-adapter kimi.test.ts failing in CI when kimi binary absent
 - ✅ ~~TASK-20260607002504470~~: Create lightweight AGENTS.md + CLAUDE.md drop-in templates for lythoskill consumer projects
+- ✅ ~~TASK-20260607003719576~~: Create lythoskill-consumer-bootstrap deck aligned with site mental model
 
 ### 悬置 (1)
 

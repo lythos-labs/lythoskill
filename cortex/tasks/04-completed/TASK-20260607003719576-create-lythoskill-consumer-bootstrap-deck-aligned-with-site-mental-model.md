@@ -6,6 +6,7 @@
 |--------|------|------|
 | backlog | 2026-06-07 | Created |
 | in-progress | 2026-06-06 | Started |
+| completed | 2026-06-06 | Closed via trailer |
 
 ## 背景与目标
 The site frames lythoskill as "a gist for your AI toolkit": a `skill-deck.toml` declares what's active, `bunx @lythos/skill-deck link` reconciles it, and combos orchestrate loaded skills. The current `templates/AGENTS.md` approach drifts from this mental model by prescribing manual shell steps (mkdir, heredoc daily skeleton, bun install assumptions). We need a deck-first bootstrap artifact that lets any workspace adopt lythoskill governance by loading a deck and executing its combo.
