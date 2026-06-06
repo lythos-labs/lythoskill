@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/6 22:06:28
+> 自动生成于 2026/6/6 22:12:07
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 299 | 进行中: 1, 待验收: 0, 已完成: 257 |
+| Tasks | 299 | 进行中: 0, 待验收: 0, 已完成: 258 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
@@ -78,15 +78,15 @@ _无_
 
 _无_
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260606220626030**: AGENTS.md v2 refactor: ZK Review methodology + pass-by-reference + source-path references
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (257)
+### 已完成 (258)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -345,6 +345,7 @@ _无_
 - ✅ ~~TASK-20260606200104214~~: Add ZK Review reference doc to cortex skill (WHAT/WHY/HOW methodology + 4 required content types)
 - ✅ ~~TASK-20260606200107286~~: Update cortex SKILL.md desc + when_to_use + refs table for ZK Review methodology
 - ✅ ~~TASK-20260606200108703~~: Update AGENTS.md task-design section to link ZK Review pattern as mandatory pre-assignment gate
+- ✅ ~~TASK-20260606220626030~~: AGENTS.md v2 refactor: ZK Review methodology + pass-by-reference + source-path references
 
 ### 悬置 (1)
 
