@@ -17,6 +17,17 @@ If you were just dropped into this repo, run these steps **before touching any c
 This project uses **lythoskill** for declarative agent skill governance.
 The source of truth is `skill-deck.toml` in the root of this workspace.
 
+### Prerequisites
+
+Lythoskill CLIs are published as npm packages but currently require the **Bun runtime** to execute (`bunx`).
+If Bun is not installed:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+Use `bunx` for all `@lythos/*` commands below. Do not substitute `npx`/`pnpm dlx` — they are not verified for lythoskill CLIs at this time.
+
 ### If this is the first time lythoskill is being adopted
 
 Download the bootstrap deck and reconcile the working set:

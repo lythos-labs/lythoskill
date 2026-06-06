@@ -2,6 +2,10 @@
 # Bootstrap lythoskill governance for any workspace — not a skill monorepo,
 # just a regular project that wants declarative agent tooling.
 #
+# Prerequisites:
+#   - Bun runtime is installed: curl -fsSL https://bun.sh/install | bash
+#   - All lythoskill CLIs below use bunx. npx / pnpm dlx are not verified.
+#
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/lythoskill-consumer-bootstrap.toml > skill-deck.toml
 #   bunx @lythos/skill-deck@latest link
@@ -33,6 +37,11 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-writer"
 prompt = """
 You are bootstrapping lythoskill governance for this workspace.
 This deck has loaded the governance skills you need; read their SKILL.md files before acting.
+
+Prerequisites
+- Bun runtime must be installed. If it is missing, run:
+  curl -fsSL https://bun.sh/install | bash
+- Use bunx for all @lythos/* commands. Do not use npx or pnpm dlx — they are not verified for lythoskill CLIs at this time.
 
 Phase 1 — Declare
 - If this directory does not have a skill-deck.toml, create one that imports this deck.

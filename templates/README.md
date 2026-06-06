@@ -6,6 +6,18 @@ Drop-in governance files for projects that want lythoskill's declarative skill d
 
 These templates are source material. The fastest path is to load the consumer bootstrap deck and let its `[combo.bootstrap]` playbook generate everything.
 
+### Prerequisites
+
+Lythoskill CLIs currently require the **Bun runtime**. Install Bun first:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
+```
+
+All `@lythos/*` commands below use `bunx`. Do not substitute `npx` or `pnpm dlx` — they are not verified for lythoskill CLIs at this time.
+
+### Bootstrap
+
 ```bash
 # 1. Download the bootstrap deck
 curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/lythoskill-consumer-bootstrap.toml > skill-deck.toml
