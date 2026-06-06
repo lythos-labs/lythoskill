@@ -63,8 +63,9 @@
 - **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
 - **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
-## 📖 Lessons (23)
+## 📖 Lessons (24)
 
+- **[2026-06-06]** [bun-test-error-exit-code-0-silent-test-failure-lesson](./03-lessons/2026-06-06-bun-test-error-exit-code-0-silent-test-failure-lesson.md)
 - **[2026-05-18]** [iocontract-reproduce-sh-exit-code-idempotency-semantics-for-ioc-handoff](./03-lessons/2026-05-18-iocontract-reproduce-sh-exit-code-idempotency-semantics-for-ioc-handoff.md)
 - **[2026-05-17]** [excessive-self-questioning-as-agent-anti-pattern](./03-lessons/2026-05-17-excessive-self-questioning-as-agent-anti-pattern.md)
 - **[2026-05-17]** [codex-symlink-snapshot-mode-origin-and-evolution](./03-lessons/2026-05-17-codex-symlink-snapshot-mode-origin-and-evolution.md)
