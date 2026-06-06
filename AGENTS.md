@@ -412,7 +412,7 @@ lythoskill/
 
 ## 8. Release & Auth (Compaction-Safe)
 
-**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com`. `~/.ssh/` is off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
+**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (a host alias in `~/.ssh/config` for key selection convenience — do not change). `~/.ssh/` is off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
 
 **Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.16.0 bump`, never by hand. Bump pipeline: write root → align all packages → build skills (part of bump command). Then: `bun install` → commit → push → `./scripts/publish.sh`.
 
