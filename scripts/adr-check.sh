@@ -139,6 +139,30 @@ else
 fi
 echo ""
 
+# ── Test file import/call consistency ─────────────────────────────
+echo "[ADR-20260502010100000] Test files: import and call must match"
+TEST_MISMATCH=0
+for test_file in packages/*/src/*.test.ts; do
+  if [ ! -f "$test_file" ]; then continue; fi
+  imports_test=$(grep -c 'import.*test.*from.*bun:test' "$test_file" || true)
+  imports_it=$(grep -c 'import.*it.*from.*bun:test' "$test_file" || true)
+  calls_test=$(grep -c '^  test(' "$test_file" || true)
+  calls_it=$(grep -c '^  it(' "$test_file" || true)
+
+  if [ "$imports_it" -gt 0 ] && [ "$calls_test" -gt 0 ]; then
+    error "Import mismatch: $test_file imports 'it' but calls 'test()' ($calls_test times)"
+    TEST_MISMATCH=$((TEST_MISMATCH + 1))
+  fi
+  if [ "$imports_test" -gt 0 ] && [ "$calls_it" -gt 0 ]; then
+    error "Import mismatch: $test_file imports 'test' but calls 'it()' ($calls_it times)"
+    TEST_MISMATCH=$((TEST_MISMATCH + 1))
+  fi
+done
+if [ "$TEST_MISMATCH" -eq 0 ]; then
+  ok "All test files have consistent import/call pairs"
+fi
+echo ""
+
 # ── ADR-20260502010100000: Backup strategy docs consistency ──────
 echo "[ADR-20260502010100000] SKILL.md must not contradict backup strategy"
 CONTRADICTORY_DOCS=$(grep -rn "Deck only manages symlinks" packages/*/skill/SKILL.md 2>/dev/null || true)

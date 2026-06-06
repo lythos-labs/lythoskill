@@ -55,14 +55,16 @@ for (const pkg of changedPackages) {
   // Parse actual test results from bun test output
   const failMatch = stdout.match(/(\d+) fail/);
   const fails = failMatch ? parseInt(failMatch[1]) : 0;
+  const errorMatch = stdout.match(/(\d+) error/);
+  const errors = errorMatch ? parseInt(errorMatch[1]) : 0;
 
-  if (fails > 0) {
-    console.error(`❌ ${pkg}: ${fails} fail(s)`);
+  if (fails > 0 || errors > 0) {
+    console.error(`❌ ${pkg}: ${fails} fail(s), ${errors} error(s)`);
     failed++;
   } else {
     const passMatch = stdout.match(/(\d+) pass/);
     const passes = passMatch ? parseInt(passMatch[1]) : 0;
-    console.log(`✅ ${pkg}: ${passes} pass, 0 fail`);
+    console.log(`✅ ${pkg}: ${passes} pass, 0 fail, 0 error`);
   }
 }
 
