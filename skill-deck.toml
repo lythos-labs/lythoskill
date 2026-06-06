@@ -1,6 +1,13 @@
 [deck]
 max_cards = 15
+# Cold pool: where skill repositories are cloned by `deck add`.
+# Think of it as a git clone cache — skills live here permanently.
+# `deck link` reads from the cold pool and creates symlinks in the working_set.
+# `deck refresh` discovers new skills in the cold pool.
 cold_pool = "~/.agents/skill-repos"
+# Working set: where your agent actually loads skills from.
+# This is a directory of symlinks (or snapshots) into the cold pool.
+# `deck link` reconciles this directory against skill-deck.toml.
 working_set = ".claude/skills"
 also_link_to = [".agents/skills"]
 

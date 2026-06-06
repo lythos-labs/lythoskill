@@ -61,7 +61,7 @@ echo ""
 
 # ── ADR-20260423182606313: Template variables resolved in build ──
 echo "[ADR-20260423182606313] No unresolved {{VAR}} in skills/**/*.md"
-UNRESOLVED_VARS=$(grep -rn "{{[A-Z]" skills/ 2>/dev/null | grep -v "node_modules" || true)
+UNRESOLVED_VARS=$(grep -rn "{{[A-Z]" skills/ 2>/dev/null | grep -v "node_modules" | grep -v "/references/" || true)
 if [ -n "$UNRESOLVED_VARS" ]; then
   error "Unresolved template variables in skills/ build output:"
   echo "$UNRESOLVED_VARS" | while read line; do

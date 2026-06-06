@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/1 17:08:50
+> 自动生成于 2026/6/6 22:06:28
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 295 | 进行中: 0, 待验收: 0, 已完成: 254 |
+| Tasks | 299 | 进行中: 1, 待验收: 0, 已完成: 257 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 84 | 已接受: 81 |
 
@@ -78,15 +78,15 @@ _无_
 
 _无_
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260606220626030**: AGENTS.md v2 refactor: ZK Review methodology + pass-by-reference + source-path references
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (254)
+### 已完成 (257)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -342,6 +342,9 @@ _无_
 - ✅ ~~TASK-20260601162858384~~: T3: fix agent-run→single stale references + broken cross-ref to archived file
 - ✅ ~~TASK-20260601162859848~~: T3: fix wiki naming — 10 bare-name files + 02-faq/02-research collision + INDEX.md gap
 - ✅ ~~TASK-20260601162901076~~: T3: consolidate cold pool patterns — 6 files with 30-40% overlap into 3-4
+- ✅ ~~TASK-20260606200104214~~: Add ZK Review reference doc to cortex skill (WHAT/WHY/HOW methodology + 4 required content types)
+- ✅ ~~TASK-20260606200107286~~: Update cortex SKILL.md desc + when_to_use + refs table for ZK Review methodology
+- ✅ ~~TASK-20260606200108703~~: Update AGENTS.md task-design section to link ZK Review pattern as mandatory pre-assignment gate
 
 ### 悬置 (1)
 
