@@ -51,7 +51,7 @@ Why this order: dependencies → skills → session state → ground truth → d
 
 ### What this project is
 
-A **lythoskill consumer project**: it uses lythoskill governance tools (`skill-deck`, `project-cortex`, `skill-arena`) without publishing its own skills. The project borrows the lythosisk daily/cortex rhythm for agent memory and task tracking.
+A **lythoskill consumer project**: it uses lythoskill governance tools (`skill-deck`, `project-cortex`, `skill-arena`) without publishing its own skills. The project borrows the lythoskill daily/cortex rhythm for agent memory and task tracking.
 
 ### Technology
 
