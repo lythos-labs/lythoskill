@@ -12,17 +12,29 @@ describe('detectKimiBinary', () => {
 
 describe('buildKimiCommand', () => {
   it('builds kimi CLI args without shell wrapper', () => {
-    const cmd = buildKimiCommand()
-    expect(cmd[0]).toBeOneOf(['kimi-cli', 'kimi'])
+    const cmd = buildKimiCommand(undefined, 'kimi-cli')
+    expect(cmd[0]).toBe('kimi-cli')
+    expect(cmd).toContain('--print')
+    expect(cmd).toContain('--output-format')
+    expect(cmd).toContain('stream-json')
+  })
+
+  it('builds kimi CLI args for kimi binary', () => {
+    const cmd = buildKimiCommand(undefined, 'kimi')
+    expect(cmd[0]).toBe('kimi')
     expect(cmd).toContain('--print')
     expect(cmd).toContain('--output-format')
     expect(cmd).toContain('stream-json')
   })
 
   it('does not use shell or redirect (injection-safe)', () => {
-    const cmd = buildKimiCommand()
+    const cmd = buildKimiCommand(undefined, 'kimi-cli')
     expect(cmd).not.toContain('sh')
     expect(cmd).not.toContain('-c')
+  })
+
+  it('throws when no binary is available', () => {
+    expect(() => buildKimiCommand(undefined, '')).toThrow('No kimi binary found in PATH')
   })
 })
 

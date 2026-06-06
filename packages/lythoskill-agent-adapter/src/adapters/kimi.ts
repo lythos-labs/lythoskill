@@ -21,8 +21,10 @@ export function detectKimiBinary(): string {
 }
 
 /** Build kimi CLI command args (no shell wrapper — safe from injection). */
-export function buildKimiCommand(_modelTier?: 'fast' | 'balanced' | 'deep'): string[] {
-  const binary = detectKimiBinary()
+export function buildKimiCommand(
+  _modelTier?: 'fast' | 'balanced' | 'deep',
+  binary = detectKimiBinary(),
+): string[] {
   if (!binary) {
     throw new Error('No kimi binary found in PATH. Install: https://github.com/MoonshotAI/kimi-cli')
   }
