@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/6/7 00:40:01
+> 自动生成于 2026/6/7 23:45:44
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 304 | 进行中: 0, 待验收: 0, 已完成: 263 |
+| Tasks | 308 | 进行中: 0, 待验收: 0, 已完成: 263 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
-| ADRs | 84 | 已接受: 81 |
+| ADRs | 85 | 已接受: 82 |
 
 ---
 
@@ -74,9 +74,12 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (4)
 
-_无_
+- [ ] **TASK-20260607233651845**: Standardize scribe daily/weekly templates
+- [ ] **TASK-20260607234330279**: start
+- [ ] **TASK-20260607234531489**: review
+- [ ] **TASK-20260607234536632**: done
 
 ### 进行中 (0)
 
@@ -486,6 +489,7 @@ _无_
 - ✅ **ADR-20260528153455764** (02-accepted): Combo `skills` field as visual annotation — human-readable, not parsed by code
 - ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
 - ✅ **ADR-20260529215906255** (02-accepted): Curator catalog resolution context — deck-aware vs independent discovery
+- ✅ **ADR-20260607233903985** (02-accepted): CLI task command: subcommand inconsistency between create and state transitions
 
 ---
 
