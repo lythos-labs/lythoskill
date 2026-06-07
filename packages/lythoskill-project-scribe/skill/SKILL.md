@@ -51,6 +51,20 @@ bunx @lythos/project-cortex@0.15.5 list
 #    - What temp files did I create and where?
 #    - What would the next agent most likely misunderstand?
 ```
+## Template Usage
+
+Scribe produces two file types. Follow the templates — they encode the
+best-practice format that evolved from 100+ daily/weekly files.
+
+| File type | Template | When to write |
+|:---|:---|:---|
+| **Daily** | [references/daily-template.md](./references/daily-template.md) | Every session ending |
+| **Weekly** | [references/weekly-template.md](./references/weekly-template.md) | End of week (Sunday night) |
+
+**Rule**: Do not invent format. If the template has a section, include it.
+If a section is marked REQUIRED, it must be present even if empty (e.g.,
+`quests_paused: []` proves you checked, not forgot).
+
 ## Core Operation: Write Daily File
 Output goes to `daily/YYYY-MM-DD.md`. The first section must be `## Session Handoff`.
 Human work logs follow after the handoff section.
@@ -109,5 +123,6 @@ during the pre-handoff check. If not, skip — scribe works independently.
 | When you need to… | Read |
 |--------------------|------|
 | See the full daily file template with all sections | [references/daily-template.md](./references/daily-template.md) |
+| See the weekly file template (YAML + markdown body) | [references/weekly-template.md](./references/weekly-template.md) |
 | Understand the CQRS relationship with onboarding | [references/cqrs-architecture.md](./references/cqrs-architecture.md) |
 | Set up automation triggers (hooks, events) | [references/automation-triggers.md](./references/automation-triggers.md) |
