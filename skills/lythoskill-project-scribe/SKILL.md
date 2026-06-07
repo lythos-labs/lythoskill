@@ -1,9 +1,12 @@
 ---
 name: lythoskill-project-scribe
-version: 0.15.5
+version: 0.16.0
 description: |
-  Session memory writer. Dumps what file exploration cannot recover —
-  pitfalls, true working-tree state, uncommitted decisions, specific  next steps — into daily/YYYY-MM-DD.md. Forms CQRS write-side pair
+  Session context dump. Self-assess what the conversation contains that has
+  NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,
+  why-we-chose-this, specific next steps — and write to daily/YYYY-MM-DD.md.
+  Things WITH structured carriers go to their carriers. Things WITHOUT
+  carriers but needed by the next agent go here. Forms CQRS write-side pair
   with project-onboarding (read-side).
 when_to_use: |
   Record progress, update task, write daily, log a pitfall, session  ending, handoff, LGTM, wrap up, context limit approaching,  踩坑了, 记录一下, 先到这里, 就这样, session 要结束了.
@@ -12,13 +15,26 @@ when_to_use: |
 # Project Scribe
 > Write what `ls` + `cat` + `git log` cannot recover. Skip everything else.
 ## Value Boundary
+
+**Scribe = session context dump for things WITHOUT structured carriers.**
+
+```
+对话中产生了什么?
+  ├── 有 task/adr/epic 载体 → 写到对应 carrier,不写 scribe
+  └── 无载体 → 自评: 下一个 agent 需要知道吗?
+        ├── 需要 → scribe
+        └── 不需要 → 不写
+```
+
 | File exploration recovers (~70%) | Scribe must dump (~30%) |
 |----------------------------------|------------------------|
 | Project structure, tech stack | Pitfalls from this session |
 | skill-deck.toml content | True working-tree state (prevents hallucination) |
-| cortex/ tasks and epics | Specific next steps (not "test it") |
-| git log history | Temp artifacts: location + purpose |
-| README, docs | Uncommitted modifications and their intent |
+| cortex/ tasks and epics | Why we chose A not B (not ADR-worthy but still important) |
+| git log history | Specific next steps (not "test it") |
+| README, docs | Temp artifacts: location + purpose |
+| git diff (code changes) | Uncommitted modifications and their intent |
+| | Meta-observations that emerge mid-conversation |
 
 If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 ## Pre-Handoff Checklist (mandatory before writing)
@@ -35,6 +51,20 @@ bunx @lythos/project-cortex@0.15.5 list
 #    - What temp files did I create and where?
 #    - What would the next agent most likely misunderstand?
 ```
+## Template Usage
+
+Scribe produces two file types. Follow the templates — they encode the
+best-practice format that evolved from 100+ daily/weekly files.
+
+| File type | Template | When to write |
+|:---|:---|:---|
+| **Daily** | [references/daily-template.md](./references/daily-template.md) | Every session ending |
+| **Weekly** | [references/weekly-template.md](./references/weekly-template.md) | End of week (Sunday night) |
+
+**Rule**: Do not invent format. If the template has a section, include it.
+If a section is marked REQUIRED, it must be present even if empty (e.g.,
+`quests_paused: []` proves you checked, not forgot).
+
 ## Core Operation: Write Daily File
 Output goes to `daily/YYYY-MM-DD.md`. The first section must be `## Session Handoff`.
 Human work logs follow after the handoff section.
@@ -93,5 +123,6 @@ during the pre-handoff check. If not, skip — scribe works independently.
 | When you need to… | Read |
 |--------------------|------|
 | See the full daily file template with all sections | [references/daily-template.md](./references/daily-template.md) |
+| See the weekly file template (YAML + markdown body) | [references/weekly-template.md](./references/weekly-template.md) |
 | Understand the CQRS relationship with onboarding | [references/cqrs-architecture.md](./references/cqrs-architecture.md) |
 | Set up automation triggers (hooks, events) | [references/automation-triggers.md](./references/automation-triggers.md) |

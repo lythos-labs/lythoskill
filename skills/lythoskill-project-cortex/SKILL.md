@@ -8,11 +8,13 @@ description: |
   Never leave state drift for the next agent to discover via git log.
   GTD-style governance: ADR, Epic, Task, Wiki. Numeric-prefixed
   directories enforce workflow order. Timestamp IDs prevent collision.
+  ZK task review (WHAT/WHY/HOW) ensures subagent-readable requirements before assignment.
   probe detects stale backlog, epic drift, and history mismatches.
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
-  task status, project index, what needs to be done, backlog,
+  ZK review task cards before assignment, task status, project index,
+  what needs to be done, backlog,
   milestone, project governance, generate index, probe status.
 
   ALSO trigger when:
@@ -24,6 +26,8 @@ when_to_use: |
   - QA sweep found findings that need tracking
   - Need to register a lesson learned or pitfall
   - User says "登记" / "记录一下" / "记下来" / "别忘了"
+  - User says "ZK review this task" / "零知识审查" / "review this task" / "任务能看懂吗" — ZK Review the card before assignment
+  - Before assigning a task to executor agent — ZK Review the card (WHAT/WHY/HOW, prerequisites, contracts, baselines, scope)
   - See a TASK-xxx or EPIC-xxx reference and need context
   - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
   - Doing session handoff or writing daily notes
@@ -470,4 +474,5 @@ Read these **only when the specific topic arises**:
 | Use Wiki for knowledge capture after task completion | [references/wiki-workflow.md](./references/wiki-workflow.md) |
 | See a complete end-to-end workflow example | [references/example-workflow.md](./references/example-workflow.md) |
 | Understand the milestone protocol in full detail | [references/milestone-protocol.md](./references/milestone-protocol.md) |
+| Design tasks that a ZK agent can execute without asking (WHAT/WHY/HOW method) | [references/zk-review.md](./references/zk-review.md) |
 | See complete state machine rules, valid transitions, and error guidance | [references/state-machines.md](./references/state-machines.md) |
