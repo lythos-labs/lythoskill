@@ -309,7 +309,7 @@ Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. T
 | **Load skills (do first)** | `bun packages/lythoskill-deck/src/cli.ts link` (shorthand: `deck link`) |
 | Run tests | `bun --filter='*' run test` |
 | Probe state | `bun packages/lythoskill-project-cortex/src/cli.ts probe` (shorthand: `cortex probe`) |
-| Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` (shorthand: `cortex task`) |
+| Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` or `... task create "title"` (shorthand: `cortex task` / `cortex task create`) |
 | ZK Review a task | Spawn ZK agent, ask WHAT/WHY/HOW on the task card + AGENTS.md |
 | Arena quick run | `bun packages/lythoskill-arena/src/cli.ts single --deck <path> --brief "prompt"` (shorthand: `arena single`) |
 | Release | `bunx @lythos/skill-creator@0.16.0 bump` → `./scripts/publish.sh` |

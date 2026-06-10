@@ -128,12 +128,19 @@ async function main(): Promise<void> {
       initWorkflow(config);
       break;
 
-    case 'task':
-      // Disambiguate: `task <id> <verb>` is rare; current CLI keeps top-level verbs for tasks.
-      if (!arg) {
+    case 'task': {
+      // Support both `task "<title>"` (legacy) and `task create "<title>"` (subcommand)
+      // for consistency with `task start/review/done` state-transition verbs.
+      let title: string;
+      if (arg === 'create' && restArgs[0]) {
+        title = restArgs[0];
+      } else if (arg) {
+        title = arg;
+      } else {
         console.error(`❌ Task title required.
 
    Usage:    bunx @lythos/project-cortex task "<title>"
+             bunx @lythos/project-cortex task create "<title>"
    Example:  bunx @lythos/project-cortex task "Fix login redirect bug"
 
    The title becomes the kebab-cased filename suffix; the new task lands
@@ -141,8 +148,9 @@ async function main(): Promise<void> {
      bunx @lythos/project-cortex list`);
         process.exit(1);
       }
-      createTask(arg, config);
+      createTask(title, config);
       break;
+    }
 
     case 'epic': {
       if (!arg) {
