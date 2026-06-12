@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/10 21:15:16
+> 自动生成于 2026/6/12 22:03:11
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 309 | 进行中: 0, 待验收: 0, 已完成: 264 |
+| Tasks | 306 | 进行中: 0, 待验收: 0, 已完成: 265 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 85 | 已接受: 82 |
 
@@ -74,12 +74,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (4)
+### 待办 (0)
 
-- [ ] **TASK-20260607233651845**: Standardize scribe daily/weekly templates
-- [ ] **TASK-20260607234330279**: start
-- [ ] **TASK-20260607234531489**: review
-- [ ] **TASK-20260607234536632**: done
+_无_
 
 ### 进行中 (0)
 
@@ -89,7 +86,7 @@ _无_
 
 _无_
 
-### 已完成 (264)
+### 已完成 (265)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -354,6 +351,7 @@ _无_
 - ✅ ~~TASK-20260607000945113~~: Fix agent-adapter kimi.test.ts failing in CI when kimi binary absent
 - ✅ ~~TASK-20260607002504470~~: Create lightweight AGENTS.md + CLAUDE.md drop-in templates for lythoskill consumer projects
 - ✅ ~~TASK-20260607003719576~~: Create lythoskill-consumer-bootstrap deck aligned with site mental model
+- ✅ ~~TASK-20260607233651845~~: Standardize scribe daily/weekly templates
 - ✅ ~~TASK-20260610210513827~~: Implement CLI task create subcommand compatibility (ADR-20260607233903985)
 
 ### 悬置 (1)

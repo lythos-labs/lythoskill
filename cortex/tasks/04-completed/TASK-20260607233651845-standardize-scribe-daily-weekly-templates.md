@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-06-07 | Created |
+| completed | 2026-06-12 | Closed via trailer |
 
 ## 背景与目标
 当前 `packages/lythoskill-project-scribe/skill/references/daily-template.md` 停留在 v0.15.5 的简版结构（Ground Truth 嵌在 Handoff 内部、无 Completed/Key Decisions/Temp Artifacts 区块），而实际 daily 文件（06-06、06-07）已演化为更成熟的格式。weekly 模板完全缺失，导致 W24 出现纯 YAML 退化（丢失 markdown body）。
