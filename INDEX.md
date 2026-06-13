@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/13 18:34:42
+> 自动生成于 2026/6/13 18:38:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 309 | 进行中: 0, 待验收: 1, 已完成: 265 |
+| Tasks | 309 | 进行中: 0, 待验收: 1, 已完成: 267 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 86 | 已接受: 82 |
 
@@ -74,10 +74,9 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (0)
 
-- [ ] **TASK-20260613182154539**: Reconcile TASK-20260530135707211 status history with completed directory
-- [ ] **TASK-20260613182155587**: Resolve cold-pool mirror stash@{0}
+_无_
 
 ### 进行中 (0)
 
@@ -87,7 +86,7 @@ _无_
 
 - 🔍 **TASK-20260613182153447**: Update ADR-20260503003314901: Closes: TASK semantic is complete not review-then-done
 
-### 已完成 (265)
+### 已完成 (267)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -354,6 +353,8 @@ _无_
 - ✅ ~~TASK-20260607003719576~~: Create lythoskill-consumer-bootstrap deck aligned with site mental model
 - ✅ ~~TASK-20260607233651845~~: Standardize scribe daily/weekly templates
 - ✅ ~~TASK-20260610210513827~~: Implement CLI task create subcommand compatibility (ADR-20260607233903985)
+- ✅ ~~TASK-20260613182154539~~: Reconcile TASK-20260530135707211 status history with completed directory
+- ✅ ~~TASK-20260613182155587~~: Resolve cold-pool mirror stash@{0}
 
 ### 悬置 (1)
 

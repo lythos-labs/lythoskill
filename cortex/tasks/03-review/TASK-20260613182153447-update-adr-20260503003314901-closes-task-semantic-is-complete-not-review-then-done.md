@@ -30,7 +30,7 @@
 
 ## 验收标准
 - [x] `bun test packages/lythoskill-project-cortex/src/lib/trailer.test.ts` 全绿
-- [ ] `cortex probe` 无新增不一致（提交前验证）
+- [x] `cortex probe` 无新增不一致
 - [x] 新 ADR 被接受，旧 ADR 标记 superseded
 - [x] AGENTS.md / conventions.md / SKILL.md / state-machines.md 与新语义一致
 

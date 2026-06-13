@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-30 | Created as part of EPIC-20260530135721111 |
+| completed | 2026-06-13 | Reconciled — work was completed in commit history but Status History was missing |
 
 ## 背景与目标
 
@@ -18,16 +19,16 @@ Arena CLI (`packages/lythoskill-arena/src/cli.ts`) 目前直接调用 `console.l
 
 ## 需求详情
 
-- [ ] 定义 `ArenaCliIO` interface: `{ log, error, exit }`
-- [ ] `export async function main(args, io?: ArenaCliIO)` — 注入
-- [ ] `singleRun(args, io?)` — 注入
-- [ ] `vsRun(args, io?)` — 注入
-- [ ] `vizRun(args, io?)` — 注入
-- [ ] `prepareWorkdir(args, io?)` — 注入
-- [ ] `archiveRun(args, io?)` — 注入
-- [ ] 所有直接 `console.log`/`console.error`/`process.exit` 改为 `io.log`/`io.error`/`io.exit`
-- [ ] 添加 `cli.test.ts` 测试：参数解析、错误路径、帮助输出
-- [ ] 测试使用 mock IO（零 spyOn console/process）
+- [x] 定义 `ArenaCliIO` interface: `{ log, error, exit }`
+- [x] `export async function main(args, io?: ArenaCliIO)` — 注入
+- [x] `singleRun(args, io?)` — 注入
+- [x] `vsRun(args, io?)` — 注入
+- [x] `vizRun(args, io?)` — 注入
+- [x] `prepareWorkdir(args, io?)` — 注入
+- [x] `archiveRun(args, io?)` — 注入
+- [x] 所有直接 `console.log`/`console.error`/`process.exit` 改为 `io.log`/`io.error`/`io.exit`
+- [x] 添加 `cli.test.ts` 测试：参数解析、错误路径、帮助输出
+- [x] 测试使用 mock IO（零 spyOn console/process）
 
 ## 技术方案
 
@@ -39,9 +40,9 @@ Arena CLI (`packages/lythoskill-arena/src/cli.ts`) 目前直接调用 `console.l
 
 ## 验收标准
 
-- [ ] `bun test packages/lythoskill-arena/src/cli.test.ts` 通过
-- [ ] 零 `spyOn(console)` / `spyOn(process)`
-- [ ] `bun --filter='*' run test` 全绿
+- [x] `bun test packages/lythoskill-arena/src/cli.test.ts` 通过
+- [x] 零 `spyOn(console)` / `spyOn(process)`
+- [x] `bun --filter='*' run test` 全绿
 
 ## 关联文件
 - 修改: `packages/lythoskill-arena/src/cli.ts`
