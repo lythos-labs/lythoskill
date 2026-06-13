@@ -14,7 +14,7 @@ export interface TrailerResult {
 const ID_RE = /^[A-Z]+-[0-9]+$/;
 
 function looksLikeTrailerLine(line: string): boolean {
-  return /^(Task|ADR|Epic|Closes):\s*/i.test(line);
+  return /^(Task|ADR|Epic|Closes|Review):\s*/i.test(line);
 }
 
 export function parseTrailers(msg: string): TrailerResult {
@@ -50,7 +50,8 @@ export function parseTrailers(msg: string): TrailerResult {
       case "Closes": {
         let dispatchVerb: string;
         if (id.startsWith("TASK-")) {
-          dispatchVerb = "complete";
+          // Strict semantic: Closes: TASK-* means "reviewed and approved" (review -> done).
+          dispatchVerb = "done";
         } else if (id.startsWith("ADR-")) {
           dispatchVerb = "adr accept";
         } else if (id.startsWith("EPIC-")) {
@@ -62,6 +63,14 @@ export function parseTrailers(msg: string): TrailerResult {
         trailers.push({ key, id, verb: dispatchVerb, raw });
         break;
       }
+      case "Review":
+        // "Development complete, submit for review" — kanban "move to review" / internal PR.
+        if (!id.startsWith("TASK-")) {
+          warnings.push(`post-commit trailer: Review: only supports TASK-* IDs in: ${line}`);
+          continue;
+        }
+        trailers.push({ key, id, verb: "review", raw });
+        break;
       case "Task":
         if (!verb) {
           warnings.push(`post-commit trailer: Task: requires a verb in: ${line}`);

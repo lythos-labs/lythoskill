@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/6/12 22:03:11
+> 自动生成于 2026/6/13 18:33:21
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 306 | 进行中: 0, 待验收: 0, 已完成: 265 |
+| Tasks | 309 | 进行中: 1, 待验收: 0, 已完成: 265 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
-| ADRs | 85 | 已接受: 82 |
+| ADRs | 86 | 已接受: 82 |
 
 ---
 
@@ -74,13 +74,14 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (2)
 
-_无_
+- [ ] **TASK-20260613182154539**: Reconcile TASK-20260530135707211 status history with completed directory
+- [ ] **TASK-20260613182155587**: Resolve cold-pool mirror stash@{0}
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260613182153447**: Update ADR-20260503003314901: Closes: TASK semantic is complete not review-then-done
 
 ### 待验收 (0)
 
@@ -430,7 +431,7 @@ _无_
 - ✅ **ADR-20260502110308316** (02-accepted): Arena TOML Schema — Player as Facade 与对决声明
 - ✅ **ADR-20260502233119561** (02-accepted): bump command and lockstep versioning policy
 - ✅ **ADR-20260502234833756** (02-accepted): identify skill packages via skill subdirectory presence
-- ✅ **ADR-20260503003314901** (02-accepted): git-coupling for cortex governance documents via commit trailer
+- 📦 **ADR-20260503003314901** (04-superseded): git-coupling for cortex governance documents via commit trailer
 - ✅ **ADR-20260503003315478** (02-accepted): epic granularity discipline — one outcome per iteration
 - ✅ **ADR-20260503152000411** (02-accepted): deck 3-axis CRUD model with as-alias schema for working-set collisions
 - ✅ **ADR-20260503170000000** (02-accepted): Monorepo Toolchain — Bun-only and Root Package.json Conventions
@@ -489,6 +490,7 @@ _无_
 - ✅ **ADR-20260528173826499** (02-accepted): Distributed orchestration by weight — why no centralized orchestrator
 - ✅ **ADR-20260529215906255** (02-accepted): Curator catalog resolution context — deck-aware vs independent discovery
 - ✅ **ADR-20260607233903985** (02-accepted): CLI task command: subcommand inconsistency between create and state transitions
+- ✅ **ADR-20260613182316950** (02-accepted): Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
 
 ---
 

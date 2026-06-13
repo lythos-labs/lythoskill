@@ -9,10 +9,10 @@ describe("parseTrailers", () => {
     expect(result.skip).toBe(false);
   });
 
-  it("parses Closes: TASK-* into complete command", () => {
+  it("parses Closes: TASK-* into done command", () => {
     const result = parseTrailers("fix: bug\n\nCloses: TASK-20260504100000001");
     expect(result.trailers).toEqual([
-      { key: "Closes", id: "TASK-20260504100000001", verb: "complete", raw: "Closes: TASK-20260504100000001" },
+      { key: "Closes", id: "TASK-20260504100000001", verb: "done", raw: "Closes: TASK-20260504100000001" },
     ]);
     expect(result.warnings).toEqual([]);
   });
@@ -28,6 +28,22 @@ describe("parseTrailers", () => {
     const result = parseTrailers("feat: done\n\nCloses: EPIC-20260504100000001");
     expect(result.trailers).toEqual([
       { key: "Closes", id: "EPIC-20260504100000001", verb: "epic done", raw: "Closes: EPIC-20260504100000001" },
+    ]);
+  });
+
+  it("parses Review: TASK-* into review command", () => {
+    const result = parseTrailers("feat: implementation\n\nReview: TASK-20260504100000001");
+    expect(result.trailers).toEqual([
+      { key: "Review", id: "TASK-20260504100000001", verb: "review", raw: "Review: TASK-20260504100000001" },
+    ]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("warns when Review: is used with non-TASK ID", () => {
+    const result = parseTrailers("feat: implementation\n\nReview: ADR-20260504100000001");
+    expect(result.trailers).toEqual([]);
+    expect(result.warnings).toEqual([
+      "post-commit trailer: Review: only supports TASK-* IDs in: Review: ADR-20260504100000001",
     ]);
   });
 
@@ -102,7 +118,7 @@ describe("parseTrailers", () => {
     ].join("\n");
     const result = parseTrailers(msg);
     expect(result.trailers).toHaveLength(3);
-    expect(result.trailers[0].verb).toBe("complete");
+    expect(result.trailers[0].verb).toBe("done");
     expect(result.trailers[1].verb).toBe("review");
     expect(result.trailers[2].verb).toBe("adr accept");
   });
@@ -123,7 +139,7 @@ describe("parseTrailers", () => {
   it("handles trailing whitespace in trailer lines", () => {
     const result = parseTrailers("fix: bug\n\nCloses: TASK-20260504100000001   ");
     expect(result.trailers).toEqual([
-      { key: "Closes", id: "TASK-20260504100000001", verb: "complete", raw: "Closes: TASK-20260504100000001   " },
+      { key: "Closes", id: "TASK-20260504100000001", verb: "done", raw: "Closes: TASK-20260504100000001   " },
     ]);
   });
 });

@@ -139,11 +139,28 @@ Cortex governance is commit-driven. Trailers in the commit message body (after a
 are parsed by `.husky/post-commit`:
 
 ```
-Closes: TASK-xxx             # Any status -> completed
-Task: TASK-xxx review        # Move task to review
-ADR: ADR-xxx accept          # Accept an ADR
-Epic: EPIC-xxx done          # Complete an epic
+Review: TASK-xxx          # in-progress → review (dev complete, submit for review / internal PR)
+Closes: TASK-xxx          # review → completed (reviewed and approved / LGTM)
+Task: TASK-xxx review     # Move task to review (explicit verb form)
+ADR: ADR-xxx accept       # Accept an ADR
+Epic: EPIC-xxx done       # Complete an epic
 ```
+
+**FSM mapping by trailer key**:
+
+| Trailer key | Valid doc types | Resolves to | FSM transition | Illegal use |
+|-------------|-----------------|-------------|----------------|-------------|
+| `Review:` | `TASK-*` only | `review <ID>` | `in-progress → review` | Non-TASK ID |
+| `Closes:` | `TASK-*` | `done <ID>` | `review → completed` | From `backlog`/`in-progress`/`suspended` |
+| `Closes:` | `ADR-*` | `adr accept <ID>` | `proposed → accepted` | Non-ADR ID |
+| `Closes:` | `EPIC-*` | `epic done <ID>` | `active → done` | Non-EPIC ID |
+| `Task:` | `TASK-*` | `<verb> <ID>` | Any valid task transition | ADR/Epic ID, or invalid task verb |
+| `ADR:` | `ADR-*` | `adr <verb> <ID>` | Any valid ADR transition | Task/Epic ID, or invalid ADR verb |
+| `Epic:` | `EPIC-*` | `epic <verb> <ID>` | Any valid epic transition | Task/ADR ID, or invalid epic verb |
+
+`Review:` and `Closes:` are **intent aliases**, not generic verbs. They exist to capture the two most
+common kanban transitions without requiring the author to remember FSM verbs. Illegal combinations
+are rejected by the cortex CLI with HATEOAS-style guidance, not silently coerced.
 
 **Do not hand-edit task status by moving files.** Always use the cortex CLI or commit trailers.
 Manual file moves bypass state-history tracking and cause probe mismatches.

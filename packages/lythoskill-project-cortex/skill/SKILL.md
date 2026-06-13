@@ -312,9 +312,10 @@ stateDiagram-v2
 | From | To | Who | Trigger | CLI Command |
 |------|----|-----|---------|-------------|
 | backlog | in-progress | Subagent | Begins implementation | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} start TASK-xxx` |
-| in-progress | review | Subagent | Core deliverables done, committed with task ID | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} review TASK-xxx` |
+| in-progress | review | Subagent/Trailer | Core deliverables done, submit for review | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} review TASK-xxx` or `Review: TASK-xxx` trailer |
 | review | completed | User/System | Exit criteria met, acceptance passed | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} done TASK-xxx` |
-| any | completed | Trailer/Hook | Commit trailer closes task | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} complete TASK-xxx` |
+| review | completed | Trailer/Hook | Commit trailer closes task after review / LGTM | `Closes: TASK-xxx` trailer |
+| any | completed | User/System | Explicit any-status close (use sparingly) | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} complete TASK-xxx` |
 | in-progress | suspended | Any | Blocked by external dependency | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} suspend TASK-xxx` |
 | suspended | in-progress | Any | Blocker resolved | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} resume TASK-xxx` |
 | any | terminated | User/System | Task cancelled or obsolete | `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} terminate TASK-xxx` |
@@ -354,20 +355,27 @@ stateDiagram-v2
 Cortex governance is **commit-driven** via git trailers parsed by `.husky/post-commit`:
 
 ```
-Closes: TASK-<id>        # Any status → completed (task), proposed → accepted (ADR), active → done (epic)
-Task: TASK-<id> <verb>   # Explicit task verb
-ADR: ADR-<id> <verb>     # ADR verb: accept, reject, supersede
-Epic: EPIC-<id> <verb>   # Epic verb: done, suspend, resume
+Review: TASK-<id>         # in-progress → review (dev complete, submit for review / internal PR)
+Closes: TASK-<id>         # review → completed (reviewed and approved / LGTM)
+Closes: ADR-<id>          # proposed → accepted
+Closes: EPIC-<id>         # active → done
+Task: TASK-<id> <verb>    # Explicit task verb
+ADR: ADR-<id> <verb>      # ADR verb: accept, reject, supersede
+Epic: EPIC-<id> <verb>    # Epic verb: done, suspend, resume
 ```
+
+`Review:` and `Closes:` are **intent aliases** for the two most common kanban transitions.
+`Closes: TASK-<id>` is strict: it resolves to `done` and requires the task to already be in
+`review`. Use `Review: TASK-<id>` when development is complete and ready for review.
 
 Example:
 ```bash
 git commit -m "feat(api): add endpoint
 
-Closes: TASK-20260503010227902"
+Review: TASK-20260503010227902"
 ```
 
-The post-commit hook auto-dispatches to `cortex` CLI and creates a follow-up commit with the state changes. Malformed trailers print warnings but do not block.
+The post-commit hook auto-dispatches to `cortex` CLI and creates a follow-up commit with the state changes. Malformed trailers or illegal FSM transitions print warnings but do not block.
 
 ```mermaid
 sequenceDiagram
@@ -376,11 +384,11 @@ sequenceDiagram
     participant H as post-commit Hook
     participant C as cortex CLI
 
-    A->>G: git commit -m "feat: ...\n\nCloses: TASK-xxx"
+    A->>G: git commit -m "feat: ...\n\nReview: TASK-xxx"
     G->>H: trigger hook
     H->>C: dispatch-trailers
     C->>C: parse trailers
-    C->>C: move TASK-xxx → completed
+    C->>C: move TASK-xxx → review
     C->>G: git add + git commit
     Note over C,G: Follow-up commit with<br/>state change appended
 ```

@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-05-03 | Created — couples cortex FSM transitions to commit messages |
 | accepted | 2026-05-03 | Accepted |
+| superseded | 2026-06-13 | Superseded by ADR-20260613182316950 |
 
 ## 背景
 

@@ -15,7 +15,8 @@ transitions and appends Status History automatically.
 | backlog | in-progress | `start` | Subagent begins work |
 | in-progress | review | `review` | Core deliverables committed |
 | review | completed | `done` | **Strict**: review → completed only |
-| any | completed | `complete` | **Any-status** close; trailer-driven |
+| review | completed | `done` (via `Closes: TASK-xxx` trailer) | Commit trailer closes task **after review / LGTM** |
+| any | completed | `complete` | **Any-status** close; explicit escape hatch (use sparingly) |
 | in-progress | suspended | `suspend` | Blocked by external dependency |
 | suspended | in-progress | `resume` | Blocker resolved |
 | review | in-progress | `reject` | Deliverables rejected, re-work required |
@@ -25,8 +26,12 @@ transitions and appends Status History automatically.
 ### Key Distinctions
 
 **`done` vs `complete`**
-- `done`: Strict review → completed. Use when user has reviewed and accepted.
-- `complete`: Any status → completed. Use for trailer-driven close (`Closes: TASK-xxx` in commit message) or when skipping review is intentional.
+- `done`: Strict review → completed. Use when user has reviewed and accepted. `Closes: TASK-xxx` trailer resolves to this command.
+- `complete`: Any status → completed. Explicit escape hatch for when skipping review is intentional. Not the default for `Closes:`.
+
+**`Review:` vs `Closes:` trailers**
+- `Review: TASK-xxx`: in-progress → review. "Development complete, submit for review / internal PR."
+- `Closes: TASK-xxx`: review → completed. "Reviewed and approved / LGTM."
 
 **`terminate` vs `archive`**
 - `terminate`: Any status → terminated. Abnormal end. Task is dead, not stored.
@@ -143,8 +148,9 @@ Git trailers parsed by `.husky/post-commit` trigger automatic state transitions:
 
 | Trailer | Effect |
 |---------|--------|
-| `Closes: TASK-xxx` | Task any-status → completed |
-| `Task: TASK-xxx review` | Task → review |
+| `Review: TASK-xxx` | Task in-progress → review (dev complete, submit for review / internal PR) |
+| `Closes: TASK-xxx` | Task review → completed (reviewed and approved / LGTM) |
+| `Task: TASK-xxx review` | Task → review (explicit verb form) |
 | `ADR: ADR-xxx accept` | ADR proposed → accepted |
 | `Epic: EPIC-xxx done` | Epic active → done |
 
