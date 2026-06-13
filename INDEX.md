@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/14 02:35:22
+> 自动生成于 2026/6/14 02:51:09
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 316 | 进行中: 0, 待验收: 2, 已完成: 270 |
+| Tasks | 316 | 进行中: 0, 待验收: 1, 已完成: 271 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
@@ -84,12 +84,11 @@ _无_
 
 _无_
 
-### 待验收 (2)
+### 待验收 (1)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
-- 🔍 **TASK-20260613185808109**: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
 
-### 已完成 (270)
+### 已完成 (271)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -360,6 +359,7 @@ _无_
 - ✅ ~~TASK-20260613182154539~~: Reconcile TASK-20260530135707211 status history with completed directory
 - ✅ ~~TASK-20260613182155587~~: Resolve cold-pool mirror stash@{0}
 - ✅ ~~TASK-20260613184943806~~: Update cortex/INDEX.md epic directory structure to match actual 99-done/03-suspended/04-archived layout
+- ✅ ~~TASK-20260613185808109~~: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
 - ✅ ~~TASK-20260613190349815~~: Probe: suppress empty-shell warnings for completed tasks by default
 
 ### 悬置 (1)

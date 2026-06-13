@@ -8,6 +8,7 @@
 | backlog | 2026-06-13 | Created |
 | in-progress | 2026-06-13 | Started |
 | review | 2026-06-13 | Deliverables committed |
+| completed | 2026-06-13 | Done |
 
 ## 背景与目标
 当前 cortex task/epic 文件名（slug）混用中英文，例如 `TASK-...-重-io-提取到-injectable-function-...md`。这类文件名对跨 CLI/跨 agent 的文件路径处理、URL 引用、搜索和排序都不友好，也是早期 agent 没有明确约束留下的痕迹。
