@@ -291,6 +291,8 @@ bun packages/lythoskill-project-cortex/src/cli.ts review TASK-xxx → 03-review 
 
 **Always use CLI** — never `mv` files by hand. CLI moves update Status History; manual `mv` causes probe mismatches. After creating a task, immediately edit the file to fill Background/Requirements/Acceptance — empty templates are rejected by pre-commit probe.
 
+**English-only slugs**: `cortex task` / `cortex epic` titles must be ASCII-only. The generated filename (`TASK-xxx-<slug>.md` / `EPIC-xxx-<slug>.md`) must contain no Chinese or other non-ASCII characters, so paths remain portable across agents, CLIs, and operating systems.
+
 #### Commit Trailers
 
 ```

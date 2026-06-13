@@ -9,13 +9,19 @@ export function ensureDir(dir: string): void {
   }
 }
 
-/** Generate filename from prefix, id, and title. */
+/** Generate filename from prefix, id, and title. Slug must be ASCII-only. */
 export function generateFileName(prefix: string, id: string, title: string): string {
   const slug = title
     .toLowerCase()
-    .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
   return `${id}-${slug}.md`;
+}
+
+/** Check whether a title would produce a valid ASCII-only slug. */
+export function hasNonAsciiSlug(title: string): boolean {
+  return /[^\x00-\x7F]/.test(title);
 }
 
 /** Scan directories for files matching prefix with 17-digit timestamp ID. */

@@ -85,7 +85,11 @@ bunx @lythos/project-cortex@0.16.0 dispatch-trailers
 > The CLI prints `Step 2/3 NOW: Edit the file...` — follow it.
 > Empty templates will be REJECTED by pre-commit probe.
 >
-> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。
+> **English-only slugs are MANDATORY.** Task/epic titles must be ASCII-only.
+> Filenames like `TASK-xxx-<slug>.md` must contain no Chinese or other non-ASCII
+> characters. Use English titles so paths are portable across agents and CLIs.
+>
+> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。标题请用英文，确保 slug 只含 ASCII 字符。
 
 # Generate INDEX.md with overview stats and document listing
 bunx @lythos/project-cortex@0.16.0 index

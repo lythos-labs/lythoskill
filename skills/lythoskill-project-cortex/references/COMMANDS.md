@@ -17,6 +17,7 @@ Commands:
   wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
   probe                 Check status consistency (dir vs Status History)
                         --suspicious   Only report suspicious patterns (empty shells, stale, drift)
+                        --include-completed-empty-shells  Include empty shells in completed/terminal dirs
   flow                  Show kanban CFD — count, avg age, WIP limits
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 

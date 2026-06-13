@@ -1,7 +1,7 @@
 import { join, dirname } from 'node:path';
 import { writeFileSync } from 'node:fs';
 import type { WorkflowConfig } from '../types.js';
-import { ensureDir, generateFileName } from '../lib/fs.js';
+import { ensureDir, generateFileName, hasNonAsciiSlug } from '../lib/fs.js';
 import { generateTimestampId } from '../lib/id.js';
 import { createEpicTemplate, type EpicTemplateOptions } from '../lib/template.js';
 import { listActiveEpics, countByLane, type Lane } from '../lib/lane.js';
@@ -71,7 +71,15 @@ export async function createEpic(
     }
   }
 
-  // 4. Render and write.
+  // 4. Validate ASCII-only slug.
+  if (hasNonAsciiSlug(title)) {
+    console.error('❌ Epic title contains non-ASCII characters.');
+    console.error('   cortex task/epic filenames (slugs) must be ASCII-only for cross-agent portability.');
+    console.error('   Please provide an English title.');
+    process.exit(1);
+  }
+
+  // 5. Render and write.
   const id = generateTimestampId('EPIC');
   const filename = generateFileName('EPIC', id, title);
   const filepath = join(config.epicsDir, config.epicSubdirs.active, filename);
