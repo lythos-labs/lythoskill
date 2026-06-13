@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/13 18:33:21
+> 自动生成于 2026/6/13 18:34:42
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 309 | 进行中: 1, 待验收: 0, 已完成: 265 |
+| Tasks | 309 | 进行中: 0, 待验收: 1, 已完成: 265 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 86 | 已接受: 82 |
 
@@ -79,13 +79,13 @@ _无_
 - [ ] **TASK-20260613182154539**: Reconcile TASK-20260530135707211 status history with completed directory
 - [ ] **TASK-20260613182155587**: Resolve cold-pool mirror stash@{0}
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260613182153447**: Update ADR-20260503003314901: Closes: TASK semantic is complete not review-then-done
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260613182153447**: Update ADR-20260503003314901: Closes: TASK semantic is complete not review-then-done
 
 ### 已完成 (265)
 
