@@ -36,54 +36,49 @@
 
 ## 选项
 
-### 方案A：AAA pinned index + dreaming 自动维护
+### 方案A：INDEX.md 置顶索引 + dreaming 维护
 
-在 `cortex/wiki/INDEX.md` 之上引入三层重要性索引：
+不改 `01-patterns/` 下的任何文件名，在目录内增加一个 `INDEX.md`（大写 `I` 使其在 `ls` 和文件浏览器中排在前面）。该 INDEX.md 按重要性分层展示 patterns：
 
-- **P0 / Active**：当前 agent 必读的核心模式。包括所有 `04-ssot/*.md` 文件，以及被多个 weekly 反复确认的核心模式。
-- **P1 / Absorbed**：已被 SSOT 吸收的模式。保留原文，但顶部添加指向 SSOT 的横幅，索引中标记为 absorbed。
-- **P2 / Historical**：探索性、实验性或已被取代的记录。按需阅读，不作为当前决策依据。
+- **P0 / Active**：当前 agent 必读的核心模式。每个条目配一句 TL;DR 说明"为什么重要"。
+- **P1 / Absorbed**：已被 SSOT 吸收的模式。TL;DR 说明"已吸收至哪份 SSOT"，保留原文链接。
+- **P2 / Historical**：探索性、实验性或已被取代的记录。TL;DR 说明"历史背景"，按需阅读。
 
-dreaming 的 Phase 2 增加一步"更新索引"：
-- 扫描 weekly chain 的 `decisions_accepted` 和 `project_lesson_candidates`
-- 被 ≥2 个 weekly 引用的模式 → P0
+ dreaming 的 Phase 2 增加一步"更新 `01-patterns/INDEX.md`"。判定规则：
+- 被 ≥2 个 weekly 的 `decisions_accepted` 或 `project_lesson_candidates` 引用 → P0
 - 已被 `04-ssot/*.md` 引用的模式 → P1
 - 其他 → P2
 
 **优点**:
-- 不删除任何历史文件
-- 新 agent 可以先读 P0 置顶，再按需深入
-- dreaming 的输出从"一堆 SSOT 文件"扩展为"SSOT + 重要性地图"
-- 与现有时间戳机制兼容
+- 零迁移成本，不改文件名，不动历史文件
+- INDEX.md 可以提供 TL;DR，agent 一眼知道"为什么重要"而不用读全文
+- 与现有时间戳命名机制完全兼容
+- 如果 agent 不读 INDEX.md 直接 `ls`，大写的 `INDEX.md` 本身也会吸引注意力
 
 **缺点**:
-- 增加 dreaming 每次运行的维护工作
-- 需要定义清晰的 P0/P1/P2 判定规则，否则会成为新的主观战场
-- INDEX.md 本身也需要 ZK validate
+- 依赖 agent 纪律：必须养成"先看 INDEX.md"的习惯
+- 如果 INDEX.md 更新不及时，会比 flat 目录更误导人
+- 不能解决"agent 直接 grep/扫描整个目录"的问题
 
-### 方案B：给每个 pattern 加 frontmatter status tag
+### 方案B：文件名加前缀置顶
 
-每个 `01-patterns/*.md` 文件增加 frontmatter：
+给 P0/P1/P2 patterns 加前缀：
 
-```yaml
----
-status: active | absorbed | historical
-importance: p0 | p1 | p2
-last_reviewed: 2026-06-13
----
+```
+P0-2026-05-02-thin-skill-pattern.md
+P1-2026-05-17-control-transfer-protocol.md
+P2-2026-05-03-skill-combo-epistemology.md
 ```
 
-dreaming 在扫描时读取这些 tag，生成索引。
-
 **优点**:
-- 信息下沉到每个文件，查询简单
-- 与 dreaming 已有的 frontmatter 探索方向一致
-- 不需要单独维护 INDEX 的置顶列表
+- `ls` 时自然按重要性排序
+- 不依赖 agent 是否读 INDEX.md
+- 机器可读，glob 方便
 
 **缺点**:
-- 50+ 文件都要加 frontmatter，初始迁移成本高
-- agent 扫描目录时仍会看到所有文件，索引层仍然是 flat 的
-- `status` 和 `importance` 可能 drift，需要审计机制
+- 需要批量重命名 50+ 文件
+- 破坏现有时间戳开头的统一性
+- P0 文件内部仍然按时间排序，没有 TL;DR 解释"为什么重要"
 
 ### 方案C：按年份/主题归档旧 patterns
 
@@ -121,17 +116,17 @@ curator 已经在技术层面使用 SQLite 索引 cold pool 中的 skill metadat
 
 ## 决策
 
-**选择**: 方案A，吸收方案B的 frontmatter tag 作为输入信号。方案D作为明确的后续演进方向，但当前不立即实施。
+**选择**: 方案A —— 在 `cortex/wiki/01-patterns/` 内增加 `INDEX.md` 置顶索引，不改文件名。 dreaming 负责维护该索引。方案D（SQLite 后端）作为明确的后续演进方向，但当前不立即实施。
 
 **原因**:
 
-1. **索引层解决索引问题，文件层解决文件问题**。重要性分层是索引职责，不应该让每个文件自己声明 importance。但 frontmatter tag 可以作为 dreaming 判定 P0/P1/P2 的输入信号之一。
+1. **零迁移成本，立即见效**。不改 50+ 文件名，不移动文件，只增加一个 INDEX.md。风险最低，可以马上测试 agent 是否真的会先看索引。
 
-2. **与现有机制最小冲突**。时间戳文件名保持不变，文件位置保持不变，只增加 INDEX 的置顶分层和 dreaming 的一个维护步骤。
+2. **INDEX.md 能提供 TL;DR**。这是文件名前缀做不到的。agent 一眼知道"为什么重要"，而不是只看到 `P0-` 前缀却不知道为什么。
 
-3. **dreaming 是天然维护者**。dreaming 已经在扫描 weekly chain 和 SSOT，让它同时更新 INDEX 的 P0/P1/P2 是合理延伸，而不是新增一个独立流程。
+3. **索引层解决索引问题，文件层保持不变**。重要性分层是索引职责。如果未来证明索引机制有效，再考虑是否下沉到文件名前缀或 SQLite。
 
-4. **保留历史但不假装历史仍然重要**。P2 / Historical 明确告诉 agent："这些文件存在，但不是你当前该优先读的。"
+4. **养成 agent 纪律**。项目已经要求 agent 先看 SSOT、先看 `AGENTS.md`、先看 `daily/`。增加"先看 `01-patterns/INDEX.md`"是同一套纪律的自然延伸。
 
 5. **方案D需要重新圆桌**。curator 使用 SQLite 索引 skill metadata 已经成熟，但 cortex/wiki 之前没有引入 SQLite 是因为"项目还在早期"。现在索引本身成为问题，重新讨论这个前提是合理的。但方案D会改变 cortex 的架构边界（从纯文件系统治理变为文件+SQLite 治理），需要独立论证：
    - SQLite catalog 是 project artifact 还是 personal artifact？

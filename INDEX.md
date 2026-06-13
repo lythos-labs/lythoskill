@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/13 19:06:52
+> 自动生成于 2026/6/13 23:53:19
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 314 | 进行中: 1, 待验收: 0, 已完成: 270 |
+| Tasks | 316 | 进行中: 0, 待验收: 1, 已完成: 270 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
@@ -74,18 +74,20 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (4)
 
 - [ ] **TASK-20260613185808109**: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
 - [ ] **TASK-20260613190646769**: Add unit tests for probe empty-shell filtering (--include-completed-empty-shells)
+- [ ] **TASK-20260613234838986**: Refactor probe.ts into intent-plan-execute IO separation
+- [ ] **TASK-20260613235254569**: Harden probe empty-shell detection: respect completed status + reduce false positives from template comments
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
 
 ### 已完成 (270)
 
