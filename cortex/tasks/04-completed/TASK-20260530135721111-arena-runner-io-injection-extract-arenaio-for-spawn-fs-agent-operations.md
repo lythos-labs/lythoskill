@@ -6,6 +6,7 @@
 | Status | Date | Note | 
 |--------|------|------|
 | backlog | 2026-05-30 | Created as part of EPIC-20260530135721111 |
+| completed | 2026-06-13 | Reconciled — work was completed in commit history but Status History was missing |
 
 ## 背景与目标
 
@@ -23,13 +24,13 @@ Arena runner (`packages/lythoskill-arena/src/runner.ts`) 的 `runArenaFromToml` 
 
 ## 需求详情
 
-- [ ] 定义 `ArenaIO` interface 覆盖上述操作
-- [ ] `runArenaFromToml(opts, io?)` — 统一注入
-- [ ] `buildArenaPrompt` 保持纯函数（无需 IO）
-- [ ] 内部所有 fs 操作改为 `io.mkdir`/`io.writeFile` 等
-- [ ] `Bun.spawn(['bunx', '@lythos/skill-deck', 'link'])` 改为 `io.spawn`
-- [ ] `useAgent(...).spawn(...)` 改为 `io.agentSpawn`
-- [ ] 添加 `runner.test.ts` 测试：mock IO 验证 plan 执行路径
+- [x] 定义 `ArenaIO` interface 覆盖上述操作
+- [x] `runArenaFromToml(opts, io?)` — 统一注入
+- [x] `buildArenaPrompt` 保持纯函数（无需 IO）
+- [x] 内部所有 fs 操作改为 `io.mkdir`/`io.writeFile` 等
+- [x] `Bun.spawn(['bunx', '@lythos/skill-deck', 'link'])` 改为 `io.spawn`
+- [x] `useAgent(...).spawn(...)` 改为 `io.agentSpawn`
+- [x] 添加 `runner.test.ts` 测试：mock IO 验证 plan 执行路径
 
 ## 技术方案
 
