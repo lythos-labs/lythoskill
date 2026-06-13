@@ -4,6 +4,21 @@ import { spawnSync } from 'node:child_process';
 import type { WorkflowConfig } from '../types.js';
 import { listActiveEpics, countByLane } from '../lib/lane.js';
 
+/** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent. */
+export const EMPTY_SHELL_PATTERNS: RegExp[] = [
+  /^- \[ \] ⚠️ PLACEHOLDER_/m,
+  /^- \[ \] 需求\d/m,
+  /^<!-- 填写/m,
+];
+
+/** Check whether a markdown content string contains empty-shell placeholders. Pure function, no IO. */
+export function isEmptyShell(content: string): boolean {
+  for (const pat of EMPTY_SHELL_PATTERNS) {
+    if (pat.test(content)) return true;
+  }
+  return false;
+}
+
 interface ProbeResult {
   file: string;
   type: 'task' | 'epic' | 'adr';
@@ -195,6 +210,25 @@ function printResults(results: ProbeResult[], label: string): void {
   }
 }
 
+/** Filter empty shells by display mode. Exported for unit testing. */
+export function filterEmptyShells(
+  shells: string[],
+  mode: 'default' | 'suspicious' | 'all'
+): string[] {
+  if (mode === 'all') return shells;
+  if (mode === 'suspicious') {
+    return shells.filter(s =>
+      s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
+    );
+  }
+  // default mode
+  return shells.filter(s => {
+    return !s.includes('04-completed') && !s.includes('06-terminated') && !s.includes('07-archived')
+      && !s.includes('99-done') && !s.includes('03-suspended') && !s.includes('04-archived')
+      && !s.includes('02-accepted') && !s.includes('03-rejected') && !s.includes('04-superseded');
+  });
+}
+
 export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }): void {
   const suspicious = opts?.suspicious ?? false;
   const includeCompletedEmptyShells = opts?.includeCompletedEmptyShells ?? false;
@@ -230,6 +264,18 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
     ...scanDir(join(config.adrDir, config.adrSubdirs.rejected), 'ADR-'),
     ...scanDir(join(config.adrDir, config.adrSubdirs.superseded), 'ADR-'),
   ];
+
+  // ── Slug charset check ─────────────────────────────────────────────
+  // Filenames must be ASCII-only after the ID prefix for cross-agent portability.
+  const nonAsciiSlugs: string[] = [];
+  const slugPattern = /^(TASK|EPIC|ADR)-\d{17}-(.+?)\.md$/;
+  for (const file of [...taskFiles, ...epicFiles, ...adrFiles]) {
+    const name = basename(file);
+    const match = name.match(slugPattern);
+    if (match && /[^\x00-\x7F]/.test(match[1])) {
+      nonAsciiSlugs.push(relative(process.cwd(), file));
+    }
+  }
 
   const taskResults = probeFiles(taskFiles, config, 'task');
   const epicResults = probeFiles(epicFiles, config, 'epic');
@@ -380,17 +426,12 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
     // By default, skip empty shells in terminal/stable directories (historical debt).
     // --suspicious only flags active/in-flight empty shells (backlog, in-progress, proposed).
     // --include-completed-empty-shells shows the full list.
-    const filtered = includeCompletedEmptyShells
-      ? emptyShells
+    const mode: 'default' | 'suspicious' | 'all' = includeCompletedEmptyShells
+      ? 'all'
       : suspicious
-        ? emptyShells.filter(s => {
-            return s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
-          })
-        : emptyShells.filter(s => {
-            return !s.includes('04-completed') && !s.includes('06-terminated') && !s.includes('07-archived')
-              && !s.includes('99-done') && !s.includes('03-suspended') && !s.includes('04-archived')
-              && !s.includes('02-accepted') && !s.includes('03-rejected') && !s.includes('04-superseded')
-          })
+        ? 'suspicious'
+        : 'default';
+    const filtered = filterEmptyShells(emptyShells, mode);
 
     if (filtered.length > 0) {
       console.log('\n📭 Empty shells (template not filled):');
@@ -439,10 +480,18 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
     console.log('     💡 Significant changes since snapshot → consider re-running BDD.')
   }
 
+  if (nonAsciiSlugs.length > 0) {
+    console.log('\n🔤 Non-ASCII slugs (filenames must be ASCII-only):');
+    for (const s of nonAsciiSlugs) {
+      console.log(`     ⚠️  ${s}`);
+    }
+    console.log('     💡 Rename with `git mv` or use the slug migration script.');
+  }
+
   const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
 
   console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0 && coverageDrift.length === 0) {
+  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0 && coverageDrift.length === 0 && nonAsciiSlugs.length === 0) {
     console.log(suspicious ? '✅ No suspicious patterns found.' : '✅ All clear! No inconsistencies found.');
   } else {
     if (!suspicious && allIssues.length > 0) {
