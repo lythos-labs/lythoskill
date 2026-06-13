@@ -45,30 +45,30 @@ export function createTaskTemplate(id: string, title: string): string {
 |--------|------|------|
 | backlog | ${today} | Created |
 
-## 背景与目标
-<!-- ⚠️ REQUIRED: 为什么需要这个任务？解决什么问题？不填会被 probe 拦截。 -->
+## Background & Goals
+<!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
 
-## 需求详情
-<!-- ⚠️ REQUIRED: 列出具体需求。保留占位符 = 空壳。 -->
+## Requirements
+<!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
 - [ ] ⚠️ PLACEHOLDER_REQUIREMENT_1
 - [ ] ⚠️ PLACEHOLDER_REQUIREMENT_2
 
-## 技术方案
-<!-- ⚠️ REQUIRED: 实现方案、关键决策、参考资源。不填会被 probe 拦截。 -->
+## Technical Approach
+<!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
 
-## 验收标准
-<!-- ⚠️ REQUIRED: 可测试的验收标准。保留占位符 = 空壳。 -->
+## Acceptance Criteria
+<!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
 - [ ] ⚠️ PLACEHOLDER_CRITERION_1
 - [ ] ⚠️ PLACEHOLDER_CRITERION_2
 
-## 进度记录
-<!-- 执行时更新，带时间戳 -->
+## Progress Log
+<!-- Update during execution, with timestamps -->
 
-## 关联文件
-- 修改:
-- 新增:
+## Related Files
+- Modified:
+- Added:
 
-## Git 提交信息建议
+## Git Commit Message
 \`\`\`
 feat(scope): description (${id})
 
@@ -76,7 +76,7 @@ feat(scope): description (${id})
 - Detail 2
 \`\`\`
 
-## 备注
+## Notes
 `;
 }
 
@@ -109,7 +109,7 @@ export function createEpicTemplate(
 /** Quote a YAML scalar if it contains special characters. */
 function escapeYamlScalar(value: string): string {
   // Simple heuristic: if the string is plain ASCII without YAML-significant chars, leave it alone.
-  if (/^[\w一-龥][\w\s一-龥.,;()/+\-]*$/.test(value)) {
+  if (/^[\w][\w\s.,;()/+\-]*$/.test(value)) {
     return value;
   }
   // Otherwise, double-quote and escape backslash + double quote.
@@ -153,40 +153,40 @@ export function createAdrTemplate(id: string, title: string): string {
 |--------|------|------|
 | proposed | ${today} | Created |
 
-## 背景
-<!-- ⚠️ REQUIRED: 问题描述和上下文。不填会被 probe 拦截。 -->
+## Background
+<!-- ⚠️ REQUIRED: Problem description and context. Empty = shell, blocked by probe. -->
 
-## 决策驱动
-<!-- ⚠️ REQUIRED: 为什么需要做这个决策？ -->
+## Decision Drivers
+<!-- ⚠️ REQUIRED: Why does this decision need to be made? -->
 -
 
-## 选项
+## Options
 
-### 方案A
-<!-- ⚠️ REQUIRED: 至少两个方案对比。保留占位符 = 空壳。 -->
-**优点**:
+### Option A
+<!-- ⚠️ REQUIRED: Compare at least two options. Keeping placeholders = shell. -->
+**Pros**:
 -
 
-**缺点**:
+**Cons**:
 -
 
-### 方案B
+### Option B
 <!-- ⚠️ REQUIRED: -->
 
-## 决策
-<!-- ⚠️ REQUIRED: 明确选择 + 原因。保留占位符 = 空壳。 -->
-**选择**: ⚠️ PLACEHOLDER_SCHEME
+## Decision
+<!-- ⚠️ REQUIRED: Explicit choice + rationale. Keeping placeholders = shell. -->
+**Choice**: ⚠️ PLACEHOLDER_SCHEME
 
-**原因**:
+**Rationale**:
 
-## 影响
-<!-- ⚠️ REQUIRED: 正面 / 负面 / 后续。不填会被 probe 拦截。 -->
-- 正面:
-- 负面:
-- 后续:
+## Impact
+<!-- ⚠️ REQUIRED: Positive / negative / follow-up. Empty = shell, blocked by probe. -->
+- Positive:
+- Negative:
+- Follow-up:
 
-## 相关
-- 关联 ADR:
-- 关联 Epic:
+## Related
+- Related ADR:
+- Related Epic:
 `;
 }

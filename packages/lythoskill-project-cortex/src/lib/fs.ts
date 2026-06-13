@@ -16,7 +16,7 @@ export function generateFileName(prefix: string, id: string, title: string): str
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `${id}-${slug}.md`;
+  return `${prefix}-${id}-${slug}.md`;
 }
 
 /** Check whether a title would produce a valid ASCII-only slug. */

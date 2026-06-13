@@ -289,7 +289,7 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
   for (const file of [...taskFiles, ...epicFiles, ...adrFiles]) {
     const name = basename(file);
     const match = name.match(slugPattern);
-    if (match && /[^\x00-\x7F]/.test(match[1])) {
+    if (match && /[^\x00-\x7F]/.test(match[2])) {
       nonAsciiSlugs.push(relative(process.cwd(), file));
     }
   }
