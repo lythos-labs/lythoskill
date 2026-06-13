@@ -8,6 +8,7 @@
 | backlog | 2026-06-13 | Created |
 | in-progress | 2026-06-13 | Started |
 | review | 2026-06-13 | Deliverables committed |
+| completed | 2026-06-13 | Done |
 
 ## 背景与目标
 用户明确：ADR-20260503003314901 的原始意图必须保持——`Closes: TASK-xxx` 应严格表示 "review 后的 LGTM 完成"，即 review → done。实现中把 `Closes: TASK-*` 映射到 `complete`（any status → completed）是一次未经授权的偏离。
