@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/6/13 18:52:11
+> 自动生成于 2026/6/13 19:06:52
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 310 | 进行中: 0, 待验收: 0, 已完成: 269 |
+| Tasks | 314 | 进行中: 1, 待验收: 0, 已完成: 270 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
-| ADRs | 86 | 已接受: 82 |
+| ADRs | 87 | 已接受: 82 |
 
 ---
 
@@ -74,19 +74,20 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (2)
 
-_无_
+- [ ] **TASK-20260613185808109**: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
+- [ ] **TASK-20260613190646769**: Add unit tests for probe empty-shell filtering (--include-completed-empty-shells)
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (269)
+### 已完成 (270)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -357,6 +358,7 @@ _无_
 - ✅ ~~TASK-20260613182154539~~: Reconcile TASK-20260530135707211 status history with completed directory
 - ✅ ~~TASK-20260613182155587~~: Resolve cold-pool mirror stash@{0}
 - ✅ ~~TASK-20260613184943806~~: Update cortex/INDEX.md epic directory structure to match actual 99-done/03-suspended/04-archived layout
+- ✅ ~~TASK-20260613190349815~~: Probe: suppress empty-shell warnings for completed tasks by default
 
 ### 悬置 (1)
 
@@ -494,6 +496,7 @@ _无_
 - ✅ **ADR-20260529215906255** (02-accepted): Curator catalog resolution context — deck-aware vs independent discovery
 - ✅ **ADR-20260607233903985** (02-accepted): CLI task command: subcommand inconsistency between create and state transitions
 - ✅ **ADR-20260613182316950** (02-accepted): Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
+- 🤔 **ADR-20260613190449007** (01-proposed): Wiki patterns: AAA pinned index + dreaming integration
 
 ---
 

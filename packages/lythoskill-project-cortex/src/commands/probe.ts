@@ -195,8 +195,9 @@ function printResults(results: ProbeResult[], label: string): void {
   }
 }
 
-export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean }): void {
+export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }): void {
   const suspicious = opts?.suspicious ?? false;
+  const includeCompletedEmptyShells = opts?.includeCompletedEmptyShells ?? false;
 
   if (!suspicious) {
     console.log('\n🔍 Probing status consistency...\n');
@@ -376,12 +377,20 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
   detectEmptyShells(adrFiles, 'adr');
 
   if (emptyShells.length > 0) {
-    // In suspicious mode, only flag empty shells in non-stable dirs (backlog, in-progress, proposed)
-    const filtered = suspicious
-      ? emptyShells.filter(s => {
-          return s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
-        })
-      : emptyShells
+    // By default, skip empty shells in terminal/stable directories (historical debt).
+    // --suspicious only flags active/in-flight empty shells (backlog, in-progress, proposed).
+    // --include-completed-empty-shells shows the full list.
+    const filtered = includeCompletedEmptyShells
+      ? emptyShells
+      : suspicious
+        ? emptyShells.filter(s => {
+            return s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
+          })
+        : emptyShells.filter(s => {
+            return !s.includes('04-completed') && !s.includes('06-terminated') && !s.includes('07-archived')
+              && !s.includes('99-done') && !s.includes('03-suspended') && !s.includes('04-archived')
+              && !s.includes('02-accepted') && !s.includes('03-rejected') && !s.includes('04-superseded')
+          })
 
     if (filtered.length > 0) {
       console.log('\n📭 Empty shells (template not filled):');
