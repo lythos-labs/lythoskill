@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/13 18:39:19
+> 自动生成于 2026/6/13 18:52:11
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 309 | 进行中: 0, 待验收: 0, 已完成: 268 |
+| Tasks | 310 | 进行中: 0, 待验收: 0, 已完成: 269 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 86 | 已接受: 82 |
 
@@ -86,7 +86,7 @@ _无_
 
 _无_
 
-### 已完成 (268)
+### 已完成 (269)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -356,6 +356,7 @@ _无_
 - ✅ ~~TASK-20260613182153447~~: Update ADR-20260503003314901: Closes: TASK semantic is complete not review-then-done
 - ✅ ~~TASK-20260613182154539~~: Reconcile TASK-20260530135707211 status history with completed directory
 - ✅ ~~TASK-20260613182155587~~: Resolve cold-pool mirror stash@{0}
+- ✅ ~~TASK-20260613184943806~~: Update cortex/INDEX.md epic directory structure to match actual 99-done/03-suspended/04-archived layout
 
 ### 悬置 (1)
 
