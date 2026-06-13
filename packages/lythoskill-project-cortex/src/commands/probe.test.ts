@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { filterEmptyShells, isEmptyShell, EMPTY_SHELL_PATTERNS } from "./probe.js";
+import { filterEmptyShells, isEmptyShell, EMPTY_SHELL_PATTERNS, extractStatusHistory } from "./probe.js";
 
 describe("isEmptyShell — pure content detection, no filesystem", () => {
   it("detects PLACEHOLDER_ requirement", () => {
@@ -34,6 +34,81 @@ describe("isEmptyShell — pure content detection, no filesystem", () => {
   it("detects multiple patterns in same content", () => {
     const content = "- [ ] ⚠️ PLACEHOLDER_1\n<!-- 填写 -->\n- [ ] 需求1\n";
     expect(isEmptyShell(content)).toBe(true);
+  });
+});
+
+describe("isEmptyShell — lifecycle exemption", () => {
+  const withStatusHistory = (statuses: string[], body: string): string => {
+    const table = statuses.map(s => `| ${s} | 2026-06-13 | Note |`).join('\n');
+    return `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n${table}\n\n${body}`;
+  };
+
+  it("exempts when Status History has in-progress", () => {
+    const content = withStatusHistory(['backlog', 'in-progress'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("exempts when Status History has completed", () => {
+    const content = withStatusHistory(['backlog', 'in-progress', 'completed'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("exempts when Status History has done", () => {
+    const content = withStatusHistory(['backlog', 'done'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("exempts when Status History has review", () => {
+    const content = withStatusHistory(['backlog', 'in-progress', 'review'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("exempts when Status History has suspended", () => {
+    const content = withStatusHistory(['backlog', 'in-progress', 'suspended'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("exempts when Status History has terminated", () => {
+    const content = withStatusHistory(['backlog', 'terminated'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("still detects when only backlog exists", () => {
+    const content = withStatusHistory(['backlog'], '- [ ] ⚠️ PLACEHOLDER_1');
+    expect(isEmptyShell(content)).toBe(true);
+  });
+
+  it("still detects when no Status History exists", () => {
+    const content = '# Task\n\n- [ ] ⚠️ PLACEHOLDER_1\n';
+    expect(isEmptyShell(content)).toBe(true);
+  });
+
+  it("exempts filled content even with active lifecycle", () => {
+    const content = withStatusHistory(['backlog', 'in-progress'], '- [x] Done\n');
+    expect(isEmptyShell(content)).toBe(false);
+  });
+});
+
+describe("extractStatusHistory", () => {
+  it("parses table format", () => {
+    const content = `## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| backlog | 2026-01-01 | Created |\n| in-progress | 2026-01-02 | Started |\n`;
+    const result = extractStatusHistory(content);
+    expect(result.lines).toEqual(['backlog', 'in-progress']);
+    expect(result.hasSection).toBe(true);
+  });
+
+  it("parses old single-line format", () => {
+    const content = `## Status\n\nbacklog\n`;
+    const result = extractStatusHistory(content);
+    expect(result.lines).toEqual(['backlog']);
+    expect(result.singleStatus).toBe('backlog');
+  });
+
+  it("returns empty when no Status History section", () => {
+    const content = '# Task\n\nNo status here.\n';
+    const result = extractStatusHistory(content);
+    expect(result.lines).toEqual([]);
+    expect(result.hasSection).toBe(false);
   });
 });
 

@@ -11,8 +11,25 @@ export const EMPTY_SHELL_PATTERNS: RegExp[] = [
   /^<!-- 填写/m,
 ];
 
-/** Check whether a markdown content string contains empty-shell placeholders. Pure function, no IO. */
+/** Check whether a markdown content string contains empty-shell placeholders. Pure function, no IO.
+ *
+ * Empty-shell = template placeholders (PLACEHOLDER_, 需求1, <!-- 填写) that
+ * indicate the file was created by CLI but never filled by agent.
+ *
+ * **Exemption**: If Status History shows the task was actively worked on
+ * (in-progress / review / completed / done / suspended / terminated),
+ * we do NOT flag it as empty shell even if template placeholders remain.
+ * The placeholders are historical template debt, not "never touched".
+ */
 export function isEmptyShell(content: string): boolean {
+  // Exemption: Status History shows active lifecycle → not a true empty shell
+  const statusHistory = extractStatusHistory(content);
+  const hasActiveLifecycle = statusHistory.lines.some(s => {
+    const lower = s.toLowerCase();
+    return ['in progress', 'in-progress', 'review', 'completed', 'done', 'suspended', 'terminated'].some(st => lower.includes(st));
+  });
+  if (hasActiveLifecycle) return false;
+
   for (const pat of EMPTY_SHELL_PATTERNS) {
     if (pat.test(content)) return true;
   }
@@ -45,7 +62,7 @@ function scanDir(dir: string, prefix: string): string[] {
   return files;
 }
 
-function extractStatusHistory(content: string): { lines: string[]; hasSection: boolean; singleStatus: string | null } {
+export function extractStatusHistory(content: string): { lines: string[]; hasSection: boolean; singleStatus: string | null } {
   // 1. 优先查找 ## Status History section
   const sectionMatch = content.match(/##\s+Status\s+History\s*\n([\s\S]*?)(?=\n##\s+|\n#{1,2}\s|$)/i);
   if (sectionMatch) {
@@ -406,13 +423,10 @@ export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolea
     for (const file of files) {
       try {
         const content = readFileSync(file, 'utf-8');
-        for (const pat of EMPTY_SHELL_PATTERNS) {
-          if (pat.test(content)) {
-            const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
-            const rel = relative(process.cwd(), file);
-            emptyShells.push(`${id}: ${rel}`);
-            break;
-          }
+        if (isEmptyShell(content)) {
+          const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
+          const rel = relative(process.cwd(), file);
+          emptyShells.push(`${id}: ${rel}`);
         }
       } catch (_) { /* skip unreadable */ }
     }
