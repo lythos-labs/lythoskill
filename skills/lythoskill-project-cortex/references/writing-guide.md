@@ -36,6 +36,8 @@
 - **Checkpoint updates** with timestamps during execution
 - Define **milestone declaration** at creation (see milestone protocol)
 - **Batch commits**: One task = one coherent batch of commits. Don't split into per-commit tasks.
+- **Commit granularity**: A batch should be 2-5 commits, not 1. Separate: (1) core change, (2) tests, (3) docs/template updates, (4) review trailer. This gives reviewer `git show <hash>` entry points for each facet.
+- **Commit-task traceability**: Every commit message includes `TASK-xxx`. This enables `git log --grep TASK-xxx` to reconstruct the full change history for a task.
 
 ## General Principles
 - **Link everything**: Task ↔ Epic ↔ ADR cross-references
