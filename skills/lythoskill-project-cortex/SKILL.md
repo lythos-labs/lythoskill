@@ -132,6 +132,39 @@ bunx @lythos/project-cortex@0.16.0 epic resume EPIC-xxx
 (source of truth) against its internal Status History table. Mismatches are
 flagged for human review — probe never auto-fixes.
 
+### Probe Flags & Modes
+
+```bash
+# Default mode — full consistency check (all directories, all checks)
+bunx @lythos/project-cortex@0.16.0 probe
+
+# Active-only mode — skip status consistency, focus on actionable items only
+bunx @lythos/project-cortex@0.16.0 probe --active-only
+
+# Include completed/terminated tasks in empty-shell detection
+bunx @lythos/project-cortex@0.16.0 probe --include-completed-empty-shells
+```
+
+| Flag | Behavior | When to use |
+|------|----------|-------------|
+| *(none)* | Full check: status consistency + lane occupancy + ADR-Epic coupling + staleness + empty shells + coverage drift + non-ASCII slugs | Default — run at session start/end |
+| `--active-only` | Skips per-file status consistency. Only checks: lane occupancy, coupling, staleness, drift, empty shells, coverage drift, slugs. Empty-shell filter narrowed to backlog/in-progress/proposed only. | Quick scan — "what needs my attention now?" |
+| `--include-completed-empty-shells` | Expands empty-shell detection to include completed, terminated, archived, done, suspended, accepted, rejected, superseded directories. | Audit — "did anything slip through with unfilled templates?" |
+
+**Backward compatibility**: `--suspicious` is accepted as a deprecated alias for `--active-only` and prints a warning to stderr.
+
+### What checks run in each mode
+
+| Check | Default | `--active-only` | Description |
+|-------|---------|-----------------|-------------|
+| Status consistency | ✅ | ❌ | Directory matches latest Status History entry |
+| Lane occupancy | ✅ | ✅ | Max 1 active epic per lane (main / emergency) |
+| ADR-Epic coupling | ✅ | ✅ | Proposed ADR must not reference active epic |
+| Staleness | ✅ | ✅ | Backlog tasks >3 days old; active epics >3 days old |
+| Empty shells | ✅ | ✅ | Template placeholders never filled by agent |
+| Coverage drift | ✅ | ✅ | Git commits since last coverage snapshot |
+| Non-ASCII slugs | ✅ | ✅ | Filenames must be ASCII-only |
+
 ### Probe Validation Loop
 
 ```mermaid
