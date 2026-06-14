@@ -9,6 +9,7 @@
 | in-progress | 2026-06-14 | Refactored probe.ts into intent-plan-execute with IO separation |
 | in-progress | 2026-06-14 | Started |
 | review | 2026-06-14 | Deliverables committed |
+| completed | 2026-06-14 | Done |
 
 ## Background & Goals
 
