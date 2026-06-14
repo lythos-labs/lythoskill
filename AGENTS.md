@@ -168,7 +168,7 @@ write task → self-review → ZK Review (WHAT/WHY/HOW) → process gaps
                                               ↓ no
                                     spawn same agent → back to ZK Review
 ```
-Three rounds is a reasonable default. If still not converged after round 3, the task design itself is the problem — go back to scope/solution, not more description.
+Three rounds is a reasonable default. If still not converged after round 3, the task design itself is the problem — go back to scope/solution, not more description. **Entering round 3 is itself a warning signal**: if you reach it, treat the task design as suspect even before the round completes.
 
 **4 required content types** (what ZK Review most often exposes as missing):
 
@@ -204,7 +204,10 @@ Three rounds is a reasonable default. If still not converged after round 3, the 
    - **Fill**: Would this gap prevent the executor from starting independently? → Add to task card
    - **Challenge**: Is this the ZK agent's knowledge gap rather than a real gap? → Note in task card why not fixing
    - **Ignore**: Would the executor figure this out from AGENTS.md + normal file exploration? → Move on
-5. If gaps remain, spawn the SAME agent (or append review log to a new one) for round 2
+5. If gaps remain, choose by purpose:
+   - **Revisit**: Spawn the SAME agent to test memory continuity (did the fixes resolve its gaps?).
+   - **Parallel**: Spawn a NEW zero-context agent to test information stability (does a fresh reader hit the same gaps?).
+   Round 3+ should bias toward Parallel — if fresh agents keep finding the same thing, the doc is the problem.
 6. Converge when new gaps < 2 and all low-priority. Full methodology + real cases: [ZK Review reference](packages/lythoskill-project-cortex/skill/references/zk-review.md).
 
 **Convergence is coordination, not elimination.** The goal is not "zero gaps" — it's "gaps no longer produce new information." If a ZK agent misunderstands something, that's signal: either the doc is ambiguous (fix it) or the agent's knowledge is genuinely incomplete (note why it's not a blocker). When you challenge a gap, the ZK agent can challenge back — this back-and-forth is the convergence mechanism. Three rounds is a practical ceiling; if you're still debating after round 3, the task scope itself is unclear.
@@ -233,6 +236,8 @@ ZK Review (document) → converge → Executor implements → Trial ZK agent run
                                               ↓ rating < 7/10
                                     New task: fix output/UX issues → ZK Review → Executor
 ```
+
+Never fold UX fixes into the original task — output gaps are invisible to document reviewers, so they need their own task card and ZK Review cycle.
 
 **Trial ZK agent prompt template:**
 ```
@@ -265,6 +270,8 @@ After running, answer:
 - **Trial user**: Finds output/interaction gaps (invisible to readers)
 - **Code reader**: Finds implementation/signature gaps
 - Each angle exposes different information. You synthesize, not follow.
+
+**Cross-model parallel**: For high-stakes tasks, run the same ZK Review prompt through `arena single --player <kimi|codex|claude>` in parallel. Divergent gaps = doc ambiguity; convergent gaps = real blocker.
 
 **Key principle**: ZK agents are sensors, not bosses. Their output is signal for your judgment, not commands for your execution.
 

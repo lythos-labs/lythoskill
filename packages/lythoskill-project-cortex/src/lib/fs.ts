@@ -11,12 +11,13 @@ export function ensureDir(dir: string): void {
 
 /** Generate filename from prefix, id, and title. Slug must be ASCII-only. */
 export function generateFileName(prefix: string, id: string, title: string): string {
+  const cleanId = id.replace(new RegExp(`^${prefix}-`), '');
   const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `${prefix}-${id}-${slug}.md`;
+  return `${prefix}-${cleanId}-${slug}.md`;
 }
 
 /** Check whether a title would produce a valid ASCII-only slug. */

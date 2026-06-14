@@ -57,4 +57,14 @@ describe('generateFileName', () => {
     const result = generateFileName('TASK', '20260503010227902', 'v2.0_release');
     expect(result).toBe('TASK-20260503010227902-v2-0-release.md');
   });
+
+  test('deduplicates prefix when id already includes it', () => {
+    const result = generateFileName('TASK', 'TASK-20260614131433088', 'ZK Review upgrade');
+    expect(result).toBe('TASK-20260614131433088-zk-review-upgrade.md');
+  });
+
+  test('deduplicates prefix for EPIC and ADR too', () => {
+    expect(generateFileName('EPIC', 'EPIC-20260503010218940', 'Test')).toBe('EPIC-20260503010218940-test.md');
+    expect(generateFileName('ADR', 'ADR-20260519224555402', 'Test')).toBe('ADR-20260519224555402-test.md');
+  });
 });
