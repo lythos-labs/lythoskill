@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/14 12:53:44
+> 自动生成于 2026/6/14 12:53:46
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 317 | 进行中: 0, 待验收: 2, 已完成: 272 |
+| Tasks | 317 | 进行中: 0, 待验收: 1, 已完成: 273 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
@@ -83,12 +83,11 @@ _无_
 
 _无_
 
-### 待验收 (2)
+### 待验收 (1)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
-- 🔍 **TASK-20260614123918272**: probe UX audit: document flags, fix suspicious naming
 
-### 已完成 (272)
+### 已完成 (273)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -362,6 +361,7 @@ _无_
 - ✅ ~~TASK-20260613185808109~~: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
 - ✅ ~~TASK-20260613190349815~~: Probe: suppress empty-shell warnings for completed tasks by default
 - ✅ ~~TASK-20260613234838986~~: Refactor probe.ts into intent-plan-execute with IO separation
+- ✅ ~~TASK-20260614123918272~~: probe UX audit: document flags, fix suspicious naming
 
 ### 悬置 (1)
 

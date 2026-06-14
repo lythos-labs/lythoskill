@@ -8,6 +8,7 @@
 | backlog | 2026-06-14 | Created from ZK Review feedback on probe intuitiveness |
 | in-progress | 2026-06-14 | Started |
 | review | 2026-06-14 | Deliverables committed |
+| completed | 2026-06-14 | Done |
 
 ## Background & Goals
 
