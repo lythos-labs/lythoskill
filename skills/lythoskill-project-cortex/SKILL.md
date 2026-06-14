@@ -10,6 +10,7 @@ description: |
   directories enforce workflow order. Timestamp IDs prevent collision.
   ZK task review (WHAT/WHY/HOW) ensures subagent-readable requirements before assignment.
   probe detects stale backlog, epic drift, and history mismatches.
+  **Task-git discipline**: One task = 2-5 commits (core, tests, docs, trailer). Every commit includes TASK-xxx for traceability. Task card includes Commit Map and Verification Matrix.
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
@@ -90,6 +91,21 @@ bunx @lythos/project-cortex@0.16.0 dispatch-trailers
 > characters. Use English titles so paths are portable across agents and CLIs.
 >
 > **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。标题请用英文，确保 slug 只含 ASCII 字符。
+
+## Task-Git Discipline
+
+**One task = 2-5 commits, not 1 giant commit.** Separate:
+1. **Core change** — implementation
+2. **Tests** — co-located `*.test.ts`
+3. **Docs/templates** — SKILL.md, AGENTS.md updates
+4. **Review trailer** — `Review: TASK-xxx` empty commit
+
+**Task card must include:**
+- **Commit Map**: `| Hash | Message | Contains |` — reviewer runs `git show <hash>`
+- **Verification Matrix**: `| # | Claim | Verify | Expected |` — each AC has `→ Verify: <command>`
+- **Quick Check**: 30-second bash block reviewer can copy-paste
+
+**Every commit message includes `TASK-xxx`.** Enables `git log --grep TASK-xxx` to reconstruct full history.
 
 # Generate INDEX.md with overview stats and document listing
 bunx @lythos/project-cortex@0.16.0 index
