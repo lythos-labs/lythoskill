@@ -251,6 +251,23 @@ After running, answer:
 
 **Example from this project**: A probe UX task passed ZK Review at 9/10 (theoretical understanding) but trial usage dropped to 5/10. The agent understood `--active-only` from docs, but running it produced almost no output — the agent couldn't tell if it worked. This revealed missing summary lines that no document review could catch.
 
+**ZK Review is information exposure, not instruction following.** The ZK agent's role is to surface angles you might have missed — not to dictate changes. You evaluate, filter, and decide:
+
+| ZK agent says | Your action |
+|---------------|-------------|
+| "This flag name is confusing" | Information: naming might be a problem. Evaluate cost/benefit of renaming vs documenting. |
+| "I don't know what this function does" | Information: missing documentation. Decide if it's in-scope or exploration-friendly. |
+| "The output surprised me" | Information: UX gap. Decide if the surprise is a bug or a learning curve. |
+| "This is clearly wrong" | Information: potential bug. Verify with code, don't take the agent's word. |
+
+**Multi-angle ZK Review**: Spawn different ZK agents for different angles:
+- **Document reader**: Finds scope/documentation gaps
+- **Trial user**: Finds output/interaction gaps (invisible to readers)
+- **Code reader**: Finds implementation/signature gaps
+- Each angle exposes different information. You synthesize, not follow.
+
+**Key principle**: ZK agents are sensors, not bosses. Their output is signal for your judgment, not commands for your execution.
+
 #### Side Decks (Pass-by-Reference Dispatch)
 
 Any deck in `examples/decks/` can be handed to a subagent as a **side deck** — a temporary, task-scoped skill set. The pattern is the same as ZK Review: pass the file path, let the subagent read it.
