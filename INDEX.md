@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/14 12:37:11
+> 自动生成于 2026/6/14 12:53:44
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 316 | 进行中: 0, 待验收: 1, 已完成: 272 |
+| Tasks | 317 | 进行中: 0, 待验收: 2, 已完成: 272 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
@@ -83,9 +83,10 @@ _无_
 
 _无_
 
-### 待验收 (1)
+### 待验收 (2)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
+- 🔍 **TASK-20260614123918272**: probe UX audit: document flags, fix suspicious naming
 
 ### 已完成 (272)
 
