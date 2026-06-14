@@ -218,6 +218,39 @@ This is not a "missing file path" — it's a **design overlap** that the task au
 
 **False positive — when to challenge back:** A ZK agent may report "cold pool is not defined" when AGENTS.md literally says "see `\"skill-deck.toml\"` in the root of this workspace." If the agent didn't follow the reference, that's **agent failure, not doc failure**. Challenge it: "The definition is in the referenced file — did you read it?" The ZK agent can then challenge back if the reference was unclear. This back-and-forth is the convergence mechanism.
 
+#### ZK Review with Trial Usage (Output/UX Layer)
+
+**Reading docs ≠ using tools.** A task can pass ZK Review (the agent understands what to do) but fail trial usage (the output/interaction is confusing). Output-layer UX issues are invisible to document review.
+
+**When to add trial usage to ZK Review:**
+- The task involves CLI output, user-facing messages, or interactive behavior
+- The task modifies how a tool presents information (not just what it computes)
+- Previous tasks in the same area had UX surprises after execution
+
+**Trial usage pattern:**
+```
+ZK Review (document) → converge → Executor implements → Trial ZK agent runs the tool → rates intuitiveness
+                                              ↓ rating < 7/10
+                                    New task: fix output/UX issues → ZK Review → Executor
+```
+
+**Trial ZK agent prompt template:**
+```
+You are a ZERO-KNOWLEDGE agent onboarding to a new project.
+Read SKILL.md + AGENTS.md, then RUN these commands:
+  <command 1>
+  <command 2>
+After running, answer:
+1. Before running: What did you expect each command to do?
+2. After running: What actually happened? Any surprises?
+3. Intuitiveness: Rate 1-10 and explain why.
+4. Gaps: What would confuse a new agent?
+```
+
+**Key principle**: The trial agent must actually execute commands, not just read about them. The gap between "I understand" and "I can use" is where UX debt hides.
+
+**Example from this project**: A probe UX task passed ZK Review at 9/10 (theoretical understanding) but trial usage dropped to 5/10. The agent understood `--active-only` from docs, but running it produced almost no output — the agent couldn't tell if it worked. This revealed missing summary lines that no document review could catch.
+
 #### Side Decks (Pass-by-Reference Dispatch)
 
 Any deck in `examples/decks/` can be handed to a subagent as a **side deck** — a temporary, task-scoped skill set. The pattern is the same as ZK Review: pass the file path, let the subagent read it.
