@@ -309,8 +309,9 @@ async function main(): Promise<void> {
 
     case 'probe':
       probeStatus(config, {
-        suspicious: allFlags.includes('--suspicious'),
+        activeOnly: allFlags.includes('--active-only') || allFlags.includes('--suspicious'),
         includeCompletedEmptyShells: allFlags.includes('--include-completed-empty-shells'),
+        suspicious: allFlags.includes('--suspicious'),
       });
       break;
 

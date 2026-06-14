@@ -88,11 +88,17 @@ describe("buildProbePlan", () => {
     expect(plan.checks.nonAsciiSlugs).toBe(true);
   });
 
-  it("disables statusConsistency when suspicious=true", () => {
-    const plan = buildProbePlan(mockConfig, { suspicious: true });
+  it("disables statusConsistency when activeOnly=true", () => {
+    const plan = buildProbePlan(mockConfig, { activeOnly: true });
     expect(plan.checks.statusConsistency).toBe(false);
     expect(plan.checks.laneOccupancy).toBe(true);
-    expect(plan.options.suspicious).toBe(true);
+    expect(plan.options.activeOnly).toBe(true);
+  });
+
+  it("still accepts deprecated suspicious option", () => {
+    const plan = buildProbePlan(mockConfig, { suspicious: true } as any);
+    expect(plan.checks.statusConsistency).toBe(false);
+    expect(plan.options.activeOnly).toBe(true);
   });
 
   it("passes through includeCompletedEmptyShells option", () => {
@@ -100,7 +106,7 @@ describe("buildProbePlan", () => {
       includeCompletedEmptyShells: true,
     });
     expect(plan.options.includeCompletedEmptyShells).toBe(true);
-    expect(plan.options.suspicious).toBe(false);
+    expect(plan.options.activeOnly).toBe(false);
   });
 
   it("is pure: same config produces same plan", () => {

@@ -202,16 +202,28 @@ describe("executeProbePlan — with mock IO", () => {
     expect(report.staleBacklog[0]).toContain("TASK-20260101000000009");
   });
 
-  it("skips status consistency when suspicious mode", () => {
+  it("skips status consistency when activeOnly mode", () => {
     const files: Record<string, string> = {
       "cortex/tasks/01-backlog/TASK-20260101000000010-test.md": `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| in-progress | 2026-01-01 | Started |\n`,
     };
-    const plan = buildProbePlan(mockConfig, { suspicious: true });
+    const plan = buildProbePlan(mockConfig, { activeOnly: true });
     const io = makeMockIO(files);
     const report = executeProbePlan(plan, io);
 
     expect(report.statusResults).toEqual([]);
-    expect(report.summary.suspicious).toBe(true);
+    expect(report.summary.activeOnly).toBe(true);
+  });
+
+  it("still works with deprecated suspicious option", () => {
+    const files: Record<string, string> = {
+      "cortex/tasks/01-backlog/TASK-20260101000000010-test.md": `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| in-progress | 2026-01-01 | Started |\n`,
+    };
+    const plan = buildProbePlan(mockConfig, { suspicious: true } as any);
+    const io = makeMockIO(files);
+    const report = executeProbePlan(plan, io);
+
+    expect(report.statusResults).toEqual([]);
+    expect(report.summary.activeOnly).toBe(true);
   });
 
   it("does not call real filesystem or git", () => {

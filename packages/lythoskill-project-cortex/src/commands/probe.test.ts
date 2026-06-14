@@ -179,16 +179,16 @@ describe("filterEmptyShells — pure filtering by path strings, no filesystem", 
     expect(filterEmptyShells(terminalOnly, 'default')).toEqual([]);
   });
 
-  it("'suspicious' mode keeps only backlog, in-progress, proposed (not review)", () => {
-    const result = filterEmptyShells(allShells, 'suspicious');
+  it("'active-only' mode keeps only backlog, in-progress, proposed (not review)", () => {
+    const result = filterEmptyShells(allShells, 'active-only');
     expect(result).toContain(backlogShell);
     expect(result).toContain(inProgressShell);
     expect(result).toContain(proposedAdr);
     expect(result).not.toContain(reviewShell);
   });
 
-  it("'suspicious' mode filters out all terminal and review states", () => {
-    const result = filterEmptyShells(allShells, 'suspicious');
+  it("'active-only' mode filters out all terminal and review states", () => {
+    const result = filterEmptyShells(allShells, 'active-only');
     expect(result).not.toContain(completedShell);
     expect(result).not.toContain(reviewShell);
     expect(result).not.toContain(suspendedShell);
@@ -201,14 +201,22 @@ describe("filterEmptyShells — pure filtering by path strings, no filesystem", 
     expect(result).not.toContain(epicArchived);
   });
 
-  it("'suspicious' mode returns empty when only review/terminal shells exist", () => {
+  it("'active-only' mode returns empty when only review/terminal shells exist", () => {
     const onlyReview = [reviewShell, completedShell];
-    expect(filterEmptyShells(onlyReview, 'suspicious')).toEqual([]);
+    expect(filterEmptyShells(onlyReview, 'active-only')).toEqual([]);
+  });
+
+  it("'suspicious' mode still works as deprecated alias for 'active-only'", () => {
+    const result = filterEmptyShells(allShells, 'suspicious');
+    expect(result).toContain(backlogShell);
+    expect(result).toContain(inProgressShell);
+    expect(result).toContain(proposedAdr);
+    expect(result).not.toContain(reviewShell);
   });
 
   it("handles mixed paths with no matching shells", () => {
     const noMatch = [completedShell, doneShell];
     expect(filterEmptyShells(noMatch, 'default')).toEqual([]);
-    expect(filterEmptyShells(noMatch, 'suspicious')).toEqual([]);
+    expect(filterEmptyShells(noMatch, 'active-only')).toEqual([]);
   });
 });

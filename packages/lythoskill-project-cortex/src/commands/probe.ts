@@ -69,7 +69,7 @@ export interface ProbePlan {
     coverageDrift: boolean;
     nonAsciiSlugs: boolean;
   };
-  options: { suspicious: boolean; includeCompletedEmptyShells: boolean };
+  options: { activeOnly: boolean; includeCompletedEmptyShells: boolean };
 }
 
 export interface ProbeReport {
@@ -83,7 +83,7 @@ export interface ProbeReport {
   coverageDrift: string[];
   nonAsciiSlugs: string[];
   summary: {
-    suspicious: boolean;
+    activeOnly: boolean;
     includeCompletedEmptyShells: boolean;
     totalIssues: number;
     hasStatusIssues: boolean;
@@ -282,10 +282,10 @@ function probeFilesWithIO(files: string[], config: WorkflowConfig, type: 'task' 
 /** Filter empty shells by display mode. Exported for unit testing. */
 export function filterEmptyShells(
   shells: string[],
-  mode: 'default' | 'suspicious' | 'all'
+  mode: 'default' | 'active-only' | 'all' | 'suspicious'
 ): string[] {
   if (mode === 'all') return shells;
-  if (mode === 'suspicious') {
+  if (mode === 'active-only' || mode === 'suspicious') {
     return shells.filter(s =>
       s.includes('01-backlog') || s.includes('02-in-progress') || s.includes('01-proposed')
     );
@@ -300,9 +300,9 @@ export function filterEmptyShells(
 
 export function buildProbePlan(
   config: WorkflowConfig,
-  opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }
+  opts?: { activeOnly?: boolean; suspicious?: boolean; includeCompletedEmptyShells?: boolean }
 ): ProbePlan {
-  const suspicious = opts?.suspicious ?? false;
+  const activeOnly = opts?.activeOnly ?? opts?.suspicious ?? false;
   const includeCompletedEmptyShells = opts?.includeCompletedEmptyShells ?? false;
 
   const tasks = Object.entries(config.taskSubdirs).map(([statusKey, subdir]) => ({
@@ -328,7 +328,7 @@ export function buildProbePlan(
     epics,
     adrs,
     checks: {
-      statusConsistency: !suspicious,
+      statusConsistency: !activeOnly,
       laneOccupancy: true,
       adrEpicCoupling: true,
       staleness: true,
@@ -336,12 +336,12 @@ export function buildProbePlan(
       coverageDrift: true,
       nonAsciiSlugs: true,
     },
-    options: { suspicious, includeCompletedEmptyShells },
+    options: { activeOnly, includeCompletedEmptyShells },
   };
 }
 
 export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO): ProbeReport {
-  const { suspicious } = plan.options;
+  const { activeOnly } = plan.options;
 
   // ── Scan directories ──────────────────────────────────────────────
   const taskFiles: string[] = [];
@@ -556,7 +556,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     coverageDrift,
     nonAsciiSlugs,
     summary: {
-      suspicious,
+      activeOnly: plan.options.activeOnly,
       includeCompletedEmptyShells: plan.options.includeCompletedEmptyShells,
       totalIssues,
       hasStatusIssues: allStatusIssues.length > 0,
@@ -607,15 +607,15 @@ function buildConfigFromPlan(plan: ProbePlan): WorkflowConfig {
 }
 
 export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProbeIO): void {
-  const { suspicious } = report.summary;
+  const { activeOnly } = report.summary;
 
   // Header
-  if (!suspicious) {
+  if (!activeOnly) {
     io.log('\n🔍 Probing status consistency...\n');
     io.log('Rule: Directory location is the source of truth.');
     io.log('Status History inside files should reflect the latest move.\n');
   } else {
-    io.log('\n🔎 Probing suspicious patterns only (empty shells, staleness, drift, lane violations)...\n');
+    io.log('\n🔎 Probing active items only (empty shells, staleness, drift, lane violations)...\n');
   }
 
   // Status consistency sections
@@ -623,7 +623,7 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
   const epicResults = report.statusResults.filter(r => r.type === 'epic');
   const adrResults = report.statusResults.filter(r => r.type === 'adr');
 
-  if (!suspicious) {
+  if (!activeOnly) {
     printResults(taskResults, '📄 Tasks', io);
     printResults(epicResults, '📋 Epics', io);
     printResults(adrResults, '🏛️  ADRs', io);
@@ -667,10 +667,10 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
 
   // Empty shells
   if (report.emptyShells.length > 0) {
-    const mode: 'default' | 'suspicious' | 'all' = report.summary.includeCompletedEmptyShells
+    const mode: 'default' | 'active-only' | 'all' = report.summary.includeCompletedEmptyShells
       ? 'all'
-      : report.summary.suspicious
-        ? 'suspicious'
+      : report.summary.activeOnly
+        ? 'active-only'
         : 'default';
     const filtered = filterEmptyShells(report.emptyShells, mode);
 
@@ -680,7 +680,7 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
         io.log(`     ⚠️  ${s}`);
       }
       io.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
-      if (!suspicious) {
+      if (!activeOnly) {
         io.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
       }
     }
@@ -705,10 +705,10 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
   // Summary
   io.log('\n' + '─'.repeat(50));
   if (report.summary.totalIssues === 0) {
-    io.log(suspicious ? '✅ No suspicious patterns found.' : '✅ All clear! No inconsistencies found.');
+    io.log(activeOnly ? '✅ No issues found in active items.' : '✅ All clear! No inconsistencies found.');
   } else {
     const allStatusIssues = report.statusResults.filter(r => r.match !== 'ok');
-    if (!suspicious && allStatusIssues.length > 0) {
+    if (!activeOnly && allStatusIssues.length > 0) {
       io.log(`⚠️  Found ${allStatusIssues.length} status issue(s) requiring human confirmation.`);
       io.log('   Please review the items above and decide:');
       io.log('   - Move file to correct directory, OR');
@@ -747,8 +747,12 @@ function printResults(results: ProbeResult[], label: string, io: ProbeIO): void 
   }
 }
 
-export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }): void {
-  const plan = buildProbePlan(config, opts);
+export function probeStatus(config: WorkflowConfig, opts?: { activeOnly?: boolean; includeCompletedEmptyShells?: boolean; suspicious?: boolean }): void {
+  const activeOnly = opts?.activeOnly ?? opts?.suspicious ?? false;
+  if (opts?.suspicious) {
+    console.warn('⚠️  Flag --suspicious is deprecated, use --active-only instead.');
+  }
+  const plan = buildProbePlan(config, { activeOnly, includeCompletedEmptyShells: opts?.includeCompletedEmptyShells });
   const report = executeProbePlan(plan, defaultProbeIO);
   printProbeSummary(report, defaultProbeIO);
 }
