@@ -1,8 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, join, relative } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import type { WorkflowConfig } from '../types.js';
-import { listActiveEpics, countByLane } from '../lib/lane.js';
+import { parseFrontmatter } from '../lib/frontmatter.js';
 
 /** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent. */
 export const EMPTY_SHELL_PATTERNS: RegExp[] = [
@@ -36,7 +36,7 @@ export function isEmptyShell(content: string): boolean {
   return false;
 }
 
-interface ProbeResult {
+export interface ProbeResult {
   file: string;
   type: 'task' | 'epic' | 'adr';
   expectedStatus: string;
@@ -46,15 +46,86 @@ interface ProbeResult {
   suggestion: string;
 }
 
-function scanDir(dir: string, prefix: string): string[] {
-  const files: string[] = [];
-  if (!existsSync(dir)) return files;
+export interface ProbeIO {
+  readFile: (path: string) => string | null;
+  readdir: (path: string) => { name: string; isDirectory: boolean }[] | null;
+  exists: (path: string) => boolean;
+  spawn: (cmd: string, args: string[], opts?: { encoding?: string; timeout?: number }) => { status: number | null; stdout: string; stderr: string };
+  log: (msg: string) => void;
+  warn: (msg: string) => void;
+  cwd: () => string;
+}
 
-  const entries = readdirSync(dir, { withFileTypes: true });
+export interface ProbePlan {
+  tasks: { dir: string; statusKey: string; files: string[] }[];
+  epics: { dir: string; statusKey: string; files: string[] }[];
+  adrs: { dir: string; statusKey: string; files: string[] }[];
+  checks: {
+    statusConsistency: boolean;
+    laneOccupancy: boolean;
+    adrEpicCoupling: boolean;
+    staleness: boolean;
+    emptyShells: boolean;
+    coverageDrift: boolean;
+    nonAsciiSlugs: boolean;
+  };
+  options: { suspicious: boolean; includeCompletedEmptyShells: boolean };
+}
+
+export interface ProbeReport {
+  statusResults: ProbeResult[];
+  laneCounts: { main: number; emergency: number; unknown: number };
+  laneWarnings: string[];
+  couplingWarnings: string[];
+  staleBacklog: string[];
+  driftedEpics: string[];
+  emptyShells: string[];
+  coverageDrift: string[];
+  nonAsciiSlugs: string[];
+  summary: {
+    suspicious: boolean;
+    includeCompletedEmptyShells: boolean;
+    totalIssues: number;
+    hasStatusIssues: boolean;
+    hasLaneIssues: boolean;
+    hasCouplingIssues: boolean;
+    hasStaleness: boolean;
+    hasEmptyShells: boolean;
+    hasCoverageDrift: boolean;
+    hasNonAsciiSlugs: boolean;
+  };
+}
+
+const defaultProbeIO: ProbeIO = {
+  readFile: (p) => {
+    try { return readFileSync(p, 'utf-8'); } catch { return null; }
+  },
+  readdir: (p) => {
+    try {
+      return readdirSync(p, { withFileTypes: true }).map(e => ({
+        name: e.name,
+        isDirectory: e.isDirectory(),
+      }));
+    } catch { return null; }
+  },
+  exists: existsSync,
+  spawn: (cmd, args, opts) => spawnSync(cmd, args, { encoding: 'utf-8', timeout: 5000, ...opts }),
+  log: console.log,
+  warn: console.warn,
+  cwd: process.cwd,
+};
+
+function scanDirWithIO(dir: string, prefix: string, io: ProbeIO): string[] {
+  const files: string[] = [];
+  if (!io.exists(dir)) return files;
+
+  const entries = io.readdir(dir);
+  if (!entries) return files;
+
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...scanDir(fullPath, prefix));
+    if (entry.isDirectory) {
+      files.push(...scanDirWithIO(fullPath, prefix, io));
     } else if (entry.name.endsWith('.md') && entry.name.startsWith(prefix)) {
       files.push(fullPath);
     }
@@ -107,7 +178,7 @@ export function extractStatusHistory(content: string): { lines: string[]; hasSec
   return { lines: [], hasSection: false, singleStatus: null };
 }
 
-function inferStatusFromPath(
+export function inferStatusFromPath(
   filePath: string,
   config: WorkflowConfig
 ): { type: 'task' | 'epic' | 'adr'; statusKey: string; statusLabel: string } | null {
@@ -129,7 +200,7 @@ function inferStatusFromPath(
   return null;
 }
 
-function checkMatch(expectedKey: string, lastHistory: string | null): { match: ProbeResult['match']; suggestion: string } {
+export function checkMatch(expectedKey: string, lastHistory: string | null): { match: ProbeResult['match']; suggestion: string } {
   if (!lastHistory) {
     return {
       match: 'missing-history',
@@ -177,21 +248,25 @@ function checkMatch(expectedKey: string, lastHistory: string | null): { match: P
   };
 }
 
-function probeFiles(files: string[], config: WorkflowConfig, type: 'task' | 'epic' | 'adr'): ProbeResult[] {
+function probeFilesWithIO(files: string[], config: WorkflowConfig, type: 'task' | 'epic' | 'adr', io: ProbeIO): ProbeResult[] {
   const results: ProbeResult[] = [];
+  const cwd = io.cwd();
 
   for (const file of files) {
     const inferred = inferStatusFromPath(file, config);
     if (!inferred) continue;
 
-    const content = readFileSync(file, 'utf-8');
+    const content = io.readFile(file);
+    if (content === null) continue;
+
     const { lines, hasSection, singleStatus } = extractStatusHistory(content);
     const lastHistoryLine = singleStatus ?? (lines.length > 0 ? lines[lines.length - 1] : null);
 
     const { match, suggestion } = checkMatch(inferred.statusKey, lastHistoryLine);
 
+    const resolvedFile = file.startsWith('/') ? file : resolve(cwd, file);
     results.push({
-      file: relative(process.cwd(), file),
+      file: relative(cwd, resolvedFile),
       type,
       expectedStatus: inferred.statusKey,
       lastHistoryLine,
@@ -202,29 +277,6 @@ function probeFiles(files: string[], config: WorkflowConfig, type: 'task' | 'epi
   }
 
   return results;
-}
-
-function printResults(results: ProbeResult[], label: string): void {
-  const issues = results.filter(r => r.match !== 'ok');
-
-  console.log(`\n${label}:`);
-
-  if (results.length === 0) {
-    console.log('  (none)');
-    return;
-  }
-
-  for (const r of results) {
-    const icon = r.match === 'ok' ? '✅' : r.match === 'mismatch' ? '❌' : r.match === 'missing-history' ? '⚠️' : '❓';
-    console.log(`  ${icon} ${r.file}`);
-    if (r.match !== 'ok') {
-      console.log(`     → ${r.suggestion}`);
-    }
-  }
-
-  if (issues.length > 0) {
-    console.log(`\n  ⚠️  ${issues.length} 个问题需人工确认`);
-  }
 }
 
 /** Filter empty shells by display mode. Exported for unit testing. */
@@ -246,280 +298,457 @@ export function filterEmptyShells(
   });
 }
 
-export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }): void {
+export function buildProbePlan(
+  config: WorkflowConfig,
+  opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }
+): ProbePlan {
   const suspicious = opts?.suspicious ?? false;
   const includeCompletedEmptyShells = opts?.includeCompletedEmptyShells ?? false;
 
-  if (!suspicious) {
-    console.log('\n🔍 Probing status consistency...\n');
-    console.log('Rule: Directory location is the source of truth.');
-    console.log('Status History inside files should reflect the latest move.\n');
-  } else {
-    console.log('\n🔎 Probing suspicious patterns only (empty shells, staleness, drift, lane violations)...\n');
+  const tasks = Object.entries(config.taskSubdirs).map(([statusKey, subdir]) => ({
+    dir: join(config.tasksDir, subdir),
+    statusKey,
+    files: [] as string[],
+  }));
+
+  const epics = Object.entries(config.epicSubdirs).map(([statusKey, subdir]) => ({
+    dir: join(config.epicsDir, subdir),
+    statusKey,
+    files: [] as string[],
+  }));
+
+  const adrs = Object.entries(config.adrSubdirs).map(([statusKey, subdir]) => ({
+    dir: join(config.adrDir, subdir),
+    statusKey,
+    files: [] as string[],
+  }));
+
+  return {
+    tasks,
+    epics,
+    adrs,
+    checks: {
+      statusConsistency: !suspicious,
+      laneOccupancy: true,
+      adrEpicCoupling: true,
+      staleness: true,
+      emptyShells: true,
+      coverageDrift: true,
+      nonAsciiSlugs: true,
+    },
+    options: { suspicious, includeCompletedEmptyShells },
+  };
+}
+
+export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO): ProbeReport {
+  const { suspicious } = plan.options;
+
+  // ── Scan directories ──────────────────────────────────────────────
+  const taskFiles: string[] = [];
+  for (const t of plan.tasks) {
+    t.files = scanDirWithIO(t.dir, 'TASK-', io);
+    taskFiles.push(...t.files);
   }
 
-  const taskFiles = [
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.backlog), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.inProgress), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.review), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.completed), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.suspended), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.terminated), 'TASK-'),
-    ...scanDir(join(config.tasksDir, config.taskSubdirs.archived), 'TASK-'),
-  ];
+  const epicFiles: string[] = [];
+  for (const e of plan.epics) {
+    e.files = scanDirWithIO(e.dir, 'EPIC-', io);
+    epicFiles.push(...e.files);
+  }
 
-  const epicFiles = [
-    ...scanDir(join(config.epicsDir, config.epicSubdirs.active), 'EPIC-'),
-    ...scanDir(join(config.epicsDir, config.epicSubdirs.done), 'EPIC-'),
-    ...scanDir(join(config.epicsDir, config.epicSubdirs.suspended), 'EPIC-'),
-    ...scanDir(join(config.epicsDir, config.epicSubdirs.archived), 'EPIC-'),
-  ];
-
-  const adrFiles = [
-    ...scanDir(join(config.adrDir, config.adrSubdirs.proposed), 'ADR-'),
-    ...scanDir(join(config.adrDir, config.adrSubdirs.accepted), 'ADR-'),
-    ...scanDir(join(config.adrDir, config.adrSubdirs.rejected), 'ADR-'),
-    ...scanDir(join(config.adrDir, config.adrSubdirs.superseded), 'ADR-'),
-  ];
+  const adrFiles: string[] = [];
+  for (const a of plan.adrs) {
+    a.files = scanDirWithIO(a.dir, 'ADR-', io);
+    adrFiles.push(...a.files);
+  }
 
   // ── Slug charset check ─────────────────────────────────────────────
-  // Filenames must be ASCII-only after the ID prefix for cross-agent portability.
   const nonAsciiSlugs: string[] = [];
   const slugPattern = /^(TASK|EPIC|ADR)-\d{17}-(.+?)\.md$/;
+  const cwd = io.cwd();
   for (const file of [...taskFiles, ...epicFiles, ...adrFiles]) {
     const name = basename(file);
     const match = name.match(slugPattern);
     if (match && /[^\x00-\x7F]/.test(match[2])) {
-      nonAsciiSlugs.push(relative(process.cwd(), file));
+      const resolvedFile = file.startsWith('/') ? file : resolve(cwd, file);
+      nonAsciiSlugs.push(relative(cwd, resolvedFile));
     }
   }
 
-  const taskResults = probeFiles(taskFiles, config, 'task');
-  const epicResults = probeFiles(epicFiles, config, 'epic');
-  const adrResults = probeFiles(adrFiles, config, 'adr');
+  // ── Status consistency ────────────────────────────────────────────
+  const configFromPlan = buildConfigFromPlan(plan);
+  const allTaskResults = plan.checks.statusConsistency
+    ? probeFilesWithIO(taskFiles, configFromPlan, 'task', io)
+    : [];
+  const allEpicResults = plan.checks.statusConsistency
+    ? probeFilesWithIO(epicFiles, configFromPlan, 'epic', io)
+    : [];
+  const allAdrResults = plan.checks.statusConsistency
+    ? probeFilesWithIO(adrFiles, configFromPlan, 'adr', io)
+    : [];
 
-  if (!suspicious) {
-    printResults(taskResults, '📄 Tasks');
-    printResults(epicResults, '📋 Epics');
-    printResults(adrResults, '🏛️  ADRs');
-  }
-
-  // --- Lane occupancy check (per ADR-20260503003315478, option E) ---
+  // --- Lane occupancy check ---
   const laneWarnings: string[] = [];
-  const activeEpics = listActiveEpics(config);
-  const counts = countByLane(activeEpics);
-
-  console.log('\n🛤️  Epic lanes (active):');
-  console.log(`     main:      ${counts.main}`);
-  console.log(`     emergency: ${counts.emergency}`);
-  if (counts.unknown > 0) {
-    console.log(`     (no lane field): ${counts.unknown}`);
-  }
-  if (counts.main > 1) {
-    laneWarnings.push(`main lane has ${counts.main} active epics (>1) — pick one focus, suspend/archive/done the rest`);
-  }
-  if (counts.emergency > 1) {
-    laneWarnings.push(`emergency lane has ${counts.emergency} active epics (>1) — emergency is single-slot by design`);
-  }
-  if (counts.unknown > 0) {
-    laneWarnings.push(`${counts.unknown} active epic(s) missing lane: field — backfill with lane: main | emergency`);
-  }
-  for (const w of laneWarnings) {
-    console.log(`     ⚠️  ${w}`);
+  let laneCounts = { main: 0, emergency: 0, unknown: 0 };
+  if (plan.checks.laneOccupancy) {
+    const activeEpicDir = plan.epics.find(e => e.statusKey === 'active')?.dir;
+    if (activeEpicDir) {
+      const activeEpicFiles = scanDirWithIO(activeEpicDir, 'EPIC-', io);
+      const epics: { lane: 'main' | 'emergency' | null }[] = [];
+      for (const file of activeEpicFiles) {
+        const content = io.readFile(file);
+        if (content === null) continue;
+        const { data } = parseFrontmatter(content);
+        const rawLane = typeof data.lane === 'string' ? data.lane : null;
+        let lane: 'main' | 'emergency' | null = null;
+        if (rawLane === 'main' || rawLane === 'emergency') {
+          lane = rawLane;
+        }
+        epics.push({ lane });
+      }
+      const counts = { main: 0, emergency: 0, unknown: 0 };
+      for (const e of epics) {
+        if (e.lane === 'main') counts.main++;
+        else if (e.lane === 'emergency') counts.emergency++;
+        else counts.unknown++;
+      }
+      laneCounts = counts;
+      if (counts.main > 1) {
+        laneWarnings.push(`main lane has ${counts.main} active epics (>1) — pick one focus, suspend/archive/done the rest`);
+      }
+      if (counts.emergency > 1) {
+        laneWarnings.push(`emergency lane has ${counts.emergency} active epics (>1) — emergency is single-slot by design`);
+      }
+      if (counts.unknown > 0) {
+        laneWarnings.push(`${counts.unknown} active epic(s) missing lane: field — backfill with lane: main | emergency`);
+      }
+    }
   }
 
   // --- ADR-Epic coupling check ---
-  // If a proposed ADR references an epic in its Related section, it should be accepted.
   const couplingWarnings: string[] = [];
-  const proposedAdrFiles = scanDir(join(config.adrDir, config.adrSubdirs.proposed), 'ADR-');
-
-  for (const adrFile of proposedAdrFiles) {
-    const content = readFileSync(adrFile, 'utf-8');
-    const epicMatch = content.match(/##\s+Related\s*\n[\s\S]*?Epic:\s*(EPIC-\d+)/i);
-    if (epicMatch) {
-      const epicId = epicMatch[1];
-      const adrId = basename(adrFile).replace(/^(ADR-\d+)-.*/, '$1');
-      couplingWarnings.push(`${adrId} references ${epicId} but is still proposed → run 'cortex adr accept ${adrId}'`);
-    }
-  }
-
-  if (couplingWarnings.length > 0) {
-    console.log('\n🔗 ADR-Epic coupling:');
-    for (const w of couplingWarnings) {
-      console.log(`     ⚠️  ${w}`);
-    }
-  }
-
-  // ── Staleness check: backlog bloat & epic drift ──────────────────
-  const now = Date.now()
-  const THREE_DAYS = 3 * 24 * 60 * 60 * 1000
-  const staleBacklog: string[] = []
-  const driftedEpics: string[] = []
-
-  const backlogDir = join(config.tasksDir, config.taskSubdirs.backlog)
-  const backlogFiles = scanDir(backlogDir, 'TASK-')
-  for (const f of backlogFiles) {
-    try {
-      const stat = readFileSync(f, 'utf-8')
-      const createdMatch = stat.match(/\|\s*backlog\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/)
-      const dateStr = createdMatch ? createdMatch[1] : null
-      if (dateStr) {
-        const age = now - new Date(dateStr).getTime()
-        if (age > THREE_DAYS) {
-          const id = basename(f).match(/^(TASK-\d+)/)?.[1] ?? basename(f)
-          const days = Math.floor(age / (24 * 60 * 60 * 1000))
-          staleBacklog.push(`${id} (${days}d old)`)
+  if (plan.checks.adrEpicCoupling) {
+    const proposedAdrDir = plan.adrs.find(a => a.statusKey === 'proposed')?.dir;
+    if (proposedAdrDir) {
+      const proposedAdrFiles = scanDirWithIO(proposedAdrDir, 'ADR-', io);
+      for (const adrFile of proposedAdrFiles) {
+        const content = io.readFile(adrFile);
+        if (content === null) continue;
+        const epicMatch = content.match(/##\s+Related\s*\n[\s\S]*?Epic:\s*(EPIC-\d+)/i);
+        if (epicMatch) {
+          const epicId = epicMatch[1];
+          const adrId = basename(adrFile).replace(/^(ADR-\d+)-.*/, '$1');
+          couplingWarnings.push(`${adrId} references ${epicId} but is still proposed → run 'cortex adr accept ${adrId}'`);
         }
       }
-    } catch (err: any) { console.warn(`probe: staleness check error: ${err.message ?? err}`) }
-  }
-
-  const activeEpicDir = join(config.epicsDir, config.epicSubdirs.active)
-  const activeEpicFiles = scanDir(activeEpicDir, 'EPIC-')
-  for (const f of activeEpicFiles) {
-    try {
-      const content = readFileSync(f, 'utf-8')
-      const statusMatch = content.match(/\|\s*active\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/)
-      const dateStr = statusMatch ? statusMatch[1] : null
-      if (dateStr) {
-        const age = now - new Date(dateStr).getTime()
-        if (age > THREE_DAYS) {
-          const id = basename(f).match(/^(EPIC-\d+)/)?.[1] ?? basename(f)
-          const days = Math.floor(age / (24 * 60 * 60 * 1000))
-          driftedEpics.push(`${id} (${days}d old)`)
-        }
-      }
-    } catch (err: any) { console.warn(`probe: staleness check error: ${err.message ?? err}`) }
-  }
-
-  if (staleBacklog.length > 0) {
-    console.log('\n📦 Backlog staleness:')
-    for (const s of staleBacklog) {
-      console.log(`     ⚠️  ${s} — may be state drift. Check: git log --oneline -- cortex/tasks/01-backlog/${s.replace(/ .*/, '')}*`)
-    }
-    console.log('     💡 If work is done, close the task. If deferred, suspend it.')
-  }
-
-  if (driftedEpics.length > 0) {
-    console.log('\n📋 Epic drift:')
-    for (const e of driftedEpics) {
-      console.log(`     ⚠️  ${e} — may have all tasks done. Check: cortex list | grep ${e.replace(/ .*/, '')}`)
-    }
-    console.log('     💡 If all tasks completed, close the epic: cortex epic done <id>')
-  }
-
-  // ── Empty-shell detection ──────────────────────────────────────────
-  // Detect tasks/epics/adrs whose body sections still contain template
-  // placeholders (PLACEHOLDER_, 需求1, <!-- 填写). These are "empty shells"
-  // — files created by CLI but never filled by agent.
-  const emptyShells: string[] = [];
-  const EMPTY_SHELL_PATTERNS: RegExp[] = [
-    /^- \[ \] ⚠️ PLACEHOLDER_/m,
-    /^- \[ \] 需求\d/m,
-    /^<!-- 填写/m,
-  ];
-
-  function detectEmptyShells(files: string[], label: string): void {
-    for (const file of files) {
-      try {
-        const content = readFileSync(file, 'utf-8');
-        if (isEmptyShell(content)) {
-          const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
-          const rel = relative(process.cwd(), file);
-          emptyShells.push(`${id}: ${rel}`);
-        }
-      } catch (_) { /* skip unreadable */ }
     }
   }
 
-  detectEmptyShells(taskFiles, 'task');
-  detectEmptyShells(epicFiles, 'epic');
-  detectEmptyShells(adrFiles, 'adr');
+  // ── Staleness check ───────────────────────────────────────────────
+  const staleBacklog: string[] = [];
+  const driftedEpics: string[] = [];
+  if (plan.checks.staleness) {
+    const now = Date.now();
+    const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
 
-  if (emptyShells.length > 0) {
-    // By default, skip empty shells in terminal/stable directories (historical debt).
-    // --suspicious only flags active/in-flight empty shells (backlog, in-progress, proposed).
-    // --include-completed-empty-shells shows the full list.
-    const mode: 'default' | 'suspicious' | 'all' = includeCompletedEmptyShells
-      ? 'all'
-      : suspicious
-        ? 'suspicious'
-        : 'default';
-    const filtered = filterEmptyShells(emptyShells, mode);
-
-    if (filtered.length > 0) {
-      console.log('\n📭 Empty shells (template not filled):');
-      for (const s of filtered) {
-        console.log(`     ⚠️  ${s}`);
-      }
-      console.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
-      if (!suspicious) {
-        console.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
-      }
-    }
-  }
-
-  // ── Coverage snapshot drift ──────────────────────────────────────
-  // Scan packages/*/test/scenarios/coverage-snapshot-*.md — check if
-  // source files changed significantly since the snapshot was taken.
-  const coverageDrift: string[] = [];
-  const coverageDir = 'packages'
-  if (existsSync(coverageDir)) {
-    try {
-      for (const pkg of readdirSync(coverageDir)) {
-        const snapshotDir = join(coverageDir, pkg, 'test', 'scenarios')
-        if (!existsSync(snapshotDir)) continue
-        for (const f of readdirSync(snapshotDir)) {
-          if (!f.startsWith('coverage-snapshot-') || !f.endsWith('.md')) continue
-          const dateMatch = f.match(/coverage-snapshot-(\d{4}-\d{2}-\d{2})/)
-          if (!dateMatch) continue
-          const snapshotDate = dateMatch[1]
-          const srcDir = join(coverageDir, pkg, 'src')
-          if (!existsSync(srcDir)) continue
-          // git log --oneline --after="<date> 00:00:00" -- <srcDir>
-          const r = spawnSync('git', ['log', '--oneline', `--after=${snapshotDate} 00:00:00`, '--', srcDir],
-            { encoding: 'utf-8', timeout: 5000 })
-          if (r.status === 0 && r.stdout.trim()) {
-            const count = r.stdout.trim().split('\n').length
-            coverageDrift.push(`${pkg}: ${count} commit(s) since ${snapshotDate}`)
+    const backlogDir = plan.tasks.find(t => t.statusKey === 'backlog')?.dir;
+    if (backlogDir) {
+      const backlogFiles = scanDirWithIO(backlogDir, 'TASK-', io);
+      for (const f of backlogFiles) {
+        const stat = io.readFile(f);
+        if (stat === null) continue;
+        const createdMatch = stat.match(/\|\s*backlog\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
+        const dateStr = createdMatch ? createdMatch[1] : null;
+        if (dateStr) {
+          const age = now - new Date(dateStr).getTime();
+          if (age > THREE_DAYS) {
+            const id = basename(f).match(/^(TASK-\d+)/)?.[1] ?? basename(f);
+            const days = Math.floor(age / (24 * 60 * 60 * 1000));
+            staleBacklog.push(`${id} (${days}d old)`);
           }
         }
       }
-    } catch (_) { /* git unavailable — skip */ }
-  }
-
-  if (coverageDrift.length > 0) {
-    console.log('\n📊 Coverage snapshot drift:')
-    for (const d of coverageDrift) console.log(`     ${d}`)
-    console.log('     💡 Significant changes since snapshot → consider re-running BDD.')
-  }
-
-  if (nonAsciiSlugs.length > 0) {
-    console.log('\n🔤 Non-ASCII slugs (filenames must be ASCII-only):');
-    for (const s of nonAsciiSlugs) {
-      console.log(`     ⚠️  ${s}`);
     }
-    console.log('     💡 Rename with `git mv` or use the slug migration script.');
+
+    const activeEpicDir = plan.epics.find(e => e.statusKey === 'active')?.dir;
+    if (activeEpicDir) {
+      const activeEpicFiles = scanDirWithIO(activeEpicDir, 'EPIC-', io);
+      for (const f of activeEpicFiles) {
+        const content = io.readFile(f);
+        if (content === null) continue;
+        const statusMatch = content.match(/\|\s*active\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
+        const dateStr = statusMatch ? statusMatch[1] : null;
+        if (dateStr) {
+          const age = now - new Date(dateStr).getTime();
+          if (age > THREE_DAYS) {
+            const id = basename(f).match(/^(EPIC-\d+)/)?.[1] ?? basename(f);
+            const days = Math.floor(age / (24 * 60 * 60 * 1000));
+            driftedEpics.push(`${id} (${days}d old)`);
+          }
+        }
+      }
+    }
   }
 
-  const allIssues = [...taskResults, ...epicResults, ...adrResults].filter(r => r.match !== 'ok');
+  // ── Empty-shell detection ─────────────────────────────────────────
+  const emptyShells: string[] = [];
+  if (plan.checks.emptyShells) {
+    function detectEmptyShells(files: string[]): void {
+      for (const file of files) {
+        const content = io.readFile(file);
+        if (content === null) continue;
+        if (isEmptyShell(content)) {
+          const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
+          const resolvedFile = file.startsWith('/') ? file : resolve(cwd, file);
+          const rel = relative(cwd, resolvedFile);
+          emptyShells.push(`${id}: ${rel}`);
+        }
+      }
+    }
 
-  console.log('\n' + '─'.repeat(50));
-  if (allIssues.length === 0 && laneWarnings.length === 0 && couplingWarnings.length === 0 && staleBacklog.length === 0 && driftedEpics.length === 0 && emptyShells.length === 0 && coverageDrift.length === 0 && nonAsciiSlugs.length === 0) {
-    console.log(suspicious ? '✅ No suspicious patterns found.' : '✅ All clear! No inconsistencies found.');
+    detectEmptyShells(taskFiles);
+    detectEmptyShells(epicFiles);
+    detectEmptyShells(adrFiles);
+  }
+
+  // ── Coverage snapshot drift ───────────────────────────────────────
+  const coverageDrift: string[] = [];
+  if (plan.checks.coverageDrift) {
+    const coverageDir = 'packages';
+    if (io.exists(coverageDir)) {
+      const pkgEntries = io.readdir(coverageDir);
+      if (pkgEntries) {
+        for (const pkg of pkgEntries) {
+          if (!pkg.isDirectory) continue;
+          const snapshotDir = join(coverageDir, pkg.name, 'test', 'scenarios');
+          if (!io.exists(snapshotDir)) continue;
+          const snapshotEntries = io.readdir(snapshotDir);
+          if (!snapshotEntries) continue;
+          for (const f of snapshotEntries) {
+            if (!f.name.startsWith('coverage-snapshot-') || !f.name.endsWith('.md')) continue;
+            const dateMatch = f.name.match(/coverage-snapshot-(\d{4}-\d{2}-\d{2})/);
+            if (!dateMatch) continue;
+            const snapshotDate = dateMatch[1];
+            const srcDir = join(coverageDir, pkg.name, 'src');
+            if (!io.exists(srcDir)) continue;
+            const r = io.spawn('git', ['log', '--oneline', `--after=${snapshotDate} 00:00:00`, '--', srcDir]);
+            if (r.status === 0 && r.stdout.trim()) {
+              const count = r.stdout.trim().split('\n').length;
+              coverageDrift.push(`${pkg.name}: ${count} commit(s) since ${snapshotDate}`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const allStatusIssues = [...allTaskResults, ...allEpicResults, ...allAdrResults].filter(r => r.match !== 'ok');
+  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + emptyShells.length + coverageDrift.length + nonAsciiSlugs.length;
+
+  return {
+    statusResults: [...allTaskResults, ...allEpicResults, ...allAdrResults],
+    laneCounts,
+    laneWarnings,
+    couplingWarnings,
+    staleBacklog,
+    driftedEpics,
+    emptyShells,
+    coverageDrift,
+    nonAsciiSlugs,
+    summary: {
+      suspicious,
+      includeCompletedEmptyShells: plan.options.includeCompletedEmptyShells,
+      totalIssues,
+      hasStatusIssues: allStatusIssues.length > 0,
+      hasLaneIssues: laneWarnings.length > 0,
+      hasCouplingIssues: couplingWarnings.length > 0,
+      hasStaleness: staleBacklog.length > 0 || driftedEpics.length > 0,
+      hasEmptyShells: emptyShells.length > 0,
+      hasCoverageDrift: coverageDrift.length > 0,
+      hasNonAsciiSlugs: nonAsciiSlugs.length > 0,
+    },
+  };
+}
+
+function buildConfigFromPlan(plan: ProbePlan): WorkflowConfig {
+  const taskSubdirs: WorkflowConfig['taskSubdirs'] = {
+    backlog: '', inProgress: '', review: '', completed: '', suspended: '', terminated: '', archived: '',
+  };
+  const epicSubdirs: WorkflowConfig['epicSubdirs'] = {
+    active: '', done: '', suspended: '', archived: '',
+  };
+  const adrSubdirs: WorkflowConfig['adrSubdirs'] = {
+    proposed: '', accepted: '', rejected: '', superseded: '',
+  };
+
+  for (const t of plan.tasks) {
+    const key = t.statusKey as keyof WorkflowConfig['taskSubdirs'];
+    if (key in taskSubdirs) taskSubdirs[key] = basename(t.dir);
+  }
+  for (const e of plan.epics) {
+    const key = e.statusKey as keyof WorkflowConfig['epicSubdirs'];
+    if (key in epicSubdirs) epicSubdirs[key] = basename(e.dir);
+  }
+  for (const a of plan.adrs) {
+    const key = a.statusKey as keyof WorkflowConfig['adrSubdirs'];
+    if (key in adrSubdirs) adrSubdirs[key] = basename(a.dir);
+  }
+
+  return {
+    tasksDir: plan.tasks[0]?.dir ? dirname(plan.tasks[0].dir) : '',
+    epicsDir: plan.epics[0]?.dir ? dirname(plan.epics[0].dir) : '',
+    adrDir: plan.adrs[0]?.dir ? dirname(plan.adrs[0].dir) : '',
+    wikiDir: '',
+    taskSubdirs,
+    epicSubdirs,
+    adrSubdirs,
+    wikiSubdirs: { patterns: '', faq: '', lessons: '', legacy: '' },
+  };
+}
+
+export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProbeIO): void {
+  const { suspicious } = report.summary;
+
+  // Header
+  if (!suspicious) {
+    io.log('\n🔍 Probing status consistency...\n');
+    io.log('Rule: Directory location is the source of truth.');
+    io.log('Status History inside files should reflect the latest move.\n');
   } else {
-    if (!suspicious && allIssues.length > 0) {
-      console.log(`⚠️  Found ${allIssues.length} status issue(s) requiring human confirmation.`);
-      console.log('   Please review the items above and decide:');
-      console.log('   - Move file to correct directory, OR');
-      console.log('   - Update Status History inside the file.');
-    }
-    if (couplingWarnings.length > 0) {
-      console.log(`⚠️  Found ${couplingWarnings.length} ADR-Epic coupling warning(s) — proposed ADRs should not reference active epics.`);
-    }
-    if (laneWarnings.length > 0) {
-      console.log(`⚠️  Found ${laneWarnings.length} lane warning(s) — see "Epic lanes" section above.`);
+    io.log('\n🔎 Probing suspicious patterns only (empty shells, staleness, drift, lane violations)...\n');
+  }
+
+  // Status consistency sections
+  const taskResults = report.statusResults.filter(r => r.type === 'task');
+  const epicResults = report.statusResults.filter(r => r.type === 'epic');
+  const adrResults = report.statusResults.filter(r => r.type === 'adr');
+
+  if (!suspicious) {
+    printResults(taskResults, '📄 Tasks', io);
+    printResults(epicResults, '📋 Epics', io);
+    printResults(adrResults, '🏛️  ADRs', io);
+  }
+
+  // Lane occupancy
+  io.log('\n🛤️  Epic lanes (active):');
+  io.log(`     main:      ${report.laneCounts.main}`);
+  io.log(`     emergency: ${report.laneCounts.emergency}`);
+  if (report.laneCounts.unknown > 0) {
+    io.log(`     (no lane field): ${report.laneCounts.unknown}`);
+  }
+  for (const w of report.laneWarnings) {
+    io.log(`     ⚠️  ${w}`);
+  }
+
+  // ADR-Epic coupling
+  if (report.couplingWarnings.length > 0) {
+    io.log('\n🔗 ADR-Epic coupling:');
+    for (const w of report.couplingWarnings) {
+      io.log(`     ⚠️  ${w}`);
     }
   }
-  console.log('');
+
+  // Staleness
+  if (report.staleBacklog.length > 0) {
+    io.log('\n📦 Backlog staleness:');
+    for (const s of report.staleBacklog) {
+      io.log(`     ⚠️  ${s} — may be state drift. Check: git log --oneline -- cortex/tasks/01-backlog/${s.replace(/ .*/, '')}*`);
+    }
+    io.log('     💡 If work is done, close the task. If deferred, suspend it.');
+  }
+
+  if (report.driftedEpics.length > 0) {
+    io.log('\n📋 Epic drift:');
+    for (const e of report.driftedEpics) {
+      io.log(`     ⚠️  ${e} — may have all tasks done. Check: cortex list | grep ${e.replace(/ .*/, '')}`);
+    }
+    io.log('     💡 If all tasks completed, close the epic: cortex epic done <id>');
+  }
+
+  // Empty shells
+  if (report.emptyShells.length > 0) {
+    const mode: 'default' | 'suspicious' | 'all' = report.summary.includeCompletedEmptyShells
+      ? 'all'
+      : report.summary.suspicious
+        ? 'suspicious'
+        : 'default';
+    const filtered = filterEmptyShells(report.emptyShells, mode);
+
+    if (filtered.length > 0) {
+      io.log('\n📭 Empty shells (template not filled):');
+      for (const s of filtered) {
+        io.log(`     ⚠️  ${s}`);
+      }
+      io.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
+      if (!suspicious) {
+        io.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
+      }
+    }
+  }
+
+  // Coverage drift
+  if (report.coverageDrift.length > 0) {
+    io.log('\n📊 Coverage snapshot drift:');
+    for (const d of report.coverageDrift) io.log(`     ${d}`);
+    io.log('     💡 Significant changes since snapshot → consider re-running BDD.');
+  }
+
+  // Non-ASCII slugs
+  if (report.nonAsciiSlugs.length > 0) {
+    io.log('\n🔤 Non-ASCII slugs (filenames must be ASCII-only):');
+    for (const s of report.nonAsciiSlugs) {
+      io.log(`     ⚠️  ${s}`);
+    }
+    io.log('     💡 Rename with `git mv` or use the slug migration script.');
+  }
+
+  // Summary
+  io.log('\n' + '─'.repeat(50));
+  if (report.summary.totalIssues === 0) {
+    io.log(suspicious ? '✅ No suspicious patterns found.' : '✅ All clear! No inconsistencies found.');
+  } else {
+    const allStatusIssues = report.statusResults.filter(r => r.match !== 'ok');
+    if (!suspicious && allStatusIssues.length > 0) {
+      io.log(`⚠️  Found ${allStatusIssues.length} status issue(s) requiring human confirmation.`);
+      io.log('   Please review the items above and decide:');
+      io.log('   - Move file to correct directory, OR');
+      io.log('   - Update Status History inside the file.');
+    }
+    if (report.couplingWarnings.length > 0) {
+      io.log(`⚠️  Found ${report.couplingWarnings.length} ADR-Epic coupling warning(s) — proposed ADRs should not reference active epics.`);
+    }
+    if (report.laneWarnings.length > 0) {
+      io.log(`⚠️  Found ${report.laneWarnings.length} lane warning(s) — see "Epic lanes" section above.`);
+    }
+  }
+  io.log('');
+}
+
+function printResults(results: ProbeResult[], label: string, io: ProbeIO): void {
+  const issues = results.filter(r => r.match !== 'ok');
+
+  io.log(`\n${label}:`);
+
+  if (results.length === 0) {
+    io.log('  (none)');
+    return;
+  }
+
+  for (const r of results) {
+    const icon = r.match === 'ok' ? '✅' : r.match === 'mismatch' ? '❌' : r.match === 'missing-history' ? '⚠️' : '❓';
+    io.log(`  ${icon} ${r.file}`);
+    if (r.match !== 'ok') {
+      io.log(`     → ${r.suggestion}`);
+    }
+  }
+
+  if (issues.length > 0) {
+    io.log(`\n  ⚠️  ${issues.length} 个问题需人工确认`);
+  }
+}
+
+export function probeStatus(config: WorkflowConfig, opts?: { suspicious?: boolean; includeCompletedEmptyShells?: boolean }): void {
+  const plan = buildProbePlan(config, opts);
+  const report = executeProbePlan(plan, defaultProbeIO);
+  printProbeSummary(report, defaultProbeIO);
 }
