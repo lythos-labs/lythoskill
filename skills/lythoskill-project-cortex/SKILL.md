@@ -439,21 +439,25 @@ stateDiagram-v2
 
 ## Commit Trailer Integration
 
-Cortex governance is **commit-driven** via git trailers parsed by `.husky/post-commit`:
+Cortex governance is **commit-driven** via git trailers parsed by `.husky/post-commit`.
+All task trailers generate `task <verb> <id>` commands (explicit kind prefix):
 
 ```
-Review: TASK-<id>         # in-progress → review (dev complete, submit for review / internal PR)
-Closes: TASK-<id>         # review → completed (reviewed and approved / LGTM)
-Closes: ADR-<id>          # proposed → accepted
-Closes: EPIC-<id>         # active → done
-Task: TASK-<id> <verb>    # Explicit task verb
-ADR: ADR-<id> <verb>      # ADR verb: accept, reject, supersede
-Epic: EPIC-<id> <verb>    # Epic verb: done, suspend, resume
+Review: TASK-<id>         # → task review TASK-<id>  (in-progress → review)
+Closes: TASK-<id>         # → task done TASK-<id>   (review → completed, strict)
+Closes: ADR-<id>          # → adr accept ADR-<id>   (proposed → accepted)
+Closes: EPIC-<id>         # → epic done EPIC-<id>   (active → done)
+Task: TASK-<id> <verb>    # → task <verb> TASK-<id> (explicit task verb)
+ADR: ADR-<id> <verb>      # → adr <verb> ADR-<id>   (ADR verb: accept, reject, supersede)
+Epic: EPIC-<id> <verb>    # → epic <verb> EPIC-<id> (Epic verb: done, suspend, resume)
 ```
 
 `Review:` and `Closes:` are **intent aliases** for the two most common kanban transitions.
-`Closes: TASK-<id>` is strict: it resolves to `done` and requires the task to already be in
+`Closes: TASK-<id>` is strict: it resolves to `task done` and requires the task to already be in
 `review`. Use `Review: TASK-<id>` when development is complete and ready for review.
+
+**Legacy aliases** (backward compatible): `start`, `review`, `done`, `complete`, `suspend`,
+`resume`, `reject`, `terminate`, `archive` also work as top-level commands without `task` prefix.
 
 Example:
 ```bash
