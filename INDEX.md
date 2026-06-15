@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/6/16 00:01:02
+> 自动生成于 2026/6/16 00:10:39
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 322 | 进行中: 0, 待验收: 3, 已完成: 276 |
 | Epics | 44 | 活跃: 1, 已完成: 39, 悬置: 2, 已归档: 2 |
-| ADRs | 88 | 已接受: 83 |
+| ADRs | 89 | 已接受: 84 |
 
 ---
 
@@ -506,6 +506,7 @@ _无_
 - ✅ **ADR-20260613182316950** (02-accepted): Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
 - 🤔 **ADR-20260613190449007** (01-proposed): Wiki patterns: AAA pinned index + dreaming integration
 - ✅ **ADR-20260615222023418** (02-accepted): Unify trailer dispatch to kind+verb+id CLI format
+- ✅ **ADR-20260616000939948** (02-accepted): skill-deck.lock: separate declarative lock from operational state snapshot
 
 ---
 
