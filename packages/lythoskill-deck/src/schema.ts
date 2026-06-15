@@ -1,6 +1,25 @@
 import { z } from "zod";
 
-// ── 单个已链接 Skill ────────────────────────────────────────
+// ── 单个已链接 Skill (lock 子集) ────────────────────────────
+export const LockSkillSchema = z.object({
+  name: z.string(),
+  alias: z.string(),
+  deck_niche: z.string(),
+  type: z.enum(["innate", "tool", "transient"]),
+  source: z.string(),
+  content_hash: z.string().optional(),
+});
+
+// ── 单个已链接 Skill (state 子集) ───────────────────────────
+export const StateSkillSchema = z.object({
+  alias: z.string(),
+  linked_at: z.string().datetime(),
+  dest: z.string(),
+  mode: z.enum(["symlink", "snapshot"]).default("symlink"),
+  deck_managed_dirs: z.array(z.string()).default([]),
+});
+
+// ── 单个已链接 Skill (完整) ─────────────────────────────────
 export const LinkedSkillSchema = z.object({
   name: z.string(),
   alias: z.string(),
@@ -38,17 +57,32 @@ export const ConstraintReportSchema = z.object({
   ),
 });
 
-// ── 完整 lock 文件 ──────────────────────────────────────────
+// ── 完整 lock 文件 (declarative, git-tracked) ───────────────
 export const SkillDeckLockSchema = z.object({
   version: z.literal("1.0.0"),
-  generated_at: z.string().datetime(),
   deck_source: z.object({
     path: z.string(),
     content_hash: z.string(),
   }),
-  working_set: z.string(),
-  cold_pool: z.string(),
-  skills: z.array(LinkedSkillSchema),
+  deck_config: z.object({
+    max_cards: z.number().int().min(1),
+    working_set: z.string(),
+    cold_pool: z.string(),
+    also_link_to: z.array(z.string()).default([]),
+  }),
+  skills: z.array(LockSkillSchema),
+});
+
+// ── 完整 state 文件 (operational, git-ignored) ──────────────
+export const SkillDeckStateSchema = z.object({
+  version: z.literal("1.0.0"),
+  generated_at: z.string().datetime(),
+  resolved_paths: z.object({
+    working_set: z.string(),
+    cold_pool: z.string(),
+    also_link_to: z.array(z.string()).default([]),
+  }),
+  skills: z.array(StateSkillSchema),
   constraints: ConstraintReportSchema,
 });
 
@@ -60,7 +94,9 @@ export const SkillEntrySchema = z.object({
 }).passthrough();
 
 export type SkillEntry = z.infer<typeof SkillEntrySchema>;
-
 export type LinkedSkill = z.infer<typeof LinkedSkillSchema>;
+export type LockSkill = z.infer<typeof LockSkillSchema>;
+export type StateSkill = z.infer<typeof StateSkillSchema>;
 export type ConstraintReport = z.infer<typeof ConstraintReportSchema>;
 export type SkillDeckLock = z.infer<typeof SkillDeckLockSchema>;
+export type SkillDeckState = z.infer<typeof SkillDeckStateSchema>;

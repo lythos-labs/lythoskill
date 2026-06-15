@@ -12,7 +12,7 @@
 
 import { parse as parseToml } from "@iarna/toml";
 import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, join } from "node:path";
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 import {
   buildValidationPlan,
@@ -23,8 +23,8 @@ import {
   type ValidationReport,
 } from "@lythos/cold-pool";
 import { findDeckToml, expandHome, findSource } from "./link.js";
-import { join } from "node:path";
 import { parseDeck } from "./parse-deck.js";
+import type { SkillDeckLock, SkillDeckState } from "./schema.js";
 
 export interface ValidateOptions {
   remote?: boolean;
@@ -50,6 +50,22 @@ export interface DeckValidationReport {
   budget: { declared: number; max_cards: number; within_budget: boolean };
 }
 
+function readLock(projectDir: string): SkillDeckLock | null {
+  const lockPath = join(projectDir, 'skill-deck.lock');
+  if (!existsSync(lockPath)) return null;
+  try {
+    return JSON.parse(readFileSync(lockPath, 'utf-8'));
+  } catch { return null; }
+}
+
+function readState(projectDir: string): SkillDeckState | null {
+  const statePath = join(projectDir, 'skill-deck.state');
+  if (!existsSync(statePath)) return null;
+  try {
+    return JSON.parse(readFileSync(statePath, 'utf-8'));
+  } catch { return null; }
+}
+
 export async function buildDeckValidation(
   cliDeckPath?: string,
   cliWorkdir?: string,
@@ -61,7 +77,7 @@ export async function buildDeckValidation(
     try {
       DECK_PATH = await fetchDeckUrl(cliDeckPath)
     } catch (e: any) {
-      return { status: 'invalid', deckPath: cliDeckPath, errors: [`Failed to fetch deck: ${e.message}`], warnings: [], entries: [], skills: [], max_cards: 0, constraints: { total_cards: 0, within_budget: true, transient_warnings: [], dir_overlaps: [] } }
+      return { status: 'invalid', deckPath: cliDeckPath, errors: [`Failed to fetch deck: ${e.message}`], warnings: [], entries: [], budget: { declared: 0, max_cards: 0, within_budget: true } }
     }
   } else {
     const resolved = resolveDeckPathSync(cliDeckPath)
@@ -121,6 +137,10 @@ export async function buildDeckValidation(
   let declaredCount = 0;
   const entryReports: DeckValidationReport['entries'] = [];
 
+  // Read lock and state for validation
+  const lock = readLock(PROJECT_DIR);
+  const state = readState(PROJECT_DIR);
+
   for (const entry of parsedEntries) {
     declaredCount++;
     if (declaredNames.has(entry.path)) {
@@ -163,7 +183,31 @@ export async function buildDeckValidation(
       );
     }
 
-    // ── Metadata drift check ──────────────────────────────────
+    // ── Lock content drift check ──────────────────────────────
+    if (lock && localStatus === 'found' && result.path) {
+      const lockSkill = lock.skills.find(s => s.alias === entry.alias);
+      if (lockSkill?.content_hash) {
+        try {
+          const currentHash = hashSkillMd(join(result.path, 'SKILL.md'));
+          if (lockSkill.content_hash !== currentHash) {
+            drift = { recordedSha256: lockSkill.content_hash, currentSha256: currentHash };
+            warnings.push(`Content drift: ${entry.alias} — SKILL.md changed since last deck add/link`);
+          }
+        } catch {
+          // Drift check is best-effort
+        }
+      }
+    }
+
+    // ── State path existence check ────────────────────────────
+    if (state) {
+      const stateSkill = state.skills.find(s => s.alias === entry.alias);
+      if (stateSkill?.dest && !existsSync(stateSkill.dest)) {
+        warnings.push(`State path missing: ${entry.alias} → ${stateSkill.dest} (run \`deck link\` to fix)`);
+      }
+    }
+
+    // ── Metadata drift check (cold pool) ──────────────────────
     if (localStatus === 'found' && result.path) {
       try {
         const pool = new ColdPool(COLD_POOL);
@@ -174,8 +218,10 @@ export async function buildDeckValidation(
           if (recorded) {
             const current = hashSkillMd(join(result.path, 'SKILL.md'));
             if (recorded !== current) {
-              drift = { recordedSha256: recorded, currentSha256: current };
-              warnings.push(`Content drift: ${entry.alias} — SKILL.md changed since last deck add/link`);
+              // Only warn if not already caught by lock drift
+              if (!drift) {
+                warnings.push(`Content drift: ${entry.alias} — SKILL.md changed since last deck add/link`);
+              }
             }
           }
         }

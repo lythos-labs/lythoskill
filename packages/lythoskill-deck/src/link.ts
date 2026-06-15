@@ -2,7 +2,7 @@
 /**
  * deck-link.ts — Skill Deck reconciler
  *
- * 读取 skill-deck.toml → 计算期望状态 → 收束 working set → 写 lock。
+ * 读取 skill-deck.toml → 计算期望状态 → 收束 working set → 写 lock + state。
  * 职责：ln -s、预算检查、过期检查、managed_dirs 重叠检测。
  * 不做：语义分析、智能推荐、niche 冲突仲裁。
  */
@@ -20,7 +20,9 @@ import { homedir } from "node:os";
 import { ColdPool, parseLocator } from "@lythos/cold-pool";
 import {
   SkillDeckLockSchema,
-  type SkillDeckLock, type LinkedSkill, type ConstraintReport,
+  SkillDeckStateSchema,
+  type SkillDeckLock, type SkillDeckState, type LinkedSkill, type ConstraintReport,
+  type LockSkill, type StateSkill,
 } from "./schema.js";
 import { parseDeck } from "./parse-deck.js";
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
@@ -139,6 +141,126 @@ function formatBackupDate(d: Date): string {
 
 const BACKUP_SIZE_THRESHOLD = 100 * 1024 * 1024; // 100MB
 
+// ── Lock/State 读写工具 ─────────────────────────────────────
+
+function readLock(projectDir: string): SkillDeckLock | null {
+  const lockPath = join(projectDir, "skill-deck.lock");
+  if (!existsSync(lockPath)) return null;
+  try {
+    return JSON.parse(readFileSync(lockPath, "utf-8"));
+  } catch { return null; }
+}
+
+function writeLock(projectDir: string, lock: SkillDeckLock): void {
+  const lockPath = join(projectDir, "skill-deck.lock");
+  writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
+}
+
+function readState(projectDir: string): SkillDeckState | null {
+  const statePath = join(projectDir, "skill-deck.state");
+  if (!existsSync(statePath)) return null;
+  try {
+    return JSON.parse(readFileSync(statePath, "utf-8"));
+  } catch { return null; }
+}
+
+function writeState(projectDir: string, state: SkillDeckState): void {
+  const statePath = join(projectDir, "skill-deck.state");
+  writeFileSync(statePath, JSON.stringify(state, null, 2) + "\n");
+}
+
+/**
+ * Migration: on first run, if .state is missing but .lock exists (old format),
+ * read the old .lock and split fields into both files.
+ */
+function migrateOldLock(projectDir: string): void {
+  const lockPath = join(projectDir, "skill-deck.lock");
+  const statePath = join(projectDir, "skill-deck.state");
+  if (existsSync(statePath) || !existsSync(lockPath)) return;
+
+  try {
+    const oldLock = JSON.parse(readFileSync(lockPath, "utf-8"));
+    if (!oldLock.skills || !Array.isArray(oldLock.skills)) return;
+
+    // Check if old lock has operational fields (linked_at, dest, mode on skills)
+    const hasOperationalFields = oldLock.skills.some((s: any) => s.linked_at || s.dest || s.mode);
+    if (!hasOperationalFields) return;
+
+    // Split: lock keeps declarative fields, state gets operational fields
+    const newLockSkills: LockSkill[] = oldLock.skills.map((s: any) => ({
+      name: s.name,
+      alias: s.alias,
+      deck_niche: s.deck_niche || "",
+      type: s.type,
+      source: s.source,
+      content_hash: s.content_hash,
+    }));
+
+    const newLock: SkillDeckLock = {
+      version: "1.0.0",
+      deck_source: oldLock.deck_source || { path: "skill-deck.toml", content_hash: "" },
+      deck_config: {
+        max_cards: oldLock.constraints?.max_cards || 10,
+        working_set: oldLock.working_set || ".claude/skills",
+        cold_pool: oldLock.cold_pool || "~/.agents/skill-repos",
+        also_link_to: [],
+      },
+      skills: newLockSkills,
+    };
+
+    const newStateSkills: StateSkill[] = oldLock.skills.map((s: any) => ({
+      alias: s.alias,
+      linked_at: s.linked_at || new Date().toISOString(),
+      dest: s.dest || "",
+      mode: s.mode || "symlink",
+      deck_managed_dirs: s.deck_managed_dirs || [],
+    }));
+
+    const newState: SkillDeckState = {
+      version: "1.0.0",
+      generated_at: oldLock.generated_at || new Date().toISOString(),
+      resolved_paths: {
+        working_set: "",
+        cold_pool: "",
+        also_link_to: [],
+      },
+      skills: newStateSkills,
+      constraints: oldLock.constraints || {
+        total_cards: newStateSkills.length,
+        max_cards: 10,
+        within_budget: true,
+        transient_warnings: [],
+        dir_overlaps: [],
+      },
+    };
+
+    writeLock(projectDir, newLock);
+    writeState(projectDir, newState);
+    console.log(`🔄 Migrated old skill-deck.lock → skill-deck.lock + skill-deck.state`);
+  } catch {
+    // Migration best-effort; if it fails, let normal flow proceed
+  }
+}
+
+/**
+ * Compare two lock objects by their content-deterministic fields.
+ * Returns true if the declarative content is identical (skill set, sources, content hashes).
+ */
+function locksContentEqual(a: SkillDeckLock, b: SkillDeckLock): boolean {
+  if (a.skills.length !== b.skills.length) return false;
+  const aSkills = new Map(a.skills.map(s => [s.alias, s]));
+  for (const bSkill of b.skills) {
+    const aSkill = aSkills.get(bSkill.alias);
+    if (!aSkill) return false;
+    if (aSkill.name !== bSkill.name) return false;
+    if (aSkill.type !== bSkill.type) return false;
+    if (aSkill.source !== bSkill.source) return false;
+    if (aSkill.content_hash !== bSkill.content_hash) return false;
+  }
+  if (a.deck_source.content_hash !== b.deck_source.content_hash) return false;
+  return true;
+}
+
 // ── 主流程 ──────────────────────────────────────────────────
 
 export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot' }): Promise<void> {
@@ -182,6 +304,10 @@ const PROJECT_DIR = cliWorkdir
   : cliDeck
     ? process.cwd()
     : dirname(DECK_PATH);
+
+// ── Migration: split old .lock on first run ─────────────────
+migrateOldLock(PROJECT_DIR);
+
 const deckRaw = readFileSync(DECK_PATH, "utf-8");
 const deckHash = hashContent(deckRaw);
 
@@ -571,7 +697,7 @@ for (let i = 0; i < allDirs.length; i++) {
   }
 }
 
-// ── 生成 lock ───────────────────────────────────────────────
+// ── 生成 lock (declarative, idempotent) ─────────────────────
 
 const constraints: ConstraintReport = {
   total_cards: linkedSkills.length,
@@ -581,24 +707,68 @@ const constraints: ConstraintReport = {
   dir_overlaps: dirOverlaps,
 };
 
-const lock: SkillDeckLock = {
+const newLock: SkillDeckLock = {
   version: "1.0.0",
-  generated_at: new Date().toISOString(),
   deck_source: { path: relative(PROJECT_DIR, DECK_PATH), content_hash: deckHash },
-  working_set: WORKING_SET_RAW,
-  cold_pool: COLD_POOL_RAW,
-  skills: linkedSkills,
-  constraints,
+  deck_config: {
+    max_cards: MAX_CARDS,
+    working_set: WORKING_SET_RAW,
+    cold_pool: COLD_POOL_RAW,
+    also_link_to: parsedToml.deck?.also_link_to
+      ? (Array.isArray(parsedToml.deck.also_link_to) ? parsedToml.deck.also_link_to : [parsedToml.deck.also_link_to])
+      : [],
+  },
+  skills: linkedSkills.map(s => ({
+    name: s.name,
+    alias: s.alias,
+    deck_niche: s.deck_niche,
+    type: s.type,
+    source: s.source,
+    content_hash: s.content_hash,
+  })),
 };
 
-const parsed = SkillDeckLockSchema.safeParse(lock);
-if (!parsed.success) {
-  console.error("❌ Lock schema validation failed:", JSON.stringify(parsed.error.format(), null, 2));
+const parsedLock = SkillDeckLockSchema.safeParse(newLock);
+if (!parsedLock.success) {
+  console.error("❌ Lock schema validation failed:", JSON.stringify(parsedLock.error.format(), null, 2));
   process.exit(1);
 }
 
-const LOCK_PATH = resolve(PROJECT_DIR, "skill-deck.lock");
-writeFileSync(LOCK_PATH, JSON.stringify(parsed.data, null, 2) + "\n");
+// Only write .lock if content has changed (idempotent)
+const existingLock = readLock(PROJECT_DIR);
+const shouldWriteLock = !existingLock || !locksContentEqual(existingLock, newLock);
+
+if (shouldWriteLock) {
+  writeLock(PROJECT_DIR, newLock);
+}
+
+// ── 生成 state (operational, always written) ──────────────────
+
+const newState: SkillDeckState = {
+  version: "1.0.0",
+  generated_at: new Date().toISOString(),
+  resolved_paths: {
+    working_set: resolvedWorkingSet,
+    cold_pool: resolvedColdPool,
+    also_link_to: ALSO_LINK_TO,
+  },
+  skills: linkedSkills.map(s => ({
+    alias: s.alias,
+    linked_at: s.linked_at,
+    dest: resolve(PROJECT_DIR, s.dest),
+    mode: s.mode,
+    deck_managed_dirs: s.deck_managed_dirs,
+  })),
+  constraints,
+};
+
+const parsedState = SkillDeckStateSchema.safeParse(newState);
+if (!parsedState.success) {
+  console.error("❌ State schema validation failed:", JSON.stringify(parsedState.error.format(), null, 2));
+  process.exit(1);
+}
+
+writeState(PROJECT_DIR, newState);
 
 // ── Metadata reconcile ──────────────────────────────────────
 
@@ -622,7 +792,8 @@ if (!cliWorkdir && cliDeck && dirname(DECK_PATH) !== process.cwd()) {
   console.log(`💡 working_set 相对于当前目录。若期望跟随 deck 文件位置，使用 --workdir <dir>`);
 }
 console.log(`✅ Sync complete: ${linkedSkills.length} skill(s) linked (max_cards: ${MAX_CARDS})`);
-console.log(`   lock: ${LOCK_PATH}`);
+console.log(`   lock: ${resolve(PROJECT_DIR, "skill-deck.lock")}${shouldWriteLock ? '' : ' (unchanged)'}`);
+console.log(`   state: ${resolve(PROJECT_DIR, "skill-deck.state")}`);
 if (dirOverlaps.length > 0) {
   console.log(`   ⚠️  ${dirOverlaps.length} directory overlap(s) (see warnings above)`);
 }

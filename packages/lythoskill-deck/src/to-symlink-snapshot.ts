@@ -15,7 +15,7 @@ import { parseDeck } from './parse-deck.js'
 import { ColdPool, parseLocator } from '@lythos/cold-pool'
 import { findSource } from './link.js'
 import { parse as parseToml } from '@iarna/toml'
-import type { SkillDeckLock } from './schema.js'
+import type { SkillDeckLock, SkillDeckState } from './schema.js'
 import { validateAlias } from './path-guard.js'
 
 export interface SymlinkSnapshotIO {
@@ -45,6 +45,21 @@ function readLock(projectDir: string): SkillDeckLock | null {
 function writeLock(projectDir: string, lock: SkillDeckLock): void {
   const lockPath = join(projectDir, 'skill-deck.lock')
   writeFileSync(lockPath, JSON.stringify(lock, null, 2) + '\n')
+}
+
+function readState(projectDir: string): SkillDeckState | null {
+  const statePath = join(projectDir, 'skill-deck.state')
+  if (!existsSync(statePath)) return null
+  try {
+    return JSON.parse(readFileSync(statePath, 'utf-8'))
+  } catch {
+    return null
+  }
+}
+
+function writeState(projectDir: string, state: SkillDeckState): void {
+  const statePath = join(projectDir, 'skill-deck.state')
+  writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n')
 }
 
 function getProjectAndDeck(cliDeckPath?: string, cliWorkdir?: string, io: SymlinkSnapshotIO = defaultIO) {
@@ -116,15 +131,25 @@ export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?
   symlinkSync(source.path, dest)
   io.log(`🔄 ${match.alias}: snapshot → symlink (target: ${relative(PROJECT_DIR, source.path)})`)
 
-  // Update lock
+  // Update lock (mode is now declarative — it changes, so lock changes)
   const lock = readLock(PROJECT_DIR)
   if (lock) {
-    const skill = lock.skills.find(s => s.alias === match.alias)
-    if (skill) {
-      skill.linked_at = new Date().toISOString()
-      skill.mode = 'symlink'
+    const lockSkill = lock.skills.find(s => s.alias === match.alias)
+    if (lockSkill) {
+      // No linked_at in new lock schema; mode is in state
     }
     writeLock(PROJECT_DIR, lock)
+  }
+
+  // Update state (operational: linked_at, mode)
+  const state = readState(PROJECT_DIR)
+  if (state) {
+    const stateSkill = state.skills.find(s => s.alias === match.alias)
+    if (stateSkill) {
+      stateSkill.linked_at = new Date().toISOString()
+      stateSkill.mode = 'symlink'
+    }
+    writeState(PROJECT_DIR, state)
   }
 }
 
@@ -191,11 +216,21 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
   // Update lock
   const lock = readLock(PROJECT_DIR)
   if (lock) {
-    const skill = lock.skills.find(s => s.alias === match.alias)
-    if (skill) {
-      skill.linked_at = new Date().toISOString()
-      skill.mode = 'snapshot'
+    const lockSkill = lock.skills.find(s => s.alias === match.alias)
+    if (lockSkill) {
+      // No linked_at in new lock schema; mode is in state
     }
     writeLock(PROJECT_DIR, lock)
+  }
+
+  // Update state
+  const state = readState(PROJECT_DIR)
+  if (state) {
+    const stateSkill = state.skills.find(s => s.alias === match.alias)
+    if (stateSkill) {
+      stateSkill.linked_at = new Date().toISOString()
+      stateSkill.mode = 'snapshot'
+    }
+    writeState(PROJECT_DIR, state)
   }
 }
