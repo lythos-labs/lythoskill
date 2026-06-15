@@ -119,7 +119,7 @@ describe('findSource', () => {
 })
 
 describe('linkDeck reconciler', () => {
-  it('B1.tracer: empty deck creates working set and lock with zero skills', () => {
+  it('B1.tracer: empty deck creates working set, lock, and state with zero skills', () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -135,21 +135,32 @@ describe('linkDeck reconciler', () => {
     expect(existsSync(workingSet)).toBe(true)
     expect(lstatSync(workingSet).isDirectory()).toBe(true)
 
+    // Lock file (declarative, git-tracked)
     const lockPath = join(projectDir, 'skill-deck.lock')
     expect(existsSync(lockPath)).toBe(true)
 
     const lock = JSON.parse(readFileSync(lockPath, 'utf-8'))
     expect(lock.version).toBe('1.0.0')
     expect(lock.skills).toEqual([])
-    expect(lock.constraints.total_cards).toBe(0)
-    expect(lock.constraints.max_cards).toBe(10)
-    expect(lock.constraints.within_budget).toBe(true)
-    expect(lock.working_set).toBe('.claude/skills')
-    expect(lock.cold_pool).toBe(coldPoolRel)
+    expect(lock.deck_config.max_cards).toBe(10)
+    expect(lock.deck_config.working_set).toBe('.claude/skills')
+    expect(lock.deck_config.cold_pool).toBe(coldPoolRel)
 
     const expectedHash = createHash('sha256').update(deckContent).digest('hex')
     expect(lock.deck_source.content_hash).toBe(expectedHash)
     expect(lock.deck_source.path).toBe('skill-deck.toml')
+
+    // State file (operational, git-ignored)
+    const statePath = join(projectDir, 'skill-deck.state')
+    expect(existsSync(statePath)).toBe(true)
+
+    const state = JSON.parse(readFileSync(statePath, 'utf-8'))
+    expect(state.version).toBe('1.0.0')
+    expect(state.skills).toEqual([])
+    expect(state.constraints.total_cards).toBe(0)
+    expect(state.constraints.max_cards).toBe(10)
+    expect(state.constraints.within_budget).toBe(true)
+    expect(state.resolved_paths.working_set).toBe(resolve(workingSet))
   })
 
   it('B2: declared skill with existing cold pool creates correct symlink', () => {
@@ -178,22 +189,41 @@ describe('linkDeck reconciler', () => {
     const target = readlinkSync(symlinkPath)
     expect(target).toBe(skillDir)
 
+    // Lock: declarative fields only
     const lock = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
     expect(lock.skills).toHaveLength(1)
 
-    const skill = lock.skills[0]
-    expect(skill.name).toBe('github.com/owner/repo/skill')
-    expect(skill.alias).toBe('my-alias')
-    expect(skill.type).toBe('tool')
-    expect(skill.source).toBe(join('github.com', 'owner', 'repo', 'skill'))
-    expect(skill.dest).toBe(join('.claude', 'skills', 'my-alias'))
-    expect(skill.content_hash).toMatch(/^[a-f0-9]{64}$/)
-    expect(skill.deck_niche).toBe('testing')
-    expect(skill.deck_managed_dirs).toEqual(['docs/'])
-    expect(skill.linked_at).toBeDefined()
+    const lockSkill = lock.skills[0]
+    expect(lockSkill.name).toBe('github.com/owner/repo/skill')
+    expect(lockSkill.alias).toBe('my-alias')
+    expect(lockSkill.type).toBe('tool')
+    expect(lockSkill.source).toBe(join('github.com', 'owner', 'repo', 'skill'))
+    expect(lockSkill.content_hash).toMatch(/^[a-f0-9]{64}$/)
+    expect(lockSkill.deck_niche).toBe('testing')
+    // Lock should NOT have operational fields
+    expect(lockSkill.linked_at).toBeUndefined()
+    expect(lockSkill.dest).toBeUndefined()
+    expect(lockSkill.mode).toBeUndefined()
+    expect(lockSkill.deck_managed_dirs).toBeUndefined()
+
+    // State: operational fields
+    const state = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills).toHaveLength(1)
+
+    const stateSkill = state.skills[0]
+    expect(stateSkill.alias).toBe('my-alias')
+    expect(stateSkill.linked_at).toBeDefined()
+    expect(stateSkill.dest).toBe(resolve(workingSet, 'my-alias'))
+    expect(stateSkill.mode).toBe('symlink')
+    expect(stateSkill.deck_managed_dirs).toEqual(['docs/'])
+    // State should NOT have declarative fields
+    expect(stateSkill.name).toBeUndefined()
+    expect(stateSkill.type).toBeUndefined()
+    expect(stateSkill.source).toBeUndefined()
+    expect(stateSkill.content_hash).toBeUndefined()
   })
 
-  it('B2.b: idempotent re-run preserves symlink state', async () => {
+  it('B2.b: idempotent re-run preserves symlink state and lock is unchanged', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
     const coldPool = join(projectDir, coldPoolRel)
@@ -207,6 +237,7 @@ describe('linkDeck reconciler', () => {
     linkDeck(deckPath, projectDir, { noBackup: true })
 
     const lock1 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+    const state1 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
     const symlinkPath = join(projectDir, '.claude', 'skills', 'my-alias')
     const target1 = readlinkSync(symlinkPath)
 
@@ -215,6 +246,7 @@ describe('linkDeck reconciler', () => {
     linkDeck(deckPath, projectDir, { noBackup: true })
 
     const lock2 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+    const state2 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
     const target2 = readlinkSync(symlinkPath)
 
     const entries = readdirSync(join(projectDir, '.claude', 'skills'))
@@ -223,12 +255,17 @@ describe('linkDeck reconciler', () => {
     expect(target2).toBe(target1)
     expect(target2).toBe(skillDir)
 
-    expect(lock2.generated_at).not.toBe(lock1.generated_at)
+    // Lock should be UNCHANGED (idempotent) since no content changed
+    expect(lock2).toEqual(lock1)
 
-    expect(lock2.skills).toHaveLength(1)
-    expect(lock2.skills[0].alias).toBe(lock1.skills[0].alias)
-    expect(lock2.skills[0].source).toBe(lock1.skills[0].source)
-    expect(lock2.skills[0].dest).toBe(lock1.skills[0].dest)
+    // State should be UPDATED (always written)
+    expect(state2.generated_at).not.toBe(state1.generated_at)
+    expect(state2.skills[0].linked_at).not.toBe(state1.skills[0].linked_at)
+
+    expect(state2.skills).toHaveLength(1)
+    expect(state2.skills[0].alias).toBe(state1.skills[0].alias)
+    expect(state2.skills[0].dest).toBe(state1.skills[0].dest)
+    expect(state2.skills[0].mode).toBe(state1.skills[0].mode)
   })
 
   it('B3: deny-by-default removes undeclared symlinks from working set', () => {
@@ -261,6 +298,10 @@ describe('linkDeck reconciler', () => {
     const lock = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
     expect(lock.skills).toHaveLength(1)
     expect(lock.skills[0].alias).toBe('skill-a')
+
+    const state = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills).toHaveLength(1)
+    expect(state.skills[0].alias).toBe('skill-a')
   })
 
   it('snapshot mode: cp instead of symlink', () => {
@@ -283,6 +324,10 @@ describe('linkDeck reconciler', () => {
     expect(lstatSync(dest).isSymbolicLink()).toBe(false)
     // Verify content was copied
     expect(existsSync(join(dest, 'SKILL.md'))).toBe(true)
+
+    // State should reflect snapshot mode
+    const state = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills[0].mode).toBe('snapshot')
   })
 
   it('B4: also_link_to fan-out creates symlinks in additional targets', () => {
@@ -319,6 +364,12 @@ path = "github.com/owner/repo/skill"
     expect(readlinkSync(primary)).toBe(skillDir)
     expect(readlinkSync(agents)).toBe(skillDir)
     expect(readlinkSync(kimi)).toBe(skillDir)
+
+    // State should include also_link_to in resolved_paths
+    const state = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
+    expect(state.resolved_paths.also_link_to).toHaveLength(2)
+    expect(state.resolved_paths.also_link_to[0]).toBe(resolve(projectDir, '.agents', 'skills'))
+    expect(state.resolved_paths.also_link_to[1]).toBe(resolve(projectDir, '.kimi', 'skills'))
   })
 
   it('B5: also_link_to respects deny-by-default in each target', () => {
@@ -364,6 +415,40 @@ path = "github.com/owner/skill-a"
     expect(existsSync(join(projectDir, '.claude', 'skills', 'skill-b'))).toBe(false)
     expect(existsSync(join(projectDir, '.agents', 'skills', 'skill-a'))).toBe(true)
     expect(existsSync(join(projectDir, '.agents', 'skills', 'skill-b'))).toBe(false)
+
+    // Lock should only have skill-a
+    const lock = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+    expect(lock.skills).toHaveLength(1)
+    expect(lock.skills[0].alias).toBe('skill-a')
+  })
+
+  it('lock is idempotent: changing only deck content updates lock', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    placeSkill(coldPool, 'github.com/owner/repo/skill')
+
+    const deckV1 = `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.my-alias]\npath = "github.com/owner/repo/skill"\n`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckV1)
+
+    linkDeck(deckPath, projectDir, { noBackup: true })
+    const lock1 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+
+    // Re-run with same deck: lock should be unchanged
+    linkDeck(deckPath, projectDir, { noBackup: true })
+    const lock2 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+    expect(lock2).toEqual(lock1)
+
+    // Change deck content (e.g., max_cards)
+    const deckV2 = `[deck]\nmax_cards = 15\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.my-alias]\npath = "github.com/owner/repo/skill"\n`
+    writeFileSync(deckPath, deckV2)
+
+    linkDeck(deckPath, projectDir, { noBackup: true })
+    const lock3 = JSON.parse(readFileSync(join(projectDir, 'skill-deck.lock'), 'utf-8'))
+    expect(lock3).not.toEqual(lock1)
+    expect(lock3.deck_config.max_cards).toBe(15)
   })
 
 })

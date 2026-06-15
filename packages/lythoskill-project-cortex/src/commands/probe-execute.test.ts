@@ -306,6 +306,8 @@ describe("printProbeSummary — output UX", () => {
       emptyShells: [],
       coverageDrift: [],
       nonAsciiSlugs: [],
+      deckLockDrift: [],
+      deckStateDrift: [],
       ...partial,
     };
   }
@@ -325,6 +327,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: false,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -351,6 +355,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: false,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -373,6 +379,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: false,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -402,6 +410,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: false,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -427,6 +437,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: false,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -452,6 +464,8 @@ describe("printProbeSummary — output UX", () => {
         hasEmptyShells: true,
         hasCoverageDrift: false,
         hasNonAsciiSlugs: false,
+        hasDeckLockDrift: false,
+        hasDeckStateDrift: false,
       },
     });
     printProbeSummary(report, io);

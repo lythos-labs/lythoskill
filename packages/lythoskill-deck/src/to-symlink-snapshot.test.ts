@@ -40,13 +40,16 @@ path = "github.com/test-org/test-skill"
 `
   writeFileSync(join(project, 'skill-deck.toml'), deckToml)
 
-  // lock file
+  // lock file (new format: declarative only)
   const lock = {
     version: '1.0.0' as const,
-    generated_at: new Date().toISOString(),
     deck_source: { path: 'skill-deck.toml', content_hash: 'abc' },
-    working_set: '.claude/skills',
-    cold_pool: 'cold-pool',
+    deck_config: {
+      max_cards: 10,
+      working_set: '.claude/skills',
+      cold_pool: 'cold-pool',
+      also_link_to: [],
+    },
     skills: [
       {
         name: 'github.com/test-org/test-skill',
@@ -54,14 +57,33 @@ path = "github.com/test-org/test-skill"
         deck_niche: '',
         type: 'tool' as const,
         source: 'github.com/test-org/test-skill',
-        dest: '.claude/skills/test-skill',
+        content_hash: 'deadbeef',
+      },
+    ],
+  }
+  writeFileSync(join(project, 'skill-deck.lock'), JSON.stringify(lock, null, 2))
+
+  // state file (new format: operational)
+  const state = {
+    version: '1.0.0' as const,
+    generated_at: new Date().toISOString(),
+    resolved_paths: {
+      working_set: workingSet,
+      cold_pool: coldPool,
+      also_link_to: [],
+    },
+    skills: [
+      {
+        alias: 'test-skill',
         linked_at: new Date().toISOString(),
+        dest: dest,
+        mode: opts.mode,
         deck_managed_dirs: [],
       },
     ],
     constraints: { total_cards: 1, max_cards: 10, within_budget: true, transient_warnings: [], dir_overlaps: [] },
   }
-  writeFileSync(join(project, 'skill-deck.lock'), JSON.stringify(lock, null, 2))
+  writeFileSync(join(project, 'skill-deck.state'), JSON.stringify(state, null, 2))
 
   const deckPath = join(project, 'skill-deck.toml')
   return { project, coldPool, workingSet, skillDir, deckPath, dest }
@@ -86,6 +108,10 @@ describe('toSymlinkSkill — snapshot → symlink', () => {
 
     const st = lstatSync(dest)
     expect(st.isSymbolicLink()).toBe(true)
+
+    // State should be updated with new mode
+    const state = JSON.parse(readFileSync(join(project, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills[0].mode).toBe('symlink')
     rmSync(project, { recursive: true, force: true })
   })
 
@@ -133,6 +159,10 @@ describe('toSnapshotSkill — symlink → snapshot', () => {
     expect(st.isDirectory()).toBe(true)
     // Should have SKILL.md
     expect(readFileSync(join(dest, 'SKILL.md'), 'utf-8')).toContain('Test Skill')
+
+    // State should be updated with new mode
+    const state = JSON.parse(readFileSync(join(project, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills[0].mode).toBe('snapshot')
     rmSync(project, { recursive: true, force: true })
   })
 
