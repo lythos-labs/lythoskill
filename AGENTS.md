@@ -425,10 +425,37 @@ bun install → commit → push → ./scripts/publish.sh
 
 #### Session Close (Handoff)
 
-1. `git status` + `git log --oneline -5` — verify state
-2. `bun packages/lythoskill-project-cortex/src/cli.ts probe` — close stale tasks, close done epics
-3. Write `daily/YYYY-MM-DD.md` — **dump what file exploration cannot recover** (pitfalls, why-we-chose-this, working-tree anomalies, specific next steps). Things WITH structured carriers (task files, ADRs, epics) go to their carriers. Things WITHOUT carriers go to scribe.
-4. Commit daily, push
+Two modes: **daily close** (every session ends with this) and **release submit** (user says "submit" / "全提交" / "push" + release intent).
+
+**Daily Close** (always run):
+```
+1. git status + git log --oneline -5  — verify state
+2. bun packages/lythoskill-project-cortex/src/cli.ts probe  — close stale tasks, close done epics
+3. bun --filter='*' run test  — test gate (canonical, not scripts/test-report.ts)
+4. Write daily/YYYY-MM-DD.md  — dump what file exploration cannot recover
+   (pitfalls, why-we-chose-this, working-tree anomalies, specific next steps)
+   Things WITH structured carriers (task, ADR, epic) → their carriers.
+   Things WITHOUT carriers → scribe.
+5. Commit daily, push
+```
+
+**Release Submit** (user says "submit" / "全提交" / "push" or "release"):
+```
+1. README sync  — if CLI surface changed, check commands/flags vs docs
+2. Test gate  — bun --filter='*' run test (pre-commit enforces, but verify)
+3. Commit with Closes: TASK-xxx trailer  — task → completed
+4. Scribe daily → commit daily
+5. Push
+6. (if release) bump → publish
+   bunx @lythos/skill-creator@0.16.0 bump  →  versions aligned + skills built + committed
+   bun install → commit → push → ./scripts/publish.sh
+```
+
+**When to bump/publish:**
+- User explicitly says "release" / "publish" / "发版" / "打tag"
+- Multiple packages have accumulated changes since last release
+- A bug fix affects external consumers (not just in-repo dev)
+- Never bump without user explicit intent — versions are shared across monorepo
 
 Scribe skill: [lythoskill-project-scribe](packages/lythoskill-project-scribe/skill/SKILL.md).
 
@@ -461,16 +488,29 @@ Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels s
 
 #### Full Submit Pipeline
 
-When user says "submit" / "全提交" / "push":
+When user says "submit" / "全提交" / "push" / "release" / "发版":
 
 ```
-1. README sync (if CLI surface changed — check if commands/flags differ from docs)
-2. Test gate (pre-commit already enforces)
-3. Commit with Closes: TASK-xxx trailer
+1. README sync  — if CLI surface changed, check commands/flags differ from docs
+2. Test gate  — bun --filter='*' run test (canonical, pre-commit enforces)
+3. Commit with Closes: TASK-xxx trailer  — task → completed
 4. Scribe daily → commit daily
 5. Push
-6. (if release) bump → publish.sh
+6. (if release) bump → publish
+   bunx @lythos/skill-creator@0.16.0 bump  →  versions aligned + skills built + committed
+   bun install → commit → push → ./scripts/publish.sh
 ```
+
+**When to release (bump + publish):**
+- User explicitly says "release" / "publish" / "发版" / "打tag"
+- Multiple packages have accumulated changes since last release
+- A bug fix affects external consumers (not just in-repo dev)
+- Never bump without user explicit intent — versions are shared across monorepo
+
+**When NOT to release:**
+- Daily "submit" / "push" without release intent → just push, no bump
+- Single package change that doesn't affect external API → wait for batch
+- User didn't say "release" → ask first
 
 #### QA Security Sweep (Module Audit)
 
