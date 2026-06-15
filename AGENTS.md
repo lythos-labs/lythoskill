@@ -36,32 +36,16 @@ Why this order: dependencies → skills → session state → ground truth → d
 
 **Source paths are readable immediately.** `packages/*/skill/references/` and `skills/*/` are git-tracked source files. You do not need `.claude/skills/` to be populated before reading them. `.claude/skills/` is the runtime working set; source paths are the SSOT.
 
-Full session rhythm: see §4 Daily Operations.
+**After executing — now read:**
 
-### 0.5. Onboarding for New Agent
-
-**First 5 minutes — don't read, execute:**
-
-```
-bun install
-bun packages/lythoskill-deck/src/cli.ts link
-# read daily/YYYY-MM-DD.md (latest)
-git status && git log --oneline -5
-bun packages/lythoskill-project-cortex/src/cli.ts probe
-```
-
-**What you now know:** dependencies OK → skills loaded → what happened last session → ground truth matches → any state drift.
-
-**Next — understand the project in this order:**
-
-1. **Read this file** (AGENTS.md) — you're doing it now. Focus on Z1-Z3; Z4 is reference, load on demand.
-2. **Read `daily/YYYY-MM-DD.md` (latest)** — session handoff from the previous agent. Check `git_commit` matches current HEAD.
-3. **Check `cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
-4. **Glance at `skill-deck.toml`** — what skills are active in this project.
-
-**Only then start working.** Don't explore the codebase before understanding what the last agent was doing and what's pending. The daily handoff exists precisely to prevent redundant `ls` and `cat`.
+1. **`daily/YYYY-MM-DD.md` (latest)** — session handoff from the previous agent. Check `git_commit` against current HEAD. If they don't match, the handoff is stale — use `git log` as ground truth instead.
+2. **`cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
+3. **`skill-deck.toml`** — what skills are active in this project.
+4. **This file (AGENTS.md)** — Z1-Z3 for working, Z4 for reference. Load on demand.
 
 **If no daily handoff exists** (rare, first session on a fresh clone): degrade to `git log --oneline -10` + `ls cortex/epics/01-active/` + `ls cortex/tasks/02-in-progress/` to reconstruct state.
+
+**Probe drift is normal if you just committed.** If `probe` reports an epic mismatch or empty shell right after you (or a previous agent in the same session) committed changes, that's expected — the handoff and probe output reflect the state *before* the commit. Use `git log` to see what changed. Don't auto-fix drift without understanding why it's there.
 
 ### 1. Identity
 
