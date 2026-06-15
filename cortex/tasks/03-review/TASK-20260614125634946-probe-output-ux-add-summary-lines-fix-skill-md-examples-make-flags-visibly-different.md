@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-06-14 | Created from ZK agent试用反馈 (agent-15) |
 | in-progress | 2026-06-15 | Started |
+| review | 2026-06-15 | Deliverables committed |
 
 ## Background & Goals
 

@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/15 19:45:21
+> 自动生成于 2026/6/15 21:06:05
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 319 | 进行中: 1, 待验收: 2, 已完成: 273 |
+| Tasks | 319 | 进行中: 0, 待验收: 3, 已完成: 273 |
 | Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
@@ -79,13 +79,14 @@ _无_
 - [ ] **TASK-20260613190646769**: Add unit tests for probe empty-shell filtering (--include-completed-empty-shells)
 - [ ] **TASK-20260613235254569**: Harden probe empty-shell detection: respect completed status + reduce false positives from template comments
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260614125634946**: probe output UX: add summary lines, fix SKILL.md examples, make flags visibly different
+_无_
 
-### 待验收 (2)
+### 待验收 (3)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
+- 🔍 **TASK-20260614125634946**: probe output UX: add summary lines, fix SKILL.md examples, make flags visibly different
 - 🔍 **TASK-20260614131433088**: ZK Review methodology upgrade - parallel validation and task chain signals
 
 ### 已完成 (273)
