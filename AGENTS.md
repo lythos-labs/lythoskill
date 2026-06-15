@@ -470,7 +470,10 @@ Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels s
 - `[TEST]` **When you'll forget:** you see two test commands and pick the prettier report. → `bun --filter='*' run test` is canonical. `scripts/test-report.ts` is a supplement — if they diverge, the script is wrong.
 - `[BDD]` **When you'll forget:** you want cheap regression coverage in CI. → Agent BDD (`showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. If you patch a BDD test for the 3rd time, the scenario is stale — rewrite it.
 - `[DECK]` **When you'll forget:** `.claude/skills/` looks stale or empty and you think `bun install` will fix it. → `deck link` (not `bun install`) refreshes the working set. `.agents/skills/` are symlinks derived from `skill-deck.toml` by the deck reconciler. After `bun install`, still run `deck link` if skills are missing.
-- `[DECK]` **When you'll forget:** `.claude/skills/` looks stale or empty and you think `bun install` will fix it. → `deck link` (not `bun install`) refreshes the working set. `.agents/skills/` are symlinks derived from `skill-deck.toml` by the deck reconciler. After `bun install`, still run `deck link` if skills are missing.
+
+**[RELEASE]**
+- `[SEMVER]` **When you'll forget:** you bump patch for a new CLI subcommand. → 0.x 阶段：patch = bug fix only; minor = new backward-compatible feature (new subcommand, new flag); major = breaking change. `task <verb>` subcommand = minor bump, not patch. Never bump without user explicit intent.
+- `[VERSION]` **When you'll forget:** you push to github before npm publish. → External consumers see two entry points: `deck link` pulls skills from github, `bunx` pulls CLI from npm. If github is ahead of npm, skill docs show new commands but CLI doesn't support them. Order: test → bump → publish → push.
 
 **[EDIT]**
 - `[SED]` **When you'll forget:** a bulk rename looks faster than editing one by one. → `sed -i` is silent corruption risk. Survey with grep/sed (read-only) → fix call sites one by one with the type checker watching.
