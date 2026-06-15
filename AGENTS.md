@@ -469,6 +469,8 @@ Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels s
 **[BOOT / TEST]**
 - `[TEST]` **When you'll forget:** you see two test commands and pick the prettier report. → `bun --filter='*' run test` is canonical. `scripts/test-report.ts` is a supplement — if they diverge, the script is wrong.
 - `[BDD]` **When you'll forget:** you want cheap regression coverage in CI. → Agent BDD (`showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. If you patch a BDD test for the 3rd time, the scenario is stale — rewrite it.
+- `[DECK]` **When you'll forget:** `.claude/skills/` looks stale or empty and you think `bun install` will fix it. → `deck link` (not `bun install`) refreshes the working set. `.agents/skills/` are symlinks derived from `skill-deck.toml` by the deck reconciler. After `bun install`, still run `deck link` if skills are missing.
+- `[DECK]` **When you'll forget:** `.claude/skills/` looks stale or empty and you think `bun install` will fix it. → `deck link` (not `bun install`) refreshes the working set. `.agents/skills/` are symlinks derived from `skill-deck.toml` by the deck reconciler. After `bun install`, still run `deck link` if skills are missing.
 
 **[EDIT]**
 - `[SED]` **When you'll forget:** a bulk rename looks faster than editing one by one. → `sed -i` is silent corruption risk. Survey with grep/sed (read-only) → fix call sites one by one with the type checker watching.
