@@ -18,6 +18,7 @@ checklist_skipped_reason: Non-interactive context
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-06-15 | Created |
+| done | 2026-06-15 | Done |
 
 ## 背景故事
 

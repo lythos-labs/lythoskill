@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/6/15 21:15:14
+> 自动生成于 2026/6/15 21:17:54
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
 | Tasks | 319 | 进行中: 0, 待验收: 2, 已完成: 274 |
-| Epics | 43 | 活跃: 0, 已完成: 39, 悬置: 2, 已归档: 2 |
+| Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 87 | 已接受: 82 |
 
 ---
@@ -59,6 +59,7 @@ _无_
 - ✅ **EPIC-20260529214429614**: Curator CLI IO injection + BDD coverage
 - ✅ **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 - ✅ **EPIC-20260530135721111**: Arena IO Injection Sweep — CLI and Runner Layers
+- ✅ **EPIC-20260615211529145**: SSOT CLI help and documentation governance
 
 ### 悬置
 
