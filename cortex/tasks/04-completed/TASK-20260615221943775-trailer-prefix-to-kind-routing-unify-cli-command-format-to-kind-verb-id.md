@@ -8,6 +8,7 @@
 | backlog | 2026-06-15 | Created |
 | in-progress | 2026-06-15 | Started |
 | review | 2026-06-15 | Deliverables committed |
+| completed | 2026-06-15 | Done |
 
 ## Background & Goals
 

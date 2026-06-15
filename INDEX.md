@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/15 22:37:18
+> 自动生成于 2026/6/15 22:43:17
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 321 | 进行中: 0, 待验收: 4, 已完成: 274 |
+| Tasks | 321 | 进行中: 0, 待验收: 3, 已完成: 275 |
 | Epics | 44 | 活跃: 1, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 88 | 已接受: 83 |
 
@@ -83,14 +83,13 @@
 
 _无_
 
-### 待验收 (4)
+### 待验收 (3)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
 - 🔍 **TASK-20260614131433088**: ZK Review methodology upgrade - parallel validation and task chain signals
 - 🔍 **TASK-20260615221622190**: review
-- 🔍 **TASK-20260615221943775**: Trailer prefix-to-kind routing: unify CLI command format to kind+verb+id
 
-### 已完成 (274)
+### 已完成 (275)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -366,6 +365,7 @@ _无_
 - ✅ ~~TASK-20260613234838986~~: Refactor probe.ts into intent-plan-execute with IO separation
 - ✅ ~~TASK-20260614123918272~~: probe UX audit: document flags, fix suspicious naming
 - ✅ ~~TASK-20260614125634946~~: probe output UX: add summary lines, fix SKILL.md examples, make flags visibly different
+- ✅ ~~TASK-20260615221943775~~: Trailer prefix-to-kind routing: unify CLI command format to kind+verb+id
 
 ### 悬置 (1)
 
