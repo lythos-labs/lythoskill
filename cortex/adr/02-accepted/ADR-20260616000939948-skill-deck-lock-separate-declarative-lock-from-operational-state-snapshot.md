@@ -172,19 +172,24 @@ All **local environment state** — absolute paths, timestamps, runtime decision
 ## Impact
 
 - Positive:
-  - Onboarding friction reduced: Boot First sequence produces clean `git status`
-  - Semantic clarity: lockfile = lock, state file = state
+## Impact
+
+- Positive:
+  - Onboarding friction eliminated: Boot First sequence produces clean `git status`
+  - Agent no longer sees `skill-deck.lock` as modified after routine `deck link`
+  - Semantic clarity: lockfile = content lock, state file = runtime state
   - Future extensibility: `skill-deck.state` can store link history, retry counts, etc.
 - Negative:
   - One-time migration complexity
   - Need to update probe and any tools that read `skill-deck.lock`
 - Follow-up:
-  - Implement `skill-deck.state` schema
-  - Update `deck link` to write both files
+  - Implement `skill-deck.state` schema in `packages/lythoskill-deck/src/`
+  - Update `deck link` to write both files (`.lock` only when content changes, `.state` always)
   - Update `deck validate` to check both
   - Update probe to use `skill-deck.state` for operational checks, `skill-deck.lock` for content verification
   - Add `skill-deck.state` to `.gitignore`
   - Migration: on first run, split existing `skill-deck.lock` into both files
+  - Update AGENTS.md Boot First to remove `skill-deck.lock` drift warning (once implemented)
 
 ## Related
 - Related ADR: ADR-20260423124812645 (Why `skills/` is committed build output)
