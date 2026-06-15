@@ -89,7 +89,7 @@ Treat it as pure derived state, like `.claude/skills/`.
 
 ### `skill-deck.lock` (declarative, git-tracked)
 
-Only fields that are **reproducible across machines**:
+Only fields that are **reproducible across machines** — relative paths, FQ locators, content hashes:
 
 ```json
 {
@@ -98,12 +98,17 @@ Only fields that are **reproducible across machines**:
     "path": "skill-deck.toml",
     "content_hash": "sha256-of-skill-deck.toml"
   },
+  "deck_config": {
+    "max_cards": 15,
+    "working_set": ".claude/skills",
+    "cold_pool": "~/.agents/skill-repos",
+    "also_link_to": [".agents/skills"]
+  },
   "skills": [
     {
-      "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
       "alias": "lythoskill-deck",
-      "deck_niche": "meta.governance.deck",
       "type": "innate",
+      "deck_niche": "meta.governance.deck",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
       "content_hash": "sha256-of-skill-content"
     }
@@ -111,22 +116,36 @@ Only fields that are **reproducible across machines**:
 }
 ```
 
-**Key principle**: No timestamps, no local paths, no symlink modes. Purely "what was declared and what hash was linked."
+**Key principle**: 
+- Relative paths only (`~` is allowed as a convention, resolved at runtime)
+- No timestamps, no absolute paths, no symlink modes
+- Purely "what was declared and what hash was linked"
+
+**Field sources**:
+- `deck_config.*` — from `skill-deck.toml` `[deck]` section
+- `skills[].alias` — from TOML key `[innate.skills.<alias>]`
+- `skills[].type` — from TOML section (`innate` vs `tool`)
+- `skills[].deck_niche` — from TOML section name or frontmatter
+- `skills[].source` — from TOML `path` field (FQ locator)
+- `skills[].content_hash` — computed by `deck link` at runtime, but **content-derived** (not operation-derived)
 
 ### `skill-deck.state` (operational, git-ignored)
 
-All **local environment state**:
+All **local environment state** — absolute paths, timestamps, runtime decisions:
 
 ```json
 {
   "generated_at": "2026-06-15T16:03:27.636Z",
-  "working_set": ".claude/skills",
-  "cold_pool": "~/.agents/skill-repos",
+  "resolved_paths": {
+    "working_set": "/Users/chariots/Downloads/lythoskill-main/.claude/skills",
+    "cold_pool": "/Users/chariots/.agents/skill-repos",
+    "also_link_to": ["/Users/chariots/Downloads/lythoskill-main/.agents/skills"]
+  },
   "skills": [
     {
-      "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
+      "alias": "lythoskill-deck",
       "linked_at": "2026-06-15T16:03:27.627Z",
-      "dest": ".claude/skills/lythoskill-deck",
+      "dest": "/Users/chariots/Downloads/lythoskill-main/.claude/skills/lythoskill-deck",
       "mode": "symlink",
       "deck_managed_dirs": [".claude/skills/", "skill-deck.lock"]
     }
@@ -136,18 +155,19 @@ All **local environment state**:
 
 **What goes here**:
 - `generated_at` — when `deck link` last ran
-- `working_set` — local working set path (may differ per machine: `.claude/skills` vs `.agents/skills`)
-- `cold_pool` — local cold pool path (may be overridden per machine)
+- `resolved_paths.working_set` — **absolute** path, resolved from `.lock`'s relative path
+- `resolved_paths.cold_pool` — **absolute** path, `~` expanded to actual home directory
+- `resolved_paths.also_link_to` — **absolute** paths for each additional link target
 - `linked_at` — per-skill link timestamp
-- `dest` — local symlink destination path
+- `dest` — **absolute** symlink destination (resolved from `working_set + alias`)
 - `mode` — symlink vs snapshot (local filesystem decision)
-- `deck_managed_dirs` — which directories this deck manages (local scope)
+- `deck_managed_dirs` — which directories this deck manages (local scope, from SKILL.md frontmatter)
 
 **Why these are operational, not declarative**:
-- Two developers can have the same `skill-deck.lock` but different `working_set` paths
+- `resolved_paths` vary per machine (different usernames, different clone locations)
 - `linked_at` changes on every `deck link` even when content hasn't changed
 - `mode` (symlink vs snapshot) is a local filesystem choice, not a project invariant
-- `dest` is derived from `working_set + alias`, not a declared value
+- `dest` is derived from `resolved_paths.working_set + alias`, not a declared value
 
 ## Impact
 
