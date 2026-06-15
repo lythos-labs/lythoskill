@@ -38,6 +38,31 @@ Why this order: dependencies → skills → session state → ground truth → d
 
 Full session rhythm: see §4 Daily Operations.
 
+### 0.5. Onboarding for New Agent
+
+**First 5 minutes — don't read, execute:**
+
+```
+bun install
+bun packages/lythoskill-deck/src/cli.ts link
+# read daily/YYYY-MM-DD.md (latest)
+git status && git log --oneline -5
+bun packages/lythoskill-project-cortex/src/cli.ts probe
+```
+
+**What you now know:** dependencies OK → skills loaded → what happened last session → ground truth matches → any state drift.
+
+**Next — understand the project in this order:**
+
+1. **Read this file** (AGENTS.md) — you're doing it now. Focus on Z1-Z3; Z4 is reference, load on demand.
+2. **Read `daily/YYYY-MM-DD.md` (latest)** — session handoff from the previous agent. Check `git_commit` matches current HEAD.
+3. **Check `cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
+4. **Glance at `skill-deck.toml`** — what skills are active in this project.
+
+**Only then start working.** Don't explore the codebase before understanding what the last agent was doing and what's pending. The daily handoff exists precisely to prevent redundant `ls` and `cat`.
+
+**If no daily handoff exists** (rare, first session on a fresh clone): degrade to `git log --oneline -10` + `ls cortex/epics/01-active/` + `ls cortex/tasks/02-in-progress/` to reconstruct state.
+
 ### 1. Identity
 
 #### What Lythoskill Is
@@ -120,17 +145,22 @@ Why: dry-run emerges naturally, pure plan functions unit-test without IO, inject
 5. **System silence is not permission.** If the platform prompts "the user has not said anything," stop, summarize state, ask for next step.
 6. **Git provenance over design assumption.** `git log --oneline -5 <file>` beats guessing why code looks wrong. This repo's small-granularity commits make this a 5-second operation.
 7. **See a bug, fix a bug — no "not my code."** If you discover a broken test, a mismatched import, a stale comment, or any defect that would trip up the next agent, fix it. Git provenance tells you who introduced it; that information is for learning, not for excusing. The codebase has no owners, only stewards.
+8. **Plan must include research.** Before deriving a solution from first principles, search the codebase. `git log --oneline -5 <file>` beats guessing why code looks the way it does. `grep` for existing patterns before inventing new ones. The project has 1000+ commits — most problems have been solved before, and the solution is in git history or existing code.
 
 #### When Internal Signals Fire
 
-| When you catch yourself thinking... | Do this |
-|-------------------------------------|---------|
+These patterns are recognizable thoughts that degrade output quality. When they appear, they are signals to pause — not to push through.
+
+| When you catch yourself thinking... | Do this instead |
+|-------------------------------------|-----------------|
 | "The user seems angry" | Re-read their literal words. What did they actually ask? Tone-reading burns cognition on imaginary signals. |
 | "I need this to pass so the user isn't upset" | Report what you found — including failures. Fake green is worse than red. |
 | "I shouldn't bother them with questions" | State the ambiguity, propose options, ask. One clear question costs less than an hour of wrong work. |
 | "The real problem is the architecture" | Quote their ask back literally. If you still think something bigger needs fixing, ask — don't substitute silently. |
 
-**The rule**: internal hesitation = signal to pause and surface. Ambiguity is not a bug to hide — it's information the user needs. Full case study: [sunk-cost-fallacy.md](cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md).
+**The rule**: internal hesitation = signal to pause and surface. Ambiguity is not a bug to hide — it's information the user needs.
+
+**Connection to TDD and Diagnose**: These two skills are designed to reinforce healthy execution habits. TDD asks you to sit with red — red is information, not failure. Diagnose asks you to reproduce before fixing, hypothesize before acting. Both reward patience over speed. When the urge to "just fix it fast" appears, that's the signal to slow down and follow the loop. Full case study: [sunk-cost-fallacy.md](cortex/wiki/02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md).
 
 #### Intent Belongs to the User
 
@@ -210,7 +240,7 @@ Three rounds is a reasonable default. If still not converged after round 3, the 
    Round 3+ should bias toward Parallel — if fresh agents keep finding the same thing, the doc is the problem.
 6. Converge when new gaps < 2 and all low-priority. Full methodology + real cases: [ZK Review reference](packages/lythoskill-project-cortex/skill/references/zk-review.md).
 
-**Convergence is coordination, not elimination.** The goal is not "zero gaps" — it's "gaps no longer produce new information." If a ZK agent misunderstands something, that's signal: either the doc is ambiguous (fix it) or the agent's knowledge is genuinely incomplete (note why it's not a blocker). When you challenge a gap, the ZK agent can challenge back — this back-and-forth is the convergence mechanism. Three rounds is a practical ceiling; if you're still debating after round 3, the task scope itself is unclear.
+**Convergence is coordination, not elimination.** The goal is not "zero gaps" — it's "gaps no longer produce new information." If a ZK agent misunderstands something, that's signal: either the doc is ambiguous (fix it) or the agent's knowledge is genuinely incomplete (note why it's not a blocker). When you challenge a gap, the ZK agent can challenge back — this back-and-forth is the convergence mechanism. **Three rounds is a practical ceiling; if you're still debating after round 3, the task scope itself is unclear. Never spawn a 4th round; rewrite the task card instead.**
 
 **Real example — what ZK Review surfaced that self-review missed:**
 
@@ -307,6 +337,7 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 
 0. **Ensure the environment works**: `bun install` (at the root of this workspace — Bun workspaces)
 1. **Ensure skills are loaded**: confirm `skill-deck.toml` exists, then `bun packages/lythoskill-deck/src/cli.ts link` → populates `.claude/skills/` from cold pool. If `.claude/skills/` is already populated but stale from a prior session, run `bun packages/lythoskill-deck/src/cli.ts link` anyway — it's idempotent.
+   - If upstream skills changed (new release, new commands), run `deck refresh --exec` before `deck link` to pull latest from github
 2. Read `daily/YYYY-MM-DD.md` (latest) → session handoff
 3. `git status` + `git log --oneline -5` → verify freshness against handoff's git_commit
 4. `bun packages/lythoskill-project-cortex/src/cli.ts probe` → check for state drift
@@ -324,7 +355,8 @@ A session goes through four phases:
 ```
 bun install → bun packages/lythoskill-deck/src/cli.ts link → read daily/YYYY-MM-DD.md (latest) → git status && git log --oneline -5 → bun packages/lythoskill-project-cortex/src/cli.ts probe
 ```
-You now know what happened last time and what's pending.
+- If skills are missing or upstream changed: `deck refresh --exec → deck link` before step 2
+- You now know what happened last time and what's pending.
 
 **2. Incoming** — user gives you something:
 - 调研 / 扫一下 / 设计 / 写文档 / 治理 / 体验 → **dispatch.** Spawn arena with the matching side deck. Don't deliberate. (Full dispatch table: §6 Deck Governance.)
@@ -395,8 +427,13 @@ deck link  →  .agents/skills/<name>/ refreshed  →  agent sees updated skill
 - `bun packages/lythoskill-creator/src/cli.ts build` — build all skills from `packages/*/skill/` to `skills/`
 - `bun packages/lythoskill-creator/src/cli.ts build <name>` — build single skill (e.g., `build project-cortex`)
 - `deck link` — reconcile `.agents/skills/` working set from `skills/` (cold pool → working set)
+- `deck refresh` — discover upstream updates for declared skills (plan-only, no auto-apply)
+- `deck refresh --exec` — execute git pull in cold pool for all declared skills
+- `deck refresh <skill> --exec` — refresh a single skill from upstream
 
 **Why this matters**: Agent reads `.agents/skills/` (working set), not `packages/*/skill/` (source). If you edit source but don't build + deck link, the agent sees stale skill. Pre-commit hook auto-builds when `packages/*/skill/` files are staged, but **manual edits without commit** require manual build + deck link.
+
+**`deck link` vs `deck refresh`**: `link` syncs working set from cold pool (local). `refresh` pulls from upstream (remote) into cold pool. After `refresh --exec`, run `deck link` again to propagate updates to working set.
 
 **Full daily cycle**:
 ```
@@ -408,6 +445,15 @@ bun install → deck link → edit code → test → edit skill source → build
 bunx @lythos/skill-creator@0.17.0 bump  →  versions aligned + skills built + committed
 bun install → commit → push → ./scripts/publish.sh
 ```
+
+**Version alignment chain** (external consumers see two entry points):
+```
+Local edit → build → test → bump → publish (npm) → push (github) → deck refresh --exec → deck link
+```
+- `deck link` pulls skills from github (cold pool clone)
+- `bunx @lythos/<name>@<<version>` pulls CLI from npm
+- **Order matters**: publish to npm before push to github, or `bunx` will fail (skill docs show new commands but CLI doesn't support them yet)
+- **Window period**: between push and publish, external consumers have inconsistent state
 
 #### Key Commands
 
@@ -449,6 +495,7 @@ Two modes: **daily close** (every session ends with this) and **release submit**
 6. (if release) bump → publish
    bunx @lythos/skill-creator@0.17.0 bump  →  versions aligned + skills built + committed
    bun install → commit → push → ./scripts/publish.sh
+7. (if release) deck refresh --exec → deck link  — update working set to match published version
 ```
 
 **When to bump/publish:**
@@ -456,6 +503,11 @@ Two modes: **daily close** (every session ends with this) and **release submit**
 - Multiple packages have accumulated changes since last release
 - A bug fix affects external consumers (not just in-repo dev)
 - Never bump without user explicit intent — versions are shared across monorepo
+
+**When to deck refresh after release:**
+- After publish, run `deck refresh --exec` to pull latest skills from upstream, then `deck link` to update working set
+- If `bunx @lythos/<name>@<<version>` fails with "Cannot find package", the version hasn't propagated to npm yet — wait or check `npm view @lythos/<name> versions`
+- If `deck refresh` fails with unstaged changes in cold pool, run `git checkout -- . && git clean -fd` in `~/.agents/skill-repos/<host>/<owner>/<repo>/`
 
 Scribe skill: [lythoskill-project-scribe](packages/lythoskill-project-scribe/skill/SKILL.md).
 
@@ -472,7 +524,7 @@ Format: `[PHASE] [TAG]` + **When you'll forget:** the moment the mistake feels s
 - `[DECK]` **When you'll forget:** `.claude/skills/` looks stale or empty and you think `bun install` will fix it. → `deck link` (not `bun install`) refreshes the working set. `.agents/skills/` are symlinks derived from `skill-deck.toml` by the deck reconciler. After `bun install`, still run `deck link` if skills are missing.
 
 **[RELEASE]**
-- `[SEMVER]` **When you'll forget:** you bump patch for a new CLI subcommand. → 0.x 阶段：patch = bug fix only; minor = new backward-compatible feature (new subcommand, new flag); major = breaking change. `task <verb>` subcommand = minor bump, not patch. Never bump without user explicit intent.
+- `[SEMVER]` **When you'll forget:** you bump patch for a new CLI subcommand. → 0.x 阶段：patch = bug fix only; minor = new backward-compatible feature (new subcommand, new flag, new API); major = breaking change. `task <verb>` subcommand = minor bump, not patch. **API change (new subcommand, new flag, new exported function) = minor, even if "small."** Never bump without user explicit intent.
 - `[VERSION]` **When you'll forget:** you push to github before npm publish. → External consumers see two entry points: `deck link` pulls skills from github, `bunx` pulls CLI from npm. If github is ahead of npm, skill docs show new commands but CLI doesn't support them. Order: test → bump → publish → push.
 
 **[EDIT]**
@@ -535,7 +587,26 @@ Key principle: findings → tasks → fixes → verify. Don't just find — act 
 
 ## Z4 — Reference
 
-### 5. Hot Files
+### 5. Arena at a Glance
+
+Arena is the most frequently used tool in this project. Three patterns cover 90% of usage:
+
+**Single-deck test** — verify a skill works before adopting:
+```
+arena single --deck <path> --brief "<task>"
+```
+
+**Cross-model validation** — ZK Review for high-stakes docs:
+```
+arena single --player <kimi|codex|claude> --deck <path> --brief "<same prompt>"
+```
+Run the same prompt through multiple players. Divergent gaps = doc ambiguity; convergent gaps = real blocker.
+
+**Module audit** — 5-phase security sweep (see §4.2 QA Security Sweep above).
+
+Arena errors are HATEOAS-style: they tell you what went wrong, what phase failed, and what to try next. If you see a fallback hint ("try `--deck` instead of `--skills`"), that hint is tested by a dormancy test — it must work on the happy path too. Full runtime details: [arena-runtime.md](packages/lythoskill-arena/skill/references/arena-runtime.md).
+
+### 6. Hot Files
 
 High-risk modification targets. Read before touching.
 
@@ -560,7 +631,7 @@ What 60+ recent commits look like — helps orient to project norms:
 | Agent adapters | 6 | Template: build command array, spawn, parse, return AgentResult |
 | Release | 5 | Mechanical: bump → commit → publish.sh |
 
-### 6. Deck Governance
+### 7. Deck Governance
 
 `skill-deck.toml` declares active skills. `deck link` reconciles the working set (deny-by-default).
 
@@ -592,7 +663,7 @@ deck refresh           # Discover + plan (no auto-apply)
 
 Full deck docs: [lythoskill-deck SKILL.md](packages/lythoskill-deck/skill/SKILL.md).
 
-### 7. Project Structure
+### 8. Project Structure
 
 ```
 lythoskill/
@@ -616,7 +687,7 @@ lythoskill/
 └── examples/decks/            # 18 pre-built deck configs
 ```
 
-### 8. Release & Auth (Compaction-Safe)
+### 9. Release & Auth (Compaction-Safe)
 
 **Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (a host alias in `~/.ssh/config` for key selection convenience — do not change). `~/.ssh/` is off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
 
@@ -626,7 +697,7 @@ lythoskill/
 
 **SKILL.md source files are templates**: `packages/*/skill/SKILL.md` contains `{{PACKAGE_VERSION}}` placeholders. Never replace with literal values — that breaks future renders. Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
-### 9. Project Skills
+### 10. Project Skills
 
 These are our own skills. Each has a SKILL.md that agents load.
 
@@ -642,7 +713,7 @@ These are our own skills. Each has a SKILL.md that agents load.
 | `lythoskill-dreaming` | Memory consolidation → SSOT | "Consolidate docs", "SSOT sweep", "memory consolidation" |
 | `lythoskill-coach` | SKILL.md quality review | Reviewing a new skill, "optimize this skill" |
 
-### 10. Pointer Index
+### 11. Pointer Index
 
 > AGENTS.md is the TL;DR. These files have the full detail. Load on demand.
 > **⚠️ Source paths**: these files live in `packages/*/skill/references/` (source) and are built to `skills/*/references/` (committed output). The paths below point to source — readable without running `deck link` first.**
