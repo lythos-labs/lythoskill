@@ -6,7 +6,7 @@
 
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
 > Auth (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**.
-> Versions move via `bunx @lythos/skill-creator@0.16.1 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
+> Versions move via `bunx @lythos/skill-creator@0.17.0 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
 > Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
 > **🚀 Bootstrap check**: If `.claude/skills/` is empty, run `bun packages/lythoskill-deck/src/cli.ts link` to populate the working set. This makes all skill references below resolvable. Deck reconciles the working set against `skill-deck.toml` — creating symlinks from the cold pool (`~/.agents/skill-repos/` by default, where `deck add` clones repos) into `.claude/skills/`.
@@ -405,7 +405,7 @@ bun install → deck link → edit code → test → edit skill source → build
 
 **Release cycle** (includes build):
 ```
-bunx @lythos/skill-creator@0.16.1 bump  →  versions aligned + skills built + committed
+bunx @lythos/skill-creator@0.17.0 bump  →  versions aligned + skills built + committed
 bun install → commit → push → ./scripts/publish.sh
 ```
 
@@ -419,7 +419,7 @@ bun install → commit → push → ./scripts/publish.sh
 | Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` or `... task create "title"` (shorthand: `cortex task` / `cortex task create`) |
 | ZK Review a task | Spawn ZK agent, ask WHAT/WHY/HOW on the task card + AGENTS.md |
 | Arena quick run | `bun packages/lythoskill-arena/src/cli.ts single --deck <path> --brief "prompt"` (shorthand: `arena single`) |
-| Release | `bunx @lythos/skill-creator@0.16.1 bump` → `./scripts/publish.sh` |
+| Release | `bunx @lythos/skill-creator@0.17.0 bump` → `./scripts/publish.sh` |
 
 **Shorthand convention**: throughout this doc, `deck link`, `arena single`, `cortex probe` etc. are shorthand. Resolution: `bun packages/<name>/src/cli.ts <cmd>` (in-repo dev) or `bunx @lythos/<name> <cmd>` (external). Full command table (auto-generated): `skills/lythoskill-project-cortex/references/COMMANDS.md`.
 
@@ -447,7 +447,7 @@ Two modes: **daily close** (every session ends with this) and **release submit**
 4. Scribe daily → commit daily
 5. Push
 6. (if release) bump → publish
-   bunx @lythos/skill-creator@0.16.1 bump  →  versions aligned + skills built + committed
+   bunx @lythos/skill-creator@0.17.0 bump  →  versions aligned + skills built + committed
    bun install → commit → push → ./scripts/publish.sh
 ```
 
@@ -499,7 +499,7 @@ When user says "submit" / "全提交" / "push" / "release" / "发版":
 4. Scribe daily → commit daily
 5. Push
 6. (if release) bump → publish
-   bunx @lythos/skill-creator@0.16.1 bump  →  versions aligned + skills built + committed
+   bunx @lythos/skill-creator@0.17.0 bump  →  versions aligned + skills built + committed
    bun install → commit → push → ./scripts/publish.sh
 ```
 
@@ -617,7 +617,7 @@ lythoskill/
 
 **Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (a host alias in `~/.ssh/config` for key selection convenience — do not change). `~/.ssh/` is off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
 
-**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.16.1 bump`, never by hand. Bump pipeline: write root → align all packages → build skills (part of bump command). Then: `bun install` → commit → push → `./scripts/publish.sh`.
+**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.0 bump`, never by hand. Bump pipeline: write root → align all packages → build skills (part of bump command). Then: `bun install` → commit → push → `./scripts/publish.sh`.
 
 **New package must be added to `scripts/publish.sh`** PACKAGES array before first release. Skill-only packages (no `package.json`) are exempt.
 
