@@ -70,6 +70,22 @@ Why does this task exist? What problem does it solve?
 
 <!-- Subagent updates below -->
 
+### 执行完成后状态流转（⚠️ 强制）
+
+实现完成、测试通过、提交后，**必须**立即执行状态流转：
+
+```bash
+# 1. 标记开始执行（如果还在 backlog）
+bun packages/lythoskill-project-cortex/src/cli.ts start TASK-XXX
+
+# 2. 标记完成，进入 review
+bun packages/lythoskill-project-cortex/src/cli.ts review TASK-XXX
+```
+
+**为什么**：directory = source of truth。文件位置决定状态，不是 Status History 表格。执行完成后如果不移动文件，probe 会报告 drift。
+
+**Subagent 执行 `git commit` 后必须自我检查：我执行了状态流转吗？**
+
 ### Checkpoint 1 - YYYY-MM-DD HH:MM
 - [x] Completed: ...
 - [ ] Blocked by: ...
