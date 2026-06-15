@@ -4,6 +4,8 @@
 Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
+  task create "<title>"  Create a new Task (explicit)
+  task <verb> <task-id>  Task state transition (start/review/done/complete/suspend/resume/reject/terminate/archive)
   epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
                         --override bypasses the lane-full guard (max 1 per lane).
@@ -22,15 +24,17 @@ Commands:
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 
 Task state machine:
-  start <task-id>       Move task to in-progress
-  review <task-id>      Move task to review
-  done <task-id>        Move task to completed (must be in review)
-  complete <task-id>    Move task to completed (any status; trailer-driven close)
-  suspend <task-id>     Move task to suspended
-  resume <task-id>      Move suspended task back to in-progress
-  reject <task-id>      Move reviewed task back to in-progress (re-work)
-  terminate <task-id>   Move task to terminated (any status)
-  archive <task-id>     Move completed task to archived
+  task start <task-id>       Move task to in-progress
+  task review <task-id>      Move task to review
+  task done <task-id>        Move task to completed (must be in review)
+  task complete <task-id>    Move task to completed (any status; trailer-driven close)
+  task suspend <task-id>     Move task to suspended
+  task resume <task-id>      Move suspended task back to in-progress
+  task reject <task-id>      Move reviewed task back to in-progress (re-work)
+  task terminate <task-id>   Move task to terminated (any status)
+  task archive <task-id>     Move completed task to archived
+
+  (Legacy aliases also work: start, review, done, complete, suspend, resume, reject, terminate, archive)
 
 ADR state machine:
   adr accept <adr-id>                  Move ADR to accepted

@@ -28,6 +28,8 @@ function printHelp(): void {
 Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
+  task create "<title>"  Create a new Task (explicit)
+  task <verb> <task-id>  Task state transition (start/review/done/complete/suspend/resume/reject/terminate/archive)
   epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
                         --override bypasses the lane-full guard (max 1 per lane).
@@ -46,15 +48,17 @@ Commands:
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 
 Task state machine:
-  start <task-id>       Move task to in-progress
-  review <task-id>      Move task to review
-  done <task-id>        Move task to completed (must be in review)
-  complete <task-id>    Move task to completed (any status; trailer-driven close)
-  suspend <task-id>     Move task to suspended
-  resume <task-id>      Move suspended task back to in-progress
-  reject <task-id>      Move reviewed task back to in-progress (re-work)
-  terminate <task-id>   Move task to terminated (any status)
-  archive <task-id>     Move completed task to archived
+  task start <task-id>       Move task to in-progress
+  task review <task-id>      Move task to review
+  task done <task-id>        Move task to completed (must be in review)
+  task complete <task-id>    Move task to completed (any status; trailer-driven close)
+  task suspend <task-id>     Move task to suspended
+  task resume <task-id>      Move suspended task back to in-progress
+  task reject <task-id>      Move reviewed task back to in-progress (re-work)
+  task terminate <task-id>   Move task to terminated (any status)
+  task archive <task-id>     Move completed task to archived
+
+  (Legacy aliases also work: start, review, done, complete, suspend, resume, reject, terminate, archive)
 
 ADR state machine:
   adr accept <adr-id>                  Move ADR to accepted
@@ -111,6 +115,56 @@ function requireDocId(
   process.exit(1);
 }
 
+function handleTaskTransition(
+  verb: string,
+  taskId: string,
+  config: WorkflowConfig,
+): void {
+  switch (verb) {
+    case 'start':
+      moveTask(taskId, 'in-progress', config, { note: 'Started' });
+      break;
+    case 'review':
+      moveTask(taskId, 'review', config, { note: 'Deliverables committed' });
+      break;
+    case 'done':
+      moveTask(
+        taskId,
+        'completed', config,
+        { note: 'Done' },
+      );
+      break;
+    case 'complete':
+      moveTask(
+        taskId,
+        'completed', config,
+        { allowAny: true, note: 'Closed via trailer' },
+      );
+      break;
+    case 'suspend':
+      moveTask(taskId, 'suspended', config, { note: 'Blocked' });
+      break;
+    case 'resume':
+      moveTask(taskId, 'in-progress', config, { note: 'Resumed' });
+      break;
+    case 'reject':
+      moveTask(taskId, 'in-progress', config, { note: 'Re-work required' });
+      break;
+    case 'terminate':
+      moveTask(taskId, 'terminated', config, { allowAny: true, note: 'Terminated' });
+      break;
+    case 'archive':
+      moveTask(taskId, 'archived', config, { allowAny: true, note: 'Archived' });
+      break;
+    default:
+      console.error(`❌ Unknown task verb: ${verb}
+
+   Supported verbs: start, review, done, complete, suspend, resume, reject, terminate, archive
+   Example: bunx @lythos/project-cortex task review TASK-20260509121724330`);
+      process.exit(1);
+  }
+}
+
 async function main(): Promise<void> {
   const config = loadConfig();
   const command = process.argv[2];
@@ -130,19 +184,31 @@ async function main(): Promise<void> {
       break;
 
     case 'task': {
-      // Support both `task "<title>"` (legacy) and `task create "<title>"` (subcommand)
-      // for consistency with `task start/review/done` state-transition verbs.
+      const TASK_VERBS = ['start', 'review', 'done', 'complete', 'suspend', 'resume', 'reject', 'terminate', 'archive', 'create'];
+      // Subcommand form: `task <verb> <TASK-ID>` (state transition)
+      if (arg && TASK_VERBS.includes(arg) && arg !== 'create') {
+        const taskId = requireDocId(restArgs[0], `task ${arg}`, 'TASK',
+          arg === 'done' ? "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'." :
+          arg === 'complete' ? "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed." :
+          undefined
+        );
+        handleTaskTransition(arg, taskId, config);
+        break;
+      }
+      // Create form: `task create "<title>"` or `task "<title>"` (legacy)
       let title: string;
       if (arg === 'create' && restArgs[0]) {
         title = restArgs[0];
       } else if (arg) {
         title = arg;
       } else {
-        console.error(`❌ Task title required.
+        console.error(`❌ Task title or subcommand required.
 
-   Usage:    bunx @lythos/project-cortex task "<title>"
+   Create:    bunx @lythos/project-cortex task "<title>"
              bunx @lythos/project-cortex task create "<title>"
-   Example:  bunx @lythos/project-cortex task "Fix login redirect bug"
+   Transition: bunx @lythos/project-cortex task <verb> <TASK-ID>
+               (verbs: start, review, done, complete, suspend, resume, reject, terminate, archive)
+   Example:    bunx @lythos/project-cortex task "Fix login redirect bug"
 
    The title becomes the kebab-cased filename suffix; the new task lands
    in cortex/tasks/01-backlog/. To list existing tasks:
@@ -165,7 +231,7 @@ async function main(): Promise<void> {
      epic suspend <EPIC-ID>  Move epic to suspended
      epic resume <EPIC-ID>   Move suspended epic back to active
 
-   To list existing epics:  bunx @lythos/project-cortex list`);
+   To list existing epics:    bunx @lythos/project-cortex list`);
         process.exit(1);
       }
       // Subcommand form: `epic <verb> <EPIC-ID>`
@@ -320,47 +386,39 @@ async function main(): Promise<void> {
       break;
 
     case 'start':
-      moveTask(requireDocId(arg, 'start', 'TASK'), 'in-progress', config, { note: 'Started' });
+      handleTaskTransition('start', requireDocId(arg, 'start', 'TASK'), config);
       break;
 
     case 'review':
-      moveTask(requireDocId(arg, 'review', 'TASK'), 'review', config, { note: 'Deliverables committed' });
+      handleTaskTransition('review', requireDocId(arg, 'review', 'TASK'), config);
       break;
 
     case 'done':
-      moveTask(
-        requireDocId(arg, 'done', 'TASK', "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'."),
-        'completed', config, { note: 'Done' },
-      );
+      handleTaskTransition('done', requireDocId(arg, 'done', 'TASK', "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'."), config);
       break;
 
     case 'complete':
-      // Trailer-driven close: any status → completed, single Status History entry.
-      // Distinct from `done` which strictly requires review → completed.
-      moveTask(
-        requireDocId(arg, 'complete', 'TASK', "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed."),
-        'completed', config, { allowAny: true, note: 'Closed via trailer' },
-      );
+      handleTaskTransition('complete', requireDocId(arg, 'complete', 'TASK', "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed."), config);
       break;
 
     case 'suspend':
-      moveTask(requireDocId(arg, 'suspend', 'TASK'), 'suspended', config, { note: 'Blocked' });
+      handleTaskTransition('suspend', requireDocId(arg, 'suspend', 'TASK'), config);
       break;
 
     case 'resume':
-      moveTask(requireDocId(arg, 'resume', 'TASK'), 'in-progress', config, { note: 'Resumed' });
+      handleTaskTransition('resume', requireDocId(arg, 'resume', 'TASK'), config);
       break;
 
     case 'reject':
-      moveTask(requireDocId(arg, 'reject', 'TASK'), 'in-progress', config, { note: 'Re-work required' });
+      handleTaskTransition('reject', requireDocId(arg, 'reject', 'TASK'), config);
       break;
 
     case 'terminate':
-      moveTask(requireDocId(arg, 'terminate', 'TASK'), 'terminated', config, { allowAny: true, note: 'Terminated' });
+      handleTaskTransition('terminate', requireDocId(arg, 'terminate', 'TASK'), config);
       break;
 
     case 'archive':
-      moveTask(requireDocId(arg, 'archive', 'TASK'), 'archived', config, { allowAny: true, note: 'Archived' });
+      handleTaskTransition('archive', requireDocId(arg, 'archive', 'TASK'), config);
       break;
 
     case 'dispatch-trailers':

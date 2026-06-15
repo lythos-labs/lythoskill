@@ -146,13 +146,13 @@ Status History. When they diverge:
 
 Git trailers parsed by `.husky/post-commit` trigger automatic state transitions:
 
-| Trailer | Effect |
-|---------|--------|
-| `Review: TASK-xxx` | Task in-progress → review (dev complete, submit for review / internal PR) |
-| `Closes: TASK-xxx` | Task review → completed (reviewed and approved / LGTM) |
-| `Task: TASK-xxx review` | Task → review (explicit verb form) |
-| `ADR: ADR-xxx accept` | ADR proposed → accepted |
-| `Epic: EPIC-xxx done` | Epic active → done |
+| Trailer | Generated Command | Effect |
+|---------|-------------------|--------|
+| `Review: TASK-xxx` | `task review TASK-xxx` | Task in-progress → review (dev complete, submit for review / internal PR) |
+| `Closes: TASK-xxx` | `task done TASK-xxx` | Task review → completed (reviewed and approved / LGTM) |
+| `Task: TASK-xxx review` | `task review TASK-xxx` | Task → review (explicit verb form) |
+| `ADR: ADR-xxx accept` | `adr accept ADR-xxx` | ADR proposed → accepted |
+| `Epic: EPIC-xxx done` | `epic done EPIC-xxx` | Epic active → done |
 
 Trailers are processed after the commit finishes, creating a follow-up commit
 with the state change. This is the preferred way to close tasks — it links the

@@ -9,10 +9,10 @@ describe("parseTrailers", () => {
     expect(result.skip).toBe(false);
   });
 
-  it("parses Closes: TASK-* into done command", () => {
+  it("parses Closes: TASK-* into task done command", () => {
     const result = parseTrailers("fix: bug\n\nCloses: TASK-20260504100000001");
     expect(result.trailers).toEqual([
-      { key: "Closes", id: "TASK-20260504100000001", verb: "done", raw: "Closes: TASK-20260504100000001" },
+      { key: "Closes", id: "TASK-20260504100000001", verb: "task done", raw: "Closes: TASK-20260504100000001" },
     ]);
     expect(result.warnings).toEqual([]);
   });
@@ -31,10 +31,10 @@ describe("parseTrailers", () => {
     ]);
   });
 
-  it("parses Review: TASK-* into review command", () => {
+  it("parses Review: TASK-* into task review command", () => {
     const result = parseTrailers("feat: implementation\n\nReview: TASK-20260504100000001");
     expect(result.trailers).toEqual([
-      { key: "Review", id: "TASK-20260504100000001", verb: "review", raw: "Review: TASK-20260504100000001" },
+      { key: "Review", id: "TASK-20260504100000001", verb: "task review", raw: "Review: TASK-20260504100000001" },
     ]);
     expect(result.warnings).toEqual([]);
   });
@@ -50,7 +50,7 @@ describe("parseTrailers", () => {
   it("parses Task: with verb", () => {
     const result = parseTrailers("chore: update\n\nTask: TASK-20260504100000001 review");
     expect(result.trailers).toEqual([
-      { key: "Task", id: "TASK-20260504100000001", verb: "review", raw: "Task: TASK-20260504100000001 review" },
+      { key: "Task", id: "TASK-20260504100000001", verb: "task review", raw: "Task: TASK-20260504100000001 review" },
     ]);
   });
 
@@ -134,8 +134,8 @@ describe("parseTrailers", () => {
     ].join("\n");
     const result = parseTrailers(msg);
     expect(result.trailers).toHaveLength(3);
-    expect(result.trailers[0].verb).toBe("done");
-    expect(result.trailers[1].verb).toBe("review");
+    expect(result.trailers[0].verb).toBe("task done");
+    expect(result.trailers[1].verb).toBe("task review");
     expect(result.trailers[2].verb).toBe("adr accept");
   });
 
@@ -155,7 +155,7 @@ describe("parseTrailers", () => {
   it("handles trailing whitespace in trailer lines", () => {
     const result = parseTrailers("fix: bug\n\nCloses: TASK-20260504100000001   ");
     expect(result.trailers).toEqual([
-      { key: "Closes", id: "TASK-20260504100000001", verb: "done", raw: "Closes: TASK-20260504100000001   " },
+      { key: "Closes", id: "TASK-20260504100000001", verb: "task done", raw: "Closes: TASK-20260504100000001   " },
     ]);
   });
 });
@@ -163,15 +163,15 @@ describe("parseTrailers", () => {
 describe("buildDispatchCommands", () => {
   it("builds commands from parsed trailers", () => {
     const trailers: TrailerResult["trailers"] = [
-      { key: "Closes", id: "TASK-1", verb: "complete", raw: "" },
-      { key: "Task", id: "TASK-2", verb: "review", raw: "" },
+      { key: "Closes", id: "TASK-1", verb: "task done", raw: "" },
+      { key: "Task", id: "TASK-2", verb: "task review", raw: "" },
       { key: "ADR", id: "ADR-1", verb: "adr accept", raw: "" },
       { key: "Epic", id: "EPIC-1", verb: "epic done", raw: "" },
     ];
     const cmds = buildDispatchCommands(trailers);
     expect(cmds).toEqual([
-      "complete TASK-1",
-      "review TASK-2",
+      "task done TASK-1",
+      "task review TASK-2",
       "adr accept ADR-1",
       "epic done EPIC-1",
     ]);

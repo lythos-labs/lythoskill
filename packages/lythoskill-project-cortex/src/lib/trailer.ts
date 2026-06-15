@@ -51,7 +51,7 @@ export function parseTrailers(msg: string): TrailerResult {
         let dispatchVerb: string;
         if (id.startsWith("TASK-")) {
           // Strict semantic: Closes: TASK-* means "reviewed and approved" (review -> done).
-          dispatchVerb = "done";
+          dispatchVerb = "task done";
         } else if (id.startsWith("ADR-")) {
           dispatchVerb = "adr accept";
         } else if (id.startsWith("EPIC-")) {
@@ -69,7 +69,7 @@ export function parseTrailers(msg: string): TrailerResult {
           warnings.push(`post-commit trailer: Review: only supports TASK-* IDs in: ${line}`);
           continue;
         }
-        trailers.push({ key, id, verb: "review", raw });
+        trailers.push({ key, id, verb: "task review", raw });
         break;
       case "Task":
         if (!id.startsWith("TASK-")) {
@@ -84,7 +84,7 @@ export function parseTrailers(msg: string): TrailerResult {
           warnings.push(`post-commit trailer: Task: verb cannot be 'task' (redundant). Use the verb directly, e.g. 'Task: ${id} review' in: ${line}`);
           continue;
         }
-        trailers.push({ key, id, verb, raw });
+        trailers.push({ key, id, verb: `task ${verb}`, raw });
         break;
       case "ADR":
         if (!verb) {

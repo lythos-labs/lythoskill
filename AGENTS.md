@@ -352,15 +352,20 @@ bun packages/lythoskill-project-cortex/src/cli.ts review TASK-xxx → 03-review 
 
 #### Commit Trailers
 
+All task trailers generate `task <verb> <id>` commands (explicit kind prefix):
+
 ```
-Review: TASK-xxx       # in-progress → review  (dev complete, submit for review / internal PR)
-Closes: TASK-xxx        # review → completed    (reviewed and approved / LGTM)
-Task: TASK-xxx review   # Explicit verb (start, review, done, suspend, resume)
-ADR: ADR-xxx accept     # ADR: accept, reject, supersede
-Epic: EPIC-xxx done     # Epic: done, suspend, resume
+Review: TASK-xxx       # → task review TASK-xxx  (in-progress → review)
+Closes: TASK-xxx        # → task done TASK-xxx   (review → completed, strict)
+Task: TASK-xxx review    # → task review TASK-xxx (explicit verb)
+ADR: ADR-xxx accept     # → adr accept ADR-xxx   (ADR: accept, reject, supersede)
+Epic: EPIC-xxx done     # → epic done EPIC-xxx   (Epic: done, suspend, resume)
 ```
 
-Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. This means after `git commit`, you may see an additional commit appear — this is normal. Malformed trailers print warnings but don't block. `Closes: TASK-xxx` is strict: it maps to `done` and requires the task to already be in `review`. Use `Review: TASK-xxx` when development is complete and ready for review. Full syntax: [cortex SKILL.md](packages/lythoskill-project-cortex/skill/SKILL.md).
+Legacy aliases (backward compatible): `start`, `review`, `done`, `complete`, `suspend`,
+`resume`, `reject`, `terminate`, `archive` also work as top-level commands without `task` prefix.
+
+Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. This means after `git commit`, you may see an additional commit appear — this is normal. Malformed trailers print warnings but don't block. `Closes: TASK-xxx` is strict: it maps to `task done` and requires the task to already be in `review`. Use `Review: TASK-xxx` when development is complete and ready for review. Full syntax: [cortex SKILL.md](packages/lythoskill-project-cortex/skill/SKILL.md).
 
 #### Task-Git Discipline
 
