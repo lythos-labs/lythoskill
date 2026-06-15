@@ -80,10 +80,74 @@ Treat it as pure derived state, like `.claude/skills/`.
 **Choice**: Option A — Split into `skill-deck.lock` (declarative, git-tracked) and `skill-deck.state` (operational, git-ignored)
 
 **Rationale**:
-- The two concerns are genuinely different: "what version is locked" vs "when did we last link"
+- The two concerns are genuinely different: "what version is locked" vs "when/where did we last link"
 - `skill-deck.lock` should behave like `bun.lockb` — agents expect lockfiles to be stable
 - `skill-deck.state` can evolve independently (add more operational metadata without affecting git)
 - The migration cost is one-time and mechanical
+
+## Split Schema
+
+### `skill-deck.lock` (declarative, git-tracked)
+
+Only fields that are **reproducible across machines**:
+
+```json
+{
+  "version": "1.0.0",
+  "deck_source": {
+    "path": "skill-deck.toml",
+    "content_hash": "sha256-of-skill-deck.toml"
+  },
+  "skills": [
+    {
+      "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
+      "alias": "lythoskill-deck",
+      "deck_niche": "meta.governance.deck",
+      "type": "innate",
+      "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
+      "content_hash": "sha256-of-skill-content"
+    }
+  ]
+}
+```
+
+**Key principle**: No timestamps, no local paths, no symlink modes. Purely "what was declared and what hash was linked."
+
+### `skill-deck.state` (operational, git-ignored)
+
+All **local environment state**:
+
+```json
+{
+  "generated_at": "2026-06-15T16:03:27.636Z",
+  "working_set": ".claude/skills",
+  "cold_pool": "~/.agents/skill-repos",
+  "skills": [
+    {
+      "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
+      "linked_at": "2026-06-15T16:03:27.627Z",
+      "dest": ".claude/skills/lythoskill-deck",
+      "mode": "symlink",
+      "deck_managed_dirs": [".claude/skills/", "skill-deck.lock"]
+    }
+  ]
+}
+```
+
+**What goes here**:
+- `generated_at` — when `deck link` last ran
+- `working_set` — local working set path (may differ per machine: `.claude/skills` vs `.agents/skills`)
+- `cold_pool` — local cold pool path (may be overridden per machine)
+- `linked_at` — per-skill link timestamp
+- `dest` — local symlink destination path
+- `mode` — symlink vs snapshot (local filesystem decision)
+- `deck_managed_dirs` — which directories this deck manages (local scope)
+
+**Why these are operational, not declarative**:
+- Two developers can have the same `skill-deck.lock` but different `working_set` paths
+- `linked_at` changes on every `deck link` even when content hasn't changed
+- `mode` (symlink vs snapshot) is a local filesystem choice, not a project invariant
+- `dest` is derived from `working_set + alias`, not a declared value
 
 ## Impact
 
