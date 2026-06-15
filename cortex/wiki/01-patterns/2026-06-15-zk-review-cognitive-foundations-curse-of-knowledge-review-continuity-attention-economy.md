@@ -65,6 +65,24 @@ category: pattern
 - "方向 A 还是方向 B？"（战略判断）
 - "ZK agent 发现的 gap 是真的 blocker 还是探索友好的？"（经验判断）
 
+### 4. 约束产生纪律（Constraint Produces Discipline）—— 为什么"利用限制"优于"补偿限制"
+
+**传统假设**：agent 的无记忆性是缺陷，需要补偿（更长的 context window、更好的 RAG、session 记忆）。
+
+**这个项目的调整**：把无记忆性当作**约束条件来设计**——约束产生纪律：
+
+- **因为 agent 每次都是 freshman，所有重要信息必须外化** → cortex task/ADR/AGENTS.md gotcha 不是"好习惯"，是**必要条件**
+- **因为 agent 不能靠记忆传递意图，goal 必须是声明式的** → WHAT/WHY/HOW task card、ADR，而不是命令式（"你上次说要做 X，接着做"）
+- **因为 agent 不能靠上下文积累判断"现在在哪"，状态必须是可查询的** → cortex probe、daily ground truth，而不是隐式
+
+**SSOT 三轴模型**是这个设计的显式表达：外化（写下来）、压缩（蒸馏到刚好够）、清零（利用空白状态）。三轴里唯一"利用"无记忆性而不是"补偿"它的是**清零轴**（ZK Review/ZK Validation）。
+
+**副产品**："人员流动大"从风险变成了**中性事实**。传统项目里人员流动导致知识流失，因为知识在人脑里。这个项目里知识在 git 里，人员流动不影响——因为每个"人员"（agent）本来就是 freshman。
+
+**并发优势**：传统团队里"老人"是稀缺资源，不能并发。freshman 可以并发，只要基础设施足够好。arena（多 agent 并行评估）、ZK Review（同时跑多个 ZK agent）都是在利用这个特性。
+
+**类比**：Immutable data 强制显式状态管理 → 无记忆性强制显式知识管理。约束不是缺陷，是设计工具。
+
 ## When to Apply / When Not to Apply
 
 **适用**：
