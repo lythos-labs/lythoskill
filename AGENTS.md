@@ -25,6 +25,7 @@ Non-breaking additions → APPEND. Breaking changes → reorder freely.
 If you were just dropped into this repo, run these five steps **before touching any code**:
 
 ```
+# Prerequisite: Bun runtime. Install from https://bun.sh if `bun` command not found.
 bun install
 bun packages/lythoskill-deck/src/cli.ts link
 # read daily/YYYY-MM-DD.md (latest)
@@ -39,6 +40,8 @@ Why this order: dependencies → skills → session state → ground truth → d
 **After executing — now read:**
 
 1. **`daily/YYYY-MM-DD.md` (latest)** — session handoff from the previous agent. Check `git_commit` against current HEAD. If they don't match, the handoff is stale — use `git log` as ground truth instead.
+   - **Structure**: daily handoffs have structured sections (not freeform): Git Commit, Session Summary, Task Status, Epic Status, Pitfalls, Next Steps. Look for these to orient quickly.
+   - **Full format**: see [daily-template.md](packages/lythoskill-project-scribe/skill/references/daily-template.md).
 2. **`cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
 3. **`skill-deck.toml`** — what skills are active in this project.
 4. **This file (AGENTS.md)** — Z1-Z3 for working, Z4 for reference. Load on demand.
@@ -46,6 +49,25 @@ Why this order: dependencies → skills → session state → ground truth → d
 **If no daily handoff exists** (rare, first session on a fresh clone): degrade to `git log --oneline -10` + `ls cortex/epics/01-active/` + `ls cortex/tasks/02-in-progress/` to reconstruct state.
 
 **Probe drift is normal if you just committed.** If `probe` reports an epic mismatch or empty shell right after you (or a previous agent in the same session) committed changes, that's expected — the handoff and probe output reflect the state *before* the commit. Use `git log` to see what changed. Don't auto-fix drift without understanding why it's there.
+
+**What probe output looks like** (typical findings and what to do):
+
+```
+📄 Tasks:
+  ✅ cortex/tasks/01-backlog: 6 consistent
+  ❌ cortex/tasks/02-in-progress: 1 stale — TASK-xxx-foo (last commit 7 days ago)
+📋 Epics:
+  ❌ cortex/epics/01-active: 1 mismatch — EPIC-yyy-bar is in 01-active but Status History says done
+```
+
+| Finding | What it means | What to do |
+|---------|-------------|------------|
+| **Epic mismatch** | File location disagrees with Status History (e.g., file in `01-active` but last row says `done`) | Investigate with `git log`, do NOT auto-fix |
+| **Empty shell** | Task file has blank required sections (Background/Requirements/Acceptance) | Investigate with `git log`, do NOT auto-fill |
+| **Stale task** | In-progress task with no recent commits | Investigate with `git log --grep TASK-xxx`, do NOT auto-move |
+| **Clean (✅)** | Directory location and Status History agree | Nothing |
+
+**Rule of thumb**: probe findings are signals, not commands. Always investigate with `git log` before moving files.
 
 ### 1. Identity
 
