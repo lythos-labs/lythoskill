@@ -190,6 +190,7 @@ io.log(`\n📊 Summary: ${totalChecked} documents checked, ${totalIssues} issues
 3. ZK agent must distinguish "documented behavior" vs "personal preference"
 4. "Not even wrong" feedback = ZK agent doesn't understand the domain → should be challenged, not accepted
 5. The original task card's "≥ 7/10" target was under-specified — without rubric, ZK agents score based on shifting intuition
+6. **ZK Trial design**: 门外汉测试（3轮，暴露认知 gap，不评分）和专家验收（3轮，基于文档评分）是独立的测试，不应绑定。每个测试有自己的收敛标准。
 
 ## Related Files
 - Modified: `packages/lythoskill-project-cortex/src/commands/probe.ts`, `packages/lythoskill-project-cortex/skill/SKILL.md`
