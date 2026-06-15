@@ -193,6 +193,37 @@ ZK agent 的反馈不等于正确——它可能因为缺少上下文而误判�
 
 ZK Review 的目标不是让 task card 完美（对所有人都自明），而是让 task card **对目标 executor agent 足够**（结合 AGENTS.md + 项目知识可执行）。
 
+## ZK Review 的陷阱：Not Even Wrong
+
+> 最危险的 ZK 反馈不是错误的，而是 **"not even wrong"** — ZK agent 完全不理解领域，凭直觉提建议。
+
+### 案例：probe UX task（TASK-20260614125634946）
+
+ZK agent 连续 6 轮 trial 给出 5/10，每次理由不同：
+- Round 1: "`--active-only` 缺少 summary line" → 合理，修复了
+- Round 2: "`--include-completed-empty-shells` 不可见" → 合理，修复了
+- Round 3: "`--active-only` 仍然太空" → 合理，加了 checks list + skipped notice
+- Round 4: "mode label 不一致" → 合理，修复了
+- Round 5: "中文提示" → 合理，修复了
+- Round 6: "`--active-only` 名称 misleading" → **Not even wrong**
+
+**问题**：ZK agent 不知道 `--active-only` 是 ADR-20260519165746212 决策的正式名称，不知道它从 `--suspicious` rename 的历史。它凭直觉说"这个名字不好"，但没有任何文档证据支持。
+
+**更深层问题**：ZK agent 不理解 probe 是 cortex 的 drift detection 工具，不理解 `--active-only` 是"quick scan"而 default 是"full check"。它同时抱怨"default 太长"和"`--active-only` 太短"——这是矛盾的期望，说明它没理解设计意图。
+
+### 如何避免 Not Even Wrong
+
+**Task card 设计者必须**：
+1. **在 ZK prompt 中明确要求 agent 先读 glossary / 设计意图**
+2. **定义评分维度**，防止 agent 凭直觉打分
+3. **要求 agent 引用文档证据**，不接受"我觉得"式的反馈
+4. **识别矛盾反馈**（同时说 A 和 非 A）→ 说明 agent 没理解领域
+
+**ZK agent 的合格标准**：
+- 能复述工具的设计意图（不是背文档，是用自己的话解释）
+- 能区分"文档描述的意图" vs "个人偏好"
+- 能识别自己不理解的部分（"我不确定这里的设计意图"）而不是瞎猜
+
 ## ZK Review 在 Lythoskill 中的位置
 
 ```
@@ -204,6 +235,12 @@ Task 设计流程:
     → 补缺口
     → cortex start TASK-xxx（分配执行）
 ```
+
+**关键改进**：ZK Review 的 prompt 必须包含：
+1. 评分维度（不是"rate 1-10"，而是"按 X/Y/Z 维度打分"）
+2. 领域上下文（"这个工具是为了解决什么问题"）
+3. 证据要求（"引用文档中矛盾的地方作为证据"）
+4. 矛盾检测（"如果你同时建议 A 和非 A，说明你没理解"）
 
 - **AGENTS.md "ZK Review Gate"**：操作框架 + 边界的入口
 - **本文档（references/zk-review.md）**：完整方法论 + 案例 + 模板

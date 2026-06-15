@@ -2,8 +2,10 @@ import { describe, it, expect } from "bun:test";
 import {
   executeProbePlan,
   buildProbePlan,
+  printProbeSummary,
   type ProbeIO,
   type ProbePlan,
+  type ProbeReport,
 } from "./probe.js";
 import type { WorkflowConfig } from "../types.js";
 
@@ -18,7 +20,7 @@ function makeMockIO(files: Record<string, string>): ProbeIO {
     absoluteFiles[absPath] = value;
   }
 
-  return {
+  const io: ProbeIO = {
     readFile: (path: string) => {
       const absPath = path.startsWith("/") ? path : `/project/${path}`;
       return absoluteFiles[absPath] ?? null;
@@ -56,6 +58,15 @@ function makeMockIO(files: Record<string, string>): ProbeIO {
     warn: (msg: string) => warns.push(msg),
     cwd: () => "/project",
   };
+
+  // Attach logs/warns for test inspection
+  (io as any)._logs = logs;
+  (io as any)._warns = warns;
+  return io;
+}
+
+function getLogs(io: ProbeIO): string[] {
+  return (io as any)._logs ?? [];
 }
 
 const mockConfig: WorkflowConfig = {
@@ -280,5 +291,172 @@ describe("executeProbePlan — with mock IO", () => {
     const report = executeProbePlan(plan, io);
     // Should not crash, just skip the unreadable file
     expect(report.statusResults.length).toBe(0);
+  });
+});
+
+describe("printProbeSummary — output UX", () => {
+  function makeReport(partial: Partial<ProbeReport> & { summary: ProbeReport["summary"] }): ProbeReport {
+    return {
+      statusResults: [],
+      laneCounts: { main: 0, emergency: 0, unknown: 0 },
+      laneWarnings: [],
+      couplingWarnings: [],
+      staleBacklog: [],
+      driftedEpics: [],
+      emptyShells: [],
+      coverageDrift: [],
+      nonAsciiSlugs: [],
+      ...partial,
+    };
+  }
+
+  it("default mode shows summary line with document count", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      summary: {
+        activeOnly: false,
+        includeCompletedEmptyShells: false,
+        totalIssues: 0,
+        totalChecked: 42,
+        hasStatusIssues: false,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: false,
+        hasEmptyShells: false,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    expect(logs.some(l => l.includes("✅ All documents consistent."))).toBe(true);
+    expect(logs.some(l => l.includes("📊 42 documents checked, 0 issue(s) found."))).toBe(true);
+  });
+
+  it("default mode shows issue count when issues exist", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      statusResults: [
+        { file: "a.md", type: "task", expectedStatus: "backlog", lastHistoryLine: "in-progress", hasHistorySection: true, match: "mismatch", suggestion: "move" },
+      ],
+      summary: {
+        activeOnly: false,
+        includeCompletedEmptyShells: false,
+        totalIssues: 1,
+        totalChecked: 10,
+        hasStatusIssues: true,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: false,
+        hasEmptyShells: false,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    expect(logs.some(l => l.includes("📊 10 documents checked, 1 issue(s) found."))).toBe(true);
+  });
+
+  it("active-only mode shows confirmation lines when clean", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      summary: {
+        activeOnly: true,
+        includeCompletedEmptyShells: false,
+        totalIssues: 0,
+        totalChecked: 20,
+        hasStatusIssues: false,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: false,
+        hasEmptyShells: false,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    expect(logs.some(l => l.includes("✅ No stale backlog items"))).toBe(true);
+    expect(logs.some(l => l.includes("✅ No empty shells in active states"))).toBe(true);
+    expect(logs.some(l => l.includes("✅ No coverage drift detected"))).toBe(true);
+    expect(logs.some(l => l.includes("✅ Epic lanes within limits"))).toBe(true);
+    expect(logs.some(l => l.includes("✅ No actionable issues found."))).toBe(true);
+    // ── active-only ALSO gets summary line now ──
+    expect(logs.some(l => l.includes("📊 20 documents checked, 0 issue(s) found."))).toBe(true);
+  });
+
+  it("active-only mode skips confirmation for categories with issues", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      staleBacklog: ["TASK-001 (5d old)"],
+      summary: {
+        activeOnly: true,
+        includeCompletedEmptyShells: false,
+        totalIssues: 1,
+        totalChecked: 20,
+        hasStatusIssues: false,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: true,
+        hasEmptyShells: false,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    // Should NOT print "No stale backlog items" when there IS stale backlog
+    expect(logs.some(l => l.includes("✅ No stale backlog items"))).toBe(false);
+    // Should still print other clean confirmations
+    expect(logs.some(l => l.includes("✅ No empty shells in active states"))).toBe(true);
+  });
+
+  it("include-completed-empty-shells shows scope indicator and confirmation when no shells anywhere", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      summary: {
+        activeOnly: false,
+        includeCompletedEmptyShells: true,
+        totalIssues: 0,
+        totalChecked: 30,
+        hasStatusIssues: false,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: false,
+        hasEmptyShells: false,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    expect(logs.some(l => l.includes("📋 Empty-shell detection: expanded"))).toBe(true);
+    expect(logs.some(l => l.includes("includes completed, terminated, archived"))).toBe(true);
+    expect(logs.some(l => l.includes("✅ No empty shells in any state (checked 30 documents)"))).toBe(true);
+  });
+
+  it("include-completed-empty-shells does NOT show confirmation when shells exist", () => {
+    const io = makeMockIO({});
+    const report = makeReport({
+      emptyShells: ["TASK-001: cortex/tasks/01-backlog/TASK-001.md"],
+      summary: {
+        activeOnly: false,
+        includeCompletedEmptyShells: true,
+        totalIssues: 1,
+        totalChecked: 30,
+        hasStatusIssues: false,
+        hasLaneIssues: false,
+        hasCouplingIssues: false,
+        hasStaleness: false,
+        hasEmptyShells: true,
+        hasCoverageDrift: false,
+        hasNonAsciiSlugs: false,
+      },
+    });
+    printProbeSummary(report, io);
+    const logs = getLogs(io);
+    expect(logs.some(l => l.includes("✅ No empty shells in any state"))).toBe(false);
+    expect(logs.some(l => l.includes("📭 Empty shells"))).toBe(true);
   });
 });

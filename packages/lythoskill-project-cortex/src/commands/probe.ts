@@ -86,6 +86,7 @@ export interface ProbeReport {
     activeOnly: boolean;
     includeCompletedEmptyShells: boolean;
     totalIssues: number;
+    totalChecked: number;
     hasStatusIssues: boolean;
     hasLaneIssues: boolean;
     hasCouplingIssues: boolean;
@@ -542,8 +543,16 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     }
   }
 
+  const totalChecked = taskFiles.length + epicFiles.length + adrFiles.length;
   const allStatusIssues = [...allTaskResults, ...allEpicResults, ...allAdrResults].filter(r => r.match !== 'ok');
-  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + emptyShells.length + coverageDrift.length + nonAsciiSlugs.length;
+  // emptyShells count should respect filter mode for totalIssues
+  const emptyShellMode: 'default' | 'active-only' | 'all' = plan.options.includeCompletedEmptyShells
+    ? 'all'
+    : plan.options.activeOnly
+      ? 'active-only'
+      : 'default';
+  const filteredEmptyShellCount = filterEmptyShells(emptyShells, emptyShellMode).length;
+  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length;
 
   return {
     statusResults: [...allTaskResults, ...allEpicResults, ...allAdrResults],
@@ -559,11 +568,12 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       activeOnly: plan.options.activeOnly,
       includeCompletedEmptyShells: plan.options.includeCompletedEmptyShells,
       totalIssues,
+      totalChecked,
       hasStatusIssues: allStatusIssues.length > 0,
       hasLaneIssues: laneWarnings.length > 0,
       hasCouplingIssues: couplingWarnings.length > 0,
       hasStaleness: staleBacklog.length > 0 || driftedEpics.length > 0,
-      hasEmptyShells: emptyShells.length > 0,
+      hasEmptyShells: filteredEmptyShellCount > 0,
       hasCoverageDrift: coverageDrift.length > 0,
       hasNonAsciiSlugs: nonAsciiSlugs.length > 0,
     },
@@ -607,7 +617,7 @@ function buildConfigFromPlan(plan: ProbePlan): WorkflowConfig {
 }
 
 export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProbeIO): void {
-  const { activeOnly } = report.summary;
+  const { activeOnly, includeCompletedEmptyShells, totalChecked, totalIssues } = report.summary;
 
   // Header
   if (!activeOnly) {
@@ -618,10 +628,35 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     io.log('\n🔎 Probing active items only (empty shells, staleness, drift, lane violations)...\n');
   }
 
+  // ── Flag scope indicators (top of output for visibility) ────────────
+  if (includeCompletedEmptyShells) {
+    io.log('📋 Empty-shell detection: expanded (includes completed, terminated, archived, suspended, done, accepted, rejected, superseded)');
+  }
+
+  // ── active-only checklist header ────────────────────────────────────
+  if (activeOnly) {
+    io.log('ℹ️  Checks: lane occupancy | stale backlog | empty shells (active) | coverage drift | ADR-Epic coupling | non-ASCII slugs');
+    io.log('⏭️  Skipped: per-file status consistency (use default mode for full check)\n');
+  }
+
   // Status consistency sections
   const taskResults = report.statusResults.filter(r => r.type === 'task');
   const epicResults = report.statusResults.filter(r => r.type === 'epic');
   const adrResults = report.statusResults.filter(r => r.type === 'adr');
+
+  if (activeOnly) {
+    // Show active directory counts for visibility
+    const activeTaskResults = taskResults.filter(r => r.file.includes('01-backlog') || r.file.includes('02-in-progress') || r.file.includes('03-review'));
+    const activeEpicResults = epicResults.filter(r => r.file.includes('01-active'));
+    const activeAdrResults = adrResults.filter(r => r.file.includes('01-proposed'));
+    if (activeTaskResults.length > 0 || activeEpicResults.length > 0 || activeAdrResults.length > 0) {
+      io.log('📂 Active documents checked:');
+      if (activeTaskResults.length > 0) io.log(`     Tasks: ${activeTaskResults.length}`);
+      if (activeEpicResults.length > 0) io.log(`     Epics: ${activeEpicResults.length}`);
+      if (activeAdrResults.length > 0) io.log(`     ADRs: ${activeAdrResults.length}`);
+      io.log('');
+    }
+  }
 
   if (!activeOnly) {
     printResults(taskResults, '📄 Tasks', io);
@@ -666,22 +701,22 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
   }
 
   // Empty shells
-  if (report.emptyShells.length > 0) {
-    const mode: 'default' | 'active-only' | 'all' = report.summary.includeCompletedEmptyShells
-      ? 'all'
-      : report.summary.activeOnly
-        ? 'active-only'
-        : 'default';
-    const filtered = filterEmptyShells(report.emptyShells, mode);
+  const emptyShellMode: 'default' | 'active-only' | 'all' = includeCompletedEmptyShells
+    ? 'all'
+    : activeOnly
+      ? 'active-only'
+      : 'default';
+  const filteredEmptyShells = filterEmptyShells(report.emptyShells, emptyShellMode);
 
-    if (filtered.length > 0) {
+  if (report.emptyShells.length > 0) {
+    if (filteredEmptyShells.length > 0) {
       io.log('\n📭 Empty shells (template not filled):');
-      for (const s of filtered) {
+      for (const s of filteredEmptyShells) {
         io.log(`     ⚠️  ${s}`);
       }
-      io.log('     💡 Edit the file to fill 背景, 需求详情, 验收标准.');
+      io.log('     💡 Edit the file to fill background, requirements, and acceptance criteria.');
       if (!activeOnly) {
-        io.log('     💡 空壳任务对 subagent 零指导价值 — 填内容优先于改代码.');
+        io.log('     💡 Empty-shell tasks provide zero guidance to subagents — fill content before writing code.');
       }
     }
   }
@@ -702,10 +737,37 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     io.log('     💡 Rename with `git mv` or use the slug migration script.');
   }
 
+  // ── Confirmation lines for clean states ───────────────────────────
+  if (activeOnly) {
+    if (report.staleBacklog.length === 0) {
+      io.log('\n✅ No stale backlog items');
+    }
+    if (filteredEmptyShells.length === 0) {
+      io.log('✅ No empty shells in active states');
+    }
+    if (report.coverageDrift.length === 0) {
+      io.log('✅ No coverage drift detected');
+    }
+    if (report.laneWarnings.length === 0 && report.laneCounts.main <= 1 && report.laneCounts.emergency <= 1) {
+      io.log('✅ Epic lanes within limits');
+    }
+    if (report.couplingWarnings.length === 0) {
+      io.log('✅ No ADR-Epic coupling issues');
+    }
+    if (report.nonAsciiSlugs.length === 0) {
+      io.log('✅ No non-ASCII slug violations');
+    }
+  }
+
+  // ── Include-completed-empty-shells confirmation ──────────────────────
+  if (includeCompletedEmptyShells && report.emptyShells.length === 0) {
+    io.log(`\n✅ No empty shells in any state (checked ${totalChecked} documents)`);
+  }
+
   // Summary
   io.log('\n' + '─'.repeat(50));
-  if (report.summary.totalIssues === 0) {
-    io.log(activeOnly ? '✅ No issues found in active items.' : '✅ All clear! No inconsistencies found.');
+  if (totalIssues === 0) {
+    io.log(activeOnly ? '✅ No actionable issues found.' : '✅ All documents consistent.');
   } else {
     const allStatusIssues = report.statusResults.filter(r => r.match !== 'ok');
     if (!activeOnly && allStatusIssues.length > 0) {
@@ -720,7 +782,29 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     if (report.laneWarnings.length > 0) {
       io.log(`⚠️  Found ${report.laneWarnings.length} lane warning(s) — see "Epic lanes" section above.`);
     }
+    if (report.staleBacklog.length > 0) {
+      io.log(`⚠️  Found ${report.staleBacklog.length} stale backlog item(s).`);
+    }
+    if (report.driftedEpics.length > 0) {
+      io.log(`⚠️  Found ${report.driftedEpics.length} drifted epic(s).`);
+    }
+    if (report.emptyShells.length > 0) {
+      io.log(`⚠️  Found ${report.emptyShells.length} empty shell(s).`);
+    }
+    if (report.coverageDrift.length > 0) {
+      io.log(`⚠️  Found ${report.coverageDrift.length} coverage drift(s).`);
+    }
+    if (report.nonAsciiSlugs.length > 0) {
+      io.log(`⚠️  Found ${report.nonAsciiSlugs.length} non-ASCII slug(s).`);
+    }
   }
+  // Summary line for all modes
+  const modeLabel = activeOnly
+    ? '(mode: --active-only)'
+    : includeCompletedEmptyShells
+      ? '(mode: --include-completed-empty-shells)'
+      : '(mode: default)';
+  io.log(`📊 ${totalChecked} documents checked, ${totalIssues} issue(s) found. ${modeLabel}`);
   io.log('');
 }
 
@@ -731,6 +815,19 @@ function printResults(results: ProbeResult[], label: string, io: ProbeIO): void 
 
   if (results.length === 0) {
     io.log('  (none)');
+    return;
+  }
+
+  // If all OK, collapse into directory summaries
+  if (issues.length === 0) {
+    const byDir = new Map<string, number>();
+    for (const r of results) {
+      const dir = r.file.split('/').slice(0, -1).join('/') || '(root)';
+      byDir.set(dir, (byDir.get(dir) ?? 0) + 1);
+    }
+    for (const [dir, count] of byDir) {
+      io.log(`  ✅ ${dir}: ${count} consistent`);
+    }
     return;
   }
 

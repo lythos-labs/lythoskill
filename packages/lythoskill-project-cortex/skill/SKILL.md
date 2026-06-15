@@ -10,6 +10,7 @@ description: |
   directories enforce workflow order. Timestamp IDs prevent collision.
   ZK task review (WHAT/WHY/HOW) ensures subagent-readable requirements before assignment.
   probe detects stale backlog, epic drift, and history mismatches.
+  **Task-git discipline**: One task = 2-5 commits (core, tests, docs, trailer). Every commit includes TASK-xxx for traceability. Task card includes Commit Map and Verification Matrix.
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
@@ -91,6 +92,21 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} dispatch-trailers
 >
 > **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。标题请用英文，确保 slug 只含 ASCII 字符。
 
+## Task-Git Discipline
+
+**One task = 2-5 commits, not 1 giant commit.** Separate:
+1. **Core change** — implementation
+2. **Tests** — co-located `*.test.ts`
+3. **Docs/templates** — SKILL.md, AGENTS.md updates
+4. **Review trailer** — `Review: TASK-xxx` empty commit
+
+**Task card must include:**
+- **Commit Map**: `| Hash | Message | Contains |` — reviewer runs `git show <hash>`
+- **Verification Matrix**: `| # | Claim | Verify | Expected |` — each AC has `→ Verify: <command>`
+- **Quick Check**: 30-second bash block reviewer can copy-paste
+
+**Every commit message includes `TASK-xxx`.** Enables `git log --grep TASK-xxx` to reconstruct full history.
+
 # Generate INDEX.md with overview stats and document listing
 bunx @lythos/project-cortex@{{PACKAGE_VERSION}} index
 
@@ -147,9 +163,9 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe --include-completed-empty-
 
 | Flag | Behavior | When to use |
 |------|----------|-------------|
-| *(none)* | Full check: status consistency + lane occupancy + ADR-Epic coupling + staleness + empty shells + coverage drift + non-ASCII slugs | Default — run at session start/end |
+| *(none)* | Full check: status consistency + lane occupancy + ADR-Epic coupling + staleness + empty shells (active states only) + coverage drift + non-ASCII slugs | Default — run at session start/end |
 | `--active-only` | Skips per-file status consistency. Only checks: lane occupancy, coupling, staleness, drift, empty shells, coverage drift, slugs. Empty-shell filter narrowed to backlog/in-progress/proposed only. | Quick scan — "what needs my attention now?" |
-| `--include-completed-empty-shells` | Expands empty-shell detection to include completed, terminated, archived, done, suspended, accepted, rejected, superseded directories. | Audit — "did anything slip through with unfilled templates?" |
+| `--include-completed-empty-shells` | Expands empty-shell detection to include completed, terminated, archived, done, suspended, accepted, rejected, superseded directories. | Historical review — "did any templates slip through unfilled in old tasks?" |
 
 **Backward compatibility**: `--suspicious` is accepted as a deprecated alias for `--active-only` and prints a warning to stderr.
 
@@ -161,9 +177,17 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe --include-completed-empty-
 | Lane occupancy | ✅ | ✅ | Max 1 active epic per lane (main / emergency) |
 | ADR-Epic coupling | ✅ | ✅ | Proposed ADR must not reference active epic |
 | Staleness | ✅ | ✅ | Backlog tasks >3 days old; active epics >3 days old |
-| Empty shells | ✅ | ✅ | Template placeholders never filled by agent |
-| Coverage drift | ✅ | ✅ | Git commits since last coverage snapshot |
+| Empty shells | ✅ (active states only) | ✅ (active states only) | Template placeholders never filled by agent. Default and `--active-only` both check active states only; use `--include-completed-empty-shells` to audit all states. |
+| Coverage drift | ✅ | ✅ | Git commits since last coverage snapshot. **Only appears when `packages/*/test/scenarios/coverage-snapshot-*.md` files exist and source files have changed since the snapshot date.** If no snapshots exist, this check silently passes. |
 | Non-ASCII slugs | ✅ | ✅ | Filenames must be ASCII-only |
+
+### Glossary
+
+| Term | Definition |
+|------|------------|
+| **Empty shell** | A task/epic/ADR file created by `cortex` CLI but never filled by an agent. Detected by template placeholders (`⚠️ PLACEHOLDER_`, `需求1`, `<!-- 填写`) that remain in the content. Empty shells provide zero guidance to subagents — filling content is higher priority than writing code. |
+| **Stale** | Backlog tasks or active epics that have been in their current state for >3 days without progress. Indicates potential state drift — either the work is done (should be closed) or the task is blocked (should be suspended). |
+| **Coverage drift** | Changes to source files since the last coverage snapshot was taken. Detected by comparing git commits since the snapshot date. Only relevant when `packages/*/test/scenarios/coverage-snapshot-*.md` files exist. |
 
 ### Probe Validation Loop
 
@@ -302,18 +326,44 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe
 ```
 Output when consistent:
 ```
-🔍 Probing cortex consistency...
+🔍 Probing status consistency...
+Rule: Directory location is the source of truth.
+Status History inside files should reflect the latest move.
+
+📄 Tasks:
+  ✅ file1
+  ✅ file2
+
+🛤️  Epic lanes (active):
+     main:      0
+     emergency: 0
+
+──────────────────────────────────────────────────
 ✅ All documents consistent.
+📊 42 documents checked, 0 issue(s) found.
 ```
 Output when mismatches found:
 ```
-🔍 Probing cortex consistency...
-⚠️  1 inconsistency found:
+🔍 Probing status consistency...
+Rule: Directory location is the source of truth.
+Status History inside files should reflect the latest move.
 
-  cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
-    Status History claims: 02-in-progress
-    Actual directory:      01-backlog
-    → File location does not match latest status record
+📄 Tasks:
+  ❌ cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
+     → Status History 最后记录 "in-progress" 与目录状态 "backlog" 不一致...
+
+  ⚠️  1 个问题需人工确认
+
+🛤️  Epic lanes (active):
+     main:      0
+     emergency: 0
+
+──────────────────────────────────────────────────
+⚠️  Found 1 status issue(s) requiring human confirmation.
+   Please review the items above and decide:
+   - Move file to correct directory, OR
+   - Update Status History inside the file.
+📊 42 documents checked, 1 issue(s) found.
 ```
 ## Task State Machine (FSM)
 

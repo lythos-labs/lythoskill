@@ -362,6 +362,48 @@ Epic: EPIC-xxx done     # Epic: done, suspend, resume
 
 Post-commit hook auto-dispatches to cortex CLI and creates a follow-up commit. This means after `git commit`, you may see an additional commit appear — this is normal. Malformed trailers print warnings but don't block. `Closes: TASK-xxx` is strict: it maps to `done` and requires the task to already be in `review`. Use `Review: TASK-xxx` when development is complete and ready for review. Full syntax: [cortex SKILL.md](packages/lythoskill-project-cortex/skill/SKILL.md).
 
+#### Task-Git Discipline
+
+**Commit granularity = reviewer entry points.** One task should produce 2-5 commits, not 1 giant commit. Separate:
+1. **Core change** — the implementation
+2. **Tests** — co-located `*.test.ts` additions
+3. **Docs/templates** — SKILL.md, AGENTS.md, template updates
+4. **Review trailer** — `Review: TASK-xxx` empty commit
+
+**Why**: `git show <hash>` gives reviewer a precise, stable entry point for each facet. A single commit with 16 file renames + tests + regex fix forces reviewer to parse a mixed diff.
+
+**Commit-task traceability**: Every commit message includes `TASK-xxx`. This enables `git log --grep TASK-xxx` to reconstruct the full change history for a task. The task card's "Commit Map" section lists hashes and their contents — reviewer runs `git show <hash>` to verify.
+
+**Verification Matrix pattern**: Each Acceptance Criteria item should include `→ Verify: <command>` with expected output. Don't say "tests pass" — say `→ Verify: bun test <path> — 14 pass, 0 fail`.
+
+#### Skill Build & Deck Refresh Lifecycle
+
+**When you modify `packages/*/skill/SKILL.md` or `packages/*/skill/scripts/`:**
+
+```
+edit packages/<name>/skill/SKILL.md  →  bun packages/lythoskill-creator/src/cli.ts build  →  skills/<name>/ updated
+                                                                      ↓
+deck link  →  .agents/skills/<name>/ refreshed  →  agent sees updated skill
+```
+
+**Commands**:
+- `bun packages/lythoskill-creator/src/cli.ts build` — build all skills from `packages/*/skill/` to `skills/`
+- `bun packages/lythoskill-creator/src/cli.ts build <name>` — build single skill (e.g., `build project-cortex`)
+- `deck link` — reconcile `.agents/skills/` working set from `skills/` (cold pool → working set)
+
+**Why this matters**: Agent reads `.agents/skills/` (working set), not `packages/*/skill/` (source). If you edit source but don't build + deck link, the agent sees stale skill. Pre-commit hook auto-builds when `packages/*/skill/` files are staged, but **manual edits without commit** require manual build + deck link.
+
+**Full daily cycle**:
+```
+bun install → deck link → edit code → test → edit skill source → build → deck link → commit → push
+```
+
+**Release cycle** (includes build):
+```
+bunx @lythos/skill-creator@0.16.0 bump  →  versions aligned + skills built + committed
+bun install → commit → push → ./scripts/publish.sh
+```
+
 #### Key Commands
 
 | Need | Command |
