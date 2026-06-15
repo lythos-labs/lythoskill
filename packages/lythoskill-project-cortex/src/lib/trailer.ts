@@ -72,8 +72,16 @@ export function parseTrailers(msg: string): TrailerResult {
         trailers.push({ key, id, verb: "review", raw });
         break;
       case "Task":
+        if (!id.startsWith("TASK-")) {
+          warnings.push(`post-commit trailer: Task: prefix requires TASK-* ID, got ${id}. Use Epic: for EPIC-* or ADR: for ADR-* in: ${line}`);
+          continue;
+        }
         if (!verb) {
           warnings.push(`post-commit trailer: Task: requires a verb in: ${line}`);
+          continue;
+        }
+        if (verb.startsWith("task ") || verb === "task") {
+          warnings.push(`post-commit trailer: Task: verb cannot be 'task' (redundant). Use the verb directly, e.g. 'Task: ${id} review' in: ${line}`);
           continue;
         }
         trailers.push({ key, id, verb, raw });

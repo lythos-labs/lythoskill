@@ -54,6 +54,22 @@ describe("parseTrailers", () => {
     ]);
   });
 
+  it("warns when Task: is used with non-TASK ID", () => {
+    const result = parseTrailers("fix: reactivate\n\nTask: EPIC-20260504100000001 resume");
+    expect(result.trailers).toEqual([]);
+    expect(result.warnings).toEqual([
+      "post-commit trailer: Task: prefix requires TASK-* ID, got EPIC-20260504100000001. Use Epic: for EPIC-* or ADR: for ADR-* in: Task: EPIC-20260504100000001 resume",
+    ]);
+  });
+
+  it("warns when Task: verb is 'task' (redundant)", () => {
+    const result = parseTrailers("fix: bug\n\nTask: TASK-20260504100000001 task review");
+    expect(result.trailers).toEqual([]);
+    expect(result.warnings).toEqual([
+      "post-commit trailer: Task: verb cannot be 'task' (redundant). Use the verb directly, e.g. 'Task: TASK-20260504100000001 review' in: Task: TASK-20260504100000001 task review",
+    ]);
+  });
+
   it("warns when Task: lacks verb", () => {
     const result = parseTrailers("chore: update\n\nTask: TASK-20260504100000001");
     expect(result.trailers).toEqual([]);
