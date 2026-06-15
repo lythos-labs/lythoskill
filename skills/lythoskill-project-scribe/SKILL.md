@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.16.0
+version: 0.17.1
 description: |
   Session context dump. Self-assess what the conversation contains that has
   NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,

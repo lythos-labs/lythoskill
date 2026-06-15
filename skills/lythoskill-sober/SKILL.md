@@ -1,6 +1,6 @@
 ---
 name: lythoskill-sober
-version: 0.16.0
+version: 0.17.1
 description: |
   Stay clear-headed. Before you commit to a conclusion, check your basis.
   Is this evidence or assumption? Do the sources agree? What's the
