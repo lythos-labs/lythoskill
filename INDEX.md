@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/6/15 21:17:54
+> 自动生成于 2026/6/15 22:37:18
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 319 | 进行中: 0, 待验收: 2, 已完成: 274 |
-| Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
-| ADRs | 87 | 已接受: 82 |
+| Tasks | 321 | 进行中: 0, 待验收: 4, 已完成: 274 |
+| Epics | 44 | 活跃: 1, 已完成: 39, 悬置: 2, 已归档: 2 |
+| ADRs | 88 | 已接受: 83 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260615211529145**: SSOT CLI help and documentation governance
 
 ### 已完成
 
@@ -59,7 +59,6 @@ _无_
 - ✅ **EPIC-20260529214429614**: Curator CLI IO injection + BDD coverage
 - ✅ **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 - ✅ **EPIC-20260530135721111**: Arena IO Injection Sweep — CLI and Runner Layers
-- ✅ **EPIC-20260615211529145**: SSOT CLI help and documentation governance
 
 ### 悬置
 
@@ -84,10 +83,12 @@ _无_
 
 _无_
 
-### 待验收 (2)
+### 待验收 (4)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
 - 🔍 **TASK-20260614131433088**: ZK Review methodology upgrade - parallel validation and task chain signals
+- 🔍 **TASK-20260615221622190**: review
+- 🔍 **TASK-20260615221943775**: Trailer prefix-to-kind routing: unify CLI command format to kind+verb+id
 
 ### 已完成 (274)
 
@@ -503,6 +504,7 @@ _无_
 - ✅ **ADR-20260607233903985** (02-accepted): CLI task command: subcommand inconsistency between create and state transitions
 - ✅ **ADR-20260613182316950** (02-accepted): Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
 - 🤔 **ADR-20260613190449007** (01-proposed): Wiki patterns: AAA pinned index + dreaming integration
+- ✅ **ADR-20260615222023418** (02-accepted): Unify trailer dispatch to kind+verb+id CLI format
 
 ---
 
