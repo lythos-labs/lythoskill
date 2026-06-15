@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/6/16 00:10:39
+> 自动生成于 2026/6/16 01:32:36
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 322 | 进行中: 0, 待验收: 3, 已完成: 276 |
+| Tasks | 326 | 进行中: 0, 待验收: 7, 已完成: 276 |
 | Epics | 44 | 活跃: 1, 已完成: 39, 悬置: 2, 已归档: 2 |
 | ADRs | 89 | 已接受: 84 |
 
@@ -83,11 +83,15 @@
 
 _无_
 
-### 待验收 (3)
+### 待验收 (7)
 
 - 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
 - 🔍 **TASK-20260614131433088**: ZK Review methodology upgrade - parallel validation and task chain signals
 - 🔍 **TASK-20260615221622190**: review
+- 🔍 **TASK-20260616002855133**: AGENTS.md onboarding friction: skill-deck.lock drift after deck link
+- 🔍 **TASK-20260616002926373**: AGENTS.md onboarding friction: bun install prerequisite not stated
+- 🔍 **TASK-20260616002953212**: AGENTS.md onboarding friction: probe output format not shown
+- 🔍 **TASK-20260616003015674**: AGENTS.md onboarding friction: daily handoff format unknown
 
 ### 已完成 (276)
 

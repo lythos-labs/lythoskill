@@ -2,8 +2,10 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (53)
+## 📚 Patterns (55)
 
+- **[2026-06-15]** [long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting](./01-patterns/2026-06-15-long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting.md)
+- **[2026-06-15]** [zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy](./01-patterns/2026-06-15-zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy.md)
 - **[2026-05-29]** [internal-roundtable-pattern](./01-patterns/2026-05-29-internal-roundtable-pattern.md)
 - **[2026-05-28]** [agent-evaluation-arena-pattern](./01-patterns/2026-05-28-agent-evaluation-arena-pattern.md)
 - **[2026-05-28]** [agent-skills-path-reference](./01-patterns/2026-05-28-agent-skills-path-reference.md)
