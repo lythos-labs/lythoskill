@@ -109,4 +109,5 @@ This repo's `skill-deck.toml` has two combos. When you use ANY deck, read its `[
 2. Read the latest weekly — it has the importance-ranked narrative
 3. Run `cortex probe` — it catches state drift
 4. Spawn a ZK agent to read the SSOTs and self-report — if it's confused, the docs need fixing
-5. Ask the user. "I don't know" is better than fabrication.
+5. **External inference test**: see `cortex/wiki/04-ssot/external-validation-meta-observation.md` — a fresh agent independently discovered the project's design philosophy from the codebase. If your reconstruction diverges significantly, the docs may have drifted.
+6. Ask the user. "I don't know" is better than fabrication.

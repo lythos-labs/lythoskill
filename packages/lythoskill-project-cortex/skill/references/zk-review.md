@@ -8,6 +8,7 @@ related:
   - AGENTS.md § ZK Review Gate
   - AGENTS.md § ZK Validation Pattern (first-class)
   - SKILL.md (lythoskill-project-cortex)
+  - cortex/wiki/04-ssot/external-validation-meta-observation.md (external inference — highest validation tier)
 summary: |
   Task cards must pass zero-knowledge review (WHAT/WHY/HOW) before
   assignment. Iterative convergence — not one-shot. ZK agents expose
