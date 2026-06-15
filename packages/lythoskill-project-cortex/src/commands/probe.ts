@@ -716,7 +716,7 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
       }
       io.log('     💡 Edit the file to fill background, requirements, and acceptance criteria.');
       if (!activeOnly) {
-        io.log('     💡 Empty-shell tasks provide zero guidance to subagents — fill content before writing code.');
+        io.log('     💡 Like a Jira ticket with only a title — zero guidance to whoever picks it up.');
       }
     }
   }
