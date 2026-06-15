@@ -185,7 +185,7 @@ bunx @lythos/project-cortex@0.16.0 probe --include-completed-empty-shells
 
 | Term | Definition |
 |------|------------|
-| **Empty shell** | A task/epic/ADR file created by `cortex` CLI but never filled by an agent. Detected by template placeholders (`⚠️ PLACEHOLDER_`, `需求1`, `<!-- 填写`) that remain in the content. Empty shells provide zero guidance to subagents — filling content is higher priority than writing code. |
+| **Empty shell** | A task/epic/ADR file created by `cortex` CLI but never filled by an agent. Like a Jira ticket with only a title and no description — it provides zero guidance to whoever picks it up. Detected by template placeholders (`⚠️ PLACEHOLDER_`, `需求1`, `<!-- 填写`) that remain in the content. **Rule**: filling content is higher priority than writing code. |
 | **Stale** | Backlog tasks or active epics that have been in their current state for >3 days without progress. Indicates potential state drift — either the work is done (should be closed) or the task is blocked (should be suspended). |
 | **Coverage drift** | Changes to source files since the last coverage snapshot was taken. Detected by comparing git commits since the snapshot date. Only relevant when `packages/*/test/scenarios/coverage-snapshot-*.md` files exist. |
 
