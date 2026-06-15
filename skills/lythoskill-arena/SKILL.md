@@ -1,6 +1,6 @@
 ---
 name: lythoskill-arena
-version: 0.17.0
+version: 0.17.1
 description: |
   Test play for skills and deck configurations. DEFAULT: agent reads
   config, spawns parallel subagents via native Agent tool, judges outputs.
@@ -21,8 +21,8 @@ when_to_use: |
   ALSO trigger when user says "test this skill", "try this deck",
   "compare A vs B", "audit this package", "sweep for bugs".
 allowed-tools:
-  - Bash(bunx @lythos/skill-arena@0.17.0 *)
-  - Bash(bunx @lythos/skill-deck@0.17.0 link *)
+  - Bash(bunx @lythos/skill-arena@0.17.1 *)
+  - Bash(bunx @lythos/skill-deck@0.17.1 link *)
 # ── deck governance metadata (consumed by lythoskill tooling only) ──
 deck_niche: meta.governance.arena
 deck_managed_dirs:
@@ -101,13 +101,13 @@ Use ONLY when comparing different players (kimi vs codex vs deepseek vs claude).
 
 ```bash
 # Single deck, explicit player
-bunx @lythos/skill-arena@0.17.0 single \
+bunx @lythos/skill-arena@0.17.1 single \
   --deck ./skill-deck.toml \
   --brief "Investigate this repo" \
   --player kimi
 
 # vs mode with arena.toml (each side's player in config)
-bunx @lythos/skill-arena@0.17.0 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.17.1 vs --config ./arena.toml
 ```
 
 See `references/player-setup.md` for player discovery, installation, and API key setup.
@@ -122,7 +122,7 @@ See `references/player-setup.md` for player discovery, installation, and API key
 
 1. **Prepare** — `prepare-workdir` with minimal deck
    ```bash
-   bunx @lythos/skill-arena@0.17.0 prepare-workdir \
+   bunx @lythos/skill-arena@0.17.1 prepare-workdir \
      --deck ./test-deck.toml \
      --out /tmp/arena-$(date +%Y%m%d-%H%M%S) \
      --brief "Execute the target skill's core workflow"
@@ -152,14 +152,14 @@ For EACH side, use `prepare-workdir` (same behavior as CLI `single` mode):
 
 ```bash
 # Plan-first: review before executing
-bunx @lythos/skill-arena@0.17.0 prepare-workdir \
+bunx @lythos/skill-arena@0.17.1 prepare-workdir \
   --deck ./side-a.toml \
   --out /tmp/arena-$(date +%Y%m%d-%H%M%S)-side-a \
   --brief "task description" \
   --dry-run
 
 # Execute (same command minus --dry-run)
-bunx @lythos/skill-arena@0.17.0 prepare-workdir \
+bunx @lythos/skill-arena@0.17.1 prepare-workdir \
   --deck ./side-a.toml \
   --out /tmp/arena-$(date +%Y%m%d-%H%M%S)-side-a \
   --brief "task description"
@@ -210,7 +210,7 @@ Use `archive` command (same copy logic as CLI `single` mode). Plan-first: dry-ru
 
 ```bash
 # Plan-first
-bunx @lythos/skill-arena@0.17.0 archive \
+bunx @lythos/skill-arena@0.17.1 archive \
   --from /tmp/arena-$(date +%Y%m%d-%H%M%S) \
   --to playground/arena-$(date +%Y%m%d-%H%M%S) \
   --sides side-a,side-b \
@@ -218,7 +218,7 @@ bunx @lythos/skill-arena@0.17.0 archive \
   --dry-run
 
 # Execute (same minus --dry-run)
-bunx @lythos/skill-arena@0.17.0 archive \
+bunx @lythos/skill-arena@0.17.1 archive \
   --from /tmp/arena-$(date +%Y%m%d-%H%M%S) \
   --to playground/arena-$(date +%Y%m%d-%H%M%S) \
   --sides side-a,side-b \
@@ -253,11 +253,11 @@ Subagent has the same Read capability — shorter prompt, lower cost, can re-rea
 
 ```bash
 # single — most common
-bunx @lythos/skill-arena@0.17.0 single \
+bunx @lythos/skill-arena@0.17.1 single \
   --deck ./deck.toml --brief "task" --out ./output
 
 # vs — declarative config
-bunx @lythos/skill-arena@0.17.0 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.17.1 vs --config ./arena.toml
 
 # Parameters
 # --brief "<prompt>"    Inline task (primary input for single)
