@@ -6,9 +6,27 @@
  * e2e/integration tests run manually. This file tests thin wrappers only.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect, afterEach } from 'bun:test'
+import { mkdtempSync, mkdirSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
 import { findGitRoot } from './refresh.ts'
+
+let cleanup: string[] = []
+
+function makeTmp(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'deck-refresh-test-'))
+  cleanup.push(dir)
+  return dir
+}
+
+afterEach(() => {
+  for (const dir of cleanup) {
+    try { rmSync(dir, { recursive: true, force: true }) } catch {}
+  }
+  cleanup = []
+})
 
 describe('findGitRoot', () => {
   it('wraps detectGitRoot → returns gitRoot or null', () => {
@@ -17,7 +35,8 @@ describe('findGitRoot', () => {
     // This test verifies the signature and null-coalescing.
     // null means detectGitRoot returned something without gitRoot (not-git, localhost, missing).
     // string means detectGitRoot found a git root.
-    const result = findGitRoot('/nonexistent/path', '/pool')
+    const nonexistent = join(makeTmp(), 'nonexistent', 'path')
+    const result = findGitRoot(nonexistent, '/pool')
     expect(typeof result === 'string' || result === null).toBe(true)
   })
 })
