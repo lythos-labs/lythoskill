@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/6/16 01:32:36
+> 自动生成于 2026/7/9 16:47:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 326 | 进行中: 0, 待验收: 7, 已完成: 276 |
-| Epics | 44 | 活跃: 1, 已完成: 39, 悬置: 2, 已归档: 2 |
+| Tasks | 325 | 进行中: 0, 待验收: 0, 已完成: 284 |
+| Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 89 | 已接受: 84 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260615211529145**: SSOT CLI help and documentation governance
+_无_
 
 ### 已完成
 
@@ -59,6 +59,7 @@
 - ✅ **EPIC-20260529214429614**: Curator CLI IO injection + BDD coverage
 - ✅ **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 - ✅ **EPIC-20260530135721111**: Arena IO Injection Sweep — CLI and Runner Layers
+- ✅ **EPIC-20260615211529145**: SSOT CLI help and documentation governance
 
 ### 悬置
 
@@ -74,26 +75,19 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (0)
 
-- [ ] **TASK-20260613190646769**: Add unit tests for probe empty-shell filtering (--include-completed-empty-shells)
-- [ ] **TASK-20260613235254569**: Harden probe empty-shell detection: respect completed status + reduce false positives from template comments
+_无_
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (7)
+### 待验收 (0)
 
-- 🔍 **TASK-20260613185621344**: Audit empty-shell completed tasks for title-to-state mismatches
-- 🔍 **TASK-20260614131433088**: ZK Review methodology upgrade - parallel validation and task chain signals
-- 🔍 **TASK-20260615221622190**: review
-- 🔍 **TASK-20260616002855133**: AGENTS.md onboarding friction: skill-deck.lock drift after deck link
-- 🔍 **TASK-20260616002926373**: AGENTS.md onboarding friction: bun install prerequisite not stated
-- 🔍 **TASK-20260616002953212**: AGENTS.md onboarding friction: probe output format not shown
-- 🔍 **TASK-20260616003015674**: AGENTS.md onboarding friction: daily handoff format unknown
+_无_
 
-### 已完成 (276)
+### 已完成 (284)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -364,13 +358,21 @@ _无_
 - ✅ ~~TASK-20260613182154539~~: Reconcile TASK-20260530135707211 status history with completed directory
 - ✅ ~~TASK-20260613182155587~~: Resolve cold-pool mirror stash@{0}
 - ✅ ~~TASK-20260613184943806~~: Update cortex/INDEX.md epic directory structure to match actual 99-done/03-suspended/04-archived layout
+- ✅ ~~TASK-20260613185621344~~: Audit empty-shell completed tasks for title-to-state mismatches
 - ✅ ~~TASK-20260613185808109~~: Enforce English-only slugs for cortex task/epic filenames and fix existing Chinese-mixed slugs
 - ✅ ~~TASK-20260613190349815~~: Probe: suppress empty-shell warnings for completed tasks by default
+- ✅ ~~TASK-20260613190646769~~: Add unit tests for probe empty-shell filtering (--include-completed-empty-shells)
 - ✅ ~~TASK-20260613234838986~~: Refactor probe.ts into intent-plan-execute with IO separation
+- ✅ ~~TASK-20260613235254569~~: Harden probe empty-shell detection: respect completed status + reduce false positives from template comments
 - ✅ ~~TASK-20260614123918272~~: probe UX audit: document flags, fix suspicious naming
 - ✅ ~~TASK-20260614125634946~~: probe output UX: add summary lines, fix SKILL.md examples, make flags visibly different
+- ✅ ~~TASK-20260614131433088~~: ZK Review methodology upgrade - parallel validation and task chain signals
 - ✅ ~~TASK-20260615221943775~~: Trailer prefix-to-kind routing: unify CLI command format to kind+verb+id
 - ✅ ~~TASK-20260615234143099~~: AGENTS.md v2.1: restore onboarding flow, plan-research rule, CPTSD rewrite
+- ✅ ~~TASK-20260616002855133~~: AGENTS.md onboarding friction: skill-deck.lock drift after deck link
+- ✅ ~~TASK-20260616002926373~~: AGENTS.md onboarding friction: bun install prerequisite not stated
+- ✅ ~~TASK-20260616002953212~~: AGENTS.md onboarding friction: probe output format not shown
+- ✅ ~~TASK-20260616003015674~~: AGENTS.md onboarding friction: daily handoff format unknown
 
 ### 悬置 (1)
 

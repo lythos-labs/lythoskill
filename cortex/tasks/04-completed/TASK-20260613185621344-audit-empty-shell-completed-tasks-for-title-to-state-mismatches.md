@@ -8,6 +8,7 @@
 | backlog | 2026-06-13 | Created |
 | in-progress | 2026-06-13 | Started |
 | review | 2026-06-13 | Deliverables committed |
+| completed | 2026-07-09 | Done |
 
 ## 背景与目标
 `cortex probe` 报告 150+ 个空壳任务/史诗，它们多处于 `04-completed/` 但文件内仍保留 `PLACEHOLDER_` / `需求1` / `<!-- 填写` 等模板占位符。这是早期 `cortex task/epic create` 没有强制要求填充内容、后续又通过 `Closes:` trailer 直接关闭留下的痕迹。

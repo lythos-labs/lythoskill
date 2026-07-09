@@ -8,6 +8,7 @@
 | backlog | 2026-06-15 | Created |
 | in-progress | 2026-06-15 | Started |
 | review | 2026-06-15 | Deliverables committed |
+| completed | 2026-07-09 | Done |
 
 ## Background & Goals
 
@@ -16,9 +17,9 @@ During AGENTS.md v2.1 onboarding testing, a zero-knowledge agent ran `cortex pro
 The AGENTS.md says "check for state drift" but does not show what probe output looks like or what "drift" means in practice. This is a friction point — agent sees output but doesn't know how to interpret it.
 
 ## Requirements
-- [ ] Add probe output example to AGENTS.md Troubleshooting or Boot First
-- [ ] Explain common probe findings: epic mismatch, empty shell, stale task
-- [ ] State what agent should do for each: investigate with `git log`, not auto-fix
+- [x] Add probe output example to AGENTS.md Troubleshooting or Boot First
+- [x] Explain common probe findings: epic mismatch, empty shell, stale task
+- [x] State what agent should do for each: investigate with `git log`, not auto-fix
 
 ## Technical Approach
 - AGENTS.md §0 Boot First or §4 Troubleshooting: add a "What probe output looks like" subsection
@@ -26,11 +27,11 @@ The AGENTS.md says "check for state drift" but does not show what probe output l
 - One-line guidance per finding type
 
 ## Acceptance Criteria
-- [ ] New agent sees probe output example before running it
-- [ ] Agent knows "empty shell" = task file with empty required sections
-- [ ] Agent knows epic mismatch = file location disagrees with Status History
-- [ ] Agent knows both require `git log` investigation, not auto-fix
-- [ ] Tests pass: 0 fail
+- [x] New agent sees probe output example before running it
+- [x] Agent knows "empty shell" = task file with empty required sections
+- [x] Agent knows epic mismatch = file location disagrees with Status History
+- [x] Agent knows both require `git log` investigation, not auto-fix
+- [x] Tests pass: 0 fail
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->

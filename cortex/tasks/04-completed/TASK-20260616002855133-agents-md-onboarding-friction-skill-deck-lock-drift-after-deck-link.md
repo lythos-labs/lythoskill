@@ -8,6 +8,7 @@
 | backlog | 2026-06-15 | Created |
 | in-progress | 2026-06-15 | Started |
 | review | 2026-06-15 | Deliverables committed |
+| completed | 2026-07-09 | Done |
 
 ## Background & Goals
 
@@ -18,14 +19,14 @@ Root cause: `skill-deck.lock` mixes declarative lock (content hash) with operati
 This is friction in the onboarding flow that should not exist. See ADR-20260616000939948 for the architecture decision.
 
 ## Requirements
-- [ ] Implement `skill-deck.state` (git-ignored) for operational state: linked_at, resolved absolute paths, mode
-- [ ] Make `skill-deck.lock` (git-tracked) idempotent: only update when content_hash changes
-- [ ] Update `deck link` to write both files
-- [ ] Update `deck validate` to check both files
-- [ ] Update `probe` to use `.state` for operational checks, `.lock` for content verification
-- [ ] Add `skill-deck.state` to `.gitignore`
-- [ ] Migration: on first run, split existing `skill-deck.lock` into both files
-- [ ] After implementation: remove `skill-deck.lock` drift warning from AGENTS.md Boot First
+- [x] Implement `skill-deck.state` (git-ignored) for operational state: linked_at, resolved absolute paths, mode
+- [x] Make `skill-deck.lock` (git-tracked) idempotent: only update when content_hash changes
+- [x] Update `deck link` to write both files
+- [x] Update `deck validate` to check both files
+- [x] Update `probe` to use `.state` for operational checks, `.lock` for content verification
+- [x] Add `skill-deck.state` to `.gitignore`
+- [x] Migration: on first run, split existing `skill-deck.lock` into both files
+- [x] After implementation: remove `skill-deck.lock` drift warning from AGENTS.md Boot First
 
 ## Technical Approach
 - `packages/lythoskill-deck/src/link.ts`: write `.state` always, `.lock` only when content_hash changes
@@ -35,11 +36,11 @@ This is friction in the onboarding flow that should not exist. See ADR-202606160
 - Migration: if `.state` missing, read `.lock` and split fields
 
 ## Acceptance Criteria
-- [ ] `deck link` produces clean `git status` when no skill content changed
-- [ ] Agent executing Boot First sees no unstaged modifications after `deck link`
-- [ ] `skill-deck.lock` changes only when skill content changes
-- [ ] `skill-deck.state` contains absolute paths and timestamps
-- [ ] Tests pass: 0 fail
+- [x] `deck link` produces clean `git status` when no skill content changed
+- [x] Agent executing Boot First sees no unstaged modifications after `deck link`
+- [x] `skill-deck.lock` changes only when skill content changes
+- [x] `skill-deck.state` contains absolute paths and timestamps
+- [x] Tests pass: 0 fail
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
