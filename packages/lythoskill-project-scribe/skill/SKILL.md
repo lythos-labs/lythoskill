@@ -81,8 +81,9 @@ daily/
 └── ...              # Flat date-based, no subdirectories
 ```
 
-Multiple sessions on the same day: append a new `## Session Handoff` section
-to the same file. The onboarding skill reads the **last** handoff section.
+Multiple sessions on the same day: prepend a new `## Session Handoff` section
+at the top of the file. The onboarding skill reads the **last** (most recent)
+handoff section.
 
 ## Handoff Must Include Verification Commands
 The handoff is not a snapshot — it's a snapshot **plus instructions to verify freshness**.

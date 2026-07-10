@@ -25,13 +25,13 @@ Goal: Rewrite scribe skill so agents understand that recording is a **checkpoint
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell, blocked by probe. -->
-- [ ] Rewrite `when_to_use` to separate "record triggers" from "session state triggers"
-- [ ] Add explicit statement: "Recording ≠ session end. Record then continue working."
-- [ ] Rename "Handoff Triggers" to "Record Triggers" or similar neutral term
-- [ ] Add mid-session recording examples (e.g., "hit a pitfall, record it, keep working")
-- [ ] Update daily template reference: "Every session ending" → "At session milestones or end"
-- [ ] Ensure SKILL.md in both `packages/` (source) and `skills/` (build output) are updated
-- [ ] Build skill after source edit
+- [x] Rewrite `when_to_use` to separate "record triggers" from "session state triggers"
+- [x] Add explicit statement: "Recording ≠ session end. Record then continue working."
+- [x] Rename "Handoff Triggers" to "Record Triggers" or similar neutral term
+- [x] Add mid-session recording examples (e.g., "hit a pitfall, record it, keep working")
+- [x] Update daily template reference: "Every session ending" → "At session milestones or end"
+- [x] Ensure SKILL.md in both `packages/` (source) and `skills/` (build output) are updated
+- [x] Build skill after source edit
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
@@ -48,18 +48,40 @@ Key rewrites:
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell, blocked by probe. -->
-- [ ] `when_to_use` no longer contains "session ending", "handoff", "wrap up", "先到这里", "就这样" as standalone triggers
-- [ ] SKILL.md contains explicit sentence: "Recording is a checkpoint, not a termination signal. Record then continue working."
-- [ ] Section formerly called "Handoff Triggers" is renamed to neutral term
-- [ ] At least one mid-session recording example is present
-- [ ] `packages/lythoskill-project-scribe/skill/SKILL.md` and `skills/lythoskill-project-scribe/SKILL.md` are both updated
-- [ ] Build succeeds without errors
-- [ ] ZK Review: fresh agent reads SKILL.md, understands that recording can happen mid-session and does not imply stopping work
+- [x] `when_to_use` no longer contains "session ending", "handoff", "wrap up", "先到这里", "就这样" as standalone triggers
+- [x] SKILL.md contains explicit sentence: "Recording is a checkpoint, not a termination signal. Record then continue working."
+- [x] Section formerly called "Handoff Triggers" is renamed to neutral term
+- [x] At least one mid-session recording example is present
+- [x] `packages/lythoskill-project-scribe/skill/SKILL.md` and `skills/lythoskill-project-scribe/SKILL.md` are both updated
+- [x] Build succeeds without errors
+- [x] ZK Review: fresh agent reads SKILL.md, understands that recording can happen mid-session and does not imply stopping work
+
+## ZK Review Result
+
+**Round 1 (2026-07-10)**: Fresh agent reads SKILL.md, asked "If user said '记录一下这个决定', what would you think?"
+
+> **Answer**: "I should record this and then continue working."
+
+**Why**: SKILL.md explicitly states:
+- `when_to_use`: "Do NOT treat 'record' as 'stop working' — record then continue"
+- `Record Then Continue` section: `User: "记录一下这个决定" → Write to daily → Continue with the task`
+- Default assumption: "record then continue. Only stop when the user explicitly confirms"
+
+**Gaps found**: Minor verification gaps (source vs output sync, build status) — all resolved by commit evidence. No understanding gaps.
+
+**Verdict**: ZK Review passes. Agent no longer infers "session end" from "record".
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-07-10 17:02 — Task registered and started
+- 2026-07-10 17:03 — Task card filled with Background/Requirements/Approach/AC
+- 2026-07-10 17:05 — Edited `packages/lythoskill-project-scribe/skill/SKILL.md`: rewrote `when_to_use`, renamed "Handoff Triggers" → "Record Then Continue", added checkpoint examples
+- 2026-07-10 17:06 — Built skill: `bun packages/lythoskill-creator/src/cli.ts build lythoskill-project-scribe`
+- 2026-07-10 17:07 — Verified both source and output files updated
+- 2026-07-10 17:08 — Committed: `docs(scribe): clarify recording is checkpoint not termination (TASK-20260710170234793)`
+- 2026-07-10 17:10 — ZK Review: fresh agent confirms "record → continue, not stop"
+- 2026-07-10 17:11 — Task card updated with ZK Review result, all AC checked
 
 ## Related Files
 - Modified:
