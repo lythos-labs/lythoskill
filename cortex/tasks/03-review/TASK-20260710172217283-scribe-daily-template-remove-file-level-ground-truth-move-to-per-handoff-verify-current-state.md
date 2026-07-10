@@ -24,12 +24,12 @@ Goal: Remove file-level `## Ground Truth`, expand `## 0. Verify Current State` i
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell, blocked by probe. -->
-- [ ] Update `daily-template.md` to remove `## Ground Truth` section
-- [ ] Expand `## 0. Verify Current State` in daily-template.md to include all fields formerly in Ground Truth (Git HEAD, Version, Deck, Branch, Active Epic/Task counts)
-- [ ] Update scribe SKILL.md to reflect new template (no file-level Ground Truth)
-- [ ] Update onboarding SKILL.md to remove Ground Truth references, clarify onboarding reads first handoff's Verify section
-- [ ] Build both skills after source edits
-- [ ] Verify existing daily files are not affected (legacy format is historical, not template)
+- [x] Update `daily-template.md` to remove `## Ground Truth` section
+- [x] Expand `## 0. Verify Current State` in daily-template.md to include all fields formerly in Ground Truth (Git HEAD, Version, Deck, Branch, Active Epic/Task counts)
+- [x] Update scribe SKILL.md to reflect new template (no file-level Ground Truth)
+- [x] Update onboarding SKILL.md to remove Ground Truth references, clarify onboarding reads first handoff's Verify section
+- [x] Build both skills after source edits
+- [x] Verify existing daily files are not affected (legacy format is historical, not template)
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
@@ -48,18 +48,23 @@ Goal: Remove file-level `## Ground Truth`, expand `## 0. Verify Current State` i
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell, blocked by probe. -->
-- [ ] `daily-template.md` no longer contains `## Ground Truth` section
-- [ ] `daily-template.md` `## 0. Verify Current State` contains all fields: Git HEAD, Version, Deck, Branch, Active Epic, Active Task
-- [ ] scribe SKILL.md does not mention file-level Ground Truth
-- [ ] onboarding SKILL.md does not mention file-level Ground Truth
-- [ ] Both skills build successfully
-- [ ] ZK Review: fresh agent reads both skills + daily-template, understands that each handoff is self-contained and no file-level state exists
+- [x] `daily-template.md` no longer contains `## Ground Truth` section
+- [x] `daily-template.md` `## 0. Verify Current State` contains all fields: Git HEAD, Version, Deck, Branch, Active Epic, Active Task
+- [x] scribe SKILL.md does not mention file-level Ground Truth
+- [x] onboarding SKILL.md does not mention file-level Ground Truth
+- [x] Both skills build successfully
+- [x] ZK Review: fresh agent reads both skills + daily-template, understands that each handoff is self-contained and no file-level state exists
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-07-10 17:22 — ADR-20260710172235956 created and filled
 - 2026-07-10 17:23 — Task card updated with ADR reference
+- 2026-07-10 17:24 — Edited daily-template.md: removed ## Ground Truth, expanded ## 0. Verify Current State
+- 2026-07-10 17:25 — Edited scribe SKILL.md: removed file-level state references
+- 2026-07-10 17:26 — Edited onboarding SKILL.md: removed Ground Truth references
+- 2026-07-10 17:27 — Built both skills
+- 2026-07-10 17:28 — Committed: `docs(scribe,onboarding): remove file-level Ground Truth...`
 
 ## Related Files
 - Modified:

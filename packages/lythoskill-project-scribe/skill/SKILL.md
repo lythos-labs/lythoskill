@@ -47,7 +47,7 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.15.5 list
+bunx @lythos/project-cortex@{{PACKAGE_VERSION}} list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
