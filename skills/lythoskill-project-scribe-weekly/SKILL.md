@@ -38,6 +38,13 @@ If the next agent can find it via `ls daily/`, `git log`, or `cortex index` — 
 ### Step 1: Gather (deterministic)
 
 ```bash
+# ISO week alignment check — confirm what week we're in and what span to cover
+python3 -c "import datetime; d = datetime.date.today(); iso = d.isocalendar(); \
+  mon = d - datetime.timedelta(days=d.weekday()); \
+  sun = mon + datetime.timedelta(days=6); \
+  print(f'Today: {d} ({d.strftime(\"%A\")}) — ISO W{iso.week}'); \
+  print(f'Standard span: {mon}_to_{sun}')"
+
 # Daily surface — which days had activity?
 ls daily/*.md | sort | tail -7
 
@@ -91,8 +98,32 @@ User confirms → proceed to write. User flags missing items → add to cluster 
 
 - User explicitly asks for weekly synthesis
 - End of week (typically Sunday) for retrospective
+- **Friday afternoon**: if the week has already produced substantial work and user wants to capture it before weekend
+- **Sunday night**: if weekend work continued the week's thread — append to existing weekly, don't create new
+- **Monday**: if weekend was quiet and weekly wasn't written yet
 - Before epic planning to understand what unlocked/paused
 - **Do NOT auto-schedule** — the player decides timing
+
+## Sunday Check (agent-initiated suggestion)
+
+If today is Sunday and you observe any of these signals during session close:
+- Epic/task cleanup feeling ("this phase feels done")
+- Goal 阶段性达到 (milestone completed, tests pass, push to remote)
+- User says "LGTM", "就这样", "先到这里" on a Sunday
+
+**Suggest to user**: "今天周日，这周的工作感觉到了一个自然的收束点。要不要沉淀一下 weekly，把这周的模式记录下来？"
+
+User says yes → run weekly prep. User says no or ignores → write daily scribe as usual, don't push.
+
+## Weekly Writing Modes
+
+| Mode | When | Action |
+|------|------|--------|
+| **Fresh** | No weekly exists for current week | Write new weekly with standard period |
+| **Append** | Weekly already exists, weekend had more work | Append to existing weekly, update core_thread if needed |
+| **Catch-up** | Gap week(s) detected | Write "no active work" weekly for gap, then current week |
+
+**Daily scribe continues regardless.** Weekly does not replace daily; they are different abstraction layers.
 
 ## Inputs (collect before writing)
 
@@ -213,6 +244,10 @@ Wrong facts in weekly = disaster for next agent. The agent owns this verificatio
 **Emergent work is not failure.** If the "emergent + done" cell is full while "planned + done" is empty, that's not a planning failure — it's the project responding to E2E reality. Document the pattern, don't apologize.
 
 **Cortex is optional.** If the project uses cortex, read active epics/tasks. If not, infer quest status from daily handoffs and git history.
+
+**Period is descriptive, not prescriptive.** The `period` field records actual work span, not rigid ISO boundaries. If work ran Friday-to-Thursday, write that. If a week had no work, write "no active work" with a standard ISO span. Future agents need to know *what happened*, not *which calendar grid cell to file it in*.
+
+**ISO week check prevents drift.** Always run the python3 one-liner in Pre-Write Verification. Historical weeklies (W19-W25 in this repo) have period drift due to continuous work across weekends. The check ensures new weeklies don't accumulate the same drift.
 
 ## Supporting References
 
