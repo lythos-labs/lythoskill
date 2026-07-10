@@ -34,6 +34,7 @@ date is recent (within 3 days).
 
 **If fresh**: use handoff directly. Skip cortex/skills exploration.
 **If stale or missing**: degrade to file exploration (see below).
+**If stale + gap >7 days**: `git log --since="7 days ago" --oneline` to reconstruct activity, then `cortex probe` to check current state. Don't rely on stale Next Steps.
 
 ### Layer 3: Ground Truth Verification (always required)
 ```bash
