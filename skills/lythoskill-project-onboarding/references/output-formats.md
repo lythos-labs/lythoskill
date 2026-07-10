@@ -51,4 +51,5 @@
 **daily/ directory doesn't exist**: Project never used scribe. This is normal
 for projects that only use cortex. Degrade to exploration silently.
 **Multiple daily files from today**: Read the latest one (by filename sort).
-Within a single file, if multiple handoff sections exist, read the last one.
+Within a single file, if multiple handoff sections exist, read the **latest**
+(most recent) one — scribe prepends new handoffs to the top of the file.
