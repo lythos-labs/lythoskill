@@ -82,7 +82,7 @@ daily/
 ```
 
 Multiple sessions on the same day: prepend a new `## Session Handoff` section
-at the top of the file. The onboarding skill reads the **last** (most recent)
+at the top of the file. The onboarding skill reads the **first** (most recent)
 handoff section.
 
 ## Handoff Must Include Verification Commands
