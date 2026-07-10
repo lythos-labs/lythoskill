@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/7/9 16:47:45
+> 自动生成于 2026/7/10 11:21:47
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 325 | 进行中: 0, 待验收: 0, 已完成: 284 |
 | Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
-| ADRs | 89 | 已接受: 84 |
+| ADRs | 90 | 已接受: 85 |
 
 ---
 
@@ -513,6 +513,7 @@ _无_
 - 🤔 **ADR-20260613190449007** (01-proposed): Wiki patterns: AAA pinned index + dreaming integration
 - ✅ **ADR-20260615222023418** (02-accepted): Unify trailer dispatch to kind+verb+id CLI format
 - ✅ **ADR-20260616000939948** (02-accepted): skill-deck.lock: separate declarative lock from operational state snapshot
+- ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation
 
 ---
 
