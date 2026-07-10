@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/10 17:02:37
+> 自动生成于 2026/7/10 17:05:06
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 329 | 进行中: 1, 待验收: 0, 已完成: 285 |
+| Tasks | 329 | 进行中: 0, 待验收: 1, 已完成: 285 |
 | Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 90 | 已接受: 85 |
 
@@ -80,13 +80,13 @@ _无_
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260710170234793**: scribe skill: clarify record is not session end - remove handoff semantics from when_to_use and triggers
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260710170234793**: scribe skill: clarify record is not session end - remove handoff semantics from when_to_use and triggers
 
 ### 已完成 (285)
 
