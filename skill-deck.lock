@@ -67,7 +67,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-      "content_hash": "5fa7d2f7348d4551786c9090f188fe0093b0149cfc0a839b2ad06f31160f6722"
+      "content_hash": "94f73cb1963167e9673defc0aa4d042c1b81f87cb5175aa6f62fbd386c539505"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",

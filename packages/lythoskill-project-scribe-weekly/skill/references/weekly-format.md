@@ -11,6 +11,8 @@ weekly/
 
 Use ISO week numbers: `YYYY-Wxx.md`. Monday = first day of week, Sunday = last.
 
+**Period flexibility**: The `period` field records the actual span of work covered, not necessarily a strict Monday-Sunday window. If work naturally ran Friday-to-Thursday (e.g., around holidays or intense sprints), record that span. If a week had no active work, use the standard ISO Monday-Sunday span with "no active work" content. Always verify with the ISO week check in Pre-Write Verification.
+
 ## Frontmatter Schema
 
 All fields are optional but strongly recommended. Omit empty fields rather than including null/empty values.
@@ -36,6 +38,16 @@ All fields are optional but strongly recommended. Omit empty fields rather than 
 **Do not write the weekly from memory.** Run these commands and compare against your mental timeline:
 
 ```bash
+# 0. ISO week alignment — verify period matches actual work dates
+#    Weekly can be written on Fri/Sun/Mon; period should reflect actual work span,
+#    not rigid ISO boundaries. Use this to confirm, not to force.
+python3 -c "import datetime; d = datetime.date.today(); iso = d.isocalendar(); \
+  mon = d - datetime.timedelta(days=d.weekday()); \
+  sun = mon + datetime.timedelta(days=6); \
+  print(f'Today: {d} ({d.strftime(\"%A\")}) — ISO W{iso.week}'); \
+  print(f'Standard ISO: {mon}_to_{sun}'); \
+  print(f'If writing today, period should cover actual work days, not necessarily Mon-Sun')"
+
 # 1. Daily files — which days actually had work?
 ls daily/*.md | sort | tail -7
 
@@ -48,6 +60,9 @@ bun packages/lythoskill-project-cortex/src/cli.ts stats
 
 # 4. ADR timeline — what decisions landed this week?
 ls -lt cortex/adr/02-accepted/ | head -15
+
+# 5. Check for existing weekly — if already written this week, append don't recreate
+ls weekly/*.md | sort | tail -3
 ```
 
 **Simulated-annealing ranking**: list every event you can recall from the week. Then:
