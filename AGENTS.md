@@ -757,7 +757,7 @@ lythoskill/
 
 **New package must be added to `scripts/publish.sh`** PACKAGES array before first release. Skill-only packages (no `package.json`) are exempt.
 
-**SKILL.md source files are templates**: `packages/*/skill/SKILL.md` contains `{{PACKAGE_VERSION}}` placeholders. Never replace with literal values — that breaks future renders. Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+**SKILL.md source files are templates**: `packages/*/skill/SKILL.md` contains `{{PACKAGE_VERSION}}` placeholders. Never replace with literal values — that breaks future renders. **This applies to all packages, including pure-skill packages (no `package.json`)**. The build command substitutes `{{PACKAGE_VERSION}}` from root `package.json` automatically. If you see a hardcoded version like `version: 0.15.5` in source, it is a bug — restore the placeholder. Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
 ### 10. Project Skills
 

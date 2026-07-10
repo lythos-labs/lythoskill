@@ -73,6 +73,8 @@ Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name
 bunx @lythos/skill-creator@0.17.2 build <skill-name>
 ```
 
+**Version placeholder rule**: Source `packages/<name>/skill/SKILL.md` must use `version: 0.17.2`. The build command substitutes this with the current root `package.json` version. **Never write a literal version** (e.g., `version: 0.15.5`) in source — this breaks future version bumps. If you find a hardcoded version in source, restore the placeholder and rebuild.
+
 Build all skills at once (used by pre-commit):
 
 ```bash
