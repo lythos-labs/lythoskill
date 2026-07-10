@@ -935,7 +935,8 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
       io.log(`⚠️  Found ${report.driftedEpics.length} drifted epic(s).`);
     }
     if (report.emptyShells.length > 0) {
-      io.log(`⚠️  Found ${report.emptyShells.length} empty shell(s).`);
+      const filtered = filterEmptyShells(report.emptyShells, emptyShellMode);
+      io.log(`⚠️  Found ${filtered.length} empty shell(s): ${filtered.map(s => s.split(':')[0]).join(', ')}`);
     }
     if (report.coverageDrift.length > 0) {
       io.log(`⚠️  Found ${report.coverageDrift.length} coverage drift(s).`);
@@ -950,7 +951,9 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
       io.log(`⚠️  Found ${report.deckStateDrift.length} deck state drift(s).`);
     }
     if (report.checklistDrift.length > 0) {
-      io.log(`⚠️  Found ${report.checklistDrift.length} checklist drift(s) — review/completed tasks with unchecked items.`);
+      const ids = report.checklistDrift.map(d => d.split(':')[0]).slice(0, 3).join(', ');
+      const more = report.checklistDrift.length > 3 ? ` (+${report.checklistDrift.length - 3} more)` : '';
+      io.log(`⚠️  Found ${report.checklistDrift.length} checklist drift(s) — ${ids}${more}`);
     }
   }
   // Summary line for all modes

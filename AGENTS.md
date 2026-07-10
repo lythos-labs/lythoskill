@@ -35,11 +35,14 @@ bun packages/lythoskill-project-cortex/src/cli.ts probe
 
 Why this order: dependencies → skills → session state → ground truth → drift check.
 
+**`deck link` output**: Links skills to `.claude/skills/` (primary working set) and `.agents/skills/` (cross-platform fallback). Both are symlinks from the cold pool (`~/.agents/skill-repos/`). The dual output is normal — don't be confused by skills appearing twice.
+
 **Source paths are readable immediately.** `packages/*/skill/references/` and `skills/*/` are git-tracked source files. You do not need `.claude/skills/` to be populated before reading them. `.claude/skills/` is the runtime working set; source paths are the SSOT.
 
 **After executing — now read:**
 
 1. **`daily/YYYY-MM-DD.md` (latest)** — session handoff from the previous agent. Check `git_commit` against current HEAD. If they don't match, the handoff is stale — use `git log` as ground truth instead.
+   - **Handoff stale + gap >7 days**: `git log --since="7 days ago" --oneline` to reconstruct activity, then `cortex probe` to check current state. Don't rely on stale Next Steps.
    - **Structure**: daily handoffs have structured sections (not freeform): Git Commit, Session Summary, Task Status, Epic Status, Pitfalls, Next Steps. Look for these to orient quickly.
    - **Full format**: see [daily-template.md](packages/lythoskill-project-scribe/skill/references/daily-template.md).
 2. **`cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
