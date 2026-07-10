@@ -1,7 +1,13 @@
 # Project Cortex
 
-> This directory contains the project's governance system — ADRs, Epics, Tasks, and Wiki patterns.
-> It is managed by the `lythoskill-project-cortex` tool.
+> **What this file is**: A curated entry point — governance structure, naming conventions,
+>   and hand-picked must-reads that don't expire. "INDEX" here means "portal", not
+>   "exhaustive listing".
+>
+> **What this file is NOT**: Real-time status. For current epics/tasks, see the
+>   directories below or run `cortex probe`. For session state, read `daily/YYYY-MM-DD.md`.
+>
+> This directory is managed by the `lythoskill-project-cortex` tool.
 
 ---
 

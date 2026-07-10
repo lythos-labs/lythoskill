@@ -1,5 +1,11 @@
 # Wiki Index
 
+> **What this file is**: A curated entry point — wiki structure and categorized entries
+>   sorted by creation date. "INDEX" here means "portal", not "exhaustive listing".
+>
+> **What this file is NOT**: Real-time status. For current project state, see
+>   `daily/YYYY-MM-DD.md` or run `cortex probe`.
+>
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
 ## 📚 Patterns (56)

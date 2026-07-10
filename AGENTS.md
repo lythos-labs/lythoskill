@@ -45,7 +45,7 @@ Why this order: dependencies → skills → session state → ground truth → d
    - **Handoff stale + gap >7 days**: `git log --since="7 days ago" --oneline` to reconstruct activity, then `cortex probe` to check current state. Don't rely on stale Next Steps.
    - **Structure**: daily handoffs have structured sections (not freeform): Git Commit, Session Summary, Task Status, Epic Status, Pitfalls, Next Steps. Look for these to orient quickly.
    - **Full format**: see [daily-template.md](packages/lythoskill-project-scribe/skill/references/daily-template.md).
-2. **`cortex/INDEX.md`** — what ADRs, epics, tasks exist and their status.
+2. **`cortex/INDEX.md`** — governance structure and must-read ADRs. **Not real-time status** — for current epics/tasks, run `cortex probe` or check `cortex/epics/01-active/` directly.
 3. **`skill-deck.toml`** — what skills are active in this project.
 4. **This file (AGENTS.md)** — Z1-Z3 for working, Z4 for reference. Load on demand.
 
