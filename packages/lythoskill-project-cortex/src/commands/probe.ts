@@ -86,6 +86,7 @@ export interface ProbeReport {
   nonAsciiSlugs: string[];
   deckLockDrift: string[];
   deckStateDrift: string[];
+  checklistDrift: string[];  // task files with unchecked checkboxes in review/completed
   summary: {
     activeOnly: boolean;
     includeCompletedEmptyShells: boolean;
@@ -100,6 +101,7 @@ export interface ProbeReport {
     hasNonAsciiSlugs: boolean;
     hasDeckLockDrift: boolean;
     hasDeckStateDrift: boolean;
+    hasChecklistDrift: boolean;
   };
 }
 
@@ -342,6 +344,7 @@ export function buildProbePlan(
       emptyShells: true,
       coverageDrift: true,
       nonAsciiSlugs: true,
+      checklistDrift: true,
       deckLockDrift: true,
       deckStateDrift: true,
     },
@@ -617,6 +620,33 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     }
   }
 
+  // ── Checklist drift (unchecked boxes in review/completed tasks) ──────
+  const checklistDrift: string[] = [];
+  if (plan.checks.checklistDrift) {
+    function detectChecklistDrift(files: string[]): void {
+      for (const file of files) {
+        const content = io.readFile(file);
+        if (content === null) continue;
+        // Only check tasks in review or completed states
+        const isReviewOrCompleted = file.includes('03-review') || file.includes('04-completed');
+        if (!isReviewOrCompleted) continue;
+        // Count unchecked boxes: - [ ] (but not PLACEHOLDER_)
+        const uncheckedBoxes = content.match(/^- \[ \].*/gm);
+        if (uncheckedBoxes && uncheckedBoxes.length > 0) {
+          // Filter out placeholder items
+          const realUnchecked = uncheckedBoxes.filter(line => !line.includes('PLACEHOLDER_'));
+          if (realUnchecked.length > 0) {
+            const id = basename(file).match(/^([A-Z]+-\d+)/)?.[1] ?? basename(file);
+            const resolvedFile = file.startsWith('/') ? file : resolve(cwd, file);
+            const rel = relative(cwd, resolvedFile);
+            checklistDrift.push(`${id}: ${realUnchecked.length} unchecked item(s) — ${rel}`);
+          }
+        }
+      }
+    }
+    detectChecklistDrift(taskFiles);
+  }
+
   const totalChecked = taskFiles.length + epicFiles.length + adrFiles.length;
   const allStatusIssues = [...allTaskResults, ...allEpicResults, ...allAdrResults].filter(r => r.match !== 'ok');
   // emptyShells count should respect filter mode for totalIssues
@@ -626,7 +656,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       ? 'active-only'
       : 'default';
   const filteredEmptyShellCount = filterEmptyShells(emptyShells, emptyShellMode).length;
-  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length;
+  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length + checklistDrift.length;
 
   return {
     statusResults: [...allTaskResults, ...allEpicResults, ...allAdrResults],
@@ -640,6 +670,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     nonAsciiSlugs,
     deckLockDrift,
     deckStateDrift,
+    checklistDrift,
     summary: {
       activeOnly: plan.options.activeOnly,
       includeCompletedEmptyShells: plan.options.includeCompletedEmptyShells,
@@ -654,6 +685,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       hasNonAsciiSlugs: nonAsciiSlugs.length > 0,
       hasDeckLockDrift: deckLockDrift.length > 0,
       hasDeckStateDrift: deckStateDrift.length > 0,
+      hasChecklistDrift: checklistDrift.length > 0,
     },
   };
 }
@@ -833,6 +865,15 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     io.log('     💡 Run `deck link` to regenerate state.');
   }
 
+  // Checklist drift (unchecked boxes in review/completed tasks)
+  if (report.checklistDrift.length > 0) {
+    io.log('\n📋 Checklist drift (unchecked items in review/completed tasks):');
+    for (const d of report.checklistDrift) {
+      io.log(`     ⚠️  ${d}`);
+    }
+    io.log('     💡 Review the task and check off completed items, or move back to in-progress.');
+  }
+
   // ── Confirmation lines for clean states ───────────────────────────
   if (activeOnly) {
     if (report.staleBacklog.length === 0) {
@@ -858,6 +899,9 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     }
     if (report.deckStateDrift.length === 0) {
       io.log('✅ No deck state drift');
+    }
+    if (report.checklistDrift.length === 0) {
+      io.log('✅ No checklist drift');
     }
   }
 
@@ -904,6 +948,9 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     }
     if (report.deckStateDrift.length > 0) {
       io.log(`⚠️  Found ${report.deckStateDrift.length} deck state drift(s).`);
+    }
+    if (report.checklistDrift.length > 0) {
+      io.log(`⚠️  Found ${report.checklistDrift.length} checklist drift(s) — review/completed tasks with unchecked items.`);
     }
   }
   // Summary line for all modes

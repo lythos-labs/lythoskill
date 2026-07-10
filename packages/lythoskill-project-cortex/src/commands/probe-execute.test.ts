@@ -308,6 +308,7 @@ describe("printProbeSummary — output UX", () => {
       nonAsciiSlugs: [],
       deckLockDrift: [],
       deckStateDrift: [],
+      checklistDrift: [],
       ...partial,
     };
   }
