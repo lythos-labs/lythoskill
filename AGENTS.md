@@ -68,7 +68,10 @@ Why this order: dependencies → skills → session state → ground truth → d
 | **Epic mismatch** | File location disagrees with Status History (e.g., file in `01-active` but last row says `done`) | Investigate with `git log`, do NOT auto-fix |
 | **Empty shell** | Task file has blank required sections (Background/Requirements/Acceptance) | Investigate with `git log`, do NOT auto-fill |
 | **Stale task** | In-progress task with no recent commits | Investigate with `git log --grep TASK-xxx`, do NOT auto-move |
+| **Checklist drift** | Review task with unchecked boxes in Acceptance Criteria | Run `cortex probe --include-completed-checklists` to see specific IDs |
 | **Clean (✅)** | Directory location and Status History agree | Nothing |
+
+**Default mode**: `cortex probe` only checks review tasks for checklist drift (not completed tasks). Use `--include-completed-checklists` to check all tasks — useful after governance cleanup sessions.
 
 **Rule of thumb**: probe findings are signals, not commands. Always investigate with `git log` before moving files.
 
@@ -102,6 +105,8 @@ Lythoskill develops **three complementary memory axes**, not one pipeline:
 | **Externalization** | Agent doesn't know what happened | cortex tasks/ADRs, plan-extract tests (verifiable memory), wiki | When you finish work that has structure (task, decision, pattern) |
 | **Compression** | Context window can't fit everything | daily ground truth (overwrite, not append), weekly core_thread, refs (on-demand load) | When context is full; when ending a session |
 | **Zeroing** | Self-review has blind spots | ZK Review (task executability), ZK audit (test adequacy), ZK validation (doc readability) | Before assigning any task; before claiming any doc "done" |
+
+**Weekly cadence**: `weekly/` extracts the core thread from dailies. Missing weeklies are reported by `cortex probe` but are **P2** — they don't block work, only reduce long-term pattern visibility. Write them when context pressure is high or at end-of-week.
 
 **SSOT is a compass, not a database.** Git + filesystem = territory (always queryable). SSOT docs = compass (what matters, why, where next). Never write into SSOT what `git log`/`ls`/`grep`/`diff` can recover. Full model: [SSOT Memory Pipeline](packages/lythoskill-project-cortex/skill/references/zk-review.md#ssot-记忆管线三轴模型).
 
