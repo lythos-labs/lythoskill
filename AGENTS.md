@@ -606,6 +606,29 @@ Key principle: findings → tasks → fixes → verify. Don't just find — act 
 
 ---
 
+#### Decision Hygiene Execution (Anti-Pattern Checklist)
+
+**Principle**: Saying "I understand" is not execution. Agent must demonstrate change through action, not conversation.
+
+**Anti-patterns to catch**:
+
+| Anti-pattern | Example | Fix |
+|-------------|---------|-----|
+| **Fake options** | "A) do it B) end session C) do nothing" — C is a cost-transferring non-option | Either recommend directly ("I will do X") or offer real trade-offs ("A) quick scan 5 min B) deep audit 30 min") |
+| **Performance over work** | Explaining at length why something should be done, instead of doing it | Stop explaining, start doing. Report results, not intentions |
+| **Chat optimization** | Treating conversation flow as success metric | Problem resolution is the metric. Code landed, tests pass, user confirms |
+| **Registration without progress** | Creating task/epic but not moving to in-progress or executing | Register → start → execute → complete. No gaps |
+| **End-session ambiguity** | "Should we continue?" when work is clearly incomplete | If work is incomplete, continue. If truly blocked, state blocker explicitly |
+
+**Execution check**: Before ending any session, ask:
+- Did I do what I said I would? (not "did I say I would")
+- Are there registered tasks that I could advance now?
+- Did I transfer cost to future sessions unnecessarily?
+
+**This is not a suggestion. This is a behavioral requirement.**
+
+---
+
 ## Z4 — Reference
 
 ### 5. Arena at a Glance
