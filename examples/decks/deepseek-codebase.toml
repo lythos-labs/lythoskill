@@ -26,10 +26,6 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-deck"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 role = "Red-green-refactor — DeepSeek's implementer + verifier subagents pair naturally"
 
-[tool.skills.to-prd]
-path = "github.com/mattpocock/skills/skills/engineering/to-prd"
-role = "Convert exploration findings to structured PRD — plan subagent output"
-
 [tool.skills.design-doc-mermaid]
 path = "github.com/SpillwaveSolutions/design-doc-mermaid"
 role = "Generate architecture diagrams from codebase exploration"
