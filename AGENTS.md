@@ -501,10 +501,17 @@ Two modes: **daily close** (every session ends with this) and **release submit**
 3. Commit with Closes: TASK-xxx trailer  — task → completed
 4. Scribe daily → commit daily
 5. Push
-6. (if release) bump → publish
+6. Verify CI  — push 后检查 GitHub Actions 状态，确认 test workflow 通过
+   特别是 validate-example-decks step：外部 skill repo 的路径可能已变更
+   失败时区分 phase：
+     'repo-existence' → repo 被删除/改名，需更新 deck 或寻找替代
+     'path-existence' → 子路径被删除，需移除或更新 skill 引用
+   gh CLI 或 GitHub 页面查看: https://github.com/lythos-labs/lythoskill/actions
+   ⚠️ 如果 gh CLI 返回 401，token 已过期 — 联系用户更新 .github-token
+7. (if release) bump → publish
    bunx @lythos/skill-creator@0.17.1 bump  →  versions aligned + skills built + committed
    bun install → commit → push → ./scripts/publish.sh
-7. (if release) deck refresh --exec → deck link  — update working set to match published version
+8. (if release) deck refresh --exec → deck link  — update working set to match published version
 ```
 
 **When to bump/publish:**
