@@ -24,22 +24,20 @@
 ```markdown
 # Daily — YYYY-MM-DD
 
-## Ground Truth
-> ⚠️ **Overwrite this block on each new session. Do not append.**
-> This is the freshness anchor — the first thing the next agent reads.
+## Session Handoff — <short descriptive title, 3-8 words>
+
+### 0. Verify Current State
+> This handoff's SSOT. Run these commands to verify freshness.
 
 **Git**: HEAD = `COMMIT_HASH` (commit message first 50 chars)
 **Version**: vX.Y.Z
 **Deck**: N skills linked
 **Branch**: main, clean/dirty working tree, ahead/behind origin
 **Active Epic**: N (count)
-**Active Task**: N (count)
+**Active Task**: N in-progress, N in review, N backlog
 
-## Session Handoff — <short descriptive title, 3-8 words>
-
-### 0. Verify Current State
 ```bash
-# Replace COMMIT_HASH with the actual hash from Ground Truth above
+# Verify: if output diverges from the fields above, this handoff is stale
 git diff COMMIT_HASH --stat
 git status --short
 git log --oneline -3
@@ -89,24 +87,14 @@ git log --oneline -3
 
 ## Section Reference
 
-### Ground Truth (REQUIRED)
-Placed at the **top** of the file, outside any handoff section. This is the first thing the next agent reads during onboarding. It must be overwritten, not appended, when a new session starts on the same day.
-
-| Field | Description |
-|:---|:---|
-| **Git** | HEAD commit hash + short message. This is the anchor for freshness verification. |
-| **Version** | Current project version (from `package.json` or root). |
-| **Deck** | Number of skills currently linked. Verifies working set state. |
-| **Branch** | Branch name + working tree status. Flag if dirty or ahead of origin. |
-| **Active Epic** | Count of epics in `cortex/epics/01-active/`. |
-| **Active Task** | Count of tasks in `cortex/tasks/02-in-progress/`. |
-
 ### Session Handoff (REQUIRED per session)
-One handoff per session. If multiple sessions occur on the same day, prepend a new `## Session Handoff` section at the top of the file. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **last** (most recent) handoff section.
+One handoff per session. If multiple sessions occur on the same day, prepend a new `## Session Handoff` section at the top of the file. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **first** (most recent) handoff section.
+
+Each handoff is self-contained — all state needed for onboarding is in `### 0. Verify Current State`. No file-level state exists.
 
 | Sub-section | Required | Description |
 |:---|:---|:---|
-| **0. Verify Current State** | Yes | Commands to verify freshness. Reader runs these; if output diverges, handoff is stale. |
+| **0. Verify Current State** | Yes | Git HEAD, Version, Deck, Branch, Active Epic/Task counts. Plus verification commands. This is the SSOT for this session. |
 | **Completed** | Yes | Numbered list. Link to commits/tasks/ADRs. Include quantitative signals. |
 | **Key Decisions** | Yes | Bulleted list. One-line rationale per decision. |
 | **Pitfalls** | Yes if any | Bulleted list. Wrong → symptom → fix → root cause → time. |
@@ -120,14 +108,14 @@ Human-readable notes below the handoff separator (`---`). Agent-generated conten
 
 ## Multiple Sessions Per Day
 
-Append a new `## Session Handoff` section with a time qualifier:
+Prepend a new `## Session Handoff` section with a time qualifier:
 
 ```markdown
 ## Session Handoff (afternoon) — <title>
 ...
 ```
 
-The onboarding skill always reads the **last** handoff section in the file. Earlier handoffs become historical record.
+The onboarding skill always reads the **first** handoff section in the file. Earlier handoffs become historical record.
 
 ---
 
@@ -135,12 +123,11 @@ The onboarding skill always reads the **last** handoff section in the file. Earl
 
 | Anti-pattern | Why it hurts | Fix |
 |:---|:---|:---|
-| **Append Ground Truth** | New session adds new Ground Truth block; file has multiple conflicting anchors | **Overwrite** Ground Truth at the top |
-| **Ground Truth hash ≠ actual HEAD** | Next agent thinks handoff is stale when it isn't, or trusts stale content | Update hash before committing daily |
 | **"Continue testing" as next step** | Not actionable — which package? which test file? | Include package/path and specific target |
 | **Narrative "what happened"** | Recoverable from git log; wastes tokens | Only dump what exploration cannot recover |
 | **Missing Temp Artifacts** | Next agent treats draft as canonical, modifies wrong file | Always list files that look real but aren't committed |
 | **No quantitative signals** | "Improved coverage" vs "coverage 33%→80%" — the latter is verifiable | Include numbers, commit hashes, test counts |
+| **Stale Verify Current State** | Next agent thinks handoff is fresh when it isn't | Update hash and state fields before writing handoff |
 
 ---
 
@@ -148,3 +135,4 @@ The onboarding skill always reads the **last** handoff section in the file. Earl
 
 - [lythoskill-project-onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) — reads this format
 - [weekly-template.md](./weekly-template.md) — weekly counterpart
+- ADR-20260710172235956 — rationale for removing file-level Ground Truth

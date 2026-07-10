@@ -42,7 +42,7 @@ git status
 git log --oneline -5
 ```
 
-Compare against handoff's Ground Truth State section. If they diverge,
+Compare against handoff's **0. Verify Current State** section. If they diverge,
 handoff is stale — flag it and rely on real-time git output.
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:

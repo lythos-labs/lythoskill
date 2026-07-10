@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/7/10 17:05:06
+> 自动生成于 2026/7/10 19:12:58
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 329 | 进行中: 0, 待验收: 1, 已完成: 285 |
+| Tasks | 330 | 进行中: 1, 待验收: 1, 已完成: 285 |
 | Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
-| ADRs | 90 | 已接受: 85 |
+| ADRs | 91 | 已接受: 86 |
 
 ---
 
@@ -80,9 +80,9 @@ _无_
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260710172217283**: scribe daily template: remove file-level Ground Truth, move to per-handoff Verify Current State
 
 ### 待验收 (1)
 
@@ -516,6 +516,7 @@ _无_
 - ✅ **ADR-20260615222023418** (02-accepted): Unify trailer dispatch to kind+verb+id CLI format
 - ✅ **ADR-20260616000939948** (02-accepted): skill-deck.lock: separate declarative lock from operational state snapshot
 - ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation
+- ✅ **ADR-20260710172235956** (02-accepted): Remove file-level Ground Truth from daily template — per-handoff Verify Current State is SSOT
 
 ---
 
