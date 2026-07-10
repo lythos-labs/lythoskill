@@ -99,7 +99,8 @@ exists and git state matches, trust it.
 fresher than a same-day handoff whose git_commit doesn't match HEAD (someone
 committed outside the agent session).
 **Multiple handoff sections.** If the daily file has multiple `## Session Handoff`
-sections (multiple sessions same day), read the **last** one.
+sections (multiple sessions same day), read the **first** one — scribe prepends
+new handoffs to the top of the file.
 ## Supporting References
 | When you need to… | Read |
 |--------------------|------|

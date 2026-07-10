@@ -9,7 +9,11 @@ description: |
   carriers but needed by the next agent go here. Forms CQRS write-side pair
   with project-onboarding (read-side).
 when_to_use: |
-  Record progress, update task, write daily, log a pitfall, session  ending, handoff, LGTM, wrap up, context limit approaching,  踩坑了, 记录一下, 先到这里, 就这样, session 要结束了.
+  Record progress at any time — mid-session or at the end. Use when:
+  user hits a pitfall, makes an important decision, completes a milestone,
+  asks to checkpoint, or says context is getting long. Also when a session
+  naturally concludes. Do NOT treat "record" as "stop working" — record
+  then continue.
 ---
 
 # Project Scribe
@@ -58,7 +62,7 @@ best-practice format that evolved from 100+ daily/weekly files.
 
 | File type | Template | When to write |
 |:---|:---|:---|
-| **Daily** | [references/daily-template.md](./references/daily-template.md) | Every session ending |
+| **Daily** | [references/daily-template.md](./references/daily-template.md) | At session milestones or end |
 | **Weekly** | [references/weekly-template.md](./references/weekly-template.md) | End of week (Sunday night) |
 
 **Rule**: Do not invent format. If the template has a section, include it.
@@ -77,8 +81,9 @@ daily/
 └── ...              # Flat date-based, no subdirectories
 ```
 
-Multiple sessions on the same day: append a new `## Session Handoff` section
-to the same file. The onboarding skill reads the **last** handoff section.
+Multiple sessions on the same day: prepend a new `## Session Handoff` section
+at the top of the file. The onboarding skill reads the **last** (most recent)
+handoff section.
 
 ## Handoff Must Include Verification Commands
 The handoff is not a snapshot — it's a snapshot **plus instructions to verify freshness**.
@@ -101,11 +106,19 @@ When the user says "hit a bug" or "踩坑了", immediately record:
 - **Root cause**: why the wrong path seemed right
 - **Time wasted**: X minutes
 ```
-## Handoff Triggers (session must execute handoff when any fires)
-- User says "LGTM", "就这样", "先到这里", "session ending"
-- Conversation exceeds 20 turns or context approaches limit
-- A milestone is completed (build succeeds, push to remote, tests pass)
-- User says "switch agent" or "换个 agent 继续"
+## Record Then Continue
+
+**Recording is a checkpoint, not a termination signal.**
+
+Agents must not infer "I wrote the daily file → my job is done." The user may ask you to record a pitfall at turn 5 and then continue debugging at turn 6.
+
+```
+User: "踩坑了" → Record pitfall → Continue working on the bug
+User: "记录一下这个决定" → Write to daily → Continue with the task
+User: "先记一下进度" → Checkpoint → Continue
+```
+
+**Default assumption: record then continue.** Only stop when the user explicitly confirms (e.g., "session ending", "LGTM", "先到这里").
 ## Gotchas
 **Show diff before writing.** Always present the handoff content to the user
 for confirmation before writing to the daily file. Prevents hallucinated state

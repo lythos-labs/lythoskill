@@ -102,7 +102,7 @@ Placed at the **top** of the file, outside any handoff section. This is the firs
 | **Active Task** | Count of tasks in `cortex/tasks/02-in-progress/`. |
 
 ### Session Handoff (REQUIRED per session)
-One handoff per session. If multiple sessions occur on the same day, append a new `## Session Handoff` section. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **last** handoff section.
+One handoff per session. If multiple sessions occur on the same day, prepend a new `## Session Handoff` section at the top of the file. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **last** (most recent) handoff section.
 
 | Sub-section | Required | Description |
 |:---|:---|:---|
