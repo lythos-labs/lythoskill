@@ -44,6 +44,7 @@ Commands:
   probe                 Check status consistency (dir vs Status History)
                         --suspicious   Only report suspicious patterns (empty shells, stale, drift)
                         --include-completed-empty-shells  Include empty shells in completed/terminal dirs
+                        --include-completed-checklists    Include checklist drift in completed tasks
   flow                  Show kanban CFD — count, avg age, WIP limits
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up (used by post-commit hook)
 
@@ -377,6 +378,7 @@ async function main(): Promise<void> {
       probeStatus(config, {
         activeOnly: allFlags.includes('--active-only') || allFlags.includes('--suspicious'),
         includeCompletedEmptyShells: allFlags.includes('--include-completed-empty-shells'),
+        includeCompletedChecklists: allFlags.includes('--include-completed-checklists'),
         suspicious: allFlags.includes('--suspicious'),
       });
       break;
