@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/10 11:21:47
+> 自动生成于 2026/7/10 16:57:51
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 325 | 进行中: 0, 待验收: 0, 已完成: 284 |
+| Tasks | 328 | 进行中: 0, 待验收: 0, 已完成: 285 |
 | Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 90 | 已接受: 85 |
 
@@ -75,9 +75,10 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (2)
 
-_无_
+- [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
+- [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
 ### 进行中 (0)
 
@@ -87,7 +88,7 @@ _无_
 
 _无_
 
-### 已完成 (284)
+### 已完成 (285)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -373,6 +374,7 @@ _无_
 - ✅ ~~TASK-20260616002926373~~: AGENTS.md onboarding friction: bun install prerequisite not stated
 - ✅ ~~TASK-20260616002953212~~: AGENTS.md onboarding friction: probe output format not shown
 - ✅ ~~TASK-20260616003015674~~: AGENTS.md onboarding friction: daily handoff format unknown
+- ✅ ~~TASK-20260710164825401~~: agent behavior gap: decision hygiene vs execution
 
 ### 悬置 (1)
 

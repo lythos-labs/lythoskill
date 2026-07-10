@@ -6,6 +6,9 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-07-10 | Created |
+| in-progress | 2026-07-10 | Started |
+| review | 2026-07-10 | Deliverables committed |
+| completed | 2026-07-10 | Done |
 
 ## Background & Goals
 

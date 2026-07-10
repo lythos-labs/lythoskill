@@ -1,15 +1,10 @@
 # Wiki Index
 
-> **What this file is**: A curated entry point — wiki structure and categorized entries
->   sorted by creation date. "INDEX" here means "portal", not "exhaustive listing".
->
-> **What this file is NOT**: Real-time status. For current project state, see
->   `daily/YYYY-MM-DD.md` or run `cortex probe`.
->
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (56)
+## 📚 Patterns (57)
 
+- **[2026-07-10]** [zk-review-trade-off-awareness](./01-patterns/2026-07-10-zk-review-trade-off-awareness.md)
 - **[2026-06-15]** [long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting](./01-patterns/2026-06-15-long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting.md)
 - **[2026-06-15]** [zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy](./01-patterns/2026-06-15-zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy.md)
 - **[2026-05-29]** [internal-roundtable-pattern](./01-patterns/2026-05-29-internal-roundtable-pattern.md)
