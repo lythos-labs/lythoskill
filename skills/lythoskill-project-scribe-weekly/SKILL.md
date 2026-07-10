@@ -235,6 +235,22 @@ ls daily/2026-05-*.md
 
 Wrong facts in weekly = disaster for next agent. The agent owns this verification — there is no `validate-weekly` CLI; weekly is a pure skill that produces a doc, the agent uses cortex probe + git log + daily ls to reality-check what it just wrote.
 
+## Decision Hygiene (agent behavior)
+
+**Do not present fake options.** When asking user for next step, every option must be a real choice with different consequences. Do not include:
+- Options that transfer cost to future sessions (e.g., "end session and let next agent handle it")
+- Options that are obviously inferior (e.g., "do nothing" when action is clearly needed)
+- Options that defer without reason (e.g., "wait" without explaining what we're waiting for)
+
+**Why**: Fake options waste user attention. They feel like marketing tricks — psychological anchors designed to make one option look good by contrast. Respect user time by offering genuine trade-offs or making the recommendation directly.
+
+**Pattern**: If you know what should happen, say so. If you need user input, offer 2-3 real alternatives with consequence briefs. If there's no real choice, don't ask.
+
+**Examples**:
+- ❌ "Should I A) verify now B) end session C) do nothing" — C is fake
+- ✅ "I recommend verifying now — cost is 1 minute, benefit is catching skill drift before next session. Confirm?"
+- ✅ "Two paths: A) quick scan (5 min, surface only) B) deep audit (30 min, full checklist). Which fits your time?"
+
 ## Scenarios & Packages (v0.1 — explore with user)
 
 Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based exploration** between agent and user. Like an ADV game: there are branches, but each branch has a default skeleton.
