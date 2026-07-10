@@ -620,12 +620,30 @@ Key principle: findings → tasks → fixes → verify. Don't just find — act 
 | **Registration without progress** | Creating task/epic but not moving to in-progress or executing | Register → start → execute → complete. No gaps |
 | **End-session ambiguity** | "Should we continue?" when work is clearly incomplete | If work is incomplete, continue. If truly blocked, state blocker explicitly |
 
-**Execution check**: Before ending any session, ask:
+**Execution check**: Before ending any session, run these commands and answer:
+
+```bash
+# 1. Check registered tasks that could advance
+bun packages/lythoskill-project-cortex/src/cli.ts list
+# → Are there in-progress tasks with no recent commits? Can you advance them now?
+
+# 2. Check working tree for uncommitted work
+git status --short
+# → Are there changes that should be committed before ending?
+
+# 3. Check daily handoff status
+ls daily/*.md | sort | tail -1
+# → Is today's daily written? Does it match current HEAD?
+```
+
+Then ask:
 - Did I do what I said I would? (not "did I say I would")
 - Are there registered tasks that I could advance now?
-- Did I transfer cost to future sessions unnecessarily?
+- Did I leave uncommitted changes, unwritten daily, or unregistered findings for the next agent?
 
 **This is not a suggestion. This is a behavioral requirement.**
+
+Full session close protocol: see AGENTS.md §3.4 "Session Close Checklist" and project-scribe skill.
 
 ---
 
