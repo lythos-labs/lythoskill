@@ -71,7 +71,7 @@ export interface ProbePlan {
     deckLockDrift: boolean;
     deckStateDrift: boolean;
   };
-  options: { activeOnly: boolean; includeCompletedEmptyShells: boolean };
+  options: { activeOnly: boolean; includeCompletedEmptyShells: boolean; includeCompletedChecklists: boolean };
 }
 
 export interface ProbeReport {
@@ -309,10 +309,11 @@ export function filterEmptyShells(
 
 export function buildProbePlan(
   config: WorkflowConfig,
-  opts?: { activeOnly?: boolean; suspicious?: boolean; includeCompletedEmptyShells?: boolean }
+  opts?: { activeOnly?: boolean; suspicious?: boolean; includeCompletedEmptyShells?: boolean; includeCompletedChecklists?: boolean }
 ): ProbePlan {
   const activeOnly = opts?.activeOnly ?? opts?.suspicious ?? false;
   const includeCompletedEmptyShells = opts?.includeCompletedEmptyShells ?? false;
+  const includeCompletedChecklists = opts?.includeCompletedChecklists ?? false;
 
   const tasks = Object.entries(config.taskSubdirs).map(([statusKey, subdir]) => ({
     dir: join(config.tasksDir, subdir),
@@ -348,7 +349,7 @@ export function buildProbePlan(
       deckLockDrift: true,
       deckStateDrift: true,
     },
-    options: { activeOnly, includeCompletedEmptyShells },
+    options: { activeOnly, includeCompletedEmptyShells, includeCompletedChecklists: false },
   };
 }
 
@@ -620,16 +621,20 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     }
   }
 
-  // ── Checklist drift (unchecked boxes in review/completed tasks) ──────
+  // ── Checklist drift (unchecked boxes in review tasks) ───────────────
+  // Default: only review tasks (03-review). Completed tasks (04-completed) may
+  // have historical template debt — use --include-completed-checklists to check them.
   const checklistDrift: string[] = [];
   if (plan.checks.checklistDrift) {
     function detectChecklistDrift(files: string[]): void {
       for (const file of files) {
         const content = io.readFile(file);
         if (content === null) continue;
-        // Only check tasks in review or completed states
-        const isReviewOrCompleted = file.includes('03-review') || file.includes('04-completed');
-        if (!isReviewOrCompleted) continue;
+        // Default mode: only review tasks. Completed tasks have historical template debt.
+        const isReview = file.includes('03-review');
+        const isCompleted = file.includes('04-completed');
+        if (!isReview && !isCompleted) continue;
+        if (isCompleted && !plan.options.includeCompletedChecklists) continue;
         // Count unchecked boxes: - [ ] (but not PLACEHOLDER_)
         const uncheckedBoxes = content.match(/^- \[ \].*/gm);
         if (uncheckedBoxes && uncheckedBoxes.length > 0) {
@@ -1002,12 +1007,12 @@ function printResults(results: ProbeResult[], label: string, io: ProbeIO): void 
   }
 }
 
-export function probeStatus(config: WorkflowConfig, opts?: { activeOnly?: boolean; includeCompletedEmptyShells?: boolean; suspicious?: boolean }): void {
+export function probeStatus(config: WorkflowConfig, opts?: { activeOnly?: boolean; includeCompletedEmptyShells?: boolean; includeCompletedChecklists?: boolean; suspicious?: boolean }): void {
   const activeOnly = opts?.activeOnly ?? opts?.suspicious ?? false;
   if (opts?.suspicious) {
     console.warn('⚠️  Flag --suspicious is deprecated, use --active-only instead.');
   }
-  const plan = buildProbePlan(config, { activeOnly, includeCompletedEmptyShells: opts?.includeCompletedEmptyShells });
+  const plan = buildProbePlan(config, { activeOnly, includeCompletedEmptyShells: opts?.includeCompletedEmptyShells, includeCompletedChecklists: opts?.includeCompletedChecklists });
   const report = executeProbePlan(plan, defaultProbeIO);
   printProbeSummary(report, defaultProbeIO);
 }
