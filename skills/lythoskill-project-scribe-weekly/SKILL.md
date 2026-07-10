@@ -235,21 +235,122 @@ ls daily/2026-05-*.md
 
 Wrong facts in weekly = disaster for next agent. The agent owns this verification — there is no `validate-weekly` CLI; weekly is a pure skill that produces a doc, the agent uses cortex probe + git log + daily ls to reality-check what it just wrote.
 
-## Gotchas
+## Scenarios & Packages (v0.1 — explore with user)
 
-**Show draft before writing.** Present the weekly content to the user for confirmation. Prevents hallucinated synthesis from being persisted.
+Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based exploration** between agent and user. Like an ADV game: there are branches, but each branch has a default skeleton.
 
-**Weekly ≠ daily rollup.** If it reads like 7 daily handoffs concatenated, it's wrong. Weekly is a *new layer of abstraction*.
+### Scene A: Weekly Writing
 
-**Emergent work is not failure.** If the "emergent + done" cell is full while "planned + done" is empty, that's not a planning failure — it's the project responding to E2E reality. Document the pattern, don't apologize.
+**Trigger**: User says "写 weekly" / "这周总结一下" / end-of-week feeling
 
-**Cortex is optional.** If the project uses cortex, read active epics/tasks. If not, infer quest status from daily handoffs and git history.
+| Package | When | Skeleton | Optional Add-ons |
+|---------|------|----------|----------------|
+| **A1: Fresh** | No weekly for current ISO week | Standard ISO period + full prep | ADR timeline, daily cross-reference |
+| **A2: Append** | Weekly exists, work continued | Extend period, update core_thread | Merge cross-week git activity |
+| **A3: Catch-up** | Gap detected | Fill gap with "no active work" first, then write current | Historical drift annotation |
 
-**Period is descriptive, not prescriptive.** The `period` field records actual work span, not rigid ISO boundaries. If work ran Friday-to-Thursday, write that. If a week had no work, write "no active work" with a standard ISO span. Future agents need to know *what happened*, not *which calendar grid cell to file it in*.
+**Agent choice**: Run `ls weekly/*.md | sort | tail -3` to detect mode. Recommend package to user. User confirms or overrides.
 
-**ISO week check prevents drift.** Always run the python3 one-liner in Pre-Write Verification. Historical weeklies (W19-W25 in this repo) have period drift due to continuous work across weekends. The check ensures new weeklies don't accumulate the same drift.
+### Scene B: User Says "消债" / "扫一下" / "还债"
 
-## Supporting References
+**Trigger**: User explicitly asks for cleanup / audit / sweep
+
+| Package | When | Skeleton | Optional Add-ons |
+|---------|------|----------|----------------|
+| **B1: Quick Scan** (5 min) | User wants overview | Weekly chain + cortex probe | Gap report only |
+| **B2: Deep Audit** (30 min) | User wants thorough check | Full 23-item reference checklist | User selects scope |
+| **B3: Targeted** | User names specific debt | Agent drills from weekly chain into named area | Cross-reference ADR/task |
+
+**Agent choice**: Ask user "quick scan or deep?" Default to B1 if user just says "消债" without qualifier.
+
+### Scene C: Session Close (Scribe)
+
+**Trigger**: User says "LGTM" / "先到这里" / session ending
+
+| Package | When | Skeleton | Optional Add-ons |
+|---------|------|----------|----------------|
+| **C1: Standard Handoff** (default) | No weekly suspicion | Write daily, no eager weekly check | — |
+| **C2: Weekly Suspicion** | User mentions cross-week work / weekly conflict | Check weekly chain before scribe | Suggest append if needed |
+
+**Agent choice**: Default C1. Switch to C2 only if session content clearly spans weeks or user explicitly mentions weekly.
+
+### Scene D: Release Prep
+
+**Trigger**: User says "release" / "ship it" / version bump
+
+| Package | When | Skeleton | Optional Add-ons |
+|---------|------|----------|----------------|
+| **D1: Version Alignment** | Pre-bump | Check package.json versions across packages | README version sync |
+| **D2: Reference Validity** | Pre-publish | Check internal links, cross-package refs | External link spot-check |
+| **D3: Full Sweep** | Major release | All 23 items + documentation freshness | Dreaming integration |
+
+**Agent choice**: User names release scope → select package. Default D1 for patch, D2 for minor, D3 for major.
+
+### Scene E: Quarterly Dreaming
+
+**Trigger**: User says "做梦" / "consolidate" / "memory cleanup"
+
+| Package | When | Skeleton | Optional Add-ons |
+|---------|------|----------|----------------|
+| **E1: Trend Analysis** | Every quarter | Weekly chain pattern + lesson candidate validation | Wiki promotion decisions |
+| **E2: Full Archive** | Year-end / major milestone | All 23 items + historical drift full audit | SSOT regeneration |
+
+**Agent choice**: Dreaming skill owns this. Weekly skill provides weekly chain as input.
+
+## 23-Item Reference Checklist (menu, not mandate)
+
+Use this as a **menu** when user selects B2 (Deep Audit) or D3 (Full Sweep). Not for everyday use.
+
+### 1. Document Chain Integrity
+- [ ] 1.1 daily chain continuity
+- [ ] 1.2 weekly chain continuity
+- [ ] 1.3 weekly period alignment
+- [ ] 1.4 daily → weekly reference consistency
+- [ ] 1.5 weekly → ADR reference consistency
+
+### 2. Code-Document Consistency
+- [ ] 2.1 skill source vs build output freshness
+- [ ] 2.2 package.json version lockstep
+- [ ] 2.3 README version sync
+- [ ] 2.4 AGENTS.md command reference validity
+- [ ] 2.5 SKILL.md command reference validity
+
+### 3. Governance State Consistency
+- [ ] 3.1 cortex task status
+- [ ] 3.2 cortex epic status
+- [ ] 3.3 ADR status vs directory location
+- [ ] 3.4 task 7+ days without commit
+- [ ] 3.5 epic all-done but not closed
+
+### 4. Reference Validity
+- [ ] 4.1 internal file references exist
+- [ ] 4.2 cross-package references exist
+- [ ] 4.3 external links (spot-check, not exhaustive)
+- [ ] 4.4 showcase → playground references
+
+### 5. Metadata Completeness
+- [ ] 5.1 skill frontmatter complete
+- [ ] 5.2 ADR Status History complete
+- [ ] 5.3 task English slug
+- [ ] 5.4 weekly frontmatter complete
+
+**How to use**: Agent presents checklist to user. User selects scope ("just 1 and 3" or "all"). Agent executes selected items. No automatic full scan.
+
+## Long-Range Consistency Principle
+
+Weekly is the **anchor** for long-range consistency. Not because it's the most frequent, but because it's the **right frequency**:
+
+- **daily**: too frequent, compaction makes it unreliable for drift detection
+- **weekly**: just right — regular enough to catch drift, sparse enough to survive compaction
+- **quarterly**: too sparse, drift accumulates beyond easy repair
+
+The weekly chain (`weekly/2026-W17.md`, `2026-W18.md`, ...) is a **temporal index**. Future agents reading cold can:
+1. Find the latest weekly → know current ISO week
+2. Follow chain backward → reconstruct narrative
+3. Detect gaps → know where drift occurred
+
+**This is the project's memory infrastructure in practice.**
+
 
 | When you need to… | Read |
 |--------------------|------|
