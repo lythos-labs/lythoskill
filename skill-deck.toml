@@ -39,7 +39,7 @@ path = "github.com/lythos-labs/lythoskill/skills/lythoskill-coach"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 role = "Systematic debugging: reproduce→minimise→hypothesis→instrument→fix→regression-test"
 
 [tool.skills.lythoskill-red-green-release]

@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "deck_source": {
     "path": "skill-deck.toml",
-    "content_hash": "4194a403e8850238da73916299f784543fc0f9b564eda78edae35f3e9f62db1e"
+    "content_hash": "fadaafad34e1da829622a8c8a3de573bc0f33da21797c9368c62817ed7e628c6"
   },
   "deck_config": {
     "max_cards": 15,
@@ -84,6 +84,14 @@
       "type": "tool",
       "source": "github.com/mattpocock/skills/skills/engineering/tdd",
       "content_hash": "5363bb2775679fe9311fbb67947f95359169c6e7f1fac77c0f25e190bca6cf2f"
+    },
+    {
+      "name": "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs",
+      "alias": "diagnose",
+      "deck_niche": "",
+      "type": "tool",
+      "source": "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs",
+      "content_hash": "7a0779480f323a66d109404646bcc1a14bf0232b45b3e3ea93b652a035718acb"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",
