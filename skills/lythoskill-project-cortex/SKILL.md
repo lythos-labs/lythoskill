@@ -529,8 +529,9 @@ After user says "LGTM": `git tag -a v0.X.0 -m "feat: description"`
 **Subagent workflow** (delegate with: "Execute TASK-xxx"):
 1. `bunx @lythos/project-cortex@0.17.2 start TASK-xxx`
 2. Implement, commit with task ID in message
-3. `bunx @lythos/project-cortex@0.17.2 review TASK-xxx`
-4. **Stop here.** Never use `done` — that requires user acceptance.
+3. **ZK-review your own work before requesting review**: spawn a fresh zero-knowledge reviewer (pass-by-reference: task card path + `git log --grep TASK-xxx` commits). Skeptical, severity-rated findings on two questions: are the checked acceptance boxes honestly supported, and does the evidence support the conclusions. Verify its P1 claims yourself (reviewers are sensors, not oracles), then fix or register follow-ups. Self-review has a structural blind spot (knowledge curse, self-graded homework) — 2026-07-17: a ZK reviewer caught an A/B report headline that misread its own primary evidence.
+4. `bunx @lythos/project-cortex@0.17.2 review TASK-xxx`
+5. **Stop here.** Never use `done` — that requires user acceptance.
 ## Milestone Protocol (Prevents Fake Completion)
 Every task must define at creation:
 - **Exit criteria**: one sentence defining "done enough"

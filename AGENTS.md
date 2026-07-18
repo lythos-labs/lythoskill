@@ -392,6 +392,8 @@ bun packages/lythoskill-project-cortex/src/cli.ts start TASK-xxx  → 02-in-prog
 bun packages/lythoskill-project-cortex/src/cli.ts review TASK-xxx → 03-review (STOP — user marks done)
 ```
 
+**Review = ZK-review first.** Before the `Review:` trailer, spawn a fresh ZK reviewer — pass-by-reference: the task card path + its commits (`git log --grep <TASK-id>`). Ask for skeptical, severity-rated findings on two questions: are the checked acceptance boxes honestly supported, and does the evidence support the conclusions. Verify its P1 claims yourself (grep/log — reviewers are sensors, not oracles), then fix or register follow-ups. Self-review has a structural blind spot (knowledge curse, self-graded homework): on 2026-07-17 a ZK reviewer caught an A/B report headline that misread its own primary evidence, plus an overclaimed acceptance box.
+
 **Always use CLI** — never `mv` files by hand. CLI moves update Status History; manual `mv` causes probe mismatches. After creating a task, immediately edit the file to fill Background/Requirements/Acceptance — empty templates are rejected by pre-commit probe.
 
 **English-only slugs**: `cortex task` / `cortex epic` titles must be ASCII-only. The generated filename (`TASK-xxx-<slug>.md` / `EPIC-xxx-<slug>.md`) must contain no Chinese or other non-ASCII characters, so paths remain portable across agents, CLIs, and operating systems.

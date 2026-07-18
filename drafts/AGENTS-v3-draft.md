@@ -200,6 +200,8 @@ cortex start TASK-xxx   → 02-in-progress
 cortex review TASK-xxx  → 03-review (STOP — user marks done)
 ```
 
+**Review = ZK-review first.** Before the `Review:` trailer, spawn a fresh ZK reviewer — pass-by-reference: the task card path + its commits (`git log --grep <TASK-id>`). Skeptical, severity-rated findings on: are the checked acceptance boxes honestly supported, does the evidence support the conclusions. Verify its P1 claims yourself (reviewers are sensors, not oracles), then fix or register follow-ups. Self-review has a structural blind spot (knowledge curse, self-graded homework).
+
 **Always CLI, never `mv`** — CLI updates Status History; manual moves cause probe mismatches. **English-only slugs** — task/epic titles must be ASCII (portable paths).
 
 #### Commit Trailers
