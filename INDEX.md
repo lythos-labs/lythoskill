@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/7/17 10:52:41
+> 自动生成于 2026/7/17 18:36:29
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 330 | 进行中: 0, 待验收: 0, 已完成: 287 |
-| Epics | 44 | 活跃: 0, 已完成: 40, 悬置: 2, 已归档: 2 |
-| ADRs | 91 | 已接受: 86 |
+| Tasks | 332 | 进行中: 1, 待验收: 0, 已完成: 287 |
+| Epics | 45 | 活跃: 1, 已完成: 40, 悬置: 2, 已归档: 2 |
+| ADRs | 92 | 已接受: 87 |
 
 ---
 
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260717161516583**: k3 era harness molting
 
 ### 已完成
 
@@ -75,14 +75,15 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (3)
 
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
+- [ ] **TASK-20260717161516624**: deck refresh self healing and boot drift detection
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260717161516693**: cptsd defensive text adaptation experiment via zk subagents
 
 ### 待验收 (0)
 
@@ -519,6 +520,7 @@ _无_
 - ✅ **ADR-20260616000939948** (02-accepted): skill-deck.lock: separate declarative lock from operational state snapshot
 - ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation
 - ✅ **ADR-20260710172235956** (02-accepted): Remove file-level Ground Truth from daily template — per-handoff Verify Current State is SSOT
+- ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
 
 ---
 
