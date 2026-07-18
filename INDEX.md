@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/18 23:03:25
+> 自动生成于 2026/7/18 23:38:58
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 332 | 进行中: 2, 待验收: 0, 已完成: 287 |
+| Tasks | 332 | 进行中: 1, 待验收: 1, 已完成: 287 |
 | Epics | 45 | 活跃: 1, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 92 | 已接受: 87 |
 
@@ -80,14 +80,13 @@
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
-### 进行中 (2)
+### 进行中 (1)
 
-- 🔄 **TASK-20260717161516624**: deck refresh self healing and boot drift detection
 - 🔄 **TASK-20260717161516693**: cptsd defensive text adaptation experiment via zk subagents
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260717161516624**: deck refresh self healing and boot drift detection
 
 ### 已完成 (287)
 
