@@ -351,7 +351,7 @@ Pattern: `produce doc → ZK agent read → self-report → revise → re-valida
 
 0. **Ensure the environment works**: `bun install` (at the root of this workspace — Bun workspaces)
 1. **Ensure skills are loaded**: confirm `skill-deck.toml` exists, then `bun packages/lythoskill-deck/src/cli.ts link` → populates `.claude/skills/` from cold pool. If `.claude/skills/` is already populated but stale from a prior session, run `bun packages/lythoskill-deck/src/cli.ts link` anyway — it's idempotent.
-   - If upstream skills changed (new release, new commands), run `deck refresh --exec` before `deck link` to pull latest from github
+   - `deck link` warns mechanically when the cold pool is behind origin, dirty, or on the wrong branch — act on those warnings: `deck refresh --exec` (self-heals a dirty cache) then `deck link` again
 2. Read `daily/YYYY-MM-DD.md` (latest) → session handoff
 3. `git status` + `git log --oneline -5` → verify freshness against handoff's git_commit
 4. `bun packages/lythoskill-project-cortex/src/cli.ts probe` → check for state drift
@@ -369,7 +369,7 @@ A session goes through four phases:
 ```
 bun install → bun packages/lythoskill-deck/src/cli.ts link → read daily/YYYY-MM-DD.md (latest) → git status && git log --oneline -5 → bun packages/lythoskill-project-cortex/src/cli.ts probe
 ```
-- If skills are missing or upstream changed: `deck refresh --exec → deck link` before step 2
+- If skills are missing or link reports cold-pool drift: `deck refresh --exec → deck link` before step 2
 - You now know what happened last time and what's pending.
 
 **2. Incoming** — user gives you something:
@@ -442,7 +442,7 @@ deck link  →  .agents/skills/<name>/ refreshed  →  agent sees updated skill
 - `bun packages/lythoskill-creator/src/cli.ts build <name>` — build single skill (e.g., `build project-cortex`)
 - `deck link` — reconcile `.agents/skills/` working set from `skills/` (cold pool → working set)
 - `deck refresh` — discover upstream updates for declared skills (plan-only, no auto-apply)
-- `deck refresh --exec` — execute git pull in cold pool for all declared skills
+- `deck refresh --exec` — execute git pull in cold pool for all declared skills (self-heals dirty clones; non-zero exit + trailing ⚠️ summary on failure)
 - `deck refresh <skill> --exec` — refresh a single skill from upstream
 
 **Why this matters**: Agent reads `.agents/skills/` (working set), not `packages/*/skill/` (source). If you edit source but don't build + deck link, the agent sees stale skill. Pre-commit hook auto-builds when `packages/*/skill/` files are staged, but **manual edits without commit** require manual build + deck link.
@@ -528,7 +528,7 @@ Two modes: **daily close** (every session ends with this) and **release submit**
 **When to deck refresh after release:**
 - After publish, run `deck refresh --exec` to pull latest skills from upstream, then `deck link` to update working set
 - If `bunx @lythos/<name>@<<version>` fails with "Cannot find package", the version hasn't propagated to npm yet — wait or check `npm view @lythos/<name> versions`
-- If `deck refresh` fails with unstaged changes in cold pool, run `git checkout -- . && git clean -fd` in `~/.agents/skill-repos/<host>/<owner>/<repo>/`
+- `deck refresh --exec` self-heals unstaged-changes failures (`git checkout -- . && git clean -fd` + retry, logged per repo). Manual fallback if that fails: run the same commands in `~/.agents/skill-repos/<host>/<owner>/<repo>/`
 
 Scribe skill: [lythoskill-project-scribe](packages/lythoskill-project-scribe/skill/SKILL.md).
 

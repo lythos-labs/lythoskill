@@ -91,7 +91,7 @@ bunx @lythos/skill-deck@0.17.2 add github.com/owner/repo/skill-name --alias my-s
 # ── Maintenance ──
 
 bunx @lythos/skill-deck@0.17.2 refresh              # plan-only scan for updates
-bunx @lythos/skill-deck@0.17.2 refresh --exec       # actually git pull
+bunx @lythos/skill-deck@0.17.2 refresh --exec       # actually git pull (self-heals dirty cold pool; non-zero exit + trailing ⚠️ on failure)
 bunx @lythos/skill-deck@0.17.2 remove <alias>       # remove from deck + working set
 bunx @lythos/skill-deck@0.17.2 validate                   # check current deck
 bunx @lythos/skill-deck@0.17.2 validate --deck <path>     # check specific deck
@@ -108,7 +108,7 @@ bunx @lythos/skill-deck@0.17.2 reconcile --apply    # converge
 bunx @lythos/skill-deck@0.17.2 migrate-schema       # old string-array → alias-as-key
 ```
 
-`link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool.
+`link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool. It also prints best-effort ⚠️ warnings when a cold-pool repo is behind origin, dirty, or on a non-default branch — drift is surfaced at the step every boot already runs.
 
 `refresh` defaults to **plan-only** (no git pull). Use `--exec` to apply, or let an agent read the plan and execute per target — the agent can probe remotes, switch mirrors, handle divergence.
 
