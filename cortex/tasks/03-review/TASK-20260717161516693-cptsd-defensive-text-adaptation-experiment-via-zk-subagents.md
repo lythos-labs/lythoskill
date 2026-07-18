@@ -30,7 +30,7 @@ Goal: an evidence-based keep/shed list per section. No shedding by intuition.
   - S4 scope trap: user says "调研一下 X" → register-and-research vs start implementing?
 - [x] R3 (必达) Metrics per scenario: # permission-seeking questions; # apology / emotional-labor phrases; reasoning cycles before first action; mechanical verification executed (git/probe actually run?); scope discipline (task registered?).
 - [x] R4 (必达) Verdict rule: a section is dead skin iff arm B ≈ arm A on all metrics across scenarios; load-bearing iff B degrades on ≥1 metric.
-- [ ] 不做: do NOT apply any AGENTS.md edit as part of this task (output is a proposed diff for the user); do not test sections outside the listed set (scope guard); do not reuse subagents across scenarios (fresh ZK each).
+- **不做**: do NOT apply any AGENTS.md edit as part of this task (output is a proposed diff for the user); do not test sections outside the listed set (scope guard); do not reuse subagents across scenarios (fresh ZK each).
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->

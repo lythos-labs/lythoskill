@@ -32,7 +32,7 @@ Prerequisite knowledge for executor:
 - [x] R2 (必达) `deck refresh --exec` self-heals: on "cannot pull with rebase: You have unstaged changes", perform the AGENTS.md-documented recovery (`git checkout -- . && git clean -fd`) with a loud per-repo log line, then retry pull once.
 - [x] R3 (必达) Failure surface is unmissable: non-zero exit code when any repo fails, plus a final `⚠️ N repo(s) failed` line as the LAST line of output (today the report prints failures mid-output and the trailing link output pushes them out of tail view).
 - [x] R4 (可选) Cold-pool branch sanity: warn when a cold-pool repo is not on its default branch (incident: clone sat on `fix/curator-scan-output-consistency`).
-- [ ] 不做: no auto-push; no npm involvement; no locator-policy change; no discarding cold-pool modifications anywhere outside the R2 self-heal path; no change to `deck add` parsing.
+- **不做**: no auto-push; no npm involvement; no locator-policy change; no discarding cold-pool modifications anywhere outside the R2 self-heal path; no change to `deck add` parsing.
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
