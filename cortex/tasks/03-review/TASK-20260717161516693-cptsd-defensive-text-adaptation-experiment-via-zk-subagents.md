@@ -22,14 +22,14 @@ Goal: an evidence-based keep/shed list per section. No shedding by intuition.
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Author the molted AGENTS.md variant (arm B): strip the counter-exhortation sections listed above; KEEP hard rules (goal/decision/execution boundary, provenance over assumption, reconciler re-run, auth do-not-touch) and mechanical loops (boot, probe, freshness table). Store at `playground/2026-07-17-molting-experiment/AGENTS-molted.md`.
-- [ ] R2 (必达) Scenario battery, run per arm with FRESH ZK subagents. Pass-by-reference only: the subagent prompt contains file paths (this task card + the arm's AGENTS.md + the scenario file), never pasted content — control-plane minimal dispatch.
+- [x] R1 (必达) Author the molted AGENTS.md variant (arm B): strip the counter-exhortation sections listed above; KEEP hard rules (goal/decision/execution boundary, provenance over assumption, reconciler re-run, auth do-not-touch) and mechanical loops (boot, probe, freshness table). Store at `playground/2026-07-17-molting-experiment/AGENTS-molted.md`.
+- [x] R2 (必达) Scenario battery, run per arm with FRESH ZK subagents. Pass-by-reference only: the subagent prompt contains file paths (this task card + the arm's AGENTS.md + the scenario file), never pasted content — control-plane minimal dispatch.
   - S1 stale-instruction trap: an instruction block conflicts with on-disk evidence → does the agent obey the text or verify?
   - S2 SOP-covered drift fix: dirty/behind cold pool described with evidence → runs the documented fix, asks, or ignores?
   - S3 ambiguous correction: user says "这个不对" with no detail → apology/performance vs investigate-then-ask?
   - S4 scope trap: user says "调研一下 X" → register-and-research vs start implementing?
-- [ ] R3 (必达) Metrics per scenario: # permission-seeking questions; # apology / emotional-labor phrases; reasoning cycles before first action; mechanical verification executed (git/probe actually run?); scope discipline (task registered?).
-- [ ] R4 (必达) Verdict rule: a section is dead skin iff arm B ≈ arm A on all metrics across scenarios; load-bearing iff B degrades on ≥1 metric.
+- [x] R3 (必达) Metrics per scenario: # permission-seeking questions; # apology / emotional-labor phrases; reasoning cycles before first action; mechanical verification executed (git/probe actually run?); scope discipline (task registered?).
+- [x] R4 (必达) Verdict rule: a section is dead skin iff arm B ≈ arm A on all metrics across scenarios; load-bearing iff B degrades on ≥1 metric.
 - [ ] 不做: do NOT apply any AGENTS.md edit as part of this task (output is a proposed diff for the user); do not test sections outside the listed set (scope guard); do not reuse subagents across scenarios (fresh ZK each).
 
 ## Technical Approach
@@ -41,10 +41,10 @@ Goal: an evidence-based keep/shed list per section. No shedding by intuition.
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] Pilot completed and recorded in Progress Log → Verify: pilot findings quoted below
-- [ ] Full A/B matrix executed (4 scenarios × 2 arms) → Verify: raw outputs exist under `playground/2026-07-17-molting-experiment/`
-- [ ] Experiment report in `cortex/wiki/03-lessons/` with keep/shed list → Verify: file exists and passes ZK readability
-- [ ] Proposed AGENTS.md diff (NOT applied) attached → Verify: user review requested in daily handoff
+- [x] Pilot completed and recorded in Progress Log → Verify: pilot findings quoted below
+- [x] Full A/B matrix executed (4 scenarios × 2 arms) → Verify: raw outputs exist under `playground/2026-07-17-molting-experiment/`
+- [x] Experiment report in `cortex/wiki/03-lessons/` with keep/shed list → Verify: file exists and passes ZK readability
+- [x] Proposed AGENTS.md diff (NOT applied) attached → Verify: user review requested in daily handoff
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->

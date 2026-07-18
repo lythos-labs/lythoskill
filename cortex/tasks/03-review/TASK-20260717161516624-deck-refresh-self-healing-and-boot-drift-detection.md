@@ -28,10 +28,10 @@ Prerequisite knowledge for executor:
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) `deck link` output includes per-repo drift warnings: behind-origin commit count and dirty-working-tree status for cold-pool repos (read-only; whether to allow a `git fetch` is a documented design decision in this card's Progress Log).
-- [ ] R2 (必达) `deck refresh --exec` self-heals: on "cannot pull with rebase: You have unstaged changes", perform the AGENTS.md-documented recovery (`git checkout -- . && git clean -fd`) with a loud per-repo log line, then retry pull once.
-- [ ] R3 (必达) Failure surface is unmissable: non-zero exit code when any repo fails, plus a final `⚠️ N repo(s) failed` line as the LAST line of output (today the report prints failures mid-output and the trailing link output pushes them out of tail view).
-- [ ] R4 (可选) Cold-pool branch sanity: warn when a cold-pool repo is not on its default branch (incident: clone sat on `fix/curator-scan-output-consistency`).
+- [x] R1 (必达) `deck link` output includes per-repo drift warnings: behind-origin commit count and dirty-working-tree status for cold-pool repos (read-only; whether to allow a `git fetch` is a documented design decision in this card's Progress Log).
+- [x] R2 (必达) `deck refresh --exec` self-heals: on "cannot pull with rebase: You have unstaged changes", perform the AGENTS.md-documented recovery (`git checkout -- . && git clean -fd`) with a loud per-repo log line, then retry pull once.
+- [x] R3 (必达) Failure surface is unmissable: non-zero exit code when any repo fails, plus a final `⚠️ N repo(s) failed` line as the LAST line of output (today the report prints failures mid-output and the trailing link output pushes them out of tail view).
+- [x] R4 (可选) Cold-pool branch sanity: warn when a cold-pool repo is not on its default branch (incident: clone sat on `fix/curator-scan-output-consistency`).
 - [ ] 不做: no auto-push; no npm involvement; no locator-policy change; no discarding cold-pool modifications anywhere outside the R2 self-heal path; no change to `deck add` parsing.
 
 ## Technical Approach
@@ -43,15 +43,19 @@ Prerequisite knowledge for executor:
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] All deck tests pass incl. new fixture tests → Verify: `bun --filter='*' run test` — 0 fail
-- [ ] Manual replay: hand-dirty a cold-pool clone → `deck refresh --exec` recovers and pulls → Verify: `git -C <repo> log -1` equals origin tip; output shows the recovery line
-- [ ] Manual replay: cold pool 1 commit behind origin → `deck link` prints a drift warning → Verify: warning line present in stdout
-- [ ] Failure visibility: force a pull failure → non-zero exit and `⚠️` summary is the last line → Verify: run, then `echo $?`
-- [ ] AGENTS.md / SKILL.md boot text updated and built → Verify: `grep` new wording in `skills/lythoskill-deck/SKILL.md`
+- [x] All deck tests pass incl. new fixture tests → Verify: `bun --filter='*' run test` — 0 fail
+- [x] Manual replay: hand-dirty a cold-pool clone → `deck refresh --exec` recovers and pulls → Verify: `git -C <repo> log -1` equals origin tip; output shows the recovery line
+- [x] Manual replay: cold pool 1 commit behind origin → `deck link` prints a drift warning → Verify: warning line present in stdout
+- [x] Failure visibility: force a pull failure → non-zero exit and `⚠️` summary is the last line → Verify: run, then `echo $?`
+- [x] AGENTS.md / SKILL.md boot text updated and built → Verify: `grep` new wording in `skills/lythoskill-deck/SKILL.md`
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 - 2026-07-17 — Registered after incident replay; incident manually fixed same day (checkout + pull + link; served text verified "first").
+- 2026-07-17 — Implemented (R1–R4) + verified live: dirty fixture → link warns AND `refresh --exec` self-heals (`🩹 … ✅ pull succeeded after self-heal`); 3-behind fixture → link warns (see caveat); forced failure → trailing `⚠️ 1 skill(s) failed` + exit code 1; branch fixture → wrong-branch warning fired on the real clone (then actually fixed: local `main` was an unrelated 82-commit history, reset to `origin/main`). `bun --filter='*' run test` green (deck: 148 pass).
+  - **Caveat (accepted)**: the probe fetch is `git fetch --depth=1` (matches `probeBehindCount` precedent) — on shallow clones the behind count under-reports (said "1 behind" for a real 3). Acceptable for a drift *signal* (nonzero = drift; `refresh --exec` is the truth-teller), but the wording "N commit(s) behind" can understate.
+  - **Bonus validation**: mid-implementation I accidentally ran `deck link` from inside the cold-pool clone, dirtying it — the new health check caught it on the very next run. The guard proved itself on its first day.
+  - **Adjacent finding (fixed, separate commit `5d755fc6`)**: `diagnose` locator pointed at dead path — upstream renamed to `engineering/diagnosing-bugs`; refresh was permanently exit-1 on it.
 
 ## Related Files
 - Modified: `packages/lythoskill-deck/src/*.ts`, `packages/lythoskill-deck/skill/SKILL.md`, `AGENTS.md`
