@@ -11,6 +11,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { execSync } from "node:child_process";
 import { gitPull } from "@lythos/cold-pool";
 import { probeConnectivity } from "@lythos/cold-pool/src/mirror.js";
 import { findDeckToml, linkDeck } from "./link.js";
@@ -140,15 +141,50 @@ export async function refreshDeck(
     }
   }
 
+  // Self-heal for dirty cold-pool clones: the documented recovery (AGENTS.md
+  // § Session Close) — the cold pool is a cache, so discarding local
+  // modifications is safe. Only dirty-tree failures trigger this
+  // (isDirtyPullFailure in refresh-plan.ts); network/auth errors surface as-is.
+  const gitRecover = (dir: string): { recovered: boolean; message: string } => {
+    try {
+      execSync('git checkout -- .', { cwd: dir, stdio: 'pipe', timeout: 15000 })
+      execSync('git clean -fd', { cwd: dir, stdio: 'pipe', timeout: 15000 })
+      return { recovered: true, message: 'git checkout -- . && git clean -fd' }
+    } catch (e: any) {
+      return { recovered: false, message: e?.message ?? String(e) }
+    }
+  }
+
+  // linkDeck is invoked fire-and-forget inside executeRefreshPlan; capture the
+  // promise so failures are reported AFTER the link output — the ⚠️ summary
+  // must be the last thing on screen (2026-07-17 incident: mid-output failure
+  // reports were pushed out of tail view by the trailing link output).
+  let linkPromise: Promise<void> | undefined
   const results = executeRefreshPlan(plan, {
     gitPull,
+    gitRecover,
     log: console.log,
-    linkDeck: async () => {
-      console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
-      console.log('🔗 Running deck link...')
-      await linkDeck(cliDeckPath, cliWorkdir)
+    linkDeck: () => {
+      linkPromise = (async () => {
+        console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
+        console.log('🔗 Running deck link...')
+        await linkDeck(cliDeckPath, cliWorkdir)
+      })()
     },
   })
 
-  if (results.some(r => r.status === 'failed')) process.exit(1)
+  if (linkPromise) await linkPromise
+
+  const failed = results.filter(r => r.status === 'failed')
+  if (failed.length > 0) {
+    const repos = [...new Set(
+      failed
+        .map(f => plan.targets.find(t => t.alias === f.alias)?.gitRoot)
+        .filter((r): r is string => !!r)
+        .map(r => r.split('/').slice(-2).join('/'))
+    )]
+    console.error(`\n⚠️  ${failed.length} skill(s) failed to refresh${repos.length ? ` — repo(s): ${repos.join(', ')}` : ''}. See report above.`)
+    console.error(`   If a repo is dirty (hand-edited cache): git -C <repo> checkout -- . && git clean -fd, then re-run deck refresh --exec`)
+    process.exitCode = 1
+  }
 }

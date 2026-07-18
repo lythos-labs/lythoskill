@@ -291,3 +291,91 @@ describe('executeRefreshPlan', () => {
     expect(logs.some(l => l.includes('single skill'))).toBe(true)
   })
 })
+
+
+// ── self-heal: dirty cold pool recovery (TASK-20260717161516624) ──────────
+
+describe('executeRefreshPlan self-heal', () => {
+  const dirtyMsg = 'error: cannot pull with rebase: You have unstaged changes.\nerror: please commit or stash them.'
+
+  it('dirty pull failure → gitRecover called, pull retried, success reported', () => {
+    const plan = makePlan([makeTarget()])
+    const logs: string[] = []
+    let recoverCalls = 0
+    let pullCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => {
+        pullCalls++
+        return pullCalls === 1
+          ? { status: 'failed' as const, message: dirtyMsg }
+          : { status: 'updated' as const, message: 'Fast-forward' }
+      },
+      gitRecover: () => { recoverCalls++; return { recovered: true, message: 'git checkout -- . && git clean -fd' } },
+      log: (msg) => logs.push(msg),
+    })
+
+    expect(recoverCalls).toBe(1)
+    expect(pullCalls).toBe(2)
+    expect(results[0].status).toBe('updated')
+    expect(logs.some(l => l.includes('self-heal'))).toBe(true)
+    expect(logs.some(l => l.includes('pull succeeded after self-heal'))).toBe(true)
+  })
+
+  it('dirty failure + failed recovery → stays failed, no retry', () => {
+    const plan = makePlan([makeTarget()])
+    const logs: string[] = []
+    let pullCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => { pullCalls++; return { status: 'failed' as const, message: dirtyMsg } },
+      gitRecover: () => ({ recovered: false, message: 'clean failed: permission denied' }),
+      log: (msg) => logs.push(msg),
+    })
+
+    expect(pullCalls).toBe(1)
+    expect(results[0].status).toBe('failed')
+    expect(logs.some(l => l.includes('self-heal failed'))).toBe(true)
+  })
+
+  it('non-dirty failure (network) → no recovery attempt', () => {
+    const plan = makePlan([makeTarget()])
+    let recoverCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => ({ status: 'failed' as const, message: 'ssh: connect to host github.com port 22: Connection refused' }),
+      gitRecover: () => { recoverCalls++; return { recovered: true, message: 'ok' } },
+      log: () => {},
+    })
+
+    expect(recoverCalls).toBe(0)
+    expect(results[0].status).toBe('failed')
+  })
+
+  it('no gitRecover injected → dirty failure behaves as before (backward compat)', () => {
+    const plan = makePlan([makeTarget()])
+    let pullCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => { pullCalls++; return { status: 'failed' as const, message: dirtyMsg } },
+      log: () => {},
+    })
+
+    expect(pullCalls).toBe(1)
+    expect(results[0].status).toBe('failed')
+  })
+
+  it('dirty failure → recovery ok → retry still fails → reported failed', () => {
+    const plan = makePlan([makeTarget()])
+    let pullCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => { pullCalls++; return { status: 'failed' as const, message: dirtyMsg } },
+      gitRecover: () => ({ recovered: true, message: 'git checkout -- . && git clean -fd' }),
+      log: () => {},
+    })
+
+    expect(pullCalls).toBe(2)
+    expect(results[0].status).toBe('failed')
+  })
+})

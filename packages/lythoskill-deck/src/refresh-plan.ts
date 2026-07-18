@@ -180,8 +180,19 @@ export interface RefreshResult {
 
 export interface RefreshIO {
   gitPull?: (dir: string) => { status: 'updated' | 'up-to-date' | 'failed'; message: string }
+  gitRecover?: (dir: string) => { recovered: boolean; message: string }
   log?: (msg: string) => void
   linkDeck?: (deckPath?: string, workdir?: string) => void
+}
+
+/**
+ * Dirty-tree pull failures block `git pull --rebase`. The documented recovery
+ * (AGENTS.md § Session Close) is `git checkout -- . && git clean -fd` — the
+ * cold pool is a cache, so discarding local modifications is safe. Only this
+ * failure class triggers self-heal; network/auth errors must surface as-is.
+ */
+export function isDirtyPullFailure(message?: string): boolean {
+  return !!message && /cannot pull with rebase|unstaged changes|Please commit your changes or stash/i.test(message)
 }
 
 export function executeRefreshPlan(plan: RefreshPlan, io?: RefreshIO): RefreshResult[] {
@@ -206,7 +217,17 @@ export function executeRefreshPlan(plan: RefreshPlan, io?: RefreshIO): RefreshRe
         skipped++
         break
       case 'git': {
-        const pullResult = gitPull(t.gitRoot!)
+        let pullResult = gitPull(t.gitRoot!)
+        if (pullResult.status === 'failed' && io?.gitRecover && isDirtyPullFailure(pullResult.message)) {
+          const rec = io.gitRecover(t.gitRoot!)
+          log(`   🩹 ${t.alias}: cold pool dirty — self-heal (${rec.message})`)
+          if (rec.recovered) {
+            pullResult = gitPull(t.gitRoot!)
+            if (pullResult.status !== 'failed') log(`   ✅ ${t.alias}: pull succeeded after self-heal`)
+          } else {
+            log(`   ⚠️  ${t.alias}: self-heal failed — ${rec.message}`)
+          }
+        }
         results.push({ alias: t.alias, path: t.sourceRel, status: pullResult.status, message: pullResult.message })
         if (pullResult.status === 'updated') updated++
         else if (pullResult.status === 'up-to-date') upToDate++

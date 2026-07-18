@@ -794,6 +794,24 @@ if (!cliWorkdir && cliDeck && dirname(DECK_PATH) !== process.cwd()) {
 console.log(`✅ Sync complete: ${linkedSkills.length} skill(s) linked (max_cards: ${MAX_CARDS})`);
 console.log(`   lock: ${resolve(PROJECT_DIR, "skill-deck.lock")}${shouldWriteLock ? '' : ' (unchanged)'}`);
 console.log(`   state: ${resolve(PROJECT_DIR, "skill-deck.state")}`);
+
+// ── Cold pool health (best-effort drift detection — never blocks link) ──
+// Boot runs `deck link` every session; this is the one step that already
+// runs, so it is where cold-pool drift (behind origin / dirty cache / wrong
+// branch) gets surfaced. Dynamic import avoids the link ↔ refresh-plan
+// module cycle. Any failure here must not break the link report.
+try {
+  const { buildRefreshPlan } = await import("./refresh-plan.js");
+  const { checkColdPoolHealth, formatHealthWarnings } = await import("./cold-pool-health.js");
+  const roots = [...new Set(
+    buildRefreshPlan(deckRaw, { deckPath: DECK_PATH, workdir: PROJECT_DIR, coldPool: COLD_POOL })
+      .targets.filter(t => t.type === 'git' && t.gitRoot)
+      .map(t => t.gitRoot!)
+  )];
+  for (const w of formatHealthWarnings(checkColdPoolHealth(roots))) console.log(w);
+} catch {
+  // best-effort only
+}
 if (dirOverlaps.length > 0) {
   console.log(`   ⚠️  ${dirOverlaps.length} directory overlap(s) (see warnings above)`);
 }
