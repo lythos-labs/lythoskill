@@ -70,7 +70,8 @@ Harness 在 DeepSeek 4 / Kimi K2.6–2.7 时代打磨成型;默认模型已切�
 - 派生状态(cold pool 克隆)被手改 → 对账器(rebase pull)卡死 → 一个月静默 drift。缓存副本永远不该手改;工具应自愈。
 - "文档已写" ≠ "会被执行":AGENTS.md 写了修复方法,一个月没人跑。routine 必须挂在已经会被执行的步骤上(boot 的 `deck link`),而不是挂在需要自觉的条件上。
 - `refresh --exec` 的失败报告其实响亮(Failed: 12),但报告在前、link 输出在后,tail 视野里失败被冲走——失败信号必须出现在输出的最后一屏。
-- (主题B 实验完成后补充)
+- (主题A 已验证) TASK-20260717161516624 交付:`deck link` 机械暴露 drift/dirty/branch;`refresh --exec` 自愈脏缓存;失败非零退出 + 末尾 ⚠️ 摘要。现场重放中该警告还当场抓住了执行者自己误在 cold pool 里跑 link 造成的脏树——guard 在第一天就证明了自己。
+- (主题B 已验证) A/B 实验(4 场景 × 2 臂,ZK K3 subagent):v3 草案(-48%)无任何指标退化;rule 9 + Action Discipline 被逐字引用为压制词汇;CPTSD 表从未被 A 臂引用 = 死皮确认。报告: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing.md`。
 
 ## 归档条件
 <!-- ⚠️ REQUIRED: 可观测的归档判据。不填会被 probe 拦截。 -->
