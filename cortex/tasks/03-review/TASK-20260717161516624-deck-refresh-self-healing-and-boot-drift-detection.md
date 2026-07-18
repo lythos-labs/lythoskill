@@ -37,13 +37,13 @@ Prerequisite knowledge for executor:
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
 - Code: `packages/lythoskill-deck/src/refresh*.ts` and link output module; pure plan functions + injected `spawn` per Intent/Plan/Execute.
-- Tests: co-located `*.test.ts` with fixture git repos (behind-origin, dirty-tree, wrong-branch); negative tests prove the warnings actually fire (per [GUARD-SENSITIVE] gotcha — a guard that never fires is worse than none).
+- Tests: co-located `*.test.ts` with injected mock IO (behind/dirty/branch warning formats + self-heal paths); negative tests prove the warnings actually fire (per [GUARD-SENSITIVE] gotcha — a guard that never fires is worse than none). (Reviewer P3-1: delivered as mock-injection, not fixture git repos; `productionHealthIO` git-invocation strings have no coverage — fixture coverage moved to TASK-20260719015727610 R5.)
 - Docs: if output surface changes, sync `packages/lythoskill-deck/skill/SKILL.md` and the AGENTS.md boot section (replace the conditional exhortation "if upstream changed, run refresh" with a reference to the mechanical signal), then `creator build` + `deck link`.
 - Version: new user-facing output/behavior = minor bump per [SEMVER] gotcha — only when the user explicitly releases.
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [x] All deck tests pass incl. new fixture tests → Verify: `bun --filter='*' run test` — 0 fail
+- [x] All deck tests pass incl. new mock-injection tests → Verify: `bun --filter='*' run test` — 0 fail
 - [x] Manual replay: hand-dirty a cold-pool clone → `deck refresh --exec` recovers and pulls → Verify: `git -C <repo> log -1` equals origin tip; output shows the recovery line
 - [x] Manual replay: cold pool 1 commit behind origin → `deck link` prints a drift warning → Verify: warning line present in stdout
 - [x] Failure visibility: force a pull failure → non-zero exit and `⚠️` summary is the last line → Verify: run, then `echo $?`
@@ -53,7 +53,7 @@ Prerequisite knowledge for executor:
 <!-- Update during execution, with timestamps -->
 - 2026-07-17 — Registered after incident replay; incident manually fixed same day (checkout + pull + link; served text verified "first").
 - 2026-07-17 — Implemented (R1–R4) + verified live: dirty fixture → link warns AND `refresh --exec` self-heals (`🩹 … ✅ pull succeeded after self-heal`); 3-behind fixture → link warns (see caveat); forced failure → trailing `⚠️ 1 skill(s) failed` + exit code 1; branch fixture → wrong-branch warning fired on the real clone (then actually fixed: local `main` was an unrelated 82-commit history, reset to `origin/main`). `bun --filter='*' run test` green (deck: 148 pass).
-  - **Caveat (accepted)**: the probe fetch is `git fetch --depth=1` (matches `probeBehindCount` precedent) — on shallow clones the behind count under-reports (said "1 behind" for a real 3). Acceptable for a drift *signal* (nonzero = drift; `refresh --exec` is the truth-teller), but the wording "N commit(s) behind" can understate.
+  - **Caveat (accepted)**: the probe fetch is `git fetch --depth=1` (matches `probeBehindCount` precedent) — on shallow clones the behind count under-reports (said "1 behind" for a real 3). Acceptable for a drift *signal* (nonzero = drift; `refresh --exec` is the truth-teller), but the wording "N commit(s) behind" can understate. **Side effect (reviewer P2-1)**: the same shallow fetch converts a *full* clone to shallow (`.git/shallow` appears) — the nominally read-only boot probe does mutate `.git`. Decision on keeping vs replacing the probe moved to TASK-20260719015727610 R1.
   - **Bonus validation**: mid-implementation I accidentally ran `deck link` from inside the cold-pool clone, dirtying it — the new health check caught it on the very next run. The guard proved itself on its first day.
   - **Adjacent finding (fixed, separate commit `5d755fc6`)**: `diagnose` locator pointed at dead path — upstream renamed to `engineering/diagnosing-bugs`; refresh was permanently exit-1 on it.
 
