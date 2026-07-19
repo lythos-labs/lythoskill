@@ -16,19 +16,6 @@
 <!--
 AGENTS.md is an activation map — most sections trigger a behavior; Z4 is reference.
 Non-breaking additions → APPEND. Breaking changes → reorder freely.
-
-v3 DRAFT (2026-07-17, EPIC-20260717161516583 / ADR-20260717161516538) — molting pass over the 806-line version:
-- MERGED: Session Close + Full Submit Pipeline + when-to-bump (were 3 overlapping blocks);
-  Start of Session into Boot First (was duplicated); ZK trial-usage + validation → one compact block.
-- REFRAMED: "When Internal Signals Fire" (CPTSD negative framing) → "Action Discipline" (both
-  directions: appeasement AND over-deference); added hard rule 9 (ask with purpose).
-- MOVED to references (pointers kept): ZK examples/convergence prose (already in zk-review.md),
-  probe interpretation detail (→ cortex skill), arena runtime (→ arena-runtime.md).
-- CUT: Recurring Work Types stats (stale monthly), duplicate compaction warnings (kept top + §8),
-  narrative padding around tables. Nothing load-bearing was removed: hard rules, boot, gotchas,
-  pointer index, dispatch tables, release/auth contract are intact.
-- Pilot evidence (TASK-20260717161516693): impulses exist natively in K3 but are suppressed by
-  citing hard rules; the suppression vocabulary came from rules, not from exhortation density.
 -->
 
 ## Z1 — Foundation
