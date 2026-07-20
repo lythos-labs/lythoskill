@@ -189,6 +189,8 @@ cortex review TASK-xxx  → 03-review (STOP — user marks done)
 
 **Review = ZK-review first.** Before the `Review:` trailer, spawn a fresh ZK reviewer — pass-by-reference: the task card path + its commits (`git log --grep <TASK-id>`). Skeptical, severity-rated findings on: are the checked acceptance boxes honestly supported, does the evidence support the conclusions. Verify its P1 claims yourself (reviewers are sensors, not oracles), then fix or register follow-ups. Self-review has a structural blind spot (knowledge curse, self-graded homework).
 
+**Significant work adds the user-sim gate**: after the ZK skeptic, spawn a profile-calibrated reviewer-as-user (prompt: `.private/user-sim-reviewer.md` — local-only, skip silently if `.private/` is absent). The ladder is self-check → ZK skeptic → user-sim → user spot-check; each layer shrinks what the user must verify. User style signals calibrate `.private/decision-profile.md` — never re-prompt the subagent.
+
 **Always CLI, never `mv`** — CLI updates Status History; manual moves cause probe mismatches. **English-only slugs** — task/epic titles must be ASCII (portable paths).
 
 #### Commit Trailers
