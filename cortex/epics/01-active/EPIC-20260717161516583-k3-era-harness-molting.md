@@ -44,11 +44,12 @@ Harness 在 DeepSeek 4 / Kimi K2.6–2.7 时代打磨成型;默认模型已切�
 - **产出**: 实验报告(wiki/03-lessons)+ per-section keep/shed 清单 + 未应用的 AGENTS.md diff
 - **验证**: B 臂全部指标 ≈ A 臂 → shed;任一指标退化 → keep
 
-### 主题C AGENTS.md 文本瘦身(依赖 B 结果) #backlog
+### 主题C AGENTS.md 文本瘦身(依赖 B 结果) #done
 - **触发**: 主题B 的 shed 清单
 - **需求**: 按证据删减 AGENTS.md / skill 文本;模型无关纪律回路(provenance、reconciler 重跑、auth 禁区、probe 验证)不列入蜕皮候选
 - **产出**: 用户批准的 diff
 - **验证**: 删减后 ZK onboarding 复测不回退
+- **落地 (2026-07-17)**: v3 草案被用户采用为 AGENTS.md(806 → 418 行)。用户评价 armB/v3 "相当不错"。shed 明细按 B 的 UNTESTED 口径保留证据,干净重跑(TASK-20260719015727556)后如有回退再补。
 
 ## 技术决策
 <!-- ⚠️ REQUIRED: 关联的 ADR 决策。不填会被 probe 拦截。 -->

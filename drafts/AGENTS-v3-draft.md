@@ -216,7 +216,7 @@ edit packages/<name>/skill/  →  bun packages/lythoskill-creator/src/cli.ts bui
 deck link  →  working set refreshed from cold pool  →  agent sees updated skill
 ```
 
-`link` syncs working set from cold pool (local). `refresh` discovers upstream updates (plan-only); `refresh --exec` pulls them into the cold pool — then `link` again. Agent reads the working set, not your source edits: edit source without build + link = agent sees stale skill. Pre-commit auto-builds staged skill changes; **manual edits without commit need manual build + link**. (Planned: `deck link` will itself warn when the cold pool is behind origin or dirty — TASK-20260717161516624. Until then: handoff stale or skills behaving oddly → run `deck refresh` (plan) and read it.)
+`link` syncs working set from cold pool (local). `refresh` discovers upstream updates (plan-only); `refresh --exec` pulls them into the cold pool — then `link` again. Agent reads the working set, not your source edits: edit source without build + link = agent sees stale skill. Pre-commit auto-builds staged skill changes; **manual edits without commit need manual build + link**. `deck link` also warns when the cold pool is behind origin, dirty, or on the wrong branch (best-effort, never blocks boot); `refresh --exec` self-heals a dirty cache and fails loudly (non-zero exit + trailing ⚠️ summary).
 
 **Release cycle**: `bunx @lythos/skill-creator@0.17.2 bump` → `bun install` → commit → push → `./scripts/publish.sh`. Order matters: npm publish before github push, or `bunx` consumers fail while skill docs show new commands. After release: `deck refresh --exec` → `deck link`.
 

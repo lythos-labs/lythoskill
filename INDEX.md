@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/18 23:49:36
+> 自动生成于 2026/7/20 11:29:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 332 | 进行中: 0, 待验收: 2, 已完成: 287 |
+| Tasks | 334 | 进行中: 0, 待验收: 0, 已完成: 289 |
 | Epics | 45 | 活跃: 1, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 92 | 已接受: 87 |
 
@@ -75,21 +75,22 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (4)
 
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
+- [ ] **TASK-20260719015727556**: cptsd ab rerun with clean methodology and spiral scenario
+- [ ] **TASK-20260719015727610**: deck cold pool probe hardening follow ups
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260717161516624**: deck refresh self healing and boot drift detection
-- 🔍 **TASK-20260717161516693**: cptsd defensive text adaptation experiment via zk subagents
+_无_
 
-### 已完成 (287)
+### 已完成 (289)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -378,6 +379,8 @@ _无_
 - ✅ ~~TASK-20260710164825401~~: agent behavior gap: decision hygiene vs execution
 - ✅ ~~TASK-20260710170234793~~: scribe skill: clarify record is not session end - remove handoff semantics from when_to_use and triggers
 - ✅ ~~TASK-20260710172217283~~: scribe daily template: remove file-level Ground Truth, move to per-handoff Verify Current State
+- ✅ ~~TASK-20260717161516624~~: deck refresh self healing and boot drift detection
+- ✅ ~~TASK-20260717161516693~~: cptsd defensive text adaptation experiment via zk subagents
 
 ### 悬置 (1)
 
