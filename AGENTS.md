@@ -181,6 +181,20 @@ Any deck in `examples/decks/` can be handed to a subagent as a task-scoped skill
 
 #### Task Lifecycle
 
+**Cortex is a git-based Jira, distilled to its essence.** Bring your PM world knowledge — the mapping is one-to-one:
+
+| Jira / PM concept | Cortex equivalent |
+|---|---|
+| Ticket (a title-only ticket guides no one) | Task card (empty shell = title-only — fill it, that's higher priority than code) |
+| Board columns + workflow transitions | `01-backlog → 02-in-progress → 03-review → 04-completed` directories; **CLI moves only** |
+| Smart commits (`Closes JIRA-123`) | Commit trailers (`Closes: TASK-xxx`; `Review:` = internal PR) |
+| Activity / audit log | Status History table + `git log --grep TASK-xxx` |
+| WIP limits | Epic lanes: main / emergency, max 1 active each |
+| Backlog refinement | ZK Review Gate (§3) |
+| Workflow validator | `cortex probe` |
+
+What transfers: shared legible state, enforced transitions, commit↔ticket traceability, small WIP. What's dropped: UI, fields, ceremony — the files ARE the tickets, git is the audit, diffs are the review surface. One agent-native addition: timestamp IDs make `ls` a time-range query, so an agent with no memory rebuilds state from the filesystem alone. Design: ADR-20260503222838594 (kanban pull), ADR-20260503003314901 (smart-commit coupling), [agent-OS framing](cortex/wiki/02-research/2026-05-17-arena-cli-archaeology-and-agent-os-design-principles.md).
+
 ```
 cortex task "title"     → 01-backlog     (then immediately fill Background/Requirements/Acceptance)
 cortex start TASK-xxx   → 02-in-progress
