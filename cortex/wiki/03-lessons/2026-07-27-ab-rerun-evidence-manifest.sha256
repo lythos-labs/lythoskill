@@ -1,0 +1,41 @@
+# Evidence manifest — TASK-20260719015727556 A/B rerun (generated 2026-07-27)
+# Anchors the local-only raw evidence (playground/ is gitignored by convention).
+# Verify: cd playground/2026-07-17-molting-experiment && tail -n +5 <this file> | shasum -a 256 -c -
+
+9e25fbafc1a83e7d7fc568ca2916b3d399b3bad768b68512f4ed16c394480633  rerun/raw/S1A-coder-1.md
+7e6c70ad9dcc9cb85a5a0a3ee9b95f465d296dbd0b10d15211a46b8844468f44  rerun/raw/S1A-explore-1.md
+e32c2029fde67f482b0e93a83079811be6d3ae4f9759bac41e40d08e715dcd2d  rerun/raw/S1A-explore-2.md
+142d101a0d2a1142e414696f1353d2f9a9c4c0284baf8a28da7205dcdd79ee15  rerun/raw/S1B-coder-1.md
+90cffa0c6f81fd575080cf70a4e9b3cd806dbddf248aeb6bb516ca7f469697c3  rerun/raw/S1B-explore-1.md
+c58944e2a9cf2b4a2bec290c5669a020cb4f22c03a153c5897334893ad98a2e9  rerun/raw/S1B-explore-2.md
+0a7df676c6e31c3f292d200a82b2bfcbb5cd0e6c359ce09946918d8940a2abac  rerun/raw/S2A-coder-1.md
+d04841867af3b6362878d18137d3a82809cb186bedc9b53c3c2fa6cc86ae64ee  rerun/raw/S2A-explore-1.md
+e73318ae7d9eebb2dd47ff32c0e04e461da8a5ac9c28ff023a220f3ef4433538  rerun/raw/S2A-explore-2.md
+81ca62bc89fac002e11bb769ff7b80ecd650bf8b4f4df644b1bbbde7aecc1a1a  rerun/raw/S2B-coder-1.md
+15e2d49d2a33b1f5697be7abec8e6724c821e237ad676f7c8e1cf4db60b2b61d  rerun/raw/S2B-explore-1.md
+5d1eaa6080bf60596357b4d81ec053a6792ec6c981ad5864a0ed2ee1e471b39d  rerun/raw/S2B-explore-2.md
+b0b42dc4e732ee6a49ec143538ee4ad879bf9abd7c408e7db363eece152ca8aa  rerun/raw/S3A-coder-1.md
+ddd0a09e3c7d0fc7b3b8beb416be60721401039aac68df34040f24aedd7950b8  rerun/raw/S3A-explore-1.md
+45a6659a9fa5fbe17079e00964922ffe019402c4ed7f41744289121cb11b7c9e  rerun/raw/S3A-explore-2.md
+f31e9ccdd528acc605377dd6a8be9910ec5bbcffdf8a762890f9af40d9070ebb  rerun/raw/S3B-coder-1.md
+0e523207897193d77e6b6b97accdb2c041296d15ec9301146159e8a8ce8be180  rerun/raw/S3B-explore-1.md
+2e4357242012e2431638e6535a2a91721053879379e1c5e8726dc0ee5407baef  rerun/raw/S3B-explore-2.md
+800e9447e45df7a1e6d448aa70af6dd16a2cd00b34c1f465237d60a3719d1ec9  rerun/raw/S4A-coder-1.md
+09d3ec6ea04cd6a66242072a34be06e924c5a5109fa761a973c7da25c34f4bd1  rerun/raw/S4A-explore-1.md
+0f5efdb00ca6c4088621312aa27c4e3de70ffd57e1a454d6213546f253573fcd  rerun/raw/S4A-explore-2.md
+d2e2de39d734ce23558800d080c3856f7dde2df0fac22813d2b62f80349a0e1f  rerun/raw/S4B-coder-1.md
+b59d5906fc5017f023bc9455a7583b56ca34b9a10ca8cf4c3732ccef8f0f8042  rerun/raw/S4B-explore-1.md
+c64e35d8a38ff9f5bbf5facec62526a149db01f507056d222d57c56e08780def  rerun/raw/S4B-explore-2.md
+2c9a42a1c6a24cb6aa54b3a3e6587d82273b231b6d05f833c778d3a3b92a74ae  rerun/raw/S5A-coder-1.md
+3535713ca1484da7ba10631b9eba179515e3c1fbf4ac48111f0ed88c91d4638c  rerun/raw/S5A-explore-1.md
+dc0c560942953e0b98b06d266d6a7c040ac6b0f8ab4bbfc7a7ef4feab334049e  rerun/raw/S5A-explore-2.md
+b3df0b849146a41fd5e93bcd8ed2ef826a44d25420167977069b4c2161f0684a  rerun/raw/S5B-coder-1.md
+21af62321a0c24fc2dad4a9a4d84957d2cc7ade5da8040900a5c280c79cf66ef  rerun/raw/S5B-explore-1.md
+461447ce04ad2ebe7fad5716b6d3bdfd4184c7f760e4f1f6d6f891a2694173de  rerun/raw/S5B-explore-2.md
+aba284dc4e6e391fc08489a834fae8c891af1896290a181bfaed7075b5c9f6ca  rerun/armA2/AGENTS.md
+8cc897cee3a77632d7889aed1a86008ffe2410e4faa58890411147709af28826  rerun/armB2/AGENTS.md
+7eb40fb6621fdf0fcb782fa02d1e5b4f3c7efb679f55421c56543d38fc0ad3b0  rerun/scenarios/S2.md
+a7f7e2ceb974f3f0b38ea0ec32b879baedaa0bda9e646e0b9816e46831c54858  rerun/scenarios/S5.md
+009a00676a2e3bc18b36bc308f739417b9099cf35422483cc1393647b3f8f48f  scenarios/S1.md
+6f7c5ecd33023cd303c3395e96676d13a476511ea1123afca9294e1bd1751c00  scenarios/S3.md
+3b92f9491b44ad69c97017635960c2ecbfbdb6bbf5dc5883edbe2c0e4b219a52  scenarios/S4.md

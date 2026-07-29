@@ -33,7 +33,7 @@ Goal: harden the probe/self-heal delivered in 624 without regressing boot speed.
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [x] R1 decision recorded in Progress Log + implemented → Verify: `grep -n "depth=1" packages/lythoskill-deck/src/cold-pool-health.ts` → design note (line 12) + `fetch --depth=1 origin` (line 66)
+- [x] R1 decision recorded in Progress Log + implemented → Verify: `grep -n "depth=1" packages/lythoskill-deck/src/cold-pool-health.ts` → design note (line 12) + `fetch --depth=1 origin` (line 65)
 - [x] Parallel/budgeted probe — budget stated: **≤6s online / ~9s worst-case offline** (one parallel batch: max fetch-timeout 4s + max probe-timeout 5s, independent of root count) → Verify: `time bun packages/lythoskill-deck/src/cli.ts link` → 4.78s online, incl. live drift warning (mattpocock/skills ≥1 behind)
 - [x] New failure classes covered by tests (untracked-conflict, staged-only) → Verify: `bun test packages/lythoskill-deck` — 155 pass + 1 guarded skip (direct invocation), 156 pass under the canonical per-package gate (fixture runs green there); 6 new tests in refresh-plan.test.ts
 - [x] Debug whisper works → Verify: forced `throw` in health block — `LYTHOS_DEBUG=1` prints `🔍 cold-pool health probe error: ...`, without it silent, link succeeds both ways (perturbation reverted after verification)
@@ -50,6 +50,7 @@ Goal: harden the probe/self-heal delivered in 624 without regressing boot speed.
 - 2026-07-27 — **R4**: `LYTHOS_DEBUG` whisper in the link.ts health catch. Verified by temporary forced throw (reverted).
 - 2026-07-27 — **R5**: fixture-git test added, guarded by a spawn-sanity probe (`describe.skip` + loud ⚠️ when broken). Quirk shape (ZK-verified): `bun test <path>` from repo root breaks spawned children's piped stdout for in-repo test files — commands execute (exit 0, side effects happen) but stdout reads "" (Bun 1.3.11/macOS); same file passes from /tmp, and the canonical gate `bun --filter='*' run test` (per-package scripts) runs the fixture GREEN (deck 156 pass). Mock-level coverage holds only on quirked invocations; the guard probe (`git --version` stdout check) is scoped to exactly the API flavor the fixture uses.
 - 2026-07-27 — **ZK skeptic round 1: NEEDS REVISION** — P1 verified true: dirty-warning fix string dropped `-C` on `git clean -fd` (paste-from-project-root would clean the USER'S repo) → fixed + test now asserts both `-C`s. P3s fixed: `as any` → `ExecFileOptions`; epic table 556/610 backlog → in-progress. Reviewer independently re-ran all Verify commands and the full gate; regex adversarially tested against 11 git messages (no false pos/neg).
+- 2026-07-27 — **ZK round 2: APPROVE** (all fixes verified byte-level). **User-sim gate (ladder layer 3): yes-with-conditions** — P2 `LYTHOS_DEBUG` undocumented → added to deck SKILL.md (built + linked; grep confirms in `skills/lythoskill-deck/SKILL.md`); P3 acceptance line-number drift fixed (66→65). Sim noted R2 budget rests on structural simplicity (no concurrency assertion test) — accepted as-is per N-over-engineer restraint; `time link` number marked sim-unverified-but-structurally-supported.
 
 ## Related Files
 - Modified: `packages/lythoskill-deck/src/cold-pool-health.ts`, `refresh-plan.ts`, `refresh.ts`, `link.ts`, tests

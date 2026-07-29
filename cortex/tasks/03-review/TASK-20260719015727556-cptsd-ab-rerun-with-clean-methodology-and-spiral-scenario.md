@@ -56,10 +56,11 @@ Prerequisite reading: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experim
 - 2026-07-27 — Executed (interrupted once by API 403, resumed). **30 subjects run** (matrix upgraded to N=3/cell: 20 explore + 10 coder for type coverage per R4-optional), 8 batches. Blinding hardened beyond card: arm files staged to neutral paths (`rerun/staging/s01..s30/`) so subjects never see "armA2/B2" naming. All raw outputs saved (S3B-coder-1 didn't self-save; orchestrator saved verbatim from its final message).
 - 2026-07-27 — Results: **0/30 degraded cells** (S5 induced no spiral in either arm); **0/15 cross-arm canary citations both directions** (contamination structurally inert + measured clean); re-added sections cited by B subjects in target scenarios (Decision Hygiene 5/15 B raws — "Registration without progress" ×3 in S4, "Performance over work"/"聊天优化" in S5; CPTSD table 1/15 — "tone-reading" in S5B) while A subjects matched behavior using Action Discipline/rule-9 vocabulary → **verdict: both sections shed-supported (vocabulary, not necessity)**. Report: `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md`.
 - 2026-07-27 — **ZK skeptic round 1: APPROVE WITH FOLLOW-UPS** — evidentiary chain re-verified independently (citations real + correctly attributed to B-only sections, canaries reproduce, hygiene reproduces, health scoring honest, verdict logic sound). Fixed: P2 diff count 54→55 (DHE=39), P2 DHE engagement 4/15→5/15 (both in report + this card), P3 S3B-explore-1 apology caveat added, P3 "verbatim" framing → "row citations (one translated)".
+- 2026-07-27 — **ZK round 2: APPROVE** (one missed 54→55 spot in §R1 fixed; stale-number sweep clean). **User-sim gate (ladder layer 3): yes-with-conditions** — P2 raw-evidence volatility → committed integrity manifest `cortex/wiki/03-lessons/2026-07-27-ab-rerun-evidence-manifest.sha256` (37 files, 37/37 OK); P3s fixed (frontmatter path, §R4 S5B per-subject citation counts, Related Files). Sim's open calibration guesses: raw local-only rated P2-not-P1; whether manifest suffices as close precondition.
 
 ## Related Files
-- Modified: none
-- Added: `playground/2026-07-17-molting-experiment/**` (v2 run), `cortex/wiki/03-lessons/2026-07-*-ab-rerun-*.md`
+- Modified: `cortex/epics/01-active/EPIC-20260717161516583-*.md` (经验沉淀), this card
+- Added: `playground/2026-07-17-molting-experiment/rerun/**` (arms, scenarios, staging, 30 raws — local-only per gitignore convention), `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md`, `cortex/wiki/03-lessons/2026-07-27-ab-rerun-evidence-manifest.sha256`
 
 ## Git Commit Message
 ```
