@@ -108,7 +108,7 @@ bunx @lythos/skill-deck@0.17.2 reconcile --apply    # converge
 bunx @lythos/skill-deck@0.17.2 migrate-schema       # old string-array → alias-as-key
 ```
 
-`link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool. It also prints best-effort ⚠️ warnings when a cold-pool repo is behind origin, dirty, or on a non-default branch — drift is surfaced at the step every boot already runs.
+`link` is a reconciler: undeclared symlinks → removed; broken symlinks → recreated; non-symlink entities → backed up then removed; missing declared skills → linked from cold pool. It also prints best-effort ⚠️ warnings when a cold-pool repo is behind origin, dirty, or on a non-default branch — drift is surfaced at the step every boot already runs. The health probe never blocks and swallows its own errors by design; set `LYTHOS_DEBUG=1` to print a caught probe error (🔍 whisper) when you suspect the probe itself is broken.
 
 `refresh` defaults to **plan-only** (no git pull). Use `--exec` to apply, or let an agent read the plan and execute per target — the agent can probe remotes, switch mirrors, handle divergence.
 
