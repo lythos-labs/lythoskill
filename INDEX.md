@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/20 16:41:33
+> 自动生成于 2026/7/29 17:21:52
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 334 | 进行中: 2, 待验收: 0, 已完成: 289 |
+| Tasks | 334 | 进行中: 1, 待验收: 1, 已完成: 289 |
 | Epics | 45 | 活跃: 1, 已完成: 40, 悬置: 2, 已归档: 2 |
 | ADRs | 92 | 已接受: 87 |
 
@@ -80,14 +80,13 @@
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
-### 进行中 (2)
+### 进行中 (1)
 
 - 🔄 **TASK-20260719015727556**: cptsd ab rerun with clean methodology and spiral scenario
-- 🔄 **TASK-20260719015727610**: deck cold pool probe hardening follow ups
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260719015727610**: deck cold pool probe hardening follow ups
 
 ### 已完成 (289)
 
