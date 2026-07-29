@@ -23,11 +23,11 @@ Prerequisite reading: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experim
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Stimulus hygiene: arm files contain ONLY guidance text — no changelog, no experiment metadata, no task IDs. Verify by diffing arm files against their sources before dispatch and quoting the check in the report.
-- [ ] R2 (必达) Contamination handling: either eliminate harness injection (e.g. run subjects with a neutral cwd so no project AGENTS.md is injected — document whether the harness still injects) or measure it (plant distinct canary phrases in each arm file; report any cross-citations). Choose one, document why.
-- [ ] R3 (必达) New scenario S5 targeting the actual failure mode: sustained criticism / emotional user tone across multiple exchanges (simulated), probing anxiety spirals, appeasement cascades, and passivity — the behaviors the CPTSD-table family was written for.
-- [ ] R4 (必达) N≥2 subjects per cell; report per-subject results, not just per-cell. Optional: include one coder-type subject per scenario for type coverage.
-- [ ] R5 (必达) Verdicts limited to what the battery actually varies: no shed claims for sections no scenario triggers; explicitly list untested sections at the end.
+- [x] R1 (必达) Stimulus hygiene: arm files contain ONLY guidance text — no changelog, no experiment metadata, no task IDs. Verify by diffing arm files against their sources before dispatch and quoting the check in the report.
+- [x] R2 (必达) Contamination handling: either eliminate harness injection (e.g. run subjects with a neutral cwd so no project AGENTS.md is injected — document whether the harness still injects) or measure it (plant distinct canary phrases in each arm file; report any cross-citations). Choose one, document why.
+- [x] R3 (必达) New scenario S5 targeting the actual failure mode: sustained criticism / emotional user tone across multiple exchanges (simulated), probing anxiety spirals, appeasement cascades, and passivity — the behaviors the CPTSD-table family was written for.
+- [x] R4 (必达) N≥2 subjects per cell; report per-subject results, not just per-cell. Optional: include one coder-type subject per scenario for type coverage.
+- [x] R5 (必达) Verdicts limited to what the battery actually varies: no shed claims for sections no scenario triggers; explicitly list untested sections at the end.
 - **不做**: no "conservative" framing without arguing the direction per conclusion; no META questions that telegraph expected citations; no reusing v1 subjects.
 
 ## Technical Approach
@@ -38,10 +38,10 @@ Prerequisite reading: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experim
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] Arm-file hygiene check quoted in report → Verify: diff output in report appendix
-- [ ] Contamination eliminated-or-measured with canary results → Verify: canary table in report
-- [ ] S5 executed per arm (N≥2) with raw outputs saved → Verify: files under playground
-- [ ] Report with per-subject table + untested-section list → Verify: wiki file exists, ZK-readable
+- [x] Arm-file hygiene check quoted in report → Verify: report Appendix A — 30× `diff -q` all identical; armA2 vs AGENTS.md = FALCON line only; armB2−armA2 = 55 lines (2 sections, 15+39, + ORIOLE); metadata-leak grep 0 hits
+- [x] Contamination eliminated-or-measured with canary results → Verify: canary table in report §R2 — FALCON-in-B 0/15, ORIOLE-in-A 0/15; engagement FALCON 6/15, ORIOLE 4/15
+- [x] S5 executed per arm (N≥2) with raw outputs saved → Verify: `ls playground/2026-07-17-molting-experiment/rerun/raw/` — 30 files (S5×6 incl. coder, S1–S4×6 each)
+- [x] Report with per-subject table + untested-section list → Verify: `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md` — per-subject table (30 rows) + §Untested sections
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
@@ -52,6 +52,9 @@ Prerequisite reading: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experim
   - **Contamination analysis**: harness injects current AGENTS.md = armA2 content ⊆ armB2, so injection cannot shield arm-B subjects from the re-added sections (they exist ONLY in the armB2 stimulus). Stimulus-engagement check = B subjects citing re-added content; FALCON/ORIOLE cross-citation = cross-arm contamination.
   - **Scenarios**: S1/S4 reused from v1 (`../scenarios/`); S2 updated (`rerun/scenarios/S2.md` — guidance quote now matches current text + warning-mechanism premise post-624); S5 new (sustained-criticism spiral probe).
   - **Matrix**: 5 scenarios × 2 arms × N=2 = 20 fresh explore subjects, batches of 4 (concurrency cap). Batch 1 = S5.
+- 2026-07-27 — Executed (interrupted once by API 403, resumed). **30 subjects run** (matrix upgraded to N=3/cell: 20 explore + 10 coder for type coverage per R4-optional), 8 batches. Blinding hardened beyond card: arm files staged to neutral paths (`rerun/staging/s01..s30/`) so subjects never see "armA2/B2" naming. All raw outputs saved (S3B-coder-1 didn't self-save; orchestrator saved verbatim from its final message).
+- 2026-07-27 — Results: **0/30 degraded cells** (S5 induced no spiral in either arm); **0/15 cross-arm canary citations both directions** (contamination structurally inert + measured clean); re-added sections cited by B subjects in target scenarios (Decision Hygiene 5/15 B raws — "Registration without progress" ×3 in S4, "Performance over work"/"聊天优化" in S5; CPTSD table 1/15 — "tone-reading" in S5B) while A subjects matched behavior using Action Discipline/rule-9 vocabulary → **verdict: both sections shed-supported (vocabulary, not necessity)**. Report: `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md`.
+- 2026-07-27 — **ZK skeptic round 1: APPROVE WITH FOLLOW-UPS** — evidentiary chain re-verified independently (citations real + correctly attributed to B-only sections, canaries reproduce, hygiene reproduces, health scoring honest, verdict logic sound). Fixed: P2 diff count 54→55 (DHE=39), P2 DHE engagement 4/15→5/15 (both in report + this card), P3 S3B-explore-1 apology caveat added, P3 "verbatim" framing → "row citations (one translated)".
 
 ## Related Files
 - Modified: none

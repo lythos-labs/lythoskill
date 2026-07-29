@@ -75,6 +75,7 @@ Harness 在 DeepSeek 4 / Kimi K2.6–2.7 时代打磨成型;默认模型已切�
 - `refresh --exec` 的失败报告其实响亮(Failed: 12),但报告在前、link 输出在后,tail 视野里失败被冲走——失败信号必须出现在输出的最后一屏。
 - (主题A 已验证) TASK-20260717161516624 交付:`deck link` 机械暴露 drift/dirty/branch;`refresh --exec` 自愈脏缓存;失败非零退出 + 末尾 ⚠️ 摘要。现场重放中该警告还当场抓住了执行者自己误在 cold pool 里跑 link 造成的脏树——guard 在第一天就证明了自己。
 - (主题B v1 实验 + ZK 复审) v1 实验(4 场景 × 2 臂):v3 草案(-48%)行为无退化成立;但 ZK review 证实方法缺陷(armB 刺激材料含实验前言 = 非盲、污染证实、N=1、未测焦虑螺旋场景),全部 shed 判定撤回为 UNTESTED——CPTSD 表实际被 S4A 逐字引用,是承重的。干净重跑: TASK-20260719015727556。报告 v2: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing.md`。教训:刺激材料永不含实验元数据;"conservative" 要按结论方向论证;实验 raw outputs 必须落盘。
+- (主题B 干净重跑, TASK-556, 2026-07-27) 5 场景(含新增 S5 持续批评螺旋探针)× 2 臂 × N=3(2 explore + 1 coder)= 30 盲受试:0/30 退化细胞;FALCON/ORIOLE 双向交叉引用 0/15(污染结构性无效 + 测量为净);两个回插章节均被 B 臂在目标场景引用(Decision Hygiene 5/15,CPTSD 表 1/15,其中一条为翻译引用),证明被读到——但 A 臂无章节也能用 Action Discipline/rule 9 完成同等行为。**结论:两章节是词汇冗余而非行为必需,shed 成立(v1 撤回正式结案)**。报告: `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md`。教训:canary  engagement 检查让"未引用"与"没读"可区分;中性 staging 路径消除臂名提示。
 
 ## 归档条件
 <!-- ⚠️ REQUIRED: 可观测的归档判据。不填会被 probe 拦截。 -->
