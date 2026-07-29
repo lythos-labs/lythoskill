@@ -67,8 +67,9 @@
 - **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
 - **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
-## 📖 Lessons (27)
+## 📖 Lessons (28)
 
+- **[2026-07-27]** [agents-md-shed-sections-ab-rerun-vocabulary-not-necessity](./03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md)
 - **[2026-07-17]** [agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing](./03-lessons/2026-07-17-agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing.md)
 - **[2026-06-07]** [agent-autonomy-positive-decision-boundary](./03-lessons/2026-06-07-agent-autonomy-positive-decision-boundary.md)
 - **[2026-06-06]** [agents-md-v2-smoke-test-validation-lesson](./03-lessons/2026-06-06-agents-md-v2-smoke-test-validation-lesson.md)
