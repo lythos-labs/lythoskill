@@ -19,7 +19,7 @@
       "deck_niche": "meta.governance.deck",
       "type": "innate",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-      "content_hash": "446c8225af8a103040f957d67714c86061a28f56588aec0c6ca5d7352dc3b20e"
+      "content_hash": "465277b53b9a2a379d95fafc3eecfb5857565b78939f7e30994acfb571831bc1"
     },
     {
       "name": "localhost/me/sober",
@@ -35,7 +35,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-      "content_hash": "d30fdedd925e3d4a7a8cedfbaec96e1a1b651c45dc3c66c0e1487a2e04cf7608"
+      "content_hash": "161054a925f8b0f86cf1c37278f4c7e6692944b84ec98a85c89bf4427e315ec6"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
