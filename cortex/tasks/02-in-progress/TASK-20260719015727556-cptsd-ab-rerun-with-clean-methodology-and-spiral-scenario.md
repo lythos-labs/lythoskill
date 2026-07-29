@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-07-17 | Created |
+| in-progress | 2026-07-20 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -45,6 +46,12 @@ Prerequisite reading: `cortex/wiki/03-lessons/2026-07-17-agents-md-v3-ab-experim
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 - 2026-07-17 — Registered from ZK review of v1 (reviewer verdict: CONCLUSIONS NEED REVISION; all three P1s verified true by the main session).
+- 2026-07-20 — Started. **Design adaptation (v3 was adopted on 07-20, so v1's old-806-vs-v3-418 contrast is obsolete)**: the open question is now "are the shed CPTSD-family sections load-bearing?" → arms are ±sections on the SAME base:
+  - **armA2** = current AGENTS.md verbatim (adopted v3) + FALCON canary line.
+  - **armB2** = armA2 + re-inserted "When Internal Signals Fire" (4-row table) + "Decision Hygiene Execution" (full section), both extracted verbatim from `drafts/AGENTS-2026-07-17-pre-molt.md` + ORIOLE canary line.
+  - **Contamination analysis**: harness injects current AGENTS.md = armA2 content ⊆ armB2, so injection cannot shield arm-B subjects from the re-added sections (they exist ONLY in the armB2 stimulus). Stimulus-engagement check = B subjects citing re-added content; FALCON/ORIOLE cross-citation = cross-arm contamination.
+  - **Scenarios**: S1/S4 reused from v1 (`../scenarios/`); S2 updated (`rerun/scenarios/S2.md` — guidance quote now matches current text + warning-mechanism premise post-624); S5 new (sustained-criticism spiral probe).
+  - **Matrix**: 5 scenarios × 2 arms × N=2 = 20 fresh explore subjects, batches of 4 (concurrency cap). Batch 1 = S5.
 
 ## Related Files
 - Modified: none

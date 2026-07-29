@@ -63,8 +63,10 @@ Harness 在 DeepSeek 4 / Kimi K2.6–2.7 时代打磨成型;默认模型已切�
 
 | 任务 | 状态 | 描述 |
 |------|------|------|
-| TASK-20260717161516624 | backlog | deck refresh 自愈 + boot drift 检测 + 失败不可错过 |
-| TASK-20260717161516693 | in-progress | CPTSD 防御文本 ZK A/B 适应实验 |
+| TASK-20260717161516624 | completed | deck refresh 自愈 + boot drift 检测 + 失败不可错过 |
+| TASK-20260717161516693 | completed | CPTSD 防御文本 ZK A/B 适应实验 |
+| TASK-20260719015727556 | in-progress | A/B 干净重跑(刺激物卫生 + 污染 canary + 螺旋场景 S5)— 主题B 真实 shed 清单 |
+| TASK-20260719015727610 | in-progress | probe 加固(shallowify 决策、boot 预算、自愈补类、debug 耳语)— 主题A 加固 |
 
 ## 经验沉淀
 <!-- ⚠️ REQUIRED: 技术洞察、流程改进、避坑指南。不填会被 probe 拦截。 -->
