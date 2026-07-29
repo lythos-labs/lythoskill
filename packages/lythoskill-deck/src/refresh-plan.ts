@@ -187,12 +187,40 @@ export interface RefreshIO {
 
 /**
  * Dirty-tree pull failures block `git pull --rebase`. The documented recovery
- * (AGENTS.md § Session Close) is `git checkout -- . && git clean -fd` — the
- * cold pool is a cache, so discarding local modifications is safe. Only this
- * failure class triggers self-heal; network/auth errors must surface as-is.
+ * is `git reset --hard HEAD && git clean -fd` — the cold pool is a cache, so
+ * discarding local modifications is safe. Only this failure class triggers
+ * self-heal; network/auth errors must surface as-is.
+ *
+ * Covered classes (R3):
+ *  - tracked modifications: "cannot pull with rebase" / "unstaged changes" /
+ *    "Please commit your changes or stash"
+ *  - untracked-file conflicts: "The following untracked working tree files
+ *    would be overwritten by merge" / "Please move or remove"
  */
 export function isDirtyPullFailure(message?: string): boolean {
-  return !!message && /cannot pull with rebase|unstaged changes|Please commit your changes or stash/i.test(message)
+  return !!message && /cannot pull with rebase|unstaged changes|Please commit your changes or stash|untracked working tree files would be overwritten|Please move or remove/i.test(message)
+}
+
+/**
+ * Production self-heal for dirty cold-pool clones. The cold pool is a cache,
+ * so discarding local modifications is safe.
+ *
+ * `git reset --hard HEAD` (not `checkout -- .`) because staged-only changes
+ * survive a checkout — the heal would be a no-op (R3b). `git clean -fd`
+ * removes the untracked files that block merge (R3a). IO injectable for tests.
+ */
+export function createGitRecover(
+  exec: (cmd: string, dir: string) => void = (cmd, dir) => { execSync(cmd, { cwd: dir, stdio: 'pipe', timeout: 15000 }) },
+): (dir: string) => { recovered: boolean; message: string } {
+  return (dir) => {
+    try {
+      exec('git reset --hard HEAD', dir)
+      exec('git clean -fd', dir)
+      return { recovered: true, message: 'git reset --hard HEAD && git clean -fd' }
+    } catch (e: any) {
+      return { recovered: false, message: e?.message ?? String(e) }
+    }
+  }
 }
 
 export function executeRefreshPlan(plan: RefreshPlan, io?: RefreshIO): RefreshResult[] {

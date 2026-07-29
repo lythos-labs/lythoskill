@@ -263,7 +263,7 @@ function locksContentEqual(a: SkillDeckLock, b: SkillDeckLock): boolean {
 
 // ── 主流程 ──────────────────────────────────────────────────
 
-export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot' }): Promise<void> {
+export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot'; skipHealthFetch?: boolean }): Promise<void> {
 const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
 
@@ -808,9 +808,12 @@ try {
       .targets.filter(t => t.type === 'git' && t.gitRoot)
       .map(t => t.gitRoot!)
   )];
-  for (const w of formatHealthWarnings(checkColdPoolHealth(roots))) console.log(w);
-} catch {
-  // best-effort only
+  // skipFetch on the nested refresh --exec → link path: the pull just fetched.
+  const health = await checkColdPoolHealth(roots, { skipFetch: opts?.skipHealthFetch });
+  for (const w of formatHealthWarnings(health)) console.log(w);
+} catch (e) {
+  // best-effort only — but a broken probe must be discoverable on demand (R4)
+  if (process.env.LYTHOS_DEBUG) console.error('🔍 cold-pool health probe error:', e)
 }
 if (dirOverlaps.length > 0) {
   console.log(`   ⚠️  ${dirOverlaps.length} directory overlap(s) (see warnings above)`);

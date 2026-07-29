@@ -11,12 +11,11 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { execSync } from "node:child_process";
 import { gitPull } from "@lythos/cold-pool";
 import { probeConnectivity } from "@lythos/cold-pool/src/mirror.js";
 import { findDeckToml, linkDeck } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
-import { buildRefreshPlan, detectGitRoot, executeRefreshPlan } from "./refresh-plan.js";
+import { buildRefreshPlan, createGitRecover, detectGitRoot, executeRefreshPlan } from "./refresh-plan.js";
 
 // Backward compat: old findGitRoot returns string|null
 export function findGitRoot(dir: string, coldPool: string): string | null {
@@ -141,19 +140,10 @@ export async function refreshDeck(
     }
   }
 
-  // Self-heal for dirty cold-pool clones: the documented recovery (AGENTS.md
-  // § Session Close) — the cold pool is a cache, so discarding local
-  // modifications is safe. Only dirty-tree failures trigger this
-  // (isDirtyPullFailure in refresh-plan.ts); network/auth errors surface as-is.
-  const gitRecover = (dir: string): { recovered: boolean; message: string } => {
-    try {
-      execSync('git checkout -- .', { cwd: dir, stdio: 'pipe', timeout: 15000 })
-      execSync('git clean -fd', { cwd: dir, stdio: 'pipe', timeout: 15000 })
-      return { recovered: true, message: 'git checkout -- . && git clean -fd' }
-    } catch (e: any) {
-      return { recovered: false, message: e?.message ?? String(e) }
-    }
-  }
+  // Self-heal for dirty cold-pool clones — implementation + rationale in
+  // refresh-plan.ts (createGitRecover); only dirty-tree failures trigger it
+  // (isDirtyPullFailure); network/auth errors surface as-is.
+  const gitRecover = createGitRecover()
 
   // linkDeck is invoked fire-and-forget inside executeRefreshPlan; capture the
   // promise so failures are reported AFTER the link output — the ⚠️ summary
@@ -168,7 +158,9 @@ export async function refreshDeck(
       linkPromise = (async () => {
         console.log(`\n💡 Run 'bunx @lythos/skill-deck link' to sync refreshed skills to working set.`)
         console.log('🔗 Running deck link...')
-        await linkDeck(cliDeckPath, cliWorkdir)
+        // skipHealthFetch: the pulls above just fetched — re-fetching in the
+        // nested health probe is pure cost (R2).
+        await linkDeck(cliDeckPath, cliWorkdir, { skipHealthFetch: true })
       })()
     },
   })
@@ -184,7 +176,7 @@ export async function refreshDeck(
         .map(r => r.split('/').slice(-2).join('/'))
     )]
     console.error(`\n⚠️  ${failed.length} skill(s) failed to refresh${repos.length ? ` — repo(s): ${repos.join(', ')}` : ''}. See report above.`)
-    console.error(`   If a repo is dirty (hand-edited cache): git -C <repo> checkout -- . && git clean -fd, then re-run deck refresh --exec`)
+    console.error(`   If a repo is dirty (hand-edited cache): git -C <repo> reset --hard HEAD && git -C <repo> clean -fd, then re-run deck refresh --exec`)
     process.exitCode = 1
   }
 }
