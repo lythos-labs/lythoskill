@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'bun:test'
 import { mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
-import { resolveRefreshConfig, detectGitRoot, buildRefreshPlan, executeRefreshPlan, type RefreshPlan, type RefreshTarget } from './refresh-plan'
+import { resolveRefreshConfig, detectGitRoot, buildRefreshPlan, executeRefreshPlan, isDirtyPullFailure, createGitRecover, type RefreshPlan, type RefreshTarget } from './refresh-plan'
 
 const deckAliasDict = `[deck]
 max_cards = 10
@@ -311,7 +311,7 @@ describe('executeRefreshPlan self-heal', () => {
           ? { status: 'failed' as const, message: dirtyMsg }
           : { status: 'updated' as const, message: 'Fast-forward' }
       },
-      gitRecover: () => { recoverCalls++; return { recovered: true, message: 'git checkout -- . && git clean -fd' } },
+      gitRecover: () => { recoverCalls++; return { recovered: true, message: 'git reset --hard HEAD && git clean -fd' } },
       log: (msg) => logs.push(msg),
     })
 
@@ -371,11 +371,75 @@ describe('executeRefreshPlan self-heal', () => {
 
     const results = executeRefreshPlan(plan, {
       gitPull: () => { pullCalls++; return { status: 'failed' as const, message: dirtyMsg } },
-      gitRecover: () => ({ recovered: true, message: 'git checkout -- . && git clean -fd' }),
+      gitRecover: () => ({ recovered: true, message: 'git reset --hard HEAD && git clean -fd' }),
       log: () => {},
     })
 
     expect(pullCalls).toBe(2)
     expect(results[0].status).toBe('failed')
+  })
+})
+
+
+// ── self-heal hardening (TASK-20260719015727610 R3) ─────────────────────────
+
+describe('isDirtyPullFailure — extended failure classes (R3a)', () => {
+  it('matches untracked-file conflict messages', () => {
+    const msg = 'error: The following untracked working tree files would be overwritten by merge:\n\tskill/SKILL.md\nPlease move or remove them before you merge.\nAborting'
+    expect(isDirtyPullFailure(msg)).toBe(true)
+  })
+
+  it('still matches tracked-modification messages', () => {
+    expect(isDirtyPullFailure('error: cannot pull with rebase: You have unstaged changes.')).toBe(true)
+    expect(isDirtyPullFailure('Please commit your changes or stash them before you merge.')).toBe(true)
+  })
+
+  it('does not match network/auth failures', () => {
+    expect(isDirtyPullFailure('ssh: connect to host github.com port 22: Connection refused')).toBe(false)
+    expect(isDirtyPullFailure('fatal: Authentication failed')).toBe(false)
+    expect(isDirtyPullFailure(undefined)).toBe(false)
+  })
+
+  it('untracked-conflict pull failure → gitRecover called, pull retried', () => {
+    const plan = makePlan([makeTarget()])
+    let recoverCalls = 0
+    let pullCalls = 0
+
+    const results = executeRefreshPlan(plan, {
+      gitPull: () => {
+        pullCalls++
+        return pullCalls === 1
+          ? { status: 'failed' as const, message: 'error: The following untracked working tree files would be overwritten by merge:\n\ta.ts\nPlease move or remove them before you merge.' }
+          : { status: 'updated' as const, message: 'Fast-forward' }
+      },
+      gitRecover: () => { recoverCalls++; return { recovered: true, message: 'git reset --hard HEAD && git clean -fd' } },
+      log: () => {},
+    })
+
+    expect(recoverCalls).toBe(1)
+    expect(pullCalls).toBe(2)
+    expect(results[0].status).toBe('updated')
+  })
+})
+
+describe('createGitRecover (R3b)', () => {
+  it('resets --hard (covers staged-only changes) then cleans untracked', () => {
+    const cmds: string[] = []
+    const recover = createGitRecover((cmd) => { cmds.push(cmd) })
+    const res = recover('/pool/repo')
+
+    expect(res.recovered).toBe(true)
+    // reset --hard HEAD — NOT `checkout -- .`, which leaves the index staged
+    // (heal would be a no-op for staged-only changes)
+    expect(cmds).toEqual(['git reset --hard HEAD', 'git clean -fd'])
+    expect(res.message).toContain('reset --hard HEAD')
+  })
+
+  it('reports failure without throwing', () => {
+    const recover = createGitRecover(() => { throw new Error('permission denied') })
+    const res = recover('/pool/repo')
+
+    expect(res.recovered).toBe(false)
+    expect(res.message).toContain('permission denied')
   })
 })
