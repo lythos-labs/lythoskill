@@ -262,7 +262,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 ```
 
 **Submit** (user says "submit" / "全提交" / "push"): README sync if CLI surface changed → test gate → commit with `Closes: TASK-xxx` → scribe daily → push → **verify CI** (GitHub Actions; distinguish `repo-existence` vs `path-existence` failures in validate-example-decks; `gh` 401 = token expired, tell user).
-**Release** (user says "release" / "发版" / "打tag"): submit, then bump → publish → `deck refresh --exec` → `deck link`. Never bump without explicit user intent — versions are shared across the monorepo. A plain "submit/push" is not a release.
+**Release** (user says "release" / "发版" / "打tag"): submit, then bump → publish (`publish.sh` ends with the `check-published-manifests` tripwire) → `deck refresh --exec` → `deck link`. Never bump without explicit user intent — versions are shared across the monorepo. A plain "submit/push" is not a release.
 
 **Before ending any session, answer with commands, not intentions**:
 ```
@@ -283,6 +283,7 @@ Each caused at least one real incident. Scan before committing. **New gotcha →
 **[RELEASE]**
 - `[SEMVER]` 0.x: patch = bug fix only; minor = any API change (new subcommand/flag/exported function, even "small"); major = breaking. Never bump without explicit user intent.
 - `[VERSION]` Push to github BEFORE npm publish = external consumers see docs the CLI can't fulfill. Order: test → bump → publish → push.
+- `[LEAK]` Published manifests must never contain `workspace:*` (0.11.0 / 0.15.7 / 0.17.2 incidents — bunx users break). `publish.sh` rewrites at publish time AND ends with the tripwire `scripts/check-published-manifests.ts <version>` (asks npm, not the bunx cache). After any publish — or to audit any old version — run it directly.
 - `[LOCKFILE]` Any `package.json` version change → `bun install` before commit. CI uses `--frozen-lockfile`.
 - `[WORKSPACE]` Never semver ranges on `@lythos/*` deps — `workspace:*`. Pre-commit enforces.
 - `[PUSH]` `git push` to `skills` may fail `(cannot lock ref)` on concurrent-session races. Fix: `git pull --rebase` then push.

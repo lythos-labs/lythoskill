@@ -154,3 +154,11 @@ fi
 
 echo ""
 echo "✅ E2E validation passed. All packages resolve correctly from npm."
+
+# ── Published-manifest guard (workspace:* tripwire) ──────────────────
+# Independent of the bunx E2E above (which a warm bunx cache can mask —
+# 0.17.2 incident): asks NPM what the manifests actually contain.
+echo ""
+echo "🛡️  Manifest guard: asserting no workspace: specifiers in published manifests..."
+ROOT_VERSION=$(node -p "require('$ROOT_DIR/package.json').version")
+bun "$ROOT_DIR/scripts/check-published-manifests.ts" "$ROOT_VERSION"
