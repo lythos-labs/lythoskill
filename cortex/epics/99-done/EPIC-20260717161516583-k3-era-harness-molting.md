@@ -18,6 +18,7 @@ checklist_skipped_reason: direction set by user in session 2026-07-17; details i
 | Status | Date | Note |
 |--------|------|------|
 | active | 2026-07-17 | Created |
+| done | 2026-07-30 | Done |
 
 ## 背景故事
 <!-- ⚠️ REQUIRED: 触发事件、问题描述、目标价值。不填会被 probe 拦截。 -->

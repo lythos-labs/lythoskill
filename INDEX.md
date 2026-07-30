@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/7/29 23:06:22
+> 自动生成于 2026/7/30 14:59:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 334 | 进行中: 0, 待验收: 2, 已完成: 289 |
-| Epics | 45 | 活跃: 1, 已完成: 40, 悬置: 2, 已归档: 2 |
+| Tasks | 335 | 进行中: 0, 待验收: 0, 已完成: 291 |
+| Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 92 | 已接受: 87 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-- **EPIC-20260717161516583**: k3 era harness molting
+_无_
 
 ### 已完成
 
@@ -60,6 +60,7 @@
 - ✅ **EPIC-20260529231316655**: Community Skill Pool Expansion — Hot & Niche Skills with WebSearch + Curator Tag
 - ✅ **EPIC-20260530135721111**: Arena IO Injection Sweep — CLI and Runner Layers
 - ✅ **EPIC-20260615211529145**: SSOT CLI help and documentation governance
+- ✅ **EPIC-20260717161516583**: k3 era harness molting
 
 ### 悬置
 
@@ -75,21 +76,21 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (3)
 
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
+- [ ] **TASK-20260730140801284**: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260719015727556**: cptsd ab rerun with clean methodology and spiral scenario
-- 🔍 **TASK-20260719015727610**: deck cold pool probe hardening follow ups
+_无_
 
-### 已完成 (289)
+### 已完成 (291)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -380,6 +381,8 @@ _无_
 - ✅ ~~TASK-20260710172217283~~: scribe daily template: remove file-level Ground Truth, move to per-handoff Verify Current State
 - ✅ ~~TASK-20260717161516624~~: deck refresh self healing and boot drift detection
 - ✅ ~~TASK-20260717161516693~~: cptsd defensive text adaptation experiment via zk subagents
+- ✅ ~~TASK-20260719015727556~~: cptsd ab rerun with clean methodology and spiral scenario
+- ✅ ~~TASK-20260719015727610~~: deck cold pool probe hardening follow ups
 
 ### 悬置 (1)
 
