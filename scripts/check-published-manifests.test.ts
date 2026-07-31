@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { parsePublishList, findWorkspaceLeaks, checkPublishedManifests } from './check-published-manifests'
+import { parsePublishList, findWorkspaceLeaks, checkPublishedManifests, guardPasses } from './check-published-manifests'
 
 const PUBLISH_SH_SNIPPET = `
 PACKAGES=(
@@ -43,9 +43,9 @@ describe('findWorkspaceLeaks', () => {
 })
 
 describe('checkPublishedManifests (injected IO)', () => {
-  it('reports leaked packages only; skips unresolvable with a warning', async () => {
+  it('reports leaked packages only; unresolvable tracked as skipped (fail-closed)', async () => {
     const logs: string[] = []
-    const { checked, leaked } = await checkPublishedManifests({
+    const { checked, leaked, skipped } = await checkPublishedManifests({
       version: '9.9.9',
       io: {
         view: (name) => {
@@ -60,13 +60,24 @@ describe('checkPublishedManifests (injected IO)', () => {
     expect(checked.length).toBeGreaterThan(0)
     expect([...leaked.keys()]).toEqual(['@lythos/skill-deck'])
     expect(leaked.get('@lythos/skill-deck')![0]).toContain('workspace:*')
-    expect(logs.some((l) => l.includes('@lythos/agent-adapter') && l.includes('skipped'))).toBe(true)
+    expect(skipped).toEqual(['@lythos/agent-adapter'])
+    expect(logs.some((l) => l.includes('@lythos/agent-adapter') && l.includes('unverifiable'))).toBe(true)
+    // fail-closed: a skip must not pass the gate
+    expect(guardPasses(leaked, skipped)).toBe(false)
   })
 
-  it('clean run → empty leak map', async () => {
-    const { leaked } = await checkPublishedManifests({
+  it('clean run → passes', async () => {
+    const { leaked, skipped } = await checkPublishedManifests({
       io: { view: () => `{ '@lythos/infra': '^0.17.3' }`, log: () => {} },
     })
-    expect(leaked.size).toBe(0)
+    expect(guardPasses(leaked, skipped)).toBe(true)
+  })
+
+  it('full-outage run (every view throws) → does NOT pass', async () => {
+    const { checked, leaked, skipped } = await checkPublishedManifests({
+      io: { view: () => { throw new Error('network down') }, log: () => {} },
+    })
+    expect(skipped).toHaveLength(checked.length)
+    expect(guardPasses(leaked, skipped)).toBe(false)
   })
 })

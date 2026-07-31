@@ -52,21 +52,29 @@ export interface GuardIO {
 export function productionView(): (pkgName: string, version?: string) => string {
   return (pkgName, version) => {
     const spec = version ? `${pkgName}@${version}` : `${pkgName}@latest`
-    return execFileSync('npm', ['view', spec, 'dependencies'], { encoding: 'utf-8', timeout: 30000 })
+    // Consumer-visible sections only (matches the rewriter's scope):
+    // deps/optional/peer are what bunx/npm install resolves. devDeps of a
+    // published package are never installed by consumers.
+    return execFileSync(
+      'npm',
+      ['view', spec, 'dependencies', 'optionalDependencies', 'peerDependencies'],
+      { encoding: 'utf-8', timeout: 30000 },
+    )
   }
 }
 
-/** Run the guard. Returns leaked package names (empty = clean). */
+/** Run the guard. Returns checked names, leaks, and unverifiable (skipped) names. */
 export async function checkPublishedManifests(opts?: {
   version?: string
   publishShPath?: string
   io?: GuardIO
-}): Promise<{ checked: string[]; leaked: Map<string, string[]> }> {
+}): Promise<{ checked: string[]; leaked: Map<string, string[]>; skipped: string[] }> {
   const publishShPath = opts?.publishShPath ?? resolve(ROOT, 'scripts/publish.sh')
   const io = { view: opts?.io?.view ?? productionView(), log: opts?.io?.log ?? console.log }
   const dirs = parsePublishList(readFileSync(publishShPath, 'utf-8'))
 
   const checked: string[] = []
+  const skipped: string[] = []
   const leaked = new Map<string, string[]>()
   for (const dir of dirs) {
     const pkgJson = JSON.parse(readFileSync(resolve(ROOT, dir, 'package.json'), 'utf-8'))
@@ -76,29 +84,41 @@ export async function checkPublishedManifests(opts?: {
     try {
       out = io.view(name, opts?.version)
     } catch (e: any) {
-      // Package/version not on npm (never published) — not a leak, but say so.
-      io.log(`   ⚠️  ${name}${opts?.version ? `@${opts.version}` : ''}: npm view failed (${e?.message?.split('\n')[0] ?? e}) — skipped`)
+      // Unverifiable — NOT clean. Tracked so the caller can fail closed.
+      skipped.push(name)
+      io.log(`   ⚠️  ${name}${opts?.version ? `@${opts.version}` : ''}: npm view failed (${e?.message?.split('\n')[0] ?? e}) — unverifiable`)
       continue
     }
     const leaks = findWorkspaceLeaks(out)
     if (leaks.length > 0) leaked.set(name, leaks)
   }
-  return { checked, leaked }
+  return { checked, leaked, skipped }
+}
+
+/** Fail-closed decision: only a fully-checked, leak-free run passes. */
+export function guardPasses(leaked: Map<string, string[]>, skipped: string[]): boolean {
+  return leaked.size === 0 && skipped.length === 0
 }
 
 if (import.meta.main) {
   const version = process.argv[2]
-  const { checked, leaked } = await checkPublishedManifests({ version })
+  const { checked, leaked, skipped } = await checkPublishedManifests({ version })
   const tag = version ?? 'latest'
-  if (leaked.size === 0) {
+  if (leaked.size === 0 && skipped.length === 0) {
     console.log(`✅ ${checked.length} published package(s) @${tag}: no workspace: specifiers in manifests`)
     process.exit(0)
   }
-  console.error(`❌ workspace: leak in ${leaked.size} published package(s) @${tag}:`)
-  for (const [name, lines] of leaked) {
-    console.error(`   ${name}:`)
-    for (const l of lines) console.error(`      ${l}`)
+  if (leaked.size > 0) {
+    console.error(`❌ workspace: leak in ${leaked.size} published package(s) @${tag}:`)
+    for (const [name, lines] of leaked) {
+      console.error(`   ${name}:`)
+      for (const l of lines) console.error(`      ${l}`)
+    }
+    console.error(`   External consumers (bunx / npm install) cannot resolve these. Republish with rewritten manifests (scripts/publish.sh).`)
   }
-  console.error(`   External consumers (bunx / npm install) cannot resolve these. Republish with rewritten manifests (scripts/publish.sh).`)
+  if (skipped.length > 0) {
+    console.error(`❌ ${skipped.length} package(s) could not be verified (npm error / not published): ${skipped.join(', ')}`)
+    console.error(`   The guard fails CLOSED — an unverifiable manifest is not a clean manifest.`)
+  }
   process.exit(1)
 }

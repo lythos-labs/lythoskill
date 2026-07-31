@@ -46,7 +46,7 @@ const targetAbs = resolve(target)
 const version = findRootVersion(dirname(targetAbs))
 const manifest = JSON.parse(readFileSync(targetAbs, 'utf-8'))
 
-const SECTIONS = ['dependencies', 'optionalDependencies', 'peerDependencies'] as const
+const SECTIONS = ['dependencies', 'optionalDependencies', 'peerDependencies', 'devDependencies'] as const
 let rewriteCount = 0
 for (const section of SECTIONS) {
   const deps = manifest[section]
