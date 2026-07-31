@@ -133,7 +133,10 @@ describeGit('productionHealthIO (fixture git repos)', () => {
     const other = join(base, 'other')
     const clone = join(base, 'clone')
     try {
-      git(base, ['init', '--bare', remote])
+      // -b main: the fixture must not depend on the runner's init.defaultBranch
+      // (ubuntu CI defaults to master → bare HEAD points at a nonexistent ref
+      // → clone has unborn HEAD → rev-parse fails. Found by CI, 2026-07-31).
+      git(base, ['init', '--bare', '-b', 'main', remote])
       git(base, ['clone', `file://${remote}`, other])
       git(other, ['config', 'user.email', 't@example.com'])
       git(other, ['config', 'user.name', 't'])
