@@ -40,14 +40,16 @@ Leak map (verified via `npm view <pkg>@0.17.2 dependencies`, 2026-07-30):
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] `npm view @lythos/skill-deck@0.17.3 dependencies` (and the 7 other leaked packages) contains no `workspace:` → Verify: grep output in this card
-- [ ] External resolution works from clean env → Verify: `bunx @lythos/skill-deck@0.17.3 --help` in a fresh container/tmp home succeeds
-- [ ] Regression guard exists and fails on the 0.17.2 state → Verify: run guard against `@0.17.2` pinned versions → non-zero exit + leaked packages listed; against `@0.17.3` → exit 0
-- [ ] AGENTS.md Release Submit checklist references the guard → Verify: grep AGENTS.md
+- [x] `npm view @lythos/skill-deck@0.17.3 dependencies` (and the 7 other leaked packages) contains no `workspace:` → Verify: publish.sh trailing guard output "✅ 13 published package(s) @0.17.3: no workspace: specifiers in manifests" (2026-07-31 run, exit 0)
+- [x] External resolution works from clean env → Verify: `HOME=$(mktemp -d) bunx @lythos/skill-deck@latest link` in empty tmp dir → "Resolving dependencies / Resolved, downloaded and extracted [26]" → expected `❌ skill-deck.toml not found` (resolution fixed; error is correct no-deck behavior); `@lythos/skill-arena@latest --help` (6 internal deps) → 234 deps resolved, help printed
+- [x] Regression guard exists and fails on the 0.17.2 state → Verify: `bun scripts/check-published-manifests.ts 0.17.2` → exit 1, exactly the 8 leaked packages listed; `@0.17.3` via publish.sh → exit 0
+- [x] AGENTS.md Release Submit checklist references the guard → Verify: `grep -n "LEAK" AGENTS.md` → `[LEAK]` gotcha + Release line tripwire mention
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 - 2026-07-30 — Registered after user report (`bunx @lythos/skill-deck@latest link` → workspace resolution errors). Leak map verified by hand (see Background). Rewrite script proven working; pipeline intact; 07-10 deviation path unrecoverable from docs.
+- 2026-07-30 — Guard implemented (`scripts/check-published-manifests.ts` + 6 unit tests, IO-injectable); wired as publish.sh's final step (belt-and-braces after bunx E2E, which a warm cache can mask); AGENTS.md `[LEAK]` gotcha + Release line. Live negative test vs @0.17.2: exit 1, exactly 8 leaked packages.
+- 2026-07-31 — **0.17.3 published** (two token iterations: first replacement token lacked publish 2FA-bypass → E403; granular token with bypass-2FA → success). All 13 packages published; bunx E2E 13/13 resolved; manifest guard clean. Clean-env verification with isolated HOME: user's original failing command now resolves. Post-release `refresh --exec` + `link` done.
 
 ## Related Files
 - Modified: `scripts/publish.sh` (maybe), `scripts/check-published-manifests.ts` (new), `AGENTS.md` (checklist line)

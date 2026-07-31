@@ -19,7 +19,7 @@
       "deck_niche": "meta.governance.deck",
       "type": "innate",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-      "content_hash": "465277b53b9a2a379d95fafc3eecfb5857565b78939f7e30994acfb571831bc1"
+      "content_hash": "7bb6205f7a45d99ff10f93cb3e58f26783d1612c0fb54f0c284450046d38c877"
     },
     {
       "name": "localhost/me/sober",
@@ -35,7 +35,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-      "content_hash": "161054a925f8b0f86cf1c37278f4c7e6692944b84ec98a85c89bf4427e315ec6"
+      "content_hash": "9974bbf8f57ec6db0c393c19d4085dc9c0f4954efc39106963dedf2bcf56f6ea"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
@@ -43,7 +43,7 @@
       "deck_niche": "meta.governance.arena",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
-      "content_hash": "adbc05e56ae28dbfcef0a2c49ffd2fb3610ba9870201ece23853d6bce8f6cf8b"
+      "content_hash": "7ce2d42911d456f65e47ac9212d959e9141474abf803b7f30fb896b69cc21e8c"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
@@ -51,7 +51,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
-      "content_hash": "74d85d2938e35e19b2735111f47526af2942548d1334e4e913fa17f6219ada31"
+      "content_hash": "c81b7181f13855656e452252d342630494d4cdd2fd57ee422d5b1c3bed7fba25"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
