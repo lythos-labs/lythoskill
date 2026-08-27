@@ -5,12 +5,15 @@ Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
   task create "<title>"  Create a new Task (explicit)
+  task list              List all tasks and epics (same as 'list')
   task <verb> <task-id>  Task state transition (start/review/done/complete/suspend/resume/reject/terminate/archive)
   epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
                         --override bypasses the lane-full guard (max 1 per lane).
                         --skip-checklist bypasses the 5-question prompt.
+  epic list              List all tasks and epics (same as 'list')
   adr "<title>"         Create a new ADR
+  adr list               List all tasks and epics (same as 'list')
   list                  List all tasks and epics
   stats                 Show project statistics
   next-id               Display timestamp ID format example

@@ -1,6 +1,6 @@
 ---
 name: lythoskill-creator
-version: 0.17.9
+version: 0.17.10
 description: |
   Scaffold and build projects for the lythoskill ecosystem only.
   Creates thin-skill monorepos: heavy logic in npm packages (Starter),
@@ -33,7 +33,7 @@ A lythoskill project separates concerns into three layers:
 Scaffold a new lythoskill monorepo.
 
 ```bash
-bunx @lythos/skill-creator@0.17.9 init <project-name>
+bunx @lythos/skill-creator@0.17.10 init <project-name>
 ```
 
 Creates a monorepo with a starter package and an example skill.
@@ -44,7 +44,7 @@ Add a new skill to an existing lythoskill monorepo. Follows the cortex Step 1/2/
 CLI creates template → agent fills content → probe verifies.
 
 ```bash
-bunx @lythos/skill-creator@0.17.9 add-skill <skill-name>
+bunx @lythos/skill-creator@0.17.10 add-skill <skill-name>
 ```
 
 **Step 1 (CLI)**: Creates `packages/<skill-name>/skill/SKILL.md` template.
@@ -70,15 +70,15 @@ bunx @lythos/skill-creator@0.17.9 add-skill <skill-name>
 Build a skill for distribution. Copies `packages/<name>/skill/` to `skills/<name>/`, strips dev-only files, validates SKILL.md frontmatter, and enforces the unified version.
 
 ```bash
-bunx @lythos/skill-creator@0.17.9 build <skill-name>
+bunx @lythos/skill-creator@0.17.10 build <skill-name>
 ```
 
-**Version placeholder rule**: Source `packages/<name>/skill/SKILL.md` must use `version: 0.17.9`. The build command substitutes this with the current root `package.json` version. **Never write a literal version** (e.g., `version: 0.15.5`) in source — this breaks future version bumps. If you find a hardcoded version in source, restore the placeholder and rebuild.
+**Version placeholder rule**: Source `packages/<name>/skill/SKILL.md` must use `version: 0.17.10`. The build command substitutes this with the current root `package.json` version. **Never write a literal version** (e.g., `version: 0.15.5`) in source — this breaks future version bumps. If you find a hardcoded version in source, restore the placeholder and rebuild.
 
 Build all skills at once (used by pre-commit):
 
 ```bash
-bunx @lythos/skill-creator@0.17.9 build --all
+bunx @lythos/skill-creator@0.17.10 build --all
 ```
 
 ### align
@@ -87,10 +87,10 @@ Audit an existing project against current lythoskill conventions. Reports drift 
 
 ```bash
 # Audit only — reports what would change
-bunx @lythos/skill-creator@0.17.9 align
+bunx @lythos/skill-creator@0.17.10 align
 
 # Auto-fix drift where possible
-bunx @lythos/skill-creator@0.17.9 align --fix
+bunx @lythos/skill-creator@0.17.10 align --fix
 ```
 
 Checks for: outdated `package.json` scripts, stale `.gitignore` patterns, missing skill-layer boilerplate, and version mismatches.
@@ -101,15 +101,15 @@ Lock-step version bump for the entire monorepo. Updates root `package.json` + ev
 
 ```bash
 # Semver targets
-bunx @lythos/skill-creator@0.17.9 bump patch
-bunx @lythos/skill-creator@0.17.9 bump minor
-bunx @lythos/skill-creator@0.17.9 bump major
+bunx @lythos/skill-creator@0.17.10 bump patch
+bunx @lythos/skill-creator@0.17.10 bump minor
+bunx @lythos/skill-creator@0.17.10 bump major
 
 # Explicit version (e.g. for major milestones)
-bunx @lythos/skill-creator@0.17.9 bump 1.0.0
+bunx @lythos/skill-creator@0.17.10 bump 1.0.0
 
 # Preview the bump without writing files
-bunx @lythos/skill-creator@0.17.9 bump 1.0.0 --dry-run
+bunx @lythos/skill-creator@0.17.10 bump 1.0.0 --dry-run
 ```
 
 Run from the project root. Expects source at `packages/<name>/skill/` and outputs to `skills/<name>/`.
