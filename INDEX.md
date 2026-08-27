@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/8/27 17:35:53
+> 自动生成于 2026/8/27 20:41:47
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 343 | 进行中: 0, 待验收: 1, 已完成: 294 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 95 | 已接受: 89 |
+| ADRs | 96 | 已接受: 90 |
 
 ---
 
@@ -533,6 +533,7 @@ _无_
 - ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation
 - ✅ **ADR-20260710172235956** (02-accepted): Remove file-level Ground Truth from daily template — per-handoff Verify Current State is SSOT
 - ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
+- ✅ **ADR-20260827124021589** (02-accepted): Separate release jobs for npm publish and Pages deploy
 - ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
 - 🤔 **ADR-20260827155909657** (01-proposed): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
 - ✅ **ADR-20260827165402810** (02-accepted): Tag-triggered release pipeline with OIDC npm provenance
