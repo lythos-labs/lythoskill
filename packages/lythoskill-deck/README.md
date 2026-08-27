@@ -8,16 +8,16 @@
 
 ```bash
 # Add a skill from skills.sh syntax (owner/repo, no conversion needed)
-bunx @lythos/skill-deck@0.17.8 add vercel-labs/agent-skills
+bunx @lythos/skill-deck@0.17.9 add vercel-labs/agent-skills
 
 # Or with @skill filter:
-bunx @lythos/skill-deck@0.17.8 add mattpocock/skills@tdd
+bunx @lythos/skill-deck@0.17.9 add mattpocock/skills@tdd
 
 # Or full-qualified locator:
-bunx @lythos/skill-deck@0.17.8 add github.com/anthropics/skills/skills/frontend-design
+bunx @lythos/skill-deck@0.17.9 add github.com/anthropics/skills/skills/frontend-design
 
 # Sync working set (creates symlinks, removes undeclared skills):
-bunx @lythos/skill-deck@0.17.8 link
+bunx @lythos/skill-deck@0.17.9 link
 ```
 
 ## Commands

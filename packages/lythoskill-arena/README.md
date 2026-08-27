@@ -16,20 +16,20 @@
 ```bash
 bun add -d @lythos/skill-arena
 # or use directly
-bunx @lythos/skill-arena@0.17.8 <command>
+bunx @lythos/skill-arena@0.17.9 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # single — test one deck (most common)
-bunx @lythos/skill-arena@0.17.8 single \
+bunx @lythos/skill-arena@0.17.9 single \
   --deck ./examples/decks/scout.toml \
   --brief "Generate auth flow diagram" \
   --out ./output
 
 # single with explicit player
-bunx @lythos/skill-arena@0.17.8 single \
+bunx @lythos/skill-arena@0.17.9 single \
   --deck ./examples/decks/scout.toml \
   --brief "Generate auth flow diagram" \
   --player kimi \
@@ -37,10 +37,10 @@ bunx @lythos/skill-arena@0.17.8 single \
 
 # cross-deck vs — compare two decks (agent-orchestrated)
 # Create arena.toml declaring sides with different decks, then:
-bunx @lythos/skill-arena@0.17.8 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.17.9 vs --config ./arena.toml
 
 # cross-player vs — compare kimi vs codex (CLI only)
-bunx @lythos/skill-arena@0.17.8 vs --config ./arena.toml --player kimi
+bunx @lythos/skill-arena@0.17.9 vs --config ./arena.toml --player kimi
 ```
 
 **What happens**: Agent creates isolated `/tmp` workdir per side, `deck link` skills, spawns parallel subagents, collects artifacts, judge scores outputs. Parent deck restored after.
@@ -50,14 +50,14 @@ bunx @lythos/skill-arena@0.17.8 vs --config ./arena.toml --player kimi
 ### `single` — one deck, one task
 
 ```bash
-bunx @lythos/skill-arena@0.17.8 single \
+bunx @lythos/skill-arena@0.17.9 single \
   --deck ./deck.toml \
   --brief "Produce a .docx report with radar chart" \
   --timeout 600000 \
   --out ./output
 
 # with explicit player
-bunx @lythos/skill-arena@0.17.8 single \
+bunx @lythos/skill-arena@0.17.9 single \
   --deck ./deck.toml \
   --brief "Produce a .docx report with radar chart" \
   --player kimi \
@@ -67,14 +67,14 @@ bunx @lythos/skill-arena@0.17.8 single \
 ### `vs` — multi-deck comparison
 
 ```bash
-bunx @lythos/skill-arena@0.17.8 vs --config ./arena.toml
-bunx @lythos/skill-arena@0.17.8 vs --config ./arena.toml --dry-run
+bunx @lythos/skill-arena@0.17.9 vs --config ./arena.toml
+bunx @lythos/skill-arena@0.17.9 vs --config ./arena.toml --dry-run
 ```
 
 ### `prepare-workdir` — isolate + link skills (agent-orchestrated)
 
 ```bash
-bunx @lythos/skill-arena@0.17.8 prepare-workdir \
+bunx @lythos/skill-arena@0.17.9 prepare-workdir \
   --deck ./skill-deck.toml \
   --out /tmp/arena-side-a \
   --brief "task description"
@@ -85,7 +85,7 @@ Creates `/tmp`-isolated workdir with deck copied, AGENTS.md written, and `deck l
 ### `archive` — collect agent outputs (agent-orchestrated)
 
 ```bash
-bunx @lythos/skill-arena@0.17.8 archive \
+bunx @lythos/skill-arena@0.17.9 archive \
   --from /tmp/arena-side-a \
   --to ./playground/output \
   --sides side-a
@@ -96,7 +96,7 @@ Copies agent artifacts from workdir(s) to output, skipping internal files (`.cla
 ### `viz` — render results (WIP — HTML report generation pending)
 
 ```bash
-bunx @lythos/skill-arena@0.17.8 viz runs/arena-<id>/
+bunx @lythos/skill-arena@0.17.9 viz runs/arena-<id>/
 ```
 
 ## Parameters
