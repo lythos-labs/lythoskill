@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/27 17:03:08
+> 自动生成于 2026/8/27 17:14:19
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 343 | 进行中: 1, 待验收: 0, 已完成: 294 |
+| Tasks | 343 | 进行中: 0, 待验收: 1, 已完成: 294 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 95 | 已接受: 89 |
 
@@ -84,13 +84,13 @@ _无_
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260827170159682**: Implement tag-triggered release pipeline with OIDC npm provenance
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260827170159682**: Implement tag-triggered release pipeline with OIDC npm provenance
 
 ### 已完成 (294)
 

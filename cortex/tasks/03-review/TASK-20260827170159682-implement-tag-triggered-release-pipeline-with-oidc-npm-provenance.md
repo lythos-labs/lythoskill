@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-08-27 | Created from accepted ADR-20260827165402810 |
 | in-progress | 2026-08-27 | Started |
+| review | 2026-08-27 | Deliverables committed |
 
 ## Background & Goals
 
