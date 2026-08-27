@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-27 | Created after `publish-github-release.sh` failed with HTTP 403 |
+| completed | 2026-08-27 | Closed via trailer |
 
 ## Background & Goals
 
@@ -20,10 +21,10 @@ The current `.github-token` (used by `gh` CLI) has repo push/admin access but **
 
 ## Requirements
 
-- [ ] Replace `.github-token` with a GitHub PAT that has permission to create releases on `lythos-labs/lythoskill`.
-- [ ] Re-run `./scripts/publish-github-release.sh 371af8fe` to create the `v0.17.3` GitHub Release.
-- [ ] Verify via `gh release list` and web fetch that `v0.17.3` appears as Latest.
-- [ ] Document the required scopes in `AGENTS.md` or `release-auth-workflow.md` so future agents/users know which token permissions to maintain.
+- [x] Replace `.github-token` with a GitHub PAT that has permission to create releases on `lythos-labs/lythoskill`.
+- [x] Re-run `./scripts/publish-github-release.sh 371af8fe` to create the `v0.17.3` GitHub Release.
+- [x] Verify via `gh release list` and web fetch that `v0.17.3` appears as Latest.
+- [x] Document the required scopes in `AGENTS.md` or `release-auth-workflow.md` so future agents/users know which token permissions to maintain.
 
 ## Technical Approach
 
@@ -72,14 +73,18 @@ GH_TOKEN=$(security find-generic-password -s 'lythos-agent-pat' -w 2>/dev/null) 
 
 ## Acceptance Criteria
 
-- [ ] `GH_TOKEN=$(<.github-token) gh release create ...` no longer returns 403.
-- [ ] `gh release list --repo lythos-labs/lythoskill` shows `v0.17.3` and it is marked `Latest`.
-- [ ] Web fetch of https://github.com/lythos-labs/lythoskill/releases/tag/v0.17.3 returns the release page (not 404/403).
-- [ ] Required token scopes are documented in release SOP.
+- [x] Token with `contents=write` is stored in macOS Keychain (`lythos-agent-pat`) and read by the release script.
+- [x] `./scripts/publish-github-release.sh 371af8fe` exits 0 and creates `v0.17.3` release.
+- [x] `gh release list --repo lythos-labs/lythoskill` shows `v0.17.3` and it is marked `Latest`.
+- [x] Web fetch of https://github.com/lythos-labs/lythoskill/releases/tag/v0.17.3 returns the release page (not 404/403).
+- [x] Required token scopes and keychain storage are documented in release SOP and AGENTS.md.
 
 ## Progress Log
 
 - 2026-08-27 — Task created after `publish-github-release.sh` failed with 403 while backfilling `v0.17.3`.
+- 2026-08-27 — User provisioned fine-grained PAT with `contents=write` (and broader maintenance scopes) into macOS Keychain as `lythos-agent-pat`.
+- 2026-08-27 — `publish-github-release.sh` updated to read from keychain/secret-tool/env, with `.github-token` as legacy fallback.
+- 2026-08-27 — Re-ran `./scripts/publish-github-release.sh 371af8fe`; release created successfully. Verified via `gh release list` and web fetch: `v0.17.3` is `Latest`.
 
 ## Related Files
 - Modified:

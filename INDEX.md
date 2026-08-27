@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/8/27 14:37:16
+> 自动生成于 2026/8/27 16:50:38
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 339 | 进行中: 0, 待验收: 0, 已完成: 292 |
+| Tasks | 340 | 进行中: 0, 待验收: 0, 已完成: 294 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 93 | 已接受: 88 |
+| ADRs | 94 | 已接受: 88 |
 
 ---
 
@@ -76,14 +76,13 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (6)
+### 待办 (5)
 
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 - [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
-- [ ] **TASK-20260827141405220**: Fix version synchronization: npm, GitHub tags/releases, and site display
 
 ### 进行中 (0)
 
@@ -93,7 +92,7 @@ _无_
 
 _无_
 
-### 已完成 (292)
+### 已完成 (294)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -387,6 +386,8 @@ _无_
 - ✅ ~~TASK-20260719015727556~~: cptsd ab rerun with clean methodology and spiral scenario
 - ✅ ~~TASK-20260719015727610~~: deck cold pool probe hardening follow ups
 - ✅ ~~TASK-20260730140801284~~: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
+- ✅ ~~TASK-20260827141405220~~: Fix version synchronization: npm, GitHub tags/releases, and site display
+- ✅ ~~TASK-20260827150725011~~: Provision GitHub token with release-write access for lythoskill releases
 
 ### 悬置 (1)
 
@@ -531,6 +532,7 @@ _无_
 - ✅ **ADR-20260710172235956** (02-accepted): Remove file-level Ground Truth from daily template — per-handoff Verify Current State is SSOT
 - ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
 - ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
+- 🤔 **ADR-20260827155909657** (01-proposed): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
 
 ---
 

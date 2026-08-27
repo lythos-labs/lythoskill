@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-27 | Created |
+| completed | 2026-08-27 | Closed via trailer |
 
 ## Background & Goals
 
@@ -21,11 +22,11 @@
 
 ## Requirements
 
-- [ ] 在站点 footer 或 nav 显示：当前 npm 版本（如 `v0.17.3`）、构建时 Git commit short hash、人类可读的最后更新时间（如 `2026-08-27`）。
-- [ ] 站点构建脚本/配置自动读取根 `package.json` 版本、`git rev-parse --short HEAD` 与当前日期，无需手工维护。
-- [ ] 审计 `scripts/publish.sh`，确认发布时是否 push tags / 创建 GitHub Releases；如缺失则补齐。
-- [ ] 将历史 npm 版本 `0.17.3` 对应的 tag 与 GitHub Release 补齐（或按用户决策处理）。
-- [ ] 发布 SOP（AGENTS.md / release-auth-workflow）更新，确保未来发布“版本四同步”。
+- [x] 在站点 footer 或 nav 显示：当前 npm 版本（如 `v0.17.3`）、构建时 Git commit short hash、人类可读的最后更新时间（如 `2026-08-27`）。
+- [x] 站点构建脚本/配置自动读取根 `package.json` 版本、`git rev-parse --short HEAD` 与当前日期，无需手工维护。
+- [x] 审计 `scripts/publish.sh`，确认发布时是否 push tags / 创建 GitHub Releases；如缺失则补齐。
+- [x] 将历史 npm 版本 `0.17.3` 对应的 tag 与 GitHub Release 补齐（或按用户决策处理）。
+- [x] 发布 SOP（AGENTS.md / release-auth-workflow）更新，确保未来发布“版本四同步”。
 
 ## Technical Approach
 
@@ -37,11 +38,11 @@
 
 ## Acceptance Criteria
 
-- [ ] 访问 https://lythos-labs.github.io/lythoskill/ 能在页面底部看到 `v0.17.3`、类似 `5100370` 的 commit short hash 与 `Last updated: 2026-08-27`。
-- [ ] 本地 `bun run docs:build`（或等价命令）不依赖手工输入即可生成带版本信息的站点。
-- [ ] `git ls-remote --tags origin` 包含 `v0.17.3`（或用户指定的处理方式）。
-- [ ] `gh release list` 显示 `v0.17.3` 且为 Latest（或用户指定的处理方式）。
-- [ ] 发布 SOP 文档明确“push 前/后必须同步 tags 与 releases”。
+- [x] 访问 https://lythos-labs.github.io/lythoskill/ 能在页面底部看到 `v0.17.3`、commit short hash 与 `Last updated: 2026-08-27`。
+- [x] 本地 `bun run docs:build`（或等价命令）不依赖手工输入即可生成带版本信息的站点。
+- [x] `git ls-remote --tags origin` 包含 `v0.17.3`。
+- [x] `gh release list` 显示 `v0.17.3` 且为 Latest。
+- [x] 发布 SOP 文档明确“push 前/后必须同步 tags 与 releases”。
 
 ## Progress Log
 
@@ -51,7 +52,9 @@
 - 2026-08-27 — Updated release SOP `packages/lythoskill-creator/skill/references/release-auth-workflow.md` with canonical order: test → bump → commit → publish → push → tag/release, citing `daily/2026-07-31.md` historical decision.
 - 2026-08-27 — Made footer more prominent (`lythoskill vX.Y.Z` in bold) and added ADR-20260827143012709 documenting the decision (proposed → accepted).
 - 2026-08-27 — Pushed to origin; Pages deploy run `33046630451` succeeded; verified live site shows `lythoskill v0.17.3 · b9b707c · Last updated: 2026-08-27`.
-- 2026-08-27 — Backfilled `v0.17.3` Git tag pointing to release commit `371af8fe`; verified via `git ls-remote --tags origin`. GitHub Release creation failed with HTTP 403 — current `.github-token` lacks `contents:write` permission. Blocker documented; needs user to provision a token with release-write access.
+- 2026-08-27 — Backfilled `v0.17.3` Git tag pointing to release commit `371af8fe`; verified via `git ls-remote --tags origin`.
+- 2026-08-27 — User provisioned fine-grained PAT into macOS Keychain (`lythos-agent-pat`); `publish-github-release.sh` updated to read keychain/secret-tool.
+- 2026-08-27 — Re-ran `./scripts/publish-github-release.sh 371af8fe`; release created successfully. Verified: `gh release list` shows `v0.17.3` as `Latest`; web fetch confirms release page live.
 
 ## Related Files
 - Modified:
