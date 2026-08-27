@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-08-27 | Created from user proposal to migrate release pipeline |
+| accepted | 2026-08-27 | Accepted |
 
 ## Background
 

@@ -232,7 +232,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 
 `link` syncs working set from cold pool (local). `refresh` discovers upstream updates (plan-only); `refresh --exec` pulls them into the cold pool — then `link` again. Agent reads the working set, not your source edits: edit source without build + link = agent sees stale skill. Pre-commit auto-builds staged skill changes; **manual edits without commit need manual build + link**. `deck link` also warns when the cold pool is behind origin, dirty, or on the wrong branch (best-effort, never blocks boot); `refresh --exec` self-heals a dirty cache and fails loudly (non-zero exit + trailing ⚠️ summary).
 
-**Release cycle**: `bunx @lythos/skill-creator@0.17.3 bump` → `bun install` → commit → push → `./scripts/publish.sh` → `./scripts/publish-github-release.sh`. Order matters: npm publish before github push, or `bunx` consumers fail while skill docs show new commands; tag/release after push so the tag points to a commit on origin. After release: `deck refresh --exec` → `deck link`.
+**Release cycle**: `bunx @lythos/skill-creator@0.17.3 bump` → `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) triggers on `v*` tags, runs tests, publishes all packages to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages. During the transition, if a package lacks an npm Trusted Publisher, fall back to `./scripts/publish.sh` → `./scripts/publish-github-release.sh`. After release: `deck refresh --exec` → `deck link`.
 
 #### Key Commands
 
@@ -244,7 +244,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 | Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` (shorthand: `cortex task`) |
 | ZK Review a task | Spawn ZK agent, WHAT/WHY/HOW on task card + AGENTS.md (pass paths) |
 | Arena quick run | `bun packages/lythoskill-arena/src/cli.ts single --deck <path> --brief "prompt"` (shorthand: `arena single`) |
-| Release | `bunx @lythos/skill-creator@0.17.3 bump` → `./scripts/publish.sh` → `./scripts/publish-github-release.sh` |
+| Release | `bunx @lythos/skill-creator@0.17.3 bump` → `git push --follow-tags` → watch Actions (`gh run watch`) |
 
 **Shorthand**: `deck link`, `arena single`, `cortex probe` resolve to `bun packages/<name>/src/cli.ts <cmd>` (in-repo) or `bunx @lythos/<name> <cmd>` (external). Full table: `skills/lythoskill-project-cortex/references/COMMANDS.md`.
 
@@ -262,7 +262,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 ```
 
 **Submit** (user says "submit" / "全提交" / "push"): README sync if CLI surface changed → test gate → commit with `Closes: TASK-xxx` → scribe daily → push → **verify CI** (GitHub Actions; distinguish `repo-existence` vs `path-existence` failures in validate-example-decks; `gh` 401 = token expired, tell user). If `site/**` changed, also check the **Deploy VitePress site to Pages** workflow — it runs separately from CI, so CI green ≠ site green (`gh run list --workflow="Deploy VitePress site to Pages"`).
-**Release** (user says "release" / "发版" / "打tag"): submit, then bump → publish (`publish.sh` ends with the `check-published-manifests` tripwire) → tag/release (`./scripts/publish-github-release.sh`) → `deck refresh --exec` → `deck link`. Never bump without explicit user intent — versions are shared across the monorepo. A plain "submit/push" is not a release.
+**Release** (user says "release" / "发版" / "打tag"): submit, then bump → `git push --follow-tags` → verify the `release` Actions run publishes to npm, creates the GitHub Release, and deploys Pages → `deck refresh --exec` → `deck link`. If the new pipeline cannot publish a package (e.g., missing npm Trusted Publisher), fall back to `./scripts/publish.sh` → `./scripts/publish-github-release.sh`. Never bump without explicit user intent — versions are shared across the monorepo. A plain "submit/push" is not a release.
 
 **Before ending any session, answer with commands, not intentions**:
 ```
@@ -282,8 +282,10 @@ Each caused at least one real incident. Scan before committing. **New gotcha →
 
 **[RELEASE]**
 - `[SEMVER]` 0.x: patch = bug fix only; minor = any API change (new subcommand/flag/exported function, even "small"); major = breaking. Never bump without explicit user intent.
-- `[VERSION]` Push to github BEFORE npm publish = external consumers see docs the CLI can't fulfill. Order: test → bump → commit → publish → push → tag/release. `publish.sh` is npm-only; `publish-github-release.sh` syncs GitHub tags/releases after push.
-- `[LEAK]` Published manifests must never contain `workspace:*` in consumer-visible sections (deps/optional/peer — devDeps are never installed by consumers; the rewriter covers them too since TASK-20260730140801284) — 0.11.0 / 0.15.7 / 0.17.2 incidents. `publish.sh` rewrites at publish time AND ends with the tripwire `scripts/check-published-manifests.ts <version>` (asks npm, not the bunx cache; fails CLOSED on unverifiable packages). After any publish — or to audit any old version — run it directly.
+- `[TAG]` New flow: push the tag with `git push --follow-tags` after the bump commit. `.github/workflows/release.yml` runs on `v*` tags and handles npm publish, GitHub Release, and Pages deploy.
+- `[VERSION]` (legacy local fallback) Push to github BEFORE npm publish = external consumers see docs the CLI can't fulfill. Order: test → bump → commit → push → publish → tag/release. `publish.sh` is npm-only; `publish-github-release.sh` syncs GitHub tags/releases after push.
+- `[PROVENANCE]` npm publishes from Actions carry provenance only if the package has a Trusted Publisher configured on npmjs.com for `lythos-labs/lythoskill/.github/workflows/release.yml`.
+- `[LEAK]` Published manifests must never contain `workspace:*` in consumer-visible sections (deps/optional/peer — devDeps are never installed by consumers; the rewriter covers them too since TASK-20260730140801284) — 0.11.0 / 0.15.7 / 0.17.2 incidents. `release.yml` rewrites before publish and runs the tripwire `scripts/check-published-manifests.ts <version>` after publish. The legacy `publish.sh` also rewrites and runs the same tripwire. After any publish — or to audit any old version — run it directly.
 - `[LOCKFILE]` Any `package.json` version change → `bun install` before commit. CI uses `--frozen-lockfile`.
 - `[WORKSPACE]` Never semver ranges on `@lythos/*` deps — `workspace:*`. Pre-commit enforces.
 - `[PUSH]` `git push` to `skills` may fail `(cannot lock ref)` on concurrent-session races. Fix: `git pull --rebase` then push.
@@ -325,7 +327,7 @@ Three patterns cover 90% of usage: **single-deck test** (`arena single --deck <p
 | `cortex/hooks/*.ts` | Silent governance failure | Hooks failing silently = trailers not dispatching |
 | `.husky/` | Guard cascade | Bugs affect every commit — QA with qa-sweep deck |
 | `AGENTS.md` | Compaction amnesia | Most-changed doc — re-read Release/Auth after compaction |
-| Release pipeline | Lockfile drift / tag-release gap | bump → install → commit → push → publish → tag/release — never skip steps; `publish.sh` is npm-only, `publish-github-release.sh` is GitHub-only |
+| Release pipeline | Lockfile drift / tag-release gap | New: bump → install → commit → `git push --follow-tags` → Actions handles publish + release + Pages. Fallback (transition): bump → install → commit → push → publish → tag/release. `release.yml` is the primary trigger; `publish.sh` + `publish-github-release.sh` are local fallbacks. |
 | Cold pool clones (`~/.agents/skill-repos/`) | Derived state | Cache, never hand-edit — fix the source, then `refresh --exec` + `link` (2026-07-17 incident) |
 
 ### 7. Deck Governance
@@ -372,11 +374,11 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 ### 9. Release & Auth (Compaction-Safe)
 
-**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is a legacy fallback for `gh` CLI; preferred storage is macOS Keychain (`security find-generic-password -s 'lythos-agent-pat' -w`) or Linux `secret-tool`. `.npm-access` is for `publish.sh` only.
+**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is a legacy fallback for `gh` CLI; preferred storage is macOS Keychain (`security find-generic-password -s 'lythos-agent-pat' -w`) or Linux `secret-tool`. `.npm-access` is for the legacy `publish.sh` fallback only; the new Actions pipeline uses OIDC and stores no npm token.
 
-**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.3 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → push → `./scripts/publish.sh` → `./scripts/publish-github-release.sh`.
+**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.3 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) handles npm publish, GitHub Release, and Pages deploy.
 
-**New package → add to `scripts/publish.sh`** PACKAGES array before first release (skill-only packages exempt).
+**New package → add to `scripts/publish.sh`** PACKAGES array before first release (skill-only packages exempt). The workflow extracts the same list, so `publish.sh` remains the SSOT.
 
 **SKILL.md sources are templates**: `packages/*/skill/SKILL.md` uses `{{PACKAGE_VERSION}}` — never write literal versions (breaks future renders; build substitutes from root `package.json`). Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 

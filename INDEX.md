@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/8/27 16:52:36
+> 自动生成于 2026/8/27 17:03:08
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 342 | 进行中: 0, 待验收: 0, 已完成: 294 |
+| Tasks | 343 | 进行中: 1, 待验收: 0, 已完成: 294 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 94 | 已接受: 88 |
+| ADRs | 95 | 已接受: 89 |
 
 ---
 
@@ -84,9 +84,9 @@ _无_
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260827170159682**: Implement tag-triggered release pipeline with OIDC npm provenance
 
 ### 待验收 (0)
 
@@ -535,6 +535,7 @@ _无_
 - ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
 - ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
 - 🤔 **ADR-20260827155909657** (01-proposed): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
+- ✅ **ADR-20260827165402810** (02-accepted): Tag-triggered release pipeline with OIDC npm provenance
 
 ---
 

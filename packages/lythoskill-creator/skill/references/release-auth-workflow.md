@@ -5,7 +5,9 @@ since: 2026-04-23
 status: accepted
 summary: |
   Lock-step versioning, auth state boundaries, bump pipeline internals,
-  and publish procedure. Auth is pre-configured — never modify.
+  and publish procedure. Primary publish is now a tag-triggered GitHub
+  Actions workflow with OIDC npm provenance; local scripts remain as
+  transition fallbacks. Auth is pre-configured — never modify.
 ---
 
 # Release & Auth Workflow
@@ -23,7 +25,7 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 | `.git/config` (origin URL) | Git push/fetch | Origin uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
 | `.github-token` (project root, gitignored) | `gh` CLI auth fallback | Legacy fallback. Preferred storage is macOS Keychain (`security`) or Linux `secret-tool`. **Never embed in a git URL or `.git/config`.** |
-| `.npm-access` (project root, gitignored) | npm publish token | Read by `scripts/publish.sh`. **Never run `npm login`** or prompt the user to log in — fix the token file instead. |
+| `.npm-access` (project root, gitignored) | npm publish token (legacy fallback) | Read by `scripts/publish.sh` during transition. The new Actions pipeline uses OIDC and does not need this file. **Never run `npm login`** or prompt the user to log in — fix the token file instead. |
 
 If anything auth-related looks "broken", do not improvise a fix. Ask.
 
@@ -62,16 +64,83 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 
 ## Release Order
 
-The canonical order is **test → bump → commit → publish → push → tag/release**. This order is intentional and was settled after prior incidents (see `daily/2026-07-31.md` Key Decisions):
+The canonical order is **test → bump → commit → push with tag**. This order is intentional and was settled after prior incidents (see `daily/2026-07-31.md` Key Decisions):
 
 1. **Test** — `bun --filter='*' run test` and any BDD/reproduce gates.
 2. **Bump** — `bunx @lythos/skill-creator@<version> bump <patch|minor|major|X.Y.Z>`.
 3. **Commit** — `git commit -am "chore(release): vX.Y.Z"` (bump only; no tag yet).
+4. **Push with tag** — `git push origin main && git push --follow-tags` (or `git push --follow-tags` if the bump commit is already on origin).
+
+The annotated tag `vX.Y.Z` triggers `.github/workflows/release.yml`, which runs tests, publishes all packages to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages.
+
+### Legacy local flow (transition fallback)
+
+If a package does not yet have an npm Trusted Publisher configured, fall back to the old local flow:
+
+1. **Test** — `bun --filter='*' run test`.
+2. **Bump** — `bunx @lythos/skill-creator@<version> bump <...>`.
+3. **Commit** — `git commit -am "chore(release): vX.Y.Z"`.
 4. **Publish** — `./scripts/publish.sh` pushes packages to npm.
 5. **Push** — `git push origin main` sends the bump commit to GitHub.
 6. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
 
-Why npm before GitHub push? So external consumers can install the new CLI before the docs site (and README) point at it. Why tag/release after push? So the annotated tag points to a commit that already exists on origin.
+Why npm before GitHub push in the legacy flow? So external consumers can install the new CLI before the docs site (and README) point at it. Why tag/release after push? So the annotated tag points to a commit that already exists on origin.
+
+## Tag-triggered Actions Release Pipeline
+
+The primary release mechanism is `.github/workflows/release.yml`.
+
+### Trigger
+
+```yaml
+on:
+  push:
+    tags: ['v*']
+```
+
+Pushing an annotated tag `vX.Y.Z` starts the workflow.
+
+### What it does
+
+1. Checks out the tag.
+2. Installs dependencies with `bun install --frozen-lockfile`.
+3. Runs `bun --filter='*' run test`.
+4. Rewrites `workspace:*` → `^<version>` in every publishable manifest using `scripts/rewrite-workspace-deps.ts`.
+5. Publishes every package in `scripts/publish.sh` `PACKAGES` order with `npm publish --access public`.
+6. Runs `scripts/check-published-manifests.ts <version>` as a post-publish tripwire.
+7. Creates the GitHub Release with `gh release create --generate-notes`.
+8. Builds and deploys the docs site to Pages.
+
+### Why npm instead of Bun for publish
+
+npm supports OIDC trusted publishing and automatic provenance attestation when running inside GitHub Actions. Bun does not yet support this flow. The workflow uses `actions/setup-node@v4` with `registry-url: 'https://registry.npmjs.org'` and leaves `NODE_AUTH_TOKEN` unset so npm exchanges the GitHub OIDC token for a short-lived publish token.
+
+### Required one-time setup
+
+Each `@lythos/*` package on npmjs.com must have a Trusted Publisher pointing to:
+
+- **Organization/User:** `lythos-labs`
+- **Repository:** `lythoskill`
+- **Workflow filename:** `release.yml`
+
+Until this is configured for a package, that package cannot be published by the Actions pipeline and must use the legacy `./scripts/publish.sh` fallback.
+
+### New packages
+
+A brand-new `@lythos/*` package has a chicken-and-egg problem: npm cannot add a Trusted Publisher for a package that does not yet exist. Options:
+
+1. Manually publish the first version with a classic npm token, then add the Trusted Publisher.
+2. Temporarily add a `NPM_TOKEN` repository secret and use it for the first publish.
+
+After the first publish, remove the secret and rely on OIDC.
+
+### Watching a release
+
+```bash
+gh run watch
+# or
+gh run list --workflow=release
+```
 
 ## Commit Policy
 
@@ -92,21 +161,25 @@ The script is the single source of truth for what gets published. Packages not i
 
 **Skill-only packages** (no `package.json`, no `src/`, pure `SKILL.md` under `skill/`) are exempt — they are build targets, not publish targets.
 
-## Publish to npm
+## Publish to npm (legacy fallback)
 
 ```bash
 ./scripts/publish.sh
 ```
 
+Use this only when a package cannot be published by the Actions pipeline (e.g., missing npm Trusted Publisher during transition).
+
 The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order, and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
 
 `publish.sh` intentionally stops at npm. Git tags and GitHub Releases are handled by a separate script so that npm auth failures do not leave GitHub in a half-published state, and vice versa.
 
-## Sync Git tag + GitHub Release
+## Sync Git tag + GitHub Release (legacy fallback)
 
 ```bash
 ./scripts/publish-github-release.sh
 ```
+
+Use this only when the Actions pipeline cannot create the release, or when backfilling a release for a historical commit.
 
 The script creates an annotated tag `vX.Y.Z` from the current commit, pushes it to `origin`, and creates a GitHub Release marked as latest. Existing tags/releases are skipped instead of failing.
 
@@ -144,7 +217,8 @@ This keeps npm, Git tags, and GitHub Releases in lock-step.
 | Gotcha | Symptom | Fix |
 |--------|---------|-----|
 | **New package, stale lockfile** | `bun install --frozen-lockfile` fails in CI | `bun install` then commit `bun.lock` |
-| **New package not in publish script** | Package missing from npm after release | Add to `scripts/publish.sh` PACKAGES array |
+| **New package not in publish script** | Package missing from npm after release | Add to `scripts/publish.sh` PACKAGES array (workflow reads the same list) |
+| **Trusted Publisher missing** | `release.yml` npm publish step fails with auth error | Add the package's Trusted Publisher on npmjs.com, or fall back to `./scripts/publish.sh` |
 | **`require()` in TypeScript source** | Pre-commit hook rejects with ESM-only ADR | Use `import` / `await import()` — never `require()` |
 | **SKILL.md edited, not rebuilt** | Skills directory stale, agent sees old instructions | `bunx @lythos/skill-creator@latest build` auto-runs in pre-commit when `skill/SKILL.md` changed |
 | **Wrong CWD for git commands** | `git add <file>` fails with "did not match" | Always `cd` to repo root first |

@@ -1,0 +1,109 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write      # create GitHub Release
+  id-token: write      # OIDC for npm trusted publishing + Pages deploy
+  pages: write         # deploy docs site to Pages
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # npm (not Bun) is required for OIDC trusted publishing and provenance.
+      # registry-url tells npm to target npmjs.org; with id-token: write, npm
+      # automatically exchanges the GitHub OIDC token for a short-lived publish
+      # token. No long-lived NPM_TOKEN secret is stored in the repo.
+      - name: Setup Node / npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run tests
+        run: bun --filter='*' run test
+
+      # npm publish does not rewrite workspace:* (unlike pnpm). Rewrite
+      # internal @lythos/* deps to ^<root-version> before publishing.
+      # scripts/publish.sh is the SSOT for the package list and order.
+      - name: Rewrite workspace:* deps for publish
+        run: |
+          mapfile -t PACKAGES < <(sed -n '/^PACKAGES=(/,/^)/p' scripts/publish.sh | grep -o '"packages/[^"]*"' | tr -d '"')
+          for pkg in "${PACKAGES[@]}"; do
+            bun scripts/rewrite-workspace-deps.ts "$pkg/package.json"
+          done
+
+      - name: Publish packages to npm
+        run: |
+          mapfile -t PACKAGES < <(sed -n '/^PACKAGES=(/,/^)/p' scripts/publish.sh | grep -o '"packages/[^"]*"' | tr -d '"')
+          for pkg in "${PACKAGES[@]}"; do
+            echo "📦 Publishing $pkg ..."
+            (cd "$pkg" && npm publish --access public)
+          done
+
+      # Independent tripwire: ask npm what it actually has, fail closed on
+      # any workspace:* leak (historical incidents: 0.11.0, 0.15.7, 0.17.2).
+      - name: Verify published manifests
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          bun scripts/check-published-manifests.ts "$VERSION"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --generate-notes
+
+      # Docs site — same build as deploy-pages.yml, but triggered by the tag
+      # rather than a main-branch push, so the new release metadata is live
+      # immediately after publish.
+      - name: Install site dependencies
+        working-directory: site
+        run: bun install
+
+      - name: Inject site version metadata
+        working-directory: site
+        run: bun scripts/inject-version.ts
+
+      - name: Build VitePress
+        working-directory: site
+        run: bun vitepress build . --outDir .vitepress/dist
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/.vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

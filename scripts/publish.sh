@@ -4,6 +4,12 @@ set -euo pipefail
 # Publish all lythos packages to npm.
 # Reads access token from .npm-access (gitignored, never committed).
 #
+# TRANSITION NOTICE (2026-08-27):
+#   The primary release mechanism is now .github/workflows/release.yml,
+#   which triggers on v* tags and publishes via OIDC trusted publishing
+#   (no long-lived npm token). Keep this script as a fallback for packages
+#   that do not yet have an npm Trusted Publisher configured.
+#
 # WORKSPACE PROTOCOL REWRITE — historical context:
 #   Internal @lythos/* deps live as "workspace:*" in source so local
 #   development always picks up the latest workspace code. `npm publish`
