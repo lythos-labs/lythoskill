@@ -17,15 +17,27 @@ TOKEN_FILE="$ROOT_DIR/.github-token"
 
 ROOT_VERSION=$(node -p "require('$ROOT_DIR/package.json').version")
 TAG="v$ROOT_VERSION"
+TARGET_COMMIT="${1:-HEAD}"
 
-echo "🏷️  Publishing GitHub release $TAG..."
+echo "🏷️  Publishing GitHub release $TAG (target: $TARGET_COMMIT)..."
+
+# Resolve target commit
+TARGET_SHA=$(git -C "$ROOT_DIR" rev-parse "$TARGET_COMMIT")
+
+echo "   Target SHA: ${TARGET_SHA:0:12}"
 
 # Create/push tag
 if git -C "$ROOT_DIR" rev-parse "$TAG" >/dev/null 2>&1; then
-  echo "   Tag $TAG already exists locally."
+  EXISTING_SHA=$(git -C "$ROOT_DIR" rev-parse "$TAG^{commit}")
+  if [ "$EXISTING_SHA" != "$TARGET_SHA" ]; then
+    echo "❌ Tag $TAG already exists locally and points to ${EXISTING_SHA:0:12}, not ${TARGET_SHA:0:12}."
+    echo "   Delete it first if you really want to move it, or pass a different target."
+    exit 1
+  fi
+  echo "   Tag $TAG already exists locally and points to the correct commit."
 else
-  git -C "$ROOT_DIR" tag -a "$TAG" -m "Release $TAG"
-  echo "   ✅ Created tag $TAG"
+  git -C "$ROOT_DIR" tag -a "$TAG" "$TARGET_SHA" -m "Release $TAG"
+  echo "   ✅ Created tag $TAG → ${TARGET_SHA:0:12}"
 fi
 
 if git -C "$ROOT_DIR" ls-remote --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then

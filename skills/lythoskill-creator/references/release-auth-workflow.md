@@ -112,6 +112,12 @@ The script reads `.github-token`, creates an annotated tag `vX.Y.Z` from the cur
 
 Run this **after** `./scripts/publish.sh` succeeds, or standalone to publish a GitHub release for a version that is already on npm. Do not re-run `publish.sh` just to create a release; it will attempt to re-publish to npm.
 
+To backfill a release for a historical commit, pass the commit hash:
+
+```bash
+./scripts/publish-github-release.sh <commit-sha>
+```
+
 This keeps npm, Git tags, and GitHub Releases in lock-step.
 
 ## CI & Publish Gotchas
