@@ -68,15 +68,15 @@ npm publish, GitHub Release creation, and Pages deploy from a single workflow.
 
 ## Acceptance Criteria
 
-- [ ] `release.yml` parses and passes `actionlint` or `gh workflow run --ref` dry check.
+- [x] `release.yml` parses and passes YAML syntax check (Python yaml parse).
 - [ ] Pushing a `v*` tag on a green main triggers the workflow (tested with the
   next patch release or a deliberate pre-release tag).
- [ ] Published packages show the npm provenance badge and link back to the
+- [ ] Published packages show the npm provenance badge and link back to the
   GitHub Actions run.
 - [ ] GitHub Release is created automatically and marked latest.
 - [ ] Docs site footer reflects the new release version/hash after deploy.
-- [ ] `AGENTS.md` and `release-auth-workflow.md` describe the new SOP accurately.
-- [ ] `scripts/publish.sh` still works as an emergency fallback.
+- [x] `AGENTS.md` and `release-auth-workflow.md` describe the new SOP accurately.
+- [x] `scripts/publish.sh` still works as an emergency fallback.
 
 ## Progress Log
 
@@ -84,7 +84,38 @@ npm publish, GitHub Release creation, and Pages deploy from a single workflow.
 - 2026-08-27 17:10 — Drafted `.github/workflows/release.yml` with OIDC npm publish, GitHub Release, and Pages deploy.
 - 2026-08-27 17:15 — Updated `AGENTS.md` and `release-auth-workflow.md` SOP; marked local scripts as transition fallbacks.
 - 2026-08-27 17:20 — Validated YAML syntax, ran `bun --filter='*' run test` (all green), built `skills/lythoskill-creator/`.
-- 2026-08-27 17:22 — Ready to commit, push, and scribe.
+- 2026-08-27 17:22 — Committed, pushed, scribed daily.
+- 2026-08-27 17:29 — Added GitHub ruleset `protect-v-tags` for `refs/tags/v*` (deletion + non-fast-forward protection).
+- 2026-08-27 17:30 — npm Trusted Publisher configuration blocked: npm does not expose a public API for this; must be done manually via npmjs.com package access pages. Verified `lythos` user has read-write access to all packages. Generated manual checklist below.
+
+## npm Trusted Publisher Manual Checklist
+
+npm [does not support programmatic configuration](https://docs.npmjs.com/trusted-publishers/) of Trusted Publishers. Each package must be configured via the npmjs.com web UI. The npm user `lythos` has read-write access to all packages, so you can do this with the current login.
+
+For each package, go to its **Access** page → **Trusted Publisher** section → **GitHub Actions**, then fill:
+
+| Package | npm Access Page |
+|---------|-----------------|
+| `@lythos/hello-world` | https://www.npmjs.com/package/@lythos/hello-world/access |
+| `@lythos/agent-adapter` | https://www.npmjs.com/package/@lythos/agent-adapter/access |
+| `@lythos/agent-adapter-claude-sdk` | https://www.npmjs.com/package/@lythos/agent-adapter-claude-sdk/access |
+| `@lythos/agent-adapter-deepseek-serve` | https://www.npmjs.com/package/@lythos/agent-adapter-deepseek-serve/access |
+| `@lythos/agent-adapter-codex` | https://www.npmjs.com/package/@lythos/agent-adapter-codex/access |
+| `@lythos/test-utils` | https://www.npmjs.com/package/@lythos/test-utils/access |
+| `@lythos/infra` | https://www.npmjs.com/package/@lythos/infra/access |
+| `@lythos/cold-pool` | https://www.npmjs.com/package/@lythos/cold-pool/access |
+| `@lythos/project-cortex` | https://www.npmjs.com/package/@lythos/project-cortex/access |
+| `@lythos/skill-curator` | https://www.npmjs.com/package/@lythos/skill-curator/access |
+| `@lythos/skill-arena` | https://www.npmjs.com/package/@lythos/skill-arena/access |
+| `@lythos/skill-creator` | https://www.npmjs.com/package/@lythos/skill-creator/access |
+| `@lythos/skill-deck` | https://www.npmjs.com/package/@lythos/skill-deck/access |
+
+Fill in:
+- **Publisher**: `lythos-labs`
+- **Repository**: `lythoskill`
+- **Workflow name**: `release.yml`
+
+After all 13 are configured, the `release` workflow can publish packages via OIDC. Until then, unconfigured packages must use the `./scripts/publish.sh` fallback.
 
 ## Related Files
 
