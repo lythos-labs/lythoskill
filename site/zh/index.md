@@ -51,9 +51,7 @@ features:
 
 試試看？一個 deck（`skill-deck.toml`）是單一檔案，宣告哪些技能是 active——可攜、可分享、可重現。
 
-::: code-group
-
-```bash [Claude Code]
+```bash
 cat > skill-deck.toml << 'EOF'
 [deck]
 max_cards = 10
@@ -63,48 +61,14 @@ working_set = ".claude/skills"
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
-[tool.skills.diagnose]
+[tool.skills.diagnosing-bugs]
 path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 EOF
 
 bunx @lythos/skill-deck@latest link
 ```
 
-```bash [Codex]
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".agents/skills"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
-EOF
-
-bunx @lythos/skill-deck@latest link
-```
-
-```bash [Cursor]
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".cursor/skills"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
-EOF
-
-bunx @lythos/skill-deck@latest link
-```
-
-:::
+不是用 Claude Code？把 `working_set` 改成 `.agents/skills`(Codex 及 14+ 種 agent）或 `.cursor/skills`(Cursor)——只差這一行。也可以直接抓這個牌組檔案：[quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml)——它在 CI 裡有遠端驗證，本頁每個 locator 都有。
 
 就這樣。複製、貼上、執行。`cold_pool` 欄位告訴系統你的技能放在哪裡——一個放 git clone repo 的目錄。`working_set` 欄位告訴系統你的 agent 去哪裡找。`bunx @lythos/skill-deck link` 把工作集對帳到與宣告完全吻合——未宣告的技能會被移除，已宣告的技能會被連結。這個檔案自我描述——不需要外部說明就能看懂它在做什麼。
 

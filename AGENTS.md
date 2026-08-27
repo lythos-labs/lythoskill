@@ -261,7 +261,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 5. Commit daily, push
 ```
 
-**Submit** (user says "submit" / "全提交" / "push"): README sync if CLI surface changed → test gate → commit with `Closes: TASK-xxx` → scribe daily → push → **verify CI** (GitHub Actions; distinguish `repo-existence` vs `path-existence` failures in validate-example-decks; `gh` 401 = token expired, tell user).
+**Submit** (user says "submit" / "全提交" / "push"): README sync if CLI surface changed → test gate → commit with `Closes: TASK-xxx` → scribe daily → push → **verify CI** (GitHub Actions; distinguish `repo-existence` vs `path-existence` failures in validate-example-decks; `gh` 401 = token expired, tell user). If `site/**` changed, also check the **Deploy VitePress site to Pages** workflow — it runs separately from CI, so CI green ≠ site green (`gh run list --workflow="Deploy VitePress site to Pages"`).
 **Release** (user says "release" / "发版" / "打tag"): submit, then bump → publish (`publish.sh` ends with the `check-published-manifests` tripwire) → `deck refresh --exec` → `deck link`. Never bump without explicit user intent — versions are shared across the monorepo. A plain "submit/push" is not a release.
 
 **Before ending any session, answer with commands, not intentions**:

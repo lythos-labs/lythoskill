@@ -33,6 +33,8 @@ jobs:
         run: bun packages/lythoskill-deck/test/runner.ts
       - name: validate example decks
         run: bun scripts/validate-example-decks.ts
+      - name: site deck snippets stay within validated decks
+        run: bun scripts/check-site-deck-snippets.ts
       - run: bun packages/lythoskill-creator/src/cli.ts align
       - name: test report
         if: always()
@@ -42,6 +44,24 @@ jobs:
         with:
           name: test-report
           path: test-results/
+
+  # Site content is user-facing — a broken VitePress build must fail the
+  # commit that caused it, in the workflow everyone watches. Deploy stays
+  # in deploy-pages.yml; here we only prove the site builds.
+  site-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install site dependencies
+        working-directory: site
+        run: bun install
+      - name: Build VitePress
+        working-directory: site
+        run: bun vitepress build . --outDir .vitepress/dist
 
   coverage-deck:
     runs-on: ubuntu-latest

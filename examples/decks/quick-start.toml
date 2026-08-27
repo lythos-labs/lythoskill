@@ -1,0 +1,23 @@
+# Quick Start Deck
+# The smallest useful deck — the one from the site's Level 0 quick start.
+# TDD + bug diagnosis, 2 skills, works as-is for any agent.
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml > skill-deck.toml
+#   bunx @lythos/skill-deck@latest link
+# Other agents: change working_set to ".agents/skills" (Codex) or ".cursor/skills" (Cursor).
+
+[deck]
+# Safety limit + forcing function. Skills work best in small numbers —
+# default 10–15. If you hit the cap, ask: do I really need all of these right now?
+max_cards = 10
+# Cold pool: a shared directory of git-cloned skill repos. link auto-clones
+# repos from github.com paths — no manual setup.
+cold_pool = "~/.agents/skill-repos"
+# Where your agent looks for skills. Change per agent:
+working_set = ".claude/skills"
+
+[tool.skills.tdd]
+path = "github.com/mattpocock/skills/skills/engineering/tdd"
+
+[tool.skills.diagnosing-bugs]
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"

@@ -51,9 +51,7 @@ Every collector hits the same organizational challenges. Here's what people do �
 
 试试看？ A deck (`skill-deck.toml`) is a single file that declares exactly which skills are active — portable, shareable, reproducible.
 
-::: code-group
-
-```bash [Claude Code]
+```bash
 cat > skill-deck.toml << 'EOF'
 [deck]
 max_cards = 10
@@ -63,48 +61,14 @@ working_set = ".claude/skills"
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
-[tool.skills.diagnose]
+[tool.skills.diagnosing-bugs]
 path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 EOF
 
 bunx @lythos/skill-deck@latest link
 ```
 
-```bash [Codex]
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".agents/skills"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
-EOF
-
-bunx @lythos/skill-deck@latest link
-```
-
-```bash [Cursor]
-cat > skill-deck.toml << 'EOF'
-[deck]
-max_cards = 10
-cold_pool = "~/.agents/skill-repos"
-working_set = ".cursor/skills"
-
-[tool.skills.tdd]
-path = "github.com/mattpocock/skills/skills/engineering/tdd"
-
-[tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
-EOF
-
-bunx @lythos/skill-deck@latest link
-```
-
-:::
+Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agents) or `.cursor/skills` (Cursor) — that one line is the only difference. You can also fetch this deck as a file: [quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml) — it is remote-validated in CI, and so is every locator on this page.
 
 That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `bunx @lythos/skill-deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 

@@ -33,7 +33,7 @@ working_set = ".claude/skills"
 [tool.skills.tdd]
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
-[tool.skills.diagnose]
+[tool.skills.diagnosing-bugs]
 path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 TOML
 
