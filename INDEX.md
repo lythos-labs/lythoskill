@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 01:40:24
+> 自动生成于 2026/8/28 02:01:01
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 349 | 进行中: 1, 待验收: 1, 已完成: 297 |
+| Tasks | 349 | 进行中: 0, 待验收: 2, 已完成: 297 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 90 |
 
@@ -84,13 +84,14 @@ _无_
 - [ ] **TASK-20260828003758156**: mechanize site command and count verification guard
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
+_无_
 
-### 待验收 (1)
+### 待验收 (2)
 
 - 🔍 **TASK-20260828002450069**: site UX and narrative alignment review
+- 🔍 **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
 
 ### 已完成 (297)
 
