@@ -51,6 +51,7 @@
 - 2026-08-27 — Updated release SOP `packages/lythoskill-creator/skill/references/release-auth-workflow.md` with canonical order: test → bump → commit → publish → push → tag/release, citing `daily/2026-07-31.md` historical decision.
 - 2026-08-27 — Made footer more prominent (`lythoskill vX.Y.Z` in bold) and added ADR-20260827143012709 documenting the decision (proposed → accepted).
 - 2026-08-27 — Pushed to origin; Pages deploy run `33046630451` succeeded; verified live site shows `lythoskill v0.17.3 · b9b707c · Last updated: 2026-08-27`.
+- 2026-08-27 — Backfilled `v0.17.3` Git tag pointing to release commit `371af8fe`; verified via `git ls-remote --tags origin`. GitHub Release creation failed with HTTP 403 — current `.github-token` lacks `contents:write` permission. Blocker documented; needs user to provision a token with release-write access.
 
 ## Related Files
 - Modified:
