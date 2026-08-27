@@ -40,7 +40,7 @@ else
   echo "   ✅ Created tag $TAG → ${TARGET_SHA:0:12}"
 fi
 
-if git -C "$ROOT_DIR" ls-remote --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+if [ -n "$(git -C "$ROOT_DIR" ls-remote --tags origin "refs/tags/$TAG")" ]; then
   echo "   Tag $TAG already exists on origin."
 else
   git -C "$ROOT_DIR" push origin "$TAG"
