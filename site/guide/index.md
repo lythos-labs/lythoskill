@@ -34,7 +34,7 @@ working_set = ".claude/skills"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 TOML
 
 # 4. Link: reconciles working set to match your deck

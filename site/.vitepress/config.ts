@@ -15,6 +15,8 @@
  *
  * 4. Use `srcExclude: ['../**']` if running `vitepress dev` from project root
  *    (prevents HMR watcher from parsing root .md files as Vue SFCs).
+ *    `drafts/**` is also excluded — rejected drafts kept as raw material,
+ *    not publishable pages (unescaped `<...>` in them breaks the Vue SFC parse).
  *
  * 5. Static assets (favicon.svg etc.) go in `site/public/`, served at `/`.
  *
@@ -28,7 +30,7 @@
 const config = {
   // Shared across all locales
   base: '/lythoskill/',
-  srcExclude: ['../**'],
+  srcExclude: ['../**', 'drafts/**'],
   head: [['link', { rel: 'icon', href: '/lythoskill/favicon.svg' }]],
 
   locales: {

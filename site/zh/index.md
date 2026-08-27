@@ -64,7 +64,7 @@ working_set = ".claude/skills"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 EOF
 
 bunx @lythos/skill-deck@latest link
@@ -81,7 +81,7 @@ working_set = ".agents/skills"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 EOF
 
 bunx @lythos/skill-deck@latest link
@@ -98,7 +98,7 @@ working_set = ".cursor/skills"
 path = "github.com/mattpocock/skills/skills/engineering/tdd"
 
 [tool.skills.diagnose]
-path = "github.com/mattpocock/skills/skills/engineering/diagnose"
+path = "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs"
 EOF
 
 bunx @lythos/skill-deck@latest link
