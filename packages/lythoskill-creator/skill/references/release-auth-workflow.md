@@ -20,12 +20,55 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 
 ## Authentication State — Pre-configured, Do Not Modify
 
-| File / Resource | Purpose | Rule |
-|------|------|------|
-| `.git/config` (origin URL) | Git push/fetch | Origin uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
+| Resource | Purpose | Rule |
+|----------|---------|------|
+| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
-| `.github-token` (project root, gitignored) | `gh` CLI auth fallback | Legacy fallback. Preferred storage is macOS Keychain (`security`) or Linux `secret-tool`. **Never embed in a git URL or `.git/config`.** |
-| `.npm-access` (project root, gitignored) | npm publish token (legacy fallback) | Read by `scripts/publish.sh` during transition. The new Actions pipeline uses OIDC and does not need this file. **Never run `npm login`** or prompt the user to log in — fix the token file instead. |
+| GitHub PAT | `gh` CLI and agent API calls | Primary storage is the system keychain. `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
+| npm token | Publish to npmjs.com | **No long-lived token in the repo.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
+
+### GitHub token storage
+
+Read the PAT from the system keychain:
+
+- **macOS**: `security find-generic-password -s 'lythos-agent-pat' -w`
+- **Linux**: `secret-tool lookup org lythos-labs scope agent`
+
+Store or rotate:
+
+```bash
+# macOS
+security add-generic-password -U -s "lythos-agent-pat" -a "$USER" -w
+
+# Linux
+secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
+```
+
+For CLI sessions, export from the keychain:
+
+```bash
+export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"
+```
+
+### Required PAT permissions
+
+Use a **fine-grained personal access token** scoped to `lythos-labs/lythoskill`:
+
+| Permission | Level | Why |
+|------------|-------|-----|
+| `contents` | write | Push code, create tags, create/edit Releases |
+| `issues` | write | Issue/label management |
+| `pull_requests` | write | PR creation/review/merge |
+| `pages` | write | Pages configuration (local diagnostics) |
+| `workflows` | write | Push workflow file changes |
+| `actions` | write | Trigger/re-run/cancel workflow runs |
+| `metadata` | read | Auto-included by GitHub |
+
+Pre-fill link (permissions only; manually select the repository):
+
+```
+https://github.com/settings/personal-access-tokens/new?name=lythos-agent-pat&description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
+```
 
 If anything auth-related looks "broken", do not improvise a fix. Ask.
 

@@ -5,7 +5,9 @@
 > Human contributors: see [README.md](./README.md).
 
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
-> Auth (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**.
+> Auth is **pre-configured — do not modify**.
+> GitHub PAT lives in the system keychain (`security find-generic-password -s 'lythos-agent-pat' -w` on macOS; `secret-tool lookup org lythos-labs scope agent` on Linux), not in repo files.
+> `.github-token` and `.npm-access` are legacy fallbacks only; the release pipeline uses OIDC trusted publishing and stores no npm token in the repo.
 > Versions move via `bunx @lythos/skill-creator@0.17.11 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
 > Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
@@ -374,13 +376,93 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 ### 9. Release & Auth (Compaction-Safe)
 
-**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is a legacy fallback for `gh` CLI; preferred storage is macOS Keychain (`security find-generic-password -s 'lythos-agent-pat' -w`) or Linux `secret-tool`. `.npm-access` is for the legacy `publish.sh` fallback only; the new Actions pipeline uses OIDC and stores no npm token.
+#### Auth state — pre-configured, do not modify
 
-**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.11 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) handles npm publish, GitHub Release, and Pages deploy.
+| Resource | Purpose | Rule |
+|----------|---------|------|
+| `.git/config` origin URL | Git push/fetch | Uses SSH alias `calt13.github.com`. **Never** `git remote set-url` to embed a token or switch protocol. |
+| `~/.ssh/` | SSH keys + alias config | Off-limits. Do not read/write/list inside. |
+| GitHub PAT | `gh` CLI and agent API calls | Stored in system keychain (see below). `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
+| npm token | Publish to npmjs.com | **No long-lived token.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
 
-**New package → add to `scripts/publish.sh`** PACKAGES array before first release (skill-only packages exempt). The workflow extracts the same list, so `publish.sh` remains the SSOT.
+#### GitHub token storage and permissions
 
-**SKILL.md sources are templates**: `packages/*/skill/SKILL.md` uses `{{PACKAGE_VERSION}}` — never write literal versions (breaks future renders; build substitutes from root `package.json`). Full contract: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+The agent reads the PAT from the system keychain:
+
+- **macOS**: `security find-generic-password -s 'lythos-agent-pat' -w`
+- **Linux**: `secret-tool lookup org lythos-labs scope agent`
+
+To store or rotate:
+
+```bash
+# macOS
+security add-generic-password -U -s "lythos-agent-pat" -a "$USER" -w
+
+# Linux
+secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
+```
+
+The PAT needs a **fine-grained personal access token** with these repository permissions for `lythos-labs/lythoskill`:
+
+| Permission | Level | Why |
+|------------|-------|-----|
+| `contents` | write | Push code, create tags, create/edit Releases |
+| `issues` | write | Issue/label management |
+| `pull_requests` | write | PR creation/review/merge |
+| `pages` | write | Pages configuration (local diagnostics) |
+| `workflows` | write | Push workflow file changes |
+| `actions` | write | Trigger/re-run/cancel workflow runs |
+| `metadata` | read | Auto-included by GitHub |
+
+Quick pre-fill link (permissions only; still manually select the repository):
+
+```
+https://github.com/settings/personal-access-tokens/new?name=lythos-agent-pat&description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
+```
+
+For CLI use, export `GH_TOKEN` from the keychain:
+
+```bash
+export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"
+```
+
+#### npm side — OIDC trusted publishing
+
+The release pipeline (`release.yml`) publishes to npm via **OIDC trusted publishing**:
+
+- GitHub Actions presents a short-lived OIDC token to npmjs.
+- npm verifies it against a **Trusted Publisher** registered per package.
+- No `NPM_TOKEN` secret is stored in the repo.
+- Every published package gets automatic provenance linked to the Actions run.
+
+Each `@lythos/*` package on npmjs.com must have one Trusted Publisher:
+
+| Field | Value |
+|-------|-------|
+| Publisher | `lythos-labs` |
+| Repository | `lythoskill` |
+| Workflow filename | `release.yml` |
+| Environment name | leave blank / "No environment" |
+| Allowed actions | `npm publish`, `npm stage publish` |
+
+**New packages** need a first manual publish (classic token or local `publish.sh`) before the Trusted Publisher can be added, because npm cannot register a publisher for a non-existent package.
+
+Full setup details and troubleshooting: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+
+#### Lock-step versioning
+
+All packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.11 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow handles npm publish, GitHub Release, and Pages deploy.
+
+#### New package checklist
+
+- Add to `scripts/publish.sh` `PACKAGES` array before first release.
+- Publish the first version manually (Trusted Publisher cannot be added for a package that does not exist).
+- Add the Trusted Publisher on npmjs.com.
+- Future releases then go through the tag-triggered Actions pipeline.
+
+#### SKILL.md sources are templates
+
+`packages/*/skill/SKILL.md` uses `{{PACKAGE_VERSION}}` — never write literal versions (breaks future renders; build substitutes from root `package.json`).
 
 ### 10. Project Skills
 
