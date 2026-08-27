@@ -113,7 +113,9 @@ Pushing an annotated tag `vX.Y.Z` starts the workflow.
 
 ### Why npm instead of Bun for publish
 
-npm supports OIDC trusted publishing and automatic provenance attestation when running inside GitHub Actions. Bun does not yet support this flow. The workflow uses `actions/setup-node@v4` with `registry-url: 'https://registry.npmjs.org'` and leaves `NODE_AUTH_TOKEN` unset so npm exchanges the GitHub OIDC token for a short-lived publish token.
+npm supports OIDC trusted publishing and automatic provenance attestation when running inside GitHub Actions. Bun does not yet support this flow. The workflow uses `actions/setup-node@v4` **without** `registry-url` so npm exchanges the GitHub OIDC token for a short-lived publish token.
+
+**Critical:** do not set `registry-url: 'https://registry.npmjs.org'` in `actions/setup-node`. Doing so makes `setup-node` write a placeholder `NODE_AUTH_TOKEN` to `.npmrc`, and npm will use that token instead of performing the OIDC exchange. With `id-token: write` and no local auth token, `npm publish` automatically requests an OIDC-bearing publish token from npmjs. No long-lived `NPM_TOKEN` secret is stored in the repo.
 
 ### Required one-time setup
 
@@ -122,8 +124,10 @@ Each `@lythos/*` package on npmjs.com must have a Trusted Publisher pointing to:
 - **Organization/User:** `lythos-labs`
 - **Repository:** `lythoskill`
 - **Workflow filename:** `release.yml`
-- **Environment name:** leave blank / "No environment" (the current `release.yml` does not use a dedicated environment for npm publish)
+- **Environment name:** leave blank / "No environment" for the npm publish job. (`release.yml` uses a `github-pages` environment only for the separate Pages deployment job; npm OIDC claims must match the no-environment publisher.)
 - **Allowed actions:** check `npm publish` and `npm stage publish`
+
+Note the npm package names vs. repository folder names. On npm the packages are `@lythos/skill-creator`, `@lythos/skill-deck`, `@lythos/skill-arena`, `@lythos/skill-curator`, etc. The repo folders are `packages/lythoskill-*`. Configure the Trusted Publisher for the npm package name, not the folder name.
 
 Until this is configured for a package, that package cannot be published by the Actions pipeline and must use the legacy `./scripts/publish.sh` fallback.
 
@@ -221,6 +225,8 @@ This keeps npm, Git tags, and GitHub Releases in lock-step.
 | **New package, stale lockfile** | `bun install --frozen-lockfile` fails in CI | `bun install` then commit `bun.lock` |
 | **New package not in publish script** | Package missing from npm after release | Add to `scripts/publish.sh` PACKAGES array (workflow reads the same list) |
 | **Trusted Publisher missing** | `release.yml` npm publish step fails with auth error | Add the package's Trusted Publisher on npmjs.com, or fall back to `./scripts/publish.sh` |
+| **Missing `repository` field** | `npm publish` fails with `E422` during provenance attestation | Add `repository` to `packages/<name>/package.json` (provenance requires it) |
+| **`registry-url` in `setup-node`** | npm uses a placeholder token instead of OIDC; publish fails or lacks provenance | Remove `registry-url` from `actions/setup-node` in `release.yml` |
 | **`require()` in TypeScript source** | Pre-commit hook rejects with ESM-only ADR | Use `import` / `await import()` — never `require()` |
 | **SKILL.md edited, not rebuilt** | Skills directory stale, agent sees old instructions | `bunx @lythos/skill-creator@latest build` auto-runs in pre-commit when `skill/SKILL.md` changed |
 | **Wrong CWD for git commands** | `git add <file>` fails with "did not match" | Always `cd` to repo root first |

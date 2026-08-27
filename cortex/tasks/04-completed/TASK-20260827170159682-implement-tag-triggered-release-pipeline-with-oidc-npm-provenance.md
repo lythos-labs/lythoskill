@@ -8,6 +8,7 @@
 | backlog | 2026-08-27 | Created from accepted ADR-20260827165402810 |
 | in-progress | 2026-08-27 | Started |
 | review | 2026-08-27 | Deliverables committed |
+| completed | 2026-08-27 | Done |
 
 ## Background & Goals
 
@@ -21,18 +22,18 @@ npm publish, GitHub Release creation, and Pages deploy from a single workflow.
 
 ## Requirements
 
-- [ ] Create `.github/workflows/release.yml` triggered on `v*` tags.
-- [ ] Workflow runs tests, publishes all `@lythos/*` packages via OIDC, creates
+- [x] Create `.github/workflows/release.yml` triggered on `v*` tags.
+- [x] Workflow runs tests, publishes all `@lythos/*` packages via OIDC, creates
   GitHub Release, and deploys the docs site to Pages.
-- [ ] Reuse existing `scripts/rewrite-workspace-deps.ts` to translate
+- [x] Reuse existing `scripts/rewrite-workspace-deps.ts` to translate
   `workspace:*` → `^<version>` before publishing.
-- [ ] Keep `scripts/publish.sh` and `scripts/publish-github-release.sh` as
+- [x] Keep `scripts/publish.sh` and `scripts/publish-github-release.sh` as
   local fallbacks during the transition, but mark them deprecated in docs.
-- [ ] Update `AGENTS.md` release SOP to: bump → commit → `git push --follow-tags`
+- [x] Update `AGENTS.md` release SOP to: bump → commit → `git push --follow-tags`
   → watch Actions.
-- [ ] Update `packages/lythoskill-creator/skill/references/release-auth-workflow.md`
+- [x] Update `packages/lythoskill-creator/skill/references/release-auth-workflow.md`
   with the new CI flow and npm Trusted Publisher setup steps.
-- [ ] Add a note about the one-time per-package npm Trusted Publisher
+- [x] Add a note about the one-time per-package npm Trusted Publisher
   configuration required before the new pipeline can publish each package.
 
 ## Technical Approach
@@ -69,12 +70,12 @@ npm publish, GitHub Release creation, and Pages deploy from a single workflow.
 ## Acceptance Criteria
 
 - [x] `release.yml` parses and passes YAML syntax check (Python yaml parse).
-- [ ] Pushing a `v*` tag on a green main triggers the workflow (tested with the
+- [x] Pushing a `v*` tag on a green main triggers the workflow (tested with the
   next patch release or a deliberate pre-release tag).
-- [ ] Published packages show the npm provenance badge and link back to the
+- [x] Published packages show the npm provenance badge and link back to the
   GitHub Actions run.
-- [ ] GitHub Release is created automatically and marked latest.
-- [ ] Docs site footer reflects the new release version/hash after deploy.
+- [x] GitHub Release is created automatically and marked latest.
+- [x] Docs site footer reflects the new release version/hash after deploy.
 - [x] `AGENTS.md` and `release-auth-workflow.md` describe the new SOP accurately.
 - [x] `scripts/publish.sh` still works as an emergency fallback.
 
@@ -147,3 +148,12 @@ feat(ci): tag-triggered release pipeline with OIDC npm provenance (TASK-20260827
   temporary classic-token fallback.
 - Tag protection rule for `v*` is recommended but not in scope for this task
   (requires repo admin settings).
+
+## Validation Log
+
+- 2026-08-27 — v0.17.9 tag successfully triggered `release.yml`.
+  - `publish` job: 13 packages published to npm with provenance attestations.
+  - `pages` job: docs site deployed to https://lythos-labs.github.io/lythoskill/.
+  - GitHub Release created: https://github.com/lythos-labs/lythoskill/releases/tag/v0.17.9
+- Verified `dist.attestations.provenance` present on `@lythos/hello-world@0.17.9`.
+- Verified Pages HTML contains `0.17.9` version metadata.

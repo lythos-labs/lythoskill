@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/27 20:41:47
+> 自动生成于 2026/8/27 22:57:50
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 343 | 进行中: 0, 待验收: 1, 已完成: 294 |
+| Tasks | 343 | 进行中: 0, 待验收: 0, 已完成: 295 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 96 | 已接受: 90 |
 
@@ -86,11 +86,11 @@ _无_
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260827170159682**: Implement tag-triggered release pipeline with OIDC npm provenance
+_无_
 
-### 已完成 (294)
+### 已完成 (295)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -386,6 +386,7 @@ _无_
 - ✅ ~~TASK-20260730140801284~~: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
 - ✅ ~~TASK-20260827141405220~~: Fix version synchronization: npm, GitHub tags/releases, and site display
 - ✅ ~~TASK-20260827150725011~~: Provision GitHub token with release-write access for lythoskill releases
+- ✅ ~~TASK-20260827170159682~~: Implement tag-triggered release pipeline with OIDC npm provenance
 
 ### 悬置 (3)
 
