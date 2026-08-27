@@ -73,3 +73,5 @@ cold-pool/
 site/node_modules/
 site/package-lock.json
 site/.vitepress/cache/
+site/.vitepress/version.json
+site/.vitepress/dist/

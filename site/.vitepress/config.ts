@@ -27,6 +27,11 @@
  * - Only index.md (home layout) needs `---` frontmatter.
  * - Test with `npx vitepress build .` before committing.
  */
+import versionMeta from './version.json' with { type: 'json' }
+
+const { version, commit, date } = versionMeta
+const commitUrl = `https://github.com/lythos-labs/lythoskill/commit/${commit}`
+
 const config = {
   // Shared across all locales
   base: '/lythoskill/',
@@ -63,6 +68,10 @@ const config = {
         socialLinks: [
           { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
+
+        footer: {
+          message: `<a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · Last updated: ${date}`,
+        },
       },
     },
 
@@ -95,6 +104,10 @@ const config = {
         socialLinks: [
           { icon: 'github', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
+
+        footer: {
+          message: `<a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · 最後更新：${date}`,
+        },
       },
     },
   },

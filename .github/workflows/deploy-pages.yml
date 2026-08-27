@@ -33,6 +33,10 @@ jobs:
         working-directory: site
         run: bun install
 
+      - name: Inject site version metadata
+        working-directory: site
+        run: bun scripts/inject-version.ts
+
       - name: Build VitePress
         working-directory: site
         run: bun vitepress build . --outDir .vitepress/dist
