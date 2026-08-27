@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.17.2
+version: 0.17.3
 description: |
   Session context dump. Self-assess what the conversation contains that has
   NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,
@@ -47,7 +47,7 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.17.2 list
+bunx @lythos/project-cortex@0.17.3 list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
