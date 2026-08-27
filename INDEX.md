@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/27 16:50:38
+> 自动生成于 2026/8/27 16:52:36
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 340 | 进行中: 0, 待验收: 0, 已完成: 294 |
+| Tasks | 342 | 进行中: 0, 待验收: 0, 已完成: 294 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 94 | 已接受: 88 |
 
@@ -393,7 +393,7 @@ _无_
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 
-### 终止 (39)
+### 终止 (41)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -434,6 +434,8 @@ _无_
 - 🛑 ~~TASK-20260521115223592~~: Fix site narrative: cold pool/working set jargon without context — lead with universal pain (global vs project skills, cp reuse, context window limit) before introducing terminology
 - 🛑 ~~TASK-20260521120336482~~: Rewrite site narrative from correct starting point: deck as shareable reproducible skill gist, compare against real alternatives (global dir, cp, vercel skills add, marketplace), progressive disclosure from getting-started to philosophy
 - 🛑 ~~TASK-20260528112402418~~: Research: Agents Skills ABC in 2026 — .agents/skills community standard scan-path landscape
+- 🛑 ~~TASK-20260827165106350~~: completed
+- 🛑 ~~TASK-20260827165106476~~: completed
 
 ---
 
