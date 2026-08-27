@@ -29,12 +29,15 @@ Commands:
   init                  Initialize cortex workflow directories
   task "<title>"        Create a new Task
   task create "<title>"  Create a new Task (explicit)
+  task list              List all tasks and epics (same as 'list')
   task <verb> <task-id>  Task state transition (start/review/done/complete/suspend/resume/reject/terminate/archive)
   epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
                         --override bypasses the lane-full guard (max 1 per lane).
                         --skip-checklist bypasses the 5-question prompt.
+  epic list              List all tasks and epics (same as 'list')
   adr "<title>"         Create a new ADR
+  adr list               List all tasks and epics (same as 'list')
   list                  List all tasks and epics
   stats                 Show project statistics
   next-id               Display timestamp ID format example
@@ -185,9 +188,14 @@ async function main(): Promise<void> {
       break;
 
     case 'task': {
-      const TASK_VERBS = ['start', 'review', 'done', 'complete', 'suspend', 'resume', 'reject', 'terminate', 'archive', 'create'];
+      const TASK_VERBS = ['start', 'review', 'done', 'complete', 'suspend', 'resume', 'reject', 'terminate', 'archive', 'create', 'list'];
+      // List form: `task list` (alias for `list`)
+      if (arg === 'list') {
+        listAll(config);
+        break;
+      }
       // Subcommand form: `task <verb> <TASK-ID>` (state transition)
-      if (arg && TASK_VERBS.includes(arg) && arg !== 'create') {
+      if (arg && TASK_VERBS.includes(arg) && arg !== 'create' && arg !== 'list') {
         const taskId = requireDocId(restArgs[0], `task ${arg}`, 'TASK',
           arg === 'done' ? "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'." :
           arg === 'complete' ? "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed." :
@@ -231,9 +239,15 @@ async function main(): Promise<void> {
      epic done <EPIC-ID>     Move epic to done
      epic suspend <EPIC-ID>  Move epic to suspended
      epic resume <EPIC-ID>   Move suspended epic back to active
+     epic list               List all tasks and epics
 
    To list existing epics:    bunx @lythos/project-cortex list`);
         process.exit(1);
+      }
+      // List form: `epic list` (alias for `list`)
+      if (arg === 'list') {
+        listAll(config);
+        break;
       }
       // Subcommand form: `epic <verb> <EPIC-ID>`
       if (arg === 'done' || arg === 'suspend' || arg === 'resume') {
@@ -290,9 +304,15 @@ async function main(): Promise<void> {
      adr accept <ADR-ID>                       Move ADR to accepted
      adr reject <ADR-ID>                       Move ADR to rejected
      adr supersede <ADR-ID> [--by <new-id>]    Move ADR to superseded
+     adr list                                  List all tasks and epics
 
    To list existing ADRs:  bunx @lythos/project-cortex list`);
         process.exit(1);
+      }
+      // List form: `adr list` (alias for `list`)
+      if (arg === 'list') {
+        listAll(config);
+        break;
       }
       if (arg === 'accept' || arg === 'reject' || arg === 'supersede') {
         const adrId = requireDocId(restArgs[0], `adr ${arg}`, 'ADR');
