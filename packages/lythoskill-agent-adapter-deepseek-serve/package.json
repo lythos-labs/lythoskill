@@ -1,6 +1,6 @@
 {
   "name": "@lythos/agent-adapter-deepseek-serve",
-  "version": "0.17.10",
+  "version": "0.17.11",
   "type": "module",
   "scripts": {
     "test": "bun test src/ --pass-with-no-tests",
