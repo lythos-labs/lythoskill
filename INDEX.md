@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/7/31 12:18:05
+> 自动生成于 2026/8/27 09:51:41
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 335 | 进行中: 0, 待验收: 1, 已完成: 291 |
+| Tasks | 335 | 进行中: 0, 待验收: 0, 已完成: 292 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 92 | 已接受: 87 |
 
@@ -85,11 +85,11 @@ _无_
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260730140801284**: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
+_无_
 
-### 已完成 (291)
+### 已完成 (292)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -382,6 +382,7 @@ _无_
 - ✅ ~~TASK-20260717161516693~~: cptsd defensive text adaptation experiment via zk subagents
 - ✅ ~~TASK-20260719015727556~~: cptsd ab rerun with clean methodology and spiral scenario
 - ✅ ~~TASK-20260719015727610~~: deck cold pool probe hardening follow ups
+- ✅ ~~TASK-20260730140801284~~: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
 
 ### 悬置 (1)
 
