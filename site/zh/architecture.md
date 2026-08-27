@@ -97,9 +97,9 @@ Curator 不是搜尋引擎——它是你在技能生態系中的**個人知識�
 
 | 層級 | 問題 | 行動 |
 |------|------|------|
-| **L0** | 「這個技能的路徑是什麼？」 | `bunx @lythos/curator find <bare-name>` — 裸名到完整定位路徑 |
-| **L1** | 「我有哪些技能？」 | `bunx @lythos/curator scan` + `bunx @lythos/curator query "SELECT ..."` — 索引並探索你的冷池 |
-| **L2** | 「我在 GitHub 上找到東西了」 | `bunx @lythos/curator add <locator>` + re-scan + tag — 種入你的收藏 |
+| **L0** | 「這個技能的路徑是什麼？」 | `bunx @lythos/skill-curator find <bare-name>` — 裸名到完整定位路徑 |
+| **L1** | 「我有哪些技能？」 | `bunx @lythos/skill-curator <pool-path>`（掃描）+ `bunx @lythos/skill-curator query "SELECT ..."` — 索引並探索你的冷池 |
+| **L2** | 「我在 GitHub 上找到東西了」 | `bunx @lythos/skill-curator add <locator>` + re-scan + tag — 種入你的收藏 |
 | **L3** | 「我該採用嗎？」 | curator → arena 測試 → `curator tag --qa` → 有信心的推薦 |
 
 **三層信任模型：**
@@ -114,7 +114,7 @@ Curator 不是搜尋引擎——它是你在技能生態系中的**個人知識�
 
 - **不是探索引擎。** Curator 不包裝外部 API，也不實作 HTTP 適配器。Agent 使用 `gh search code`、WebSearch、WebFetch 進行探索。Curator 是讓探索更快的本機快取，以及記住所發現內容的豐富層。
 - **Agent 豐富的 metadata。** L3 資料（niche 標籤、QA 訊號）來自 `curator tag`，而非 SKILL.md frontmatter。技能作者寫 L1（描述）。策展者寫 L3（分類 + 驗證）。這些是分離的資料層。重新掃描會保留 agent 寫入的標籤。
-- **對帳式索引。** 一次 `bunx @lythos/curator scan` 將任何檔案系統狀態收斂到乾淨索引。重建前自動備份。`bunx @lythos/curator restore` 可回滾。
+- **對帳式索引。** 一次 `bunx @lythos/skill-curator <pool-path>` 掃描將任何檔案系統狀態收斂到乾淨索引。重建前自動備份。`bunx @lythos/skill-curator restore` 可回滾。
 - **資料飛輪。** 更多使用 → 更多 QA 資料 → 更好的 curator → 更好的推薦 → 更有針對性的測試 → 更多 QA 資料。Curator 的價值隨時間複利增長，而 deck/arena 提供的是穩態價值。
 - **QA 來源必須記錄。** 每個 QA 訊號都帶有 `source_type`、`source_name`、`signal_value`。無來源訊號會被拒收。事實查核使用多來源交叉比對，搭配結構化信心評級（HIGH / LOW / CONTRADICTED）。
 

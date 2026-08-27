@@ -99,9 +99,9 @@ Curator is NOT a search engine — it is your **personal knowledge base** for th
 
 | Level | Question | Action |
 |-------|----------|--------|
-| **L0** | "What's the path for this skill?" | `bunx @lythos/curator find <bare-name>` — bare name to full locator |
-| **L1** | "What do I have?" | `bunx @lythos/curator scan` + `bunx @lythos/curator query "SELECT ..."` — index and explore your cold pool |
-| **L2** | "I found something on GitHub" | `bunx @lythos/curator add <locator>` + re-scan + tag — seed your collection |
+| **L0** | "What's the path for this skill?" | `bunx @lythos/skill-curator find <bare-name>` — bare name to full locator |
+| **L1** | "What do I have?" | `bunx @lythos/skill-curator <pool-path>` (scan) + `bunx @lythos/skill-curator query "SELECT ..."` — index and explore your cold pool |
+| **L2** | "I found something on GitHub" | `bunx @lythos/skill-curator add <locator>` + re-scan + tag — seed your collection |
 | **L3** | "Should I adopt this?" | curator -> arena test -> `curator tag --qa` -> recommend with confidence |
 
 **Three-layer trust model:**
@@ -116,7 +116,7 @@ Curator is NOT a search engine — it is your **personal knowledge base** for th
 
 - **Not a discovery engine.** Curator does NOT wrap external APIs or implement HTTP adapters. The agent uses `gh search code`, WebSearch, and WebFetch for discovery. Curator is the local cache that makes discovery faster, and the enrichment layer that remembers what was found.
 - **Agent-enriched metadata.** L3 data (niche tags, QA signals) comes from `curator tag`, not from SKILL.md frontmatter. Skill authors write L1 (description). The curator writes L3 (classification + verification). These are separate data layers. Re-scan preserves agent-written tags.
-- **Reconciler-style indexing.** One `bunx @lythos/curator scan` converges any filesystem state to a clean index. Auto-backup before rebuild. `bunx @lythos/curator restore` to roll back.
+- **Reconciler-style indexing.** One `bunx @lythos/skill-curator <pool-path>` scan converges any filesystem state to a clean index. Auto-backup before rebuild. `bunx @lythos/skill-curator restore` to roll back.
 - **Data flywheel.** More usage -> more QA data -> better curator -> better recommendations -> more targeted testing -> even more QA data. Curator's value compounds over time while deck/arena deliver steady-state value.
 - **QA provenance required.** Every QA signal carries `source_type`, `source_name`, and `signal_value`. No-provenance signals are rejected. Fact-checking uses multi-source cross-referencing with structured confidence (HIGH / LOW / CONTRADICTED).
 

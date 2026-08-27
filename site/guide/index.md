@@ -8,7 +8,12 @@ This guide is self-contained — start here with nothing installed and follow ea
 
 Copy, paste, run. This single script sets up bun, creates the cold pool, and activates your first two skills.
 
+Run it in the project directory where your agent works (the deck and working set are per-project). One thing to know before you paste: `link` is **deny-by-default** — after step 4, your working set contains exactly what the deck declares, and anything already in `.claude/skills/` that is not in the deck is removed from the working set. Nothing is deleted from disk — undeclared skills are only unlinked, and adding them to the deck brings them back. If you have existing skills you want to keep, list them in the deck first (Level 1 shows how).
+
 ```bash
+# 0. Go to the project where your agent works
+cd /path/to/your-project
+
 # 1. Install bun (macOS / Linux / WSL)
 curl -fsSL https://bun.sh/install | bash
 
@@ -42,11 +47,9 @@ TOML
 bunx @lythos/skill-deck@latest link
 ```
 
-Your agent now sees exactly 2 skills. Everything else that was in your working set is gone — because it was not in the deck.
+Success looks like `Sync complete: 2 skill(s) linked` and two symlinks in `.claude/skills/` (`ls -la .claude/skills/`). Your agent now sees exactly those 2 skills — start a new agent session in this directory to pick them up. Everything else that was in your working set is unlinked, because it was not in the deck.
 
 **Prerequisite**: [bun](https://bun.sh) is the only runtime. If you prefer npm: `npx @lythos/skill-deck@latest link` works too, but `bunx` is faster.
-
-## Level 1: Understand Your Deck
 
 ## Level 1: Understand Your Deck
 
@@ -70,11 +73,11 @@ Your deck declares which skills are active (the **working set**). But where do t
 :::
 
 ```bash
-bunx @lythos/curator scan                     # Index your cold pool
-bunx @lythos/curator find "fact-check"        # Find skills by name or keyword
+bunx @lythos/skill-curator ~/.agents/skill-repos   # Index your cold pool (scan)
+bunx @lythos/skill-curator find "fact-check"       # Find skills by name or keyword
 ```
 
-Curator returns locator paths. Add to deck, run `bunx @lythos/skill-deck link`. Discovery → selection → reconciliation in one loop.
+Curator returns locator paths. Add to deck, run `bunx @lythos/skill-deck@latest link`. Discovery → selection → reconciliation in one loop.
 
 ## Level 3: Test Before You Trust
 
@@ -85,6 +88,8 @@ bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this au
 ```
 
 Arena spawns a zero-knowledge subagent with your task and your deck. You see the output — not the marketing copy.
+
+**Prerequisite**: arena needs at least one agent "player" to spawn. It auto-detects on first run: `kimi` CLI (`uv tool install kimi-cli`, then `kimi login`), `codex` CLI, or an `ANTHROPIC_API_KEY` for Claude. One is enough; each run uses that player's quota and takes minutes, not seconds.
 
 For A/B comparison:
 

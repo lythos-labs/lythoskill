@@ -8,7 +8,12 @@
 
 複製、貼上、執行。這一段腳本會安裝 bun、建立冷池、啟用你的前兩個技能。
 
+請在你的 agent 實際工作的專案目錄裡執行（牌組和工作集是 per-project 的）。貼上之前先知道一件事：`link` 是 **deny-by-default**——第 4 步之後，工作集裡只會剩下牌組宣告的內容，`.claude/skills/` 裡不在牌組中的東西會被移出工作集。磁碟上不會刪除任何東西——只是解除連結，加進牌組就能恢復。如果你有想保留的既有技能，先把它們列進牌組（第 1 級會教）。
+
 ```bash
+# 0. 進入你的 agent 工作的專案目錄
+cd /path/to/your-project
+
 # 1. 安裝 bun（macOS / Linux / WSL）
 curl -fsSL https://bun.sh/install | bash
 
@@ -42,7 +47,7 @@ TOML
 bunx @lythos/skill-deck@latest link
 ```
 
-你的 agent 現在只看見 2 個技能。工作集中其他所有東西都消失了——因為它們不在牌組裡。
+成功的樣子：輸出 `Sync complete: 2 skill(s) linked`，且 `.claude/skills/` 裡有兩個 symlink(`ls -la .claude/skills/` 確認）。你的 agent 現在只看見這 2 個技能——在此目錄開一個新的 agent 會話即可生效。工作集中其他東西都被解除連結，因為它們不在牌組裡。
 
 **前置條件**：[bun](https://bun.sh) 是唯一需要的執行環境。如果你偏好 npm：`npx @lythos/skill-deck@latest link` 也可以，但 `bunx` 更快。
 
@@ -68,11 +73,11 @@ bunx @lythos/skill-deck@latest link
 :::
 
 ```bash
-bunx @lythos/curator scan                     # 索引你的冷池
-bunx @lythos/curator find "fact-check"        # 按名稱或關鍵字搜尋技能
+bunx @lythos/skill-curator ~/.agents/skill-repos   # 索引你的冷池（掃描）
+bunx @lythos/skill-curator find "fact-check"       # 按名稱或關鍵字搜尋技能
 ```
 
-Curator 回傳 locator 路徑。加到牌組，執行 `bunx @lythos/skill-deck link`。探索 → 選擇 → 對帳，一個循環完成。
+Curator 回傳 locator 路徑。加到牌組，執行 `bunx @lythos/skill-deck@latest link`。探索 → 選擇 → 對帳，一個循環完成。
 
 ## 第 3 級：先測試再信任
 
@@ -83,6 +88,8 @@ bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this au
 ```
 
 Arena 生成一個零知識子代理，載入你的任務和你的牌組。你看到的是輸出——不是行銷文案。
+
+**前置條件**:arena 需要至少一個 agent「player」來生成子代理。首次執行會自動偵測：`kimi` CLI(`uv tool install kimi-cli` 後 `kimi login`)、`codex` CLI，或 Claude 的 `ANTHROPIC_API_KEY`。裝一個就夠；每次執行會消耗該 player 的額度，時間以分鐘計。
 
 A/B 比較：
 

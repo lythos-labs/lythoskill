@@ -68,7 +68,7 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-不是用 Claude Code？把 `working_set` 改成 `.agents/skills`(Codex 及 14+ 種 agent）或 `.cursor/skills`(Cursor)——只差這一行。也可以直接抓這個牌組檔案：[quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml)——它在 CI 裡有遠端驗證，本頁每個 locator 都有。
+不是用 Claude Code？把 `working_set` 改成 `.agents/skills`(Codex 及 14+ 種 agent）或 `.cursor/skills`(Cursor)——只差這一行。（一個注意事項：`link` 只對帳牌組裡指定的那個工作集；如果你把既有專案切到新的工作集，舊目錄會原樣留下——自己刪掉，或如果你同時用兩種 agent 就保留。）也可以直接抓這個牌組檔案：[quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml)——它在 CI 裡有遠端驗證，本頁每個 locator 都有。
 
 就這樣。複製、貼上、執行。`cold_pool` 欄位告訴系統你的技能放在哪裡——一個放 git clone repo 的目錄。`working_set` 欄位告訴系統你的 agent 去哪裡找。`bunx @lythos/skill-deck link` 把工作集對帳到與宣告完全吻合——未宣告的技能會被移除，已宣告的技能會被連結。這個檔案自我描述——不需要外部說明就能看懂它在做什麼。
 
@@ -95,7 +95,7 @@ Lythoskill 將它們分開：
 |------|------|------|
 | **Deck** | 哪些是 active？ | `bunx @lythos/skill-deck link` 對帳工作集 |
 | **Arena** | 它真的能用嗎？ | `bunx @lythos/skill-arena vs` 執行 A/B 測試並評分 |
-| **Curator** | 外面有什麼？ | `bunx @lythos/curator find` 查詢已索引的冷池 |
+| **Curator** | 外面有什麼？ | `bunx @lythos/skill-curator find` 查詢已索引的冷池 |
 
 [完整架構 ->](/zh/architecture)
 

@@ -49,7 +49,7 @@ Every collector hits the same organizational challenges. Here's what people do �
 
 ## A Gist for Your AI Toolkit
 
-试试看？ A deck (`skill-deck.toml`) is a single file that declares exactly which skills are active — portable, shareable, reproducible.
+Want to try? A deck (`skill-deck.toml`) is a single file that declares exactly which skills are active — portable, shareable, reproducible.
 
 ```bash
 cat > skill-deck.toml << 'EOF'
@@ -68,7 +68,7 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agents) or `.cursor/skills` (Cursor) — that one line is the only difference. You can also fetch this deck as a file: [quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml) — it is remote-validated in CI, and so is every locator on this page.
+Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agents) or `.cursor/skills` (Cursor) — that one line is the only difference. (One caveat: `link` reconciles the working set named in the deck; if you switch an existing project to a new working set, the old directory is left as-is — remove it yourself, or keep both if you run two agents.) You can also fetch this deck as a file: [quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml) — it is remote-validated in CI, and so is every locator on this page.
 
 That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `bunx @lythos/skill-deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 
@@ -95,7 +95,7 @@ Store everything          Select what's active         Only what's declared
 |--------|----------|------|
 | **Deck** | What's active? | `bunx @lythos/skill-deck link` reconciles working set |
 | **Arena** | Does it work? | `bunx @lythos/skill-arena vs` runs A/B tests with judge |
-| **Curator** | What's out there? | `bunx @lythos/curator find` — your personal index of discovered skills |
+| **Curator** | What's out there? | `bunx @lythos/skill-curator find` — your personal index of discovered skills |
 
 [Full architecture ->](/architecture)
 
@@ -131,7 +131,7 @@ We validate documentation the same way — **zero-knowledge (ZK) subagents** ver
 
 [Read the agent's handoff ->](https://rfdk364izj6ca.ok.kimi.link/)
 
-> "deny-by-default 和防火墙默认拒绝策略一样——安全来自最小权限" — Kimi agent, 2026-05-20
+> "Deny-by-default is like a firewall's default-deny policy — security comes from least privilege" — Kimi agent, 2026-05-20
 
 ## Start Here
 
