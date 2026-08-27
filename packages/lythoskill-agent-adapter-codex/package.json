@@ -1,6 +1,6 @@
 {
   "name": "@lythos/agent-adapter-codex",
-  "version": "0.17.9",
+  "version": "0.17.10",
   "type": "module",
   "scripts": {
     "test": "bun test src/ --pass-with-no-tests",

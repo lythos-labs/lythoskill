@@ -1,6 +1,6 @@
 {
   "name": "@lythos/cold-pool",
-  "version": "0.17.9",
+  "version": "0.17.10",
   "description": "Cold pool service layer — dedicated resource holder for skill repositories with intent/plan/execute primitives. Single owner of git side-effects; consumed by deck/curator/arena.",
   "keywords": [
     "ai-agent",
