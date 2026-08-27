@@ -60,6 +60,19 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 
 `packages/*/skill/SKILL.md` contains placeholders (`0.17.3`, `@lythos/skill-creator`, `lythoskill-creator`, `src/cli.ts`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
 
+## Release Order
+
+The canonical order is **test → bump → commit → publish → push → tag/release**. This order is intentional and was settled after prior incidents (see `daily/2026-07-31.md` Key Decisions):
+
+1. **Test** — `bun --filter='*' run test` and any BDD/reproduce gates.
+2. **Bump** — `bunx @lythos/skill-creator@<version> bump <patch|minor|major|X.Y.Z>`.
+3. **Commit** — `git commit -am "chore(release): vX.Y.Z"` (bump only; no tag yet).
+4. **Publish** — `./scripts/publish.sh` pushes packages to npm.
+5. **Push** — `git push origin main` sends the bump commit to GitHub.
+6. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
+
+Why npm before GitHub push? So external consumers can install the new CLI before the docs site (and README) point at it. Why tag/release after push? So the annotated tag points to a commit that already exists on origin.
+
 ## Commit Policy
 
 - `bump` produces an unstaged diff. Commit it with `chore(release): vX.Y.Z`.
@@ -86,6 +99,20 @@ The script is the single source of truth for what gets published. Packages not i
 ```
 
 The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order, and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
+
+`publish.sh` intentionally stops at npm. Git tags and GitHub Releases are handled by a separate script so that npm auth failures do not leave GitHub in a half-published state, and vice versa.
+
+## Sync Git tag + GitHub Release
+
+```bash
+./scripts/publish-github-release.sh
+```
+
+The script reads `.github-token`, creates an annotated tag `vX.Y.Z` from the current commit, pushes it to `origin`, and creates a GitHub Release marked as latest. Existing tags/releases are skipped instead of failing.
+
+Run this **after** `./scripts/publish.sh` succeeds, or standalone to publish a GitHub release for a version that is already on npm. Do not re-run `publish.sh` just to create a release; it will attempt to re-publish to npm.
+
+This keeps npm, Git tags, and GitHub Releases in lock-step.
 
 ## CI & Publish Gotchas
 
