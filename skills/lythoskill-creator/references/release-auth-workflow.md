@@ -60,7 +60,7 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 
 ## SKILL.md Source Files Are Templates
 
-`packages/*/skill/SKILL.md` contains placeholders (`0.17.3`, `@lythos/skill-creator`, `lythoskill-creator`, `src/cli.ts`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
+`packages/*/skill/SKILL.md` contains placeholders (`0.17.4`, `@lythos/skill-creator`, `lythoskill-creator`, `src/cli.ts`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
 
 ## Release Order
 
