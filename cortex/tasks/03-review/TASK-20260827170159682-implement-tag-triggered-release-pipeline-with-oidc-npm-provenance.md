@@ -114,6 +114,8 @@ Fill in:
 - **Publisher**: `lythos-labs`
 - **Repository**: `lythoskill`
 - **Workflow name**: `release.yml`
+- **Environment name**: leave blank / "No environment" (the current `release.yml` does not use a dedicated environment for npm publish).
+- **Allowed actions**: check both `npm publish` and `npm stage publish`.
 
 After all 13 are configured, the `release` workflow can publish packages via OIDC. Until then, unconfigured packages must use the `./scripts/publish.sh` fallback.
 

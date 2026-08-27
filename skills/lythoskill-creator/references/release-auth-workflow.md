@@ -122,6 +122,8 @@ Each `@lythos/*` package on npmjs.com must have a Trusted Publisher pointing to:
 - **Organization/User:** `lythos-labs`
 - **Repository:** `lythoskill`
 - **Workflow filename:** `release.yml`
+- **Environment name:** leave blank / "No environment" (the current `release.yml` does not use a dedicated environment for npm publish)
+- **Allowed actions:** check `npm publish` and `npm stage publish`
 
 Until this is configured for a package, that package cannot be published by the Actions pipeline and must use the legacy `./scripts/publish.sh` fallback.
 
