@@ -29,6 +29,7 @@ summary: |
 | `.husky/` | Guard cascade | Bugs affect every commit. | `arena single --deck examples/decks/qa-sweep.toml --brief "audit .husky changes"` |
 | `AGENTS.md` | Compaction amnesia | Most-changed doc. | Self-check: re-read top Release/Auth section after every context compaction |
 | Release pipeline | Lockfile drift | `bump` → `bun install` → commit → push → `publish.sh` | Never skip `bun install`; verify with `--frozen-lockfile` in CI |
+| `scripts/publish.sh` + `check-published-manifests.ts` | Manifest leak | 0.17.2 shipped 8 packages with unrewritten `workspace:*`; tripwire asks npm registry (not bunx cache), fails closed | Runs automatically as publish.sh last step; audit any old version: `bun scripts/check-published-manifests.ts <version>` |
 
 ## When Touching a Hot File
 

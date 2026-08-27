@@ -1,9 +1,9 @@
 ---
-last_consolidated: 2026-06-01
-sources: ["daily/2026-05-28.md", "daily/2026-06-01.md", "weekly/2026-W23.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
+last_consolidated: 2026-08-27
+sources: ["daily/2026-05-28.md", "daily/2026-06-01.md", "daily/2026-07-20.md", "daily/2026-07-27.md", "daily/2026-07-31.md", "weekly/2026-W23.md", "weekly/2026-W29.md", "weekly/2026-W31.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
 zk_validated: true
 zk_issues: 0
-zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure clean, concrete examples ground each pattern'"
+zk_validator: "ZK subagent agent-0 — 2026-08-27 — validated §4 update + §12-15; P1 (§14 timeline) + P2s fixed in place; earlier sections validated by ZK subagent ae891a5 (2026-05-28)"
 ---
 
 # Pitfalls — Recurring Failure Modes
@@ -57,6 +57,8 @@ zk_validator: "ZK subagent ae891a5 — 2026-05-28 — 'mostly clear, structure c
 **Root cause**: `deck validate` treated "not in cold pool" as hard error. Now (v0.15.4+) it's a warning with HATEOAS next-step suggestions.
 
 **Fix**: `bunx @lythos/curator add <locator>` or `git clone` into cold pool.
+
+**Update (2026-07)**: the worse variant was a cold-pool clone serving **month-old content** — onboarding was served 06-15 text while origin had the 07-10 fix; the clone also had a discarded hand-patch and sat on an unrelated branch. Doc routines didn't catch it in long sessions, so per ADR-20260717161516538 the drift signal was **mechanized into the tools**: `deck link` warns when the cold pool is behind origin / dirty / on the wrong branch, and `refresh --exec` self-heals a dirty cache. A week later (07-27, during probe-hardening TASK-20260719015727610) a second bug surfaced: `link.ts` didn't `await` the async-ified health check, so boot warnings were **silently dead** (TypeError swallowed by catch). Lesson stack: (1) mechanize, don't exhort; (2) a guard that fails silently is worse than no guard — verify guards fire with live replays; (3) both times a repaired guard caught real upstream drift within its first minute (day-one self-proof, twice: 07-19 wrong-cwd reconcile, 07-27 mattpocock/skills behind origin).
 
 ## 5. Post-Compaction Amnesia
 
@@ -187,3 +189,39 @@ The mirror image of evaluator surface-scan: **project agents defending existing 
 3. Distinguish "SSOT is the authority" from "SSOT is infallible" — the former is architecture, the latter is hubris
 
 **Prevention**: When another agent creates or bulk-updates SSOT, run a ZK subagent pass specifically checking factual claims against ground truth (git log, file system, actual CLI behavior). The agent that wrote the SSOT cannot be the one that validates it.
+
+## 12. Release Sessions That Don't Record Their Own Commands
+
+**Symptom**: A publish goes wrong months later and the root cause is unrecoverable — the daily for the release session only says "publish all packages," not how.
+
+**Root cause**: Release work feels mechanical, so the session log records the outcome, not the execution path. When 0.17.2 (2026-07-10) shipped 8 packages with unrewritten `workspace:*` manifests, no record existed of how that publish deviated from `publish.sh` (script bypassed? manual `npm publish` per package? E2E false-green via bunx cache?). The deviation is permanently unexplainable.
+
+**Fix**: Release-class sessions must record the actual commands executed in the daily. Reproducibility of the *process* is part of the release artifact, not just the version tag.
+
+**Prevention**: The tripwire `scripts/check-published-manifests.ts` (asks npm registry, not the bunx cache; fails CLOSED when a package is unverifiable) now runs as the last step of `publish.sh`, so a leaked manifest cannot ship silently again even if the process deviates. See AGENTS.md [LEAK] gotcha.
+
+## 13. Verifying a Guard Against the Thing It Guards
+
+**Symptom**: A leak-detector reports clean while the leak is real.
+
+**Root cause**: Two forms, both hit in the 0.17.2 incident: (1) **checking the local cache instead of the registry** — the bunx global cache on the publishing machine masks an unrewritten manifest, so E2E verification passes falsely; (2) **fail-open on missing data** — the first guard version treated "npm view returned nothing" (offline, typo'd name) as "clean." Also recurring: **pipes eat exit codes** — `bun guard.ts | tail -1` leaves `$?` as tail's; redirect the guard's output to a file, then check the guard's own exit code.
+
+**Fix**: Guards ask the external source of truth (npm registry), treat "cannot verify" as failure, and are live-verified with output redirected to files.
+
+## 14. Environment-Dependent Test Fixtures
+
+**Symptom**: Test is green locally, red in CI — same code, same fixture.
+
+**Root cause**: Fixture implicitly depends on the runner environment: git default branch (macOS = `main`, ubuntu CI = `master`), timezone, locale. Real case (2026-07-31): deck's R5 bare-repo fixture passed on macOS while main was red in CI from 07-27 to 07-31 — and the redness went unnoticed because CI verification had been blocked since 07-20 (11 days) by a `gh` 401.
+
+**Fix**: Pin every environment-sensitive parameter explicitly (`git init --bare -b main`). Never inherit defaults from the runner.
+
+**Related**: The `gh` 401's root cause was **keyring old token taking precedence over the `.github-token` file** — replacing the file token didn't help. When "I replaced the token but still get 401," suspect the read source first (`gh auth status`), not permissions. Workaround: prefix commands with `GH_TOKEN=$(<.github-token)`.
+
+## 15. API Quota 403 Masquerading as Session End
+
+**Symptom**: Session "ends" mid-work; the next session finds a dirty working tree with half-finished, uncommitted work (happened twice: 07-20, 07-27).
+
+**Root cause**: API quota exhaustion surfaces as a generic 403 that looks like a normal stop. Long experiment batches kept their state only in conversation memory.
+
+**Fix**: Long batch work checkpoints to disk per batch (raw outputs written incrementally, not at the end). Recovery anchors must exist outside the handoff — the handoff is written at session end, which is exactly what didn't happen.

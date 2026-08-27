@@ -1,5 +1,5 @@
 ---
-last_consolidated: 2026-06-01
+last_consolidated: 2026-08-27
 sources:
   - "weekly/2026-W17.md"
   - "weekly/2026-W18.md"
@@ -8,8 +8,16 @@ sources:
   - "weekly/2026-W21.md"
   - "weekly/2026-W22.md"
   - "weekly/2026-W23.md"
-  - "cortex/adr/02-accepted/ (82 ADR files on disk)"
+  - "weekly/2026-W28.md"
+  - "weekly/2026-W29.md"
+  - "weekly/2026-W30.md"
+  - "weekly/2026-W31.md"
+  - "daily/2026-07-31.md"
+  - "cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md"
+  - "cortex/adr/02-accepted/ (90 ADR files on disk)"
 zk_validated: true
+zk_issues: 0
+zk_validator: "ZK subagent agent-0 — 2026-08-27 — 8/10 readability; P1 (§14 timeline, in pitfalls.md) + P2s fixed in place"
 ---
 
 # Key Decisions -- Current State
@@ -26,6 +34,10 @@ Each entry: **ADR ID**, one-line decision, and current status.
 - `⚠️ superseded by ADR-xxx` -- overruled; see superseding ADR for current rule
 - **git-history only** -- these ADRs exist on disk and in git, but do NOT represent
   current architectural truth. They are listed in Superseded ADRs below.
+
+The `#` column is a global sequence assigned in consolidation order, NOT per-section
+position — new ADRs are appended to their topic section with the next global number,
+so a section may jump (e.g. 26 → 58). No rows were deleted.
 
 The canonical example of ADR lineage tracing is the Combo Evolution trace at the
 end of this document. If you encounter a decision chain that looks similar, apply
@@ -76,6 +88,12 @@ Deck governance, cortex GTD state machine, and session handoff.
 | 24 | ADR-20260503222838594 | Kanban pull mode with CFD observability for agent-driven task management. | ✅ holds |
 | 25 | ADR-20260519165746212 | Cortex `probe --suspicious` mode: actionable patterns only (drift, stale references, empty shells). | ✅ holds |
 | 26 | ADR-20260519153000000 | Scheduled weekly entropy reduction as governance hygiene. | ✅ holds |
+| 58 | ADR-20260607233903985 | Cortex CLI task command unified: create was bare `task "title"` while transitions used subcommands — inconsistency resolved. | ✅ holds |
+| 59 | ADR-20260613182316950 | Trailer semantics ratified: `Closes: TASK-xxx` = any-status → completed; `Review:` = dev-complete → review. Strict state machine. | ✅ holds |
+| 60 | ADR-20260615222023418 | Trailer dispatch unified to `kind verb id` CLI format (e.g. `Task:` → `review TASK-xxx`). | ✅ holds |
+| 61 | ADR-20260710111933808 | cortex/INDEX.md HATEOAS boundary: explicit is/is-not contract for derived-state curation — portal, not real-time status. | ✅ holds |
+| 62 | ADR-20260710172235956 | File-level Ground Truth removed from daily template; per-handoff "Verify Current State" section is the SSOT. | ✅ holds |
+| 63 | ADR-20260717161516538 | Mechanize boot routines, don't exhort (drift signals live in `deck link`/`refresh --exec`, not docs) + shed dead defensive text no longer needed by current-model agents ("K3 era"). Basis of the AGENTS.md v3 molt (806→418 lines); shed verdicts later proven by a 30-subject A/B rerun (cortex/wiki/03-lessons/2026-07-27: vocabulary redundancy ≠ behavior necessity). | ✅ holds |
 
 ---
 
@@ -100,6 +118,7 @@ Cold pool, curator, skill types, locator resolution, and the filesystem-native d
 | 39 | ADR-20260507110332831 | Validate-companion pattern: every agent-produced state summary ships with a paired one-click reality-check command. | ✅ holds |
 | 40 | ADR-20260519144445916 | `working_set` must NOT alias build output directory `skills/`. The May 17 rename (`working_set` → `skills`) was reverted May 19 because `deck link` overwrote committed build output with symlinks. | ✅ holds |
 | 41 | ADR-20260519144500000 | Remove `LYTHOS_COLD_POOL` env var. Superseded by deck.toml as the canonical cold-pool locator. | ✅ holds |
+| 64 | ADR-20260616000939948 | skill-deck.lock split: declarative lock separated from operational state snapshot. | ✅ holds (ADR-level) |
 
 ---
 
@@ -138,6 +157,7 @@ Versioning, publishing, guard modules, and testing conventions.
 
 Key non-ADR decisions in this domain:
 - **Publish-time workspace:* rewrite**: Source stays `workspace:*` for local dev ergonomics. `publish.sh` rewrites to `^version` before `npm publish`, then `git checkout` restores. Pre-commit rejects `^x.y.z` on internal deps in source. Only correct resolution for dual-audience (local dev + npm consumer) tension.
+- **Published-manifest tripwire** (2026-07-31, after the 0.17.2 leak): `scripts/check-published-manifests.ts` runs as the last step of `publish.sh` — asks the npm registry (never the bunx cache) and fails CLOSED when a package is unverifiable. 0.17.2 shipped 8 packages with unrewritten `workspace:*`; 0.17.3 republished clean. See pitfalls.md §12-13 and AGENTS.md [LEAK].
 
 ---
 
