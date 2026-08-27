@@ -83,7 +83,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/mattpocock/skills/skills/engineering/tdd",
-      "content_hash": "5363bb2775679fe9311fbb67947f95359169c6e7f1fac77c0f25e190bca6cf2f"
+      "content_hash": "cb01f66bebfaa25fa1f88e6b7e769cd9fd9f35b1120b8563749820738814c927"
     },
     {
       "name": "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs",
@@ -91,7 +91,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/mattpocock/skills/skills/engineering/diagnosing-bugs",
-      "content_hash": "7a0779480f323a66d109404646bcc1a14bf0232b45b3e3ea93b652a035718acb"
+      "content_hash": "77f3cf31bc99b2f49af943222526531fcc9fc41d047626d3640e875e85af3e84"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",

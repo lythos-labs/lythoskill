@@ -143,3 +143,33 @@ Before finalizing any doc edit:
 - [ ] Paragraph lengths vary (not all 3-5 sentences).
 - [ ] Doc can end without a summary paragraph.
 - [ ] Every analogy is in a secondary section, not the opening.
+
+## External Article Publication Gate
+
+Anything published for external readers (site pages, blog articles, quick starts) must
+pass ALL of these gates before it ships. Self-review is not a gate — the writer cannot
+validate their own work (knowledge curse).
+
+1. **Writer-criteria pass** — the checklist above, applied by someone other than the drafter.
+2. **Fact-check against the repo** — every path, command, ADR/TASK ID, and quoted string
+   verified with Glob/Grep/ls. Trim claims that can't be verified cheaply; never invent.
+3. **VitePress safety scan** — every `.md` under `site/` is parsed as a Vue SFC. Strip
+   fenced blocks and inline code, then grep for raw `<[a-zA-Z]`: must be zero hits.
+   (Unescaped `<...>` broke the production build for 7 weeks in 2026-07.)
+4. **Redundancy check across the section** — a new article must carry only its unique
+   delta plus a cross-link to the canonical piece. ~70% overlap between siblings is an
+   editorial failure, not thoroughness (ZK reader verdict, 2026-08-27).
+5. **ZK readability pass** — spawn a fresh subagent with NO project context; pass file
+   paths, never pasted content. It self-reports understanding, contradictions, and
+   severity-tagged findings. Treat findings as sensors: verify P1s yourself, then fix
+   or register follow-ups. Iterate until no open P1/P2.
+6. **Trial run for actionable content** — if the piece contains steps the reader is
+   meant to execute (install, configure, run), a ZK agent must actually EXECUTE them in
+   a clean environment and confirm it ends up working. Narrative/opinion pieces are
+   exempt from execution but not from gates 1-5; any command shown must still be
+   copy-pasteable as written.
+
+Real case: `site/articles/` (2026-08-27) — first ZK pass rated the section 4/10
+(five near-identical articles, precision bugs); restructure to canonical + companions,
+second pass 6/10, residual P1/P2 fixed in place. The gate's value is the loop, not
+the first draft.
