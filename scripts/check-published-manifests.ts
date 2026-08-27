@@ -55,11 +55,30 @@ export function productionView(): (pkgName: string, version?: string) => string 
     // Consumer-visible sections only (matches the rewriter's scope):
     // deps/optional/peer are what bunx/npm install resolves. devDeps of a
     // published package are never installed by consumers.
-    return execFileSync(
-      'npm',
-      ['view', spec, 'dependencies', 'optionalDependencies', 'peerDependencies'],
-      { encoding: 'utf-8', timeout: 30000 },
-    )
+    //
+    // Retry with backoff: npm view can 404 for a few seconds after a fresh
+    // publish because registry replicas need time to converge. Fail-closed
+    // still applies — if all retries fail, the caller treats it as unverifiable.
+    const maxAttempts = 5
+    const baseDelayMs = 1000
+    let lastError: unknown
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return execFileSync(
+          'npm',
+          ['view', spec, 'dependencies', 'optionalDependencies', 'peerDependencies'],
+          { encoding: 'utf-8', timeout: 30000 },
+        )
+      } catch (e) {
+        lastError = e
+        if (attempt < maxAttempts) {
+          const delay = baseDelayMs * attempt
+          console.log(`   ⏳ ${spec}: npm view attempt ${attempt}/${maxAttempts} failed, retrying in ${delay}ms...`)
+          Bun.sleepSync(delay)
+        }
+      }
+    }
+    throw lastError
   }
 }
 

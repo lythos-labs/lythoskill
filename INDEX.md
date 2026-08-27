@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/27 23:48:08
+> 自动生成于 2026/8/28 00:00:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 344 | 进行中: 0, 待验收: 0, 已完成: 296 |
+| Tasks | 345 | 进行中: 0, 待验收: 0, 已完成: 297 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 96 | 已接受: 90 |
 
@@ -90,7 +90,7 @@ _无_
 
 _无_
 
-### 已完成 (296)
+### 已完成 (297)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -388,6 +388,7 @@ _无_
 - ✅ ~~TASK-20260827150725011~~: Provision GitHub token with release-write access for lythoskill releases
 - ✅ ~~TASK-20260827170159682~~: Implement tag-triggered release pipeline with OIDC npm provenance
 - ✅ ~~TASK-20260827234446584~~: Add cortex task list subcommand to prevent accidental task creation
+- ✅ ~~TASK-20260827235943331~~: Add retry to check-published-manifests.ts to avoid npm registry race condition
 
 ### 悬置 (3)
 
