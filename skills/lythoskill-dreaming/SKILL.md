@@ -1,6 +1,6 @@
 ---
 name: lythoskill-dreaming
-version: 0.17.3
+version: 0.17.9
 description: |
   夜有所梦 — project memory consolidation. Daily (scribe) captures raw
   experience, weekly extracts patterns and anomalies, dreaming consolidates
