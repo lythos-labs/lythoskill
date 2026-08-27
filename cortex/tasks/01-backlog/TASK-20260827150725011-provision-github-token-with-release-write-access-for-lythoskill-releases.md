@@ -37,9 +37,10 @@ Two token strategies:
    - Resource owner: `lythos-labs`
    - Repository access: `lythos-labs/lythoskill` only
    - Repository permissions:
-     - **Contents**: Read and Write (required to create releases and read repo metadata)
-     - **Actions**: Read (to list/check workflow runs via `gh run list`)
-     - **Metadata**: Read (automatic, required for API access)
+     - **Contents**: Read and Write — **mandatory** for `POST /repos/{owner}/{repo}/releases` ([GitHub REST docs](https://docs.github.com/en/rest/releases/releases#create-a-release)).
+     - **Actions**: Read — needed for `gh run list` (checking CI / Pages deploy workflow), not for release creation itself.
+     - **Metadata**: Read — automatic, required for API access.
+     - **Workflows**: Write — only needed if the release target commit adds/modifies files under `.github/workflows/`; for normal releases, Contents write is sufficient.
    - No other permissions needed for the current workflow.
 
 After updating `.github-token`:
