@@ -45,6 +45,7 @@ const config = {
           { text: 'Architecture', link: '/architecture' },
           { text: 'Ecosystem', link: '/ecosystem' },
           { text: 'Philosophy', link: '/philosophy' },
+          { text: 'Articles', link: '/articles/' },
           { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
 
@@ -76,6 +77,7 @@ const config = {
           { text: '架構', link: '/zh/architecture' },
           { text: '生態', link: '/zh/ecosystem' },
           { text: '哲學', link: '/zh/philosophy' },
+          { text: '文章 (EN)', link: '/articles/' },
           { text: 'GitHub', link: 'https://github.com/lythos-labs/lythoskill' },
         ],
 
