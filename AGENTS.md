@@ -6,7 +6,7 @@
 
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
 > Auth (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**.
-> Versions move via `bunx @lythos/skill-creator@0.17.6 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
+> Versions move via `bunx @lythos/skill-creator@0.17.7 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
 > Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
 > **🚀 Bootstrap check**: If `.claude/skills/` is empty, run `bun packages/lythoskill-deck/src/cli.ts link` to populate the working set. Deck reconciles the working set against `skill-deck.toml` — symlinks from the cold pool (`~/.agents/skill-repos/`, where `deck add` clones repos) into `.claude/skills/`.
@@ -232,7 +232,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 
 `link` syncs working set from cold pool (local). `refresh` discovers upstream updates (plan-only); `refresh --exec` pulls them into the cold pool — then `link` again. Agent reads the working set, not your source edits: edit source without build + link = agent sees stale skill. Pre-commit auto-builds staged skill changes; **manual edits without commit need manual build + link**. `deck link` also warns when the cold pool is behind origin, dirty, or on the wrong branch (best-effort, never blocks boot); `refresh --exec` self-heals a dirty cache and fails loudly (non-zero exit + trailing ⚠️ summary).
 
-**Release cycle**: `bunx @lythos/skill-creator@0.17.6 bump` → `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) triggers on `v*` tags, runs tests, publishes all packages to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages. During the transition, if a package lacks an npm Trusted Publisher, fall back to `./scripts/publish.sh` → `./scripts/publish-github-release.sh`. After release: `deck refresh --exec` → `deck link`.
+**Release cycle**: `bunx @lythos/skill-creator@0.17.7 bump` → `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) triggers on `v*` tags, runs tests, publishes all packages to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages. During the transition, if a package lacks an npm Trusted Publisher, fall back to `./scripts/publish.sh` → `./scripts/publish-github-release.sh`. After release: `deck refresh --exec` → `deck link`.
 
 #### Key Commands
 
@@ -244,7 +244,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 | Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` (shorthand: `cortex task`) |
 | ZK Review a task | Spawn ZK agent, WHAT/WHY/HOW on task card + AGENTS.md (pass paths) |
 | Arena quick run | `bun packages/lythoskill-arena/src/cli.ts single --deck <path> --brief "prompt"` (shorthand: `arena single`) |
-| Release | `bunx @lythos/skill-creator@0.17.6 bump` → `git push --follow-tags` → watch Actions (`gh run watch`) |
+| Release | `bunx @lythos/skill-creator@0.17.7 bump` → `git push --follow-tags` → watch Actions (`gh run watch`) |
 
 **Shorthand**: `deck link`, `arena single`, `cortex probe` resolve to `bun packages/<name>/src/cli.ts <cmd>` (in-repo) or `bunx @lythos/<name> <cmd>` (external). Full table: `skills/lythoskill-project-cortex/references/COMMANDS.md`.
 
@@ -376,7 +376,7 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 **Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is a legacy fallback for `gh` CLI; preferred storage is macOS Keychain (`security find-generic-password -s 'lythos-agent-pat' -w`) or Linux `secret-tool`. `.npm-access` is for the legacy `publish.sh` fallback only; the new Actions pipeline uses OIDC and stores no npm token.
 
-**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.6 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) handles npm publish, GitHub Release, and Pages deploy.
+**Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.7 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow (`.github/workflows/release.yml`) handles npm publish, GitHub Release, and Pages deploy.
 
 **New package → add to `scripts/publish.sh`** PACKAGES array before first release (skill-only packages exempt). The workflow extracts the same list, so `publish.sh` remains the SSOT.
 
