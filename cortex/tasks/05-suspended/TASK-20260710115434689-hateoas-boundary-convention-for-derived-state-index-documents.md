@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-07-10 | Created |
+| in-progress | 2026-08-27 | Started |
+| suspended | 2026-08-27 | Blocked |
 
 ## Background & Goals
 

@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/8/27 17:14:19
+> 自动生成于 2026/8/27 17:35:53
 
 ## 📊 概览
 
@@ -76,10 +76,8 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (3)
 
-- [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
-- [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 - [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
@@ -389,9 +387,11 @@ _无_
 - ✅ ~~TASK-20260827141405220~~: Fix version synchronization: npm, GitHub tags/releases, and site display
 - ✅ ~~TASK-20260827150725011~~: Provision GitHub token with release-write access for lythoskill releases
 
-### 悬置 (1)
+### 悬置 (3)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
+- ⏸️ **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
+- ⏸️ **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
 ### 终止 (41)
 
