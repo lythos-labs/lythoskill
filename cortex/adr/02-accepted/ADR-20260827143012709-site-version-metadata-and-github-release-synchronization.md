@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-08-27 | Created |
+| accepted | 2026-08-27 | Accepted |
 
 ## Background
 

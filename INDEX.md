@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/8/27 09:51:41
+> 自动生成于 2026/8/27 14:37:16
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 335 | 进行中: 0, 待验收: 0, 已完成: 292 |
+| Tasks | 339 | 进行中: 0, 待验收: 0, 已完成: 292 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 92 | 已接受: 87 |
+| ADRs | 93 | 已接受: 88 |
 
 ---
 
@@ -76,10 +76,14 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (6)
 
 - [ ] **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - [ ] **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
+- [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
+- [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
+- [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
+- [ ] **TASK-20260827141405220**: Fix version synchronization: npm, GitHub tags/releases, and site display
 
 ### 进行中 (0)
 
@@ -526,6 +530,7 @@ _无_
 - ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation
 - ✅ **ADR-20260710172235956** (02-accepted): Remove file-level Ground Truth from daily template — per-handoff Verify Current State is SSOT
 - ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
+- ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
 
 ---
 
