@@ -22,7 +22,7 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 |------|------|------|
 | `.git/config` (origin URL) | Git push/fetch | Origin uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
-| `.github-token` (project root, gitignored) | `gh` CLI auth only | Use as `gh auth login --with-token < .github-token`. **Never embed in a git URL or `.git/config`.** |
+| `.github-token` (project root, gitignored) | `gh` CLI auth fallback | Legacy fallback. Preferred storage is macOS Keychain (`security`) or Linux `secret-tool`. **Never embed in a git URL or `.git/config`.** |
 | `.npm-access` (project root, gitignored) | npm publish token | Read by `scripts/publish.sh`. **Never run `npm login`** or prompt the user to log in — fix the token file instead. |
 
 If anything auth-related looks "broken", do not improvise a fix. Ask.
@@ -108,7 +108,26 @@ The script reads `.npm-access`, configures the npm registry, runs `npm whoami` t
 ./scripts/publish-github-release.sh
 ```
 
-The script reads `.github-token`, creates an annotated tag `vX.Y.Z` from the current commit, pushes it to `origin`, and creates a GitHub Release marked as latest. Existing tags/releases are skipped instead of failing.
+The script creates an annotated tag `vX.Y.Z` from the current commit, pushes it to `origin`, and creates a GitHub Release marked as latest. Existing tags/releases are skipped instead of failing.
+
+### Token storage
+
+The script looks for the GitHub PAT in this order:
+
+1. `GH_TOKEN` environment variable.
+2. macOS Keychain: `security find-generic-password -s 'lythos-agent-pat' -w`
+3. Linux secret-tool: `secret-tool lookup org lythos-labs scope agent`
+4. Legacy file: `.github-token` in the repo root.
+
+Recommended: store the token in the system keychain so it never sits in the filesystem:
+
+```bash
+# macOS
+security add-generic-password -s "lythos-agent-pat" -a "$USER" -w
+
+# Linux
+secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
+```
 
 Run this **after** `./scripts/publish.sh` succeeds, or standalone to publish a GitHub release for a version that is already on npm. Do not re-run `publish.sh` just to create a release; it will attempt to re-publish to npm.
 
