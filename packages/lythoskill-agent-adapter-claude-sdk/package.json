@@ -24,5 +24,10 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.131",
     "@lythos/agent-adapter": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-agent-adapter-claude-sdk"
   }
 }

@@ -23,5 +23,10 @@
   ],
   "dependencies": {
     "@lythos/agent-adapter": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-agent-adapter-deepseek-serve"
   }
 }

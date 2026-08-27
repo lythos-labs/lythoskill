@@ -38,5 +38,10 @@
     "@lythos/agent-adapter": "workspace:*",
     "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-test-utils"
   }
 }

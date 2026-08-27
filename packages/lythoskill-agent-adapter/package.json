@@ -24,5 +24,10 @@
     "test": "bun test src/ --pass-with-no-tests",
     "test:coverage": "bun test src/ --coverage --coverage-reporter=lcov --coverage-dir=coverage --pass-with-no-tests",
     "test:watch": "bun test src/ --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-agent-adapter"
   }
 }
