@@ -372,7 +372,7 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 ### 9. Release & Auth (Compaction-Safe)
 
-**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is for `gh` CLI only. `.npm-access` is for `publish.sh` only.
+**Do not modify auth state.** `.git/config` uses SSH alias `calt13.github.com` (host alias in `~/.ssh/config` — do not change). `~/.ssh/` off-limits. `.github-token` is a legacy fallback for `gh` CLI; preferred storage is macOS Keychain (`security find-generic-password -s 'lythos-agent-pat' -w`) or Linux `secret-tool`. `.npm-access` is for `publish.sh` only.
 
 **Lock-step versioning**: all packages + root share one version. Bump via `bunx @lythos/skill-creator@0.17.3 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → push → `./scripts/publish.sh` → `./scripts/publish-github-release.sh`.
 

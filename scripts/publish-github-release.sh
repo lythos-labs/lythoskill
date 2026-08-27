@@ -8,12 +8,13 @@ set -euo pipefail
 #   2. The release tag points to a commit that exists on origin.
 #
 # Keeps GitHub tags/releases in lock-step with npm.
-# Requires `.github-token` (gitignored) for the gh CLI.
+# Reads GH_TOKEN from (in order): env var, macOS keychain, Linux secret-tool, .github-token file.
 # Safe to re-run: skips existing tags/releases instead of failing.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TOKEN_FILE="$ROOT_DIR/.github-token"
+KEYCHAIN_SERVICE="lythos-agent-pat"
 
 ROOT_VERSION=$(node -p "require('$ROOT_DIR/package.json').version")
 TAG="v$ROOT_VERSION"
@@ -47,12 +48,55 @@ else
   echo "   ✅ Pushed tag $TAG"
 fi
 
-# Create GitHub Release
+# Resolve GitHub token (env var > macOS keychain > Linux secret-tool > .github-token file)
+resolve_token() {
+  if [ -n "${GH_TOKEN:-}" ]; then
+    echo "$GH_TOKEN"
+    return 0
+  fi
+
+  if command -v security >/dev/null 2>&1; then
+    local token
+    token=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -w 2>/dev/null || echo "")
+    if [ -n "$token" ]; then
+      echo "$token"
+      return 0
+    fi
+  fi
+
+  if command -v secret-tool >/dev/null 2>&1; then
+    local token
+    token=$(secret-tool lookup org lythos-labs scope agent 2>/dev/null || echo "")
+    if [ -n "$token" ]; then
+      echo "$token"
+      return 0
+    fi
+  fi
+
+  if [ -f "$TOKEN_FILE" ]; then
+    cat "$TOKEN_FILE" 2>/dev/null || echo ""
+    return 0
+  fi
+
+  echo ""
+}
+
 export GH_TOKEN
-GH_TOKEN=$(cat "$TOKEN_FILE" 2>/dev/null || echo "")
+GH_TOKEN=$(resolve_token)
 if [ -z "$GH_TOKEN" ]; then
-  echo "❌ Token file not found or empty: $TOKEN_FILE"
-  echo "   Place your GitHub personal access token in this file (gitignored)."
+  echo "❌ GitHub token not found."
+  echo ""
+  echo "   Store it in one of the following ways:"
+  echo ""
+  echo "   macOS Keychain (recommended):"
+  echo "     security add-generic-password -s '$KEYCHAIN_SERVICE' -a '\$USER' -w"
+  echo ""
+  echo "   Linux secret-tool:"
+  echo "     secret-tool store --label='lythos-labs agent PAT' org lythos-labs scope agent"
+  echo ""
+  echo "   Legacy file (gitignored, less secure):"
+  echo "     echo 'github_pat_xxx' > $TOKEN_FILE"
+  echo ""
   exit 1
 fi
 

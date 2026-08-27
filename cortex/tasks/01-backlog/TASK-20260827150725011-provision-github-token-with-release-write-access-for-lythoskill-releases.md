@@ -43,17 +43,31 @@ Two token strategies:
      - **Workflows**: Write — only needed if the release target commit adds/modifies files under `.github/workflows/`; for normal releases, Contents write is sufficient.
    - No other permissions needed for the current workflow.
 
-After updating `.github-token`:
+### Token storage
+
+Store the PAT in the system keychain rather than the `.github-token` file:
+
+```bash
+# macOS
+security add-generic-password -s "lythos-agent-pat" -a "$USER" -w
+
+# Linux
+secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
+```
+
+`scripts/publish-github-release.sh` reads the token in this order: `GH_TOKEN` env → macOS Keychain → Linux secret-tool → `.github-token` fallback.
+
+### Verification
 
 ```bash
 # Verify auth
-GH_TOKEN=$(<.github-token) gh auth status
+GH_TOKEN=$(security find-generic-password -s 'lythos-agent-pat' -w 2>/dev/null) gh auth status
 
 # Re-run release creation for v0.17.3
 ./scripts/publish-github-release.sh 371af8fe
 
 # Verify
-GH_TOKEN=$(<.github-token) gh release list --repo lythos-labs/lythoskill --limit 5
+GH_TOKEN=$(security find-generic-password -s 'lythos-agent-pat' -w 2>/dev/null) gh release list --repo lythos-labs/lythoskill --limit 5
 ```
 
 ## Acceptance Criteria
