@@ -27,10 +27,10 @@ Leak map (verified via `npm view <pkg>@0.17.2 dependencies`, 2026-07-30):
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Republish all packages with rewritten manifests as a patch release (0.17.3) via the official flow: `bunx @lythos/skill-creator bump` → `bun install` → commit → push → `./scripts/publish.sh`. **Requires explicit user release intent** — never bump unprompted.
-- [ ] R2 (必达) Post-publish verification from a CLEAN environment (not the publishing machine — bunx cache can mask leaks): `npm view @lythos/skill-deck@0.17.3 dependencies` shows no `workspace:`; ideally a clean-vm/container `bunx @lythos/skill-deck@0.17.3 link --help`.
-- [ ] R3 (必达) Regression guard so a leaked manifest can never ship silently again: a script (e.g. `scripts/check-published-manifests.ts`) that asserts zero `workspace:` in `npm view` deps for every published @lythos package; wire it into the release submit checklist (AGENTS.md) and/or CI.
-- [ ] R4 (可选) Root-cause note: record in this card why publish.sh's E2E gate didn't catch 0.17.2 (bunx cache hypothesis vs script bypass) if recoverable; if not, say so.
+- [x] R1 (必达) Republish all packages with rewritten manifests as a patch release (0.17.3) via the official flow: `bunx @lythos/skill-creator bump` → `bun install` → commit → push → `./scripts/publish.sh`. **Requires explicit user release intent** — never bump unprompted.
+- [x] R2 (必达) Post-publish verification from a CLEAN environment (not the publishing machine — bunx cache can mask leaks): `npm view @lythos/skill-deck@0.17.3 dependencies` shows no `workspace:`; ideally a clean-vm/container `bunx @lythos/skill-deck@0.17.3 link --help`.
+- [x] R3 (必达) Regression guard so a leaked manifest can never ship silently again: a script (e.g. `scripts/check-published-manifests.ts`) that asserts zero `workspace:` in `npm view` deps for every published @lythos package; wire it into the release submit checklist (AGENTS.md) and/or CI.
+- [x] R4 (可选) Root-cause note: record in this card why publish.sh's E2E gate didn't catch 0.17.2 (bunx cache hypothesis vs script bypass) if recoverable; if not, say so.
 - **不做**: no unpublish attempts (>72h window long past); no `npm deprecate` unless user asks; no changes to the rewrite script itself unless a defect is found (none found 2026-07-30).
 
 ## Technical Approach
