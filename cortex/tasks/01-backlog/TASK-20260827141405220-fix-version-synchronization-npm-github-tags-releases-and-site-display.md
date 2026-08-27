@@ -49,10 +49,23 @@
 - 2026-08-27 — Implemented site version metadata injection: `site/scripts/inject-version.ts`, `site/.vitepress/config.ts` footer (EN + ZH), `site/package.json` build script, CI workflows updated.
 - 2026-08-27 — Created dedicated GitHub release script `scripts/publish-github-release.sh` (separate from npm `publish.sh` per user feedback).
 - 2026-08-27 — Updated release SOP `packages/lythoskill-creator/skill/references/release-auth-workflow.md` with canonical order: test → bump → commit → publish → push → tag/release, citing `daily/2026-07-31.md` historical decision.
+- 2026-08-27 — Made footer more prominent (`lythoskill vX.Y.Z` in bold) and added ADR-20260827143012709 documenting the decision (proposed → accepted).
+- 2026-08-27 — Pushed to origin; Pages deploy run `33046630451` succeeded; verified live site shows `lythoskill v0.17.3 · b9b707c · Last updated: 2026-08-27`.
 
 ## Related Files
 - Modified:
+  - `site/.vitepress/config.ts`
+  - `site/package.json`
+  - `site/scripts/inject-version.ts`
+  - `.github/workflows/test.yml`
+  - `.github/workflows/deploy-pages.yml`
+  - `.gitignore`
+  - `scripts/publish-github-release.sh`
+  - `packages/lythoskill-creator/skill/references/release-auth-workflow.md`
+  - `AGENTS.md`
+  - `INDEX.md`
 - Added:
+  - `cortex/adr/02-accepted/ADR-20260827143012709-site-version-metadata-and-github-release-synchronization.md`
 
 ## Git Commit Message
 ```
