@@ -1,0 +1,57 @@
+# TASK-20260828004417068: research deepseek-harness plugin integration with lythoskill governance
+
+## Status History
+<!-- machine-parseable table: directory = current status, last row = latest record -->
+
+| Status | Date | Note |
+|--------|------|------|
+| backlog | 2026-08-27 | Created |
+
+## Background & Goals
+<!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
+
+User inbox item (2026-08-28): DeepSeek Harness (`dsh`, official plugin-kernel harness, 2026-08; web UI + headless, TUI via community plugins like dsh-TUI) is plugin-shaped, which makes it a natural research target for a **bidirectional** integration:
+
+1. **lythoskill → dsh**: our cross-session memory / project governance tooling (cortex tasks/ADRs, daily/weekly scribe, dreaming SSOT consolidation) as dsh plugins — dsh has sessions/events/plugins but no governance layer.
+2. **dsh → lythoskill**: dsh as a consumer of our skill governance — its plugin ecosystem (`dsh plugin add github:...`) is exactly the "frictionless install, no governance" pattern lythoskill exists to govern; also evaluate dsh as an arena player (see ADR-20260828004129233).
+
+This is research-level: produce findings and a recommendation, no implementation.
+
+## Requirements
+<!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
+- [ ] Survey dsh's plugin architecture (Cordis plugin rows, `cordis.patch.yml` bundles, `ctx.agents` / session-event APIs) — what can a plugin actually hook?
+- [ ] Map lythoskill capabilities onto dsh extension points: which of cortex/scribe/dreaming/deck could be a dsh plugin, and what would the integration surface be?
+- [ ] Assess the reverse direction: does dsh's plugin distribution create a governance need lythoskill-deck could serve? Is dsh viable as an arena player (headless mode)?
+- [ ] Write findings to `cortex/wiki/02-research/2026-MM-DD-deepseek-harness-integration-survey.md` with a clear recommendation (integrate / adapter-only / watch-and-wait)
+
+## Technical Approach
+<!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
+
+- Dispatch the deep-research deck (`arena single --deck examples/decks/deep-research.toml`) per deck-first dispatch rule.
+- Sources: dsh official docs/repo, plugin marketplaces, community TUI plugin repos (dsh-TUI, dsh-tianshu-tui) as concrete plugin API evidence.
+- Feed results into ADR-20260828004129233 (adapter lifecycle) — a dsh player adapter decision depends on this survey.
+
+## Acceptance Criteria
+<!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
+- [ ] Research doc exists in cortex/wiki/02-research/ with the three mapping questions answered and cited sources
+- [ ] Recommendation states one of: integrate / adapter-only / watch-and-wait, with reasoning
+- [ ] If adapter recommended: follow-up task registered referencing ADR-20260828004129233
+
+## Progress Log
+<!-- Update during execution, with timestamps -->
+
+- 2026-08-28: Registered from user inbox item. Blocked on nothing; research-only scope.
+
+## Related Files
+- Modified:
+- Added:
+
+## Git Commit Message
+```
+feat(scope): description (TASK-20260828004417068)
+
+- Detail 1
+- Detail 2
+```
+
+## Notes

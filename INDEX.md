@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/8/28 00:00:25
+> 自动生成于 2026/8/28 01:36:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 345 | 进行中: 0, 待验收: 0, 已完成: 297 |
+| Tasks | 349 | 进行中: 0, 待验收: 1, 已完成: 297 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 96 | 已接受: 90 |
+| ADRs | 99 | 已接受: 90 |
 
 ---
 
@@ -76,19 +76,22 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (3)
+### 待办 (6)
 
 - [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
+- [ ] **TASK-20260828003758156**: mechanize site command and count verification guard
+- [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
+- [ ] **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260828002450069**: site UX and narrative alignment review
 
 ### 已完成 (297)
 
@@ -540,6 +543,9 @@ _无_
 - ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
 - 🤔 **ADR-20260827155909657** (01-proposed): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
 - ✅ **ADR-20260827165402810** (02-accepted): Tag-triggered release pipeline with OIDC npm provenance
+- 🤔 **ADR-20260828004129143** (01-proposed): host-agent handoff as default execution mode when arena runs inside an agent
+- 🤔 **ADR-20260828004129233** (01-proposed): player adapter lifecycle policy aliases renames and version support ranges
+- 🤔 **ADR-20260828005453077** (01-proposed): incubate standalone general-purpose zk review skill
 
 ---
 
