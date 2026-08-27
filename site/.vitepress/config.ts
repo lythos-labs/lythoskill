@@ -70,7 +70,7 @@ const config = {
         ],
 
         footer: {
-          message: `<a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · Last updated: ${date}`,
+          message: `<strong>lythoskill <a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a></strong> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · Last updated: ${date}`,
         },
       },
     },
@@ -106,7 +106,7 @@ const config = {
         ],
 
         footer: {
-          message: `<a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · 最後更新：${date}`,
+          message: `<strong>lythoskill <a href="https://github.com/lythos-labs/lythoskill/releases/tag/v${version}" target="_blank" rel="noreferrer">v${version}</a></strong> · <a href="${commitUrl}" target="_blank" rel="noreferrer">${commit}</a> · 最後更新：${date}`,
         },
       },
     },
