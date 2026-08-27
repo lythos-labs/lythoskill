@@ -29,11 +29,15 @@ export const DEFAULT_CONFIG: WorkflowConfig = {
     rejected: '03-rejected',
     superseded: '04-superseded',
   },
+  // 02-faq and 02-research share prefix 02 — historical numbering drift.
+  // Config matches disk; renumbering would break references across ADRs/dailies.
   wikiSubdirs: {
     patterns: '01-patterns',
     faq: '02-faq',
+    research: '02-research',
     lessons: '03-lessons',
-    legacy: '04-legacy',
+    ssot: '04-ssot',
+    archived: '05-archived',
   },
 };
 

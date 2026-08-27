@@ -98,8 +98,10 @@ const mockConfig: WorkflowConfig = {
   wikiSubdirs: {
     patterns: "01-patterns",
     faq: "02-faq",
+    research: "02-research",
     lessons: "03-lessons",
-    legacy: "04-legacy",
+    ssot: "04-ssot",
+    archived: "05-archived",
   },
 };
 
@@ -170,6 +172,58 @@ describe("executeProbePlan — with mock IO", () => {
 
     expect(report.emptyShells.length).toBe(1);
     expect(report.emptyShells[0]).toContain("TASK-20260101000000004-test");
+  });
+
+  // Wiki structure: every config dir must exist on disk, and every on-disk
+  // subdir must be in config — drift in either direction is a finding.
+  const allWikiDirsFixture: Record<string, string> = Object.fromEntries(
+    Object.values(mockConfig.wikiSubdirs).map((d) => [
+      `cortex/wiki/${d}/2026-01-01-entry.md`,
+      "# Entry\n",
+    ]),
+  );
+
+  it("reports wiki dir on disk but not in config (disk-not-in-config)", () => {
+    const files: Record<string, string> = {
+      ...allWikiDirsFixture,
+      "cortex/wiki/INDEX.md": "# Wiki Index\n",
+      "cortex/wiki/09-unknown/2026-01-01-stray.md": "# Stray\n",
+    };
+    const plan = buildProbePlan(mockConfig);
+    const io = makeMockIO(files);
+    const report = executeProbePlan(plan, io);
+
+    expect(report.wikiStructureDrift.length).toBe(1);
+    expect(report.wikiStructureDrift[0]).toContain("wiki/09-unknown");
+    expect(report.wikiStructureDrift[0]).toContain("not in config.wikiSubdirs");
+    expect(report.summary.hasWikiStructureDrift).toBe(true);
+    expect(report.summary.totalIssues).toBeGreaterThan(0);
+  });
+
+  it("reports config wikiSubdirs missing on disk (config-not-on-disk)", () => {
+    // Only 5 of the 6 config dirs exist — 05-archived is missing
+    const files: Record<string, string> = { ...allWikiDirsFixture };
+    delete files["cortex/wiki/05-archived/2026-01-01-entry.md"];
+    const plan = buildProbePlan(mockConfig);
+    const io = makeMockIO(files);
+    const report = executeProbePlan(plan, io);
+
+    expect(report.wikiStructureDrift.length).toBe(1);
+    expect(report.wikiStructureDrift[0]).toContain("wikiSubdirs.archived");
+    expect(report.wikiStructureDrift[0]).toContain("not on disk");
+  });
+
+  it("reports no wiki drift when disk matches config (INDEX.md ignored)", () => {
+    const files: Record<string, string> = {
+      ...allWikiDirsFixture,
+      "cortex/wiki/INDEX.md": "# Wiki Index\n",
+    };
+    const plan = buildProbePlan(mockConfig);
+    const io = makeMockIO(files);
+    const report = executeProbePlan(plan, io);
+
+    expect(report.wikiStructureDrift).toEqual([]);
+    expect(report.summary.hasWikiStructureDrift).toBe(false);
   });
 
   it("detects ADR-Epic coupling", () => {
@@ -309,6 +363,7 @@ describe("printProbeSummary — output UX", () => {
       deckLockDrift: [],
       deckStateDrift: [],
       checklistDrift: [],
+      wikiStructureDrift: [],
       ...partial,
     };
   }
@@ -330,6 +385,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -358,6 +414,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -382,6 +439,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -413,6 +471,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -440,6 +499,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);
@@ -467,6 +527,7 @@ describe("printProbeSummary — output UX", () => {
         hasNonAsciiSlugs: false,
         hasDeckLockDrift: false,
         hasDeckStateDrift: false,
+        hasWikiStructureDrift: false,
       },
     });
     printProbeSummary(report, io);

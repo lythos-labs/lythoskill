@@ -31,8 +31,10 @@ const mockConfig: WorkflowConfig = {
   wikiSubdirs: {
     patterns: "01-patterns",
     faq: "02-faq",
+    research: "02-research",
     lessons: "03-lessons",
-    legacy: "04-legacy",
+    ssot: "04-ssot",
+    archived: "05-archived",
   },
 };
 
@@ -75,6 +77,20 @@ describe("buildProbePlan", () => {
       "superseded",
     ]);
     expect(plan.adrs[0].dir).toBe("cortex/adr/01-proposed");
+  });
+
+  it("returns a plan with all wiki directories", () => {
+    const plan = buildProbePlan(mockConfig);
+    expect(plan.wikiDir).toBe("cortex/wiki");
+    expect(plan.wiki.map((w) => w.key)).toEqual([
+      "patterns",
+      "faq",
+      "research",
+      "lessons",
+      "ssot",
+      "archived",
+    ]);
+    expect(plan.wiki[2].dir).toBe("cortex/wiki/02-research");
   });
 
   it("enables all checks by default", () => {

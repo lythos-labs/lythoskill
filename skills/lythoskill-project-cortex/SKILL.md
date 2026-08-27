@@ -73,7 +73,7 @@ bunx @lythos/project-cortex@0.17.11 task "Fix login bug"
 bunx @lythos/project-cortex@0.17.11 epic "User auth system" --lane main|emergency
 bunx @lythos/project-cortex@0.17.11 adr "Choose database"
 # Create a Wiki entry (dated, for knowledge capture)
-bunx @lythos/project-cortex@0.17.11 wiki "Your insight" --category pattern|faq|lesson
+bunx @lythos/project-cortex@0.17.11 wiki "Your insight" --category pattern|faq|research|lesson|ssot
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex@0.17.11 init
 # Process commit trailers (used by post-commit hook)
@@ -228,9 +228,12 @@ cortex/
 └── wiki/
     ├── 01-patterns/      ← Reusable solutions
     ├── 02-faq/           ← Common questions
+    ├── 02-research/      ← Research notes and investigations
     ├── 03-lessons/       ← Retrospectives
-    └── 04-legacy/        ← Outdated but historically valuable
+    ├── 04-ssot/          ← Single source of truth (conventions, decisions)
+    └── 05-archived/      ← Outdated but historically valuable
 ```
+(02-faq and 02-research share prefix 02 — historical numbering drift; config matches disk, renumbering would break references.)
 Numeric prefixes ensure GTD workflow ordering in `ls` output.
 ## ID Format
 `PREFIX-yyyyMMddHHmmssSSS` (17 digits). Collision-free, self-sorting, no registry.
@@ -316,8 +319,11 @@ ADRs:
 
 Wiki:
   Patterns       : 4
-  FAQ            : 1
+  Faq            : 1
+  Research       : 0
   Lessons        : 0
+  Ssot           : 0
+  Archived       : 0
 ```
 
 ### Consistency probe (read-only)

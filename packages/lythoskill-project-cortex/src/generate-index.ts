@@ -282,8 +282,10 @@ function generateWikiIndex(config: WorkflowConfig) {
   try {
     const patterns = readWikiDir(join(config.wikiDir, config.wikiSubdirs.patterns));
     const faqs = readWikiDir(join(config.wikiDir, config.wikiSubdirs.faq));
+    const research = readWikiDir(join(config.wikiDir, config.wikiSubdirs.research));
     const lessons = readWikiDir(join(config.wikiDir, config.wikiSubdirs.lessons));
-    const legacy = readWikiDir(join(config.wikiDir, config.wikiSubdirs.legacy));
+    const ssot = readWikiDir(join(config.wikiDir, config.wikiSubdirs.ssot));
+    const archived = readWikiDir(join(config.wikiDir, config.wikiSubdirs.archived));
 
     const formatList = (entries: WikiEntry[], subdir: string) =>
       entries.map(e => `- **[${e.date}]** [${e.slug}](./${subdir}/${e.file})`).join('\n');
@@ -300,15 +302,23 @@ ${formatList(patterns, config.wikiSubdirs.patterns) || '*No entries yet.*'}
 
 ${formatList(faqs, config.wikiSubdirs.faq) || '*No entries yet.*'}
 
+## 🔬 Research (${research.length})
+
+${formatList(research, config.wikiSubdirs.research) || '*No entries yet.*'}
+
 ## 📖 Lessons (${lessons.length})
 
 ${formatList(lessons, config.wikiSubdirs.lessons) || '*No entries yet.*'}
 
-## 🗄️ Legacy (${legacy.length})
+## 🧭 SSOT (${ssot.length})
+
+${formatList(ssot, config.wikiSubdirs.ssot) || '*No entries yet.*'}
+
+## 🗄️ Archived (${archived.length})
 
 > Historical entries that no longer reflect current practice. Kept for reference.
 
-${formatList(legacy, config.wikiSubdirs.legacy) || '*No entries yet.*'}
+${formatList(archived, config.wikiSubdirs.archived) || '*No entries yet.*'}
 
 ---
 

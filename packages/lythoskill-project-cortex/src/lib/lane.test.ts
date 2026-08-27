@@ -44,8 +44,10 @@ describe("validateLaneGuard", () => {
       wikiSubdirs: {
         patterns: "01-patterns",
         faq: "02-faq",
+        research: "02-research",
         lessons: "03-lessons",
-        legacy: "04-legacy",
+        ssot: "04-ssot",
+        archived: "05-archived",
       },
     };
   });

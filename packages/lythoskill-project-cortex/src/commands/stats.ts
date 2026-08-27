@@ -54,11 +54,10 @@ export function showStats(config: WorkflowConfig): void {
     console.log(`  ${(name as string).padEnd(15)}: ${count}`);
   }
 
-  const wikiDirs = [
-    ['Patterns', join(config.wikiDir, config.wikiSubdirs.patterns)],
-    ['FAQ', join(config.wikiDir, config.wikiSubdirs.faq)],
-    ['Lessons', join(config.wikiDir, config.wikiSubdirs.lessons)],
-  ];
+  // Iterate config.wikiSubdirs directly so stats can never drift from the config shape.
+  const wikiDirs = Object.entries(config.wikiSubdirs).map(
+    ([key, subdir]) => [key.charAt(0).toUpperCase() + key.slice(1), join(config.wikiDir, subdir)],
+  );
 
   console.log('\nWiki:');
   for (const [name, dir] of wikiDirs) {

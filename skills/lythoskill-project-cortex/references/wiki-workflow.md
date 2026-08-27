@@ -11,7 +11,10 @@ Task execution → LGTM confirmed → Distill to Wiki → Future tasks reference
 |-----------|---------|---------|
 | `01-patterns/` | Reusable solutions | CSS Flex alignment pattern |
 | `02-faq/` | Common questions | Why does Grid squeeze labels? |
+| `02-research/` | Research notes and investigations | Adapter comparison findings |
 | `03-lessons/` | Retrospective insights | Epic post-mortem |
+| `04-ssot/` | Single source of truth | Conventions, key decisions |
+| `05-archived/` | Outdated but historically valuable | Superseded pattern |
 
 ## When to Create Wiki Entries
 Only after success is confirmed (LGTM). Do not speculatively document

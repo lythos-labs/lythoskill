@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-27 | Created |
+| in-progress | 2026-08-27 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -25,12 +26,12 @@ Also noted: `02-faq` and `02-research` share prefix `02` — historical numberin
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] DEFAULT_CONFIG.wikiSubdirs updated to match disk reality: patterns/faq/research/lessons/ssot/archived (drop legacy; keep duplicate 02- prefix as-is, document why)
-- [ ] generate-index.ts emits sections for all six dirs (research + ssot + archived included)
-- [ ] wiki.ts command can create research/ssot entries
-- [ ] stats.ts counts all six dirs
-- [ ] init.ts scaffolds the real structure
-- [ ] probe gains a wiki-structure consistency check (config dirs exist on disk; unknown dirs on disk reported) — closes the blind guard
+- [x] DEFAULT_CONFIG.wikiSubdirs updated to match disk reality: patterns/faq/research/lessons/ssot/archived (drop legacy; keep duplicate 02- prefix as-is, documented in config.ts comment)
+- [x] generate-index.ts emits sections for all six dirs (research + ssot + archived included)
+- [x] wiki.ts command can create research/ssot entries
+- [x] stats.ts counts all six dirs (now iterates config — cannot drift again)
+- [x] init.ts scaffolds the real structure (loops config; verified live in mktemp dir)
+- [x] probe gains a wiki-structure consistency check (drift both directions = findings) — closes the blind guard
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
@@ -41,14 +42,15 @@ Also noted: `02-faq` and `02-research` share prefix `02` — historical numberin
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] `cortex/wiki/INDEX.md` regenerated includes 02-research, 04-ssot, 05-archived sections → Verify: `grep -c "02-research\|04-ssot\|05-archived" cortex/wiki/INDEX.md` ≥ 3
-- [ ] probe fires on wiki dir not in config → Verify: create temp unknown dir, run probe, expect finding; remove after
-- [ ] `bun --filter='*lythoskill-project-cortex*' run test` green
+- [x] `cortex/wiki/INDEX.md` regenerated includes 02-research, 04-ssot, 05-archived sections → grep count 34 (≥3) ✔
+- [x] probe fires on wiki dir not in config → live negative check: temp `99-probe-negative-test/` dir reported as drift, removed after ✔ (plus 3 unit tests in probe-execute.test.ts)
+- [x] package tests green: 129 pass, 0 fail (correct invocation: `bun --filter='./packages/lythoskill-project-cortex' run test`; npm name is @lythos/project-cortex)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Registered. Drift verified against config.ts + 4 consumers + generated INDEX.md.
+- 2026-08-28: Implemented via coder subagent (agent-6), P1 claims self-verified (tests 129/0, INDEX sections present, probe 497 docs 0 issues). Also swept stale docs inside the package (skill/SKILL.md, references/wiki-workflow.md described the old 4-dir structure). Bonus fix: pre-existing latent type gap in ProbePlan.checks (missing checklistDrift).
 
 ## Related Files
 - Modified:

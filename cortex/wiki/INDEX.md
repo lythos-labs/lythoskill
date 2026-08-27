@@ -67,6 +67,31 @@
 - **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
 - **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
+## 🔬 Research (22)
+
+- **[2026-08-28]** [early-predictions-vs-august-reality-audit](./02-research/2026-08-28-early-predictions-vs-august-reality-audit.md)
+- **[2026-05-28]** [claude-code-market-position-and-path-strategy-validation](./02-research/2026-05-28-claude-code-market-position-and-path-strategy-validation.md)
+- **[2026-05-28]** [hateoas-from-http-to-agent-hypermedia](./02-research/2026-05-28-hateoas-from-http-to-agent-hypermedia.md)
+- **[2026-05-20]** [head-skill-cross-model-self-verification.sober-review](./02-research/2026-05-20-head-skill-cross-model-self-verification.sober-review.md)
+- **[2026-05-20]** [head-skill-cross-model-self-verification](./02-research/2026-05-20-head-skill-cross-model-self-verification.md)
+- **[2026-05-19]** [documentation-site-pattern-inventory-from-historical-excavation](./02-research/2026-05-19-documentation-site-pattern-inventory-from-historical-excavation.md)
+- **[2026-05-19]** [documentation-site-cognitive-topology-lesson](./02-research/2026-05-19-documentation-site-cognitive-topology-lesson.md)
+- **[2026-05-17]** [guiran-agent-bdd-checkpoint-inventory](./02-research/2026-05-17-guiran-agent-bdd-checkpoint-inventory.md)
+- **[2026-05-17]** [arena-cli-archaeology-and-agent-os-design-principles](./02-research/2026-05-17-arena-cli-archaeology-and-agent-os-design-principles.md)
+- **[2026-05-13]** [sunk-cost-fallacy-git-rollback-cheaper-than-patch](./02-research/2026-05-13-sunk-cost-fallacy-git-rollback-cheaper-than-patch.md)
+- **[2026-05-11]** [skills-sh-interop-syntax-sugar](./02-research/2026-05-11-skills-sh-interop-syntax-sugar.md)
+- **[2026-05-11]** [deck-add-variant-coverage](./02-research/2026-05-11-deck-add-variant-coverage.md)
+- **[2026-05-11]** [test-infrastructure-audit-real-counts-dead-gates](./02-research/2026-05-11-test-infrastructure-audit-real-counts-dead-gates.md)
+- **[2026-05-11]** [git-provenance-over-design-assumption-lesson](./02-research/2026-05-11-git-provenance-over-design-assumption-lesson.md)
+- **[2026-05-11]** [bump-must-regenerate-lockfile](./02-research/2026-05-11-bump-must-regenerate-lockfile.md)
+- **[2026-05-10]** [codex-cli-sdk-for-useagent-integration](./02-research/2026-05-10-codex-cli-sdk-for-useagent-integration.md)
+- **[2026-05-08]** [lythoskill-curator-deep-research](./02-research/2026-05-08-lythoskill-curator-deep-research.md)
+- **[2026-05-08]** [hermes-curator-deep-research](./02-research/2026-05-08-hermes-curator-deep-research.md)
+- **[2026-05-08]** [skill-curation-patterns-research](./02-research/2026-05-08-skill-curation-patterns-research.md)
+- **[2026-05-08]** [agentskill-sh-ecosystem-deep-dive](./02-research/2026-05-08-agentskill-sh-ecosystem-deep-dive.md)
+- **[2026-05-07]** [research-quality-audit](./02-research/2026-05-07-research-quality-audit.md)
+- **[2026-05-07]** [ai-agent-skills-ecosystem](./02-research/2026-05-07-ai-agent-skills-ecosystem.md)
+
 ## 📖 Lessons (29)
 
 - **[2026-08-28]** [agent-ux-feedback-fresh-model-session](./03-lessons/2026-08-28-agent-ux-feedback-fresh-model-session.md)
@@ -99,11 +124,25 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
-## 🗄️ Legacy (0)
+## 🧭 SSOT (9)
+
+- **[0000-00-00]** [agent-onboarding-guide](./04-ssot/agent-onboarding-guide.md)
+- **[0000-00-00]** [architecture](./04-ssot/architecture.md)
+- **[0000-00-00]** [pitfalls](./04-ssot/pitfalls.md)
+- **[0000-00-00]** [conventions](./04-ssot/conventions.md)
+- **[0000-00-00]** [agent-onboarding-guide.zh](./04-ssot/agent-onboarding-guide.zh.md)
+- **[0000-00-00]** [reproduce-sh-bdd](./04-ssot/reproduce-sh-bdd.md)
+- **[0000-00-00]** [key-decisions](./04-ssot/key-decisions.md)
+- **[0000-00-00]** [external-validation-meta-observation](./04-ssot/external-validation-meta-observation.md)
+- **[0000-00-00]** [project-hotspots](./04-ssot/project-hotspots.md)
+
+## 🗄️ Archived (3)
 
 > Historical entries that no longer reflect current practice. Kept for reference.
 
-*No entries yet.*
+- **[2026-05-02]** [external-skill-governance-bridge](./05-archived/2026-05-02-external-skill-governance-bridge.md)
+- **[2026-05-02]** [skill-selection-pipeline](./05-archived/2026-05-02-skill-selection-pipeline.md)
+- **[2026-05-02]** [skill-combo-epistemology-and-tcg-analogy](./05-archived/2026-05-02-skill-combo-epistemology-and-tcg-analogy.md)
 
 ---
 

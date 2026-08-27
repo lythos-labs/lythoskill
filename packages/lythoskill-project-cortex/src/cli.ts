@@ -43,7 +43,7 @@ Commands:
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
-  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
+  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|research|lesson|ssot]
   probe                 Check status consistency (dir vs Status History)
                         --suspicious   Only report suspicious patterns (empty shells, stale, drift)
                         --include-completed-empty-shells  Include empty shells in completed/terminal dirs
@@ -376,13 +376,15 @@ async function main(): Promise<void> {
       if (!arg) {
         console.error(`❌ Wiki title required.
 
-   Usage:     bunx @lythos/project-cortex wiki "<title>" [--category pattern|faq|lesson]
+   Usage:     bunx @lythos/project-cortex wiki "<title>" [--category pattern|faq|research|lesson|ssot]
    Example:   bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
 
    Categories (default: pattern):
      pattern   Reusable solutions and conventions
      faq       Common questions
+     research  Research notes and investigations
      lesson    Retrospectives and post-mortems
+     ssot      Single source of truth (conventions, decisions)
 
    Index: cortex/wiki/INDEX.md is auto-regenerated. To rebuild manually:
      bunx @lythos/project-cortex index wiki`);

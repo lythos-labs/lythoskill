@@ -60,6 +60,8 @@ export interface ProbePlan {
   tasks: { dir: string; statusKey: string; files: string[] }[];
   epics: { dir: string; statusKey: string; files: string[] }[];
   adrs: { dir: string; statusKey: string; files: string[] }[];
+  wikiDir: string;
+  wiki: { key: string; dir: string }[];
   checks: {
     statusConsistency: boolean;
     laneOccupancy: boolean;
@@ -68,6 +70,8 @@ export interface ProbePlan {
     emptyShells: boolean;
     coverageDrift: boolean;
     nonAsciiSlugs: boolean;
+    checklistDrift: boolean;
+    wikiStructure: boolean;
     deckLockDrift: boolean;
     deckStateDrift: boolean;
   };
@@ -87,6 +91,7 @@ export interface ProbeReport {
   deckLockDrift: string[];
   deckStateDrift: string[];
   checklistDrift: string[];  // task files with unchecked checkboxes in review/completed
+  wikiStructureDrift: string[];  // config.wikiSubdirs vs actual cortex/wiki/ subdirs
   summary: {
     activeOnly: boolean;
     includeCompletedEmptyShells: boolean;
@@ -102,6 +107,7 @@ export interface ProbeReport {
     hasDeckLockDrift: boolean;
     hasDeckStateDrift: boolean;
     hasChecklistDrift: boolean;
+    hasWikiStructureDrift: boolean;
   };
 }
 
@@ -333,10 +339,17 @@ export function buildProbePlan(
     files: [] as string[],
   }));
 
+  const wiki = Object.entries(config.wikiSubdirs).map(([key, subdir]) => ({
+    key,
+    dir: join(config.wikiDir, subdir),
+  }));
+
   return {
     tasks,
     epics,
     adrs,
+    wikiDir: config.wikiDir,
+    wiki,
     checks: {
       statusConsistency: !activeOnly,
       laneOccupancy: true,
@@ -346,6 +359,7 @@ export function buildProbePlan(
       coverageDrift: true,
       nonAsciiSlugs: true,
       checklistDrift: true,
+      wikiStructure: true,
       deckLockDrift: true,
       deckStateDrift: true,
     },
@@ -652,6 +666,29 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     detectChecklistDrift(taskFiles);
   }
 
+  // ── Wiki structure consistency ─────────────────────────────────────
+  // Drift in both directions is a finding: config.wikiSubdirs entries that
+  // don't exist on disk, and on-disk wiki subdirs missing from config (which
+  // index/stats/wiki commands would silently skip). Files like INDEX.md are
+  // ignored — only directories count.
+  const wikiStructureDrift: string[] = [];
+  if (plan.checks.wikiStructure && io.exists(plan.wikiDir)) {
+    const knownDirs = new Set(plan.wiki.map(w => basename(w.dir)));
+    for (const w of plan.wiki) {
+      if (!io.exists(w.dir)) {
+        wikiStructureDrift.push(`wikiSubdirs.${w.key} = '${basename(w.dir)}' not on disk — run \`cortex init\` to scaffold, or fix config`);
+      }
+    }
+    const wikiEntries = io.readdir(plan.wikiDir);
+    if (wikiEntries) {
+      for (const entry of wikiEntries) {
+        if (entry.isDirectory && !knownDirs.has(entry.name)) {
+          wikiStructureDrift.push(`wiki/${entry.name} exists on disk but is not in config.wikiSubdirs — index/stats/wiki commands skip it`);
+        }
+      }
+    }
+  }
+
   const totalChecked = taskFiles.length + epicFiles.length + adrFiles.length;
   const allStatusIssues = [...allTaskResults, ...allEpicResults, ...allAdrResults].filter(r => r.match !== 'ok');
   // emptyShells count should respect filter mode for totalIssues
@@ -661,7 +698,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       ? 'active-only'
       : 'default';
   const filteredEmptyShellCount = filterEmptyShells(emptyShells, emptyShellMode).length;
-  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length + checklistDrift.length;
+  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length + checklistDrift.length + wikiStructureDrift.length;
 
   return {
     statusResults: [...allTaskResults, ...allEpicResults, ...allAdrResults],
@@ -676,6 +713,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     deckLockDrift,
     deckStateDrift,
     checklistDrift,
+    wikiStructureDrift,
     summary: {
       activeOnly: plan.options.activeOnly,
       includeCompletedEmptyShells: plan.options.includeCompletedEmptyShells,
@@ -691,6 +729,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       hasDeckLockDrift: deckLockDrift.length > 0,
       hasDeckStateDrift: deckStateDrift.length > 0,
       hasChecklistDrift: checklistDrift.length > 0,
+      hasWikiStructureDrift: wikiStructureDrift.length > 0,
     },
   };
 }
@@ -727,7 +766,7 @@ function buildConfigFromPlan(plan: ProbePlan): WorkflowConfig {
     taskSubdirs,
     epicSubdirs,
     adrSubdirs,
-    wikiSubdirs: { patterns: '', faq: '', lessons: '', legacy: '' },
+    wikiSubdirs: { patterns: '', faq: '', research: '', lessons: '', ssot: '', archived: '' },
   };
 }
 
@@ -750,7 +789,7 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
 
   // ── active-only checklist header ────────────────────────────────────
   if (activeOnly) {
-    io.log('ℹ️  Checks: lane occupancy | stale backlog | empty shells (active) | coverage drift | ADR-Epic coupling | non-ASCII slugs');
+    io.log('ℹ️  Checks: lane occupancy | stale backlog | empty shells (active) | coverage drift | ADR-Epic coupling | non-ASCII slugs | wiki structure');
     io.log('⏭️  Skipped: per-file status consistency (use default mode for full check)\n');
   }
 
@@ -879,6 +918,15 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     io.log('     💡 Review the task and check off completed items, or move back to in-progress.');
   }
 
+  // Wiki structure drift (config.wikiSubdirs vs actual wiki/ subdirs)
+  if (report.wikiStructureDrift.length > 0) {
+    io.log('\n📚 Wiki structure drift (config.wikiSubdirs vs wiki/ on disk):');
+    for (const d of report.wikiStructureDrift) {
+      io.log(`     ⚠️  ${d}`);
+    }
+    io.log('     💡 Align config.wikiSubdirs with the real wiki layout, or scaffold missing dirs with `cortex init`.');
+  }
+
   // ── Confirmation lines for clean states ───────────────────────────
   if (activeOnly) {
     if (report.staleBacklog.length === 0) {
@@ -907,6 +955,9 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
     }
     if (report.checklistDrift.length === 0) {
       io.log('✅ No checklist drift');
+    }
+    if (report.wikiStructureDrift.length === 0) {
+      io.log('✅ Wiki structure matches config');
     }
   }
 
@@ -959,6 +1010,9 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
       const ids = report.checklistDrift.map(d => d.split(':')[0]).slice(0, 3).join(', ');
       const more = report.checklistDrift.length > 3 ? ` (+${report.checklistDrift.length - 3} more)` : '';
       io.log(`⚠️  Found ${report.checklistDrift.length} checklist drift(s) — ${ids}${more}`);
+    }
+    if (report.wikiStructureDrift.length > 0) {
+      io.log(`⚠️  Found ${report.wikiStructureDrift.length} wiki structure drift(s).`);
     }
   }
   // Summary line for all modes

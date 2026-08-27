@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 01:36:25
+> 自动生成于 2026/8/28 01:40:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 349 | 进行中: 0, 待验收: 1, 已完成: 297 |
+| Tasks | 349 | 进行中: 1, 待验收: 1, 已完成: 297 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 90 |
 
@@ -76,18 +76,17 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (6)
+### 待办 (5)
 
 - [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
 - [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
 - [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
 - [ ] **TASK-20260828003758156**: mechanize site command and count verification guard
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
-- [ ] **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
 
 ### 待验收 (1)
 
