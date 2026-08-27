@@ -101,7 +101,7 @@ Store everything          Select what's active         Only what's declared
 
 ## Real Decks, Real Projects
 
-These are working configurations from the [examples directory](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) — 22 decks and growing. Each one is a single file you can fetch and use immediately:
+These are working configurations from the [examples directory](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) — 24 decks and growing. Each one is a single file you can fetch and use immediately:
 
 - **Engineering** — TDD + PRD + architecture diagrams for disciplined development
 - **Design Studio** — frontend taste, theme factory, brand guidelines. Kills AI slop.
@@ -117,7 +117,7 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/m
 bunx @lythos/skill-deck@latest link
 ```
 
-[Browse all 22 example decks ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
+[Browse all 24 example decks ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
 
 ## Built by AI Agents
 

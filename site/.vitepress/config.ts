@@ -60,6 +60,26 @@ const config = {
               text: 'In Action Guide',
               items: [
                 { text: 'Overview', link: '/guide/' },
+                { text: 'Level 0: Quick Start', link: '/guide/#level-0-quick-start' },
+                { text: 'Level 1: Understand Your Deck', link: '/guide/#level-1-understand-your-deck' },
+                { text: 'Level 2: Discover More Skills', link: '/guide/#level-2-discover-more-skills' },
+                { text: 'Level 3: Test Before You Trust', link: '/guide/#level-3-test-before-you-trust' },
+                { text: 'Level 4: Compose Pipelines', link: '/guide/#level-4-compose-pipelines' },
+                { text: 'Level 5: Govern at Scale', link: '/guide/#level-5-govern-at-scale' },
+                { text: 'Level 6: Contribute Back', link: '/guide/#level-6-contribute-back' },
+              ]
+            }
+          ],
+          '/articles/': [
+            {
+              text: 'Articles',
+              items: [
+                { text: 'Overview', link: '/articles/' },
+                { text: 'Agent-Boosted UX (canonical)', link: '/articles/agent-boosted-ux' },
+                { text: 'The Goldilocks Consumer', link: '/articles/goldilocks-consumer' },
+                { text: 'ZK Review and Concept Migration', link: '/articles/zk-concept-symmetry' },
+                { text: 'OS Vocabulary as Engineering Language', link: '/articles/os-vocabulary' },
+                { text: 'Conclusion-First ADRs', link: '/articles/conclusion-first' },
               ]
             }
           ]
@@ -96,6 +116,13 @@ const config = {
               text: '實戰指南',
               items: [
                 { text: '總覽', link: '/zh/guide/' },
+                { text: '第 0 級：快速開始', link: '/zh/guide/#第-0-級-快速開始' },
+                { text: '第 1 級：理解你的牌組', link: '/zh/guide/#第-1-級-理解你的牌組' },
+                { text: '第 2 級：探索更多技能', link: '/zh/guide/#第-2-級-探索更多技能' },
+                { text: '第 3 級：先測試再信任', link: '/zh/guide/#第-3-級-先測試再信任' },
+                { text: '第 4 級：組合管線', link: '/zh/guide/#第-4-級-組合管線' },
+                { text: '第 5 級：規模化治理', link: '/zh/guide/#第-5-級-規模化治理' },
+                { text: '第 6 級：回饋貢獻', link: '/zh/guide/#第-6-級-回饋貢獻' },
               ]
             }
           ]

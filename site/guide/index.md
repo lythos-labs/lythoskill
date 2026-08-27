@@ -89,12 +89,30 @@ bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this au
 
 Arena spawns a zero-knowledge subagent with your task and your deck. You see the output — not the marketing copy.
 
-**Prerequisite**: arena needs at least one agent "player" to spawn. It auto-detects on first run: `kimi` CLI (`uv tool install kimi-cli`, then `kimi login`), `codex` CLI, or an `ANTHROPIC_API_KEY` for Claude. One is enough; each run uses that player's quota and takes minutes, not seconds.
+**Prerequisite**: arena runs on an agent "player". The default player is `kimi` ([Kimi Code CLI](https://github.com/MoonshotAI/kimi-cli)). To use a different player, pass `--player`: `claude` (needs `ANTHROPIC_API_KEY`, a `.claude-sdk-key` file in the project root, or a Claude Code session) or `codex` (needs `codex login`). Each run uses that player's quota and takes minutes, not seconds.
 
-For A/B comparison:
+For A/B comparison, declare both decks in an `arena.toml`:
+
+```toml
+[arena]
+task = "./TASK.md"        # a markdown file with your task
+criteria = ["correctness", "clarity"]
+runs_per_side = 1
+
+[[side]]
+name = "current"
+player = "kimi"
+deck = "./skill-deck.toml"
+
+[[side]]
+name = "candidate"
+player = "kimi"
+deck = "./skill-deck-alt.toml"
+```
 
 ```bash
-bunx @lythos/skill-arena vs --deck-a skill-deck.toml --deck-b skill-deck-alt.toml --brief "write API docs"
+bunx @lythos/skill-arena vs --config arena.toml --dry-run   # preview the plan
+bunx @lythos/skill-arena vs --config arena.toml             # run it
 ```
 
 **What changed**: Skill adoption is empirical, not faith-based.
