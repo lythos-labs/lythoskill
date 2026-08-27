@@ -5,21 +5,21 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write      # create GitHub Release
-  id-token: write      # OIDC for npm trusted publishing + Pages deploy
-  pages: write         # deploy docs site to Pages
-
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
+  # Main release job: npm publish + GitHub Release.
+  # Runs with NO GitHub Environment so the OIDC token presented to npm
+  # only carries the repository/workflow claims required by the npm
+  # Trusted Publisher (organization, repository, workflow filename).
+  # See ADR-20260827124021589.
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: write      # create GitHub Release
+      id-token: write      # OIDC for npm trusted publishing
     steps:
       - name: Checkout tag
         uses: actions/checkout@v5
@@ -84,9 +84,39 @@ jobs:
         run: |
           gh release create "${GITHUB_REF_NAME}" --generate-notes
 
-      # Docs site — same build as deploy-pages.yml, but triggered by the tag
-      # rather than a main-branch push, so the new release metadata is live
-      # immediately after publish.
+  # Docs site deployment: separate job with its own GitHub Environment so
+  # Pages protection rules do not interfere with npm OIDC claims.
+  # Builds from the same tag so the site reflects the just-published release.
+  pages:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read       # checkout
+      id-token: write      # Pages deployment
+      pages: write         # deploy docs site to Pages
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
       - name: Install site dependencies
         working-directory: site
         run: bun install
