@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 19:03:16
+> 自动生成于 2026/8/28 19:58:25
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 359 | 进行中: 5, 待验收: 0, 已完成: 299 |
+| Tasks | 362 | 进行中: 0, 待验收: 5, 已完成: 299 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (10)
+### 待办 (13)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
@@ -88,18 +88,21 @@
 - [ ] **TASK-20260828141622828**: publish player adapter support matrix
 - [ ] **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
 - [ ] **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
+- [ ] **TASK-20260828194647623**: test deck add advisory probe branch (probe failure does not hard-exit)
+- [ ] **TASK-20260828195535425**: explain curator degraded entries on scan output
+- [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 
-### 进行中 (5)
-
-- 🔄 **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
-- 🔄 **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
-- 🔄 **TASK-20260827131734254**: deck-link-prints-each-skill-twice
-- 🔄 **TASK-20260828003758156**: mechanize site command and count verification guard
-- 🔄 **TASK-20260828111354804**: fix mirror probe false negative HEAD semantics vs clone capability
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (5)
+
+- 🔍 **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
+- 🔍 **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
+- 🔍 **TASK-20260827131734254**: deck-link-prints-each-skill-twice
+- 🔍 **TASK-20260828003758156**: mechanize site command and count verification guard
+- 🔍 **TASK-20260828111354804**: fix mirror probe false negative HEAD semantics vs clone capability
 
 ### 已完成 (299)
 
