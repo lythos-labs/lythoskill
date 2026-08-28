@@ -89,7 +89,7 @@ bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this au
 
 Arena spawns a zero-knowledge subagent with your task and your deck. You see the output — not the marketing copy.
 
-**Prerequisite**: arena runs on an agent "player". The default player is `kimi` ([Kimi Code CLI](https://github.com/MoonshotAI/kimi-cli)). To use a different player, pass `--player`: `claude` (needs `ANTHROPIC_API_KEY`, a `.claude-sdk-key` file in the project root, or a Claude Code session) or `codex` (needs `codex login`). Each run uses that player's quota and takes minutes, not seconds.
+**Prerequisite**: run inside an agent session (Claude Code, Kimi Code, …) and arena hands the run back to your agent — no extra install. Outside an agent session, pass `--player` to spawn an external CLI: `kimi` ([Kimi Code CLI](https://github.com/MoonshotAI/kimi-cli)), `claude` (needs `ANTHROPIC_API_KEY`, a `.claude-sdk-key` file in the project root, or a Claude Code session), or `codex` (needs `codex login`). Each external run uses that player's quota and takes minutes, not seconds.
 
 For A/B comparison, declare both decks in an `arena.toml`:
 

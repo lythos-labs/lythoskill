@@ -2,6 +2,7 @@
 
 > **Pattern**: Use an `AgentAdapter` interface to swap agent backends without changing arena/BDD pipeline logic.
 > **Validated**: 2026-05-06 — Kimi CLI replacement for Claude CLI in Bun.spawn context.
+> **Update 2026-08-28**: `arena single`'s default inside an agent session is now host-handoff (no external spawn); adapters run only on explicit `--player`. See ADR-20260828004129143.
 
 ## Problem
 

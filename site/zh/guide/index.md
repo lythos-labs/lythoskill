@@ -89,7 +89,7 @@ bunx @lythos/skill-arena single --deck skill-deck.toml --brief "refactor this au
 
 Arena 生成一個零知識子代理，載入你的任務和你的牌組。你看到的是輸出——不是行銷文案。
 
-**前置條件**：arena 需要一個 agent「player」來執行。預設 player 是 `kimi`（[Kimi Code CLI](https://github.com/MoonshotAI/kimi-cli)）。要用其他 player，加 `--player`：`claude`（需要 `ANTHROPIC_API_KEY`、專案根目錄的 `.claude-sdk-key` 檔案，或 Claude Code 工作階段）或 `codex`（需要先 `codex login`）。每次執行會消耗該 player 的額度，時間以分鐘計。
+**前置條件**：在 agent 工作階段內（Claude Code、Kimi Code……）執行，arena 會把執行交還給你的 agent 編排——無需額外安裝。在 agent 工作階段之外，用 `--player` 指定外部 CLI：`kimi`（[Kimi Code CLI](https://github.com/MoonshotAI/kimi-cli)）、`claude`（需要 `ANTHROPIC_API_KEY`、專案根目錄的 `.claude-sdk-key` 檔案，或 Claude Code 工作階段）或 `codex`（需要先 `codex login`）。每次外部執行會消耗該 player 的額度，時間以分鐘計。
 
 A/B 比較用一份 `arena.toml` 宣告兩副牌組：
 

@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-28 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -18,11 +19,11 @@ Today `arena single` hard-defaults to `player = 'kimi'` (`packages/lythoskill-ar
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Host detection via one injectable function (e.g. `detectHost(env)` in a new `packages/lythoskill-arena/src/host.ts`): known markers = `CLAUDECODE` (Claude Code), `CLAUDE_CODE_SSE_PORT` (claude-code forks incl. kimi-code), plus Codex's marker if one is documented (research; otherwise omit). Detection result = host name or generic "agent host (unidentified)" — never blocks on identifying the specific host
-- [ ] R2 (必达) Handoff mode: host detected AND no `--player` → print HATEOAS guidance (what: you are inside an agent session / why: host orchestration is the default per ADR / how: spawn subagents with each deck, judge outputs, pointer to `skills/lythoskill-arena/references/arena-runtime.md`) and exit 0 without spawning anything
-- [ ] R3 (必达) Explicit `--player` always forces the external spawn (current behavior byte-for-byte); no host detected AND no `--player` → loud error pointing at `skills/lythoskill-arena/references/player-setup.md`
-- [ ] R4 (必达) Tests: env-fixture matrix — {host detected, not detected} × {--player given, absent} = 4 cells, each asserting mode; no-spawn in handoff mode asserted structurally (see Technical Approach)
-- [ ] R5 (可选) Audit `skills/lythoskill-arena/` + `site/` for `arena single` examples that assume an external kimi default; align wording with the two modes. Also update `cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md` with a one-line pointer to the new default
+- [x] R1 (必达) Host detection via one injectable function (e.g. `detectHost(env)` in a new `packages/lythoskill-arena/src/host.ts`): known markers = `CLAUDECODE` (Claude Code), `CLAUDE_CODE_SSE_PORT` (claude-code forks incl. kimi-code), plus Codex's marker if one is documented (research; otherwise omit). Detection result = host name or generic "agent host (unidentified)" — never blocks on identifying the specific host
+- [x] R2 (必达) Handoff mode: host detected AND no `--player` → print HATEOAS guidance (what: you are inside an agent session / why: host orchestration is the default per ADR / how: spawn subagents with each deck, judge outputs, pointer to `skills/lythoskill-arena/references/arena-runtime.md`) and exit 0 without spawning anything
+- [x] R3 (必达) Explicit `--player` always forces the external spawn (current behavior byte-for-byte); no host detected AND no `--player` → loud error pointing at `skills/lythoskill-arena/references/player-setup.md`
+- [x] R4 (必达) Tests: env-fixture matrix — {host detected, not detected} × {--player given, absent} = 4 cells, each asserting mode; no-spawn in handoff mode asserted structurally (see Technical Approach)
+- [x] R5 (可选) Audit `skills/lythoskill-arena/` + `site/` for `arena single` examples that assume an external kimi default; align wording with the two modes. Also update `cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md` with a one-line pointer to the new default
 - **不做**: the CLI runner path is preserved, not deleted (cross-player fairness needs it); no changes to `vs --config` flow; no telemetry of host detection
 
 ## Technical Approach
@@ -35,15 +36,17 @@ Today `arena single` hard-defaults to `player = 'kimi'` (`packages/lythoskill-ar
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] 4-cell env/flag matrix tests green in `packages/lythoskill-arena/src/cli.test.ts` (or new `host.test.ts`) → Verify: `bun --filter='@lythos/skill-arena' run test`
-- [ ] Manual: `CLAUDE_CODE_SSE_PORT=1 bun packages/lythoskill-arena/src/cli.ts single --deck examples/decks/quick-start.toml --brief "test"` in a tmp cwd prints handoff guidance, creates no `agent-output-*` dir, exit 0 → Verify: run it
-- [ ] `env -i PATH=$PATH HOME=$HOME bun packages/lythoskill-arena/src/cli.ts single --brief "x"` → loud error pointing at player-setup.md → Verify: run it
-- [ ] `bun --filter='*' run test` green overall → Verify: run it (canonical)
+- [x] 4-cell env/flag matrix tests green in `packages/lythoskill-arena/src/cli.test.ts` (or new `host.test.ts`) → Verify: `bun --filter='@lythos/skill-arena' run test`
+- [x] Manual: `CLAUDE_CODE_SSE_PORT=1 bun packages/lythoskill-arena/src/cli.ts single --deck examples/decks/quick-start.toml --brief "test"` in a tmp cwd prints handoff guidance, creates no `agent-output-*` dir, exit 0 → Verify: run it
+- [x] `env -i PATH=$PATH HOME=$HOME bun packages/lythoskill-arena/src/cli.ts single --brief "x"` → loud error pointing at player-setup.md → Verify: run it
+- [x] `bun --filter='*' run test` green overall → Verify: run it (canonical)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Created as follow-up of ADR-20260828004129143 acceptance (Option B).
+- 2026-08-28: Implemented. `src/host.ts` (detectHost + resolveSingleMode, pure/injectable); cli.ts singleRun: mode resolution FIRST (acceptance 3 requires the no-player error to precede the --deck error), handoff branch before deck fetch + adapter dynamic imports (no-spawn structural), external path byte-for-byte via `mode.player`. Codex marker omitted per R1 (no documented marker found). host.test.ts: 10 tests — detectHost ×4, 4-cell matrix, 2 integration through main() with env pinning (tmp cwd, no agent-output-* assertion). Manual acceptance both pass (handoff exit 0 + no dir; env -i exit 1 + player-setup.md pointer). R5: player-setup.md rewritten (no default/fallback chain), site guide en+zh prerequisite paragraphs, wiki player-abstraction one-liner; skill rebuilt.
+- 2026-08-28: Guard tripped (good): CLI_TABLE drift tripwire flagged SingleMode enum labels ('handoff'/'no-player'/'external' via `=== 'x'` regex) as unknown dispatch labels — sanctioned fix per curator precedent: added to arena ignoreDispatch. Full gate EXIT=0 after.
 - 2026-08-28: ZK review round 1 — P2s fixed (kimi-code env marker researched: none exists, only CLAUDE_CODE_SSE_PORT — detection is host-agnostic by design; no-spawn assertion now structural via branch placement before dynamic imports), P3s applied (player-setup.md pointer; site/architecture.md:87 path).
 
 ## Related Files

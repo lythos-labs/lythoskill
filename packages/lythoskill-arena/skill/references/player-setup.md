@@ -1,14 +1,18 @@
 # Player Setup & Discovery
 
+> **Default mode changed (ADR-20260828004129143)**: inside an agent session,
+> `arena single` without `--player` prints host-handoff guidance and exits —
+> the host agent orchestrates the run itself. External players below are only
+> spawned when `--player` is passed explicitly (or when no agent host is
+> detected, where `--player` is required).
+
 ## Auto-Detection (first run)
 
-Arena auto-detects available players on first run:
+When `--player` is passed, arena resolves the named player:
 
-1. Checks `which kimi`, `which codex`, `which deepseek` (CLI-wrapped players)
-2. Checks `ANTHROPIC_API_KEY` for Claude (SDK — no CLI binary needed)
-3. Records available players to `~/.agents/lythoskill/arena/players.json`
-4. Defaults to `kimi` if available (proven headless reliability)
-5. If no players found, guides installation
+1. CLI-wrapped players need their binary on PATH (`which kimi`, `which codex`, `which deepseek`)
+2. Claude (SDK) needs `ANTHROPIC_API_KEY` — no CLI binary
+3. Unknown/failed resolution fails loudly with install guidance
 
 ```bash
 # Supported players (install at least one):
@@ -20,14 +24,14 @@ npm i -g @openai/codex                      # codex (codex exec --json)
 
 ## Player Priority
 
-| Player | Priority | Headless mode | When to use |
-|--------|----------|---------------|-------------|
-| **kimi** (default) | 1st | `--print --afk` | Best cost/reliability ratio. Eager tools, no deadlock. |
-| **codex** | 2nd | `codex exec --json` | If you already have codex installed. |
-| **deepseek** | 3rd | `deepseek serve --http` | Daemon mode for headless use. |
-| **claude** | 4th | SDK (`claude-sdk` adapter) | Uses Anthropic SDK directly — no shell spawn, no deadlock. |
+| Player | Headless mode | When to use |
+|--------|---------------|-------------|
+| **kimi** | `--print --afk` | Best cost/reliability ratio. Eager tools, no deadlock. |
+| **codex** | `codex exec --json` | If you already have codex installed. |
+| **deepseek** | `deepseek serve --http` | Daemon mode for headless use. |
+| **claude** | SDK (`claude-sdk` adapter) | Uses Anthropic SDK directly — no shell spawn, no deadlock. |
 
-If `player` is omitted, arena tries kimi → codex → deepseek → claude.
+There is no fallback chain: `player` is either given explicitly via `--player`, or the run is host-handoff (agent session) / a loud error (no host). Pick the player that matches your goal — for cross-player comparison, run one `--player` per side.
 
 ## API Key Setup
 
