@@ -2,8 +2,8 @@
   "name": "lythoskill-site",
   "private": true,
   "scripts": {
-    "dev": "bun scripts/inject-version.ts && vitepress dev .",
-    "build": "bun scripts/inject-version.ts && vitepress build .",
+    "dev": "bun scripts/inject-version.ts && bun scripts/inject-stats.ts && vitepress dev .",
+    "build": "bun scripts/inject-version.ts && bun scripts/inject-stats.ts && vitepress build .",
     "preview": "vitepress preview ."
   },
   "dependencies": {

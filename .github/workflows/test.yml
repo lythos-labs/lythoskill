@@ -64,9 +64,19 @@ jobs:
       - name: Inject site version metadata
         working-directory: site
         run: bun scripts/inject-version.ts
+      - name: Inject site stats
+        working-directory: site
+        run: bun scripts/inject-stats.ts
       - name: Build VitePress
         working-directory: site
         run: bun vitepress build . --outDir .vitepress/dist
+      # A hard-coded stale number in the md sources would fail this grep:
+      # the built HTML must carry the CURRENT deck count, in both locales.
+      - name: Built HTML carries the current deck count (EN+ZH)
+        run: |
+          DECKS=$(ls examples/decks/*.toml | wc -l | tr -d ' ')
+          grep -q "Browse all $DECKS example decks" site/.vitepress/dist/index.html
+          grep -q "瀏覽全部 $DECKS 副範例牌組" site/.vitepress/dist/zh/index.html
 
   coverage-deck:
     runs-on: ubuntu-latest

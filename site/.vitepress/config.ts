@@ -28,15 +28,40 @@
  * - Test with `npx vitepress build .` before committing.
  */
 import versionMeta from './version.json' with { type: 'json' }
+import statsMeta from './stats.json' with { type: 'json' }
+import { injectStatsIntoText, type SiteStats } from '../scripts/inject-stats'
 
 const { version, commit, date } = versionMeta
 const commitUrl = `https://github.com/lythos-labs/lythoskill/commit/${commit}`
+
+// Build-time stat injection (TASK-20260828141622988): {{DECK_COUNT}} /
+// {{PACKAGE_COUNT}} / {{SKILL_COUNT}} in markdown are replaced at render time
+// from generated stats.json — a generated number cannot rot.
+// markdown-it core rule, typed loosely to avoid pulling markdown-it types
+// into the config (vitepress bundles them).
+/* eslint-disable @typescript-eslint/no-explicit-any */
+function statsInjectRule(stats: SiteStats) {
+  return (state: any) => {
+    for (const token of state.tokens) {
+      if (token.type !== 'inline' || !token.children) continue
+      for (const child of token.children) {
+        if (child.type === 'text') child.content = injectStatsIntoText(child.content, stats)
+      }
+    }
+  }
+}
 
 const config = {
   // Shared across all locales
   base: '/lythoskill/',
   srcExclude: ['../**', 'drafts/**'],
   head: [['link', { rel: 'icon', href: '/lythoskill/favicon.svg' }]],
+
+  markdown: {
+    config(md: any) {
+      md.core.ruler.push('stats-inject', statsInjectRule(statsMeta as SiteStats))
+    },
+  },
 
   locales: {
     root: {

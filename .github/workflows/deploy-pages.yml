@@ -37,6 +37,10 @@ jobs:
         working-directory: site
         run: bun scripts/inject-version.ts
 
+      - name: Inject site stats
+        working-directory: site
+        run: bun scripts/inject-stats.ts
+
       - name: Build VitePress
         working-directory: site
         run: bun vitepress build . --outDir .vitepress/dist
