@@ -13,13 +13,10 @@ export type KimiUpstream = 'kimi-cli' | 'kimi-code'
 /** Supported range across both upstreams (ADR-20260828004129233 Option B). */
 export const KIMI_VERSION_RANGE = '>=0.30.0 <2.0.0'
 
-/** Detect which kimi binary to use. Prefers kimi-cli (legacy, v1.x) over kimi (kimi-code, v0.x). */
-export function detectKimiBinary(): string {
-  if (Bun.which('kimi-cli')) {
-    return 'kimi-cli'
-  }
-  if (Bun.which('kimi')) {
-    return 'kimi'
+/** Detect which kimi binary to use, in the declared preference order (default: kimi-cli legacy over kimi kimi-code). */
+export function detectKimiBinary(binaries: string[] = ['kimi-cli', 'kimi']): string {
+  for (const b of binaries) {
+    if (Bun.which(b)) return b
   }
   return ''
 }
@@ -187,33 +184,43 @@ export function detectKimiProtocolMismatch(result: {
 
 // ── Spawn wrapper (IO, tested via BDD / arena integration) ──────────────────
 
-/** Probe `<binary> --version`, classify the upstream, enforce the supported range. Fail closed. */
-function probeKimiUpstream(binary: string): { upstream: KimiUpstream; version: string } {
-  const probe = Bun.spawnSync([binary, '--version'])
+/** Probe `<binary> <probeArgs>`, classify the upstream, enforce the declared version range. Fail closed. */
+function probeKimiUpstream(
+  binary: string,
+  probeArgs: string[],
+  versionRange: string,
+): { upstream: KimiUpstream; version: string } {
+  const probe = Bun.spawnSync([binary, ...probeArgs])
   const output = `${probe.stdout.toString()}\n${probe.stderr.toString()}`.trim()
   const parsed = parseKimiVersion(output)
   const upstream = parsed ? classifyKimiUpstream(parsed.major) : null
-  if (!parsed || !upstream || !satisfiesVersionRange(parsed.version, KIMI_VERSION_RANGE)) {
+  if (!parsed || !upstream || !satisfiesVersionRange(parsed.version, versionRange)) {
     throw new Error([
-      `kimi upstream probe failed: "${binary} --version" returned "${output.slice(0, 120) || '(no output)'}"`,
+      `kimi upstream probe failed: "${binary} ${probeArgs.join(' ')}" returned "${output.slice(0, 120) || '(no output)'}"`,
       `Detected: ${parsed ? `version ${parsed.version}` : 'unparseable version output'}`,
-      `Supported: kimi-cli 1.x (legacy), kimi-code ${KIMI_VERSION_RANGE}`,
+      `Supported: kimi-cli 1.x (legacy) / kimi-code 0.x — declared range: ${versionRange}`,
       `Fix: install/upgrade kimi-cli (https://github.com/MoonshotAI/kimi-cli) or kimi-code, or pick another --player.`,
     ].join('\n   '))
   }
   return { upstream, version: parsed.version }
 }
 
-async function spawnKimi(opts: {
-  brief: string
-  cwd: string
-  timeoutMs?: number
-}): Promise<AgentRunResult> {
-  const binary = detectKimiBinary()
+async function spawnKimi(
+  opts: {
+    brief: string
+    cwd: string
+    timeoutMs?: number
+  },
+  declared?: AgentAdapter['upstream'],
+): Promise<AgentRunResult> {
+  const binary = detectKimiBinary(declared?.binaries)
   if (!binary) {
     throw new Error('kimi not found in PATH. Install: https://github.com/MoonshotAI/kimi-cli')
   }
-  const { upstream } = probeKimiUpstream(binary)
+  // Contract semantics: adapters without an `upstream` declaration stay unprobed (legacy behavior).
+  const probed = declared ? probeKimiUpstream(binary, declared.probeArgs, declared.versionRange) : null
+  const upstream: KimiUpstream = probed?.upstream ?? 'kimi-cli'
+  if (probed) console.error(`ℹ️  kimi upstream: ${probed.upstream} ${probed.version}`)
 
   // kimi-cli reads the prompt from stdin (temp file); kimi-code takes it as --prompt argv.
   let promptFile: string | null = null
@@ -276,7 +283,7 @@ const kimiAdapter: AgentAdapter = {
   },
 
   async spawn(opts): Promise<AgentRunResult> {
-    return spawnKimi(opts)
+    return spawnKimi(opts, kimiAdapter.upstream)
   },
 
   async invokeTool(_opts): Promise<unknown> {

@@ -43,6 +43,11 @@ describe('resolvePlayer', () => {
     expect(playerAliasNote('expert-architect')).toBeNull()
   })
 
+  it('playerAliasNote covers the other built-in mappings too (claude family)', () => {
+    expect(playerAliasNote('claude')).toContain("'claude' = 'claude-sdk'")
+    expect(playerAliasNote('claude-cli')).toContain("'claude-cli' = 'claude'")
+  })
+
   it('passes through unknown player names', () => {
     expect(resolvePlayer('expert-architect')).toBe('expert-architect')
   })
