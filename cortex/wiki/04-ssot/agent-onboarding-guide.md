@@ -15,9 +15,10 @@ You are about to enter a project with 1000+ commits, 81 ADRs, 54 wiki patterns, 
 Your reading order:
 1. This guide (5 min) — mental model
 2. `AGENTS.md` Index table (2 min) — what exists, where to find it
-3. `weekly/` latest 2 files (5 min) — what happened recently
-4. `cortex/wiki/04-ssot/key-decisions.md` § ZK Agent Alert (2 min) — what not to break
-5. Now you can start working
+3. `cortex/wiki/01-patterns/INDEX.md` (2 min) — P0/P1/P2 layered map of all patterns; read it before scanning individual pattern files
+4. `weekly/` latest 2 files (5 min) — what happened recently
+5. `cortex/wiki/04-ssot/key-decisions.md` § ZK Agent Alert (2 min) — what not to break
+6. Now you can start working
 
 ## 1. What Is This Project?
 

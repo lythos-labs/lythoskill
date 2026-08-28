@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-28 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -43,10 +44,11 @@ The ADR's 后续 assigns these wiring items, none of which exist yet:
 
 - 2026-08-28: Created as follow-up of ADR-20260613190449007 acceptance （方案A). Initial classification shipped in commit `7de92b8c` (same commit series as the acceptance).
 - 2026-08-28: ZK review round 1 — 2 P1 fixed (INDEX.md did not exist at review time → now committed; ADR path/status claims → acceptance landed, paths updated), P2 (dropped 后续 item: 更新 cortex/wiki/INDEX.md 模板) added to 不做， P3 (insertion line numbers + zh register) applied. Round 2: PASS.
+- 2026-08-28: Implemented. R1: dreaming SKILL.md Phase 2 gains the INDEX maintenance step with ADR rules verbatim + absorb/promote actions; rebuilt to skills/ via `build lythoskill-dreaming` (note: card said `build dreaming` — actual package name is lythoskill-dreaming). R2: both onboarding guides gain the patterns-INDEX step as item 3 (lists renumbered). R3: boundary line added to patterns INDEX header; verified `cortex index wiki` leaves 01-patterns/INDEX.md byte-identical (shasum identical before/after). All acceptance greps pass; canonical test gate EXIT=0 (12 packages, 0 fail).
 
 ## Related Files
-- Modified: (pending)
-- Added: (pending)
+- Modified: packages/lythoskill-dreaming/skill/SKILL.md, skills/lythoskill-dreaming/SKILL.md (build output), cortex/wiki/04-ssot/agent-onboarding-guide.md, agent-onboarding-guide.zh.md, cortex/wiki/01-patterns/INDEX.md (boundary line)
+- Added: none
 
 ## Git Commit Message
 ```

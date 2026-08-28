@@ -87,6 +87,14 @@ Example SSOT topics:
 - `key-decisions.md` — ADRs that still hold (superseded ones noted but not replayed)
 - `pitfalls.md` — recurring failure modes and their fixes
 
+**Update `cortex/wiki/01-patterns/INDEX.md`** (ADR-20260613190449007 maintenance loop — a stale index is more misleading than none). Judgment rules (from the ADR, verbatim):
+
+- 被 ≥2 个 weekly 的 `decisions_accepted` 或 `project_lesson_candidates` 引用 → P0
+- 已被 `04-ssot/*.md` 引用的模式 → P1
+- 其他 → P2
+
+When this phase absorbs a pattern into an SSOT file, move its INDEX entry to P1 and name the absorbing file in its TL;DR. When a weekly newly cites a pattern for the second time (≥2 distinct weeklies), promote it to P0.
+
 ### Phase 3: ZK Validate
 
 After writing SSOT, spawn a **zero-knowledge subagent**:

@@ -7,6 +7,7 @@
 - **P2 / Historical**：探索性、实验性或已被取代的记录。TL;DR 给出历史背景，按需阅读。
 
 > 维护：由 lythoskill-dreaming Phase 2 维护；判定规则见 ADR-20260613190449007。
+> 边界：`cortex index wiki` 生成器只写 `cortex/wiki/INDEX.md`，从不触碰本文件（generate-index.ts 只写 `join(config.wikiDir, 'INDEX.md')`，且 readWikiDir 过滤掉所有 INDEX.md）。
 > 初次分类：2026-08-28（56 篇日期戳 pattern；`weekly-synthesis-template.md` 是模板，不参与分层）。
 
 ## P0 / Active

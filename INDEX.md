@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 21:27:13
+> 自动生成于 2026/8/28 21:31:48
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 363 | 进行中: 0, 待验收: 0, 已完成: 305 |
+| Tasks | 363 | 进行中: 1, 待验收: 0, 已完成: 305 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,10 +76,9 @@
 
 ## 📄 Tasks
 
-### 待办 (13)
+### 待办 (12)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
-- [ ] **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
 - [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
@@ -92,9 +91,9 @@
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 - [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
 
 ### 待验收 (0)
 

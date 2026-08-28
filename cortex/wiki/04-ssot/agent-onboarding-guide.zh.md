@@ -15,9 +15,10 @@ zk_validated: false
 你的閱讀順序：
 1. 本指南（五分鐘）——建立心智模型
 2. `AGENTS.md` 的 Index 表格（兩分鐘）——知道什麼東西在哪裡
-3. `weekly/` 最新兩份（五分鐘）——知道最近發生了什麼
-4. `cortex/wiki/04-ssot/key-decisions.md` 的 ZK Agent Alert 段落（兩分鐘）——知道什麼不能碰
-5. 現在可以開始工作了
+3. `cortex/wiki/01-patterns/INDEX.md`（兩分鐘）——所有 pattern 的 P0/P1/P2 分層地圖；掃描單篇 pattern 之前先看它
+4. `weekly/` 最新兩份（五分鐘）——知道最近發生了什麼
+5. `cortex/wiki/04-ssot/key-decisions.md` 的 ZK Agent Alert 段落（兩分鐘）——知道什麼不能碰
+6. 現在可以開始工作了
 
 ## 1. 這個專案是什麼
 
