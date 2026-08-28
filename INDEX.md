@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 22:07:31
+> 自动生成于 2026/8/28 22:07:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 364 | 进行中: 0, 待验收: 1, 已完成: 307 |
+| Tasks | 364 | 进行中: 0, 待验收: 0, 已完成: 308 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -94,11 +94,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260828195535425**: explain curator degraded entries on scan output
+_无_
 
-### 已完成 (307)
+### 已完成 (308)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -407,6 +407,7 @@ _无_
 - ✅ ~~TASK-20260828141622425~~: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
 - ✅ ~~TASK-20260828141622777~~: kimi-code player alias and adapter version-range probe
 - ✅ ~~TASK-20260828194647623~~: test deck add advisory probe branch (probe failure does not hard-exit)
+- ✅ ~~TASK-20260828195535425~~: explain curator degraded entries on scan output
 
 ### 悬置 (3)
 
