@@ -7,6 +7,7 @@ import { formatPlanOutput, type ArenaResult, buildArenaPrompt } from './runner'
 import { parseArenaToml, buildExecutionPlan } from './arena-toml'
 import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckSkills } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
+import { resolveSingleMode } from './host'
 
 // ─── ArenaCliIO interface (injected for testability) ───────────────────────
 
@@ -154,6 +155,18 @@ async function singleRun(args: string[], io: ArenaCliIO) {
     else if (args[i] === '--timeout') opts.timeout = args[++i]
   }
 
+  // Mode resolution comes FIRST (ADR-20260828004129143): with no --player, the
+  // relevant failure/guidance is about execution mode, not about flags.
+  const mode = resolveSingleMode(opts.player, process.env)
+  if (mode.mode === 'no-player') {
+    error(`❌ No --player given and no agent host detected.
+   arena single runs in one of two modes:
+     1. Inside an agent session → host-handoff is the default (the host orchestrates the run).
+     2. Anywhere else → pass --player <name> to spawn an external CLI.
+   Player setup: skills/lythoskill-arena/references/player-setup.md`)
+    exit(1)
+  }
+
   if (!opts.deck) {
     error(`❌ --deck <path|url> is required.
    --deck accepts local paths and http/https URLs (auto-fetched).
@@ -218,6 +231,23 @@ async function singleRun(args: string[], io: ArenaCliIO) {
     }
   }
 
+  // Host-handoff: print HATEOAS guidance and return BEFORE any fetch/spawn —
+  // no-spawn is structural (adapter dynamic imports below are never reached,
+  // no agent-output-* dir is ever created).
+  if (mode.mode === 'handoff') {
+    log(`🤝 Host-handoff mode — agent session detected (${mode.host.host}${mode.host.marker ? ` via ${mode.host.marker}` : ''})
+
+   What: arena single is running inside an agent session and hands this run back to the host.
+   Why:  host-orchestrated runs are the default (ADR-20260828004129143) — the host agent
+         spawns subagents per deck and judges outputs itself; no external player CLI needed.
+   How:  1. Spawn a subagent with deck: ${opts.deck}
+         2. ${opts.task ? `Task: ${opts.task}` : `Brief: ${opts.brief}`}
+         3. Judge the subagent output(s) against the brief.
+   Docs: skills/lythoskill-arena/references/arena-runtime.md
+   Override: pass --player <name> to force an external CLI run.`)
+    return
+  }
+
   const { existsSync: deckExists, writeFileSync: deckWrite } = await import('node:fs')
   let deckPath: string
   if (opts.deck.startsWith('http://') || opts.deck.startsWith('https://')) {
@@ -273,9 +303,9 @@ async function singleRun(args: string[], io: ArenaCliIO) {
   try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
   const { resolvePlayer, playerAliasNote } = await import('./player')
 
-  const player = resolvePlayer(opts.player ?? 'kimi')
+  const player = resolvePlayer(mode.player)
   const agent = useAgent(player)
-  const aliasNote = playerAliasNote(opts.player ?? 'kimi')
+  const aliasNote = playerAliasNote(mode.player)
   if (aliasNote) log(`ℹ️  ${aliasNote}`)
   const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), `agent-output-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`)
   mkdirSync(outDir, { recursive: true })

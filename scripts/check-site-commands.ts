@@ -85,7 +85,7 @@ const CLI_TABLE: CliSpec[] = [
     shape: 'subcommand',
     // dispatch: cli() switch — packages/lythoskill-arena/src/cli.ts (`if (cmd === ...)` chain)
     commands: ['single', 'run', 'vs', 'compare', 'viz', 'prepare-workdir', 'archive'],
-    ignoreDispatch: ['string', 'true'], // typeof / literal comparisons, not subcommands
+    ignoreDispatch: ['string', 'true', 'external', 'handoff', 'no-player'], // typeof / literal comparisons + SingleMode enum labels (host.ts), not subcommands
   },
   {
     pkg: '@lythos/skill-deck',
