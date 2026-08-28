@@ -104,7 +104,7 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-This uses Anthropic's official [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill — a real, runnable example. After linking, check `.claude/skills/` (or your configured `working_set`) and you'll see the skill files on disk. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) for 18+ pre-built decks.
+This uses Anthropic's official [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) skill — a real, runnable example. After linking, check `.claude/skills/` (or your configured `working_set`) and you'll see the skill files on disk. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md) for 24+ pre-built decks.
 
 ### Managing Your Deck
 
@@ -220,7 +220,7 @@ Skills are authored using the **thin-skill pattern**: heavy logic in npm package
 
 ### Explore Pre-Built Decks
 
-18+ decks for common tasks: documentation, research, architecture review, security audit. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md).
+24+ decks for common tasks: documentation, research, architecture review, security audit. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md).
 
 ---
 

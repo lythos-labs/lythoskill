@@ -64,4 +64,6 @@ function main() {
   console.log(`📊 Injected site stats: ${stats.deckCount} decks · ${stats.packageCount} packages · ${stats.skillCount} skills`)
 }
 
-if (import.meta.main) main()
+// Direct-invocation detection without import.meta.main: esbuild (vitepress
+// config bundling, cjs output) warns on import.meta; argv sniffing is silent.
+if (process.argv[1]?.endsWith('inject-stats.ts')) main()

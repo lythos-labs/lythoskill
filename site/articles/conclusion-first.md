@@ -28,7 +28,7 @@ The ADR is the single source of truth for the decision; the task is the executio
 
 **Built, then rejected.** ADR-20260506103209293 demoted "combo" from a skill type to a deck-level prompt, superseding an earlier design that had already been implemented. Conclusion-first does not prevent building the wrong thing; it gives the reversal a durable, citable home, so the next agent reads why the feature was removed instead of rediscovering the reasons the hard way.
 
-The full ADR set lives in `cortex/adr/02-accepted/` (around 90 accepted at time of writing), with rejected proposals preserved in `cortex/adr/03-rejected/`.
+The full ADR set lives in `cortex/adr/02-accepted/` (nearly 100 accepted at time of writing), with rejected proposals preserved in `cortex/adr/03-rejected/`.
 
 ## The self-proving loop, and its limit
 

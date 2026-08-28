@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'bun:test'
 import { execFileSync } from 'node:child_process'
-import { dirname } from 'node:path'
+import { dirname, join } from 'node:path'
+import { mkdtempSync, readFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { computeStats, injectStatsIntoText } from '../site/scripts/inject-stats'
 
 // Lives in root scripts/ (not site/scripts/) so the canonical gate picks it up:
@@ -8,8 +10,13 @@ import { computeStats, injectStatsIntoText } from '../site/scripts/inject-stats'
 // skill-creator's test script runs ../../scripts/.
 const ROOT_DIR = dirname(dirname(new URL(import.meta.url).pathname))
 
+// Gotcha (see scripts/check-site-commands.test.ts): subprocess pipe capture
+// returns empty stdout under `bun test` with repo coverage on — redirect to a
+// temp file and read it back instead of trusting execFileSync's encoding return.
 function sh(cmd: string): number {
-  return parseInt(execFileSync('sh', ['-c', cmd], { cwd: ROOT_DIR, encoding: 'utf-8' }).trim(), 10)
+  const out = join(mkdtempSync(join(tmpdir(), 'stats-sh-')), 'out.txt')
+  execFileSync('sh', ['-c', `${cmd} > "$1"`, 'sh', out], { cwd: ROOT_DIR })
+  return parseInt(readFileSync(out, 'utf-8').trim(), 10)
 }
 
 describe('computeStats', () => {

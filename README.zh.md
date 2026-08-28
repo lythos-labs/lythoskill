@@ -124,7 +124,7 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-这里用的是 Anthropic 官方 [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) 技能——真实可运行的示例。链接完成后检查 `.claude/skills/`（或你配置的 `working_set`），能看到技能文件在磁盘上。18+ 预组 deck 见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
+这里用的是 Anthropic 官方 [`frontend-design`](https://github.com/anthropics/skills/tree/main/skills/frontend-design) 技能——真实可运行的示例。链接完成后检查 `.claude/skills/`（或你配置的 `working_set`），能看到技能文件在磁盘上。24+ 预组 deck 见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
 
 ### 管理你的 Deck
 
@@ -250,7 +250,7 @@ Agent 只看见声明的技能。不多不少。
 
 ### 探索预组 Deck
 
-18+ 面向常见任务的 deck：文档处理、调研、架构评审、安全审计等。见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
+24+ 面向常见任务的 deck：文档处理、调研、架构评审、安全审计等。见 [`examples/decks/INDEX.md`](./examples/decks/INDEX.md)。
 
 ---
 
@@ -295,7 +295,7 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 - **决策即 ADR。** 浏览 [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) —— 30+ 架构决策，附完整推理、被拒绝的备选方案和置信度评分。没有"相信我们，我们更懂"。
 - **发布前经 arena 测试。** Skill 发布前，在真实任务上跑控制变量对比。见 [`showcase/`](./showcase/) —— agent 使用 lythoskill 治理的 deck 完成的页面、报告和工具。
 - **技能与实现分离。** Thin-skill 模式（`packages/<name>/skill/SKILL.md`）让你能精确审计 agent 看到了什么。
-- **661 个测试，0 失败。** 71 个 plan 生成单元测试，21 个 CLI BDD 场景，5 个 agent BDD 场景。覆盖率诚实——没有 gate 膨胀。
+- **1000+ 个测试，0 失败。** 单元 + CLI BDD + agent BDD 三层，共 56 个测试文件。覆盖率诚实——没有 gate 膨胀。
 
 这个项目是它自己的证明。我们用自己发布的工具治理自己。
 
@@ -416,7 +416,7 @@ Output  (skills/<name>/)         → 提交到 Git → agent 可见的技能
 ## 测试
 
 ```bash
-bun --filter='*' run test          # 全部 661 个测试，44 个文件
+bun --filter='*' run test          # 全部 1000+ 个测试（canonical gate）
 bun run test:coverage              # 覆盖率报告
 bun run test:bdd                   # BDD 集成测试
 ```
