@@ -113,7 +113,7 @@ describe('CLI_TABLE drift tripwire', () => {
   // (Caught a real miss: deck's `update` was absent, ZK review 2026-08-28.)
   const clis = loadClis(ROOT)
   for (const cli of clis.values()) {
-    if (cli.shape !== 'subcommand') continue
+    // positional CLIs are included too — curator's dispatch is a label chain
     it(`${cli.pkg}: every dispatch label is in the table`, () => {
       const labels = extractDispatchLabels(readFileSync(join(ROOT, cli.source), 'utf8'))
       const ignored = new Set([...(cli.ignoreDispatch ?? []), ...cli.commands])

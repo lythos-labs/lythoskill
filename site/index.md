@@ -72,7 +72,7 @@ Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agen
 
 That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `bunx @lythos/skill-deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 
-Give this file to a teammate — same setup. Switch to a different deck for a different project — one command. No cleanup, no leftovers, no "I forgot I installed that."
+Give this file to a teammate — same setup. Switch to a different deck for a different project — one command. Within the declared working set: no cleanup, no leftovers, no "I forgot I installed that." (Switching a project to a *different* working set leaves the old one behind — `link` prints a warning with the cleanup command.)
 
 ## How It Works
 

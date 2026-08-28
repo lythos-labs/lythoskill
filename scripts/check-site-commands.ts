@@ -28,10 +28,11 @@
  *      pool-path positional, so a bare non-path word (`scan`) is rejected
  *      as a would-be subcommand. The table itself is tripwired by the
  *      "CLI_TABLE drift" test in check-site-commands.test.ts, which extracts
- *      dispatch labels (`case 'x'` / `=== 'x'`) from each CLI source and
- *      fails when a label is missing from the table — the same rot class
- *      this guard exists to kill (ZK review 2026-08-28 caught `update`
- *      missing from the deck table this way).
+ *      dispatch labels (`case 'x'` / `=== 'x'`) from every CLI source
+ *      (subcommand- AND positional-shaped — curator's dispatch is a label
+ *      chain too) and fails when a label is missing from the table — the
+ *      same rot class this guard exists to kill (ZK review 2026-08-28
+ *      caught `update` missing from the deck table this way).
  *
  * Numbers policy ("N decks / N packages / N tests"): DEFERRED, documented
  * per TASK-20260828003758156. Build-time injection (inject-version.ts-style)
@@ -98,10 +99,12 @@ const CLI_TABLE: CliSpec[] = [
     pkg: '@lythos/skill-curator',
     source: 'packages/lythoskill-curator/src/cli.ts',
     shape: 'positional',
-    // dispatch: printHelp + import.meta.main chain — packages/lythoskill-curator/src/cli.ts
+    // dispatch: printHelp + import.meta.main chain (`cmd === 'x'` at cli.ts:1407-1425)
     // No subcommand (or only flags) = scan mode with a pool-path positional.
-    // Drift tripwire skips positional CLIs (dispatch is not a label switch).
     commands: ['add', 'tag', 'refresh-plan', 'refresh-execute', 'query', 'audit', 'find', 'restore'],
+    // 'scan' is the deliberate unknown-command carve-out (TASK-20260827131734103);
+    // the rest are result-status literals compared inside runCurator.
+    ignoreDispatch: ['scan', 'already-present', 'cloned', 'done', 'failed', 'incomplete', 'skip', 'string'],
   },
   {
     pkg: '@lythos/skill-creator',
