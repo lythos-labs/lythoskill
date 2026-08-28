@@ -147,4 +147,28 @@ describe('singleRun host-handoff integration', () => {
       expect(errors[0]).toContain('--player')
     })
   })
+
+  it('handoff mode fails fast on a bogus LOCAL deck path (no guidance, exit 1)', async () => {
+    await withEnv({ CLAUDE_CODE_SSE_PORT: '1' }, async () => {
+      const { io, logs, errors } = mockIO()
+      const exitCode = await catchExitAsync(async () => {
+        await main(['single', '--deck', './no-such-deck.toml', '--brief', 'x'], io)
+      })
+      expect(exitCode).toBe(1)
+      expect(errors[0]).toContain('Deck file not found')
+      expect(logs.join('\n')).not.toContain('Host-handoff mode')
+    })
+  })
+
+  it('empty --player "" is rejected loudly, never falls into handoff', async () => {
+    await withEnv({ CLAUDE_CODE_SSE_PORT: '1' }, async () => {
+      const { io, logs, errors } = mockIO()
+      const exitCode = await catchExitAsync(async () => {
+        await main(['single', '--deck', QUICK_START_DECK, '--brief', 'x', '--player', ''], io)
+      })
+      expect(exitCode).toBe(1)
+      expect(errors[0]).toContain('--player requires a non-empty name')
+      expect(logs.join('\n')).not.toContain('Host-handoff mode')
+    })
+  })
 })

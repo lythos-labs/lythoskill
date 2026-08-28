@@ -112,6 +112,10 @@ Commands:
   vs       Compare decks via arena.toml (declarative, Pareto-optimal)
   viz      Visualize a completed arena run (HTML + chart)
 
+Modes (single):
+  Inside an agent session  → host-handoff guidance (default; no external spawn)
+  Anywhere else            → pass --player <name> (kimi|kimi-code|codex|claude|deepseek)
+
 Examples:
   lythoskill-arena single --brief "find and research" --deck ./decks/scout.toml
   lythoskill-arena single --brief "find and research" --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
@@ -153,6 +157,12 @@ async function singleRun(args: string[], io: ArenaCliIO) {
     else if (args[i] === '--player' || args[i] === '-p') opts.player = args[++i]
     else if (args[i] === '--out' || args[i] === '-o') opts.out = args[++i]
     else if (args[i] === '--timeout') opts.timeout = args[++i]
+  }
+
+  if (opts.player !== undefined && !opts.player) {
+    error(`❌ --player requires a non-empty name (e.g. --player kimi).
+   Player setup: skills/lythoskill-arena/references/player-setup.md`)
+    exit(1)
   }
 
   // Mode resolution comes FIRST (ADR-20260828004129143): with no --player, the
@@ -235,13 +245,20 @@ async function singleRun(args: string[], io: ArenaCliIO) {
   // no-spawn is structural (adapter dynamic imports below are never reached,
   // no agent-output-* dir is ever created).
   if (mode.mode === 'handoff') {
+    // Fail fast on a bogus LOCAL deck path — the host agent would discover it
+    // later otherwise. URLs are passed through (fetch validation is the host's).
+    if (!/^https?:\/\//.test(opts.deck!) && !existsSync(resolve(opts.deck!))) {
+      error(`❌ Deck file not found: ${resolve(opts.deck!)}
+   Fix the path (or pass a URL) before handing off — the host agent needs a real deck.`)
+      exit(1)
+    }
     log(`🤝 Host-handoff mode — agent session detected (${mode.host.host}${mode.host.marker ? ` via ${mode.host.marker}` : ''})
 
    What: arena single is running inside an agent session and hands this run back to the host.
    Why:  host-orchestrated runs are the default (ADR-20260828004129143) — the host agent
          spawns subagents per deck and judges outputs itself; no external player CLI needed.
-   How:  1. Spawn a subagent with deck: ${opts.deck}
-         2. ${opts.task ? `Task: ${opts.task}` : `Brief: ${opts.brief}`}
+   How:  1. In a subagent workdir, link the deck: bunx @lythos/skill-deck link --deck ${opts.deck}
+         2. Spawn a subagent with that workdir and this ${opts.task ? `task: ${opts.task}` : `brief: ${opts.brief}`}
          3. Judge the subagent output(s) against the brief.
    Docs: skills/lythoskill-arena/references/arena-runtime.md
    Override: pass --player <name> to force an external CLI run.`)

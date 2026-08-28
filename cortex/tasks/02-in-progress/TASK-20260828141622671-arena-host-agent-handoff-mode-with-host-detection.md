@@ -65,3 +65,6 @@ feat(arena): host-agent handoff as default mode inside agent sessions (TASK-2026
 
 ## Notes
 - Cross-model doc validation for the new guidance text: `arena single --player <kimi|codex|claude>` per AGENTS.md (doc readability protocol) — after the docs audit (R5).
+- 2026-08-28: ZK skeptic review — PASS-WITH-NITS (no P1/P2). P3s: `--player ""` edge; handoff skips deck validation; help text mode blind spot; stale `players detect` ref (pre-existing, → TASK-20260828232221671).
+- 2026-08-28: user-sim gate — yes-with-conditions. Conditions handled pre-review: help text now documents both modes (cli.ts); handoff guidance How-step 1 now includes `bunx @lythos/skill-deck link --deck <path>` (deck mechanism); handoff fails fast on bogus local deck path (existsSync, URLs pass through); `--player ""` rejected loudly. host.test.ts 12/12. Registered follow-up: TASK-20260828232221671.
+
