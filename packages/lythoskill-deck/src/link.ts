@@ -568,6 +568,30 @@ function reconcileTargetDir(
   }
 }
 
+// ── working_set 切换检测（只警告，从不自动删除）──────────────
+// state 已记录上一次 resolved_paths.working_set（ADR-20260616000939948）。
+// 若与本次不同且旧目录仍存在 link 自己创建的 symlink（state.skills 里的
+// alias），打印 HATEOAS 警告：旧目录可能属于另一个仍在使用的 agent，
+// 所以给出精确的 rm 提示，由用户决定是否清理。
+
+const prevState = readState(PROJECT_DIR);
+const prevWorkingSet = prevState?.resolved_paths?.working_set;
+if (prevWorkingSet && resolve(prevWorkingSet) !== resolvedWorkingSet) {
+  const leftovers: string[] = [];
+  for (const s of prevState?.skills || []) {
+    const p = join(prevWorkingSet, s.alias);
+    try {
+      if (lstatSync(p).isSymbolicLink()) leftovers.push(p);
+    } catch {}
+  }
+  if (leftovers.length > 0) {
+    console.warn(`⚠️  Previous working set still has ${leftovers.length} link-created symlink(s)`);
+    console.warn(`   what: ${prevWorkingSet} contains symlinks from the previous working_set: ${leftovers.map(p => basename(p)).join(", ")}`);
+    console.warn(`   why:  working_set switched ${relative(PROJECT_DIR, prevWorkingSet)} → ${relative(PROJECT_DIR, resolvedWorkingSet)}. Leftovers may be intentional — another agent may still use that directory — so link never deletes them automatically.`);
+    console.warn(`   fix:  rm ${leftovers.join(" ")}`);
+  }
+}
+
 // ── 收束 working set ────────────────────────────────────────
 
 const declaredNames = new Set(declared.map(d => d.alias));

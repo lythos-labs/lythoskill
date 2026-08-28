@@ -68,7 +68,7 @@ EOF
 bunx @lythos/skill-deck@latest link
 ```
 
-Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agents) or `.cursor/skills` (Cursor) — that one line is the only difference. (One caveat: `link` reconciles the working set named in the deck; if you switch an existing project to a new working set, the old directory is left as-is — remove it yourself, or keep both if you run two agents.) You can also fetch this deck as a file: [quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml) — it is remote-validated in CI, and so is every locator on this page.
+Not on Claude Code? Change `working_set` to `.agents/skills` (Codex and 14+ agents) or `.cursor/skills` (Cursor) — that one line is the only difference. (One caveat: `link` reconciles the working set named in the deck; if you switch an existing project to a new working set, the old directory is left as-is — `link` prints a warning with the exact `rm` command to clean it up, or keep both if you run two agents.) You can also fetch this deck as a file: [quick-start.toml](https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/main/examples/decks/quick-start.toml) — it is remote-validated in CI, and so is every locator on this page.
 
 That's it. Copy, paste, run. The `cold_pool` field tells the system where your skills live — a directory of git-cloned repos. The `working_set` field tells it where your agent looks. `bunx @lythos/skill-deck link` reconciles the working set to match the declaration exactly: undeclared skills are removed, declared skills are linked. The file is self-documenting — no external commentary needed to understand what it does.
 

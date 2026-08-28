@@ -452,3 +452,80 @@ path = "github.com/owner/skill-a"
   })
 
 })
+
+// Capture console.log/warn/error lines emitted during fn's synchronous run.
+// linkDeck is async, but all link output happens before its first await.
+function captureConsole(fn: () => unknown): string[] {
+  const lines: string[] = []
+  const origLog = console.log
+  const origWarn = console.warn
+  const origError = console.error
+  console.log = (...a: any[]) => { lines.push(a.join(' ')) }
+  console.warn = (...a: any[]) => { lines.push(a.join(' ')) }
+  console.error = (...a: any[]) => { lines.push(a.join(' ')) }
+  try { fn() } finally {
+    console.log = origLog
+    console.warn = origWarn
+    console.error = origError
+  }
+  return lines
+}
+
+describe('working_set switch warning (TASK-20260827131734189)', () => {
+  const deckFor = (workingSet: string) => `[deck]
+working_set = "${workingSet}"
+cold_pool = "cold-pool"
+
+[tool.skills.skill-a]
+path = "github.com/owner/repo/skill-a"
+`
+
+  function setupProject(): { projectDir: string; deckPath: string } {
+    const projectDir = makeTmp()
+    placeSkill(join(projectDir, 'cold-pool'), 'github.com/owner/repo/skill-a')
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    return { projectDir, deckPath }
+  }
+
+  it('switch with old set present: warns (HATEOAS) and never auto-deletes', () => {
+    const { projectDir, deckPath } = setupProject()
+
+    writeFileSync(deckPath, deckFor('.claude/skills'))
+    linkDeck(deckPath, projectDir, { noBackup: true })
+
+    writeFileSync(deckPath, deckFor('.agents/skills'))
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    const out = lines.join('\n')
+
+    // HATEOAS: what / why / how-to-fix
+    expect(out).toContain('Previous working set still has 1 link-created symlink(s)')
+    expect(out).toContain('.claude/skills → .agents/skills')
+    expect(out).toContain('another agent may still use that directory')
+    expect(out).toContain(`rm ${join(projectDir, '.claude', 'skills', 'skill-a')}`)
+
+    // never auto-delete: old symlink still present, new set populated
+    expect(lstatSync(join(projectDir, '.claude', 'skills', 'skill-a')).isSymbolicLink()).toBe(true)
+    expect(lstatSync(join(projectDir, '.agents', 'skills', 'skill-a')).isSymbolicLink()).toBe(true)
+  })
+
+  it('switch with old set already gone: no warning', () => {
+    const { projectDir, deckPath } = setupProject()
+
+    writeFileSync(deckPath, deckFor('.claude/skills'))
+    linkDeck(deckPath, projectDir, { noBackup: true })
+
+    rmSync(join(projectDir, '.claude', 'skills'), { recursive: true, force: true })
+
+    writeFileSync(deckPath, deckFor('.agents/skills'))
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    expect(lines.join('\n')).not.toContain('Previous working set')
+  })
+
+  it('first link ever (no previous state): no warning', () => {
+    const { projectDir, deckPath } = setupProject()
+
+    writeFileSync(deckPath, deckFor('.claude/skills'))
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    expect(lines.join('\n')).not.toContain('Previous working set')
+  })
+})

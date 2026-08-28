@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-27 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -16,8 +17,8 @@ Design tension: the old working set may belong to a DIFFERENT agent the user sti
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Decide the semantics: (a) link cleans the previously-known working set (tracked in skill-deck.state) on switch, (b) link warns loudly about the leftover old working set with a remediation hint, or (c) document-only (current state). Write the decision in this card before implementing
-- [ ] R2 (必达) Implement the chosen behavior with tests covering: switch with old set present, switch with old set already gone, first link (no previous set)
+- [x] R1 (必达) **Decision (2026-08-28): (b) warn loudly.** link compares `skill-deck.state`'s previous working_set against the current one; on switch with link-created symlinks still present in the old dir, print a HATEOAS warning (what's there / why it may be intentional — another agent may use it / how to clean: exact `rm` hint). Rationale: (a) auto-clean contradicts the project's audit-first instinct for destructive ops (A-prune-is-heredoc-not-action) — the old set may serve a different agent the user still runs; (c) leaves the "No cleanup, no leftovers" site claim contradicted. Warning makes the leftover visible without a silent destructive act.
+- [x] R2 (必达) Implement the chosen behavior with tests covering: switch with old set present, switch with old set already gone, first link (no previous set) → all three cases tested in link.test.ts (`working_set switch warning` describe)
 - **不做**: no multi-working-set simultaneous reconciliation (that's `also_link_to`'s job — ADR-20260517152850372)
 
 ## Technical Approach
@@ -28,16 +29,18 @@ Design tension: the old working set may belong to a DIFFERENT agent the user sti
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] Repro the trial: link with working_set A, switch to B, re-link → old set handled per chosen semantics → Verify: fixture test asserting old-set state
-- [ ] Site caveat in site/index.md matches final behavior (update if (a) or (b) lands) → Verify: grep the caveat text
-- [ ] `bun --filter=@lythos/skill-deck run test` green → Verify: run it
+- [x] Repro the trial: link with working_set A, switch to B, re-link → old set handled per chosen semantics → fixture tests in link.test.ts (`working_set switch warning` describe: warns + never auto-deletes; old set gone → silent; first link → silent)
+- [x] Site caveat in site/index.md matches final behavior → updated en+zh: "link prints a warning with the exact rm command" (2026-08-28)
+- [x] `bun --filter=@lythos/skill-deck run test` green → canonical gate EXIT=0 (2026-08-28), 161 tests in skill-deck
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
+- 2026-08-28: Implemented decision (b). link.ts reads `skill-deck.state`'s previous `resolved_paths.working_set` (state snapshot per ADR-20260616000939948); on switch with link-created symlinks still present, prints HATEOAS warning (what/why/exact `rm` fix) — never auto-deletes. Site caveat updated en+zh to match. Three fixture tests (switch+leftover, switch+gone, first link). Canonical gate EXIT=0.
+
 ## Related Files
-- Modified: (pending)
-- Added: (pending)
+- Modified: packages/lythoskill-deck/src/link.ts, packages/lythoskill-deck/src/link.test.ts, site/index.md, site/zh/index.md
+- Added: (none)
 
 ## Git Commit Message
 ```
