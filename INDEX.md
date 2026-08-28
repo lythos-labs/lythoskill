@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 23:30:46
+> 自动生成于 2026/8/28 23:31:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 365 | 进行中: 0, 待验收: 1, 已完成: 308 |
+| Tasks | 365 | 进行中: 0, 待验收: 0, 已完成: 309 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -94,11 +94,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260828141622671**: arena host-agent handoff mode with host detection
+_无_
 
-### 已完成 (308)
+### 已完成 (309)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -405,6 +405,7 @@ _无_
 - ✅ ~~TASK-20260828011012367~~: cortex wikiSubdirs config drifted from real wiki structure
 - ✅ ~~TASK-20260828111354804~~: fix mirror probe false negative HEAD semantics vs clone capability
 - ✅ ~~TASK-20260828141622425~~: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
+- ✅ ~~TASK-20260828141622671~~: arena host-agent handoff mode with host detection
 - ✅ ~~TASK-20260828141622777~~: kimi-code player alias and adapter version-range probe
 - ✅ ~~TASK-20260828194647623~~: test deck add advisory probe branch (probe failure does not hard-exit)
 - ✅ ~~TASK-20260828195535425~~: explain curator degraded entries on scan output
