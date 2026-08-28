@@ -33,6 +33,17 @@ import { findDeckToml, expandHome } from './link.js'
 import { validateAlias } from './path-guard.js'
 
 /**
+ * IO seam for addSkill (Intent/Plan/Execute convention; mirror.ts ProbeDeps precedent).
+ * Tests inject probe/fetchPlan/exit to prove the advisory-probe branch never
+ * hard-exits before the clone attempt (TASK-20260828194647623).
+ */
+export interface AddSkillIO {
+  probe?: typeof probeConnectivity
+  fetchPlan?: typeof executeFetchPlan
+  exit?: (code: number) => never
+}
+
+/**
  * Build candidate paths for skill discovery within a cloned repo.
  * Pure path math — no IO. Separated so tests can verify the search
  * order without setting up real directories.
@@ -206,7 +217,11 @@ function exitInvalidLocator(locator: string): never {
 export async function addSkill(
   locator: string,
   options: { deck?: string; workdir?: string; alias?: string; type?: string; dryRun?: boolean; mode?: 'symlink' | 'snapshot' },
+  io?: AddSkillIO,
 ) {
+  const exit: (code: number) => never = io?.exit ?? ((code) => process.exit(code))
+  const probeFn = io?.probe ?? probeConnectivity
+  const fetchFn = io?.fetchPlan ?? executeFetchPlan
   const dryRun = options.dryRun || false
   const workdir = options.workdir ? resolvePath(options.workdir) : process.cwd()
   const deckPath = options.deck
@@ -220,7 +235,7 @@ export async function addSkill(
   if (parsed.isLocalhost) {
     console.error(`❌ deck add does not support localhost locators (no remote to clone).`)
     console.error(`   For local skills, place SKILL.md in your cold pool manually then run "deck link".`)
-    process.exit(1)
+    exit(1)
   }
 
   const coldPoolPath = resolveColdPoolPath(deckPath, workdir)
@@ -231,13 +246,13 @@ export async function addSkill(
   try { validateAlias(rawAlias) } catch (e: any) {
     console.error(`❌ Invalid alias: ${e.message}`)
     console.error('   Aliases may only contain letters, numbers, hyphens, and underscores.')
-    process.exit(1)
+    exit(1)
   }
   const skillType = (options.type || 'tool').toLowerCase()
 
   if (!['innate', 'tool'].includes(skillType)) {
     console.error(`❌ Invalid type: ${skillType}. Must be innate or tool. (combo is now a prompt, not a skill type.)`)
-    process.exit(1)
+    exit(1)
   }
 
   const fqPathBefore = fqOf(parsed) // pre-discovery — may be repo-level for @skill
@@ -284,7 +299,7 @@ export async function addSkill(
   // methods a naive probe sends while serving clones fine).
   let probe: Awaited<ReturnType<typeof probeConnectivity>> | undefined
   if (fetchPlan.cloneUrl) {
-    probe = await probeConnectivity(fetchPlan.cloneUrl, 5000)
+    probe = await probeFn(fetchPlan.cloneUrl, 5000)
     if (!probe) {
       console.warn(`⚠️  Network probe inconclusive for ${fetchPlan.cloneUrl}`)
       console.warn(`   Attempting clone anyway — git's own error will be authoritative.`)
@@ -309,7 +324,7 @@ export async function addSkill(
   // then anthropics/skills/docx). Used to early-exit here, which broke
   // the monorepo workflow and triggered post-compaction agent CPTSD
   // (see: 2026-05-07 morning skill-deck.toml overwrite incident).
-  const fetchResult = executeFetchPlan(fetchPlan, {
+  const fetchResult = fetchFn(fetchPlan, {
     log: (msg) => console.log(msg),
   })
 
@@ -326,7 +341,7 @@ export async function addSkill(
       console.error(`   Network probe was inconclusive before the clone attempt (both tiers failed on all URLs).`)
     }
     console.error(`   To fix: export LYTHOS_GH_MIRROR="https://your-mirror.com" (or set LYTHOS_SOCKS_PROXY)`)
-    process.exit(1)
+    exit(1)
   }
 
   if (fetchResult.status === 'already-present') {
@@ -349,7 +364,7 @@ export async function addSkill(
   if (!skillDir) {
     console.error(`❌ No SKILL.md found in downloaded repo`)
     console.error(`   Checked: ${fetchPlan.targetDir}`)
-    process.exit(1)
+    exit(1)
   }
 
   console.log(`✅ Skill ready: ${skillName} (alias: ${alias})`)
@@ -379,7 +394,7 @@ export async function addSkill(
     }
     if (allAliases.has(alias)) {
       console.error(`❌ Alias "${alias}" already exists in deck`)
-      process.exit(1)
+      exit(1)
     }
 
     // Auto-migrate old string-array format to dict

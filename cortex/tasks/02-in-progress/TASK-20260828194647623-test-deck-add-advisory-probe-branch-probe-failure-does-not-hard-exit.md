@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-28 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -33,6 +34,7 @@ ZK skeptic review of TASK-20260828111354804 (mirror probe fix, commit `6ff09d89`
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Registered from ZK skeptic review of TASK-20260828111354804 (P2 finding: advisory branch untested).
+- 2026-08-28: Implemented. Seam = optional `AddSkillIO { probe, fetchPlan, exit }` param on addSkill (mirror.ts ProbeDeps precedent); all six in-function `process.exit` calls routed through the seam (exitInvalidLocator module helper left as-is — outside the probe branch, pre-probe validation only). Three tests added: (1) probe undefined + fetch succeeds → calls = [probe, fetch], exit never reached, deck.toml written; (2) probe with failures + fetch failed → exit(1) via seam + stderr contains 'Probe detail' + the simulated 403; (3) probe undefined + fetch failed → 'Network probe was inconclusive' line. Negative test per acceptance: temp-patched `exit(1)` into the probe block → test 1 failed with HARD_EXIT_1 → reverted. `bun --filter='@lythos/skill-deck' run test` → 164 pass, 0 fail.
 
 ## Related Files
 - Modified: packages/lythoskill-deck/src/add.ts, add.test.ts (pending)

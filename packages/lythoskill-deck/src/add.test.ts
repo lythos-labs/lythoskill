@@ -195,3 +195,110 @@ describe('normalizeSkillsSh', () => {
       .toBe('github.com/anthropics/skills/skills/frontend-design#abc1234')
   })
 })
+
+// ── addSkill advisory-probe branch (IO seam, TASK-20260828194647623) ────────
+// The probe advises, the clone decides. These tests pin that a probe failure
+// never hard-exits before the clone attempt, and that a clone failure surfaces
+// the probe's per-URL failure detail.
+
+import { spyOn } from 'bun:test'
+import { readFileSync } from 'node:fs'
+import { addSkill, type AddSkillIO } from './add.ts'
+import { ColdPool, buildFetchPlan, parseLocator } from '@lythos/cold-pool'
+
+function makeAddSandbox() {
+  const workdir = mkdtempSync(join(tmpdir(), 'deck-add-io-'))
+  const poolDir = join(workdir, 'pool')
+  const deckPath = join(workdir, 'skill-deck.toml')
+  writeFileSync(deckPath, `[deck]\ncold_pool = "${poolDir}"\nworking_set = ".claude/skills"\n`)
+  const plan = buildFetchPlan(new ColdPool(poolDir), parseLocator('github.com/acme/widgets')!)
+  return { workdir, deckPath, poolDir, targetDir: plan.targetDir }
+}
+
+function hardExitSentinel(exitCodes: number[]): (code: number) => never {
+  return (code: number) => {
+    exitCodes.push(code)
+    throw new Error(`HARD_EXIT_${code}`)
+  }
+}
+
+describe('addSkill advisory probe branch', () => {
+  it('probe failure does NOT hard-exit — clone is still attempted, success path completes', async () => {
+    const { workdir, deckPath, targetDir } = makeAddSandbox()
+    mkdirSync(targetDir, { recursive: true })
+    writeFileSync(join(targetDir, 'SKILL.md'), '---\nname: widgets\ndescription: test\n---\n')
+
+    const calls: string[] = []
+    const exitCodes: number[] = []
+    const io: AddSkillIO = {
+      probe: (async () => { calls.push('probe'); return undefined }) as any,
+      fetchPlan: ((() => { calls.push('fetch'); return { status: 'already-present' } })) as any,
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    await addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io)
+
+    // probe ran, clone attempted after it, and exit was never reached
+    expect(calls).toEqual(['probe', 'fetch'])
+    expect(exitCodes).toEqual([])
+    expect(readFileSync(deckPath, 'utf-8')).toContain('github.com/acme/widgets')
+    rmSync(workdir, { recursive: true, force: true })
+  })
+
+  it('probe failure + clone failure → error output includes probe failures detail, exits via seam', async () => {
+    const { workdir, deckPath } = makeAddSandbox()
+    const errLines: string[] = []
+    const errSpy = spyOn(console, 'error').mockImplementation((...args: any[]) => { errLines.push(args.join(' ')) })
+    const warnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const exitCodes: number[] = []
+    const io: AddSkillIO = {
+      probe: (async () => ({
+        url: 'https://github.com/acme/widgets.git',
+        path: 'direct',
+        confidence: 'high',
+        failures: [{ url: 'https://github.com/acme/widgets.git', reason: 'HTTP 403 (simulated)' }],
+      })) as any,
+      fetchPlan: ((() => ({ status: 'failed', message: 'git clone exploded (simulated)' }))) as any,
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io))
+        .rejects.toThrow('HARD_EXIT_1')
+
+      expect(exitCodes).toEqual([1])
+      const out = errLines.join('\n')
+      expect(out).toContain('git clone exploded (simulated)')
+      expect(out).toContain('Probe detail')
+      expect(out).toContain('HTTP 403 (simulated)')
+    } finally {
+      errSpy.mockRestore()
+      warnSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('inconclusive probe (undefined) + clone failure → inconclusive line printed', async () => {
+    const { workdir, deckPath } = makeAddSandbox()
+    const errLines: string[] = []
+    const errSpy = spyOn(console, 'error').mockImplementation((...args: any[]) => { errLines.push(args.join(' ')) })
+    const warnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const exitCodes: number[] = []
+    const io: AddSkillIO = {
+      probe: (async () => undefined) as any,
+      fetchPlan: ((() => ({ status: 'failed', message: 'simulated clone failure' }))) as any,
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io))
+        .rejects.toThrow('HARD_EXIT_1')
+
+      expect(errLines.join('\n')).toContain('Network probe was inconclusive')
+    } finally {
+      errSpy.mockRestore()
+      warnSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+})
