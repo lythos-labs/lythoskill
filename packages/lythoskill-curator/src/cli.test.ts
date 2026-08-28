@@ -292,6 +292,60 @@ describe('scanSkill', () => {
     expect(meta!.status).toBe('parsed')
     expect(meta!.parseError).toBeNull()
   })
+
+  it('parses CRLF frontmatter (Windows-authored SKILL.md) without degrading', () => {
+    // Regression: real cold pool had 3 skills degrading solely on \r\n line endings
+    const dir = join(tmpDir, 'crlf-skill')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'SKILL.md'), '---\r\nname: crlf-skill\r\ndescription: Written on Windows.\r\nversion: "1.0.0"\r\n---\r\n\r\n# Body\r\n')
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('parsed')
+    expect(meta!.name).toBe('crlf-skill')
+    expect(meta!.description).toBe('Written on Windows.')
+    expect(meta!.parseError).toBeNull()
+  })
+
+  it('SKILL.md with no frontmatter → incomplete with an explicit reason (no parser crash)', () => {
+    // Regression: previously crashed inside YAML.parse(undefined) and surfaced
+    // "undefined is not an object (evaluating 'source.length')" to the user
+    const dir = join(tmpDir, 'no-frontmatter')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'SKILL.md'), '# Just Markdown\n\nNo frontmatter here.\n')
+    const meta = scanSkill(dir)
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('incomplete')
+    expect(meta!.parseError).toContain('no YAML frontmatter block')
+    expect(meta!.name).toBe('no-frontmatter') // path-derived
+  })
+})
+
+describe('scan report degraded explanation', () => {
+  it('degraded entries print a reason and a remediation hint, not just a label', () => {
+    const poolDir = mkdtempSync(join(tmpdir(), 'curator-degraded-'))
+    const dir = join(poolDir, 'bare-skill')
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'SKILL.md'), '# Bare\n\nNo frontmatter.\n')
+    // Second degraded class: frontmatter parses but description is missing
+    createSkillDir(poolDir, 'no-desc', 'name: no-desc\nversion: "1.0.0"\n')
+
+    const logs: string[] = []
+    try {
+      runCurator([poolDir], {
+        log: (msg) => logs.push(String(msg)),
+        error: () => {},
+        exit: (code) => { throw new Error(`EXIT:${code}`) },
+      })
+    } finally {
+      rmSync(poolDir, { recursive: true, force: true })
+    }
+
+    const out = logs.join('\n')
+    expect(out).toContain('2 skill(s) indexed with degraded status')
+    expect(out).toContain('no YAML frontmatter block')   // per-entry reason (no-frontmatter class)
+    expect(out).toContain('frontmatter has no description')  // per-entry reason (missing-description class)
+    expect(out).toContain('Fix: add or repair the SKILL.md frontmatter')  // remediation hint
+  })
 })
 
 // ── curator add CLI BDD ────────────────────────────────────

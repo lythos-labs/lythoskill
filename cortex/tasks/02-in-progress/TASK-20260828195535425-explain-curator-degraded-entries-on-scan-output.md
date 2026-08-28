@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-28 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -35,6 +36,9 @@ A first-time user running `curator` on their pool sees "degraded" with no explan
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Registered from user-sim review P2 (finding without artifact). Origin: ZK onboarding trial 2026-08-27, noted in TASK-20260827131734103 Background.
+- 2026-08-28: R1 root-cause (reproduced live, 952-skill pool): the {{PACKAGE_VERSION}} hypothesis is FALSIFIED — none of the 6 degraded were lythoskill's own skills (pool composition changed since the 08-27 trial). Actual three causes: (1) 3× lijigang/ljg-skills — CRLF line endings; the frontmatter split regex leaves a lone trailing \r after the final scalar, yaml@2 dies with "Unexpected scalar at node end"; (2) 1× daymade/competitors-analysis — genuinely invalid YAML (`argument-hint: [a] [b]`), degraded is the CORRECT signal; (3) 2× (wrsmith108, Undermybelt) — no frontmatter block at all; parseFrontmatter returns no _raw and YAML.parse(undefined) crashed with "undefined is not an object (evaluating 'source.length')".
+- 2026-08-28: R2 decision = (c) both. Curator-side fixes: CRLF normalized via `\r\n?` → `\n` before YAML.parse; no-frontmatter → status 'incomplete' with explicit reason string instead of a parser crash. Output-side: degraded block gains a two-line footer explaining what degraded means + the fix. 不做 respected: the genuinely-invalid-YAML entry still degrades (signal not silenced).
+- 2026-08-28: Verified live — real pool scan now shows 3 degraded (down from 6), each with a one-line reason: 2× [MISSING] no-frontmatter (self-explanatory), 1× [YAML] genuine. Tests: 3 new (CRLF regression, no-frontmatter regression, report-level reason+hint via runCurator io injection); `bun --filter='./packages/lythoskill-curator' run test` → 112 pass, 0 fail.
 
 ## Related Files
 - Modified: packages/lythoskill-curator/src/cli.ts (pending)

@@ -40,7 +40,7 @@ interface SkillMeta {
   // FSM tracking
   contentHash: string;
   status: string; // parsed | parse_error | incomplete
-  parseError: string | null; // error message if YAML.parse threw
+  parseError: string | null; // why the entry degraded: YAML.parse error message, or an explicit reason (no frontmatter / missing description)
 }
 
 export interface CuratorIO {
@@ -101,27 +101,39 @@ export function scanSkill(path: string): SkillMeta | null {
 
   let frontmatter: Record<string, unknown> = {}
   let parseError: string | null = null
-  try {
-    // R3 (TASK-20260827131734103): template placeholders like {{ PACKAGE_VERSION }}
-    // in our own skills' frontmatter parse as YAML collection keys, and yaml@2
-    // emits a noisy stack-trace warning via process.emitWarning. Suppress just
-    // that warning during the parse — real parse errors still throw (caught
-    // below), and other warnings pass through. (logLevel: 'silent' is NOT an
-    // option: it also downgrades real syntax errors to non-throwing warnings.)
-    const origEmitWarning = process.emitWarning
-    process.emitWarning = ((warning: any, ...args: any[]) => {
-      if (String(warning).includes('Keys with collection values will be stringified')) return
-      return origEmitWarning.call(process, warning, ...args)
-    }) as typeof process.emitWarning
+  let noFrontmatter = false
+  if (rawFm._raw === undefined) {
+    // No frontmatter block at all — not a YAML error, just missing metadata.
+    // Degrade gracefully with an explicit reason instead of crashing the parser
+    // (previously surfaced as "undefined is not an object (evaluating 'source.length')").
+    noFrontmatter = true
+    parseError = 'no YAML frontmatter block (SKILL.md must start with ---) — indexed with path-derived metadata only'
+  } else {
     try {
-      frontmatter = YAML.parse(rawFm._raw as string) || {}
-    } finally {
-      process.emitWarning = origEmitWarning
+      // R3 (TASK-20260827131734103): template placeholders like {{ PACKAGE_VERSION }}
+      // in our own skills' frontmatter parse as YAML collection keys, and yaml@2
+      // emits a noisy stack-trace warning via process.emitWarning. Suppress just
+      // that warning during the parse — real parse errors still throw (caught
+      // below), and other warnings pass through. (logLevel: 'silent' is NOT an
+      // option: it also downgrades real syntax errors to non-throwing warnings.)
+      const origEmitWarning = process.emitWarning
+      process.emitWarning = ((warning: any, ...args: any[]) => {
+        if (String(warning).includes('Keys with collection values will be stringified')) return
+        return origEmitWarning.call(process, warning, ...args)
+      }) as typeof process.emitWarning
+      try {
+        // Normalize CRLF — Windows-authored SKILL.md files are valid YAML once
+        // line endings are normalized (yaml@2 chokes on a stray \r otherwise,
+        // including a lone trailing \r left by the frontmatter split regex).
+        frontmatter = YAML.parse((rawFm._raw as string).replace(/\r\n?/g, '\n')) || {}
+      } finally {
+        process.emitWarning = origEmitWarning
+      }
+    } catch (e) {
+      // Frontmatter parse failed — use empty frontmatter, derive basics from path.
+      // The skill still exists and has a path; basic metadata is derivable.
+      parseError = e instanceof Error ? e.message : String(e)
     }
-  } catch (e) {
-    // Frontmatter parse failed — use empty frontmatter, derive basics from path.
-    // The skill still exists and has a path; basic metadata is derivable.
-    parseError = e instanceof Error ? e.message : String(e)
   }
 
   const hasScripts = statSync(join(path, 'scripts'), { throwIfNoEntry: false })?.isDirectory() || false;
@@ -132,11 +144,15 @@ export function scanSkill(path: string): SkillMeta | null {
 
   // Structural validation: classify scan quality
   let status = 'parsed'
-  if (parseError) {
+  if (noFrontmatter) {
+    // Missing metadata, not malformed metadata — 'incomplete' (tag: MISSING), with the reason carried in parseError.
+    status = 'incomplete'
+  } else if (parseError) {
     status = 'parse_error'
   } else if (!core.description) {
     // description is essential for discovery; without it the skill is effectively invisible
     status = 'incomplete'
+    parseError = 'frontmatter has no description — invisible to metadata search (query/audit); add a description field'
   }
 
   // CLI-specific IO extras
@@ -377,6 +393,8 @@ export function runCurator(argv: string[], io: CuratorIO = defaultCuratorIO) {
       const tag = s.status === 'parse_error' ? 'YAML' : s.status === 'incomplete' ? 'MISSING' : s.status;
       io.log(`   [${tag}] ${s.path}${s.parseError ? ` — ${s.parseError}` : ''}`);
     }
+    io.log(`   ↳ degraded = indexed with partial metadata (the skill still works for path-based operations).`);
+    io.log(`     Fix: add or repair the SKILL.md frontmatter (name + description), then re-run the scan.`);
   }
   if (skipped.length > 0) {
     io.log(`🚫 ${skipped.length} skill(s) skipped (unreadable):`);
