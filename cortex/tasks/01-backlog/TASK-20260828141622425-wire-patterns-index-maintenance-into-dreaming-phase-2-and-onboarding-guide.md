@@ -42,7 +42,7 @@ The ADR's 后续 assigns these wiring items, none of which exist yet:
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Created as follow-up of ADR-20260613190449007 acceptance （方案A). Initial classification shipped in commit `7de92b8c` (same commit series as the acceptance).
-- 2026-08-28: ZK review round 1 — 2 P1 fixed (INDEX.md did not exist at review time → now committed; ADR path/status claims → acceptance landed, paths updated), P2 （ dropped 后续 item) added to 不做， P3 (insertion line numbers + zh register) applied.
+- 2026-08-28: ZK review round 1 — 2 P1 fixed (INDEX.md did not exist at review time → now committed; ADR path/status claims → acceptance landed, paths updated), P2 (dropped 后续 item: 更新 cortex/wiki/INDEX.md 模板) added to 不做， P3 (insertion line numbers + zh register) applied. Round 2: PASS.
 
 ## Related Files
 - Modified: (pending)

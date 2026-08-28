@@ -28,7 +28,7 @@ This is a **discussion/spike card**: the deliverable is a decision document, not
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
-- Read first: `cortex/adr/02-accepted/ADR-20260613190449007-*.md` (full 方案D option text), curator's SQLite usage in `packages/lythoskill-curator/src/catalog-db.ts` and the shared layer `packages/lythoskill-infra/src/sqlite-db.ts` (relevant because the ADR asks whether wiki indexing reuses curator's mechanism), and the "personal environment scan"定位 in curator's SKILL.md.
+- Read first: `cortex/adr/02-accepted/ADR-20260613190449007-*.md` (full 方案D option text), curator's SQLite usage in `packages/lythoskill-curator/src/catalog-db.ts` and the shared layer `packages/lythoskill-infra/src/sqlite-db.ts` (relevant because the ADR asks whether wiki indexing reuses curator's mechanism), and the "personal environment scan, not project artifact" 定位 — the exact phrase lives in `cortex/adr/02-accepted/ADR-20260424000744041-curator-output-is-personal-environment-scan-not-project-artifact.md` (curator's SKILL.md:38 says "personal knowledge base" — same idea, less precise).
 - Evidence gathering: check whether dreaming has been maintaining `cortex/wiki/01-patterns/INDEX.md` (`git log --oneline -- cortex/wiki/01-patterns/INDEX.md`) — freshness or rot is the deciding evidence. (File exists since commit `7de92b8c`; before …425 lands there is no maintenance loop to evaluate.)
 - Output: `bun packages/lythoskill-project-cortex/src/cli.ts adr "<title>"` then fill the card; it stays proposed for user decision.
 
