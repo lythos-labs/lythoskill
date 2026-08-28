@@ -271,10 +271,12 @@ async function singleRun(args: string[], io: ArenaCliIO) {
   try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
   try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
   try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
-  const { resolvePlayer } = await import('./player')
+  const { resolvePlayer, playerAliasNote } = await import('./player')
 
   const player = resolvePlayer(opts.player ?? 'kimi')
   const agent = useAgent(player)
+  const aliasNote = playerAliasNote(opts.player ?? 'kimi')
+  if (aliasNote) log(`ℹ️  ${aliasNote}`)
   const outDir = opts.out ? resolve(opts.out) : join(process.cwd(), `agent-output-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}`)
   mkdirSync(outDir, { recursive: true })
 

@@ -16,10 +16,24 @@ const BUILTIN_PLAYERS: Record<string, string> = {
   'claude-code': 'claude-sdk',
   'claude-cli': 'claude',           // legacy CLI spawn — explicitly opt-in
   'kimi': 'kimi',
+  'kimi-code': 'kimi',              // renamed upstream — users guess the new name (ADR-20260828004129233)
   'deepseek': 'deepseek',
   'codex': 'codex',
   'cursor': 'cursor',
   'gemini': 'gemini',
+}
+
+/**
+ * One-line note when a player reference resolves through a built-in mapping
+ * (e.g. 'kimi-code' → 'kimi'), else null. Pure — callers decide whether to print.
+ */
+export function playerAliasNote(name: string): string | null {
+  const normalized = name.toLowerCase().trim()
+  const resolved = BUILTIN_PLAYERS[normalized]
+  if (resolved && resolved !== normalized) {
+    return `player '${normalized}' = '${resolved}' (built-in alias)`
+  }
+  return null
 }
 
 /**

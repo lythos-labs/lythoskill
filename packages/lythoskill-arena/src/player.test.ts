@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'bun:test'
-import { resolvePlayer, resolveSides, groupBySide, totalRuns } from './player'
+import { resolvePlayer, playerAliasNote, resolveSides, groupBySide, totalRuns } from './player'
 import { parseArenaToml } from './arena-toml'
 
 const toml = parseArenaToml(`
@@ -30,6 +30,17 @@ describe('resolvePlayer', () => {
 
   it('maps kimi → kimi', () => {
     expect(resolvePlayer('kimi')).toBe('kimi')
+  })
+
+  it('maps kimi-code → kimi (upstream rename alias)', () => {
+    expect(resolvePlayer('kimi-code')).toBe('kimi')
+    expect(resolvePlayer('Kimi-Code')).toBe('kimi')
+  })
+
+  it('playerAliasNote reports alias mappings only', () => {
+    expect(playerAliasNote('kimi-code')).toContain("'kimi-code' = 'kimi'")
+    expect(playerAliasNote('kimi')).toBeNull()
+    expect(playerAliasNote('expert-architect')).toBeNull()
   })
 
   it('passes through unknown player names', () => {
