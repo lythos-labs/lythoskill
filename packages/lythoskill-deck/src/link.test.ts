@@ -471,6 +471,65 @@ function captureConsole(fn: () => unknown): string[] {
   return lines
 }
 
+describe('link output — each skill prints once per destination (TASK-20260827131734254)', () => {
+  it('single destination: each skill prints exactly once', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+    placeSkill(coldPool, 'github.com/owner/repo/skill-b')
+
+    const deckContent = `[deck]
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+
+[tool.skills.skill-a]
+path = "github.com/owner/repo/skill-a"
+
+[tool.skills.skill-b]
+path = "github.com/owner/repo/skill-b"
+`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    const linkLines = lines.filter(l => l.includes('🔗'))
+    expect(linkLines.filter(l => l.includes('skill-a'))).toHaveLength(1)
+    expect(linkLines.filter(l => l.includes('skill-b'))).toHaveLength(1)
+  })
+
+  it('also_link_to fan-out: once per destination, each destination labeled', () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+
+    placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+
+    const deckContent = `[deck]
+working_set = ".claude/skills"
+cold_pool = "${coldPoolRel}"
+also_link_to = [".agents/skills"]
+
+[tool.skills.skill-a]
+path = "github.com/owner/repo/skill-a"
+`
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckContent)
+
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    const out = lines.join('\n')
+
+    // skill-a appears exactly twice: once per actual destination
+    const linkLines = lines.filter(l => l.includes('🔗'))
+    expect(linkLines.filter(l => l.includes('skill-a'))).toHaveLength(2)
+
+    // both destinations labeled before their link lines
+    expect(out).toContain('working_set: .claude/skills')
+    expect(out).toContain('also_link_to: .agents/skills')
+  })
+})
+
 describe('working_set switch warning (TASK-20260827131734189)', () => {
   const deckFor = (workingSet: string) => `[deck]
 working_set = "${workingSet}"

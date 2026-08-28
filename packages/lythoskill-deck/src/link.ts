@@ -595,6 +595,7 @@ if (prevWorkingSet && resolve(prevWorkingSet) !== resolvedWorkingSet) {
 // ── 收束 working set ────────────────────────────────────────
 
 const declaredNames = new Set(declared.map(d => d.alias));
+console.log('📁 working_set: ' + relative(PROJECT_DIR, WORKING_SET));
 	reconcileTargetDir(WORKING_SET, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
 
 // also_link_to fan-out (POSSE pattern, ADR-20260517152850372)
@@ -662,8 +663,6 @@ for (const target of ALSO_LINK_TO) {
     ...(item.expires ? { expires: item.expires } : {}),
     deck_managed_dirs: managedDirs,
   });
-
-  console.log(`  🔗 ${item.alias}`);
 }
 
 // ── Transient 过期检查 ──────────────────────────────────────
