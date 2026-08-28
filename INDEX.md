@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 23:32:23
+> 自动生成于 2026/8/29 00:12:27
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 365 | 进行中: 1, 待验收: 0, 已完成: 309 |
+| Tasks | 365 | 进行中: 0, 待验收: 1, 已完成: 309 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -89,13 +89,13 @@
 - [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 - [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
 
 ### 已完成 (309)
 
