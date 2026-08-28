@@ -10,8 +10,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
+import { spawnSync } from 'node:child_process'
 
-import { extractQuotedPhrases, scanSkill, runAdd, writeAddition, runFind, runQuery, runAudit, runTag, backupIndex, restoreIndex, printHelp, runRefreshPlan, runRefreshExecute } from './cli.ts'
+import { extractQuotedPhrases, scanSkill, runCurator, runAdd, writeAddition, runFind, runQuery, runAudit, runTag, backupIndex, restoreIndex, printHelp, runRefreshPlan, runRefreshExecute } from './cli.ts'
 import { inferSource } from './curator-core'
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -997,5 +998,100 @@ describe('printHelp', () => {
     expect(output).toContain('audit')
     expect(output).toContain('find')
     expect(exitCode).toBe(0)
+  })
+})
+
+// ── runCurator arg validation (TASK-20260827131734103) ───────
+// Fail-closed: unknown first arg must not be consumed as a pool path
+// (previously: "Indexed 0 skills", exit 0, garbage <arg>/.lythoskill-curator/).
+
+describe('runCurator arg validation', () => {
+  const cliPath = join(__dirname, 'cli.ts')
+
+  it('V1: unknown arg in temp cwd → non-zero exit, loud error, no garbage dir', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-validate-'))
+    const res = spawnSync(process.execPath, [cliPath, 'frobnicate'], { cwd: tmpDir, encoding: 'utf-8' })
+
+    expect(res.status).not.toBe(0)
+    expect(res.stderr).toContain('Unknown command or nonexistent pool path')
+    expect(res.stderr).toContain('frobnicate')
+    expect(res.stderr).toContain('What to do')
+    expect(existsSync(join(tmpDir, 'frobnicate'))).toBe(false)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('V2: nonexistent absolute path → exit(1) + error, nothing created', () => {
+    const errors: string[] = []
+    const code = catchExit(() => runCurator(['/nonexistent/path/to/pool'], {
+      log: () => {},
+      error: (msg) => errors.push(String(msg)),
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    }))
+
+    expect(code).toBe(1)
+    expect(errors.some(e => e.includes('nonexistent pool path'))).toBe(true)
+    expect(errors.some(e => e.includes('/nonexistent/path/to/pool'))).toBe(true)
+    expect(existsSync('/nonexistent/path/to/pool')).toBe(false)
+  })
+
+  it('V3: "scan" literal → rejected with pointer, no scan/ dir created in cwd', () => {
+    // R2 decision: `scan` is NOT an alias — scanning is the default action,
+    // the positional form is the documented one. Reject with a pointer.
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-validate-'))
+    const res = spawnSync(process.execPath, [cliPath, 'scan'], { cwd: tmpDir, encoding: 'utf-8' })
+
+    expect(res.status).not.toBe(0)
+    expect(res.stderr).toContain('Unknown command: "scan"')
+    expect(res.stderr).toContain('no `scan` subcommand')
+    expect(existsSync(join(tmpDir, 'scan'))).toBe(false)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('V4: existing pool dir still scans (regression)', () => {
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-validate-'))
+    const poolDir = join(tmpDir, 'pool')
+    createSkillDir(poolDir, 'ok-skill', 'name: ok-skill\ndescription: Works.\n')
+
+    const logs: string[] = []
+    runCurator([poolDir], {
+      log: (msg) => logs.push(String(msg)),
+      error: () => {},
+      exit: (code) => { throw new Error(`EXIT:${code}`) },
+    })
+
+    expect(logs.some(l => l.includes('Indexed 1 skills'))).toBe(true)
+    expect(existsSync(join(poolDir, '.lythoskill-curator', 'REGISTRY.json'))).toBe(true)
+
+    rmSync(tmpDir, { recursive: true, force: true })
+  })
+
+  it('V5: template placeholder frontmatter parses quietly (R3, no stderr stack trace)', () => {
+    // {{ PACKAGE_VERSION }} in our own skills' frontmatter parses as a YAML
+    // collection key; yaml@2 emits a process.emitWarning with full stack trace.
+    const tmpDir = mkdtempSync(join(tmpdir(), 'curator-validate-'))
+    const dir = createSkillDir(tmpDir, 'tpl-version', [
+      'name: tpl-version',
+      'description: Has a template placeholder.',
+      'version: {{ PACKAGE_VERSION }}',
+      '',
+    ].join('\n'))
+
+    const warnings: string[] = []
+    const origEmitWarning = process.emitWarning
+    process.emitWarning = ((warning: any) => { warnings.push(String(warning)) }) as typeof process.emitWarning
+    let meta: ReturnType<typeof scanSkill>
+    try {
+      meta = scanSkill(dir)
+    } finally {
+      process.emitWarning = origEmitWarning
+    }
+
+    expect(meta).not.toBeNull()
+    expect(meta!.status).toBe('parsed')
+    expect(warnings.some(w => w.includes('stringified'))).toBe(false)
+
+    rmSync(tmpDir, { recursive: true, force: true })
   })
 })

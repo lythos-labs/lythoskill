@@ -102,7 +102,22 @@ export function scanSkill(path: string): SkillMeta | null {
   let frontmatter: Record<string, unknown> = {}
   let parseError: string | null = null
   try {
-    frontmatter = YAML.parse(rawFm._raw as string) || {}
+    // R3 (TASK-20260827131734103): template placeholders like {{ PACKAGE_VERSION }}
+    // in our own skills' frontmatter parse as YAML collection keys, and yaml@2
+    // emits a noisy stack-trace warning via process.emitWarning. Suppress just
+    // that warning during the parse — real parse errors still throw (caught
+    // below), and other warnings pass through. (logLevel: 'silent' is NOT an
+    // option: it also downgrades real syntax errors to non-throwing warnings.)
+    const origEmitWarning = process.emitWarning
+    process.emitWarning = ((warning: any, ...args: any[]) => {
+      if (String(warning).includes('Keys with collection values will be stringified')) return
+      return origEmitWarning.call(process, warning, ...args)
+    }) as typeof process.emitWarning
+    try {
+      frontmatter = YAML.parse(rawFm._raw as string) || {}
+    } finally {
+      process.emitWarning = origEmitWarning
+    }
   } catch (e) {
     // Frontmatter parse failed — use empty frontmatter, derive basics from path.
     // The skill still exists and has a path; basic metadata is derivable.
@@ -308,6 +323,37 @@ export function restoreIndex(outputDir: string, io: CuratorIO = defaultCuratorIO
 
 export function runCurator(argv: string[], io: CuratorIO = defaultCuratorIO) {
   const { poolPath, outputDir } = parseCuratorArgs(argv);
+
+  // Fail loudly on unknown args — an unrecognized first arg lands here as
+  // "pool path". Scanning a nonexistent dir would silently index 0 skills
+  // with exit 0 and create a garbage <arg>/.lythoskill-curator/ in cwd
+  // (TASK-20260827131734103). Validate BEFORE any mkdir/write side effects.
+  if (poolPath === 'scan') {
+    // R2: `scan` is rejected with a pointer — scanning is the default action,
+    // the positional form is the documented one. No alias (keeps surface small).
+    io.error!('❌ Unknown command: "scan"')
+    io.error!('')
+    io.error!('   Curator has no `scan` subcommand — scanning is the default action.')
+    io.error!('')
+    io.error!('   Did you mean:')
+    io.error!('     lythoskill-curator                # scan default cold pool (~/.agents/skill-repos)')
+    io.error!('     lythoskill-curator <pool-path>    # scan a specific cold pool')
+    io.exit!(1)
+  }
+  const poolStat = statSync(poolPath, { throwIfNoEntry: false })
+  if (!poolStat?.isDirectory()) {
+    io.error!(`❌ Unknown command or nonexistent pool path: "${poolPath}"`)
+    io.error!('')
+    io.error!('   Why: the first positional argument must be an existing cold-pool')
+    io.error!('   directory to scan, or a subcommand: add, tag, query, audit, find,')
+    io.error!('   restore, refresh-plan, refresh-execute.')
+    io.error!('')
+    io.error!('   What to do:')
+    io.error!('     lythoskill-curator                # scan default cold pool (~/.agents/skill-repos)')
+    io.error!('     lythoskill-curator <pool-path>    # scan a specific cold pool')
+    io.error!('     lythoskill-curator --help         # full usage')
+    io.exit!(1)
+  }
 
   const skillDirs = findSkillDirs(poolPath);
 

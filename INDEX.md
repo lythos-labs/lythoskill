@@ -1,13 +1,13 @@
 # Project Index
 
-> 自动生成于 2026/8/28 10:59:02
+> 自动生成于 2026/8/28 12:23:27
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 349 | 进行中: 0, 待验收: 0, 已完成: 299 |
-| Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
+| Tasks | 350 | 进行中: 5, 待验收: 0, 已完成: 299 |
+| Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 90 |
 
 ---
@@ -16,7 +16,7 @@
 
 ### 进行中
 
-_无_
+- **EPIC-20260828111425886**: external agent accessibility and onboarding
 
 ### 已完成
 
@@ -76,17 +76,17 @@ _无_
 
 ## 📄 Tasks
 
-### 待办 (5)
+### 待办 (1)
 
-- [ ] **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
-- [ ] **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
-- [ ] **TASK-20260827131734254**: deck-link-prints-each-skill-twice
-- [ ] **TASK-20260828003758156**: mechanize site command and count verification guard
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 
-### 进行中 (0)
+### 进行中 (5)
 
-_无_
+- 🔄 **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
+- 🔄 **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
+- 🔄 **TASK-20260827131734254**: deck-link-prints-each-skill-twice
+- 🔄 **TASK-20260828003758156**: mechanize site command and count verification guard
+- 🔄 **TASK-20260828111354804**: fix mirror probe false negative HEAD semantics vs clone capability
 
 ### 待验收 (0)
 
