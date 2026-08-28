@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
-import { extractCommands, extractFlags, validateCommand, loadClis, checkSite } from './check-site-commands'
+import { extractCommands, extractFlags, extractDispatchLabels, validateCommand, loadClis, checkSite } from './check-site-commands'
 
 const ROOT = resolve(import.meta.dirname, '..')
 const GUARD = join(ROOT, 'scripts', 'check-site-commands.ts')
@@ -103,6 +103,30 @@ describe('validateCommand', () => {
 
   it('fails closed on unknown packages', () => {
     expect(validateCommand(clis, at('@lythos/curator', ['scan']))).toContain('unknown package "@lythos/curator"')
+  })
+})
+
+describe('CLI_TABLE drift tripwire', () => {
+  // The subcommand table is hand-maintained; this test makes drift loud —
+  // every `case 'x'` / `=== 'x'` dispatch label in a subcommand-shaped CLI's
+  // source must be in its table row (or its ignoreDispatch list).
+  // (Caught a real miss: deck's `update` was absent, ZK review 2026-08-28.)
+  const clis = loadClis(ROOT)
+  for (const cli of clis.values()) {
+    if (cli.shape !== 'subcommand') continue
+    it(`${cli.pkg}: every dispatch label is in the table`, () => {
+      const labels = extractDispatchLabels(readFileSync(join(ROOT, cli.source), 'utf8'))
+      const ignored = new Set([...(cli.ignoreDispatch ?? []), ...cli.commands])
+      const missing = labels.filter(l => !ignored.has(l))
+      expect(missing).toEqual([])
+    })
+  }
+
+  it('guard fails closed when a CLI source is unreadable', () => {
+    // loadClis with a bogus root → every loadError must surface as an offender
+    const dir = fixture('unreadable-cli', '```bash\nbunx @lythos/skill-deck link\n```\n')
+    const { offenders } = checkSite(dir, '/nonexistent-root')
+    expect(offenders.some(o => o.includes('cannot read CLI source'))).toBe(true)
   })
 })
 
