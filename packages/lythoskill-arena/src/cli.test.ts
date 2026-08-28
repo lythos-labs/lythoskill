@@ -74,10 +74,14 @@ describe('main', () => {
 })
 
 describe('singleRun', () => {
+  // Validation-order tests pin --player to force external mode: since
+  // TASK-20260828141622671, mode resolution (host handoff vs no-player error)
+  // precedes flag validation, and the host env of the machine running the
+  // tests would otherwise change which error fires (CI has no host markers).
   it('errors when --deck is missing', async () => {
     const { io, logs, errors } = mockIO()
     const exitCode = await catchExitAsync(async () => {
-      await main(['single', '--brief', 'test task'], io)
+      await main(['single', '--brief', 'test task', '--player', 'kimi'], io)
     })
     expect(exitCode).toBe(1)
     expect(errors.length).toBeGreaterThan(0)
@@ -88,7 +92,7 @@ describe('singleRun', () => {
   it('errors when both --task and --brief are missing', async () => {
     const { io, logs, errors } = mockIO()
     const exitCode = await catchExitAsync(async () => {
-      await main(['single', '--deck', './some-deck.toml'], io)
+      await main(['single', '--deck', './some-deck.toml', '--player', 'kimi'], io)
     })
     expect(exitCode).toBe(1)
     expect(errors.length).toBeGreaterThan(0)
@@ -99,7 +103,7 @@ describe('singleRun', () => {
   it('errors when --brief is empty string', async () => {
     const { io, logs, errors } = mockIO()
     const exitCode = await catchExitAsync(async () => {
-      await main(['single', '--deck', './some-deck.toml', '--brief', ''], io)
+      await main(['single', '--deck', './some-deck.toml', '--brief', '', '--player', 'kimi'], io)
     })
     expect(exitCode).toBe(1)
     expect(errors.length).toBeGreaterThan(0)
