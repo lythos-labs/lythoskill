@@ -221,6 +221,15 @@ Epic: EPIC-xxx done     # Epic: done, suspend, resume
 
 Post-commit hook auto-dispatches and creates a follow-up commit — an extra commit after yours is normal. `Closes:` requires the task to already be in review. Full syntax: [cortex SKILL.md](packages/lythoskill-project-cortex/skill/SKILL.md).
 
+**Attribution trailers (every agent-authored commit)**: the commit Author stays the human's git identity; credit the agent via trailers at the end of the body:
+
+```
+Co-Authored-By: AI Agent <you+ai@proton.me>
+Model: <model id from the host config, e.g. kimi-code/k3 — read default_model, never guess>
+```
+
+Ordering when cortex trailers are also present: cortex trailers (`Closes:`/`Review:`/…) first, then `Co-Authored-By:`, then `Model:` last. The cortex trailer parser (`packages/lythoskill-project-cortex/src/lib/trailer.ts`) is line-based over exactly five keys (`Task|ADR|Epic|Closes|Review`), so attribution lines never interfere — verified 2026-08-28 on the TASK-20260828141622777 commit series. Write messages with `git commit -F <file>` (apostrophes in `$()` heredocs break parsing — see Critical Gotchas).
+
 #### Task-Git Discipline
 
 **Commit granularity = reviewer entry points**: one task → 2–5 commits (core change / tests / docs / review trailer), never one giant mixed commit. Every commit message includes `TASK-xxx` (`git log --grep` reconstructs the task). Acceptance criteria carry `→ Verify: <command>` with expected output — not "tests pass" but `bun test <path> — 14 pass, 0 fail`.
