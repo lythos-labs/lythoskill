@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path'
 export type GitExec = typeof execFileSync
 
 /** Read LYTHOS_SOCKS_PROXY env var and return git-config args if present. */
-function socksProxyArgs(): string[] {
+export function socksProxyArgs(): string[] {
   const proxy = process.env.LYTHOS_SOCKS_PROXY?.trim()
   if (!proxy) return []
   const url = proxy.startsWith('socks5://') ? proxy : `socks5://${proxy}`

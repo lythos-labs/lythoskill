@@ -50,78 +50,168 @@ describe('probeConnectivity', () => {
     }
   }
 
-  // ── Tracer Bullet ──
-  it('direct reachable → returns direct path', async () => {
-    mockFetch(
-      new Map([
-        ['https://example.com/skill', new Response(null, { status: 200 })],
-      ]),
-    )
+  /** execFileSync fake: per-URL git ls-remote success/failure; curl never succeeds. */
+  function mockGitExec(okUrls: string[] = []) {
+    const calls: Array<{ file: string; args: string[] }> = []
+    const exec = (file: unknown, args: unknown) => {
+      const a = (args as string[]).map(String)
+      calls.push({ file: String(file), args: a })
+      if (String(file) === 'git') {
+        const url = a[a.length - 1]!
+        if (okUrls.includes(url)) return ''
+        throw new Error(`git ls-remote failed for ${url}`)
+      }
+      throw new Error('curl failed')
+    }
+    return { exec: exec as any, calls }
+  }
 
-    const result = await probeConnectivity('https://example.com/skill')
+  /** execFileSync fake where git can never answer (e.g. binary missing). */
+  function gitUnavailable() {
+    return (() => {
+      throw new Error('spawnSync git ENOENT')
+    }) as any
+  }
+
+  const DIRECT = 'https://example.com/skill'
+  const MIRROR = 'https://my-mirror.example.com'
+  const MIRROR_URL = `${MIRROR}/${DIRECT}`
+  const infoRefs = (u: string) => `${u}/info/refs?service=git-upload-pack`
+
+  // ── Tier 1: git-verified ──────────────────────────────────────────
+
+  it('direct ls-remote ok → git-verified direct, fetch never called', async () => {
+    const { exec } = mockGitExec([DIRECT])
+    mockFetch(new Map([[infoRefs(DIRECT), new Response(null, { status: 200 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: exec })
 
     expect(result).toMatchObject({
       path: 'direct',
-      url: 'https://example.com/skill',
+      url: DIRECT,
       latencyMs: expect.any(Number),
+      confidence: 'git-verified',
     })
+    expect(fetchCalls.length).toBe(0)
   })
 
-  // ── Vertical Slice 2 ──
-  it('direct fails, user mirror ok → returns mirror path', async () => {
-    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
-    mockFetch(
-      new Map([
-        ['https://example.com/skill', new Response(null, { status: 500 })],
-        ['https://my-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
-      ]),
-    )
+  it('direct ls-remote fails, mirror ls-remote ok → git-verified mirror', async () => {
+    process.env.LYTHOS_GH_MIRROR = MIRROR
+    const { exec } = mockGitExec([MIRROR_URL])
+    mockFetch(new Map())
 
-    const result = await probeConnectivity('https://example.com/skill')
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: exec })
 
     expect(result).toMatchObject({
       path: 'mirror',
-      url: 'https://my-mirror.example.com/https://example.com/skill',
-      latencyMs: expect.any(Number),
+      url: MIRROR_URL,
+      confidence: 'git-verified',
     })
+    // direct failure recorded for diagnostics
+    expect(result?.failures?.some((f) => f.url === DIRECT)).toBe(true)
   })
 
-  // ── Vertical Slice 3 ──
-  it('all paths fail → returns undefined', async () => {
-    mockFetch(new Map())
+  it('HEAD-blocking mirror is NOT rejected when ls-remote succeeds (the K3 false negative)', async () => {
+    // ghfast.top-style mirror: rejects HEAD/GET on bare URL with 403, but
+    // serves git smart-HTTP fine — ls-remote (clone's handshake) succeeds.
+    process.env.LYTHOS_GH_MIRROR = MIRROR
+    const { exec } = mockGitExec([MIRROR_URL])
+    globalThis.fetch = async () => new Response(null, { status: 403 })
 
-    const result = await probeConnectivity('https://example.com/skill')
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: exec })
+
+    expect(result).toBeDefined()
+    expect(result?.path).toBe('mirror')
+    expect(result?.confidence).toBe('git-verified')
+    expect(result?.authRequired).toBeUndefined()
+  })
+
+  it('LYTHOS_SOCKS_PROXY set → ls-remote injects -c http.proxy flags (same as clone)', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
+    const { exec, calls } = mockGitExec([DIRECT])
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: exec })
+
+    expect(result?.confidence).toBe('git-verified')
+    const gitCall = calls.find((c) => c.file === 'git')!
+    expect(gitCall.args).toContain('http.proxy=socks5://127.0.0.1:1080')
+    expect(gitCall.args).toContain('https.proxy=socks5://127.0.0.1:1080')
+  })
+
+  // ── Tier 2: http-signal (git cannot answer) ──────────────────────
+
+  it('git unavailable, GET info/refs 200 → http-signal direct', async () => {
+    mockFetch(new Map([[infoRefs(DIRECT), new Response(null, { status: 200 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
+
+    expect(result).toMatchObject({
+      path: 'direct',
+      url: DIRECT,
+      confidence: 'http-signal',
+    })
+    expect(fetchCalls.length).toBe(1)
+    expect(fetchCalls[0].url).toBe(infoRefs(DIRECT))
+    expect(fetchCalls[0].options.method).toBe('GET')
+  })
+
+  it('403 on GET info/refs → reachable with authRequired (not "blocked")', async () => {
+    mockFetch(new Map([[infoRefs(DIRECT), new Response(null, { status: 403 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
+
+    expect(result).toMatchObject({ path: 'direct', confidence: 'http-signal', authRequired: true })
+  })
+
+  it('401 on GET info/refs → reachable with authRequired', async () => {
+    mockFetch(new Map([[infoRefs(DIRECT), new Response(null, { status: 401 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
+
+    expect(result?.authRequired).toBe(true)
+  })
+
+  it('404 on GET info/refs → reachable (host alive), no authRequired', async () => {
+    mockFetch(new Map([[infoRefs(DIRECT), new Response(null, { status: 404 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
+
+    expect(result?.path).toBe('direct')
+    expect(result?.authRequired).toBeUndefined()
+  })
+
+  it('git unavailable, direct HTTP fails, mirror HTTP ok → http-signal mirror', async () => {
+    process.env.LYTHOS_GH_MIRROR = MIRROR
+    mockFetch(new Map([[infoRefs(MIRROR_URL), new Response(null, { status: 200 })]]))
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
+
+    expect(result).toMatchObject({ path: 'mirror', url: MIRROR_URL, confidence: 'http-signal' })
+  })
+
+  // ── Both tiers fail everywhere → undefined ───────────────────────
+
+  it('undefined only when both tiers fail on all URLs', async () => {
+    process.env.LYTHOS_GH_MIRROR = MIRROR
+    mockFetch(new Map()) // every fetch → ENOTFOUND
+
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
 
     expect(result).toBeUndefined()
   })
 
-  // ── Vertical Slice 4 ──
-  it('404 is treated as reachable (server alive)', async () => {
-    mockFetch(
-      new Map([
-        ['https://example.com/skill', new Response(null, { status: 404 })],
-      ]),
-    )
+  // ── Tier-2 racing behavior ───────────────────────────────────────
 
-    const result = await probeConnectivity('https://example.com/skill')
-
-    expect(result?.path).toBe('direct')
-  })
-
-  // ── Vertical Slice 5: Racing behavior ──
-  it('probes race concurrently, not sequentially', async () => {
-    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
+  it('tier-2 HTTP probes race concurrently, not sequentially', async () => {
+    process.env.LYTHOS_GH_MIRROR = MIRROR
     const start = performance.now()
 
     mockFetch(
-      new Map([
-        ['https://example.com/skill', new Response(null, { status: 500 })],
-        ['https://my-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
-      ]),
+      new Map([[infoRefs(MIRROR_URL), new Response(null, { status: 200 })]]),
       50, // each mock fetch takes 50ms
     )
 
-    const result = await probeConnectivity('https://example.com/skill')
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
 
     const elapsed = performance.now() - start
 
@@ -130,23 +220,7 @@ describe('probeConnectivity', () => {
     expect(elapsed).toBeLessThan(150)
   })
 
-  // ── Vertical Slice 6: No user mirror set → only probes direct ──
-  it('without user mirror, only probes direct', async () => {
-    mockFetch(
-      new Map([
-        ['https://example.com/skill', new Response(null, { status: 200 })],
-      ]),
-    )
-
-    const result = await probeConnectivity('https://example.com/skill')
-
-    expect(result?.path).toBe('direct')
-    expect(fetchCalls.length).toBe(1)
-    expect(fetchCalls[0].url).toBe('https://example.com/skill')
-  })
-
-  // ── Vertical Slice 7: Timeout honored ──
-  it('timeout aborts slow probes', async () => {
+  it('timeout aborts slow tier-2 probes', async () => {
     globalThis.fetch = async (_input, init?) => {
       return new Promise((_, reject) => {
         const timer = setTimeout(
@@ -161,83 +235,96 @@ describe('probeConnectivity', () => {
     }
 
     const start = performance.now()
-    const result = await probeConnectivity('https://example.com/skill', 100)
+    const result = await probeConnectivity(DIRECT, 100, { execFileSync: gitUnavailable() })
     const elapsed = performance.now() - start
 
     expect(result).toBeUndefined()
     expect(elapsed).toBeLessThan(500) // 100ms timeout + overhead
   })
 
-  // ── Vertical Slice 8: SOCKS proxy routing ──
-  it('SOCKS proxy set, curl succeeds → returns direct path', async () => {
+  // ── Tier-2 SOCKS proxy routing (curl) ────────────────────────────
+
+  it('SOCKS proxy set, git unavailable, curl ok → http-signal direct via curl', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
     const execCalls: Array<{ file: string; args: string[] }> = []
 
     const mockExec = (file: unknown, args: unknown) => {
-      execCalls.push({ file: String(file), args: args as string[] })
-      return ''
+      const a = (args as string[]).map(String)
+      execCalls.push({ file: String(file), args: a })
+      if (String(file) === 'curl') return '200'
+      throw new Error('spawnSync git ENOENT')
     }
-    const result = await probeConnectivity('https://example.com/skill', 3000, {
-      execFileSync: mockExec as any,
-    })
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: mockExec as any })
 
     expect(result).toMatchObject({
       path: 'direct',
-      url: 'https://example.com/skill',
+      url: DIRECT,
       latencyMs: expect.any(Number),
+      confidence: 'http-signal',
     })
-    expect(execCalls.length).toBe(1)
-    expect(execCalls[0].file).toBe('curl')
-    expect(execCalls[0].args).toContain('--proxy')
-    expect(execCalls[0].args).toContain('socks5://127.0.0.1:1080')
+    const curlCalls = execCalls.filter((c) => c.file === 'curl')
+    expect(curlCalls.length).toBe(1)
+    expect(curlCalls[0].args).toContain('--proxy')
+    expect(curlCalls[0].args).toContain('socks5://127.0.0.1:1080')
+    expect(curlCalls[0].args[curlCalls[0].args.length - 1]).toBe(infoRefs(DIRECT))
   })
 
-  // ── Vertical Slice 9: SOCKS proxy with socks5:// prefix ──
   it('SOCKS proxy already has socks5:// prefix → does not double-prefix', async () => {
     process.env.LYTHOS_SOCKS_PROXY = 'socks5://proxy.example.com:1080'
     const execCalls: Array<{ file: string; args: string[] }> = []
 
-    const mockExec2 = (file: unknown, args: unknown) => {
-      execCalls.push({ file: String(file), args: args as string[] })
-      return ''
+    const mockExec = (file: unknown, args: unknown) => {
+      const a = (args as string[]).map(String)
+      execCalls.push({ file: String(file), args: a })
+      if (String(file) === 'curl') return '200'
+      throw new Error('spawnSync git ENOENT')
     }
-    await probeConnectivity('https://example.com/skill', 3000, {
-      execFileSync: mockExec2 as any,
-    })
+    await probeConnectivity(DIRECT, 3000, { execFileSync: mockExec as any })
 
-    expect(execCalls[0].args).toContain('socks5://proxy.example.com:1080')
-    expect(execCalls[0].args).not.toContain('socks5://socks5://proxy.example.com:1080')
+    const curlCall = execCalls.find((c) => c.file === 'curl')!
+    expect(curlCall.args).toContain('socks5://proxy.example.com:1080')
+    expect(curlCall.args).not.toContain('socks5://socks5://proxy.example.com:1080')
   })
 
-  // ── Vertical Slice 10: SOCKS proxy fails → no automatic unproxied fallback ──
-  it('SOCKS proxy fails → no automatic unproxied fallback', async () => {
+  it('SOCKS curl gets 403 → http-signal direct with authRequired', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
 
-    const result = await probeConnectivity('https://example.com/skill', 3000, {
-      execFileSync: () => {
+    const mockExec = (file: unknown) => {
+      if (String(file) === 'curl') return '403'
+      throw new Error('spawnSync git ENOENT')
+    }
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: mockExec as any })
+
+    expect(result).toMatchObject({ path: 'direct', confidence: 'http-signal', authRequired: true })
+  })
+
+  it('SOCKS proxy fails (git + curl) → no automatic unproxied fallback', async () => {
+    process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
+
+    const result = await probeConnectivity(DIRECT, 3000, {
+      execFileSync: (() => {
         throw new Error('curl failed')
-      },
+      }) as any,
       fetch: async () => new Response(null, { status: 200 }),
     })
 
-    // Design choice: when SOCKS proxy is configured but curl fails, the direct
-    // probe fails. No automatic fallback to unproxied fetch — the user
-    // explicitly chose to route traffic through the proxy, so we honor that
-    // choice rather than silently bypassing it.
+    // Design choice: when SOCKS proxy is configured but both git and curl
+    // fail, the direct probe fails. No automatic fallback to unproxied
+    // fetch — the user explicitly chose to route traffic through the
+    // proxy, so we honor that choice rather than silently bypassing it.
     expect(result).toBeUndefined()
   })
 
-  // ── Vertical Slice 11: SOCKS proxy only affects direct, mirror still works ──
-  it('SOCKS proxy fails but mirror succeeds', async () => {
+  it('SOCKS proxy fails but mirror succeeds → mirror; only one curl call', async () => {
     process.env.LYTHOS_SOCKS_PROXY = '127.0.0.1:1080'
-    process.env.LYTHOS_GH_MIRROR = 'https://my-mirror.example.com'
+    process.env.LYTHOS_GH_MIRROR = MIRROR
     const execCalls: Array<{ file: string; args: string[] }> = []
 
-    const result = await probeConnectivity('https://example.com/skill', 3000, {
-      execFileSync: (file, args) => {
-        execCalls.push({ file: String(file), args: args as string[] })
-        throw new Error('curl failed')
-      },
+    const result = await probeConnectivity(DIRECT, 3000, {
+      execFileSync: ((file: unknown, args: unknown) => {
+        execCalls.push({ file: String(file), args: (args as string[]).map(String) })
+        throw new Error('proxy unreachable')
+      }) as any,
       fetch: async (input) => {
         const url = String(input)
         if (url.includes('my-mirror')) {
@@ -249,7 +336,7 @@ describe('probeConnectivity', () => {
 
     // SOCKS proxy is only used for direct probes; mirror probes use native fetch
     expect(result?.path).toBe('mirror')
-    expect(execCalls.length).toBe(1) // only one curl call for direct probe
+    expect(execCalls.filter((c) => c.file === 'curl').length).toBe(1)
   })
 
   // ── Backward compat: legacy env var name still works ──
@@ -265,12 +352,11 @@ describe('probeConnectivity', () => {
 
     mockFetch(
       new Map([
-        ['https://example.com/skill', new Response(null, { status: 500 })],
-        ['https://legacy-mirror.example.com/https://example.com/skill', new Response(null, { status: 200 })],
+        [infoRefs(`https://legacy-mirror.example.com/${DIRECT}`), new Response(null, { status: 200 })],
       ]),
     )
 
-    const result = await probeConnectivity('https://example.com/skill')
+    const result = await probeConnectivity(DIRECT, 3000, { execFileSync: gitUnavailable() })
 
     console.warn = originalWarn
 

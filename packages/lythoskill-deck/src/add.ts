@@ -277,20 +277,27 @@ export async function addSkill(
   // git clone needs the parent of the target dir (e.g. host/owner/) to exist
   mkdirSync(dirname(fetchPlan.targetDir), { recursive: true })
 
-  // ── Plan→Apply boundary: probe network before any git operation ────────
+  // ── Plan→Apply boundary: advisory network probe before clone ────────
+  // The probe advises, clone decides. A failed probe no longer hard-exits:
+  // git's own error is authoritative (probe false negatives were a real
+  // incident — git smart-HTTP mirrors like ghfast.top reject the HTTP
+  // methods a naive probe sends while serving clones fine).
+  let probe: Awaited<ReturnType<typeof probeConnectivity>> | undefined
   if (fetchPlan.cloneUrl) {
-    const probe = await probeConnectivity(fetchPlan.cloneUrl, 5000)
+    probe = await probeConnectivity(fetchPlan.cloneUrl, 5000)
     if (!probe) {
-      console.error(`❌ Cannot reach ${fetchPlan.cloneUrl}`)
-      console.error(`   Network probe failed — the host may be unreachable or blocked.`)
-      console.error(``)
-      console.error(`   To fix:`)
-      console.error(`     export LYTHOS_GH_MIRROR="https://your-mirror.com"`)
-      console.error(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
-      console.error(`     # See: AGENTS.md → Network Restrictions`)
-      process.exit(1)
+      console.warn(`⚠️  Network probe inconclusive for ${fetchPlan.cloneUrl}`)
+      console.warn(`   Attempting clone anyway — git's own error will be authoritative.`)
+      console.warn(``)
+      console.warn(`   If clone fails:`)
+      console.warn(`     export LYTHOS_GH_MIRROR="https://your-mirror.com"`)
+      console.warn(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
+      console.warn(`     # See: AGENTS.md → Network Restrictions`)
+    } else if (probe.authRequired) {
+      console.warn(`⚠️  ${probe.url} responded 401/403 — credentials may be required.`)
+      console.warn(`   Attempting clone anyway — git will use its own credential config.`)
     }
-    if (probe.path === 'mirror') {
+    if (probe?.path === 'mirror') {
       console.log(`🪞 Using mirror: ${probe.url} (${probe.latencyMs}ms)`)
     }
   }
@@ -309,6 +316,16 @@ export async function addSkill(
   if (fetchResult.status === 'failed') {
     rmSync(fetchPlan.targetDir, { recursive: true, force: true })
     console.error(`❌ Failed to fetch: ${fetchResult.message ?? 'unknown error'}`)
+    // Two layers of evidence: the probe's per-URL failures + git's own error.
+    if (probe?.failures && probe.failures.length > 0) {
+      console.error(`   Probe detail (${probe.confidence}):`)
+      for (const f of probe.failures) {
+        console.error(`     ${f.url} — ${f.reason}`)
+      }
+    } else if (!probe && fetchPlan.cloneUrl) {
+      console.error(`   Network probe was inconclusive before the clone attempt (both tiers failed on all URLs).`)
+    }
+    console.error(`   To fix: export LYTHOS_GH_MIRROR="https://your-mirror.com" (or set LYTHOS_SOCKS_PROXY)`)
     process.exit(1)
   }
 

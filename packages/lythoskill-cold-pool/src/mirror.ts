@@ -14,6 +14,7 @@
  */
 
 import { execFileSync } from 'node:child_process'
+import { socksProxyArgs } from './git-io.js'
 
 export function getMirror(): string | undefined {
   let v = process.env.LYTHOS_GH_MIRROR?.trim()
@@ -52,6 +53,15 @@ export interface ProbeResult {
   path: 'direct' | 'mirror'
   url: string
   latencyMs: number
+  /**
+   * Evidence tier. 'git-verified' = `git ls-remote` succeeded — the exact
+   * handshake a clone performs, on the same network stack. 'http-signal' =
+   * only an HTTP response was observed (fallback tier when git cannot
+   * answer); weaker evidence, so callers should treat it as advisory.
+   */
+  confidence: 'git-verified' | 'http-signal'
+  /** Set when the HTTP tier got 401/403 — host reachable, credentials likely required. */
+  authRequired?: boolean
 }
 
 export interface ProbeFailure {
@@ -64,42 +74,88 @@ export interface ProbeDeps {
   execFileSync?: typeof execFileSync
 }
 
+/** Short, single-line reason from an exec/fetch error (stderr first line wins). */
+function errReason(err: unknown): string {
+  const stderr = (err as { stderr?: { toString: () => string } })?.stderr?.toString().trim()
+  if (stderr) return stderr.split('\n')[0]!
+  return err instanceof Error ? err.message : String(err)
+}
+
 /**
- * Quick connectivity probe: race direct + user mirror (if set) concurrently.
- * Uses short timeout (default 3s) to fail fast instead of waiting for
- * the full git clone / fetch timeout.
+ * Tiered connectivity probe: direct first, user mirror (if set) alongside.
  *
- * When LYTHOS_SOCKS_PROXY is set, direct probes route through the SOCKS
- * proxy via curl (Bun fetch does not support socks5://).
+ * Tier 1 — `git ls-remote --heads <url>`: the same first handshake a clone
+ * performs, on the same network stack — it inherits the user's git config
+ * (http.proxy, url.insteadOf, http.sslVerify, credentials) and gets the same
+ * LYTHOS_SOCKS_PROXY `-c` flags that git-io's clone/pull inject. This is the
+ * only tier with real predictive power for clone success.
  *
- * Returns the first success, or undefined with failures recorded.
+ * Tier 2 (fallback when no ls-remote succeeds — e.g. git binary missing) —
+ * HTTP `GET <url>/info/refs?service=git-upload-pack`, the request a clone
+ * actually sends first (NOT a bare-URL HEAD, which git smart-HTTP reverse
+ * proxies like ghfast.top reject with 403/405). Any HTTP response proves the
+ * host is reachable (as opposed to DNS/TLS failure); 401/403 is classified
+ * as auth-required, not "blocked". The direct tier keeps the
+ * LYTHOS_SOCKS_PROXY curl route — Bun fetch cannot speak socks5://, and
+ * git ls-remote already inherits git proxy config, so SOCKS-via-curl is
+ * only an HTTP-tier concern.
+ *
+ * Returns the first success with per-URL failures recorded, or undefined
+ * only when BOTH tiers fail on ALL URLs.
  */
 export async function probeConnectivity(
   url: string,
   timeoutMs = 3000,
   deps?: ProbeDeps,
 ): Promise<ProbeResult & { failures?: ProbeFailure[] } | undefined> {
-  const start = performance.now()
   const failures: ProbeFailure[] = []
   const _fetch = deps?.fetch ?? globalThis.fetch
   const _exec = deps?.execFileSync ?? execFileSync
+  const targets: Array<{ targetUrl: string; pathLabel: 'direct' | 'mirror' }> = [
+    { targetUrl: url, pathLabel: 'direct' },
+    ...mirrorUrls(url).map((m) => ({ targetUrl: m, pathLabel: 'mirror' as const })),
+  ]
 
-  async function tryFetch(
+  // ── Tier 1: git ls-remote (ground truth) ───────────────────────────
+  // execFileSync is synchronous, so tier-1 probes run sequentially — the
+  // per-probe timeout bounds each attempt.
+  for (const { targetUrl, pathLabel } of targets) {
+    const t0 = performance.now()
+    try {
+      _exec('git', [...socksProxyArgs(), 'ls-remote', '--heads', targetUrl], {
+        encoding: 'utf-8',
+        timeout: timeoutMs,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      })
+      return {
+        path: pathLabel,
+        url: targetUrl,
+        latencyMs: Math.round(performance.now() - t0),
+        confidence: 'git-verified',
+        failures,
+      }
+    } catch (err) {
+      failures.push({ url: targetUrl, reason: errReason(err) })
+    }
+  }
+
+  // ── Tier 2: HTTP signal (degraded path when git cannot answer) ─────
+  async function tryHttp(
     targetUrl: string,
     pathLabel: 'direct' | 'mirror',
   ): Promise<ProbeResult | undefined> {
     const t0 = performance.now()
+    const probeUrl = `${targetUrl.replace(/\/+$/, '')}/info/refs?service=git-upload-pack`
     try {
       // Route direct probes through SOCKS proxy when configured
       if (pathLabel === 'direct') {
         const socksProxy = process.env.LYTHOS_SOCKS_PROXY?.trim()
         if (socksProxy) {
           const proxyUrl = socksProxy.startsWith('socks5://') ? socksProxy : `socks5://${socksProxy}`
-          _exec(
+          const out = _exec(
             'curl',
             [
               '--silent',
-              '--head',
               '--location',
               '--proxy',
               proxyUrl,
@@ -107,38 +163,48 @@ export async function probeConnectivity(
               String(Math.ceil(timeoutMs / 1000)),
               '--max-time',
               String(Math.ceil(timeoutMs / 1000)),
-              targetUrl,
+              '--output',
+              '/dev/null',
+              '--write-out',
+              '%{http_code}',
+              probeUrl,
             ],
             { encoding: 'utf-8', timeout: timeoutMs + 500 },
           )
-          return { path: pathLabel, url: targetUrl, latencyMs: Math.round(performance.now() - t0) }
+          const code = Number(String(out).trim())
+          return {
+            path: pathLabel,
+            url: targetUrl,
+            latencyMs: Math.round(performance.now() - t0),
+            confidence: 'http-signal',
+            authRequired: code === 401 || code === 403 || undefined,
+          }
         }
       }
 
-      const res = await _fetch(targetUrl, {
-        method: 'HEAD',
+      const res = await _fetch(probeUrl, {
+        method: 'GET',
         signal: AbortSignal.timeout(timeoutMs),
         redirect: 'follow',
       })
-      if (res.ok || res.status === 404) {
-        // 404 means server reachable, resource may not exist
-        return { path: pathLabel, url: targetUrl, latencyMs: Math.round(performance.now() - t0) }
-      }
-      failures.push({ url: targetUrl, reason: `HTTP ${res.status}` })
-    } catch (err) {
-      failures.push({
+      // Any HTTP response means the host is reachable — even a 4xx/5xx
+      // (a 4xx only says this URL/method is not accepted, unlike a
+      // DNS/TLS failure which means the host cannot be reached at all).
+      return {
+        path: pathLabel,
         url: targetUrl,
-        reason: err instanceof Error ? err.message : String(err),
-      })
+        latencyMs: Math.round(performance.now() - t0),
+        confidence: 'http-signal',
+        authRequired: res.status === 401 || res.status === 403 || undefined,
+      }
+    } catch (err) {
+      failures.push({ url: targetUrl, reason: errReason(err) })
     }
     return undefined
   }
 
-  // Build all probe promises (direct + mirrors) and race for first success
-  const probes = [tryFetch(url, 'direct')]
-  for (const mirrorUrl of mirrorUrls(url)) {
-    probes.push(tryFetch(mirrorUrl, 'mirror'))
-  }
+  // Race direct + mirrors concurrently; first success wins
+  const probes = targets.map((t) => tryHttp(t.targetUrl, t.pathLabel))
 
   let result: ProbeResult | undefined
   let pending = probes.length

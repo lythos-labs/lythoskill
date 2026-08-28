@@ -131,11 +131,15 @@ export async function refreshDeck(
     const probeUrl = `https://${firstTarget.path}`
     const probe = await probeConnectivity(probeUrl, 5000)
     if (!probe) {
-      console.error(`⚠️  Network probe failed for ${probeUrl}`)
-      console.error(`   Refresh may fail for git targets. To fix:`)
+      console.error(`⚠️  Network probe inconclusive for ${probeUrl}`)
+      console.error(`   Refresh may fail for git targets — git's own errors will be authoritative. To fix:`)
       console.error(`     export LYTHOS_GH_MIRROR="https://your-mirror.com"`)
       console.error(`     # Or set LYTHOS_SOCKS_PROXY for SOCKS5 routing`)
       console.error(`   Continuing anyway — per-target errors will be reported below.`)
+      console.error()
+    } else if (probe.authRequired) {
+      console.error(`⚠️  ${probe.url} responded 401/403 — credentials may be required for git targets.`)
+      console.error(`   Continuing anyway — git will use its own credential config.`)
       console.error()
     }
   }

@@ -161,7 +161,7 @@ The deck does NOT auto-insert a `skills/` prefix. Verify repo structure before w
 
 **SKILL.md type field**: Only `standard` or `flow` are valid. `innate`/`tool`/`transient` are deck toml section names, not SKILL.md types. `deck_skill_type` (custom field) for `fork`/`transient` declarations.
 
-**Network restrictions**: If `deck add` or `validate --remote` fails with "Cannot reach github.com", use one of these env vars:
+**Network restrictions**: The pre-clone connectivity probe is advisory — `deck add` always attempts the clone and lets git's own error be authoritative (probe false negatives on git smart-HTTP mirrors were a real incident). If a clone fails with network errors, use one of these env vars:
 
 | Variable | When to use | Example |
 |----------|-------------|---------|
