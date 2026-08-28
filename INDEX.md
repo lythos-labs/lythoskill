@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 21:31:48
+> 自动生成于 2026/8/28 21:38:46
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 363 | 进行中: 1, 待验收: 0, 已完成: 305 |
+| Tasks | 363 | 进行中: 0, 待验收: 1, 已完成: 305 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -91,13 +91,13 @@
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 - [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
 
 ### 已完成 (305)
 
