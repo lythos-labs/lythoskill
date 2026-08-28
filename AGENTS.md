@@ -281,6 +281,7 @@ Each caused at least one real incident. Scan before committing. **New gotcha →
 - `[TEST]` `bun --filter='*' run test` is canonical. `scripts/test-report.ts` is a supplement — if they diverge, the script is wrong.
 - `[BDD]` Agent BDD (`showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. Patch a BDD test for the 3rd time → the scenario is stale, rewrite it.
 - `[DECK]` `.claude/skills/` stale or empty → `deck link` (not `bun install`) refreshes the working set.
+- `[TEST]` `Bun.spawnSync` pipe capture returns empty stdout/stderr (exit code still correct) under `bun test` with coverage on (repo `bunfig.toml`). Subprocess-assertion tests must redirect via `sh -c` to files and read them back — see `scripts/check-site-commands.test.ts`.
 
 **[RELEASE]**
 - `[SEMVER]` 0.x: patch = bug fix only; minor = any API change (new subcommand/flag/exported function, even "small"); major = breaking. Never bump without explicit user intent.
