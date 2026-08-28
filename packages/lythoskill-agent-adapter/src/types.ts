@@ -33,6 +33,22 @@ export interface ToolDefinition {
 
 export interface AgentAdapter {
   name: string
+
+  /**
+   * Optional upstream declaration (ADR-20260828004129233 Option B): which upstream
+   * binary(-ies) this adapter drives, the supported version range, and how to probe.
+   * Adapters that declare it probe at spawn time and fail closed (loud HATEOAS error)
+   * on unknown/out-of-range upstreams. Adapters without it are unprobed (unchanged).
+   */
+  upstream?: {
+    /** Candidate binary names in preference order (e.g. ['kimi-cli', 'kimi']). */
+    binaries: string[]
+    /** Space-separated comparators, e.g. '>=0.30.0 <2.0.0'. */
+    versionRange: string
+    /** Args that print the version, e.g. ['--version']. */
+    probeArgs: string[]
+  }
+
   spawn(opts: {
     cwd: string
     brief: string
