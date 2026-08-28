@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 02:01:01
+> 自动生成于 2026/8/28 10:59:02
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 349 | 进行中: 0, 待验收: 2, 已完成: 297 |
+| Tasks | 349 | 进行中: 0, 待验收: 0, 已完成: 299 |
 | Epics | 45 | 活跃: 0, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 90 |
 
@@ -88,12 +88,11 @@ _无_
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260828002450069**: site UX and narrative alignment review
-- 🔍 **TASK-20260828011012367**: cortex wikiSubdirs config drifted from real wiki structure
+_无_
 
-### 已完成 (297)
+### 已完成 (299)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -392,6 +391,8 @@ _无_
 - ✅ ~~TASK-20260827170159682~~: Implement tag-triggered release pipeline with OIDC npm provenance
 - ✅ ~~TASK-20260827234446584~~: Add cortex task list subcommand to prevent accidental task creation
 - ✅ ~~TASK-20260827235943331~~: Add retry to check-published-manifests.ts to avoid npm registry race condition
+- ✅ ~~TASK-20260828002450069~~: site UX and narrative alignment review
+- ✅ ~~TASK-20260828011012367~~: cortex wikiSubdirs config drifted from real wiki structure
 
 ### 悬置 (3)
 
