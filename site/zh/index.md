@@ -101,7 +101,7 @@ Lythoskill 將它們分開：
 
 ## 真實牌組，真實專案
 
-這些是來自 [examples 目錄](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) 的工作配置——24 副牌組且持續成長中。每一副都是一個你可以直接拿來用的單一檔案：
+這些是來自 [examples 目錄](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) 的工作配置——{{DECK_COUNT}} 副牌組且持續成長中。每一副都是一個你可以直接拿來用的單一檔案：
 
 - **Engineering** — TDD + PRD + 架構圖，紀律化的開發流程
 - **Design Studio** — 前端品味、主題工廠、品牌指南。消滅 AI 塑膠感。
@@ -117,11 +117,11 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/m
 bunx @lythos/skill-deck@latest link
 ```
 
-[瀏覽全部 24 副範例牌組 ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
+[瀏覽全部 {{DECK_COUNT}} 副範例牌組 ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
 
 ## 由 AI Agent 打造
 
-零人工程式碼。每一行程式碼，包含 13 個套件、600+ 測試、所有 CLI 工具、所有 SKILL.md 檔案，由 AI agent 在人類指導下產出。我們 dogfood 自己的治理：lythoskill 的開發使用 lythoskill-deck 來管理打造 lythoskill 的技能。
+零人工程式碼。每一行程式碼，包含 {{PACKAGE_COUNT}} 個套件、600+ 測試、所有 CLI 工具、所有 SKILL.md 檔案，由 AI agent 在人類指導下產出。我們 dogfood 自己的治理：lythoskill 的開發使用 lythoskill-deck 來管理打造 lythoskill 的技能。
 
 這不是噱頭，是治理模型的證明：如果 agent 無法用自己提供的工具可靠地建構和維護這個專案，那工具就是壞的。
 

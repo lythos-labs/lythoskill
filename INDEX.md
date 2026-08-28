@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 23:31:24
+> 自动生成于 2026/8/28 23:32:23
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 365 | 进行中: 0, 待验收: 0, 已完成: 309 |
+| Tasks | 365 | 进行中: 1, 待验收: 0, 已完成: 309 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (11)
+### 待办 (10)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
@@ -84,15 +84,14 @@
 - [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
 - [ ] **TASK-20260828141622828**: publish player adapter support matrix
 - [ ] **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
-- [ ] **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 - [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
 - [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 - [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
 
 ### 待验收 (0)
 

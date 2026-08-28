@@ -101,7 +101,7 @@ Store everything          Select what's active         Only what's declared
 
 ## Real Decks, Real Projects
 
-These are working configurations from the [examples directory](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) — 24 decks and growing. Each one is a single file you can fetch and use immediately:
+These are working configurations from the [examples directory](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks) — {{DECK_COUNT}} decks and growing. Each one is a single file you can fetch and use immediately:
 
 - **Engineering** — TDD + PRD + architecture diagrams for disciplined development
 - **Design Studio** — frontend taste, theme factory, brand guidelines. Kills AI slop.
@@ -117,11 +117,11 @@ curl -fsSL https://raw.githubusercontent.com/lythos-labs/lythoskill/refs/heads/m
 bunx @lythos/skill-deck@latest link
 ```
 
-[Browse all 24 example decks ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
+[Browse all {{DECK_COUNT}} example decks ->](https://github.com/lythos-labs/lythoskill/tree/main/examples/decks)
 
 ## Built by AI Agents
 
-Agent-driven from day one. Every line — 13 packages, 600+ tests, all CLI tools — written by AI agents under human architecture and review. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
+Agent-driven from day one. Every line — {{PACKAGE_COUNT}} packages, 600+ tests, all CLI tools — written by AI agents under human architecture and review. We dogfood our own governance: lythoskill's development uses lythoskill-deck to manage the skills that build lythoskill.
 
 This is not a gimmick. It is proof that the governance model works: if agents could not reliably build and maintain this project using the very tools it provides, the tools would be broken. The human sets direction; the agents execute with guardrails.
 

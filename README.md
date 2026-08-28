@@ -231,7 +231,7 @@ We are in early days. No Fortune 500 testimonial yet. What we have is **self-gov
 - **Every decision is an ADR.** Browse [`cortex/adr/02-accepted/`](./cortex/adr/02-accepted/) — 30+ architecture decisions with full reasoning, rejected alternatives, and confidence scores. No "trust us, we know better."
 - **Every release is arena-tested.** Before a skill ships, it runs through controlled-variable comparisons against real tasks. See [`showcase/`](./showcase/) for pages, reports, and tools built by agents using lythoskill-governed decks.
 - **Every skill is built with creator.** The thin-skill pattern (`packages/<name>/skill/SKILL.md`) means agent-facing instructions are separate from implementation — you can audit exactly what the agent sees.
-- **661 tests, 0 fail.** 71 unit tests for plan generation, 21 CLI BDD scenarios, 5 agent BDD scenarios. Coverage is honest — no gate inflation.
+- **1000+ tests, 0 fail.** Unit + CLI BDD + agent BDD layers across 56 test files. Coverage is honest — no gate inflation.
 
 This project is its own proof. We govern it with the same tools we ship.
 
@@ -352,7 +352,7 @@ See [`references/comparisons.md`](./references/comparisons.md) for how this comp
 ## Testing
 
 ```bash
-bun --filter='*' run test          # all 661 tests across 44 files
+bun --filter='*' run test          # all 1000+ tests (canonical gate)
 bun run test:coverage              # coverage report
 bun run test:bdd                   # BDD integration tests
 ```
