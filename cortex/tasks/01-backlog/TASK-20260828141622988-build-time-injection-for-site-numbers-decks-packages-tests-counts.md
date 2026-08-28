@@ -16,23 +16,24 @@ Trigger evidence: 2026-08-28 UX review found "22 decks" stale at 24 exactly one 
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] R1 (必达) Inventory: find every hard-coded project-statistic number in `site/**/*.md` (deck count, package count, test count, skill count — grep for digit+unit patterns around "deck", "package", "test", "skill" in both en+zh) and list them in the Progress Log with file:line
-- [ ] R2 (必达) Choose and document the mechanism: (a) extend `site/scripts/inject-version.ts` with a placeholder map (`{{DECK_COUNT}}` etc. replaced pre-build), or (b) a markdown-it plugin. Decide by which touches fewer files; record the decision in the card
+- [ ] R1 (必达) Inventory: find every hard-coded project-statistic number in `site/**/*.md` (grep for digit+unit patterns around "deck", "package", "test", "skill" in both en+zh) and list them in the Progress Log with file:line. **Define the unit before wiring each source**: "packages" could mean dirs under `packages/` (21) or published `@lythos/*` packages (fewer — skill-only packages like scribe/dreaming/coach have no npm package); use `ls -d packages/*/` filtered to dirs with a non-private package.json for the published count
+- [ ] R2 (必达) Choose and document the mechanism. Note: `site/scripts/inject-version.ts` does NOT do text substitution — it writes `.vitepress/version.json` consumed by `config.ts`. So the real options are: (a) a **VitePress markdown transform** (`markdown.config` hook in `site/.vitepress/config.ts`) replacing `{{DECK_COUNT}}`-style placeholders at render time, fed by a sibling script to inject-version.ts; or (b) a markdown-it plugin. Decide by which touches fewer files; record the decision in the card
 - [ ] R3 (必达) EN+ZH page pairs both covered — a number updated in `site/index.md` but not `site/zh/index.md` is the exact rot class being fixed
-- [ ] R4 (必达) Source of truth per number is mechanical (e.g. `ls examples/decks/*.toml | wc -l`, `ls -d packages/*/ | wc -l`), computed at build time — never hand-maintained
-- **不做**: no lint-checking of prose numbers (brittle — "600+" ranges, rejected in the deferral rationale); no runtime fetches
+- [ ] R4 (必达) Source of truth per number is mechanical, computed at build time: deck count = `ls examples/decks/*.toml | wc -l` (24 as of 2026-08-28), skill count = `ls -d skills/*/ | wc -l`, package count = per R1's definition. **Test count has no cheap mechanical source** ("600+" comes from the full test run — too expensive for site build): either use `find packages -name '*.test.ts' | wc -l` as a documented proxy, or classify test count as intentionally-static in the R1 inventory
+- [ ] R5 (可选) Extend the inventory to README.md / README.zh.md stats if R1's grep surfaces them there
+- **不做**: no lint-checking of prose numbers (brittle — "600+" ranges, rejected in the deferral rationale); no runtime fetches; no running the test suite at site-build time
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
-- Existing injection precedent: `site/scripts/inject-version.ts` (read it first — it already does build-time substitution for versions).
-- Site build: `site/.vitepress/` config + `bun run docs:build` (check site/package.json scripts).
-- CI: the site-build job in `.github/workflows/test.yml` — injected numbers must appear in the built output; add a grep assertion on the built HTML for one known-dynamic number (negative: hard-coded stale number would fail).
+- Existing build hook: `site/scripts/inject-version.ts` (43 lines, generates version.json) chained from `bun run build` in `site/package.json` (scripts are `dev`/`build`/`preview` — **there is no `docs:build`**).
+- Site config: `site/.vitepress/config.ts` — the markdown transform hook lives here if option (a) is chosen.
+- CI: the site-build job in `.github/workflows/test.yml` (lines 51-69, output dir `.vitepress/dist`) — add a grep assertion on the built HTML for one known-dynamic number (a hard-coded stale number would fail).
 - The command guard (`scripts/check-site-commands.ts`) is the sibling — match its fail-closed, loud-error philosophy.
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] Inventory table in Progress Log covers every hard-coded stat number found in R1, each marked injected / intentionally-static → Verify: spot-check 3 entries against the files
-- [ ] After `bun run docs:build` (site/), built HTML contains the CURRENT deck count (matches `ls examples/decks/*.toml | wc -l`) → Verify: grep built output
+- [ ] Inventory table in Progress Log covers every hard-coded stat number found in R1, each marked injected / intentionally-static (with reason) → Verify: spot-check 3 entries against the files
+- [ ] After `cd site && bun run build`, built HTML contains the CURRENT deck count (matches `ls examples/decks/*.toml | wc -l`) → Verify: grep `.vitepress/dist` output
 - [ ] EN+ZH parity: the same number appears identical in both built locales → Verify: grep both
 - [ ] `bun --filter='*' run test` green + site build green → Verify: run both
 
@@ -40,16 +41,17 @@ Trigger evidence: 2026-08-28 UX review found "22 decks" stale at 24 exactly one 
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Created from the deferral recorded in TASK-20260828003758156 (numbers policy split out of the command guard).
+- 2026-08-28: ZK review round 1 — P2s fixed (`docs:build` command didn't exist → `bun run build`; inject-version.ts isn't a substitution mechanism → option (a) reworded to VitePress markdown transform; test/skill/package count sources pinned, test count may land in intentionally-static), P3 (no 可选 tier) fixed with R5.
 
 ## Related Files
-- Modified: site/scripts/inject-version.ts or site/.vitepress/ config, site/**/*.md pages with numbers (pending inventory)
+- Modified: site/.vitepress/config.ts or site/scripts/ (pending mechanism decision), site/**/*.md pages with numbers (pending inventory)
 - Added: (pending)
 
 ## Git Commit Message
 ```
 feat(site): build-time injection for project statistic numbers (TASK-20260828141622988)
 
-- Placeholder map injected pre-build; deck/package/test counts computed mechanically
+- VitePress markdown transform replaces placeholders pre-build; counts computed mechanically
 - EN+ZH parity; CI assertion on one dynamic number in built HTML
 ```
 

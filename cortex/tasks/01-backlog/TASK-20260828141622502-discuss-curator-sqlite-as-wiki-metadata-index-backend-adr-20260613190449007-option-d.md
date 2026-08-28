@@ -10,13 +10,15 @@
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
 
-ADR-20260613190449007 accepted 方案A (INDEX.md pinned index) and explicitly deferred 方案D — using curator's SQLite catalog as the metadata index backend for `cortex/wiki/` — as "值得一个独立的 roundtable/ADR，而不是作为本 ADR 的附带方案解决". The ADR lists three open questions that any 方案D proposal must answer:
+ADR-20260613190449007 (accepted 2026-08-28, now in `cortex/adr/02-accepted/`) accepted 方案A (INDEX.md pinned index — initial classification shipped in commit `7de92b8c`) and explicitly deferred 方案D — using curator's SQLite catalog as the metadata index backend for `cortex/wiki/` — as "值得一个独立的 roundtable/ADR，而不是作为本 ADR 的附带方案解决". The ADR lists three open questions that any 方案D proposal must answer:
 
 1. Is the SQLite catalog a **project artifact** or a **personal artifact**? (curator's catalog is "personal environment scan, not project artifact" today.)
 2. Who owns INDEX.md generation — dreaming, curator, or a new cortex subcommand?
 3. What is the recovery path when the SQLite file is corrupted or lost (rebuild from frontmatter?).
 
-This is a **discussion/spike card**: the deliverable is a decision document, not code. It should only be picked up after 方案A has run long enough to have evidence (INDEX.md kept fresh by dreaming, or demonstrably rotting — either is input).
+This is a **discussion/spike card**: the deliverable is a decision document, not code.
+
+**Blocked by / depends on TASK-20260828141622425** (dreaming wiring). Trigger to start: **≥2 dreaming runs after …425 lands, or 4 weeks after …425 lands, whichever comes first** — the evidence this card needs is whether 方案A's INDEX stays fresh under dreaming maintenance or rots.
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
@@ -26,8 +28,8 @@ This is a **discussion/spike card**: the deliverable is a decision document, not
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
-- Read first: `cortex/adr/02-accepted/ADR-20260613190449007-*.md` (full 方案D option text), curator's SQLite usage in `packages/lythoskill-curator/src/` (catalog.db), and the "personal environment scan"定位 in curator's SKILL.md.
-- Evidence gathering: check whether dreaming has been maintaining `cortex/wiki/01-patterns/INDEX.md` (`git log --oneline -- cortex/wiki/01-patterns/INDEX.md`) — freshness or rot is the deciding evidence.
+- Read first: `cortex/adr/02-accepted/ADR-20260613190449007-*.md` (full 方案D option text), curator's SQLite usage in `packages/lythoskill-curator/src/catalog-db.ts` and the shared layer `packages/lythoskill-infra/src/sqlite-db.ts` (relevant because the ADR asks whether wiki indexing reuses curator's mechanism), and the "personal environment scan"定位 in curator's SKILL.md.
+- Evidence gathering: check whether dreaming has been maintaining `cortex/wiki/01-patterns/INDEX.md` (`git log --oneline -- cortex/wiki/01-patterns/INDEX.md`) — freshness or rot is the deciding evidence. (File exists since commit `7de92b8c`; before …425 lands there is no maintenance loop to evaluate.)
 - Output: `bun packages/lythoskill-project-cortex/src/cli.ts adr "<title>"` then fill the card; it stays proposed for user decision.
 
 ## Acceptance Criteria
@@ -39,6 +41,7 @@ This is a **discussion/spike card**: the deliverable is a decision document, not
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Created as follow-up of ADR-20260613190449007 acceptance （方案D deferred discussion).
+- 2026-08-28: ZK review round 1 — P1s fixed (ADR path/status → acceptance landed; evidence-baseline precondition → explicit dependency on …425 + quantified trigger), P3 (catalog-db.ts / infra/sqlite-db.ts file pointers) applied.
 
 ## Related Files
 - Modified: (none — new ADR only)
@@ -53,4 +56,4 @@ docs(adr): propose wiki metadata index backend decision (option D roundtable) (T
 ```
 
 ## Notes
-- Deliberately parked in backlog until 方案A has accumulated evidence; do not start immediately.
+- Deliberately parked in backlog until the trigger fires; do not start immediately.
