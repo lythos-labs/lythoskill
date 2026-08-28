@@ -85,7 +85,7 @@ Every task has a mirrored Issue; task state changes update the Issue; PRs auto-c
 
 ## Decision
 
-**Choice**: **Option A for now, with experimental pilots for Option B and Option C.**
+**Choice**: **Option A for now, with experimental pilots for Option B and Option C.** (Accepted by user 2026-08-28 — "cortex 就是 SSOT")
 
 **Rationale**:
 - `cortex/` must remain the SSOT. No automated outbound mutation of GitHub should happen until the inbound flow is proven safe.

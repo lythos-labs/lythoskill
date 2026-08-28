@@ -53,7 +53,7 @@ New thin skill package carrying the general methodology: sensor-not-oracle frami
 
 ## Decision
 <!-- ⚠️ REQUIRED: Explicit choice + rationale. Keeping placeholders = shell. -->
-**Choice**: Option B (recommended; pending user acceptance)
+**Choice**: Option B (accepted by user 2026-08-28)
 
 **Rationale**: The pattern has three independent existence proofs inside this repo and directly caused external-facing bug catches (site commands, onboarding UX). Extraction cost is low because the thin-skill pipeline already exists; the main risk (boundary leakage) is mitigated by making cortex/arena reference the new skill rather than inlining copies.
 

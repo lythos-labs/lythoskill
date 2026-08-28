@@ -59,7 +59,7 @@ Pin "works with upstream version X" in docs, don't touch adapters.
 
 ## Decision
 <!-- ⚠️ REQUIRED: Explicit choice + rationale. Keeping placeholders = shell. -->
-**Choice**: Option B (recommended; pending user acceptance)
+**Choice**: Option B (accepted by user 2026-08-28)
 
 **Rationale**: Adapters are the project's boundary with the fastest-moving layer of the ecosystem. The only sustainable posture is fail-closed with explicit support ranges plus aliases that absorb renames — the same deny-by-default instinct as deck governance, applied to upstream versions.
 

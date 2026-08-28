@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/8/28 12:23:27
+> 自动生成于 2026/8/28 14:33:18
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 350 | 进行中: 5, 待验收: 0, 已完成: 299 |
+| Tasks | 359 | 进行中: 5, 待验收: 0, 已完成: 299 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 99 | 已接受: 90 |
+| ADRs | 99 | 已接受: 91 |
 
 ---
 
@@ -76,9 +76,18 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (10)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
+- [ ] **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
+- [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
+- [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
+- [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
+- [ ] **TASK-20260828141622671**: arena host-agent handoff mode with host detection
+- [ ] **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
+- [ ] **TASK-20260828141622828**: publish player adapter support matrix
+- [ ] **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
+- [ ] **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
 
 ### 进行中 (5)
 
@@ -534,7 +543,7 @@ _无_
 - ✅ **ADR-20260529215906255** (02-accepted): Curator catalog resolution context — deck-aware vs independent discovery
 - ✅ **ADR-20260607233903985** (02-accepted): CLI task command: subcommand inconsistency between create and state transitions
 - ✅ **ADR-20260613182316950** (02-accepted): Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
-- 🤔 **ADR-20260613190449007** (01-proposed): Wiki patterns: AAA pinned index + dreaming integration
+- ✅ **ADR-20260613190449007** (02-accepted): Wiki patterns: AAA pinned index + dreaming integration
 - ✅ **ADR-20260615222023418** (02-accepted): Unify trailer dispatch to kind+verb+id CLI format
 - ✅ **ADR-20260616000939948** (02-accepted): skill-deck.lock: separate declarative lock from operational state snapshot
 - ✅ **ADR-20260710111933808** (02-accepted): INDEX.md HATEOAS boundary — explicit is/is-not contract for derived-state curation

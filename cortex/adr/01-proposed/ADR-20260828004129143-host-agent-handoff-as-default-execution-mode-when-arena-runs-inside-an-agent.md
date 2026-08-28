@@ -55,7 +55,7 @@ When the arena CLI detects it is running inside an agent session, default to **h
 
 ## Decision
 <!-- ⚠️ REQUIRED: Explicit choice + rationale. Keeping placeholders = shell. -->
-**Choice**: Option B (recommended; pending user acceptance)
+**Choice**: Option B (accepted by user 2026-08-28)
 
 **Rationale**: The CLI's default role changes from "executor" to "cross-player specialist". Inside an agent host, the host is the natural player — fixed player, variable deck is the comparison users actually want. The CLI runner remains for the cross-player case where a neutral harness matters.
 
