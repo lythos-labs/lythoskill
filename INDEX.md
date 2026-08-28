@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/8/28 14:35:13
+> 自动生成于 2026/8/28 14:35:16
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 359 | 进行中: 5, 待验收: 0, 已完成: 299 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 99 | 已接受: 94 |
+| ADRs | 99 | 已接受: 95 |
 
 ---
 
@@ -555,7 +555,7 @@ _无_
 - ✅ **ADR-20260827165402810** (02-accepted): Tag-triggered release pipeline with OIDC npm provenance
 - ✅ **ADR-20260828004129143** (02-accepted): host-agent handoff as default execution mode when arena runs inside an agent
 - ✅ **ADR-20260828004129233** (02-accepted): player adapter lifecycle policy aliases renames and version support ranges
-- 🤔 **ADR-20260828005453077** (01-proposed): incubate standalone general-purpose zk review skill
+- ✅ **ADR-20260828005453077** (02-accepted): incubate standalone general-purpose zk review skill
 
 ---
 

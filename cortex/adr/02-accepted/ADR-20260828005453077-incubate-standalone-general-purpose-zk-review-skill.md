@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-08-27 | Created |
+| accepted | 2026-08-28 | Accepted |
 
 ## Background
 <!-- ⚠️ REQUIRED: Problem description and context. Empty = shell, blocked by probe. -->
