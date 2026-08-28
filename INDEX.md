@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 21:23:54
+> 自动生成于 2026/8/28 21:27:13
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 363 | 进行中: 0, 待验收: 1, 已完成: 304 |
+| Tasks | 363 | 进行中: 0, 待验收: 0, 已完成: 305 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -96,11 +96,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
+_无_
 
-### 已完成 (304)
+### 已完成 (305)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -406,6 +406,7 @@ _无_
 - ✅ ~~TASK-20260828003758156~~: mechanize site command and count verification guard
 - ✅ ~~TASK-20260828011012367~~: cortex wikiSubdirs config drifted from real wiki structure
 - ✅ ~~TASK-20260828111354804~~: fix mirror probe false negative HEAD semantics vs clone capability
+- ✅ ~~TASK-20260828141622777~~: kimi-code player alias and adapter version-range probe
 
 ### 悬置 (3)
 
