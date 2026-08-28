@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 20:45:32
+> 自动生成于 2026/8/28 21:23:54
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 362 | 进行中: 1, 待验收: 0, 已完成: 304 |
+| Tasks | 363 | 进行中: 0, 待验收: 1, 已完成: 304 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (12)
+### 待办 (13)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
@@ -90,14 +90,15 @@
 - [ ] **TASK-20260828194647623**: test deck add advisory probe branch (probe failure does not hard-exit)
 - [ ] **TASK-20260828195535425**: explain curator degraded entries on scan output
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
+- [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
 
 ### 已完成 (304)
 
