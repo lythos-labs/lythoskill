@@ -25,7 +25,8 @@
  * - Copy this comment block when creating new VitePress site pages.
  * - Prefer plain markdown (no YAML frontmatter) for content pages.
  * - Only index.md (home layout) needs `---` frontmatter.
- * - Test with `npx vitepress build .` before committing.
+ * - Test with `bun run build` before committing (injects version + stats first;
+ *   bare `vitepress build` skips injection and can ship stale numbers).
  */
 import versionMeta from './version.json' with { type: 'json' }
 import statsMeta from './stats.json' with { type: 'json' }
