@@ -293,6 +293,7 @@ Each caused at least one real incident. Scan before committing. **New gotcha →
 - `[BDD]` Agent BDD (`showcase/*/reproduce.sh`) uses LLM calls, NOT in pre-commit. Run intentionally before major releases. Patch a BDD test for the 3rd time → the scenario is stale, rewrite it.
 - `[DECK]` `.claude/skills/` stale or empty → `deck link` (not `bun install`) refreshes the working set.
 - `[TEST]` `Bun.spawnSync` pipe capture returns empty stdout/stderr (exit code still correct) under `bun test` with coverage on (repo `bunfig.toml`). Subprocess-assertion tests must redirect via `sh -c` to files and read them back — see `scripts/check-site-commands.test.ts`.
+- `[TEST]` Env-sensitive code (host detection, `process.env` branches) makes tests host-dependent: the local gate runs inside an agent session (`CLAUDE_CODE_SSE_PORT` set) but CI has a clean env — a test can be green locally and red in CI (2026-08-29 incident, arena singleRun validation tests). Tests covering env-branched code must pin the env vars explicitly; when in doubt, verify with `env -u CLAUDE_CODE_SSE_PORT -u CLAUDECODE bun --filter='*' run test` (CI simulation).
 
 **[RELEASE]**
 - `[SEMVER]` 0.x: patch = bug fix only; minor = any API change (new subcommand/flag/exported function, even "small"); major = breaking. Never bump without explicit user intent.
