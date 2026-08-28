@@ -224,9 +224,11 @@ Post-commit hook auto-dispatches and creates a follow-up commit — an extra com
 **Attribution trailers (every agent-authored commit)**: the commit Author stays the human's git identity; credit the agent via trailers at the end of the body:
 
 ```
-Co-Authored-By: AI Agent <you+ai@proton.me>
+Co-Authored-By: AI Agent <calt13+ai@proton.me>
 Model: <model id from the host config, e.g. kimi-code/k3 — read default_model, never guess>
 ```
+
+(`calt13+ai` = the human's git email local part + `+ai` — same address, plus-addressed. If the human's git email changes, follow it.)
 
 Ordering when cortex trailers are also present: cortex trailers (`Closes:`/`Review:`/…) first, then `Co-Authored-By:`, then `Model:` last. The cortex trailer parser (`packages/lythoskill-project-cortex/src/lib/trailer.ts`) is line-based over exactly five keys (`Task|ADR|Epic|Closes|Review`), so attribution lines never interfere — verified 2026-08-28 on the TASK-20260828141622777 commit series. Write messages with `git commit -F <file>` (apostrophes in `$()` heredocs break parsing — see Critical Gotchas).
 
