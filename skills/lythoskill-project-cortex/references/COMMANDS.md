@@ -19,7 +19,7 @@ Commands:
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
-  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
+  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|research|lesson|ssot]
   probe                 Check status consistency (dir vs Status History)
                         --suspicious   Only report suspicious patterns (empty shells, stale, drift)
                         --include-completed-empty-shells  Include empty shells in completed/terminal dirs
