@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 19:58:34
+> 自动生成于 2026/8/28 20:25:00
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 362 | 进行中: 0, 待验收: 5, 已完成: 299 |
+| Tasks | 362 | 进行中: 0, 待验收: 0, 已完成: 304 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -96,15 +96,11 @@
 
 _无_
 
-### 待验收 (5)
+### 待验收 (0)
 
-- 🔍 **TASK-20260827131734103**: curator-cli-fails-open-on-unknown-arg
-- 🔍 **TASK-20260827131734189**: deck-link-leaves-previous-working-set-on-switch
-- 🔍 **TASK-20260827131734254**: deck-link-prints-each-skill-twice
-- 🔍 **TASK-20260828003758156**: mechanize site command and count verification guard
-- 🔍 **TASK-20260828111354804**: fix mirror probe false negative HEAD semantics vs clone capability
+_无_
 
-### 已完成 (299)
+### 已完成 (304)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -398,13 +394,18 @@ _无_
 - ✅ ~~TASK-20260719015727556~~: cptsd ab rerun with clean methodology and spiral scenario
 - ✅ ~~TASK-20260719015727610~~: deck cold pool probe hardening follow ups
 - ✅ ~~TASK-20260730140801284~~: npm 0.17.2 workspace-protocol leak republish and publish-pipeline regression guard
+- ✅ ~~TASK-20260827131734103~~: curator-cli-fails-open-on-unknown-arg
+- ✅ ~~TASK-20260827131734189~~: deck-link-leaves-previous-working-set-on-switch
+- ✅ ~~TASK-20260827131734254~~: deck-link-prints-each-skill-twice
 - ✅ ~~TASK-20260827141405220~~: Fix version synchronization: npm, GitHub tags/releases, and site display
 - ✅ ~~TASK-20260827150725011~~: Provision GitHub token with release-write access for lythoskill releases
 - ✅ ~~TASK-20260827170159682~~: Implement tag-triggered release pipeline with OIDC npm provenance
 - ✅ ~~TASK-20260827234446584~~: Add cortex task list subcommand to prevent accidental task creation
 - ✅ ~~TASK-20260827235943331~~: Add retry to check-published-manifests.ts to avoid npm registry race condition
 - ✅ ~~TASK-20260828002450069~~: site UX and narrative alignment review
+- ✅ ~~TASK-20260828003758156~~: mechanize site command and count verification guard
 - ✅ ~~TASK-20260828011012367~~: cortex wikiSubdirs config drifted from real wiki structure
+- ✅ ~~TASK-20260828111354804~~: fix mirror probe false negative HEAD semantics vs clone capability
 
 ### 悬置 (3)
 
