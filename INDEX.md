@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 20:25:21
+> 自动生成于 2026/8/28 20:45:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 362 | 进行中: 0, 待验收: 0, 已完成: 304 |
+| Tasks | 362 | 进行中: 1, 待验收: 0, 已完成: 304 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (13)
+### 待办 (12)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622425**: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
@@ -84,7 +84,6 @@
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
 - [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
 - [ ] **TASK-20260828141622671**: arena host-agent handoff mode with host detection
-- [ ] **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
 - [ ] **TASK-20260828141622828**: publish player adapter support matrix
 - [ ] **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
 - [ ] **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
@@ -92,9 +91,9 @@
 - [ ] **TASK-20260828195535425**: explain curator degraded entries on scan output
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260828141622777**: kimi-code player alias and adapter version-range probe
 
 ### 待验收 (0)
 

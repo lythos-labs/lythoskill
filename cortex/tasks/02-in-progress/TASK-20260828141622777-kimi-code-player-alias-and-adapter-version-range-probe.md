@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-28 | Created |
+| in-progress | 2026-08-28 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -34,6 +35,17 @@ So the real work: capability-aware upstream detection (which upstream is behind 
 - Version parsing: no semver lib in any package.json (verified) — hand-roll a minimal compare; keep dependency-free per repo instinct.
 - Deprecation-window precedent: `cortex/epics/99-done/EPIC-20260518145235543-*.md` (claude-cli deprecation — note: often mislabeled "ADR-20260518145235543", including in `player.ts:15`; it is an EPIC with tasks A-D, not deprecation-window policy).
 
+### Implementation plan (2026-08-28, post-repro design — verified facts below all reproduced live)
+
+**Reproduced facts**: (1) `kimi --print --output-format stream-json` → exit 1, empty stdout, stderr `error: unknown option '--print'` — silent passthrough confirmed. (2) arena `singleRun` (cli.ts:348) never checks `agentResult.code`; runner.ts:324 per-cell catch converts a throw into an ERROR verdict — throwing from the adapter is a safe loud failure on both paths. (3) kimi-code 0.38.0's working flag set: `kimi -p <prompt> --output-format stream-json` (prompt mode is mutually exclusive with `--auto`/`--yolo`; `--output-format` requires prompt mode, no stdin). (4) kimi-code's stream-json is schema-compatible with `parseKimiStreamJson` (`role:"assistant"` + string content, plus `role:"meta"` lines skipped by the role filter) — live capture parsed to `PROBE_OK`. (5) Version fingerprints: `kimi --version` → `0.38.0`; `kimi-cli --version` → `kimi, version 1.45.0`. (6) All callers of `buildKimiCommand`/`parseKimiStreamJson` are kimi.ts + kimi.test.ts — signature can evolve safely.
+
+**Design**:
+- R1: `AgentAdapter.upstream?: { binaries: string[]; versionRange: string; probeArgs: string[] }` (optional; kimi declares `binaries: ['kimi-cli','kimi']`, `versionRange: '>=0.30.0 <2.0.0'`, `probeArgs: ['--version']`).
+- R2 pure functions in kimi.ts: `parseKimiVersion` (first `\d+\.\d+\.\d+` in output), `classifyKimiUpstream` (0→kimi-code, 1→kimi-cli, else null = fail closed), `satisfiesVersionRange` (hand-rolled `>=`/`>`/`<=`/`<` comparators), `buildKimiCommand(modelTier, binary, upstream='kimi-cli', prompt?)` (kimi-code → `--prompt <prompt>`, never `--print`), `detectKimiProtocolMismatch({code, rawStdout, stderr, events})` (code≠0 → error w/ stderr snippet; code 0 + non-empty stdout + 0 events → protocol mismatch; code 0 + empty stdout → no output; else null — deliberately does NOT reject "events but no text"). `parseKimiStreamJson` gains `events: number` in its return (backward compatible).
+- R2 IO flow in spawnKimi: detectKimiBinary → `Bun.spawnSync([binary, '--version'])` probe → parse/classify/range-check (failure → HATEOAS Error: found / supported / fix) → upstream-specific command (kimi-code: prompt in argv, no temp file) → spawn → parse → mismatch check → throw HATEOAS Error. Dead catch-all (kimi.ts:127-130) deleted. Probe runs per spawn (≈10-50ms, no cache-staleness class).
+- R3 layer choice: `arena/src/player.ts` BUILTIN_PLAYERS + one-line note in `singleRun` (cli.ts:276) only — precedent `'claude-code': 'claude-sdk'`; registry layer would make the adapter package know arena concepts; runner.ts per-cell resolution stays quiet (no per-cell spam).
+- Reliability: fix at adapter layer covers all three spawn consumers (singleRun, runner cells, comparative-judge) which never check exit codes; schema compatibility is measured not assumed; probe is ground truth not name-guessing; fail-closed only outside known-good ranges (ADR Option B semantics).
+
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
 - [ ] `bun --filter='@lythos/agent-adapter' run test` green incl. the R4 fixture matrix → Verify: run it
@@ -42,16 +54,26 @@ So the real work: capability-aware upstream detection (which upstream is behind 
 - [ ] Out-of-range/missing probe → loud HATEOAS error, exit non-zero → Verify: stub binary on PATH printing a bogus version
 - [ ] `bun --filter='*' run test` green overall → Verify: run it (canonical)
 
+## Implementation Results (2026-08-28)
+- `bun --filter='@lythos/agent-adapter' run test` → 51 pass, 0 fail (incl. full R4 matrix: version parse/classify/range, kimi-code command build, real kimi-code capture parse, protocol-mismatch matrix with the live-bug regression fixture)
+- `bun --filter='@lythos/skill-arena' run test` → 145 pass, 0 fail (incl. alias resolution + note tests)
+- Live A (kimi-code path, kimi-cli hidden from PATH): `arena single --player kimi` → real output `ARENA_777_OK`, exit 0
+- Live B (alias): `arena single --player kimi-code` → prints `ℹ️  player 'kimi-code' = 'kimi' (built-in alias)`, real output, exit 0
+- Live C (out-of-range): stub `kimi` printing `9.9.9` → exit 1, HATEOAS error (Detected 9.9.9 / Supported ranges / Fix)
+- `bun --filter='*' run test` → EXIT=0 (canonical gate)
+
+
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Created as follow-up of ADR-20260828004129233 acceptance (Option B).
 - 2026-08-28: ZK review round 1 — P1 (binary-name contradiction) resolved by live verification: kimi-code's binary IS `kimi` (v0.38.0); card rewritten around capability detection + player-level alias. P1/P2 (alias layer unspecified) → R3 names the layer choice. P2 (ADR→EPIC mislabel) fixed with note.
 - 2026-08-28: ZK round 2 (PASS-WITH-NITS) — P2s fixed: real degradation mechanism is parseKimiStreamJson's never-throw empty-text passthrough (catch-all 126-130 is dead code); R1 `upstream` declared optional, kimi-only scope. P3s applied: no spawn-injection precedent (pure-function extraction instead, R4); kimi-cli self-reports "kimi, version 1.45.0" → discriminate on major version (R2).
+- 2026-08-28: Pre-implementation verification + plan-mode design. Live-reproduced the bug (`--print` rejected by kimi-code 0.38.0, exit 1, empty stdout, arena reports success) and live-verified the fix substrate (kimi-code flag set = `-p <prompt> --output-format stream-json`; its stream-json parses with the existing parser; version fingerprints for both binaries). Plan written into Technical Approach above.
 
 ## Related Files
-- Modified: packages/lythoskill-agent-adapter/src/types.ts, adapters/kimi.ts, packages/lythoskill-arena/src/player.ts (pending)
-- Added: (pending)
+- Modified: packages/lythoskill-agent-adapter/src/types.ts (optional `upstream` field on AgentAdapter), adapters/kimi.ts (probe/classify/split flag sets + fail-loud mismatch detection; dead catch-all removed), adapters/kimi.test.ts (fixture matrix incl. live-bug regression), packages/lythoskill-arena/src/player.ts (`kimi-code` alias + `playerAliasNote`), src/cli.ts (one-line alias note in singleRun), player.test.ts
+- Added: none
 
 ## Git Commit Message
 ```
