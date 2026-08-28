@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-08-27 | Created from user vision: cortex posse + GitHub as channel |
+| accepted | 2026-08-28 | Accepted |
 
 ## Background
 

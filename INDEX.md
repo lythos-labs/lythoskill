@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/8/28 14:33:18
+> 自动生成于 2026/8/28 14:35:05
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 359 | 进行中: 5, 待验收: 0, 已完成: 299 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 99 | 已接受: 91 |
+| ADRs | 99 | 已接受: 92 |
 
 ---
 
@@ -551,7 +551,7 @@ _无_
 - ✅ **ADR-20260717161516538** (02-accepted): mechanize boot routines and shed dead defensive text for k3 era
 - ✅ **ADR-20260827124021589** (02-accepted): Separate release jobs for npm publish and Pages deploy
 - ✅ **ADR-20260827143012709** (02-accepted): Site version metadata and GitHub release synchronization
-- 🤔 **ADR-20260827155909657** (01-proposed): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
+- ✅ **ADR-20260827155909657** (02-accepted): Cortex as SSOT with GitHub Issues and PRs as inbound/outbound channels
 - ✅ **ADR-20260827165402810** (02-accepted): Tag-triggered release pipeline with OIDC npm provenance
 - 🤔 **ADR-20260828004129143** (01-proposed): host-agent handoff as default execution mode when arena runs inside an agent
 - 🤔 **ADR-20260828004129233** (01-proposed): player adapter lifecycle policy aliases renames and version support ranges
