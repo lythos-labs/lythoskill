@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/28 21:51:28
+> 自动生成于 2026/8/28 22:07:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 363 | 进行中: 1, 待验收: 0, 已完成: 307 |
+| Tasks | 364 | 进行中: 0, 待验收: 1, 已完成: 307 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (10)
+### 待办 (11)
 
 - [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
@@ -88,14 +88,15 @@
 - [ ] **TASK-20260828141622988**: build-time injection for site numbers (decks packages tests counts)
 - [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
 - [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
+- [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260828195535425**: explain curator degraded entries on scan output
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260828195535425**: explain curator degraded entries on scan output
 
 ### 已完成 (307)
 
