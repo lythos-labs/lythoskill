@@ -72,6 +72,15 @@ jobs:
         run: |
           mapfile -t PACKAGES < <(sed -n '/^PACKAGES=(/,/^)/p' scripts/publish.sh | grep -o '"packages/[^"]*"' | tr -d '"')
           for pkg in "${PACKAGES[@]}"; do
+            name=$(node -p "require('./$pkg/package.json').name")
+            version=$(node -p "require('./$pkg/package.json').version")
+            # Idempotent: skip versions already on npm so a failed-job re-run
+            # (e.g. verify-step propagation lag, 2026-08-29) does not die on
+            # E403 "cannot publish over previously published versions".
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "⏭️  $name@$version already on npm — skipping"
+              continue
+            fi
             echo "📦 Publishing $pkg ..."
             (cd "$pkg" && npm publish --access public)
           done

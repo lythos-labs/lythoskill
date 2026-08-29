@@ -56,11 +56,13 @@ export function productionView(): (pkgName: string, version?: string) => string 
     // deps/optional/peer are what bunx/npm install resolves. devDeps of a
     // published package are never installed by consumers.
     //
-    // Retry with backoff: npm view can 404 for a few seconds after a fresh
-    // publish because registry replicas need time to converge. Fail-closed
-    // still applies — if all retries fail, the caller treats it as unverifiable.
-    const maxAttempts = 5
-    const baseDelayMs = 1000
+    // Retry with backoff: npm view can 404 for tens of seconds after a fresh
+    // publish because registry replicas need time to converge (2026-08-29
+    // incident: 5×(1-4s) ≈ 10s was not enough; release run 33223763727).
+    // Worst case ≈ 5+10+15+20+25+30+35 = 140s. Fail-closed still applies —
+    // if all retries fail, the caller treats it as unverifiable.
+    const maxAttempts = 8
+    const baseDelayMs = 5000
     let lastError: unknown
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
