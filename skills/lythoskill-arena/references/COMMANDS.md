@@ -9,6 +9,10 @@ Commands:
   vs       Compare decks via arena.toml (declarative, Pareto-optimal)
   viz      Visualize a completed arena run (HTML + chart)
 
+Modes (single):
+  Inside an agent session  → host-handoff guidance (default; no external spawn)
+  Anywhere else            → pass --player <name> (kimi|kimi-code|codex|claude|deepseek)
+
 Examples:
   lythoskill-arena single --brief "find and research" --deck ./decks/scout.toml
   lythoskill-arena single --brief "find and research" --deck https://raw.githubusercontent.com/lythos-labs/lythoskill/main/examples/decks/scout.toml
