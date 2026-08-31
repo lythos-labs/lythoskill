@@ -37,6 +37,9 @@ export { readCheckpoints } from './checkpoint'
 // Built-in adapters — lightweight CLI wrappers only.
 // Heavy adapters live in separate packages (see above).
 export { kimiAdapter } from './adapters/kimi'
+// Shared version-range check (ADR-20260828004129233 Option B) — used by adapter
+// packages (e.g. agent-adapter-deepseek-harness) that declare an upstream range.
+export { satisfiesVersionRange } from './adapters/kimi'
 export {
   claudeCliAdapter,
   buildClaudeCommand,

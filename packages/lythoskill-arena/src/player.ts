@@ -18,6 +18,8 @@ const BUILTIN_PLAYERS: Record<string, string> = {
   'kimi': 'kimi',
   'kimi-code': 'kimi',              // renamed upstream — users guess the new name (ADR-20260828004129233)
   'deepseek': 'deepseek',
+  'deepseek-harness': 'deepseek-harness',
+  'dsh': 'deepseek-harness',        // upstream binary name (ADR-20260828004129233)
   'codex': 'codex',
   'cursor': 'cursor',
   'gemini': 'gemini',

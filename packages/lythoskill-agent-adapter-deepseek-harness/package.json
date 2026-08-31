@@ -1,0 +1,34 @@
+{
+  "name": "@lythos/agent-adapter-deepseek-harness",
+  "version": "0.18.0",
+  "description": "DeepSeek Harness (dsh) headless player adapter for lythoskill arena",
+  "type": "module",
+  "scripts": {
+    "test": "bun test src/ --pass-with-no-tests",
+    "test:coverage": "bun test src/ --coverage --coverage-reporter=lcov --coverage-dir=coverage --pass-with-no-tests",
+    "test:watch": "bun test src/ --watch"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "agent-adapter",
+    "headless"
+  ],
+  "dependencies": {
+    "@lythos/agent-adapter": "workspace:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lythos-labs/lythoskill.git",
+    "directory": "packages/lythoskill-agent-adapter-deepseek-harness"
+  }
+}

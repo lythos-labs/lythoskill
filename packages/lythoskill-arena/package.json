@@ -51,6 +51,7 @@
   "optionalDependencies": {
     "@lythos/agent-adapter-claude-sdk": "workspace:*",
     "@lythos/agent-adapter-deepseek-serve": "workspace:*",
+    "@lythos/agent-adapter-deepseek-harness": "workspace:*",
     "@lythos/agent-adapter-codex": "workspace:*"
   }
 }

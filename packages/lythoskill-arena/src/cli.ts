@@ -317,6 +317,7 @@ async function singleRun(args: string[], io: ArenaCliIO) {
   const { useAgent } = await import('@lythos/test-utils/agents')
   try { await import('@lythos/agent-adapter-claude-sdk') } catch { /* package not installed */ }
   try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package not installed */ }
+  try { await import('@lythos/agent-adapter-deepseek-harness') } catch { /* package not installed */ }
   try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
   const { resolvePlayer, playerAliasNote } = await import('./player')
 

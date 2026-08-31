@@ -1,0 +1,25 @@
+STUB-HEADLESS-OUTPUT: You are running an arena evaluation cell.
+
+CWD: /var/folders/h1/lfp3fxf11cl4nhh90sz320zw0000gn/T/arena-single-1788167317018
+Deck: /Users/chariots/Downloads/lythoskill-main/examples/decks/scout.toml
+Produce output to: /var/folders/h1/lfp3fxf11cl4nhh90sz320zw0000gn/T/arena-single-1788167317018/
+
+MANDATORY — write decision-log.jsonl to the output directory.
+Each line is one JSON object with: t (seconds elapsed),
+phase (setup/content/design/output), decision (what you chose),
+reason (why). This is your decision trail — the only way the
+orchestrator can understand your reasoning chain.
+
+Example:
+{"t":0,"phase":"setup","decision":"selected Golden Hour palette","reason":"warm tones match baking theme"}
+{"t":12,"phase":"content","decision":"6 science topics","reason":"requires chemistry depth"}
+
+ROBUSTNESS — If any command or script fails, read the error output, fix the issue, and retry.
+Do not stop on the first error. Ensure all required output files exist before finishing.
+
+TOOLS — Use the skills already linked in your working set (check with `ls .claude/skills/` or your configured path).
+They are available and tested. Only write alternative scripts if the linked skills explicitly
+cannot handle the task.
+
+TASK:
+e2e stub task

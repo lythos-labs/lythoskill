@@ -89,6 +89,7 @@ PACKAGES=(
 	  "packages/lythoskill-agent-adapter"
 	  "packages/lythoskill-agent-adapter-claude-sdk"
 	  "packages/lythoskill-agent-adapter-deepseek-serve"
+	  "packages/lythoskill-agent-adapter-deepseek-harness"
   "packages/lythoskill-agent-adapter-codex"
   "packages/lythoskill-test-utils"
   "packages/lythoskill-infra"

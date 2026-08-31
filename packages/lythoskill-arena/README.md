@@ -105,7 +105,7 @@ bunx @lythos/skill-arena@0.18.0 viz runs/arena-<id>/
 |------|---------|-------------|
 | `--brief "<text>"` | single | Inline task brief |
 | `--deck <path\|url>` | single | Deck file (URL auto-fetched) |
-| `--player <name>` | single, vs | Agent player: kimi\|codex\|deepseek\|claude |
+| `--player <name>` | single, vs | Agent player: kimi\|codex\|deepseek\|deepseek-harness\|claude |
 | `--timeout <ms>` | single | Subagent timeout (300000–600000 for complex tasks) |
 | `--from <dir>` | archive | Source workdir |
 | `--to <dir>` | archive | Output directory |
@@ -122,6 +122,7 @@ For cross-player mode, install at least one agent CLI:
 uv tool install kimi-cli           # kimi (recommended default)
 npm i -g @openai/codex             # codex
 # deepseek: bundled with desktop app or pip install deepseek-cli
+npm i -g @deepseek-ai/dsh          # deepseek-harness (alias: dsh) — needs Node >= 22.19 + DEEPSEEK_API_KEY
 # claude: set ANTHROPIC_API_KEY (SDK, no CLI binary needed)
 ```
 
