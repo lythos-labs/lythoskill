@@ -1,8 +1,10 @@
 import { describe, it, expect } from "bun:test";
+import { createHash } from "node:crypto";
 import {
   executeProbePlan,
   buildProbePlan,
   printProbeSummary,
+  resolveLockWorkingSet,
   type ProbeIO,
   type ProbePlan,
   type ProbeReport,
@@ -534,5 +536,68 @@ describe("printProbeSummary — output UX", () => {
     const logs = getLogs(io);
     expect(logs.some(l => l.includes("✅ No empty shells in any state"))).toBe(false);
     expect(logs.some(l => l.includes("📭 Empty shells"))).toBe(true);
+  });
+});
+
+describe("deck lock drift — working_set resolution + content verification", () => {
+  const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+
+  const SKILL_CONTENT = "# foo skill\n";
+  function makeLock(workingSet: string | undefined, hash = sha256(SKILL_CONTENT)): string {
+    return JSON.stringify({
+      version: "1.0.0",
+      deck_source: { path: "skill-deck.toml", content_hash: "x" },
+      ...(workingSet ? { deck_config: { max_cards: 10, working_set: workingSet, cold_pool: "~/.agents/skill-repos" } } : {}),
+      skills: [{ alias: "foo", deck_niche: "", type: "tool", source: "github.com/o/r/s", content_hash: hash }],
+    });
+  }
+
+  it("no false positive when deck declares working_set = .agents/skills (external report 2026-08-31)", () => {
+    const files: Record<string, string> = {
+      "skill-deck.lock": makeLock(".agents/skills"),
+      ".agents/skills/foo/SKILL.md": SKILL_CONTENT,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+    expect(report.deckLockDrift).toEqual([]);
+  });
+
+  it("still detects a skill genuinely missing from the configured working set", () => {
+    const files: Record<string, string> = {
+      "skill-deck.lock": makeLock(".agents/skills"),
+      // no .agents/skills/foo/SKILL.md — but the OLD hardcoded path exists:
+      ".claude/skills/foo/SKILL.md": SKILL_CONTENT,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+    expect(report.deckLockDrift).toEqual(["foo: missing from working set .agents/skills (lock says linked; run `deck link` to regenerate)"]);
+  });
+
+  it("detects real content drift via sha256 against lock content_hash", () => {
+    const files: Record<string, string> = {
+      "skill-deck.lock": makeLock(".claude/skills"),
+      ".claude/skills/foo/SKILL.md": "# foo skill — edited after link\n",
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+    expect(report.deckLockDrift.length).toBe(1);
+    expect(report.deckLockDrift[0]).toContain("foo: SKILL.md changed since last deck link");
+  });
+
+  it("falls back to .claude/skills for locks without deck_config", () => {
+    const files: Record<string, string> = {
+      "skill-deck.lock": makeLock(undefined),
+      ".claude/skills/foo/SKILL.md": SKILL_CONTENT,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+    expect(report.deckLockDrift).toEqual([]);
+  });
+
+  it("resolveLockWorkingSet: recorded value wins, fallback for old locks", () => {
+    expect(resolveLockWorkingSet({ deck_config: { working_set: ".agents/skills" } }, "/project")).toBe("/project/.agents/skills");
+    expect(resolveLockWorkingSet({}, "/project")).toBe("/project/.claude/skills");
+    expect(resolveLockWorkingSet({ deck_config: {} }, "/project")).toBe("/project/.claude/skills");
+  });
+
+  it("resolveLockWorkingSet: expands leading ~ and passes absolute paths through (ZK P2)", () => {
+    expect(resolveLockWorkingSet({ deck_config: { working_set: "~/.openclaw/skills" } }, "/project", "/home/u")).toBe("/home/u/.openclaw/skills");
+    expect(resolveLockWorkingSet({ deck_config: { working_set: "/opt/skills" } }, "/project", "/home/u")).toBe("/opt/skills");
   });
 });

@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import type { WorkflowConfig } from '../types.js';
 import { parseFrontmatter } from '../lib/frontmatter.js';
 
@@ -34,6 +36,25 @@ export function isEmptyShell(content: string): boolean {
     if (pat.test(content)) return true;
   }
   return false;
+}
+
+/**
+ * Working set directory for deck-lock-drift checks: the lock's own recorded
+ * `deck_config.working_set` (written by `deck link` from skill-deck.toml),
+ * fallback '.claude/skills' for pre-deck_config locks. Returns an ABSOLUTE
+ * path: leading `~` expands to home, absolute paths pass through, relative
+ * paths resolve against the probe cwd. Pure function, no IO.
+ */
+export function resolveLockWorkingSet(
+  lock: { deck_config?: { working_set?: string } },
+  cwd: string,
+  home: string = homedir(),
+): string {
+  const raw = lock.deck_config?.working_set || '.claude/skills';
+  if (raw === '~') return home;
+  if (raw.startsWith('~/')) return join(home, raw.slice(2));
+  if (isAbsolute(raw)) return raw;
+  return join(cwd, raw);
 }
 
 export interface ProbeResult {
@@ -579,19 +600,27 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
         try {
           const lock = JSON.parse(lockContent);
           if (lock.skills && Array.isArray(lock.skills)) {
+            // Working set comes from the lock's own recorded deck_config
+            // (written by `deck link` from skill-deck.toml) — never hardcode
+            // '.claude/skills': decks with working_set = ".agents/skills"
+            // false-positive every skill (external report 2026-08-31).
+            const workingSetDir = resolveLockWorkingSet(lock, cwd);
             for (const skill of lock.skills) {
               if (skill.content_hash) {
                 // Check if skill content hash matches current working set
-                const wsSkillPath = join(cwd, '.claude', 'skills', skill.alias, 'SKILL.md');
+                const wsSkillPath = join(workingSetDir, skill.alias, 'SKILL.md');
                 if (io.exists(wsSkillPath)) {
                   const wsContent = io.readFile(wsSkillPath);
                   if (wsContent) {
-                    const currentHash = wsContent; // Simplified: actual hash comparison would need crypto
-                    // In a real implementation, we'd compute SHA256 here
-                    // For now, we just verify the path exists as a proxy
+                    // Real content verification: sha256 of SKILL.md, same
+                    // algorithm as deck's hashSkillMd (cold-pool git-hash.ts).
+                    const currentHash = createHash('sha256').update(wsContent).digest('hex');
+                    if (currentHash !== skill.content_hash) {
+                      deckLockDrift.push(`${skill.alias}: SKILL.md changed since last deck link (lock ${skill.content_hash.slice(0, 8)}… ≠ working set ${currentHash.slice(0, 8)}…)`);
+                    }
                   }
                 } else {
-                  deckLockDrift.push(`${skill.alias}: missing from working set (lock says linked)`);
+                  deckLockDrift.push(`${skill.alias}: missing from working set ${lock.deck_config?.working_set || '.claude/skills'} (lock says linked; run \`deck link\` to regenerate)`);
                 }
               }
             }
