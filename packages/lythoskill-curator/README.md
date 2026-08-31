@@ -16,28 +16,28 @@ As your skill ecosystem grows (GitHub trending, marketplace downloads, agent rec
 ```bash
 bun add -d @lythos/skill-curator
 # or use directly
-bunx @lythos/skill-curator@0.18.0 <command>
+bunx @lythos/skill-curator@0.19.0 <command>
 ```
 
 ## Quick Start
 
 ```bash
 # Scan cold pool and build index
-bunx @lythos/skill-curator@0.18.0
+bunx @lythos/skill-curator@0.19.0
 
 # Add a skill (with decision record)
-bunx @lythos/skill-curator@0.18.0 add github.com/foo/bar-skill \
+bunx @lythos/skill-curator@0.19.0 add github.com/foo/bar-skill \
   --pool ~/.agents/skill-repos \
   --reason "LobeHub trending, claims web scraping"
 
 # Fork an existing skill
-bunx @lythos/skill-curator@0.18.0 add github.com/you/better-scraper \
+bunx @lythos/skill-curator@0.19.0 add github.com/you/better-scraper \
   --pool ~/.agents/skill-repos \
   --forked-from github.com/foo/bar-skill \
   --reason "fork: fixed PDF extraction bug"
 
 # Query the catalog
-bunx @lythos/skill-curator@0.18.0 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
+bunx @lythos/skill-curator@0.19.0 query "SELECT name, description FROM skills WHERE niches LIKE '%testing%'"
 ```
 
 ## Commands
