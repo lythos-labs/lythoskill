@@ -67,8 +67,9 @@
 - **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
 - **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
 
-## 🔬 Research (22)
+## 🔬 Research (23)
 
+- **[2026-08-29]** [deepseek-harness-integration-survey](./02-research/2026-08-29-deepseek-harness-integration-survey.md)
 - **[2026-08-28]** [early-predictions-vs-august-reality-audit](./02-research/2026-08-28-early-predictions-vs-august-reality-audit.md)
 - **[2026-05-28]** [claude-code-market-position-and-path-strategy-validation](./02-research/2026-05-28-claude-code-market-position-and-path-strategy-validation.md)
 - **[2026-05-28]** [hateoas-from-http-to-agent-hypermedia](./02-research/2026-05-28-hateoas-from-http-to-agent-hypermedia.md)

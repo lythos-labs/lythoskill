@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-08-27 | Created |
+| in-progress | 2026-08-29 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -33,18 +34,19 @@ This is research-level: produce findings and a recommendation, no implementation
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] Research doc exists in cortex/wiki/02-research/ with the three mapping questions answered and cited sources
-- [ ] Recommendation states one of: integrate / adapter-only / watch-and-wait, with reasoning
-- [ ] If adapter recommended: follow-up task registered referencing ADR-20260828004129233
+- [x] Research doc exists in cortex/wiki/02-research/ with the three mapping questions answered and cited sources → `2026-08-29-deepseek-harness-integration-survey.md`; orchestrator spot-checked load-bearing primary sources (official README + CLI reference both fetched, claims matched)
+- [x] Recommendation states one of: integrate / adapter-only / watch-and-wait, with reasoning → **adapter-only** (build headless player adapter now; defer dsh-plugin shipping until rc churn settles; watch governance-direction market with re-open triggers)
+- [x] If adapter recommended: follow-up task registered referencing ADR-20260828004129233 → TASK-20260829090402490 (backlog, card filled)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 - 2026-08-28: Registered from user inbox item. Blocked on nothing; research-only scope.
+- 2026-08-29: Executed as agent-orchestrated arena single (deep-research deck; per 671 handoff mode, no CLI `arena single`). Research cell produced `report.md` (19 KB) + `decision-log.jsonl` (9 entries). Wiki doc written, follow-up adapter task TASK-20260829090402490 registered, run archived to `playground/2026-08-29-dsh-integration-survey/`.
 
 ## Related Files
-- Modified:
-- Added:
+- Modified: (none yet)
+- Added: `cortex/wiki/02-research/2026-08-29-deepseek-harness-integration-survey.md`, `playground/2026-08-29-dsh-integration-survey/` (archive), `cortex/tasks/01-backlog/TASK-20260829090402490-*` (follow-up)
 
 ## Git Commit Message
 ```

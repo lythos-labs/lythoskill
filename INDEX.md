@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/29 00:12:51
+> 自动生成于 2026/8/31 17:15:55
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 365 | 进行中: 0, 待验收: 0, 已完成: 310 |
+| Tasks | 367 | 进行中: 3, 待验收: 0, 已完成: 310 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,9 +76,8 @@
 
 ## 📄 Tasks
 
-### 待办 (10)
+### 待办 (9)
 
-- [ ] **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
 - [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
@@ -89,9 +88,11 @@
 - [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 - [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
 
-### 进行中 (0)
+### 进行中 (3)
 
-_无_
+- 🔄 **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
+- 🔄 **TASK-20260829090402490**: implement deepseek-harness headless player adapter
+- 🔄 **TASK-20260831170333599**: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 
 ### 待验收 (0)
 
