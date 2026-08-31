@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/31 17:34:22
+> 自动生成于 2026/8/31 18:37:16
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 367 | 进行中: 0, 待验收: 3, 已完成: 310 |
+| Tasks | 367 | 进行中: 0, 待验收: 0, 已完成: 313 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -92,13 +92,11 @@
 
 _无_
 
-### 待验收 (3)
+### 待验收 (0)
 
-- 🔍 **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
-- 🔍 **TASK-20260829090402490**: implement deepseek-harness headless player adapter
-- 🔍 **TASK-20260831170333599**: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
+_无_
 
-### 已完成 (310)
+### 已完成 (313)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -402,6 +400,7 @@ _无_
 - ✅ ~~TASK-20260827235943331~~: Add retry to check-published-manifests.ts to avoid npm registry race condition
 - ✅ ~~TASK-20260828002450069~~: site UX and narrative alignment review
 - ✅ ~~TASK-20260828003758156~~: mechanize site command and count verification guard
+- ✅ ~~TASK-20260828004417068~~: research deepseek-harness plugin integration with lythoskill governance
 - ✅ ~~TASK-20260828011012367~~: cortex wikiSubdirs config drifted from real wiki structure
 - ✅ ~~TASK-20260828111354804~~: fix mirror probe false negative HEAD semantics vs clone capability
 - ✅ ~~TASK-20260828141622425~~: wire patterns INDEX maintenance into dreaming Phase 2 and onboarding guide
@@ -410,6 +409,8 @@ _无_
 - ✅ ~~TASK-20260828141622988~~: build-time injection for site numbers (decks packages tests counts)
 - ✅ ~~TASK-20260828194647623~~: test deck add advisory probe branch (probe failure does not hard-exit)
 - ✅ ~~TASK-20260828195535425~~: explain curator degraded entries on scan output
+- ✅ ~~TASK-20260829090402490~~: implement deepseek-harness headless player adapter
+- ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 
 ### 悬置 (3)
 
