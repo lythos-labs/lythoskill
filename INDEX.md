@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/8/31 17:15:55
+> 自动生成于 2026/8/31 17:33:32
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 367 | 进行中: 3, 待验收: 0, 已完成: 310 |
+| Tasks | 367 | 进行中: 2, 待验收: 1, 已完成: 310 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -88,15 +88,14 @@
 - [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 - [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
 
-### 进行中 (3)
+### 进行中 (2)
 
-- 🔄 **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 - 🔄 **TASK-20260829090402490**: implement deepseek-harness headless player adapter
 - 🔄 **TASK-20260831170333599**: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260828004417068**: research deepseek-harness plugin integration with lythoskill governance
 
 ### 已完成 (310)
 
