@@ -4,9 +4,11 @@ version: 0.19.1
 description: |
   夜有所梦 — project memory consolidation. Daily (scribe) captures raw
   experience, weekly extracts patterns and anomalies, dreaming consolidates
-  the accumulated memory into SSOT. External review via ZK subagent (the
-  same de facto standard pattern used by Hermes Curator's forked-agent
-  review), with cross-model validation via arena for critical docs.
+  the accumulated memory into the single source of truth (SSOT).
+  External review via a zero-knowledge subagent (a fresh agent with no
+  conversation context — the same pattern Hermes Curator uses for
+  forked-agent review), with cross-model validation via arena for
+  critical docs.
 when_to_use: |
   After major documentation changes, weekly cleanup, pre-onboarding prep,
   context pressure is high, wiki/ADR has grown stale, user says "做梦",

@@ -3,7 +3,7 @@ name: lythoskill-project-scribe-weekly
 version: 0.19.1
 description: |
   Weekly synthesis writer. Distills the past 7 days' core thread + quest DAG
-  into a frontmatter-rich short doc. Never replays git log or cortex INDEX
+  (task dependency graph) into a frontmatter-rich short doc. Never replays git log or cortex INDEX
   (those are direct queries already). Forms the weekly counterpart to
   project-scribe (daily) and project-onboarding (read-side).
 when_to_use: |

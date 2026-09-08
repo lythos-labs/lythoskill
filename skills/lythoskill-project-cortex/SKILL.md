@@ -3,14 +3,17 @@ name: project-cortex
 version: 0.19.1
 description: |
   Register tasks BEFORE fixing bugs. Close epics when work is done.
-  Always use CLI for state transitions — never mv files by hand.
-  CLI moves update Status History; manual mv causes probe mismatches.
-  Never leave state drift for the next agent to discover via git log.
-  GTD-style governance: ADR, Epic, Task, Wiki. Numeric-prefixed
-  directories enforce workflow order. Timestamp IDs prevent collision.
-  ZK task review (WHAT/WHY/HOW) ensures subagent-readable requirements before assignment.
-  probe detects stale backlog, epic drift, and history mismatches.
-  **Task-git discipline**: One task = 2-5 commits (core, tests, docs, trailer). Every commit includes TASK-xxx for traceability. Task card includes Commit Map and Verification Matrix.
+  Always move state through the CLI — never mv files by hand: CLI moves
+  write Status History, manual moves create probe mismatches. Never leave
+  state drift for the next agent to discover via git log. GTD (Getting
+  Things Done)-style governance across ADR (architecture decision record)
+  / Epic / Task / Wiki. Zero-knowledge (ZK) review = a fresh-agent pass
+  over a task card (WHAT/WHY/HOW) before assignment, so an executor with
+  no conversation context can still run it. `cortex probe` = drift
+  detector: stale backlog, drifted epics, history mismatches vs git
+  reality. **Task-git discipline**: one task = 2-5 commits (core, tests,
+  docs, trailer); every commit carries its full TASK-id (see ID Format —
+  truncated IDs are not addressable).
 when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
@@ -31,13 +34,14 @@ when_to_use: |
   - Before assigning a task to executor agent — ZK Review the card (WHAT/WHY/HOW, prerequisites, contracts, baselines, scope)
   - See a TASK-xxx or EPIC-xxx reference and need context
   - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
-  - Doing session handoff or writing daily notes
+  - Doing session handoff or writing daily notes — save discipline: fires
+    after ANY commit batch, not only at session end
   - husky post-commit trailer processing (Closes:/Task:/ADR: trailers auto-create follow-up commits)
 
   CRITICAL — trigger proactively, do NOT wait for user to ask:
   - Finished a batch of fixes and pushed — verify tasks moved, epic status matches reality
   - User says "确认epic/task都正常流转" or "还在途的epic是什么" — probe for state drift
-  - Session ending, writing handoff — run `cortex list` and close stale epics, don't leave them for next agent
+  - Writing or updating daily notes (save discipline — after any commit batch, NOT only at session end) — run `cortex list` and close stale epics, don't leave them for next agent
   - Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
   - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
   - ABSOLUTELY FORBIDDEN: mv/cp/rename task or epic files by hand. ALWAYS use CLI: `cortex start/done/complete/suspend <id>`. Manual moves skip Status History update and create probe noise.
@@ -242,6 +246,13 @@ Numeric prefixes ensure GTD workflow ordering in `ls` output.
 | Task | `TASK-20250420120000000` |
 | Epic | `EPIC-20250420120100000` |
 | ADR | `ADR-20250420120200000` |
+
+**Always spell IDs in full — truncation is not addressable.** `…402`-style
+abbreviations cannot be resolved by a zero-context reader: the date prefix
+IS the lookup key, and a 3-digit suffix matches nothing. Applies everywhere
+an ID is written for another agent to follow: daily handoffs, ADRs, wiki,
+task cards, commit trailers. The reader must jump to the carrier with zero
+re-derivation (same contract as scribe's "no raw ref → no item").
 
 **Preview next IDs before creating:**
 ```bash
