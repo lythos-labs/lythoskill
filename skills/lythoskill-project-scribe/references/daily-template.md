@@ -91,7 +91,7 @@ git log --oneline -3
 ## Section Reference
 
 ### Session Handoff (REQUIRED per session)
-One handoff per session. If multiple sessions occur on the same day, prepend a new `## Session Handoff` section at the top of the file. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **first** (most recent) handoff section.
+One handoff per session, savable any number of times (save discipline — writing it ≠ session end). If multiple sessions occur on the same day, prepend a new `## Session Handoff` section at the top of the file. The [onboarding skill](../../../lythoskill-project-onboarding/skill/SKILL.md) reads the **first** (most recent) handoff section.
 
 Each handoff is self-contained — all state needed for onboarding is in `### 0. Verify Current State`. No file-level state exists.
 

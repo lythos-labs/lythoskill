@@ -9,15 +9,33 @@ description: |
   carriers but needed by the next agent go here. Forms CQRS write-side pair
   with project-onboarding (read-side).
 when_to_use: |
-  Record progress at any time — mid-session or at the end. Use when:
-  user hits a pitfall, makes an important decision, completes a milestone,
-  asks to checkpoint, or says context is getting long. Also when a session
-  naturally concludes. Do NOT treat "record" as "stop working" — record
-  then continue.
+  Record after a batch of commits lands — mid-session or at close, while
+  facts are fresh. Use when: user hits a pitfall, makes an important
+  decision, completes a milestone, asks to checkpoint, or says context is
+  getting long. Do NOT treat "record" as "stop working" — the section
+  name marks the next session's read artifact, not this session's end.
 ---
 
 # Project Scribe
 > Write what `ls` + `cat` + `git log` cannot recover. Skip everything else.
+
+## Trigger: save discipline, not session-end
+
+The intent is the old **save-to-disk discipline** — 怕断电所以随手存盘.
+For an agent the power cut is compaction / crash / context loss: it can
+hit mid-task with no warning, and only git-tracked, already-written
+files survive it. Scribe = save game; the daily file is the save slot.
+
+The reliable save anchor is a **batch of commits landing** — scribe 顺手
+while facts are fresh. A session cannot judge its own remaining context;
+"write the handoff when the session feels done" is unreliable and
+produces rushed, telegraphic output. Anchor to the commit, not the mood.
+
+`## Session Handoff` names the artifact the NEXT session reads, not the
+moment you write it. One session saves any number of times; saving says
+nothing about this session ending (record-then-continue is the default,
+see below).
+
 ## Value Boundary
 
 **Scribe = session context dump for things WITHOUT structured carriers.**
@@ -130,7 +148,10 @@ Rationale: the reader is an agent under onboarding time pressure with zero
 conversation context. What/Why/Done lets it verify completion without
 guessing intent; the raw ref lets it jump to ground truth instead of
 re-deriving the search path. "Continue testing" fails because it
-re-exports the derivation cost to the reader.
+re-exports the derivation cost to the reader. The contract is also the
+anti-jargon bar: a writer in a hurry produces telegraphic fragments that
+decode to nothing for a zero-context reader; forcing What/Why/Done + ref
+per item forces complete, checkable sentences at write time.
 
 ## ZK Review Gate (mandatory before commit)
 The handoff's irreplaceable content — resume pointers ("agent-0 still holds
