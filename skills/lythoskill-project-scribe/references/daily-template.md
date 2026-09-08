@@ -101,7 +101,7 @@ Each handoff is self-contained — all state needed for onboarding is in `### 0.
 | **Completed** | Yes | Numbered list. Link to commits/tasks/ADRs. Include quantitative signals. |
 | **Key Decisions** | Yes | Bulleted list. One-line rationale per decision. |
 | **Pitfalls** | Yes if any | Bulleted list. Wrong → symptom → fix → root cause → time. |
-| **Next Steps** | Yes | Numbered list, prioritized. Specific, not vague. |
+| **Next Steps** | Yes | Numbered list, prioritized. Each item follows the Resumption-Items contract: What + Why + Done + raw ref (see scribe SKILL.md). Specific, not vague. |
 | **Temp Artifacts** | Yes if any | Path + lifecycle description. Prevents next agent from treating drafts as canonical. |
 
 ### Work Log (OPTIONAL)

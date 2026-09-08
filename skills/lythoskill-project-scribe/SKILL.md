@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.19.0
+version: 0.19.1
 description: |
   Session context dump. Self-assess what the conversation contains that has
   NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,
@@ -48,7 +48,7 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.19.0 list
+bunx @lythos/project-cortex@0.19.1 list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
@@ -98,6 +98,40 @@ git log --oneline -3                # Confirm recent commits match
 ```
 If the reader runs these and output diverges from the handoff, the handoff is stale.
 Real-time output takes precedence.
+
+## Resumption Items: What + Why + Done + Raw Ref
+
+Items the next agent must ACT on carry a stricter contract than narrative
+sections. Applies to four categories: **half-done work** (做到一半),
+**stuck** (卡住), **pending decision** (待裁决 — ADR-worthy or not), and
+**every Next Steps entry**.
+
+Each item answers four things:
+
+| Part | Question | Bar |
+|------|----------|-----|
+| **What** | 什么事 | One concrete action, not a theme ("wire X into Y's stdout", not "finish the feature") |
+| **Why** | 为什么要做 | Cost of NOT doing it — the incident or drift it prevents |
+| **Done** | 做完怎样 | Observable end state: command output, test count, filed ADR id — not "looks good" |
+| **Raw ref** | where to jump | `file:line`, TASK-/ADR-/EPIC-id, commit hash, or URL — zero re-derivation |
+
+**No raw ref → no item.** An item you cannot point at is a wish, not a
+handoff entry (mirrors cortex's "no source → no rule" — false confidence
+is worse than empty space).
+
+Category-specific additions:
+
+- **Stuck**: blocker as fact (exact error text / missing input) + what was
+  already tried (one line + ref) + the cheapest next probe.
+- **待裁决**: the decision question + options one line each + what input
+  unblocks it (who/what is missing). File the ADR, or link the existing id.
+
+Rationale: the reader is an agent under onboarding time pressure with zero
+conversation context. What/Why/Done lets it verify completion without
+guessing intent; the raw ref lets it jump to ground truth instead of
+re-deriving the search path. "Continue testing" fails because it
+re-exports the derivation cost to the reader.
+
 ## ZK Review Gate (mandatory before commit)
 The handoff's irreplaceable content — resume pointers ("agent-0 still holds
 the four-round context, don't open a fresh session for review"), temp
