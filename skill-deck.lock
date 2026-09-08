@@ -19,7 +19,7 @@
       "deck_niche": "meta.governance.deck",
       "type": "innate",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-deck",
-      "content_hash": "b4cd11ffedfdaafc517eb29fb1f89dfacf624ae36f82de11ff8f64cf3e61ebd3"
+      "content_hash": "0214c3b21872a4168b7d0d8471d4052b9d9af87c14c83e2bbcdbf3b4b6164d2b"
     },
     {
       "name": "localhost/me/sober",
@@ -35,7 +35,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-cortex",
-      "content_hash": "eb5c6d98edaf7973f42e49d2536b842cd812200d7e92d1c2e0c13de939953a3a"
+      "content_hash": "445c96c76241bd605a44db82df8084618f80cbbc25fc2742d2033cc98505115f"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
@@ -43,7 +43,7 @@
       "deck_niche": "meta.governance.arena",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-arena",
-      "content_hash": "2f41c46a8bc65a708b366b55e3d4c02b555f7e894f9b454ba2c42e95f1258aee"
+      "content_hash": "899bd191d10454a531f84a96ea27a8a08d9d277149f6cf3de5f3f45197e2c769"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
@@ -51,7 +51,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-curator",
-      "content_hash": "87871424415eb5cc5f98b043fadc5d0a8768f332bc7ffeec215f9f64a7467d04"
+      "content_hash": "acdab921962cd2006fcb7fe1e3506081001151a3a461c69e03db7b2916df7262"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
@@ -59,7 +59,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
-      "content_hash": "6d185890a46f98da8980764186891c7fbd48df83e74904d5686a8d133688ca90"
+      "content_hash": "784d3b7c6fb9f9ecda8eb0152d30db6140ea5a8f0261772ab8d2cef8398ab300"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
@@ -67,7 +67,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-      "content_hash": "f814bb580dd1b0182741e9d0b55617759fe0f7b8ae8dccf805d0081809c7c0ce"
+      "content_hash": "5bee310e25f412dfac9c8be6cb5ae7abd8c1625e890c1f4d2260aef0669a1329"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
@@ -75,7 +75,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
-      "content_hash": "e305e496f4bf8c027af5d49e71781b9b0ef285d1028bf597ec7c1527adea241a"
+      "content_hash": "6bb9af9c928eb20bb68fa2b7f12b01a08a65f09a5f3d7ee74cdbe6d8279c229f"
     },
     {
       "name": "github.com/mattpocock/skills/skills/engineering/tdd",
@@ -99,7 +99,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-red-green-release",
-      "content_hash": "a9c062c6cce715624ae0044790bfe650d79fd5712eb221657392faadb0f5ece1"
+      "content_hash": "bdf19ede33ca47a1927ce48733e009d731bcbb64702683b7696cd7d78892b3e3"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe-weekly",
@@ -107,7 +107,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe-weekly",
-      "content_hash": "571f0a099d0c607e297ad84d2583998cda41a3e723d15cb35a1f64a299137e1f"
+      "content_hash": "8bedbe65c3aceb51604a0610d6cf93e9a24868776cc675b54d97d7d343ba8809"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-writer",
@@ -115,7 +115,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-writer",
-      "content_hash": "7f426c4c9f2c880c1075fdb3b2829166da6d8fddcbe248766c6b63c4e724b17e"
+      "content_hash": "bc45886ba285c04918df686184350fae7eb03c006c35621580e488a62dc80558"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-dreaming",
@@ -123,7 +123,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-dreaming",
-      "content_hash": "a1b17cef268614493838b0a19844fb29ea0a44cdf4a16e93473628d37938b274"
+      "content_hash": "38a0cdd529078eef6b43df25329c7ca80ce5a03ff4975f96ab00ddacc798cf4a"
     }
   ]
 }
