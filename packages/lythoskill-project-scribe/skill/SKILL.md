@@ -153,7 +153,9 @@ anti-jargon bar: a writer in a hurry produces telegraphic fragments that
 decode to nothing for a zero-context reader; forcing What/Why/Done + ref
 per item forces complete, checkable sentences at write time.
 
-推荐写这样的句子，而不是电报式黑话:
+推荐写这样的句子，而不是电报式黑话。The writer acts as **secretary, not
+stenographer**: humans abbreviate by nature when speaking fast — decode the
+shorthand into these sentences; never transcribe the fragment as-is.
 
 | ❌ 电报式（reader 无法执行） | ✅ 推荐（What + Why + Done + ref 落成一句） |
 |---|---|
