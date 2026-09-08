@@ -136,6 +136,36 @@ Do NOT silently migrate.
 | Working Set | Symlinks only. What the agent actually scans. Default: `.claude/skills/` (configurable per platform). |
 | skill-deck.lock | Machine-generated snapshot: resolved paths, hashes, constraints. |
 
+## lock vs state — what to commit and why
+The deck writes two machine files with opposite git policies
+(ADR-20260616000939948 — born from a real incident: a ZK agent saw the old
+all-in-one lock dirty after a routine link and asked whether to commit).
+
+| File | Content-derived? | git | Why |
+|------|-----------------|-----|-----|
+| `skill-deck.toml` | hand-edited desired state | **commit** | The declaration IS the reproducibility contract (`go.mod` role). |
+| `skill-deck.lock` | yes — relative paths, FQ locators, content hashes only; no timestamps, no absolute paths | **commit** (root lock) | `go.sum`/`bun.lockb` role: pins "which content was linked", so any machine/agent resolves identical bytes, probe detects drift, agent B inherits agent A's resolution. |
+| `skill-deck.state` | no — `generated_at`/`linked_at` timestamps, absolute paths, symlink dest/mode | **ignore** | Changes on EVERY link and encodes this machine's filesystem. Regenerate anytime via `deck link`. Never read it for "what version is locked" — that is the lock's job. |
+
+Also ignore: working sets (`.claude/`, `.agents/skills/` — symlinks are
+per-machine) and non-root experiment lockfiles (`.agents/skill-deck.lock`,
+`showcase/**/skill-deck.lock`). This repo's `.gitignore` is the reference
+implementation.
+
+**Why the lock belongs in git**: a hash-only lock diff is the audit trail
+of "upstream skill content moved" — the alternative is silent drift. The
+split exists precisely so the lock behaves like a lockfile (changes only
+on content change) while link's operational churn lands in the ignored
+state file. `deck link` prints a drift hint when the lock changes — follow
+it; it stays silent when nothing moved.
+
+**Wrap-up ordering (real case, 2026-08-31 release)**: the session's final
+`deck link` ran at 17:46:55 — after the scribe's git-status snapshot, 80 s
+before the daily commit. Nobody re-checked `git status`; the lock sat
+dirty for a week and cost the next onboarding a judgment cycle. Rule: any
+link/refresh is followed by a fresh `git status` as the LAST operation
+before the final commit.
+
 ## Constraints
 
 - **deny-by-default** — undeclared skills are physically absent from working set

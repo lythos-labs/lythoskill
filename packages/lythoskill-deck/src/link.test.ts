@@ -18,7 +18,7 @@ import { tmpdir, homedir } from 'node:os'
 import { createHash } from 'node:crypto'
 import { spawnSync } from 'node:child_process'
 
-import { findDeckToml, expandHome, findSource, linkDeck } from './link.ts'
+import { findDeckToml, expandHome, findSource, linkDeck, formatLockDriftHint } from './link.ts'
 
 let cleanup: string[] = []
 
@@ -586,5 +586,53 @@ path = "github.com/owner/repo/skill-a"
     writeFileSync(deckPath, deckFor('.claude/skills'))
     const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
     expect(lines.join('\n')).not.toContain('Previous working set')
+  })
+})
+
+describe('formatLockDriftHint (HATEOAS lock-drift guidance)', () => {
+  it('drift path: hands the agent triage + commit + verify actions', () => {
+    const lines = formatLockDriftHint(true)
+    const joined = lines.join('\n')
+    expect(lines.length).toBeGreaterThan(0)
+    expect(joined).toContain('skill-deck.lock changed')
+    expect(joined).toContain('git diff skill-deck.lock')
+    expect(joined).toContain('git add skill-deck.lock')
+    expect(joined).toContain('bunx @lythos/skill-deck validate')
+  })
+
+  it('dormancy: silent when the lock is unchanged (happy path)', () => {
+    expect(formatLockDriftHint(false)).toEqual([])
+  })
+
+  it('B2.c: linkDeck prints the hint on first link, stays silent on idempotent re-run', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    placeSkill(coldPool, 'github.com/owner/repo/skill')
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, `[deck]\nmax_cards = 10\nworking_set = ".claude/skills"\ncold_pool = "${coldPoolRel}"\n\n[tool.skills.my-alias]\npath = "github.com/owner/repo/skill"\n`)
+
+    const lines: string[] = []
+    const origLog = console.log
+    console.log = (...a: any[]) => { lines.push(a.join(' ')) }
+    try {
+      await linkDeck(deckPath, projectDir, { noBackup: true })
+    } finally {
+      console.log = origLog
+    }
+    const first = lines.join('\n')
+    expect(first).toContain('skill-deck.lock changed')
+    expect(first).toContain('git add skill-deck.lock')
+
+    lines.length = 0
+    console.log = (...a: any[]) => { lines.push(a.join(' ')) }
+    try {
+      await linkDeck(deckPath, projectDir, { noBackup: true })
+    } finally {
+      console.log = origLog
+    }
+    const second = lines.join('\n')
+    expect(second).not.toContain('skill-deck.lock changed')
+    expect(second).toContain('(unchanged)')
   })
 })

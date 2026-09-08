@@ -43,7 +43,8 @@ when_to_use: |
 If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 ## Pre-Handoff Checklist (mandatory before writing)
 ```bash
-# 1. Git state
+# 1. Git state — snapshot LAST: after any deck link/refresh/release step,
+#    immediately before writing (a later link can silently dirty the tree)
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)

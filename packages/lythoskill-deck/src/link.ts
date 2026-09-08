@@ -263,6 +263,23 @@ function locksContentEqual(a: SkillDeckLock, b: SkillDeckLock): boolean {
 
 // ── 主流程 ──────────────────────────────────────────────────
 
+/**
+ * HATEOAS drift hint (agent-facing): when the lock changed, the working
+ * tree just went dirty by design — say so inline, hand the agent the
+ * triage + commit action in bunx style. Dormant on the happy path
+ * (unchanged lock → zero output), so boot-time `deck link` stays quiet.
+ */
+export function formatLockDriftHint(shouldWriteLock: boolean): string[] {
+  if (!shouldWriteLock) return [];
+  return [
+    `📝 skill-deck.lock changed — content hashes moved (upstream skill content updated).`,
+    `   It is git-tracked on purpose. Triage, then commit it now:`,
+    `     git diff skill-deck.lock      # hash-only = upstream content moved (safe); path/entry changes = review`,
+    `     git add skill-deck.lock && git commit -m "chore(deck): sync lock hashes"`,
+    `   Verify: bunx @lythos/skill-deck validate`,
+  ];
+}
+
 export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot'; skipHealthFetch?: boolean }): Promise<void> {
 const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
@@ -817,6 +834,7 @@ if (!cliWorkdir && cliDeck && dirname(DECK_PATH) !== process.cwd()) {
 console.log(`✅ Sync complete: ${linkedSkills.length} skill(s) linked (max_cards: ${MAX_CARDS})`);
 console.log(`   lock: ${resolve(PROJECT_DIR, "skill-deck.lock")}${shouldWriteLock ? '' : ' (unchanged)'}`);
 console.log(`   state: ${resolve(PROJECT_DIR, "skill-deck.state")}`);
+for (const line of formatLockDriftHint(shouldWriteLock)) console.log(line);
 
 // ── Cold pool health (best-effort drift detection — never blocks link) ──
 // Boot runs `deck link` every session; this is the one step that already
