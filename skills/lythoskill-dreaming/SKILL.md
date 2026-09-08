@@ -1,6 +1,6 @@
 ---
 name: lythoskill-dreaming
-version: 0.17.11
+version: 0.19.0
 description: |
   夜有所梦 — project memory consolidation. Daily (scribe) captures raw
   experience, weekly extracts patterns and anomalies, dreaming consolidates
@@ -146,6 +146,10 @@ last_consolidated: 2026-05-28
 sources: ["cortex/adr/02-accepted/ADR-xxx.md", "cortex/wiki/01-patterns/xxx.md"]
 zk_validated: true
 zk_issues: 0
+# Recommended for self-description (required for new files where they apply):
+related: ["packages/lythoskill-x/skill/references/xxx.md"]   # adjacent authoritative docs
+summary: |
+  One paragraph: what this SSOT covers + who its primary reader is.
 ---
 ```
 

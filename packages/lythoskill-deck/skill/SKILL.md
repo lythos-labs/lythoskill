@@ -178,6 +178,8 @@ bunx @lythos/skill-deck@{{PACKAGE_VERSION}} add github.com/owner/repo/skill
 
 **Never guess locators** — web-search the repo structure before writing paths for unfamiliar repos.
 
+**skill-deck.lock goes dirty by design** — `link`/`refresh` recompute the lock's content hashes from linked skill content, which lives OUTSIDE the repo (working-set symlinks → cold pool / upstream). The lock is the only in-repo artifact that moves, so `git status` can show `M skill-deck.lock` while no repo file changed. That is derived-state drift, not repo drift — don't burn a judgment cycle on it. Triage via `git diff skill-deck.lock`: hash-only lines = external content moved, safe to commit as housekeeping; path/entry/structure changes = real working-set change, review before committing. Never hand-edit the lock — regenerate via `deck link` (reverting `skill-deck.toml` does not revert derived state; re-run `link`).
+
 ## Deck as Orchestrator — Task → Deck Mapping
 
 lythos has no standalone orchestrator. **The deck IS the orchestrator entry point.** You (the agent) select the right pre-built deck for the user's task, link it in an isolated environment, and execute. The three-layer distribution: light orchestration in combo prompt, medium in SKILL.md, heavy mechanical in CLI.

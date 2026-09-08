@@ -500,6 +500,7 @@ All packages + root share one version. Bump via `bunx @lythos/skill-creator@0.19
 |-------------------|------|
 | Full memory pipeline (3-axis model + SSOT diagram) | [ZK Review reference § SSOT](packages/lythoskill-project-cortex/skill/references/zk-review.md) |
 | ZK Review methodology (prompt templates, gap processing, trial-usage, real cases) | [ZK Review reference](packages/lythoskill-project-cortex/skill/references/zk-review.md) |
+| What session jargon means (ZK review baseline for handoffs — deposit recurring terms here) | [Glossary](cortex/wiki/04-ssot/glossary.md) |
 | Intent/Plan/Execute deep dive (IO injection table, when/when-not) | [intent-plan-execute.md](packages/lythoskill-deck/skill/references/intent-plan-execute.md) |
 | Thin Skill Pattern full detail (build pipeline, skill product ID) | [thin-skill-pattern.md](packages/lythoskill-creator/skill/references/thin-skill-pattern.md) |
 | Why Bun over Node, ESM-only, monorepo conventions | `cortex/adr/02-accepted/ADR-20260503170000000-monorepo-toolchain-bun-only-and-root-package-json-conventions.md` |

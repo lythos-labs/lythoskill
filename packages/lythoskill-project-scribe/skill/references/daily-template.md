@@ -35,6 +35,9 @@
 **Branch**: main, clean/dirty working tree, ahead/behind origin
 **Active Epic**: N (count)
 **Active Task**: N in-progress, N in review, N backlog
+**Resume**: live session context a fresh agent must know (e.g. "agent-0
+still holds the four-round review context — don't open a fresh session"),
+or `nothing live`
 
 ```bash
 # Verify: if output diverges from the fields above, this handoff is stale
@@ -94,7 +97,7 @@ Each handoff is self-contained — all state needed for onboarding is in `### 0.
 
 | Sub-section | Required | Description |
 |:---|:---|:---|
-| **0. Verify Current State** | Yes | Git HEAD, Version, Deck, Branch, Active Epic/Task counts. Plus verification commands. This is the SSOT for this session. |
+| **0. Verify Current State** | Yes | Git HEAD, Version, Deck, Branch, Active Epic/Task counts, Resume pointer (live session context). Plus verification commands. This is the SSOT for this session. |
 | **Completed** | Yes | Numbered list. Link to commits/tasks/ADRs. Include quantitative signals. |
 | **Key Decisions** | Yes | Bulleted list. One-line rationale per decision. |
 | **Pitfalls** | Yes if any | Bulleted list. Wrong → symptom → fix → root cause → time. |

@@ -125,7 +125,7 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
-## 🧭 SSOT (9)
+## 🧭 SSOT (10)
 
 - **[0000-00-00]** [agent-onboarding-guide](./04-ssot/agent-onboarding-guide.md)
 - **[0000-00-00]** [architecture](./04-ssot/architecture.md)
@@ -136,6 +136,7 @@
 - **[0000-00-00]** [key-decisions](./04-ssot/key-decisions.md)
 - **[0000-00-00]** [external-validation-meta-observation](./04-ssot/external-validation-meta-observation.md)
 - **[0000-00-00]** [project-hotspots](./04-ssot/project-hotspots.md)
+- **[0000-00-00]** [glossary](./04-ssot/glossary.md)
 
 ## 🗄️ Archived (3)
 
