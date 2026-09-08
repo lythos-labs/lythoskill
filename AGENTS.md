@@ -271,6 +271,8 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 4. Write daily/YYYY-MM-DD.md               — dump what file exploration cannot recover
    (pitfalls, why-we-chose-this, anomalies, specific next steps)
    Things WITH structured carriers (task/ADR/epic) → their carriers. Without → scribe.
+   Save discipline (怕断电存盘): also after ANY mid-session commit batch —
+   writing it ≠ session end; the section name marks the next session's read.
 5. Commit daily, push
 ```
 
@@ -485,7 +487,7 @@ All packages + root share one version. Bump via `bunx @lythos/skill-creator@0.19
 | `lythoskill-arena` | Skill test-play (single/vs, deck-first dispatch) | "test this skill", "compare A vs B", "audit this package" |
 | `lythoskill-curator` | Cold-pool skill indexer (scan/query/tag/audit) | "find a skill for X", "what skills do I have" |
 | `lythoskill-project-cortex` | ADR/Epic/Task governance + ZK Review | "create task", "register finding", "ZK review this" |
-| `lythoskill-project-scribe` | Session handoff (daily context dump) | Record progress (mid-session or end), "log this" |
+| `lythoskill-project-scribe` | Session handoff (daily context dump) | Save after commit batches (mid-session or close), "log this" |
 | `lythoskill-project-scribe-weekly` | Weekly pattern extraction | End of week, "weekly review" |
 | `lythoskill-project-onboarding` | Session context loader | Start of session, "what happened last time" |
 | `lythoskill-dreaming` | Memory consolidation → SSOT | "Consolidate docs", "SSOT sweep" |

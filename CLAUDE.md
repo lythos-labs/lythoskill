@@ -15,7 +15,7 @@
 
 ## Session Handoff (Claude-specific reminder)
 
-When a session is ending, follow the handoff flow defined in `AGENTS.md` → "Session Handoff Checklist". Write to `daily/YYYY-MM-DD.md` (per ADR-20260424125637347). **Do NOT write or read `daily/HANDOFF.md` — that path is deprecated**; older docs may still reference it but the dated file is canonical.
+Scribe is **save discipline** (怕断电所以随手存盘) — save after each batch of commits lands, while facts are fresh; compaction is the power cut and only git-tracked files survive it. The `## Session Handoff` section names the next session's read artifact — saving mid-session says nothing about this session ending. Flow: `AGENTS.md` → "Session Close & Submit". Write to `daily/YYYY-MM-DD.md` (per ADR-20260424125637347). **Do NOT write or read `daily/HANDOFF.md` — that path is deprecated**; older docs may still reference it but the dated file is canonical.
 
 ## Onboarding Order for Claude Code
 
