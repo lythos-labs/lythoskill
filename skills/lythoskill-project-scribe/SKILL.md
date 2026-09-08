@@ -153,6 +153,15 @@ anti-jargon bar: a writer in a hurry produces telegraphic fragments that
 decode to nothing for a zero-context reader; forcing What/Why/Done + ref
 per item forces complete, checkable sentences at write time.
 
+推荐写这样的句子，而不是电报式黑话:
+
+| ❌ 电报式（reader 无法执行） | ✅ 推荐（What + Why + Done + ref 落成一句） |
+|---|---|
+| "Next: kimi adapter 加固" | "Harden the kimi adapter probe (TASK-20260828212204402): probe times out under sandbox though `--version` passes; done = probe e2e green under CI-sim env, `env -u CLAUDE_CODE_SSE_PORT bun --filter='*' run test` EXIT=0" |
+| "deck lock 又脏了，提交一下" | "skill-deck.lock dirty after `deck refresh --exec` — hash-only, 4 entries (upstream content moved); commit it (`git add skill-deck.lock`), done = `git status` clean" |
+| "dsh 插件化待定" | "待裁决： ship lythoskill-as-dsh-plugin? (a) adapter-only — current, low cost; (b) full plugin — blocked on dsh stable API (≥0.2); unblocker = dsh roadmap signal, else close as adapter-only by 2026-09-15. Ref: cortex/wiki/02-research/2026-08-29-deepseek-harness-integration-survey.md §Recommendation" |
+| "卡在 npm 发布" | "Stuck: `npm view @lythos/skill-deck` 404 immediately after publish; republish → E403. E403 = publish already succeeded (propagation delay). Next probe: exact-match `[ \"$OUT\" = \"0.19.1\" ]` after 60 s — never grep the version in error text (false positive)" |
+
 ## ZK Review Gate (mandatory before commit)
 The handoff's irreplaceable content — resume pointers ("agent-0 still holds
 the four-round context, don't open a fresh session for review"), temp
