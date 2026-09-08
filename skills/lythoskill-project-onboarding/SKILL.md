@@ -6,7 +6,8 @@ description: |
   project context without redundant file exploration. Three-layer
   loading: CLAUDE.md (stable) → daily handoff (session state) →
   git verification (ground truth). Degrades to file exploration
-  when no handoff exists. CQRS read-side pair with project-scribe.
+  when no handoff exists. Read-side pair with project-scribe (scribe
+  writes the daily, onboarding reads it).
 when_to_use: |
   Start of session, resume work, onboard to project, review history,
   continue previous work, take over task, what happened last time,  先复盘, 了解项目, 接手任务, 继续之前的工作.
