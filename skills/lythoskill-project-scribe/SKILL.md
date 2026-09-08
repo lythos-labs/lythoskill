@@ -1,6 +1,6 @@
 ---
 name: lythoskill-project-scribe
-version: 0.17.11
+version: 0.19.0
 description: |
   Session context dump. Self-assess what the conversation contains that has
   NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,
@@ -47,13 +47,14 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 git status
 git log --oneline -5
 # 2. Cortex state (if cortex is active)
-bunx @lythos/project-cortex@0.17.11 list
+bunx @lythos/project-cortex@0.19.0 list
 # 3. Session recall — ask yourself:
 #    - What did I modify but not commit?
 #    - What pitfalls did I hit?
 #    - What important decisions were made verbally?
 #    - What temp files did I create and where?
 #    - What would the next agent most likely misunderstand?
+# 4. After drafting: run the ZK Review Gate (below) — before commit
 ```
 ## Template Usage
 
@@ -87,15 +88,45 @@ handoff section.
 
 ## Handoff Must Include Verification Commands
 The handoff is not a snapshot — it's a snapshot **plus instructions to verify freshness**.
-Always include in `## 0. Verify Current State`:
+Always include in `### 0. Verify Current State`:
 ```markdown
-## 0. Verify Current State
+### 0. Verify Current State
 git diff <handoff-commit> --stat    # Construct "from T0 to now"
 git status --short                  # Real-time working tree
 git log --oneline -3                # Confirm recent commits match
 ```
 If the reader runs these and output diverges from the handoff, the handoff is stale.
 Real-time output takes precedence.
+## ZK Review Gate (mandatory before commit)
+The handoff's irreplaceable content — resume pointers ("agent-0 still holds
+the four-round context, don't open a fresh session for review"), temp
+artifacts, colloquial context — is exactly what a session-internal author
+writes worst: it is the most session-specific and the most likely to come
+out as unresolvable jargon (curse of knowledge). The play-by-play sections
+need no such care — cortex task cards + git history already carry them. So
+before commit the handoff gets a zero-knowledge pass, weighted at the top:
+
+1. Draft the handoff (with `### 0. Verify Current State`) and write it
+   after user confirmation (Gotchas: show diff first).
+2. Spawn a fresh ZK reviewer — **pass-by-reference**: the handoff file path,
+   the `AGENTS.md` path, and the glossary path
+   `cortex/wiki/04-ssot/glossary.md`. Never paste content.
+3. Charter the reviewer accordingly — this goes into the spawn prompt:
+   effort goes on the resume pointers (the `**Resume**` field in
+   `### 0. Verify Current State`) and the Temp Artifacts section — not on
+   task state or history.
+4. Fix every unresolved item **on the spot**, then commit.
+   - **Anti-bloat**: a fix = one-sentence gloss + a pointer, bounded by the
+     Value Boundary above — a fix restores what `ls`/`git log` cannot
+     recover, it never adds what they can. Never dump transcript into the
+     handoff — reading cost kills recall in reverse. A term that needs a
+     paragraph belongs in the glossary, not expanded here.
+   - Recurring jargon → deposit a row in the glossary (with source);
+     one-off jargon → gloss in place.
+5. ZK agents are sensors, not bosses (AGENTS.md) — you judge each finding.
+
+Methodology + gap-processing rules:
+`packages/lythoskill-project-cortex/skill/references/zk-review.md`.
 ## Pitfall Recording
 When the user says "hit a bug" or "踩坑了", immediately record:
 ```markdown
