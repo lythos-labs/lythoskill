@@ -170,7 +170,7 @@ Three rounds is a practical ceiling — entering round 3 means the task design i
 
 #### Side Decks (Pass-by-Reference Dispatch)
 
-Any deck in `examples/decks/` can be handed to a subagent as a task-scoped skill set: pass the file path, subagent runs `deck link --deck <path>`, your main deck stays unchanged. Index: [examples/decks/INDEX.md](./examples/decks/INDEX.md).
+Any deck file can be handed to a subagent as a task-scoped skill set: pass the file path, subagent runs `deck link --deck <path>`, your main deck stays unchanged. Deck kinds: **project deck** (`skill-deck.toml` in-repo, always linked), **side deck** (any file/URL, linked per task by arena or subagent), **local deck** (outside the repo, machine-only, `localhost/*` skills). Index: [examples/decks/INDEX.md](./examples/decks/INDEX.md). External-facing explainer: [README → Side Decks](./README.md).
 
 ### 4. Daily Operations
 

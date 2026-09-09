@@ -222,6 +222,29 @@ Skills are authored using the **thin-skill pattern**: heavy logic in npm package
 
 24+ decks for common tasks: documentation, research, architecture review, security audit. See [`examples/decks/INDEX.md`](./examples/decks/INDEX.md).
 
+### Side Decks — Task-Scoped Dispatch
+
+A **side deck** is a deck file passed by reference: a task-scoped skill set that never touches your main working set. Three deck kinds:
+
+| Kind | Lives | When it's linked |
+|------|-------|------------------|
+| Project deck | `skill-deck.toml` in your repo | Always — this is your working set |
+| Side deck | any deck file or URL | Per task — by an arena run or a subagent |
+| Local deck | outside the repo (e.g. `decks-local/`) | Machine-only; references `localhost/*` skills |
+
+Two ways to consume a side deck:
+
+```bash
+# 1. Arena run: isolated workdir, deck auto-linked, output where you say
+bunx @lythos/skill-arena@latest single \
+  --deck ./examples/decks/qa-sweep.toml --brief "audit this repo" --out /tmp/arena-audit
+
+# 2. Hand the file to your agent — it runs `deck link --deck <path>` in its own
+#    workspace. Your main deck stays untouched. That is the whole point.
+```
+
+A deck's `[combo.*]` sections are part of the dispatch: combo prompts are the orchestration playbook, read and executed by the agent that receives the deck.
+
 ---
 
 ## Why Trust This
