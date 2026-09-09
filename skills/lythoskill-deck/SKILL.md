@@ -216,6 +216,8 @@ lythos has no standalone orchestrator. **The deck IS the orchestrator entry poin
 
 **When you encounter a deck with `[combo.<name>]` sections, READ the combo prompts.** They are the orchestration playbook — step-by-step instructions for multi-skill pipelines. The combo section is not optional metadata; it IS the orchestrator. Skipping it means executing skills in isolation without the coordination logic.
 
+**Consumption contract: combo prompts are read and executed by the agent.** The CLI only parses them into sections — there is no combo runtime, no code executes them. If you receive a deck (main or side) and skip its combos, you have not actually run the deck.
+
 ### Intent → Deck mapping
 
 | User says | Deck to use | Command |
