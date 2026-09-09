@@ -12,6 +12,7 @@ import { resolve, dirname, join, relative } from 'node:path'
 import { homedir } from 'node:os'
 import { findDeckToml, expandHome } from './link.js'
 import { parseDeck } from './parse-deck.js'
+import { removeEntryForRelink } from './safe-remove.js'
 import { ColdPool, parseLocator } from '@lythos/cold-pool'
 import { findSource } from './link.js'
 import { parse as parseToml } from '@iarna/toml'
@@ -197,8 +198,9 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
     io.exit(1)
   }
 
-  // Remove symlink, cp snapshot
-  rmSync(dest, { recursive: true, force: true })
+  // Remove symlink, cp snapshot — lstat-verified symlink above, so this is
+  // unlink-only (never recursive into target; Goose #11600 class)
+  removeEntryForRelink(dest)
   cpSync(source.path, dest, { recursive: true })
   io.log(`🧊 ${match.alias}: symlink → snapshot (pinned copy from ${relative(PROJECT_DIR, source.path)})`)
 

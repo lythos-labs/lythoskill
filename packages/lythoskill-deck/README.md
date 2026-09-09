@@ -1,6 +1,6 @@
 # @lythos/skill-deck
 
-![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen) ![CI](https://img.shields.io/badge/CI-71%20unit%20%2B%2021%20CLI%20BDD-brightgreen) ![Agent BDD](https://img.shields.io/badge/Agent%20BDD-5%20local-blue) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2)
+![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen) ![CI](https://img.shields.io/badge/CI-199%20unit%20%2B%2021%20CLI%20BDD-brightgreen) ![Agent BDD](https://img.shields.io/badge/Agent%20BDD-5%20local-blue) ![Intent/Plan](https://img.shields.io/badge/arch-intent%2Fplan%2Fexecute-8A2BE2)
 
 > Declarative skill deck governance. Declare which skills a project needs in `skill-deck.toml`, run `deck link`, and the working set becomes an exact mirror. Undeclared skills are physically removed — deny-by-default.
 
@@ -31,6 +31,7 @@ bunx @lythos/skill-deck@0.19.1 link
 | `remove` | `<alias> [--deck]` | Remove skill from deck.toml and working set. Cold pool untouched. |
 | `to-symlink` | `<alias> [--deck] [--workdir]` | Switch a skill to symlink mode (live link, follows cold pool). |
 | `to-snapshot` | `<alias> [--deck] [--workdir]` | Switch a skill to snapshot mode (pinned copy of current HEAD). |
+| `per-run` | `<cli> [--deck] [--workdir]` | Render a per-run CLI invocation from deck state — skills visible for this run only, zero projection (nothing linked or written). Verified renderers: `kimi` (`--skills-dir` / `extra_skill_dirs`), `crush` (`option skill-path`). |
 | `migrate-schema` | `[--dry-run]` | Convert legacy string-array deck.toml to alias-as-key dict. |
 
 ## Options
@@ -51,6 +52,16 @@ bunx @lythos/skill-deck@0.19.1 link
 `link` refuses to operate if `working_set` resolves to your home directory or root (`/`).
 
 **Snapshot mode** (`--mode snapshot`): copies the source directory into the working set instead of symlinking. Snapshots are pinned to the cold pool version at link time. Use `deck to-symlink <alias>` to switch back.
+
+**Adapter policy layer** (`src/adapter-registry.ts`): per-CLI data from the 2026-09-09 16-CLI skill-dir survey — symlink guarantee tier (docs/issue/hazard), fan-out targets, per-run switching mechanisms, hazard flags with source URLs. `deck link` consults it:
+
+- Symlink removal never recurses into link targets (Goose #11600 recursive-delete class) — cold-pool content is unlink-proof by construction, with dormancy tests.
+- Fan-out to `.goose/skills` prints a data-loss warning (removing deck skills via the Goose UI can delete cold-pool content); the shared `.agents/skills` dir stays quiet.
+- Fanning the same deck into two dirs scanned by one CLI warns about duplicate-name discovery (opencode #46327).
+- A skill source inside the fan-out dir is refused (symlink-cycle ENAMETOOLONG class, opencode #45961).
+- `.clinerules` fans out as snapshot copies — Cline does not follow symlinks there.
+
+Default decks (`.claude/skills` + `.agents/skills`) emit zero adapter warnings and behave exactly as before.
 
 ## Exit codes
 
@@ -119,7 +130,7 @@ This enables testing without real git operations. Full pattern: [Intent / Plan /
 
 | Layer | Count | CI |
 |-------|-------|----|
-| Unit tests | 71 | ✅ |
+| Unit tests | 199 | ✅ |
 | CLI BDD | 21 | ✅ |
 | Agent BDD | 5 | local only |
 

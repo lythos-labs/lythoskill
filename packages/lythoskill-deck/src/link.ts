@@ -15,7 +15,7 @@ import {
   symlinkSync, cpSync, lstatSync, rmSync, statSync, writeFileSync,
 } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { resolve, dirname, join, basename, relative } from "node:path";
+import { resolve, dirname, join, basename, relative, sep } from "node:path";
 import { homedir } from "node:os";
 import { ColdPool, parseLocator } from "@lythos/cold-pool";
 import {
@@ -27,6 +27,9 @@ import {
 import { parseDeck } from "./parse-deck.js";
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 import { safeResolveInDir } from "./path-guard.js";
+import { targetModeOverride } from "./adapter-registry.js";
+import { collectFanOutWarnings } from "./adapter-policy.js";
+import { removeSymlinkOnly, removeEntryForRelink } from "./safe-remove.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
 
@@ -57,6 +60,17 @@ export function parseAlsoLinkTo(raw: any, projectDir: string): { targets: string
 
 function hashContent(content: string): string {
   return createHash("sha256").update(content).digest("hex");
+}
+
+/**
+ * 循环链拒绝(opencode #45961 ENAMETOOLONG 崩溃类):source 位于 fan-out
+ * 目录内部时,创建的 symlink 会成为自引用环。正常 deck(cold pool 在
+ * project 外)永不触发 — dormancy 守护在 adapter-policy 测试中。
+ */
+export function wouldCreateCycle(source: string, targetDir: string): boolean {
+  const src = resolve(source);
+  const dir = resolve(targetDir);
+  return src === dir || src.startsWith(dir + sep);
 }
 // ── Front matter 提取 ───────────────────────────────────────
 
@@ -511,6 +525,13 @@ function reconcileTargetDir(
 ): void {
   mkdirSync(targetDir, { recursive: true });
 
+  // registry 模式覆盖(Cline 类 copy 目标);docs 级目标返回 undefined → 行为不变
+  const override = targetModeOverride(targetDir);
+  const effectiveMode = override?.mode ?? mode;
+  if (override) {
+    console.log(`  💡 ${override.reason}`);
+  }
+
   const nonSymlinks: string[] = [];
   try {
     for (const entry of readdirSync(targetDir)) {
@@ -563,7 +584,8 @@ function reconcileTargetDir(
           const st = lstatSync(entryPath);
           if (!st.isSymbolicLink()) continue;
         } catch { continue; }
-        rmSync(entryPath, { recursive: true, force: true });
+        // Goose #11600 防线:已 lstat 确认是 symlink,只删链接本身,绝不 recursive 进目标
+        removeSymlinkOnly(entryPath);
         console.log(`  🗑️  Removed: ${entry}`);
       }
     }
@@ -571,10 +593,19 @@ function reconcileTargetDir(
 
   for (const item of declared) {
     const dest = join(targetDir, item.alias);
-    try { lstatSync(dest); rmSync(dest, { recursive: true, force: true }); } catch {}
+    const linkMode = item.mode ?? effectiveMode;
+    // 循环检查先于清位:source 在 fan-out 目录内时拒绝,绝不能用
+    // removeEntryForRelink 把 source 自己删掉(opencode #45961 类)
+    if (linkMode !== 'snapshot' && wouldCreateCycle(item.sourcePath, targetDir)) {
+      console.error(`❌ Cycle refused: ${item.alias} — source is inside the fan-out dir`);
+      console.error(`   why:  self-referencing symlink = ENAMETOOLONG crash in opencode (#45961 class)`);
+      console.error(`   source: ${item.sourcePath}`);
+      continue;
+    }
+    // 清位:旧条目是 symlink → 只删链接(不递归进 cold pool);真实目录(旧 snapshot)→ recursive
+    removeEntryForRelink(dest);
     try {
       mkdirSync(dirname(dest), { recursive: true });
-      const linkMode = item.mode ?? mode;
       if (linkMode === 'snapshot') cpSync(item.sourcePath, dest, { recursive: true });
       else symlinkSync(item.sourcePath, dest);
     } catch (err: any) {
@@ -622,6 +653,12 @@ for (const target of ALSO_LINK_TO) {
   reconcileTargetDir(target, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
 }
 
+// ── Adapter policy warnings(registry 驱动;默认 .claude+.agents/skills 对零警告) ──
+for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO])) {
+  console.warn(`⚠️  [${w.severity}] ${w.message}`);
+  console.warn(`   ref: ${w.ref}`);
+}
+
 // ── 收集元数据 ──────────────────────────────────────────────
 
 	const linkedSkills: LinkedSkill[] = [];
@@ -629,16 +666,19 @@ for (const target of ALSO_LINK_TO) {
 	for (const item of declared) {
   const dest = join(WORKING_SET, item.alias);
 
-  // 幂等：已存在则删除重建（lstat 不跟随 symlink，能处理断链/自引用 symlink）
-  try {
-    lstatSync(dest);
-    rmSync(dest, { recursive: true, force: true });
-  } catch {}
+  const linkModeMeta = item.mode ?? MODE;
+  // 同 reconcileTargetDir 的循环守卫:先拒后清,不删 source 自身
+  if (linkModeMeta !== 'snapshot' && wouldCreateCycle(item.sourcePath, WORKING_SET)) {
+    console.error(`❌ Cycle refused: ${item.alias} — source is inside the working set (#45961 class)`);
+    continue;
+  }
+
+  // 幂等:已存在则删除重建。symlink 只删链接本身(#11600 防线);真实目录 recursive
+  removeEntryForRelink(dest);
 
   try {
     mkdirSync(dirname(dest), { recursive: true });
-    const linkMode = item.mode ?? MODE;
-	    if (linkMode === 'snapshot') {
+	    if (linkModeMeta === 'snapshot') {
       cpSync(item.sourcePath, dest, { recursive: true });
     } else {
       symlinkSync(item.sourcePath, dest);

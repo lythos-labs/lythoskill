@@ -1,7 +1,7 @@
 <!-- AUTO-GENERATED -->
 lythoskill-deck -- Declarative skill deck governance — cold pool, working set, deny-by-default
 
-Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck to-symlink <alias> | lythoskill-deck to-snapshot <alias> | lythoskill-deck migrate-schema [--dry-run]
+Usage: lythoskill-deck link | lythoskill-deck add <locator> | lythoskill-deck refresh [<fq|alias>] | lythoskill-deck validate [deck.toml] | lythoskill-deck remove <fq|alias> | lythoskill-deck to-symlink <alias> | lythoskill-deck to-snapshot <alias> | lythoskill-deck per-run <cli> | lythoskill-deck migrate-schema [--dry-run]
 
 Commands:
   link                        Sync working set with skill-deck.toml
@@ -11,6 +11,7 @@ Commands:
   remove <fq|alias>           Remove a skill from deck.toml and working set
   to-symlink <alias>          Switch a skill to symlink mode (live link, follows cold pool)
   to-snapshot <alias>         Switch a skill to snapshot mode (pinned cp of current HEAD)
+  per-run <cli>               Render per-run CLI invocation from deck state (no relink, zero side effects)
   migrate-schema [--dry-run]  Convert string-array deck.toml to alias-as-key dict
 
 Options:

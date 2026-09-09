@@ -7,13 +7,36 @@
  */
 
 import { parse as parseToml, stringify as stringifyToml } from "@iarna/toml";
-import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync, lstatSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
 import { ColdPool } from "@lythos/cold-pool";
 import { homedir } from "node:os";
 import { validateAlias } from "./path-guard.js";
+import { removeSymlinkOnly } from "./safe-remove.js";
+
+/**
+ * 删除工作集条目。Goose #11600 防线:lstat 判定,是 symlink 就只删链接本身
+ * (无 recursive,cold pool 真身永不被触碰);真实目录(如手工 snapshot)保持
+ * 历史 recursive 行为。不用 existsSync 判定 — 它跟随链接,会漏掉断链。
+ */
+function removeLinkedEntry(linkPath: string, io: DeckIO, label: string): void {
+  let st;
+  try {
+    st = lstatSync(linkPath);
+  } catch {
+    io.log(`  ⚠️  ${label} not found: ${linkPath}`);
+    return;
+  }
+  if (st.isSymbolicLink()) {
+    removeSymlinkOnly(linkPath);
+    io.log(`  🗑️  Removed ${label}: ${linkPath}`);
+  } else {
+    rmSync(linkPath, { recursive: true, force: true });
+    io.log(`  🗑️  Removed ${label} (real dir): ${linkPath}`);
+  }
+}
 
 export interface DeckIO {
   error: (msg: string) => void;
@@ -109,24 +132,12 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   // ── 删 working set symlink ──────────────────────────────────
 
-  const symlinkPath = join(WORKING_SET, alias);
-  if (existsSync(symlinkPath)) {
-    rmSync(symlinkPath, { recursive: true, force: true });
-    io.log(`  🗑️  Removed symlink: ${symlinkPath}`);
-  } else {
-    io.log(`  ⚠️  Symlink not found: ${symlinkPath}`);
-  }
+  removeLinkedEntry(join(WORKING_SET, alias), io, "symlink");
 
   // ── 删 also_link_to symlinks ─────────────────────────────────
 
   for (const target of ALSO_LINK_TO) {
-    const linkPath = join(target, alias);
-    if (existsSync(linkPath)) {
-      rmSync(linkPath, { recursive: true, force: true });
-      io.log(`  🗑️  Removed also_link_to symlink: ${linkPath}`);
-    } else {
-      io.log(`  ⚠️  also_link_to symlink not found: ${linkPath}`);
-    }
+    removeLinkedEntry(join(target, alias), io, "also_link_to symlink");
   }
 
   // ── Metadata cleanup ────────────────────────────────────────

@@ -7,6 +7,7 @@ import { updateDeck } from './update.js'
 import { migrateSchema } from './migrate-schema.js'
 import { removeSkill } from './remove.js'
 import { toSymlinkSkill, toSnapshotSkill } from './to-symlink-snapshot.js'
+import { perRun } from './per-run.js'
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from './resolve-deck.js'
 import { formatHelp } from './help.js'
 
@@ -63,6 +64,7 @@ const HELP_CONFIG = {
     { name: 'remove', description: 'Remove a skill from deck.toml and working set', args: '<fq|alias>' },
     { name: 'to-symlink', description: 'Switch a skill to symlink mode (live link, follows cold pool)', args: '<alias>' },
     { name: 'to-snapshot', description: 'Switch a skill to snapshot mode (pinned cp of current HEAD)', args: '<alias>' },
+    { name: 'per-run', description: 'Render per-run CLI invocation from deck state (no relink, zero side effects)', args: '<cli>' },
     { name: 'migrate-schema', description: 'Convert string-array deck.toml to alias-as-key dict', args: '[--dry-run]' },
   ],
   options: [
@@ -150,6 +152,15 @@ switch (command) {
       process.exit(1)
     }
     toSnapshotSkill(target, deckPath, workdir)
+    break
+  }
+  case 'per-run': {
+    const cliId = args[1] && !args[1].startsWith('-') ? args[1] : undefined
+    if (!cliId) {
+      console.error('❌ Missing CLI id. Usage: deck per-run <cli>   (e.g. kimi, crush — see adapter registry)')
+      process.exit(1)
+    }
+    perRun(cliId, deckPath, workdir)
     break
   }
   case 'migrate-schema': {
