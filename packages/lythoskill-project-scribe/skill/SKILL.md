@@ -153,7 +153,9 @@ anti-jargon bar: a writer in a hurry produces telegraphic fragments that
 decode to nothing for a zero-context reader; forcing What/Why/Done + ref
 per item forces complete, checkable sentences at write time.
 
-Write sentences like these, not telegraphic fragments. The writer acts as
+Write sentences like these, not telegraphic fragments. The ❌ samples below
+are synthesized typical shorthand (any user's, not a specific person's words).
+The writer acts as
 **secretary, not stenographer**: humans abbreviate by nature when speaking
 fast — decode the shorthand into these sentences; never transcribe the
 fragment as-is.
@@ -211,11 +213,9 @@ When the user says "hit a bug" or "踩坑了" ("hit a pitfall"), immediately rec
 
 Agents must not infer "I wrote the daily file → my job is done." The user may ask you to record a pitfall at turn 5 and then continue debugging at turn 6.
 
-```
-User: "踩坑了" ("hit a pitfall") → Record pitfall → Continue working on the bug
-User: "记录一下这个决定" ("record this decision") → Write to daily → Continue with the task
-User: "先记一下进度" ("jot down progress first") → Checkpoint → Continue
-```
+Trigger phrases: "踩坑了" ("hit a pitfall") → record pitfall, keep debugging;
+"记录一下这个决定" ("record this decision") → write to daily, continue the task;
+"先记一下进度" ("jot down progress first") → checkpoint, continue.
 
 **Default assumption: record then continue.** Only stop when the user explicitly confirms (e.g., "session ending", "LGTM", "先到这里" "let's stop here").
 ## Gotchas

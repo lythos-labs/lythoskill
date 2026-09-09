@@ -225,7 +225,7 @@ lythos has no standalone orchestrator. **The deck IS the orchestrator entry poin
 | 设计 / 架构 / 画图 ("design" / "architecture" / "draw diagrams") / architecture | `architecture-explainer.toml` | `arena single --deck examples/decks/architecture-explainer.toml --brief "..."` |
 | 写文档 / 科普 ("write docs" / "explain to a general audience") / docs | `documents.toml` | `arena single --deck examples/decks/documents.toml --brief "..."` |
 | 治理 / task / epic ("governance") / governance | `governance.toml` | `arena single --deck examples/decks/governance.toml --brief "..."` |
-| 体验 / 测试 UX ("experience" / "test the UX") / scout | `scout.toml` | `arena single --deck examples/decks/scout.toml --brief "..."` |
+| 体验 / 测试 UX ("try it out" / "UX-test") / scout | `scout.toml` | `arena single --deck examples/decks/scout.toml --brief "..."` |
 | 改bug / 诊断 ("fix bugs" / "diagnose") / diagnose | Use `diagnose` skill directly | — |
 | 写测试 / TDD ("write tests") | Use `tdd` skill directly | — |
 | 发布 / release / ship ("release") | Use `lythoskill-red-green-release` skill directly | — |

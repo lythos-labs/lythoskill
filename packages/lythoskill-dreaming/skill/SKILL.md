@@ -2,7 +2,8 @@
 name: lythoskill-dreaming
 version: {{PACKAGE_VERSION}}
 description: |
-  夜有所梦 — project memory consolidation. Daily (scribe) captures raw
+  Project memory consolidation — 夜有所梦 ("night dreams": the day's scattered
+  notes get consolidated into long-term memory while "sleeping"). Daily (scribe) captures raw
   experience, weekly extracts patterns and anomalies, dreaming consolidates
   the accumulated memory into the single source of truth (SSOT).
   External review via a zero-knowledge subagent (a fresh agent with no

@@ -18,33 +18,15 @@ when_to_use: |
   Create a task, create an epic, create an ADR, architecture decision,
   project management, track requirements, delegate to subagent,
   ZK review task cards before assignment, task status, project index,
-  what needs to be done, backlog,
-  milestone, project governance, generate index, probe status.
-
-  ALSO trigger when:
-  - About to commit and need to write a trailer (Closes: TASK-xxx, Task: TASK-xxx review, ADR: ADR-xxx accept)
-  - Just finished a task and need to move it to review/completed
-  - Need to check active tasks/epics before starting new work
-  - Found a bug or vulnerability — register it as a task BEFORE fixing
-  - Discovered a systemic issue that needs an ADR
-  - QA sweep found findings that need tracking
-  - Need to register a lesson learned or pitfall
-  - User says "登记" / "记录一下" / "记下来" / "别忘了"
-  - User says "ZK review this task" / "零知识审查" ("zero-knowledge review") / "review this task" / "任务能看懂吗" ("can an executor understand this task") — ZK Review the card before assignment
-  - Before assigning a task to executor agent — ZK Review the card (WHAT/WHY/HOW, prerequisites, contracts, baselines, scope)
-  - See a TASK-xxx or EPIC-xxx reference and need context
-  - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
-  - Doing session handoff or writing daily notes — save discipline: fires
-    after ANY commit batch, not only at session end
-  - husky post-commit trailer processing (Closes:/Task:/ADR: trailers auto-create follow-up commits)
-
-  CRITICAL — trigger proactively, do NOT wait for user to ask:
-  - Finished a batch of fixes and pushed — verify tasks moved, epic status matches reality
-  - User says "确认epic/task都正常流转" ("confirm epics/tasks are flowing properly") or "还在途的epic是什么" ("what epics are still in flight") — probe for state drift
-  - Writing or updating daily notes (save discipline — after any commit batch, NOT only at session end) — run `cortex list` and close stale epics, don't leave them for next agent
-  - Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
-  - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
-  - ABSOLUTELY FORBIDDEN: mv/cp/rename task or epic files by hand. ALWAYS use CLI: `cortex start/done/complete/suspend <id>`. Manual moves skip Status History update and create probe noise.
+  what needs to be done, backlog, milestone, project governance,
+  generate index, probe status. User says "登记" (register) / "记录一下"
+  (record it) / "创建任务" (create task) / "完成" (done) / "推进" (advance)
+  / "状态" (status) / "零知识审查" (zero-knowledge review) / "任务能看懂吗"
+  (can an executor understand this task). Proactive: just finished a fix
+  batch and pushed; about to commit with a trailer; writing daily notes;
+  epic marked active but all its tasks are done; about to mv a task file
+  by hand (forbidden — always use the CLI). Full trigger list: body §Also
+  Trigger When.
 allowed-tools:
   - Bash(bunx @lythos/project-cortex@{{PACKAGE_VERSION}} *)
 ---
@@ -69,6 +51,27 @@ derives tasks       guides tasks        links to epic/adr
 | **Task** | **Pointer / Reference** | A task card is a `pointer` to epic/adr context plus executable instructions. It does **not** inline the full epic or ADR body — that would be "pass by value" and create drift. |
 
 **Pass by reference, not by value**: A task card should contain precise pointers (`Refs: EPIC-xxx`, `See ADR-yyy §Decision`, `Modify: src/path.ts`) so a subagent can navigate to source of truth. The card is a **map**, not a warehouse. A new team member reading only AGENTS.md + the task card should be able to find everything needed without asking for clarification.
+
+## Also Trigger When
+
+- About to commit and need to write a trailer (`Closes: TASK-xxx`, `Task: TASK-xxx review`, `ADR: ADR-xxx accept`)
+- Just finished a task and need to move it to review/completed
+- Need to check active tasks/epics before starting new work
+- Found a bug or vulnerability — register it as a task BEFORE fixing
+- Discovered a systemic issue that needs an ADR
+- QA sweep found findings that need tracking
+- Need to register a lesson learned or pitfall
+- User says "登记" / "记录一下" / "记下来" / "别忘了"
+- Before assigning a task to an executor agent — ZK Review the card (WHAT/WHY/HOW, prerequisites, contracts, baselines, scope)
+- See a TASK-xxx or EPIC-xxx reference and need context
+- husky post-commit trailer processing (trailers auto-create follow-up commits)
+
+**CRITICAL — trigger proactively, do NOT wait for the user to ask:**
+- Finished a batch of fixes and pushed — verify tasks moved, epic status matches reality
+- Writing or updating daily notes (save discipline — after ANY commit batch) — run `cortex list` and close stale epics, don't leave them for the next agent
+- Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
+- Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
+- **ABSOLUTELY FORBIDDEN: mv/cp/rename task or epic files by hand.** ALWAYS use CLI: `cortex start/done/complete/suspend <id>`. Manual moves skip Status History update and create probe noise.
 
 ## CLI Commands
 ```bash
@@ -257,162 +260,18 @@ an ID is written for another agent to follow: daily handoffs, ADRs, wiki,
 task cards, commit trailers. The reader must jump to the carrier with zero
 re-derivation (same contract as scribe's "no raw ref → no item").
 
-**Preview next IDs before creating:**
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} next-id
-```
-Output:
-```
-📋 Timestamp ID Format:
-
-  Task: TASK-20260502110420008
-  Epic: EPIC-20260502110420009
-  ADR:  ADR-20260502110420009
-
-  Format: PREFIX-yyyyMMddHHmmssSSS (17 digits)
-```
+**Preview next IDs before creating:** `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} next-id`
+(prints the next Task/Epic/ADR timestamp IDs in the `PREFIX-yyyyMMddHHmmssSSS` format).
 
 ## Command Output Examples
 
-Agents should expect the following output patterns when invoking CLI commands.
+Agents should expect stable output patterns when invoking CLI commands.
+Sample outputs (create / stats / probe, consistent and mismatch cases):
+[references/command-output.md](./references/command-output.md).
 
-### Creating a document
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} adr "Choose database"
-```
-Output:
-```
-✅ Created: cortex/adr/01-proposed/ADR-20260502110308316-Choose-database.md
-🏛️  ADR ID: ADR-20260502110308316
-```
-
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} task "Fix login bug"
-```
-Output:
-```
-✅ Created: cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
-📝 Task ID: TASK-20260502110308316
-```
-
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} epic "User auth system"
-```
-Output:
-```
-✅ Created: cortex/epics/01-active/EPIC-20260502110308316-User-auth-system.md
-🎯 Epic ID: EPIC-20260502110308316
-```
-
-### Project statistics
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} stats
-```
-Output:
-```
-📊 Project Statistics:
-
-Tasks:
-  Backlog        : 3
-  In Progress    : 1
-  Review         : 0
-  Completed      : 5
-  Suspended      : 0
-  Terminated     : 0
-  Archived       : 2
-
-Epics:
-  Active         : 1
-  Archived       : 0
-
-ADRs:
-  Proposed       : 2
-  Accepted       : 1
-  Rejected       : 0
-  Superseded     : 0
-
-Wiki:
-  Patterns       : 4
-  Faq            : 1
-  Research       : 0
-  Lessons        : 0
-  Ssot           : 0
-  Archived       : 0
-```
-
-### Consistency probe (read-only)
-```bash
-bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe
-```
-Output when consistent:
-```
-🔍 Probing status consistency...
-Rule: Directory location is the source of truth.
-Status History inside files should reflect the latest move.
-
-📄 Tasks:
-  ✅ file1
-  ✅ file2
-
-🛤️  Epic lanes (active):
-     main:      0
-     emergency: 0
-
-──────────────────────────────────────────────────
-✅ All documents consistent.
-📊 42 documents checked, 0 issue(s) found.
-```
-Output when mismatches found:
-```
-🔍 Probing status consistency...
-Rule: Directory location is the source of truth.
-Status History inside files should reflect the latest move.
-
-📄 Tasks:
-  ❌ cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
-     → Status History last entry says "in-progress" but directory says "backlog"...
-
-  ⚠️  1 issue(s) requiring human confirmation
-
-🛤️  Epic lanes (active):
-     main:      0
-     emergency: 0
-
-──────────────────────────────────────────────────
-⚠️  Found 1 status issue(s) requiring human confirmation.
-   Please review the items above and decide:
-   - Move file to correct directory, OR
-   - Update Status History inside the file.
-📊 42 documents checked, 1 issue(s) found.
-```
 ## Task State Machine (FSM)
 
 Directory location is the source of truth. Status History mirrors the directory.
-
-```mermaid
-stateDiagram-v2
-    [*] --> backlog : create
-    backlog --> in_progress : start
-    in_progress --> review : review
-    review --> completed : done
-    in_progress --> suspended : suspend
-    suspended --> in_progress : resume
-    review --> in_progress : reject
-    backlog --> terminated : terminate
-    in_progress --> terminated : terminate
-    review --> terminated : terminate
-    suspended --> terminated : terminate
-    completed --> archived : archive
-    completed --> [*]
-    terminated --> [*]
-    archived --> [*]
-
-    note right of review
-        done: review → completed only
-        complete: any → completed
-        (trailer-driven)
-    end note
-```
 
 ### Transition Table
 
@@ -431,31 +290,7 @@ stateDiagram-v2
 
 ### ADR State Machine
 
-```mermaid
-stateDiagram-v2
-    [*] --> proposed : create
-    proposed --> accepted : accept
-    proposed --> rejected : reject
-    proposed --> superseded : supersede
-    accepted --> superseded : supersede
-    rejected --> [*]
-    superseded --> [*]
-```
-
 ### Epic State Machine
-
-```mermaid
-stateDiagram-v2
-    [*] --> active : create
-    active --> done : done
-    active --> suspended : suspend
-    suspended --> active : resume
-    done --> archived : archive
-    active --> [*]
-    suspended --> [*]
-    done --> [*]
-    archived --> [*]
-```
 
 ## Commit Trailer Integration
 

@@ -197,7 +197,7 @@ instructions outperforms a 390-line skill full of gaps.
 **"See references/ for more details" is a bibliography, not a dispatch table.**
 Every reference entry needs a trigger condition: "Read X when Y happens."
 
-** burying the core verb wastes description budget.**
+**Burying the core verb wastes description budget.**
 "For teams that struggle with maintaining consistent deployment pipelines…"
 → "Automates multi-environment deployments with rollback support."
 Front-load the solution, not the problem.
