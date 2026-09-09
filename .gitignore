@@ -31,6 +31,10 @@ playground/
 # Private operational docs (local-only, never commit)
 .private/
 
+# Local-only side decks — reference localhost/* cold-pool skills,
+# resolve only on this machine. Never commit, never publish.
+decks-local/
+
 # Curator generated artifacts (cold pool index, regenerated at runtime)
 .lythoskill-curator/
 
