@@ -103,6 +103,7 @@ bunx @lythos/skill-deck@0.19.1 validate --remote          # probe locators again
 
 bunx @lythos/skill-deck@0.19.1 to-symlink <alias>   # snapshot → symlink
 bunx @lythos/skill-deck@0.19.1 to-snapshot <alias>  # symlink → snapshot (pin HEAD)
+bunx @lythos/skill-deck@0.19.1 per-run kimi          # render per-run CLI call from deck state (zero side effects)
 bunx @lythos/skill-deck@0.19.1 reconcile            # drift report vs cold pool
 bunx @lythos/skill-deck@0.19.1 reconcile --apply    # converge
 bunx @lythos/skill-deck@0.19.1 migrate-schema       # old string-array → alias-as-key
