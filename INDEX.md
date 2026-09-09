@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/9 17:20:16
+> 自动生成于 2026/9/9 22:57:14
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 375 | 进行中: 0, 待验收: 0, 已完成: 314 |
+| Tasks | 375 | 进行中: 0, 待验收: 0, 已完成: 315 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 99 | 已接受: 95 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (16)
+### 待办 (15)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -92,7 +92,6 @@
 - [ ] **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
-- [ ] **TASK-20260909155425926**: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 
 ### 进行中 (0)
@@ -103,7 +102,7 @@ _无_
 
 _无_
 
-### 已完成 (314)
+### 已完成 (315)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -419,6 +418,7 @@ _无_
 - ✅ ~~TASK-20260829090402490~~: implement deepseek-harness headless player adapter
 - ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 - ✅ ~~TASK-20260909152255103~~: deck UX: ZK trial 5/10 — combo discoverability and vocabulary orientation
+- ✅ ~~TASK-20260909155425926~~: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
 
 ### 悬置 (3)
 
