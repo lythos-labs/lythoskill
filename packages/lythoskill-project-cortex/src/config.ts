@@ -29,11 +29,11 @@ export const DEFAULT_CONFIG: WorkflowConfig = {
     rejected: '03-rejected',
     superseded: '04-superseded',
   },
-  // 02-faq and 02-research share prefix 02 — historical numbering drift.
-  // Config matches disk; renumbering would break references across ADRs/dailies.
+  // Historical numbering drift (02-faq vs 02-research) resolved 2026-09-09:
+  // 02-faq retired — its 2 files migrated to 01-patterns (guided tour →
+  // level-gated-onboarding-ladder) and 04-ssot (player-prerequisites).
   wikiSubdirs: {
     patterns: '01-patterns',
-    faq: '02-faq',
     research: '02-research',
     lessons: '03-lessons',
     ssot: '04-ssot',

@@ -35,7 +35,6 @@ export interface WorkflowConfig {
 
   wikiSubdirs: {
     patterns: string;
-    faq: string;
     research: string;
     lessons: string;
     ssot: string;

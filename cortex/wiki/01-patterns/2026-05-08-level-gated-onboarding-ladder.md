@@ -1,12 +1,15 @@
 ---
 created: 2026-05-08
-updated: 2026-05-08
-category: faq
+updated: 2026-09-09
+category: patterns
 ---
 
-# lythoskill in Action — 6-Level Guided Tour
+# Level-Gated Onboarding Ladder (lythoskill in Action)
 
-> 上手门槛像游戏关卡一样设计 — 每一关解锁一个新能力，前一关产出是后一关的装备。
+> **Pattern**: 上手门槛像游戏关卡一样设计 — 每一关解锁一个新能力,前一关产出是后一关的装备。
+> 入门材料不是文档堆,是一条产出链:Level N 的产出物就是 Level N+1 的输入装备。
+> 本文是该 pattern 的实例化:lythoskill 的 6 级 tour(原 FAQ 遗留,2026-09-09
+> 迁入 patterns;`02-faq/` 目录已随本迁移退役)。
 
 ## Level 0: Zero-Knowledge Taste (5 min)
 

@@ -281,7 +281,6 @@ function readWikiDir(dir: string): WikiEntry[] {
 function generateWikiIndex(config: WorkflowConfig) {
   try {
     const patterns = readWikiDir(join(config.wikiDir, config.wikiSubdirs.patterns));
-    const faqs = readWikiDir(join(config.wikiDir, config.wikiSubdirs.faq));
     const research = readWikiDir(join(config.wikiDir, config.wikiSubdirs.research));
     const lessons = readWikiDir(join(config.wikiDir, config.wikiSubdirs.lessons));
     const ssot = readWikiDir(join(config.wikiDir, config.wikiSubdirs.ssot));
@@ -297,10 +296,6 @@ function generateWikiIndex(config: WorkflowConfig) {
 ## 📚 Patterns (${patterns.length})
 
 ${formatList(patterns, config.wikiSubdirs.patterns) || '*No entries yet.*'}
-
-## ❓ FAQ (${faqs.length})
-
-${formatList(faqs, config.wikiSubdirs.faq) || '*No entries yet.*'}
 
 ## 🔬 Research (${research.length})
 

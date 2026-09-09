@@ -30,7 +30,6 @@ const mockConfig: WorkflowConfig = {
   },
   wikiSubdirs: {
     patterns: "01-patterns",
-    faq: "02-faq",
     research: "02-research",
     lessons: "03-lessons",
     ssot: "04-ssot",
@@ -84,13 +83,12 @@ describe("buildProbePlan", () => {
     expect(plan.wikiDir).toBe("cortex/wiki");
     expect(plan.wiki.map((w) => w.key)).toEqual([
       "patterns",
-      "faq",
       "research",
       "lessons",
       "ssot",
       "archived",
     ]);
-    expect(plan.wiki[2].dir).toBe("cortex/wiki/02-research");
+    expect(plan.wiki[1].dir).toBe("cortex/wiki/02-research");
   });
 
   it("enables all checks by default", () => {

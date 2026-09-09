@@ -237,13 +237,13 @@ cortex/
 │   └── 07-archived/      ← Final archive
 └── wiki/
     ├── 01-patterns/      ← Reusable solutions
-    ├── 02-faq/           ← Common questions
     ├── 02-research/      ← Research notes and investigations
     ├── 03-lessons/       ← Retrospectives
     ├── 04-ssot/          ← Single source of truth (conventions, decisions)
     └── 05-archived/      ← Outdated but historically valuable
 ```
-(02-faq and 02-research share prefix 02 — historical numbering drift; config matches disk, renumbering would break references.)
+(02-faq retired 2026-09-09: guided tour → 01-patterns/level-gated-onboarding-ladder,
+player prerequisites → 04-ssot/player-prerequisites.)
 Numeric prefixes ensure GTD workflow ordering in `ls` output.
 ## ID Format
 `PREFIX-yyyyMMddHHmmssSSS` (17 digits). Collision-free, self-sorting, no registry.

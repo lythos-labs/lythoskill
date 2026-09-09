@@ -35,8 +35,10 @@ cortex/
 └── wiki/
     ├── INDEX.md          <- Auto-generated wiki index
     ├── 01-patterns/      <- Reusable solutions and conventions
-    ├── 02-faq/           <- Common questions
-    └── 03-lessons/       <- Retrospectives and post-mortems
+    ├── 02-research/      <- Research notes and investigations
+    ├── 03-lessons/       <- Retrospectives and post-mortems
+    ├── 04-ssot/          <- Single source of truth (conventions, decisions)
+    └── 05-archived/      <- Outdated but historically valuable
 ```
 
 ## Naming Convention

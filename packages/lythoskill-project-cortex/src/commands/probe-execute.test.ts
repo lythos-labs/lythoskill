@@ -99,7 +99,6 @@ const mockConfig: WorkflowConfig = {
   },
   wikiSubdirs: {
     patterns: "01-patterns",
-    faq: "02-faq",
     research: "02-research",
     lessons: "03-lessons",
     ssot: "04-ssot",

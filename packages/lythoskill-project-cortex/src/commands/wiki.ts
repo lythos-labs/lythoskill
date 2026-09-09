@@ -14,7 +14,6 @@ export function createWiki(title: string, config: WorkflowConfig, category: stri
 
   const subdirMap: Record<string, string> = {
     pattern: config.wikiSubdirs.patterns,
-    faq: config.wikiSubdirs.faq,
     research: config.wikiSubdirs.research,
     lesson: config.wikiSubdirs.lessons,
     ssot: config.wikiSubdirs.ssot,
@@ -28,12 +27,11 @@ export function createWiki(title: string, config: WorkflowConfig, category: stri
 
    Valid categories:
      pattern   Reusable solutions and conventions
-     faq       Common questions
      research  Research notes and investigations
      lesson    Retrospectives and post-mortems
      ssot      Single source of truth (conventions, decisions)
 
-   Usage:    bunx @lythos/project-cortex wiki "<title>" --category pattern|faq|research|lesson|ssot
+   Usage:    bunx @lythos/project-cortex wiki "<title>" --category pattern|research|lesson|ssot
    Example:  bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
 
    Index regenerates automatically; to rebuild manually:

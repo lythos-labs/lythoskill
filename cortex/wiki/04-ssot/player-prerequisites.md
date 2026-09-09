@@ -1,12 +1,13 @@
 ---
 created: 2026-05-08
-updated: 2026-05-08
-category: faq
+updated: 2026-09-09
+category: ssot
 ---
 
 # Player Prerequisites
 
 > Each player adapter needs a specific CLI installed. The adapter detects availability at runtime; if missing, that player is silently unavailable.
+> (原 FAQ 遗留,2026-09-09 迁入 SSOT——per-player CLI 要求是运维事实,会漂移,属 single source of truth 而非 pattern。)
 
 ## Quick Reference
 
@@ -65,4 +66,4 @@ bun -e "import { listAgents } from '@lythos/agent-adapter'; console.log(listAgen
 
 - [Agent Adapter as Actor Pattern](../../wiki/01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - [Player-Deck Separation](../../wiki/01-patterns/2026-05-02-player-deck-separation-and-tcg-player-analogy.md)
-- [lythoskill in Action Guided Tour](./2026-05-08-lythoskill-in-action-guided-tour.md)
+- [Level-Gated Onboarding Ladder](../01-patterns/2026-05-08-level-gated-onboarding-ladder.md)

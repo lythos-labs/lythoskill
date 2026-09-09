@@ -2,7 +2,7 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (57)
+## 📚 Patterns (58)
 
 - **[2026-07-10]** [zk-review-trade-off-awareness](./01-patterns/2026-07-10-zk-review-trade-off-awareness.md)
 - **[2026-06-15]** [long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting](./01-patterns/2026-06-15-long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting.md)
@@ -30,6 +30,7 @@
 - **[2026-05-10]** [cold-pool-metadata-filesystem-ground-truth](./01-patterns/2026-05-10-cold-pool-metadata-filesystem-ground-truth.md)
 - **[2026-05-09]** [cold-pool-architecture-deck-decoupling-with-fsm-reference-counting](./01-patterns/2026-05-09-cold-pool-architecture-deck-decoupling-with-fsm-reference-counting.md)
 - **[2026-05-09]** [dormancy-property-test-for-fallback-hints](./01-patterns/2026-05-09-dormancy-property-test-for-fallback-hints.md)
+- **[2026-05-08]** [level-gated-onboarding-ladder](./01-patterns/2026-05-08-level-gated-onboarding-ladder.md)
 - **[2026-05-08]** [agents-md-bootloader-pattern](./01-patterns/2026-05-08-agents-md-bootloader-pattern.md)
 - **[2026-05-08]** [agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends](./01-patterns/2026-05-08-agent-adapter-as-actor-daemon-lifecycle-facade-pattern-for-multi-player-cli-backends.md)
 - **[2026-05-08]** [curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery](./01-patterns/2026-05-08-curator-comparison-hermes-vs-lythoskill-agent-side-lifecycle-vs-ecosystem-discovery.md)
@@ -62,13 +63,9 @@
 - **[2026-05-02]** [self-contained-task-writing](./01-patterns/2026-05-02-self-contained-task-writing.md)
 - **[0000-00-00]** [weekly-synthesis-template](./01-patterns/weekly-synthesis-template.md)
 
-## ❓ FAQ (2)
+## 🔬 Research (24)
 
-- **[2026-05-08]** [lythoskill-in-action-guided-tour](./02-faq/2026-05-08-lythoskill-in-action-guided-tour.md)
-- **[2026-05-08]** [player-prerequisites](./02-faq/2026-05-08-player-prerequisites.md)
-
-## 🔬 Research (23)
-
+- **[2026-09-09]** [wedge-path-research-synthesis](./02-research/2026-09-09-wedge-path-research-synthesis.md)
 - **[2026-08-29]** [deepseek-harness-integration-survey](./02-research/2026-08-29-deepseek-harness-integration-survey.md)
 - **[2026-08-28]** [early-predictions-vs-august-reality-audit](./02-research/2026-08-28-early-predictions-vs-august-reality-audit.md)
 - **[2026-05-28]** [claude-code-market-position-and-path-strategy-validation](./02-research/2026-05-28-claude-code-market-position-and-path-strategy-validation.md)
@@ -93,8 +90,9 @@
 - **[2026-05-07]** [research-quality-audit](./02-research/2026-05-07-research-quality-audit.md)
 - **[2026-05-07]** [ai-agent-skills-ecosystem](./02-research/2026-05-07-ai-agent-skills-ecosystem.md)
 
-## 📖 Lessons (29)
+## 📖 Lessons (30)
 
+- **[2026-09-09]** [moo-pareto-article-expert-peer-review](./03-lessons/2026-09-09-moo-pareto-article-expert-peer-review.md)
 - **[2026-08-28]** [agent-ux-feedback-fresh-model-session](./03-lessons/2026-08-28-agent-ux-feedback-fresh-model-session.md)
 - **[2026-07-27]** [agents-md-shed-sections-ab-rerun-vocabulary-not-necessity](./03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md)
 - **[2026-07-17]** [agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing](./03-lessons/2026-07-17-agents-md-v3-ab-experiment-compression-safe-reframes-load-bearing.md)
@@ -125,18 +123,19 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
-## 🧭 SSOT (10)
+## 🧭 SSOT (11)
 
 - **[0000-00-00]** [agent-onboarding-guide](./04-ssot/agent-onboarding-guide.md)
 - **[0000-00-00]** [architecture](./04-ssot/architecture.md)
 - **[0000-00-00]** [pitfalls](./04-ssot/pitfalls.md)
 - **[0000-00-00]** [conventions](./04-ssot/conventions.md)
+- **[0000-00-00]** [glossary](./04-ssot/glossary.md)
+- **[0000-00-00]** [player-prerequisites](./04-ssot/player-prerequisites.md)
 - **[0000-00-00]** [agent-onboarding-guide.zh](./04-ssot/agent-onboarding-guide.zh.md)
 - **[0000-00-00]** [reproduce-sh-bdd](./04-ssot/reproduce-sh-bdd.md)
 - **[0000-00-00]** [key-decisions](./04-ssot/key-decisions.md)
 - **[0000-00-00]** [external-validation-meta-observation](./04-ssot/external-validation-meta-observation.md)
 - **[0000-00-00]** [project-hotspots](./04-ssot/project-hotspots.md)
-- **[0000-00-00]** [glossary](./04-ssot/glossary.md)
 
 ## 🗄️ Archived (3)
 

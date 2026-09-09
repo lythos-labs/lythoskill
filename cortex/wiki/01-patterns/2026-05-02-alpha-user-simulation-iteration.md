@@ -87,7 +87,7 @@ CRITICAL:
 - README 的 Getting Started 章节
 - CLI help 的补充说明
 - `SKILL.md` 的 Usage 示例
-- `cortex/wiki/02-faq/` 的新条目
+- `cortex/wiki/01-patterns/` 或 `03-lessons/` 的新条目
 
 ## 为什么比传统测试好
 
