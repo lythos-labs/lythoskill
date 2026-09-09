@@ -21,14 +21,15 @@ when_to_use: |
 
 ## Trigger: save discipline, not session-end
 
-The intent is the old **save-to-disk discipline** — 怕断电所以随手存盘.
-For an agent the power cut is compaction / crash / context loss: it can
-hit mid-task with no warning, and only git-tracked, already-written
-files survive it. Scribe = save game; the daily file is the save slot.
+The intent is the old **save-to-disk discipline**: save constantly, because
+a power cut can hit at any moment. For an agent the power cut is
+compaction / crash / context loss: it can hit mid-task with no warning, and
+only git-tracked, already-written files survive it. Scribe = save game; the
+daily file is the save slot.
 
-The reliable save anchor is a **batch of commits landing** — scribe 顺手
-while facts are fresh. A session cannot judge its own remaining context;
-"write the handoff when the session feels done" is unreliable and
+The reliable save anchor is a **batch of commits landing** — scribe right
+after, while facts are fresh. A session cannot judge its own remaining
+context; "write the handoff when the session feels done" is unreliable and
 produces rushed, telegraphic output. Anchor to the commit, not the mood.
 
 `## Session Handoff` names the artifact the NEXT session reads, not the
@@ -41,11 +42,11 @@ see below).
 **Scribe = session context dump for things WITHOUT structured carriers.**
 
 ```
-对话中产生了什么?
-  ├── 有 task/adr/epic 载体 → 写到对应 carrier,不写 scribe
-  └── 无载体 → 自评: 下一个 agent 需要知道吗?
-        ├── 需要 → scribe
-        └── 不需要 → 不写
+What came out of this conversation?
+  ├── Has a structured carrier (task/ADR/epic) → write to that carrier, not scribe
+  └── No carrier → self-assess: does the next agent need to know this?
+        ├── Yes → scribe
+        └── No → don't write it
 ```
 
 | File exploration recovers (~70%) | Scribe must dump (~30%) |
@@ -120,18 +121,17 @@ Real-time output takes precedence.
 ## Resumption Items: What + Why + Done + Raw Ref
 
 Items the next agent must ACT on carry a stricter contract than narrative
-sections. Applies to four categories: **half-done work** (做到一半),
-**stuck** (卡住), **pending decision** (待裁决 — ADR-worthy or not), and
-**every Next Steps entry**.
+sections. Applies to four categories: **half-done work**, **stuck**, **pending
+decision** (ADR-worthy or not), and **every Next Steps entry**.
 
 Each item answers four things:
 
 | Part | Question | Bar |
 |------|----------|-----|
-| **What** | 什么事 | One concrete action, not a theme ("wire X into Y's stdout", not "finish the feature") |
-| **Why** | 为什么要做 | Cost of NOT doing it — the incident or drift it prevents |
-| **Done** | 做完怎样 | Observable end state: command output, test count, filed ADR id — not "looks good" |
-| **Raw ref** | where to jump | `file:line`, TASK-/ADR-/EPIC-id, commit hash, or URL — zero re-derivation |
+| **What** | What is the action | One concrete action, not a theme ("wire X into Y's stdout", not "finish the feature") |
+| **Why** | Why do it | Cost of NOT doing it — the incident or drift it prevents |
+| **Done** | What does done look like | Observable end state: command output, test count, filed ADR id — not "looks good" |
+| **Raw ref** | Where to jump | `file:line`, TASK-/ADR-/EPIC-id, commit hash, or URL — zero re-derivation |
 
 **No raw ref → no item.** An item you cannot point at is a wish, not a
 handoff entry (mirrors cortex's "no source → no rule" — false confidence
@@ -141,7 +141,7 @@ Category-specific additions:
 
 - **Stuck**: blocker as fact (exact error text / missing input) + what was
   already tried (one line + ref) + the cheapest next probe.
-- **待裁决**: the decision question + options one line each + what input
+- **Pending decision**: the decision question + options one line each + what input
   unblocks it (who/what is missing). File the ADR, or link the existing id.
 
 Rationale: the reader is an agent under onboarding time pressure with zero
@@ -153,16 +153,17 @@ anti-jargon bar: a writer in a hurry produces telegraphic fragments that
 decode to nothing for a zero-context reader; forcing What/Why/Done + ref
 per item forces complete, checkable sentences at write time.
 
-推荐写这样的句子，而不是电报式黑话。The writer acts as **secretary, not
-stenographer**: humans abbreviate by nature when speaking fast — decode the
-shorthand into these sentences; never transcribe the fragment as-is.
+Write sentences like these, not telegraphic fragments. The writer acts as
+**secretary, not stenographer**: humans abbreviate by nature when speaking
+fast — decode the shorthand into these sentences; never transcribe the
+fragment as-is.
 
-| ❌ 电报式（reader 无法执行） | ✅ 推荐（What + Why + Done + ref 落成一句） |
+| ❌ Telegram-style (the reader can't execute it) | ✅ Recommended (What + Why + Done + ref as one sentence) |
 |---|---|
-| "Next: kimi adapter 加固" | "Harden the kimi adapter probe (TASK-20260828212204402): probe times out under sandbox though `--version` passes; done = probe e2e green under CI-sim env, `env -u CLAUDE_CODE_SSE_PORT bun --filter='*' run test` EXIT=0" |
-| "deck lock 又脏了，提交一下" | "skill-deck.lock dirty after `deck refresh --exec` — hash-only, 4 entries (upstream content moved); commit it (`git add skill-deck.lock`), done = `git status` clean" |
-| "dsh 插件化待定" | "待裁决： ship lythoskill-as-dsh-plugin? (a) adapter-only — current, low cost; (b) full plugin — blocked on dsh stable API (≥0.2); unblocker = dsh roadmap signal, else close as adapter-only by 2026-09-15. Ref: cortex/wiki/02-research/2026-08-29-deepseek-harness-integration-survey.md §Recommendation" |
-| "卡在 npm 发布" | "Stuck: `npm view @lythos/skill-deck` 404 immediately after publish; republish → E403. E403 = publish already succeeded (propagation delay). Next probe: exact-match `[ \"$OUT\" = \"0.19.1\" ]` after 60 s — never grep the version in error text (false positive)" |
+| "Next: kimi adapter 加固" ("harden the kimi adapter") | "Harden the kimi adapter probe (TASK-20260828212204402): probe times out under sandbox though `--version` passes; done = probe e2e green under CI-sim env, `env -u CLAUDE_CODE_SSE_PORT bun --filter='*' run test` EXIT=0" |
+| "deck lock 又脏了，提交一下" ("deck lock is dirty again, commit it") | "skill-deck.lock dirty after `deck refresh --exec` — hash-only, 4 entries (upstream content moved); commit it (`git add skill-deck.lock`), done = `git status` clean" |
+| "dsh 插件化待定" ("dsh plugin-ization TBD") | "Pending decision: ship lythoskill-as-dsh-plugin? (a) adapter-only — current, low cost; (b) full plugin — blocked on dsh stable API (≥0.2); unblocker = dsh roadmap signal, else close as adapter-only by 2026-09-15. Ref: cortex/wiki/02-research/2026-08-29-deepseek-harness-integration-survey.md §Recommendation" |
+| "卡在 npm 发布" ("stuck at npm publish") | "Stuck: `npm view @lythos/skill-deck` 404 immediately after publish; republish → E403. E403 = publish already succeeded (propagation delay). Next probe: exact-match `[ \"$OUT\" = \"0.19.1\" ]` after 60 s — never grep the version in error text (false positive)" |
 
 ## ZK Review Gate (mandatory before commit)
 The handoff's irreplaceable content — resume pointers ("agent-0 still holds
@@ -195,7 +196,7 @@ before commit the handoff gets a zero-knowledge pass, weighted at the top:
 Methodology + gap-processing rules:
 `packages/lythoskill-project-cortex/skill/references/zk-review.md`.
 ## Pitfall Recording
-When the user says "hit a bug" or "踩坑了", immediately record:
+When the user says "hit a bug" or "踩坑了" ("hit a pitfall"), immediately record:
 ```markdown
 ### Pitfall: <short description>
 - **Wrong approach**: what was tried
@@ -211,12 +212,12 @@ When the user says "hit a bug" or "踩坑了", immediately record:
 Agents must not infer "I wrote the daily file → my job is done." The user may ask you to record a pitfall at turn 5 and then continue debugging at turn 6.
 
 ```
-User: "踩坑了" → Record pitfall → Continue working on the bug
-User: "记录一下这个决定" → Write to daily → Continue with the task
-User: "先记一下进度" → Checkpoint → Continue
+User: "踩坑了" ("hit a pitfall") → Record pitfall → Continue working on the bug
+User: "记录一下这个决定" ("record this decision") → Write to daily → Continue with the task
+User: "先记一下进度" ("jot down progress first") → Checkpoint → Continue
 ```
 
-**Default assumption: record then continue.** Only stop when the user explicitly confirms (e.g., "session ending", "LGTM", "先到这里").
+**Default assumption: record then continue.** Only stop when the user explicitly confirms (e.g., "session ending", "LGTM", "先到这里" "let's stop here").
 ## Gotchas
 **Show diff before writing.** Always present the handoff content to the user
 for confirmation before writing to the daily file. Prevents hallucinated state

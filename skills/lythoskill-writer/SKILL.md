@@ -44,38 +44,50 @@ paragraph. The opening paragraph states the core conclusion directly.
 - If deleted, would a human reader lose actionable information?
 - Are there sentences that only set up or qualify without delivering substance?
 
-**Anti-patterns**:
-- "值得注意的是…" → Delete. Say the fact.
-- "在这个 AI 快速发展的时代…" → Delete. Enter the topic directly.
-- "总之 / 归根结底" → Last sentence should just end. No summary wrapper.
-- "让我们…" → "You can…" or delete.
+**Anti-patterns** (quoted phrases are Chinese AI-flavored openers):
+- "值得注意的是…" ("it's worth noting that…") → Delete. Say the fact.
+- "在这个 AI 快速发展的时代…" ("in this era of rapid AI development…") → Delete. Enter the topic directly.
+- "总之 / 归根结底" ("in summary / in the end") → Last sentence should just end. No summary wrapper.
+- "让我们…" ("let us…") → "You can…" or delete.
 
 ### 3. Banned Vocabulary
 
 These words carry no operational meaning for human readers. Delete or replace with specifics.
+(The lexicon below is Chinese AI-marketing buzzwords, kept verbatim because the docs
+being reviewed are in Chinese: 深度 "depth", 赋能 "empowerment", 破局 "breakthrough",
+底层逻辑 "underlying logic", 内卷 "involution", 跃迁 "leap", 共鸣 "resonance",
+升华 "sublimation", 蜕变 "transformation", 颠覆 "disruption", 降维打击
+"dimensional-reduction strike", 弯道超车 "overtaking on the curve", 认知升级
+"cognitive upgrade", 高维视角 "high-dimensional view", 闭环 "closed loop",
+抓手 "handle/grasp", 链路 "chain", 赛道 "track/field", 护城河 "moat",
+生态位 "ecological niche", 价值感 "sense of value", 仪式感 "sense of ritual",
+松弛感 "sense of ease", 钝感力 "resilience", 复盘 "retrospective", 沉淀
+"accumulation", 刻意练习 "deliberate practice", 成长型思维 "growth mindset",
+不妨 "might as well".)
 
 **Delete outright**:
 深度、赋能、破局、底层逻辑、内卷、跃迁、共鸣、升华、蜕变、颠覆、降维打击、
 弯道超车、认知升级、高维视角、闭环、抓手、链路、赛道、护城河、生态位、
 价值感、仪式感、松弛感、钝感力、复盘、沉淀、刻意练习、成长型思维、不妨
 
-**Replace with specifics**:
-- "确保" → state the guarantee or the check that enforces it
-- "至关重要" → state the consequence of ignoring it
-- "精心打造" → describe the actual design decision
+**Replace with specifics** (quoted words are Chinese filler that sounds precise but isn't):
+- "确保" ("ensure") → state the guarantee or the check that enforces it
+- "至关重要" ("crucial") → state the consequence of ignoring it
+- "精心打造" ("meticulously crafted") → describe the actual design decision
 
 ### 4. Sentence Pattern Quotas
 
 These patterns are not wrong in isolation, but their overuse creates a mechanical rhythm
-that humans recognize as generated.
+that humans recognize as generated. (Quoted patterns are Chinese rhetorical devices:
+排比 "parallelism", 反问句 "rhetorical question", 破折号 "em-dash".)
 
 | Pattern | Quota | Fix |
 |---------|-------|-----|
-| "不是…而是…" | max 1 per doc | Say the second half directly |
-| "不仅…也…" / "不只…更…" | max 1 per doc | Use two independent sentences |
-| 排比 / 三件套对称 | max 1 per doc, ≤3 items | Break symmetry, vary length |
-| 反问句 | max 1 per doc | Convert to declarative statement |
-| 破折号（——） | max 2 per doc | Use commas or parentheses for qualification |
+| "不是…而是…" ("not X but Y") | max 1 per doc | Say the second half directly |
+| "不仅…也…" / "不只…更…" ("not only X but also Y") | max 1 per doc | Use two independent sentences |
+| 排比 / 三件套对称 (parallelism / tricolon symmetry) | max 1 per doc, ≤3 items | Break symmetry, vary length |
+| 反问句 (rhetorical question) | max 1 per doc | Convert to declarative statement |
+| 破折号（——）(em-dash) | max 2 per doc | Use commas or parentheses for qualification |
 
 **Exception**: Tables, code blocks, and configuration examples are exempt from quotas —
 their structure serves readability, not rhetoric.
@@ -95,8 +107,8 @@ their structure serves readability, not rhetoric.
 **Target**: Friendly expert, not academic lecturer; not marketing brochure.
 
 - Short sentences are fine. Fragments are fine.
-- Use "你" for the reader. Never "您". Use "我" or "我们" for the author team.
-- No slogans, no elevation, no 鸡汤.
+- Use "你" (informal "you") for the reader. Never "您" (formal "you"). Use "我" or "我们" ("I" / "we") for the author team.
+- No slogans, no elevation, no 鸡汤 ("chicken-soup" — empty inspirational padding).
 - Uncertainty is acceptable: "lythoskill is in early days" is better than
   "lythoskill represents the future of agent governance."
 
