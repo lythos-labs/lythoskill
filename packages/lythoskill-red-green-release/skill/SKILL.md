@@ -4,7 +4,7 @@ version: {{PACKAGE_VERSION}}
 description: |
   User-acceptance-driven release workflow using heredoc patch files.  Each iteration produces a timestamped pr-<timestamp>-<desc>.sh that  self-archives after execution. No tag without explicit user LGTM.  Supports rollback via archived backups.
 when_to_use: |
-  LGTM, ship it, looks good, tag it, rollback, broke it, create patch,  apply changes, version release, 对了, 就是这样, 我觉得ok, 可以打tag,  改坏了, 回滚, 打tag, repomix, web chat, no git access, remote agent, apply patch manually.
+  LGTM, ship it, looks good, tag it, rollback, broke it, create patch,  apply changes, version release, 对了 ("that's right"), 就是这样 ("exactly"), 我觉得ok ("I think it's ok"), 可以打tag ("you can tag it"),  改坏了 ("broke it"), 回滚 ("roll it back"), 打tag ("tag it"), repomix, web chat, no git access, remote agent, apply patch manually.
 ---
 # Red-Green Release Workflow
 > No tag without LGTM. Every change is a self-archiving patch. Every state is rollback-able.
@@ -20,7 +20,7 @@ This skill shines when the agent **does not have direct filesystem or git access
 In these scenarios the agent cannot `git commit`, `git diff`, or write files directly. The heredoc patch is the **only viable delivery format**.
 
 ## Core Principles
-1. **User acceptance drives releases** — "LGTM" / "对了" / "就是这样" → then and only then commit + tag.
+1. **User acceptance drives releases** — "LGTM" / "对了" ("that's right") / "就是这样" ("exactly") → then and only then commit + tag.
 2. **Atomic patches** — Each iteration = one `pr-<timestamp>-<desc>.sh` with heredoc content replacement.
 3. **Self-archiving** — Patch copies itself to `archived-patches/` and deletes itself after execution.
 4. **Rollback-ready** — Every patch backs up originals before modifying. Rollback = restore backup.

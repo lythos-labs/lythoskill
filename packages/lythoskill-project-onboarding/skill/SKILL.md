@@ -10,7 +10,7 @@ description: |
   writes the daily, onboarding reads it).
 when_to_use: |
   Start of session, resume work, onboard to project, review history,
-  continue previous work, take over task, what happened last time,  先复盘, 了解项目, 接手任务, 继续之前的工作.
+  continue previous work, take over task, what happened last time,  先复盘 ("review first"), 了解项目 ("understand the project"), 接手任务 ("take over a task"), 继续之前的工作 ("continue previous work").
 ---
 
 # Project Onboarding

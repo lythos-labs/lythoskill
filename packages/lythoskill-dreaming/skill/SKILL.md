@@ -15,9 +15,10 @@ when_to_use: |
   "整理文档", "consolidate", "SSOT", "sleep on it", "memory consolidation".
 ---
 
-# Dreaming — 夜有所梦
+# Dreaming — 夜有所梦 ("night dreams": consolidate the day into long-term memory)
 
-> 日有所思（daily + weekly），夜有所梦（dreaming → SSOT）。
+> By day, thought (日有所思 — daily + weekly gather raw experience); by night,
+> dreams (夜有所梦 — dreaming consolidates it into the SSOT).
 > Scan → Consolidate → ZK Validate. Extract the "currently true" from scattered docs.
 
 ## The Project's Memory System
@@ -26,19 +27,30 @@ Project documentation works like human memory:
 
 | Layer | Tool | What it does |
 |-------|------|-------------|
-| **日有所思** — 经历 | `scribe daily` | Raw session capture: what was done, what was decided, what went wrong |
-| **日有所思** — 复盘 | `scribe weekly` | Cross-session pattern extraction: core threads, anomalies, docs now stale |
-| **夜有所梦** — 巩固 | `dreaming` | Memory consolidation: extract "currently true" from accumulated docs → SSOT |
+| **By day — experience** (日有所思) | `scribe daily` | Raw session capture: what was done, what was decided, what went wrong |
+| **By day — review** (日有所思) | `scribe weekly` | Cross-session pattern extraction: core threads, anomalies, docs now stale |
+| **By night — consolidation** (夜有所梦) | `dreaming` | Memory consolidation: extract "currently true" from accumulated docs → SSOT |
 
-Daily 不是流水账，weekly 不是 daily 的汇总。Daily 是 session 级 raw experience，weekly 是跨 session 的模式识别（core_thread、anomaly、docs_now_stale）——本质上是在反腐：发现漂移、标记腐烂、追踪 gap 收敛。Dreaming 是在积累了足够的 daily + weekly 之后，把分散在 wiki/ADR/daily 中尚未腐烂的有效信息提取为 SSOT——就像睡眠中大脑把短期记忆巩固为长期记忆。
+Daily is a raw-experience log, not a ledger replay; weekly is cross-session pattern
+recognition (core_thread, anomaly, docs_now_stale) — essentially anti-corruption work:
+detect drift, mark rot, track gap closure. Dreaming is the next layer: once enough
+daily + weekly has accumulated, extract everything still-true scattered across
+wiki/ADR/daily into the SSOT — the way a sleeping brain consolidates short-term memory
+into long-term memory.
 
-## 第一原理
+## First Principles
 
-这个模式是我们从 document rot 出发，从自己的 weekly 实践中自然长出来的。Weekly 已经在做反腐——跨 session 检测 anomalies、标记 docs_now_stale、追踪 gap 收敛。Dreaming 是 weekly 的自然延伸：weekly 发现了什么在腐烂，dreaming 把还没腐烂的提取出来固化。
+The layering: daily captures raw experience; weekly extracts cross-session
+patterns and flags rot (docs_now_stale, anomalies); dreaming consolidates what
+still holds into the SSOT. Each layer feeds the next — weekly finds what is
+rotting, dreaming solidifies what hasn't rotted yet.
 
-听说过 Hermes Curator 的 dreaming 机制，觉得我们在做的事类似，发起了田野调查——果然，独立交叉对到同一个答案。然后正确迁移到了项目文档管理场景。田野调研见 [`references/hermes-dreaming-field-notes.md`](./references/hermes-dreaming-field-notes.md)。
+The mechanism has an external precedent: the Hermes Curator dreaming mechanism
+converges on the same idea independently. The transfer of that mechanism to
+project documentation is what this skill implements. Field notes:
+[`references/hermes-dreaming-field-notes.md`](./references/hermes-dreaming-field-notes.md).
 
-**核心洞察：维护应该是独立周期，不嵌入每次任务。**
+**Core insight: maintenance should be a standalone cycle, not embedded in every task.**
 
 ## Three-Phase Flow
 
@@ -89,11 +101,13 @@ Example SSOT topics:
 - `key-decisions.md` — ADRs that still hold (superseded ones noted but not replayed)
 - `pitfalls.md` — recurring failure modes and their fixes
 
-**Update `cortex/wiki/01-patterns/INDEX.md`** (ADR-20260613190449007 maintenance loop — a stale index is more misleading than none). Judgment rules (from the ADR, verbatim):
+**Update `cortex/wiki/01-patterns/INDEX.md`** (ADR-20260613190449007 maintenance loop — a stale index is more misleading than none). Judgment rules (from ADR-20260613190449007, verbatim; the ADR text is Chinese):
 
 - 被 ≥2 个 weekly 的 `decisions_accepted` 或 `project_lesson_candidates` 引用 → P0
+  (cited by ≥2 distinct weeklies' `decisions_accepted` or `project_lesson_candidates` → P0)
 - 已被 `04-ssot/*.md` 引用的模式 → P1
-- 其他 → P2
+  (already referenced by a `04-ssot/*.md` file → P1)
+- 其他 → P2 (everything else → P2)
 
 When this phase absorbs a pattern into an SSOT file, move its INDEX entry to P1 and name the absorbing file in its TL;DR. When a weekly newly cites a pattern for the second time (≥2 distinct weeklies), promote it to P0.
 

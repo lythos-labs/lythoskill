@@ -2,11 +2,13 @@
 name: lythoskill-curator
 version: 0.19.1
 description: |
-  Skill 策展者/买家秀 (curator's perspective). Scans your local cold pool,
+  Skill curator (买家秀 — "buyer show": hands-on QA notes, as opposed to the
+  author's own 卖家秀 "seller show" claims). Scans your local cold pool,
   indexes SKILL.md frontmatter into REGISTRY.json + catalog.db. CLI is mechanical
   glue (scan/query/tag/audit/find) — YOU are the agent who combines curator's local cache
   with WebSearch, deep research, and arena testing to discover, annotate, fact-check,
-  and recommend. Curator = 查卡器 + 备注 + 组卡审美. Reconciler-style: any filesystem
+  and recommend. Curator = card searcher (查卡器) + personal notes (备注) + composition
+  taste (组卡审美). Reconciler-style: any filesystem
   state → scan → converges to clean index. Auto-backup; rollback via `restore`.
 when_to_use: |
   Find a skill for X, search skills, what skills do I have, list all skills,
@@ -30,10 +32,12 @@ deck_managed_dirs:
 ---
 
 # Skill Curator
-> 策展者/买家秀 = 查卡器 + 备注 + 组卡审美
+> Curator's perspective (买家秀 "buyer show" — what hands-on use actually found,
+> versus the author's 卖家秀 "seller show" claims) = card searcher + personal notes
+> + composition taste.
 > CLI is mechanical glue (scan, query, tag, audit). Agent does the thinking.
 
-## Mental Model: Curator = 策展者 (Curator's Perspective)
+## Mental Model: Curator = the Curator's Perspective (策展者)
 
 Curator is NOT a discovery engine. It's the **curator's personal knowledge base** —
 a card searcher + personal notes system for the skill ecosystem.
@@ -42,18 +46,22 @@ a card searcher + personal notes system for the skill ecosystem.
 
 | Mode | Metaphor | What it does |
 |------|----------|-------------|
-| 记者 (Journalist) | Investigation + narrative + expression | Fact-check claims, cross-reference sources, detect bias, assign confidence |
-| 架构师 (Architect) | Composition aesthetics | Understand synergies, deduce combos, judge structural fit, design archetypes |
+| Journalist (记者) | Investigation + narrative + expression | Fact-check claims, cross-reference sources, detect bias, assign confidence |
+| Architect (架构师) | Composition aesthetics | Understand synergies, deduce combos, judge structural fit, design archetypes |
 
-**组卡审美 (composition taste) has three inputs**:
-1. **Arena 实战数值** — quantitative: scores, pass/fail, performance data
-2. **审美评析** — qualitative: your own judgment of a skill's design, clarity, fit
-3. **Combo 推演** — systemic: how skills compose, what synergies emerge, what archetype they form
+**Composition taste (组卡审美) has three inputs**:
+1. **Arena field data** — quantitative: scores, pass/fail, performance data
+2. **Design critique** — qualitative: your own judgment of a skill's design, clarity, fit
+3. **Combo reasoning** — systemic: how skills compose, what synergies emerge, what archetype they form
 
-A curator doesn't just verify facts (记者). A curator understands **how skills combine
-to be beautiful** (架构师). This is what separates a card database from a deck builder.
+A curator doesn't just verify facts (Journalist mode). A curator understands **how skills
+combine to be beautiful** (Architect mode). This is what separates a card database from
+a deck builder.
 
-**Curator 依赖 deck + arena 的能力**：curator 不评估孤立技能——它评估"这张牌在这个卡组里完成这个任务"的表现。Arena 测试的是 deck 级别能力，curator 记录的是 deck-task 级别的 QA。一张牌在一副卡组里表现出色，在另一副里可能无用。架构师理解这种上下文依赖性。
+**Curator builds on deck + arena**: it never evaluates a skill in isolation — it evaluates
+"this card, in this deck, on this task." Arena tests deck-level capability; curator records
+deck-task-level QA. A card that excels in one deck may be useless in another; the Architect
+mode exists to reason about exactly this context dependence.
 
 ## Discovery SOP (Agent-Driven)
 
@@ -88,7 +96,7 @@ discover → rank → recommend.
 | Scenario | What you know | Start here |
 |----------|--------------|------------|
 | "I know the skill name" | bare name (e.g., "fullstack-dev") | `curator find` → gh search code |
-| "I know the person/org" | fuzzy name (e.g., "归藏师傅") | WebSearch → gh search code for precise path |
+| "I know the person/org" | fuzzy name (e.g., a Chinese creator's online handle) | WebSearch → gh search code for precise path |
 | "I know the repo URL" | repo URL (e.g., `github.com/lijigang/ljg-skills`) | gh api peek → curator add |
 
 ### Search Precision Ladder
@@ -135,7 +143,7 @@ $ gh api repos/lijigang/ljg-skills/contents/skills/ljg-think/SKILL.md \
     --jq '.content' | base64 -d | head -5
 ---
 name: ljg-think
-description: 追本之箭——纵向深钻思维工具...
+description: Arrow-to-the-root — a vertical deep-drill thinking tool...
 ```
 
 Once you've identified the skills you want, `curator add` the repo normally.
@@ -178,7 +186,7 @@ bunx @lythos/skill-curator@0.19.1 ~/.agents/skill-repos --output /tmp/my-index/
 ```
 Reconciler-style: converges any state to a clean index. Auto-backup before rebuild.
 
-### Tag — agent-enriched metadata (L3 买家秀)
+### Tag — agent-enriched metadata (L3, the curator's own "buyer show")
 ```bash
 # Write niche tags (curator's personal classification)
 bunx @lythos/skill-curator@0.19.1 tag <skill-name> --niche "meta.governance.deck"
@@ -193,8 +201,11 @@ bunx @lythos/skill-curator@0.19.1 tag <skill-name> \
   --qa '{"source_type":"hub/agentskill.sh","source_url":"https://...","signal_type":"securityScore","signal_value":95}'
 ```
 
-**Tag is agent-enriched, NOT extracted from SKILL.md frontmatter.** Skill authors write L1 卖家秀
-(description). The curator writes L3 买家秀 (niche + QA). These are separate data layers.
+**Tag is agent-enriched metadata: the curator's own QA notes, written after hands-on
+testing.** Skill authors write the L1 layer (description — the "seller show", what the
+author advertises). The curator writes the L3 layer (niche + QA — the "buyer show", what
+actual use found). These are separate data layers; a scan never overwrites the curator's
+notes with author claims.
 Re-scan preserves agent-written tags (merge strategy: scan updates name/description/path,
 preserves niches column).
 
@@ -353,11 +364,11 @@ bunx @lythos/skill-curator@0.19.1 refresh-execute
 bunx @lythos/skill-curator@0.19.1 restore
 ```
 
-## Fact-Check + Confidence Evaluation (记者)
+## Fact-Check + Confidence Evaluation (Journalist mode)
 
 The curator's verification layer — not just collecting QA signals, but verifying
-claims and assigning structured confidence. The agent is a **journalist** (记者):
-investigation + narrative synthesis + expression.
+claims and assigning structured confidence. The agent is a **journalist** (记者,
+the investigator role): investigation + narrative synthesis + expression.
 
 ### Fact-Check Workflow
 ```

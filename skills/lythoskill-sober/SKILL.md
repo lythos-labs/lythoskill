@@ -15,7 +15,7 @@ when_to_use: |
   that can be verified by search — if doubt → divert → ACTIVATE.
   Verify claim, fact-check, cross-reference sources, how confident, detect bias,
   source filtering, evidence assessment, multi-source analysis, compare agents,
-  三方测评. ALSO when curator fact-check SOP requires structured verification.
+  三方测评 ("third-party independent evaluation"). ALSO when curator fact-check SOP requires structured verification.
 allowed-tools:
   - WebSearch
   - WebFetch
@@ -42,7 +42,7 @@ Flag unverifiable claims explicitly — don't guess.
 10 sources citing the same report = 1 source. Sources that cite each other are
 echo, not convergence. Always trace to primary source.
 
-### 3. L3 > L2 > L1 (自己动手丰衣足食)
+### 3. L3 > L2 > L1 (自己动手丰衣足食 — "do it yourself and you'll have plenty": self-reliance, build your own verification when none exists)
 Arena self-test (L3) beats hub review (L2) beats author description (L1).
 One arena run is worth more than 5 external reviews. If no L3 data exists,
 the first recommendation is always: run arena.

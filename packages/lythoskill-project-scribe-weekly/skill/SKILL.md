@@ -108,10 +108,12 @@ User confirms → proceed to write. User flags missing items → add to cluster 
 
 If today is Sunday and you observe any of these signals during session close:
 - Epic/task cleanup feeling ("this phase feels done")
-- Goal 阶段性达到 (milestone completed, tests pass, push to remote)
-- User says "LGTM", "就这样", "先到这里" on a Sunday
+- Goal reached at a natural milestone (milestone completed, tests pass, push to remote)
+- User says "LGTM", "就这样" ("that's it"), "先到这里" ("let's stop here") on a Sunday
 
-**Suggest to user**: "今天周日，这周的工作感觉到了一个自然的收束点。要不要沉淀一下 weekly，把这周的模式记录下来？"
+**Suggest to the user, in their own language**: this week's work seems to have
+reached a natural close — do they want to consolidate a weekly and record the
+week's pattern?
 
 User says yes → run weekly prep. User says no or ignores → write daily scribe as usual, don't push.
 
@@ -207,6 +209,8 @@ Compare *intended priorities* against *actual execution*:
 ## Salience Filter
 
 > "太细节的小事不会在 weekly 里。特别强烈的印象会在。"
+> ("Tiny details don't go in the weekly. What goes in is what left a strong
+> impression.")
 
 | Include | Exclude |
 |---------|---------|
@@ -257,7 +261,7 @@ Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based
 
 ### Scene A: Weekly Writing
 
-**Trigger**: User says "写 weekly" / "这周总结一下" / end-of-week feeling
+**Trigger**: User says "写 weekly" ("write the weekly") / "这周总结一下" ("summarize this week") / end-of-week feeling
 
 | Package | When | Skeleton | Optional Add-ons |
 |---------|------|----------|----------------|
@@ -267,7 +271,7 @@ Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based
 
 **Agent choice**: Run `ls weekly/*.md | sort | tail -3` to detect mode. Recommend package to user. User confirms or overrides.
 
-### Scene B: User Says "消债" / "扫一下" / "还债"
+### Scene B: User Says "消债" / "扫一下" / "还债" ("pay down debt" / "sweep" / "clear debt" — user wants a cleanup audit of accumulated documentation/governance debt)
 
 **Trigger**: User explicitly asks for cleanup / audit / sweep
 
@@ -277,11 +281,11 @@ Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based
 | **B2: Deep Audit** (30 min) | User wants thorough check | Full 23-item reference checklist | User selects scope |
 | **B3: Targeted** | User names specific debt | Agent drills from weekly chain into named area | Cross-reference ADR/task |
 
-**Agent choice**: Ask user "quick scan or deep?" Default to B1 if user just says "消债" without qualifier.
+**Agent choice**: Ask user "quick scan or deep?" Default to B1 if user just says "消债" ("pay down debt") without qualifier.
 
 ### Scene C: Session Close (Scribe)
 
-**Trigger**: User says "LGTM" / "先到这里" / session ending
+**Trigger**: User says "LGTM" / "先到这里" ("let's stop here") / session ending
 
 | Package | When | Skeleton | Optional Add-ons |
 |---------|------|----------|----------------|
@@ -304,7 +308,7 @@ Weekly writing is not a rigid procedure. It's a **scenario-driven, package-based
 
 ### Scene E: Quarterly Dreaming
 
-**Trigger**: User says "做梦" / "consolidate" / "memory cleanup"
+**Trigger**: User says "做梦" ("dreaming" — user asks for memory consolidation) / "consolidate" / "memory cleanup"
 
 | Package | When | Skeleton | Optional Add-ons |
 |---------|------|----------|----------------|

@@ -30,7 +30,7 @@ when_to_use: |
   - QA sweep found findings that need tracking
   - Need to register a lesson learned or pitfall
   - User says "登记" / "记录一下" / "记下来" / "别忘了"
-  - User says "ZK review this task" / "零知识审查" / "review this task" / "任务能看懂吗" — ZK Review the card before assignment
+  - User says "ZK review this task" / "零知识审查" ("zero-knowledge review") / "review this task" / "任务能看懂吗" ("can an executor understand this task") — ZK Review the card before assignment
   - Before assigning a task to executor agent — ZK Review the card (WHAT/WHY/HOW, prerequisites, contracts, baselines, scope)
   - See a TASK-xxx or EPIC-xxx reference and need context
   - User says "登记" (register), "创建任务" (create task), "完成" (done), "推进" (advance), "状态" (status)
@@ -40,7 +40,7 @@ when_to_use: |
 
   CRITICAL — trigger proactively, do NOT wait for user to ask:
   - Finished a batch of fixes and pushed — verify tasks moved, epic status matches reality
-  - User says "确认epic/task都正常流转" or "还在途的epic是什么" — probe for state drift
+  - User says "确认epic/task都正常流转" ("confirm epics/tasks are flowing properly") or "还在途的epic是什么" ("what epics are still in flight") — probe for state drift
   - Writing or updating daily notes (save discipline — after any commit batch, NOT only at session end) — run `cortex list` and close stale epics, don't leave them for next agent
   - Notice an epic marked active but its tasks are all done — it's state drift, close it immediately
   - Commit message includes Closes:/Task: trailers — verify post-commit dispatch worked, tasks actually moved
@@ -94,7 +94,10 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} dispatch-trailers
 > Filenames like `TASK-xxx-<slug>.md` must contain no Chinese or other non-ASCII
 > characters. Use English titles so paths are portable across agents and CLIs.
 >
-> **Agent 不需要自己拼路径或生成 ID。** CLI 会自动处理：timestamp ID、模板填充、目录放置。Agent 只需执行命令，然后从输出中读取返回的完整路径和 ID，然后**立即编辑填充内容**。标题请用英文，确保 slug 只含 ASCII 字符。
+> **The agent never hand-assembles paths or generates IDs.** The CLI handles
+> timestamp IDs, template filling, and directory placement. The agent runs the
+> command, reads the full path and ID from its output, and immediately edits the
+> file to fill in content. Write titles in English so the slug stays ASCII-only.
 
 ## Task-Git Discipline
 
@@ -189,7 +192,7 @@ bunx @lythos/project-cortex@{{PACKAGE_VERSION}} probe --include-completed-empty-
 
 | Term | Definition |
 |------|------------|
-| **Empty shell** | A task/epic/ADR file created by `cortex` CLI but never filled by an agent. Like a Jira ticket with only a title and no description — it provides zero guidance to whoever picks it up. Detected by template placeholders (`⚠️ PLACEHOLDER_`, `需求1`, `<!-- 填写`) that remain in the content. **Rule**: filling content is higher priority than writing code. |
+| **Empty shell** | A task/epic/ADR file created by `cortex` CLI but never filled by an agent. Like a Jira ticket with only a title and no description — it provides zero guidance to whoever picks it up. Detected by template placeholders that remain in the content (`⚠️ PLACEHOLDER_`, `需求1` — the Chinese template's "requirement 1" filler, `<!-- 填写` — "fill in"). **Rule**: filling content is higher priority than writing code. |
 | **Stale** | Backlog tasks or active epics that have been in their current state for >3 days without progress. Indicates potential state drift — either the work is done (should be closed) or the task is blocked (should be suspended). |
 | **Coverage drift** | Changes to source files since the last coverage snapshot was taken. Detected by comparing git commits since the snapshot date. Only relevant when `packages/*/test/scenarios/coverage-snapshot-*.md` files exist. |
 
@@ -367,9 +370,9 @@ Status History inside files should reflect the latest move.
 
 📄 Tasks:
   ❌ cortex/tasks/01-backlog/TASK-20260502110308316-Fix-login-bug.md
-     → Status History 最后记录 "in-progress" 与目录状态 "backlog" 不一致...
+     → Status History last entry says "in-progress" but directory says "backlog"...
 
-  ⚠️  1 个问题需人工确认
+  ⚠️  1 issue(s) requiring human confirmation
 
 🛤️  Epic lanes (active):
      main:      0

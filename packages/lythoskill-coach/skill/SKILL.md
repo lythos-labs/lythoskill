@@ -95,7 +95,7 @@ Custom fields: use a consistent prefix (e.g. `deck_`). Custom fields are
 parsed but not injected into context — zero token cost.
 
 #### 5.1. Type Field
-- **Philosophy**: 如果你有 type，我就认，我不验证。Don't enforce specific type values — runtime-specific type validation is fragile (Kimi's new skill system dropped the `standard`/`flow` distinction, proving the point)
+- **Philosophy**: "declare whatever type you want — I accept it as-is and I don't validate it." Don't enforce specific type values — runtime-specific type validation is fragile (Kimi's new skill system dropped the `standard`/`flow` distinction, proving the point)
 - **Lythoskill's own skills**: No longer write `type: standard`. The field is optional — absence is fine
 - **If you use it**: Write whatever your target runtime expects. Coach won't flag it
 
