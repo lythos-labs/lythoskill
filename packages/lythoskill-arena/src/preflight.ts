@@ -237,6 +237,93 @@ export function buildArchiveSidePlan(
   return plan
 }
 
+// ── parseDeckCombos ──────────────────────────────────────────────────────
+
+/**
+ * Parse `[combo.<name>] prompt = "..."` sections from a parsed deck TOML.
+ *
+ * Combos are orchestration playbooks for the AGENT — the CLI never executes
+ * them (deck consumption contract, packages/lythoskill-deck/skill/SKILL.md).
+ * Returns combo names in declaration order so generated orientation docs
+ * (AGENTS.md) can point the agent at them before anything else.
+ *
+ * Pure: Record → string[]. No IO.
+ */
+export function parseDeckCombos(
+  deckParsed: Record<string, any>
+): string[] {
+  const combo = deckParsed?.combo
+  if (!combo || typeof combo !== 'object') return []
+  return Object.keys(combo).filter(k => k !== 'prompt')
+}
+
+// ── buildAgentsMd ────────────────────────────────────────────────────────
+
+/**
+ * Build the unified arena workdir AGENTS.md — the agent's orientation artifact.
+ *
+ * Single source of truth for the template; all three write sites use it:
+ *   - prepare-workdir (buildPreparePlan)
+ *   - single (cli.ts agent-run)
+ *   - A/B runner cells (runner.ts)
+ *
+ * F1 (TASK-20260909152255103): combo sections are surfaced FIRST when present —
+ * they are the best orientation artifact in the deck. F3: first-timer
+ * vocabulary glossed here (the one tool-level place; the full glossary lives
+ * in the deck skill's references/glossary.md).
+ *
+ * Pure: strings → string. No IO.
+ */
+export function buildAgentsMd(params: {
+  mode: string
+  headerLines?: string[]
+  combos?: string[]
+}): string {
+  const lines: string[] = [
+    '# Arena Test Environment',
+    `**Mode**: ${params.mode}`,
+    ...(params.headerLines ?? []),
+    '',
+  ]
+
+  if (params.combos && params.combos.length > 0) {
+    lines.push(
+      '## Combos — Read These First',
+      'This deck has combo prompts in `skill-deck.toml`. They are YOUR orchestration',
+      'playbook: each `[combo.<name>] prompt` is read and executed by YOU (the agent) —',
+      'the CLI only parses them; nothing runs them. Open `skill-deck.toml` and follow',
+      'each combo in order:',
+      ...params.combos.map(name => `- \`${name}\``),
+      '',
+    )
+  }
+
+  lines.push(
+    '## Setup Order (why this sequence)',
+    '1. `skill-deck.toml` copied here → declares which skills you can use',
+    '2. `deck link` runs → cold pool skills become visible in the working set',
+    '3. Skill existence checked → warns if any declared skill is missing from cold pool',
+    '4. `AGENTS.md` written last → confirms setup succeeded before agent starts',
+    'If setup fails mid-sequence, the workdir is incomplete and nothing runs.',
+    '',
+    '## Vocabulary (first time here?)',
+    '- **cold pool** — where skill sources live on disk. You never read it directly.',
+    '- **working set** — `.claude/skills/`: the symlinks you actually see. `deck link` keeps it matching the deck.',
+    '- **innate** — always-on skills (governance, meta). **tool** — skills you load on demand.',
+    '- **max_cards** — hard budget in the toml; `deck link` refuses to exceed it.',
+    '',
+    '## How This Works',
+    '- Write ALL output files to this directory (CWD).',
+    '- Use available skills — check the working set directory (e.g. `ls .claude/skills/`).',
+    '',
+    '## Output Contract',
+    '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
+    '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
+  )
+
+  return lines.join('\n')
+}
+
 // ── buildPreparePlan ─────────────────────────────────────────────────────
 
 /**
@@ -270,25 +357,10 @@ export function buildPreparePlan(params: {
   const skills = parseDeckSkills(deckParsed)
   const hasSkills = skills.length > 0
 
-  const agentsMd = [
-    '# Arena Test Environment',
-    '**Mode**: agent-orchestrated cell',
-    '',
-    '## Setup Order (why this sequence)',
-    '1. `skill-deck.toml` copied here → declares which skills you can use',
-    '2. `deck link` runs → cold pool skills become visible in the working set',
-    '3. Skill existence checked → warns if any declared skill is missing from cold pool',
-    '4. `AGENTS.md` written last → confirms setup succeeded before agent starts',
-    'If setup fails mid-sequence, the workdir is incomplete and nothing runs.',
-    '',
-    '## How This Works',
-    '- Write ALL output files to this directory (CWD).',
-    '- Use available skills — check the working set directory (e.g. `ls .claude/skills/`).',
-    '',
-    '## Output Contract',
-    '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
-    '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
-  ].join('\n')
+  const agentsMd = buildAgentsMd({
+    mode: 'agent-orchestrated cell',
+    combos: parseDeckCombos(deckParsed),
+  })
 
   return { deckPath: params.deckPath, deckContent: params.deckContent, workDir: params.workDir, skills, hasSkills, agentsMd }
 }

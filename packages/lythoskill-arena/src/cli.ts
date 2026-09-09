@@ -5,7 +5,7 @@ import { homedir, tmpdir } from 'node:os'
 import { ZodError } from 'zod'
 import { formatPlanOutput, type ArenaResult, buildArenaPrompt } from './runner'
 import { parseArenaToml, buildExecutionPlan } from './arena-toml'
-import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckSkills } from './preflight'
+import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckCombos, parseDeckSkills, buildAgentsMd } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
 import { resolveSingleMode } from './host'
 
@@ -340,17 +340,16 @@ async function singleRun(args: string[], io: ArenaCliIO) {
   // Setup workdir
   const agentWorkdir = join(tmpdir(), `arena-single-${Date.now()}`)
   mkdirSync(agentWorkdir, { recursive: true })
-  writeFileSync(join(agentWorkdir, 'skill-deck.toml'), readFileSync(deckPath, 'utf-8'))
-  writeFileSync(join(agentWorkdir, 'AGENTS.md'), [
-    '# Arena Test Environment',
-    `**Mode**: single`,
-    '## How This Works',
-    '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
-    '- Complete the task using available skills. Output to this directory.',
-    '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
-  ].join('\n'))
+  const singleDeckRaw = readFileSync(deckPath, 'utf-8')
+  writeFileSync(join(agentWorkdir, 'skill-deck.toml'), singleDeckRaw)
+  let singleDeckParsed: Record<string, any> = {}
+  try { singleDeckParsed = Bun.TOML.parse(singleDeckRaw) as Record<string, any> } catch {}
+  writeFileSync(join(agentWorkdir, 'AGENTS.md'), buildAgentsMd({
+    mode: 'single',
+    combos: parseDeckCombos(singleDeckParsed),
+  }))
 
-  const deckRaw = readFileSync(join(agentWorkdir, 'skill-deck.toml'), 'utf-8')
+  const deckRaw = singleDeckRaw
   let deckParsed: Record<string, any> = {}
   try { deckParsed = Bun.TOML.parse(deckRaw) as Record<string, any> } catch {}
   const hasSkills = parseDeckSkills(deckParsed).length > 0

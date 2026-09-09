@@ -44,6 +44,8 @@ skills = [
 > ⚠️ **Agent: when you encounter a deck, read its combo section.** Combo prompts are the orchestration playbook — step-by-step multi-skill pipeline instructions. They are not optional metadata. Skipping them means executing skills in isolation without the coordination logic.
 
 Lightweight playbooks for the agent. NOT skill sections — each `[combo.<name>] prompt` gives the agent conditional routing logic. One deck can declare multiple combos.
+
+**Consumer declaration: the agent reads and executes combo prompts; the CLI only parses them into sections — there is no combo runtime, no code executes them.** Skipping a deck's combos means the deck was never actually run.
 ```toml
 [combo.promo]
 prompt = """

@@ -3,6 +3,8 @@
 |------|-----------|
 | **Cold Pool** | Local directory storing all downloaded skills. Agent does not scan here. Only `deck link` reads from it. |
 | **Working Set** | Symlinks only. The directory the agent scans for skills. Default: `.claude/skills/` (configurable per platform). |
+| **Innate** | Always-on skill class: eagerly loaded, full context every session (governance, meta). Budget them tightly. |
+| **Tool** | On-demand skill class: lazy, read only when triggered. The default class for specialists. |
 | **deny-by-default** | Undeclared skills are physically absent from the working set. Not disabled — gone. |
 | **Silent Blend** | Same-niche skills coexist in working set → agent picks randomly per task → inconsistent output, no errors. |
 | **Niche** | Skill's domain as dot-separated namespace (e.g. `meta.governance.deck`). Same-niche innate skills must not coexist. |

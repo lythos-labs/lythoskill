@@ -582,3 +582,76 @@ describe('buildPreparePlan', () => {
     expect(plan.deckContent).toBe(DECK_ONE_SKILL)
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════
+// parseDeckCombos + combo surfacing in AGENTS.md (F1/F2, TASK-20260909152255103)
+// ═══════════════════════════════════════════════════════════════════════════
+
+import { parseDeckCombos, buildAgentsMd } from './preflight'
+
+const DECK_WITH_COMBOS = `
+[deck]
+max_cards = 10
+
+[tool.skills.pdf]
+path = "github.com/anthropics/skills/skills/pdf"
+
+[combo.promo]
+prompt = "Pipeline: Position → Draft → Review."
+
+[combo.research]
+prompt = "Pipeline: Discover → Verify → Analyze."
+`
+
+describe('parseDeckCombos', () => {
+
+  it('extracts combo names in declaration order', () => {
+    const parsed = Bun.TOML.parse(DECK_WITH_COMBOS) as Record<string, any>
+    expect(parseDeckCombos(parsed)).toEqual(['promo', 'research'])
+  })
+
+  it('no combo section → empty array', () => {
+    const parsed = Bun.TOML.parse(DECK_ONE_SKILL) as Record<string, any>
+    expect(parseDeckCombos(parsed)).toEqual([])
+  })
+
+  it('legacy bare [combo] prompt field → empty array (default combo, no named section)', () => {
+    const parsed = Bun.TOML.parse('[combo]\nprompt = "do stuff"') as Record<string, any>
+    expect(parseDeckCombos(parsed)).toEqual([])
+  })
+})
+
+describe('buildAgentsMd combo surfacing (F1)', () => {
+
+  it('deck with combos → AGENTS.md lists them under "Read These First"', () => {
+    const parsed = Bun.TOML.parse(DECK_WITH_COMBOS) as Record<string, any>
+    const md = buildAgentsMd({ mode: 'single', combos: parseDeckCombos(parsed) })
+    expect(md).toContain('## Combos — Read These First')
+    expect(md).toContain('- `promo`')
+    expect(md).toContain('- `research`')
+    expect(md.indexOf('Combos — Read These First')).toBeLessThan(md.indexOf('## Setup Order'))
+  })
+
+  it('combo consumer declared: agent reads/executes, CLI only parses (F2)', () => {
+    const md = buildAgentsMd({ mode: 'single', combos: ['promo'] })
+    expect(md).toContain('executed by YOU (the agent)')
+    expect(md).toContain('the CLI only parses them; nothing runs them')
+  })
+
+  it('deck without combos → no combos section', () => {
+    const md = buildAgentsMd({ mode: 'single' })
+    expect(md).not.toContain('Combos')
+  })
+})
+
+describe('buildAgentsMd vocabulary gloss (F3)', () => {
+
+  it('glosses cold pool / working set / innate / tool / max_cards', () => {
+    const md = buildAgentsMd({ mode: 'single' })
+    expect(md).toContain('**cold pool**')
+    expect(md).toContain('**working set**')
+    expect(md).toContain('**innate**')
+    expect(md).toContain('**tool**')
+    expect(md).toContain('**max_cards**')
+  })
+})

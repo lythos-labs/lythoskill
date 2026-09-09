@@ -16,7 +16,7 @@ import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan 
 import { resolvePlayer, resolveSides } from './player'
 import { aggregateAllStats } from './stats'
 import type { SideStats } from './stats'
-import { buildCopyPlan } from './preflight'
+import { buildCopyPlan, buildAgentsMd, parseDeckCombos } from './preflight'
 
 // ── ArenaIO interface (Intent/Plan/Execute fractal pattern) ───────────────
 
@@ -234,15 +234,15 @@ export async function runArenaFromToml(opts: {
 
     try {
       // Setup: deck + AGENTS.md + link
-      ioWithDefaults.writeFile(join(workDir, 'skill-deck.toml'), ioWithDefaults.readFile(cell.deck))
-      ioWithDefaults.writeFile(join(workDir, 'AGENTS.md'), [
-        '# Arena Test Environment',
-        `**Side**: ${cell.side}`, `**Player**: ${cell.player}`, `**Run**: ${cell.run}`,
-        '## How This Works',
-        '- Isolated arena test directory. Skills in skill-deck.toml, linked via deck link.',
-        '- Complete the task using available skills. Output to this directory.',
-        '- MANDATORY: write decision-log.jsonl (see prompt for schema).',
-      ].join('\n'))
+      const cellDeckRaw = ioWithDefaults.readFile(cell.deck)
+      ioWithDefaults.writeFile(join(workDir, 'skill-deck.toml'), cellDeckRaw)
+      let cellDeckParsed: Record<string, any> = {}
+      try { cellDeckParsed = Bun.TOML.parse(cellDeckRaw) as Record<string, any> } catch {}
+      ioWithDefaults.writeFile(join(workDir, 'AGENTS.md'), buildAgentsMd({
+        mode: 'A/B cell',
+        headerLines: [`**Side**: ${cell.side}`, `**Player**: ${cell.player}`, `**Run**: ${cell.run}`],
+        combos: parseDeckCombos(cellDeckParsed),
+      }))
       const linkProc = await ioWithDefaults.spawn(
         ['bunx', '@lythos/skill-deck', 'link'],
         { cwd: workDir, env: { ...process.env, HOME: process.env.HOME! } },
