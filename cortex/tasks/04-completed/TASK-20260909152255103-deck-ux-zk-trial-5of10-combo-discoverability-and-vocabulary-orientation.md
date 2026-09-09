@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-09-09 | Created from ZK trial of decks-local/gefei-seo.toml (5/10) |
 | completed | 2026-09-09 | F1-F6 fixed; ZK re-trial 8/10 (≥7 gate passed); 4 residual items also fixed same-day |
+| completed | 2026-09-09 | Closed via trailer |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
