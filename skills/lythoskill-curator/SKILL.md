@@ -14,11 +14,9 @@ when_to_use: |
   Find a skill for X, search skills, what skills do I have, list all skills,
   catalog skills, explore cold pool, scan skill pool, skill index, update index,
   recommend a deck, is there a skill for Y, discover skills, cold pool query,
-  skill lookup, what's available, curator query, curator scan, curator audit,
-  curator tag, annotate skill, fact-check skill, cross-reference skill quality,
-  find path for <name>, how to add <name>, what's the path for,
-  bare name to full path, where is skill <name>, how do I install <name>,
-  curator find, lookup skill path, skill locator for.
+  skill lookup, what's available, curator query/scan/audit/tag, annotate skill,
+  fact-check skill, cross-reference skill quality, skill path lookup
+  (find path for <name>, bare name → full path, how do I install <name>).
   ALSO trigger when user wants to do a task and you need to find the right skill:
   curator query local cache → WebSearch for new candidates →
   curator add + curator tag → arena test → curator tag --qa → recommend with confidence.
