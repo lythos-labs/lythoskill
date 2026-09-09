@@ -247,3 +247,54 @@ alternatives(项目纪律:拒绝的流行方案也要留痕)。
 - 不做 per-CLI 深度集成适配器(只到"投影 + 保证分级"层;深度集成是各 harness
   自己的事)。
 - 不投资发现层排名/推荐机制(curator 维持索引 + L3,不做 ranking)。
+
+## G. Fact-check 附录(2026-09-09,两个零上下文 agent,主证据级)
+
+> 用户三条 claim 的裁决。方法:两个零上下文 fact-check agent(打破诅咒知识),
+> 全部主证据(curl 直取 + GitHub/HN API;WebFetch 域被墙时用 SOCKS 代理回退)。
+
+### G1. "数量爆炸 + 精品稀少" — VERIFIED(方向强,一处原数字被反超)
+
+- 数量爆炸:OSSInsight 原文 verbatim(2023 年 17 repo → 2026 Q1 23,900+;57k
+  AGENTS.md;31k skill 定义)。旧引用 "49 万" 溯源失败但已被 live 计数碾压:
+  **SkillsMP 3,184,139 / skills.sh 1,406,477**(2026-09-09 直取)。新 hub 仍在
+  月度诞生(awesomeskills/proskills/localskills/claudemarketplaces 全部 live)。
+- 精品稀少:SkillsBench(arXiv:2602.12670)生态均值 **6.2/12**,benchmark 只用
+  top quartile(≥9/12);curated skill +16.6pp pass rate——**质量分布两极,
+  头部收益是同行评审级的大数**。安全面:Snyk 扫描 3,984 skills → 36.8% 有 flaw、
+  13.4% critical、76 个确认恶意 payload;**但 scanner "46.8% malicious" 被
+  arXiv:2603.16572(repo-aware 分析)证伪到 0.52%**——无上下文扫描夸大恶意率,
+  这个 counter-nuance 必须进任何引用。
+- KOL 形态(claim 3):**PARTIAL**。KOL 个人 repo 霸榜双榜(mattpocock 五占 top9、
+  awesome-list 15k-75k stars、claudemarketplaces 自称 38 万月活)实锤;**反向证据
+  同样硬**:skills.sh 榜首是 find-skills(3.3M 安装)——发现工具本身是生态第一
+  skill,marketplace 原生搜索同样巨大。强版("主要是 KOL 而非搜索")无调查数据
+  支持;弱版("策展层是主要注意力过滤器之一")证据充分。
+
+### G2. "去中心化 = 企业自部署,hub 不比 GitHub/npm" — VERIFIED(供应商证据决定性)
+
+- **CLI 企业层实锤(一手 docs)**:Claude Code 有 managed settings / self-hosted
+  gateway / org-wide skill 部署 / 私有 plugin marketplace(需 PAT);Codex 有
+  requirements.toml managed hooks + managed config layers + managed developer
+  instructions(源码层实现替换语义)。两大 coding agent 都在建**管理员强制的
+  组织层**——这就是 covenant-SOP 的产品化形态。
+- **商业私有 hub 已存在**:localskills.sh(SSO/SCIM/DPA/审计日志,per-seat 收费)。
+- hub 脆弱性:描述半边 VERIFIED(hub 只承载单一资产类,GitHub/npm 承载通用
+  基础设施);预测半边 PARTIAL——8/8 抽查 hub 全部 live,死的是工具(Roo Code
+  2026-05-15 archived)不是 hub;ClawHavoc 大投毒事件(341/2,857→824/10,700+)
+  是信任/安全失败而非经济失败,且 hub 存活并加了 VirusTotal/verified publisher。
+  **脆弱性目前表现为安全事件,不表现为死亡。**
+- "被吃掉 → hub 经济学退化"因果链:UNVERIFIABLE(双向信号)。n8n 一手:"Skills.md
+  = glorified prompt templates…table stakes"(退化信号);proskills/skills.sh 全在
+  转向 curation/verification 信任层(hosting 不值钱,判断值钱);但 skills.sh 安装
+  量仍在暴涨(反退化信号)。**没有可归因于模型发布的 hub 死亡案例。**
+
+### G3. 对本项目的修正
+
+1. **叙事用词纪律**:引用恶意率必须带 repo-aware counter-nuance;“KOL 主导”
+   只能以弱版形式写。→ 进 writer/coach 规则候选(需 source attribution)。
+2. **企业词簇(Tier-1 keyword 补)**:managed settings / enterprise skill
+   governance / private skill marketplace / self-hosted agent skills——
+   CLI 厂商已经教育了这个词汇,P3 关键词卡应收录。
+3. **P6 监视哨补充信号**:hub 层"hosting→curation"迁移 = 我们 assurance 列
+   投资的外部旁证;若未来出现 hub 死亡事件,回看本节 G2 基线。
