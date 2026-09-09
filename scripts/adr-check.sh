@@ -90,6 +90,26 @@ if [ "$MISSING_BUILDS" -eq 0 ]; then
 fi
 echo ""
 
+# ── ADR-20260423124812645: frontmatter name == directory name ─────
+echo "[ADR-20260423124812645] SKILL.md frontmatter name must match directory name"
+NAME_MISMATCHES=0
+for skill_md in packages/*/skill/SKILL.md skills/*/SKILL.md; do
+  if [ ! -f "$skill_md" ]; then continue; fi
+  dir_name=$(basename "$(dirname "$(dirname "$skill_md")")")
+  case "$skill_md" in
+    skills/*/SKILL.md) dir_name=$(basename "$(dirname "$skill_md")") ;;
+  esac
+  fm_name=$(grep -m1 '^name:' "$skill_md" | sed 's/^name: *//' | tr -d '\r')
+  if [ -n "$fm_name" ] && [ "$fm_name" != "$dir_name" ]; then
+    error "$skill_md: frontmatter name '$fm_name' != directory '$dir_name'"
+    NAME_MISMATCHES=$((NAME_MISMATCHES + 1))
+  fi
+done
+if [ "$NAME_MISMATCHES" -eq 0 ]; then
+  ok "All SKILL.md frontmatter names match their directory names"
+fi
+echo ""
+
 # ── ADR-20260423191001406: npm package naming ────────────────────
 echo "[ADR-20260423191001406] packages/*/package.json name must start with @lythos/"
 NAMING_ERRORS=0

@@ -1,5 +1,5 @@
 ---
-name: project-cortex
+name: lythoskill-project-cortex
 version: 0.19.1
 description: |
   Register tasks BEFORE fixing bugs. Close epics when work is done.
