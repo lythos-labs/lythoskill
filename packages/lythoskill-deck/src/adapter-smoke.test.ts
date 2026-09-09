@@ -115,6 +115,34 @@ describe('docs-tier smoke — deck link against docs-tier fan-out dirs', () => {
     expect(all).toMatch(/11600/)
   })
 
+  it('.clinerules as FILE (common Cline layout) is skipped with error, not a crash', async () => {
+    // ZK re-trial defect fix: also_link_to = [".clinerules"] where .clinerules
+    // is the common single-file layout must not die with uncaught EEXIST
+    // mid-run; it must print an agent-facing error and keep linking others.
+    const root = makeTmp()
+    const { deckPath } = makeDocsTierDeck(root)
+    writeFileSync(join(root, '.clinerules'), '# rules file (Cline single-file layout)\n')
+    const raw = readFileSync(deckPath, 'utf-8').replace(
+      'also_link_to = [".roo/skills", ".gemini/skills"]',
+      'also_link_to = [".clinerules", ".roo/skills"]'
+    )
+    writeFileSync(deckPath, raw)
+
+    const errors: string[] = []
+    const origError = console.error
+    console.error = (...a: any[]) => { errors.push(a.join(' ')) }
+    let threw: unknown = null
+    try {
+      await linkDeck(deckPath, root, { noBackup: true, skipHealthFetch: true })
+    } catch (e) { threw = e }
+    finally { console.error = origError }
+
+    expect(threw).toBeNull()
+    expect(errors.join('\n')).toMatch(/\.clinerules/)
+    // other fan-out target still processed
+    expect(lstatSync(join(root, '.roo/skills/docs-tier-skill')).isSymbolicLink()).toBe(true)
+  })
+
   it('cycle-class layout is refused, not created', async () => {
     const root = makeTmp()
     const coldPool = join(root, 'pool')

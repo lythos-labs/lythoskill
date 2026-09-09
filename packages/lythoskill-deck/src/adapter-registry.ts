@@ -199,7 +199,7 @@ export const ADAPTER_REGISTRY: readonly CliAdapter[] = [
         id: "windows-non-discovery-no-dedupe",
         severity: "info",
         ref: "https://opencode.ai/docs/skills/",
-        note: "Windows non-discovery + no inode dedupe among 6 open symlink issues",
+        note: "Windows non-discovery documented at the docs page; no per-issue source captured for the broader symlink edge-case set — recheck at quarterly survey (P6 watch)",
       },
     ],
     source: "https://opencode.ai/docs/skills/",
@@ -217,7 +217,7 @@ export const ADAPTER_REGISTRY: readonly CliAdapter[] = [
         id: "clinerules-symlink-not-followed",
         severity: "warning",
         ref: "https://github.com/cline/cline/issues/3092",
-        note: ".clinerules/ symlinks confirmed NOT followed (open bug #3092, also #3437) — copy/rsync target. Deck fans Cline's .clinerules dir as snapshot; skills-dir (.agents/skills) symlink support is unverified but left as-is (deck default is the survey-validated projection)",
+        note: ".clinerules/ symlinks confirmed NOT followed (bug #3092, closed; behavior re-verified 2026-09-09) — copy/rsync target. Deck fans Cline's .clinerules dir as snapshot; skills-dir (.agents/skills) symlink support is unverified but left as-is (deck default is the survey-validated projection)",
         triggerDirs: [".clinerules"],
       },
     ],
@@ -229,7 +229,7 @@ export const ADAPTER_REGISTRY: readonly CliAdapter[] = [
     name: "Crush",
     symlinkTier: "issue",
     fanOutTargets: [".crush/skills", ".agents/skills", "~/.config/crush/skills"],
-    perRunSwitch: { kind: "config", primary: "skill-path", note: "set via `option skill-path <dir>`" },
+    perRunSwitch: { kind: "config", primary: "skill-path", repeatable: true, note: "list option (`option skill-path <dir>` appends; `option reset skill-path` clears)" },
     perRoleScoping: "none",
     hazards: [
       {

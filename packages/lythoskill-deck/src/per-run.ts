@@ -68,7 +68,11 @@ export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
       result.configLines.push(`option ${sw.primary} ${targets[0] ?? "<dir>"}`);
     } else {
       for (const t of targets) result.configLines.push(`option ${sw.primary} ${t}`);
-      result.notes.push(`${adapter.name} ${sw.primary} is single-path — one option line per dir`);
+      result.notes.push(
+        sw.repeatable
+          ? `${adapter.name} ${sw.primary} is a repeatable list option — one line per dir`
+          : `${adapter.name} ${sw.primary} is single-path — one option line per dir`
+      );
     }
     result.notes.push("config form: run inside the CLI, or place in its config file");
     return result;

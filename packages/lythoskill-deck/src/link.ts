@@ -523,6 +523,21 @@ function reconcileTargetDir(
   mode: 'symlink' | 'snapshot',
   PROJECT_DIR: string,
 ): void {
+  // ZK re-trial defect fix: fan-out target that exists as a FILE (common for
+  // .clinerules — Cline's rules file, not a skills dir) must skip with an
+  // agent-facing error, not crash the whole run with uncaught EEXIST.
+  // statSync follows symlinks: symlink-to-dir targets keep historical behavior.
+  try {
+    const st = statSync(targetDir);
+    if (!st.isDirectory()) {
+      console.error(`❌ Fan-out target is a file, not a directory: ${targetDir}`);
+      console.error(`   why:  it exists as a file (common for .clinerules — Cline's rules file)`);
+      console.error(`   fix:  remove it from also_link_to, or point at a real directory; continuing with other targets`);
+      console.error(`   ref:  https://github.com/cline/cline/issues/3092`);
+      return;
+    }
+  } catch { /* ENOENT = doesn't exist yet → create below */ }
+
   mkdirSync(targetDir, { recursive: true });
 
   // registry 模式覆盖(Cline 类 copy 目标);docs 级目标返回 undefined → 行为不变

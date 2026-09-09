@@ -37,7 +37,7 @@ describe('renderPerRun — kimi (flag, repeatable)', () => {
   })
 })
 
-describe('renderPerRun — crush (config, single-path)', () => {
+describe('renderPerRun — crush (config, repeatable list)', () => {
   it('renders option skill-path config line', () => {
     const r = renderPerRun('crush', ['/a/.claude/skills'])
     expect(r.error).toBeUndefined()
@@ -45,10 +45,10 @@ describe('renderPerRun — crush (config, single-path)', () => {
     expect(r.configLines).toEqual(['option skill-path /a/.claude/skills'])
   })
 
-  it('multiple targets → one option line per dir + note', () => {
+  it('multiple targets → one option line per dir + repeatable-list note', () => {
     const r = renderPerRun('crush', ['/a', '/b'])
     expect(r.configLines).toEqual(['option skill-path /a', 'option skill-path /b'])
-    expect(r.notes.join(' ')).toMatch(/single-path/)
+    expect(r.notes.join(' ')).toMatch(/repeatable list/)
   })
 })
 

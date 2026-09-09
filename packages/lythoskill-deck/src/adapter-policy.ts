@@ -60,7 +60,8 @@ function collectDuplicateScans(targets: string[], warnings: FanOutWarning[]): vo
       severity: "warning",
       message:
         `${adapter.name} scans ${ts.length} fan-out dirs (${ts.join(", ")}) — same-name skills ` +
-        `discovered via two roots trigger duplicate warnings. Fan to one dir per CLI, or use per-run mode.`,
+        `discovered via two roots trigger duplicate warnings. Drop one of these roots from also_link_to ` +
+        `(keep the single dir this CLI scans), or use per-run mode.`,
       ref: duplicateHazardRef(adapter),
     });
   }
