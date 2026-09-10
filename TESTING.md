@@ -71,6 +71,22 @@ packages/<name>/test/scenarios/<slug>-bdd/
 - Co-located with package: `packages/<name>/test/scenarios/` → exercises `<name>`.
 - Legacy `*.agent.md` format still supported via parseAgentMd (coexist, not replaced).
 
+**`judge-verdict.json` schema** — `verdict` (PASS / PARTIAL / FAIL), `scenario`, `criteria`
+(id → `status` + the command the judge actually ran), `summary`. Two further fields are
+required by [ADR-20260910113730375](cortex/adr/02-accepted/ADR-20260910113730375-*.md):
+
+- **`reviewed_commit`** — the full sha the verdict's claims hold under. A verdict is evidence
+  about *a commit*, not about "the current state"; without the sha, a later reader applies a
+  stale green to a tree it never saw.
+- **`independence`** — the two layers stated separately: `knowledge` (did the judge see how the
+  work was done? a zero-context prompt answers this) and `orchestration` (is the judge a
+  different session/orchestrator, or the same one?). "Independent" without the split is the
+  failure mode named in `TASK-20260910110545092` B6: knowledge-independence is easy to achieve
+  and gets read as the harder orchestration-independence. Write "no" where it is no.
+
+`environment` (bun version / OS) belongs in the verdict too — pass counts are conditional
+values, and a claim that cannot name its interpreter is not a claim.
+
 ## Running Tests
 
 ```bash

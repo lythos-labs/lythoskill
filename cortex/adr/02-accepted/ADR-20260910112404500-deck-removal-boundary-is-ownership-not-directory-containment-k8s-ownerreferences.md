@@ -115,6 +115,39 @@ deck 拥有一个条目的充要条件是二者之一:
 - 判据**不得**降级为 `lstat` 推断:`lstat` 只能说"路径上有个真实目录",说不出
   "这个目录是 deck 建的"。
 
+## 已知边界:判据是"形状",不是"出身"(2026-09-10 实测补记)
+
+选定的两条判据里,(b)`state-record` 是**真出身**(deck 自己的记录),而 (a)"指向本 deck
+cold pool 的 symlink"是**形状** —— 它断言的是"这看起来像我建的",不是"这确实是我建的"。
+两者的差别有可达的反例,**已实测**(`also-link-to-bdd` 的 BDD 裁判独立发现,本卡复核):
+
+在一个 deck 管理的 fan-out 目标里,手工建一个**未被声明**、但指向本 deck cold pool 的 symlink
+(如 `ln -s <cold-pool>/x/y/myskill .agents/skills/myskill`)→ 下一次 `deck link` 会把它删掉。
+
+- **该行为是否正确**:是。目标是 deck 管理的目录,而 deck 的契约是 deny-by-default
+  (未声明的技能在该目录里不应当存在);这也是"用户直接改 toml 后能收敛回声明态"所依赖的那一遍。
+- **需要更正的一处描述**:该删除**不是静默的** —— stdout 打印 `🗑️  Removed: <name>`。
+  BDD 裁判在 `judge-verdict.json` 的 summary 里写作 "silently deleted ... no advisory",
+  本卡复核发现它只查了 stderr;**日志行在 stdout 上**。差的不是"有没有出声",是
+  "出声够不够":外来条目(指向别处)拿的是三件套(what/why/fix),这一条只拿到一行动作。
+- **这不是"刻意的不对称",是待补的浓度差**(owner 2026-09-10):
+  「**担心 agent 拿静默美德扩大解释。事实上这个项目更加推崇 HATEOAS 式的 exit message**」。
+  即:B18 那条"静默是挣来的"约束的是**不发无信息的行**,不是**少说话**;凡是有动作发生的
+  地方,输出应当带 what/why/fix 三件套。回收这一遍(删掉"形状像我建的"的条目)属于
+  **有动作发生**,所以它欠一句"我是按什么判据认领它的、你想留住该怎么办"。
+- **为什么不因此改判据**:收紧成"只认 state-record"会让**旧 state 未记录**的合法条目
+  (早于 state 机制建的 symlink)变成不可回收,收敛性反而更差。所以改的是**输出**,不是判据。
+
+### Follow-up
+
+- [ ] **回收遍补齐 HATEOAS 浓度**(本 ADR 的后果,不开卡 —— 见
+  `writing-guide.md` → "An accepted ADR carries its own follow-up"):
+  `link.ts` 的回收遍(`removeSymlinkOnly` 那一处,打印 `🗑️ Removed: <alias>`)补 what/why/fix:
+  what = 这个条目指向本 deck cold pool 但未在 `skill-deck.toml` 里声明;
+  why = deny-by-default 的收敛动作,判断依据是**形状**(指向 cold pool)而非 deck 的创建记录;
+  fix = 要留住它就写进 `skill-deck.toml`,要删就 `rm`。
+  验收 = 一条输出断言钉住三行存在 + 默认 deck dormancy 不破。
+
 ## Impact
 
 - **Positive**:

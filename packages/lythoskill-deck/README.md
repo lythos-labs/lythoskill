@@ -62,6 +62,11 @@ bunx @lythos/skill-deck@0.19.1 link
 - A fan-out target **no surveyed CLI scans** prints an **info** line (`<dir>: no layout data — hazards unknown`). Silence would read as "checked, and safe"; it is not — it means deck has no data for that directory. See *Unlisted targets* below.
 - A fan-out target that is **not a skills dir but a CLI's config root** (or a container of config roots) prints a **warning**. See *Wrong-level targets* below.
 
+> **"Silence is earned" constrains *noise*, not *volume*.** It says deck must not print a line that
+> carries no information ("checked, and fine" when nothing was checked). It does **not** say output
+> should be short. Wherever deck *acts*, the output owes a HATEOAS-style message: what happened,
+> why, and what to do next. Reading the rule as "print less" inverts it.
+
 **Unlisted targets — silence is earned, not default.** The survey covers 16 CLIs; a target outside
 it gets no hazard analysis, and the two checks above both no-op on it. Printing nothing there would
 make `also_link_to = [".some-new-cli/skills"]` indistinguishable from a target that was checked and

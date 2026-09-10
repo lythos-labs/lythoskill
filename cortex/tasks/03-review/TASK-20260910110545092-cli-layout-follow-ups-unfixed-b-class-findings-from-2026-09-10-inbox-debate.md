@@ -54,7 +54,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       "普查日 / 复核日 / 补录日"三事件,qwen 行的补录出身只活在 note 散文里。
       修:加 `verifiedBy: "survey" | "restored"` 可选字段,仅 qwen 行标 `restored`;
       `layoutProblems()` 加「restored 行必须有非空 note」自检。**普查本体一行不动。**
-- [~] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
+- [x] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
       unpersisted`),导致 qwen 行只能按"候选顺序首名"补录。定性 = **取证过程未留痕**,
       非"调研方式不可靠"。修:确立普查证据的落盘位置与命名。
       **同一段还有第二例(2026-09-10 复核新发现)**:P2 的独立验证(ZK re-trial,
@@ -92,7 +92,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       `renderPerRun` 不动;测试改为纯函数走真 tmp + 入口只留零副作用 smoke。
 - [x] **B10** `safe-remove.test.ts:101-103` 递归删除测试只断言目录消失、**无嵌套内容断言** ——
       Bun 若把 `recursive` 退化成 no-op 仍绿。修:补一行嵌套文件断言。
-- [~] **B19(新,2026-09-10 加)** ⚠️ **本条的立论已被实测推翻,见 `## Progress Log` 2026-09-10 末条** ——
+- [x] **B19(新,2026-09-10 加)** ⚠️ **本条的立论已被实测推翻,见 `## Progress Log` 2026-09-10 末条** ——
       该场景 PHASE 2 的断言 9-11 在新归属语义下**照常成立**(那些条目是 deck 自己建的 symlink,
       归属判定允许删);已实测全量重放 1-19 全过。**仍缺的是 verdict 产物**(需 agent + judge 跑一轮),
       已按"大 gap 先跳"记录,不假装完成。原文保留如下(它记录了当时为什么这么判):
@@ -192,7 +192,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       且带进一条后来被证伪的 claim(`65b02db7` 删除)。
       **改法同 B4/B5**:卡面正文不动,由原卡 `## Notes` 注记补「8.5 @ c8ebcc76;折后未评」。
       (B6 改"独立"二字的用法,B7 补"覆盖到哪个 commit" —— 同一句话的两处,分开改)
-- [ ] **B16** `decision-log` 时间戳不可信,属**证据卫生**缺陷:
+- [x] **B16** `decision-log` 时间戳不可信,属**证据卫生**缺陷:
       `playground/2026-09-10-inbox-debate/raw/decision-log.jsonl` 文件 mtime = 22:52,
       其内部时间戳 = 23:20–23:45,**自相矛盾**;折入 commit 时间戳 = 22:56:31。
       judge 结论:「墙钟彻底不可信,顺序只能由**逻辑 + 文件系统锚**定。」
@@ -301,33 +301,33 @@ B17/B18 的结论回填到本卡 `## Notes`。
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
 
-- [ ] `cortex probe` 通过(本卡非空壳)
-- [ ] **B20**:pre-commit 重建触发条件覆盖「任一包的 `src/**` 且该包有 `skill/` 产物」;
+- [x] `cortex probe` 通过(本卡非空壳)
+- [x] **B20**:pre-commit 重建触发条件覆盖「任一包的 `src/**` 且该包有 `skill/` 产物」;
       并补 dormancy 式校验(重建后 `git diff --quiet skills/` 为空)
-- [ ] **B21**:`probe` 能抓出**未填的 ADR** —— 终结条件 = 一条单测:
+- [x] **B21**:`probe` 能抓出**未填的 ADR** —— 终结条件 = 一条单测:
       `cortex adr` 建出的原始模板 → `isEmptyShell` 为 `true`(现在这条测试会红);
       并核对 EPIC 模板是否同病
-- [ ] **B2**:`~/.config/goose/skills` 进 `triggerDirs`(`cli-layout.ts:175`),该目录触发
+- [x] **B2**:`~/.config/goose/skills` 进 `triggerDirs`(`cli-layout.ts:175`),该目录触发
       data-loss 警告,有测试钉死 —— **且 `cli-layout.test.ts:49` 的
       `toEqual(['.goose/skills'])` 已从"钉住漏报"改为"钉住两目录 + 行为"**;
       用 mutation test 证明新断言能抓住旧行为(`triggerDirs` 改回单目录 → 必须红)
-- [ ] **B13**:`layoutProblems()` 对 `perRoleScoping` 有非空 + 长度检查
-- [ ] **B3**:`verifiedBy` 字段落地,仅 qwen 行标 `restored`,`layoutProblems()` 对
+- [x] **B13**:`layoutProblems()` 对 `perRoleScoping` 有非空 + 长度检查
+- [x] **B3**:`verifiedBy` 字段落地,仅 qwen 行标 `restored`,`layoutProblems()` 对
       "restored 且 note 为空"报错;16 行普查数据未改
-- [ ] **B9**:`loadPerRunTargets` 是纯函数,`renderPerRun` 签名与行为未变
-- [ ] **B10**:`safe-remove` 递归删除测试断言嵌套文件内容
-- [ ] **B8**:deck README 不含 `buildPrunePlan` / `executePrunePlan` 的虚假宣称
-- [ ] **B11/B12**:`AGENTS.md` 语义层纪律成文;`safe-remove.ts` 注释引 Bun 实测测试而非 Node 文档
-- [ ] **B4/B5/B6/B7**:`daily/2026-09-09.md` **就地**修正完成;卡面**经原卡 Notes 注记**修正
+- [x] **B9**:抽出的目标计算是纯函数(实现名 **`targetsFromDeck`** —— 吃 parse 后的对象而非路径,才可能不碰 fs;见 Progress Log),`renderPerRun` 签名与行为未变
+- [x] **B10**:`safe-remove` 递归删除测试断言嵌套文件内容
+- [x] **B8**:deck README 不再把 `buildPrunePlan` / `executePrunePlan` 说成 deck 自己的(归位到 `@lythos/cold-pool`:两个函数确实存在,只是在另一个包)
+- [x] **B11/B12**:`AGENTS.md` 语义层纪律成文;`safe-remove.ts` 注释引 Bun 实测测试而非 Node 文档
+- [x] **B4/B5/B6/B7**:`daily/2026-09-09.md` **就地**修正完成;卡面**经原卡 Notes 注记**修正
       (正文不动),原卡 Notes 记录了修正项,且注记里写明
       **`ZK 8.5 @ c8ebcc76` + 折入 `2686e0d4` 后未复评**(B7 的验收点 =
       注记里出现 commit sha,而不是只出现数字 8.5)
-- [ ] **B16**:`decision-log` 的时序不可用性**在产出端或其契约里有落点** ——
+- [x] **B16**:`decision-log` 的时序不可用性**在产出端或其契约里有落点** ——
       修时间戳来源,或在 `reproduce-sh-bdd` 契约写明「decision-log 不是时钟」。
       仅在 ADR 里声明"别信它"不算完成(ADR-20260910113730375 证据卫生条款)
 - [x] **取证未留痕**:`/tmp/arena-p2-adapter-retrial/` 的 ZK 证据已落盘入仓;普查证据与 ZK 证据
       的**落盘位置与命名**已成文(否则本条只是把这一份挪个地方,下批照样丢)
-- [ ] **B19**:`also-link-to-bdd` 已对齐新归属语义(自建 → 删;外来 → 留 + warn),
+- [x] **B19**:`also-link-to-bdd` 已对齐新归属语义(自建 → 删;外来 → 留 + warn),
       且产出 `decision-log.jsonl` + `judge-verdict.json`(与 `deck-remove-bdd` /
       `to-symlink-snapshot-bdd` 同形 —— 现在只有这两个有产物)
 - [x] **B17/B18**:已整理成可裁决形态并呈现 owner,结论(或"待裁决")落在本卡 Notes
@@ -363,7 +363,7 @@ B17/B18 的结论回填到本卡 `## Notes`。
       两条被否决的候选(裸 `-`、按数量断言)留在注释里,防下个 agent 重提
 - [x] **B16(证据卫生)**:`ts` 不是时钟写进 `reproduce-sh-bdd-contract.md`(产出端契约),
       不只写在 ADR 里
-- [~] **B19 / 取证未留痕(部分)**:场景已**真跑**并新增 PHASE 5 钉新边界;ZK 证据已落盘
+- [x] **B19 / 取证未留痕(部分)**:场景已**真跑**并新增 PHASE 5 钉新边界;ZK 证据已落盘
       `showcase/2026-09-09-p2-cli-layout-zk-retrial/`;**仍缺 = verdict 产物**(需 agent + judge
       跑一轮)—— 按 owner"大 gap 先跳"记录,不假装完成
 - [x] **CI 全绿(本批顺带修复)**:`CLI_TABLE drift tripwire` 报 deck `per-run` 缺表
@@ -530,6 +530,31 @@ B17/B18 的结论回填到本卡 `## Notes`。
     `scripts/check-site-commands.test.ts` 的 **CLI_TABLE drift tripwire** 报 deck 的 `per-run`
     不在守卫表里(P2 批新增子命令时漏更新)。**守卫按设计工作,是表错了**;
     与 2026-08-28 的 `update` 漏项同一类,已补并注明出处。
+
+- 2026-09-10: **B19 verdict 产物落盘(真跑一轮:player + 独立 judge)**,owner 指示「跑一轮补上,这次落盘」。
+  产物进 `also-link-to-bdd/`,沿用 `TESTING.md` 的四文件约定,不新发明。
+  - **player**(零上下文,只读 `reproduce.sh` 的 stdout 指令)→ 逐条实测 23/23,
+    写 `decision-log.jsonl`(13 行,单一时钟源 `date -u +%FT%TZ`)。
+  - **judge**(另一次独立调用,只读 `judge.md` + fixture,**不采信 player 的报告**)→ **PASS(23/23)**;
+    它**自己重放**了整个生命周期(link → remove → re-add → link → 植入外来条目 → re-link)
+    来复核那 17 条已消失在末态里的中间断言,并逐路径 + sha256 对齐 cold pool 与 `skill-deck.lock`。
+  - 先给 `judge.md` 补了 PHASE 5 的四条判据(`foreign_*`)—— **没有判据的边界等于没被测**。
+  - `judge-verdict.json` 加两个字段并写进 `TESTING.md`:①`reviewed_commit` = `30cda3b6`
+    (ADR-20260910113730375 的 commit-pinning);②`independence` **分两层**(knowledge = 零上下文 → 达成;
+    orchestration = 同 session 同一编排方 → **不达成**),这正是 B6 要求的"两件事分开写"。
+  - **裁判报回三件判据覆盖不到的事**,两件已各自落地:
+    1. **并发会话**(就是我)在裁判期间改了工作树 —— 裁判自核 `packages/lythoskill-deck` 干净、
+       `cli.ts` 对 HEAD 无 diff,故结论仍绑定 `30cda3b6` ✓(**它没有被脏树带偏,也没有借脏树打折**)。
+    2. **归属判据是"形状"不是"出身"**:手工建的、指向本 deck cold pool 的未声明 symlink 会被删。
+       本卡复核后**更正了裁判的一处措辞**(它写 "silently";实测 stdout 有 `🗑️ Removed:` 一行)
+       —— 已写进 `ADR-20260910112404500` 的「已知边界」节。
+       **owner 定调(同日)**:「**担心 agent 拿静默美德扩大解释。事实上这个项目更加推崇 HATEOAS 式的
+       exit message**」→ 故该节的结论不是"这不对称是刻意的"就完事,而是**登记为待办**:
+       回收那一遍的输出应补齐 what/why/fix 的浓度(见该 ADR「已知边界」节末)。
+    3. **`deck add` / `remove` 摧毁 toml 全部注释** → 新卡 `TASK-20260910152029904`
+       (player 与 judge **两次独立**撞到;player 自己判成 "cosmetic, no action needed" ——
+       **在不该收口的地方收了口**,值得留档)。owner 已给解法方向:**参考 Cargo(`toml_edit`)/ Poetry
+       (`tomlkit`)的格式保留编辑,定位用 AST、写回用范围替换**,而不是继续用对象序列化器重写全文。
 
 ## Related Files
 - Modified:
