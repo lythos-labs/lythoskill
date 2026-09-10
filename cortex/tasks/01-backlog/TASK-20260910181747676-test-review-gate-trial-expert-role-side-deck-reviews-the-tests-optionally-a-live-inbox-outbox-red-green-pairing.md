@@ -78,6 +78,8 @@
 <!-- Update during execution, with timestamps -->
 
 ## Related Files
+- 决策载体:**ADR-20260910181957316**(两段闸门;本卡是它 Follow-up 里的第三段闸实测项)
+- 原则已落:`packages/lythoskill-project-cortex/skill/references/zk-review.md` §第三段(SOURCE,已重建)
 - Modified:
 - Added:
 
