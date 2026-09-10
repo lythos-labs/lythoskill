@@ -218,6 +218,12 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
   - **另一条先前存在的同类缺陷**(`deck remove` 在读取器读不了的 deck 上抛原始 iarna 栈,`ddddcb16^:remove.ts:87` 可复现)
     已记到 `TASK-20260910160707856`(与本卡无关)。
 
+- 2026-09-10: **记录一处 commit message 笔误(不重写历史)**:`a5756b4f` 的消息把先前存在缺陷的
+  起始点写成 `ddddca16^:remove.ts:87` —— **`ddddca16` 不是有效对象**(实测 `git cat-file -t` → *Not a valid object name*),
+  真实是 **`ddddcb16^`**。**durable artifacts 无恙**:本卡与 `TASK-20260910160707856` 记的都是正确哈希,
+  仓内文件无一处含错值 —— 只有按那个形状 grep commit log 的人会撞到死哈希。
+  按仓库纪律**不改写已推送的历史**:以本行更正,而不 force-push。
+
 ## Related Files
 - Modified: (执行时填)
 - Added: `src/toml-splice.test.ts`(三形状 + 非 ASCII fixture);`packages/lythoskill-deck/package.json` 增一个解析器依赖(**不是**行级编辑实现)
