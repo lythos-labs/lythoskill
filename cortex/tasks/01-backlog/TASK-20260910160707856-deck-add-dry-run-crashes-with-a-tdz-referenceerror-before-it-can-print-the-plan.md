@@ -147,6 +147,17 @@ $ deck remove beta --deck <含多行内联表的 deck>
 `per-run.ts:144`、`migrate-schema.ts:23` 在同一个坏 deck 上仍是原始 iarna 栈(`deck validate` 则是干净的一行)。
 本卡点名的是 remove/add 两处,故按卡的范围做;`readDeckOrExplain` 已在 `parse-deck.ts` 里,谁要接都能一条线接上。
 
+**⚠️ trailer 未生效(下一个 agent 必读)**:提交 `83f14fd3` 带 `Task: TASK-20260910160707856 review`,
+但 post-commit 的 cortex 派发**拒绝了**这次转换:
+
+```
+❌ Invalid transition for Task TASK-20260910160707856: backlog → review
+   Allowed targets from "backlog": in-progress
+```
+
+即本卡停在 `01-backlog`(执行者按纪律**不自己**跑状态转换)。要走 review 得先 `cortex start TASK-20260910160707856`。
+之所以是 backlog:卡从建立起就没被 start 过。
+
 **⚠️ 工作树异常(下一个 agent 必读)**:本卡的三处**源码**改动被并行 agent 的 commit `5a853c71`
 ("docs(cortex): fix a dead INDEX pointer…",00:12:41)顺手带走了 —— 那笔提交的文件表里混着
 `deck/src/add.ts`(+47)/`parse-deck.ts`(+37)/`remove.ts`(+12),提交信息里一个字都没提。代码没丢(已在 HEAD),
