@@ -299,6 +299,66 @@ prompt = "keep"
   })
 })
 
+
+describe('ZK-impl round-2:级联走到底 / 点号键 / 结果护栏 / 空 map', () => {
+  it('R2-H1: rule ② cascade removes the empty [tool] header too (was: left behind)', () => {
+    const src = '[deck]\nmax_cards = 10\n\n[tool]\n\n[tool.skills]\nalpha = { path = "x" }\n'
+    const out = spliceRemoveSkill(src, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe('[deck]\nmax_cards = 10\n\n')
+  })
+
+  it('R2-H3: dotted-key placements the reader accepts are removable', () => {
+    const a = '[deck]\nmax_cards = 10\n\n[tool]\nskills.alpha.path = "github.com/a/b/alpha"\n'
+    const b = '[deck]\nmax_cards = 10\n\n[tool.skills]\nalpha.path = "github.com/a/b/alpha"\n'
+    for (const src of [a, b]) {
+      const out = spliceRemoveSkill(src, 'tool', 'alpha')
+      expect(out.ok).toBe(true)
+      if (!out.ok) return
+      expect(out.src).not.toContain('alpha')
+      expect(() => parseTOML(out.src, { range: true })).not.toThrow()
+    }
+  })
+
+  it('R2-H3b: a dotted entry split across several key-values goes as one entry', () => {
+    const src = '[deck]\nmax_cards = 10\n\n[tool]\nskills.alpha.path = "p"\nskills.alpha.role = "r"\nskills.beta.path = "q"\n'
+    const out = spliceRemoveSkill(src, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).not.toContain('alpha')
+    expect(out.src).toContain('skills.beta.path = "q"')
+  })
+
+  it('R2-H4: a scalar skills value is refused by the RESULT guard, file untouched', () => {
+    // `[tool] skills = "oops"` 能通过 validate 并正常 link;旧路径写下去会让文件不可解析,
+    // 并让**别的 section** 的已声明技能从所有读取者眼里消失。枚举形状挡不住它 —— 这条护栏能。
+    const src = '[deck]\nmax_cards = 10\n\n[tool]\nskills = "oops"\n\n[innate.skills.keep]\npath = "k"\n'
+    const out = spliceInsertSkill(src, 'tool', 'beta', { path: 'github.com/a/b/beta' })
+    expect(out.ok).toBe(false)
+    if (out.ok) return
+    expect(out.code).toBe('would-corrupt')
+    expect(out.message).toContain('refusing to write')
+  })
+
+  it('R2-H2: the EOF insert path also uses the file\'s own line ending', () => {
+    const crlf = '[deck]\r\nmax_cards = 10\r\n'
+    const out = spliceInsertSkill(crlf, 'innate', 'alpha', { path: 'p' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).not.toMatch(/(?<!\r)\n/)
+  })
+
+  it('the empty-map branch is pinned (mutation `skills = {, beta = …}` must not be reachable)', () => {
+    const empty = '[deck]\nmax_cards = 10\n\n[tool]\nskills = {}\n'
+    const out = spliceInsertSkill(empty, 'tool', 'beta', { path: 'p' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain('skills = {beta = { path = "p" }}')
+    expect(() => parseTOML(out.src, { range: true })).not.toThrow()
+  })
+})
+
 describe('units + line endings', () => {
   it('a non-ASCII file splices at the right place (code units, not bytes)', () => {
     // 若实现把 offset 当字节用,`→` 之后的所有定位都会偏 —— 这里用"删完必须与写死的期望相同"抓它

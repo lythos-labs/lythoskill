@@ -22,7 +22,7 @@ import { parseTOML } from 'toml-eslint-parser'
 /** 一次 splice 的结果。失败一律**报错而不退回整份重写**(ADR §规格「失败即不写」)。 */
 export type SpliceResult =
   | { ok: true; src: string }
-  | { ok: false; code: 'parse-error' | 'not-found' | 'unrepresentable'; message: string }
+  | { ok: false; code: 'parse-error' | 'not-found' | 'unrepresentable' | 'would-corrupt'; message: string }
 
 interface Node {
   type: string
@@ -88,6 +88,32 @@ function parse(src: string): Node[] | SpliceResult {
 
 const isErr = (x: unknown): x is SpliceResult => typeof x === 'object' && x !== null && 'ok' in x
 
+/**
+ * **结果的护栏**(ADR §规格「失败即不写」用在**输出**上):
+ * 拼出来的文本必须能被解析,否则报错而不写。
+ *
+ * 这条是**结构性**的,不是又一个形状规则:任何"我以为我认识、其实读侧另有写法"的形状
+ * (scalar `skills`、点号键、以后新增的)在这里被一次拦住 —— 而不是靠我把形状枚举全。
+ * 实测反例:deck 里 `[tool] skills = "oops"` 能通过 `validate` 并正常 link,
+ * 但按"追加一个表"的常规路径写下去会让文件**不可解析**,且**另一个 section 的已声明技能
+ * 会从所有读取者眼里消失**。枚举挡不住它,这一条能。
+ */
+function finalize(original: string, next: string): SpliceResult {
+  if (next === original) return { ok: true, src: next }
+  try {
+    parseTOML(next, { range: true })
+  } catch (err: any) {
+    return {
+      ok: false,
+      code: 'would-corrupt',
+      message:
+        `the spliced result would not parse (${err?.message ?? err}) — refusing to write. ` +
+        `This deck uses a shape this writer does not model; the file is byte-identical to before.`,
+    }
+  }
+  return { ok: true, src: next }
+}
+
 /** `[<section>]` 表节点(内联表形态的容器) */
 const sectionTable0 = (body: Node[], src: string, section: string): Node | undefined =>
   tableByKey(body, src, section)
@@ -114,6 +140,10 @@ interface Located {
   arrayElem?: boolean
   /** true = 命中的是内联表里的条目(删除时同样要连一个相邻逗号走) */
   mapEntry?: boolean
+  /** 点号键家族:一次删除可能涉及多条 key-value(R2-H3) */
+  group?: Node[]
+  /** 一次剪掉的**整段**(用于"连空表头一起走"的级联:两个相邻节点合成一个区间) */
+  range?: [number, number]
 }
 
 function locate(body: Node[], src: string, section: string, alias: string): Located | undefined {
@@ -126,7 +156,18 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
   const inline = kvInTable(skillsTable, src, alias)
   if (inline) {
     const isOnlyEntry = (skillsTable?.body?.length ?? 0) === 1
-    return { node: inline, container: isOnlyEntry ? skillsTable : undefined }
+    if (!isOnlyEntry) return { node: inline }
+    // 级联:这张表空了 → 连表头一起走;若 `[<section>]` 表体本来就空 → 一级也不留(R2-H1)
+    const secTable = tableByKey(body, src, section)
+    const secEmpty =
+      secTable !== undefined &&
+      secTable !== skillsTable &&
+      (secTable.body?.length ?? 0) === 0 &&
+      isAdjacent(src, secTable, skillsTable!)
+    // 两个相邻节点合成一个区间:单次剪掉"空 section 头 + 这张表"(级联要走到底)
+    return secEmpty
+      ? { node: inline, range: [secTable!.range[0], skillsTable!.range[1]] }
+      : { node: inline, container: skillsTable }
   }
 
   // ④ `[<section>] skills = { alias = { … } }` 内联表里的那个条目(H1:读取侧认它,写入侧就得认)
@@ -165,7 +206,52 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
       }
     }
   }
+  // ⑤ 点号键家族(R2-H3):`[tool] skills.alpha.path = …` / `[tool.skills] alpha.path = …` /
+  //    `[tool] skills.alpha = { … }` 等 —— 读取侧全认(`validate` 通过),写入侧也必须认。
+  //    做法是**通用**的:走全树算每个 key-value 的完整路径,取等于或前缀于目标的那些
+  //    (点号字段可能拆成多条 kv,所以是"一组"而不是"一个")。
+  const wantFull = `${section}.skills.${alias}`
+  const hits: Node[] = []
+  walkKv(body, [], (kv, path) => {
+    const full = path.join('.')
+    if (full === wantFull || full.startsWith(`${wantFull}.`)) hits.push(kv)
+  })
+  if (hits.length > 0) {
+    const owner = tableByKey(body, src, `${section}.skills`) ?? tableByKey(body, src, section)
+    const ownerBody = owner?.body ?? []
+    const clearsOwner = owner !== undefined && ownerBody.length === hits.length && hits.every(h => ownerBody.includes(h))
+    if (clearsOwner) {
+      const secTable = tableByKey(body, src, section)
+      const extend =
+        secTable && secTable !== owner && (secTable.body?.length ?? 0) === 0 && isAdjacent(src, secTable, owner!)
+          ? secTable.range[0]
+          : owner!.range[0]
+      return { node: hits[0], group: hits, range: [extend, owner!.range[1]] }
+    }
+    return { node: hits[0], group: hits }
+  }
+
   return undefined
+}
+
+/** 全树遍历:回调拿到每个 key-value 及其**完整路径**(含所在表的点号段) */
+function walkKv(nodes: Node[], prefix: string[], cb: (kv: Node, path: string[]) => void): void {
+  for (const n of nodes) {
+    if (n.type === 'TOMLTable' && n.body) {
+      walkKv(n.body, [...prefix, ...keySegments(n)], cb)
+    } else if (n.type === 'TOMLKeyValue') {
+      const path = [...prefix, ...keySegments(n)]
+      cb(n, path)
+      const inner = (n.value as any)?.body
+      if (Array.isArray(inner)) walkKv(inner, path, cb) // 内联表体(如 skills = { alpha.path = … })
+    }
+  }
+}
+
+/** 两个节点之间只有空白(用于"相邻才连表头一起删"的判断) */
+function isAdjacent(src: string, a: Node, b: Node): boolean {
+  const [first, second] = a.range[0] < b.range[0] ? [a, b] : [b, a]
+  return /^[\s]*$/.test(src.slice(first.range[1], second.range[0]))
 }
 
 const stripQuotes = (s: string): string => s.replace(/^["']|["']$/g, '')
@@ -209,6 +295,17 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
     }
   }
 
+  // ── ⑤ 点号键家族:一组 key-value 逐个剪掉(从后往前,避免下标失效)──
+  if (hit.range) return finalize(src, cut(src, hit.range[0], hit.range[1]))
+  if (hit.group) {
+    const ranges = hit.group
+      .map(n => [n.range[0], n.range[1] + lineEndingRun(src, n.range[1])] as const)
+      .sort((x, y) => y[0] - x[0])
+    let out = src
+    for (const [rs, re] of ranges) out = out.slice(0, rs) + out.slice(re)
+    return finalize(src, out)
+  }
+
   // ── ③④ 数组元素 / 内联表条目:元素 + **恰好一个**相邻逗号(及其后的空白)一起走 ──
   if (hit.arrayElem) {
     const el = hit.node
@@ -216,18 +313,18 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
     if (after) {
       const commaEnd = el.range[1] + after[1].length + 1
       const ws = src.slice(commaEnd).match(/^[ \t]*/)?.[0].length ?? 0
-      return { ok: true, src: cut(src, el.range[0], commaEnd + ws) }
+      return finalize(src, cut(src, el.range[0], commaEnd + ws))
     }
     const before = src.slice(0, el.range[0]).match(/,(\s*)$/)
     if (before) {
       // 末元素:连它**前面**那个逗号一起走(不重排其余元素,也不留双空格)
-      return { ok: true, src: cut(src, el.range[0] - before[0].length, el.range[1]) }
+      return finalize(src, cut(src, el.range[0] - before[0].length, el.range[1]))
     }
     // 单元素数组:整个 key-value 走(级联见下)
   }
 
   const target = hit.container ?? hit.node
-  return { ok: true, src: cut(src, target.range[0], target.range[1]) }
+  return finalize(src, cut(src, target.range[0], target.range[1]))
 }
 
 export interface InsertEntry {
@@ -280,7 +377,7 @@ export function spliceInsertSkill(
     const at = close - wsBefore
     const isEmpty = (arr.value!.elements ?? []).length === 0
     const addition = `${isEmpty ? '' : ', '}"${entry.path}"`
-    return { ok: true, src: src.slice(0, at) + addition + src.slice(at) }
+    return finalize(src, src.slice(0, at) + addition + src.slice(at))
   }
 
   if (shape === 'inline-map') {
@@ -296,7 +393,7 @@ export function spliceInsertSkill(
     if (entry.source) fields.push(`source = "${entry.source}"`)
     const isEmpty = ((map.value as any).body ?? []).length === 0
     const addition = `${isEmpty ? '' : ', '}${alias} = { ${fields.join(', ')} }`
-    return { ok: true, src: src.slice(0, at) + addition + src.slice(at) }
+    return finalize(src, src.slice(0, at) + addition + src.slice(at))
   }
 
   const block = [`[${section}.skills.${alias}]`, `path = "${entry.path}"`]
@@ -310,11 +407,11 @@ export function spliceInsertSkill(
   if (lastTable) {
     const at = lastTable.range[1]
     const eol = lineEndingAt(src, at) // H3:按**插入点**判行尾,不是 offset 0
-    return { ok: true, src: src.slice(0, at) + eol + eol + text.replace(/\n/g, eol) + src.slice(at) }
+    return finalize(src, src.slice(0, at) + eol + eol + text.replace(/\n/g, eol) + src.slice(at))
   }
   // 没有同前缀 table:落到文件末尾(保持一行空行)
   const trimmed = src.replace(/[\r\n]+$/, '')
   const tail = src.slice(trimmed.length)
-  const eol = lineEndingAt(src, Math.max(0, trimmed.length - 1))
-  return { ok: true, src: trimmed + eol + eol + text.replace(/\n/g, eol) + tail }
+  const eol = /\r\n/.test(src) ? '\r\n' : '\n' // R2-H2:按文件**实际**行尾,不猜最后一个字符
+  return finalize(src, trimmed + eol + eol + text.replace(/\n/g, eol) + tail)
 }
