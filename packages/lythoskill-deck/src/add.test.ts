@@ -376,3 +376,164 @@ describe('addSkill advisory probe branch', () => {
     }
   })
 })
+
+// ── --dry-run(TASK-20260910160707856)───────────────────────────────────────
+// `--dry-run` 的用途正是"动手之前先看清单" —— 而它恰好在打印清单那一步崩:
+// 使用点(`[${skillType}.skills.${alias}]`)在 `const alias = rawAlias` **之前**,
+// 同一函数作用域内的 TDZ。与 deck 内容无关、与网络无关,走到那一行必然抛。
+//
+// 计划还得与实际**同判**:alias 与复用/克隆判定都取自真实执行用的那份值,
+// 读不了的 deck 在这儿就拒绝(真实执行也会拒绝),不打印一份跑不了的清单。
+
+/** 读取器读不了的 deck:多行内联表 —— `@iarna/toml` 拒收,`toml-eslint-parser` 收。 */
+function writeUnreadableDeck(workdir: string): string {
+  const deckPath = join(workdir, 'skill-deck.toml')
+  writeFileSync(deckPath, `[deck]
+working_set = ".claude/skills"
+cold_pool = "pool"
+
+[tool.skills.alpha]
+path = "github.com/foo/bar"
+meta = {
+  a = 1,
+  b = 2,
+}
+`)
+  return deckPath
+}
+
+describe('addSkill --dry-run', () => {
+  it('prints the plan and returns without throwing (TDZ pin: alias exists before the dry-run branch)', async () => {
+    const { workdir, deckPath } = makeAddSandbox()
+    const lines: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((...args: any[]) => { lines.push(args.join(' ')) })
+    const exitCodes: number[] = []
+
+    try {
+      // 注:没有注入 fetchPlan —— dry-run 在 probe/clone **之前**就 return。
+      // 这一步不联网、不碰冷池,是这个测试能当"回归钉子"的前提。
+      await addSkill('github.com/acme/widgets', { deck: deckPath, workdir, dryRun: true },
+        { exit: hardExitSentinel(exitCodes) })
+
+      const out = lines.join('\n')
+      expect(out).toContain('[tool.skills.widgets]')
+      expect(out).toContain('path = "github.com/acme/widgets"')
+      expect(out).toContain('Would clone')
+      expect(exitCodes).toEqual([])
+    } finally {
+      logSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('reuse branch: an existing repo dir is reported as reuse, not clone (executeFetchPlan reads the dir, not .git)', async () => {
+    const { workdir, deckPath, targetDir } = makeAddSandbox()
+    mkdirSync(targetDir, { recursive: true })
+    const lines: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((...args: any[]) => { lines.push(args.join(' ')) })
+
+    try {
+      await addSkill('github.com/acme/widgets', { deck: deckPath, workdir, dryRun: true },
+        { exit: hardExitSentinel([]) })
+
+      const out = lines.join('\n')
+      expect(out).toContain('Would reuse the existing dir — no clone')
+      expect(out).not.toContain('Would clone')
+    } finally {
+      logSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('@skill locator: the plan marks alias/path as provisional (discovery happens after the clone)', async () => {
+    const { workdir, deckPath } = makeAddSandbox()
+    const lines: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((...args: any[]) => { lines.push(args.join(' ')) })
+
+    try {
+      await addSkill('acme/widgets@pdf', { deck: deckPath, workdir, dryRun: true },
+        { exit: hardExitSentinel([]) })
+
+      const out = lines.join('\n')
+      // pre-discovery 的 alias 是 repo 名 —— 真实执行可能改成发现的目录名,
+      // 所以计划必须自己说出来,而不是印一份看起来已定的清单。
+      expect(out).toContain('[tool.skills.widgets]')
+      expect(out).toContain('provisional')
+    } finally {
+      logSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('unreadable deck: refuses before printing a plan, with the three-part message', async () => {
+    const { workdir } = makeAddSandbox()
+    const deckPath = writeUnreadableDeck(workdir)
+    const lines: string[] = []
+    const errLines: string[] = []
+    const logSpy = spyOn(console, 'log').mockImplementation((...args: any[]) => { lines.push(args.join(' ')) })
+    const errSpy = spyOn(console, 'error').mockImplementation((...args: any[]) => { errLines.push(args.join(' ')) })
+    const exitCodes: number[] = []
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir, dryRun: true },
+        { exit: hardExitSentinel(exitCodes) })).rejects.toThrow('HARD_EXIT_1')
+
+      expect(exitCodes).toEqual([1])
+      const err = errLines.join('\n')
+      expect(err).toContain('cannot be read by the tool\'s own parser')
+      expect(err).toContain('why:')
+      expect(err).toContain('fix:')
+      expect(err).not.toContain('at parseInlineTable')  // 栈不外泄
+      // 计划不能先印一份跑不了的清单
+      expect(lines.join('\n')).not.toContain('Would add to skill-deck.toml')
+    } finally {
+      logSpy.mockRestore()
+      errSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('write path: unreadable deck → three-part message, not the iarna stack', async () => {
+    const { workdir, deckPath, targetDir } = makeAddSandbox()
+    mkdirSync(targetDir, { recursive: true })
+    writeFileSync(join(targetDir, 'SKILL.md'), '---\nname: widgets\ndescription: test\n---\n')
+
+    const errLines: string[] = []
+    const errSpy = spyOn(console, 'error').mockImplementation((...args: any[]) => { errLines.push(args.join(' ')) })
+    const warnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const logSpy = spyOn(console, 'log').mockImplementation(() => {})
+    const exitCodes: number[] = []
+    const io: AddSkillIO = {
+      probe: (async () => undefined) as any,
+      // 写回时读不了。实测里这种 deck 是**全程**读不了的 —— 那种情况下
+      // resolveColdPoolPath 的兜底会把冷池退回默认,于是"仓库已在池里"
+      // 就是走到这道闸的现实路径(已用真实 CLI 跑通:三件套消息 + exit 1 +
+      // deck 逐字节不变)。这里冷池已在计划期用可读的 deck 定好,
+      // 所以在这一步把文件换成读不了的版本来钉住同一道闸 ——
+      // 闸本身只读 deckPath,冷池从哪来与它无关。
+      fetchPlan: ((() => {
+        writeUnreadableDeck(workdir)
+        return { status: 'already-present', targetDir }
+      }) as any),
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io))
+        .rejects.toThrow('HARD_EXIT_1')
+
+      expect(exitCodes).toEqual([1])
+      const err = errLines.join('\n')
+      expect(err).toContain('cannot be read by the tool\'s own parser')
+      expect(err).toContain('why:')
+      expect(err).toContain('fix:')
+      expect(err).toContain('nothing was changed on disk')
+      expect(err).not.toContain('at parseInlineTable')
+    } finally {
+      errSpy.mockRestore()
+      warnSpy.mockRestore()
+      logSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+})

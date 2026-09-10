@@ -179,6 +179,77 @@ path = "github.com/owner/repo/skill-a"
     expect(existsSync(skillDir)).toBe(true)
   })
 
+  // ── 读取器读不了的 deck(TASK-20260910160707856,缺陷二)────────────────────
+  // `deck remove` 在一个**读取器读不了的 deck** 上抛的是原始 iarna 栈 ——
+  // 崩在"本该给消息"的地方(与 `deck add --dry-run` 的 TDZ 同类)。
+  // 实测形状:多行内联表(`@iarna/toml` 拒、`toml-eslint-parser` 收)。
+  // 修法不是 try/catch 吞掉:给三件套消息(是什么 / 为什么 / 怎么修),
+  // 并且**一个字节都不改盘**。
+
+  it('C14: unreadable deck → three-part message, exit 1, file byte-identical', async () => {
+    const projectDir = makeTmp()
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(
+      deckPath,
+      `[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "cold-pool"
+
+[tool.skills.alpha]
+path = "github.com/foo/bar"
+meta = {
+  a = 1,
+  b = 2,
+}
+`
+    )
+    const before = readFileSync(deckPath, 'utf-8')
+
+    const errors: string[] = []
+    let exitCode: number | undefined
+    const io = {
+      error: (msg: string) => errors.push(String(msg)),
+      exit: (code?: number) => { exitCode = code ?? 0; throw new Error(`EXIT:${code}`) },
+      warn: (_msg: string) => {},
+      log: (_msg: string) => {},
+    }
+
+    try {
+      const { removeSkill } = await import('./remove.ts')
+      removeSkill('alpha', deckPath, projectDir, io)
+      expect(false).toBe(true)
+    } catch (err: any) {
+      // 出口是 io 缝里的 exit(1),不是解析器抛的 TomlError
+      expect(String(err.message)).toBe('EXIT:1')
+      expect(exitCode).toBe(1)
+      const out = errors.join('\n')
+      expect(out).toContain('cannot be read by the tool\'s own parser')
+      expect(out).toContain('why:')
+      expect(out).toContain('fix:')
+      expect(out).not.toContain('at parseInlineTable')  // 栈不外泄
+      expect(readFileSync(deckPath, 'utf-8')).toBe(before)
+    }
+  })
+
+  it('C15: readable deck still removes (the guard is not a blanket refusal)', async () => {
+    const projectDir = makeTmp()
+    const coldPoolRel = 'cold-pool'
+    const coldPool = join(projectDir, coldPoolRel)
+    const skillDir = placeSkill(coldPool, 'github.com/owner/repo/skill-a')
+    const deckPath = buildDeck(projectDir, coldPoolRel, 'skill-a', 'github.com/owner/repo/skill-a')
+
+    const workingSet = join(projectDir, '.claude', 'skills')
+    mkdirSync(workingSet, { recursive: true })
+    symlinkSync(skillDir, join(workingSet, 'skill-a'))
+
+    const { removeSkill } = await import('./remove.ts')
+    removeSkill('skill-a', deckPath, projectDir)
+
+    expect(readFileSync(deckPath, 'utf-8')).not.toContain('[tool.skills.skill-a]')
+    expect(existsSync(join(workingSet, 'skill-a'))).toBe(false)
+  })
+
   it('C13: remove with empty also_link_to preserves backward compat', async () => {
     const projectDir = makeTmp()
     const coldPoolRel = 'cold-pool'
