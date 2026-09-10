@@ -85,8 +85,10 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 > **ADR-20260910152957509** — *deck declaration writes must touch only the bytes they are about:
 > locate with an AST, splice back by range, never re-serialise the document*
 
-一句话:定位用语法树(不用行/正则),写回只替换**这次操作所关于的那段字节**,其余逐字不动 ——
+一句话:定位用语法树(不用行/正则),写回只替换**这次操作所关于的那段文本**,其余逐字不动 ——
 注释与格式的保留因此是**结构性结果**,不是需要维护的特性。被拒选项与实测数字都在 ADR 里。
+**规格表以 ADR 的 `### 规格` 为准**(`§ Round-1 修正` 是历史):定位单位是 **UTF-16 code unit**
+(不是字节),而且 ADR 第一版里那条"无变化则不写文件 + 强制测试"**已撤回为守卫**(它今天没有触发路径)。
 
 **为什么不是"换个库"**:根因是**用对象图重写整份文档**这个解法(`parse → 改对象 → stringify`),
 注释不在对象里,换任何同模型的对象序列化器都不改善(owner:「**那说明是解法有问题**」)。
@@ -101,9 +103,9 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 | `toml-eslint-parser` 1.0.3 | **86 KB** + 1 依赖 | 逐 table 给出精确字节区间 |
 | AST 定位 + 区间 splice | — | 对本仓真实 deck:删一个 table → 注释 **9→9**、前后缀**逐字节相同**、reparse 通过、接缝复原原有空行样式 |
 
-**本卡要做的事**(规格表在 ADR 的 Decision 节):`remove.ts` / `add.ts` 的写回路径改走 splice;
-核实 `migrate-schema` 是否同病;测试钉三件事 —— ①注释逐字保留 ②未触碰键格式不变
-③**无变化时不写文件**(mtime 不变)。
+**本卡要做的事**(规则以 ADR 的 `### 规格` 表为准,不在本卡复述):`remove.ts` / `add.ts` 的写回路径改走 splice;
+核实 `migrate-schema` 是否同病;测试钉两件事 —— ①节点**范围外**的注释逐字保留 ②未触碰的键格式不变
+(原来列的第 ③ 条"无变化不写文件"已撤回为守卫,不强制测试)。
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
