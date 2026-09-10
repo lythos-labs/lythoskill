@@ -217,18 +217,26 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
     if (full === wantFull || full.startsWith(`${wantFull}.`)) hits.push(kv)
   })
   if (hits.length > 0) {
+    // **折叠嵌套命中,只留最外层**(R3-H1):内联表的**内层字段**也是命中
+    // (`skills.alpha = { path = …, source = … }` 里的 path/source 路径同样以 `<alias>.` 为前缀),
+    // 若不折叠,先剪内层会让外层的 end 偏移失效 —— 剪裁会**越界吃掉后面的注释与 section**,
+    // 而且结果往往仍可解析,所以结果护栏救不了它。
+    const outer = hits.filter(h => !hits.some(o => o !== h && o.range[0] <= h.range[0] && o.range[1] >= h.range[1]))
     const owner = tableByKey(body, src, `${section}.skills`) ?? tableByKey(body, src, section)
     const ownerBody = owner?.body ?? []
-    const clearsOwner = owner !== undefined && ownerBody.length === hits.length && hits.every(h => ownerBody.includes(h))
+    const clearsOwner = owner !== undefined && ownerBody.length === outer.length && outer.every(h => ownerBody.includes(h))
     if (clearsOwner) {
       const secTable = tableByKey(body, src, section)
       const extend =
         secTable && secTable !== owner && (secTable.body?.length ?? 0) === 0 && isAdjacent(src, secTable, owner!)
           ? secTable.range[0]
           : owner!.range[0]
-      return { node: hits[0], group: hits, range: [extend, owner!.range[1]] }
+      // 清空的是**内联 map 的最后一个字段**时,留下 `skills = {  }` 是残渣 → 连 map 一起走
+      const mapOwner = kvInTable(secTable ?? owner, src, 'skills')
+      const start = mapOwner && (mapOwner.value as any)?.body?.length === outer.length ? mapOwner.range[0] : extend
+      return { node: outer[0], group: outer, range: [Math.min(start, owner!.range[0]), Math.max(mapOwner?.range[1] ?? 0, owner!.range[1])] }
     }
-    return { node: hits[0], group: hits }
+    return { node: outer[0], group: outer }
   }
 
   return undefined
@@ -412,6 +420,10 @@ export function spliceInsertSkill(
   // 没有同前缀 table:落到文件末尾(保持一行空行)
   const trimmed = src.replace(/[\r\n]+$/, '')
   const tail = src.slice(trimmed.length)
-  const eol = /\r\n/.test(src) ? '\r\n' : '\n' // R2-H2:按文件**实际**行尾,不猜最后一个字符
+  // R2-H2 / R3-LOW:按**插入点之前最后一个行尾**判,不扫全文 ——
+  // 多行字符串里出现 CRLF 的 LF 文件会被全文扫描误导成 CRLF。
+  const before = src.slice(0, trimmed.length)
+  const nl = before.lastIndexOf('\n')
+  const eol = nl > 0 && before[nl - 1] === '\r' ? '\r\n' : '\n'
   return finalize(src, trimmed + eol + eol + text.replace(/\n/g, eol) + tail)
 }

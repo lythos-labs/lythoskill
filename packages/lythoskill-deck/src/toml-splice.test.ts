@@ -359,6 +359,40 @@ describe('ZK-impl round-2:级联走到底 / 点号键 / 结果护栏 / 空 map',
   })
 })
 
+
+describe('ZK-impl round-3:R3-H1 越界剪裁(组内嵌套必须折叠)', () => {
+  const SRC = `[deck]
+max_cards = 10
+
+# ── tool ──
+[tool]
+skills.alpha = { path = "localhost/me/alpha", source = "https://x" }
+
+# ── combo ──
+[combo.weekly]
+prompt = "keep me"
+`
+
+  it('an inline-map entry with inner fields does not eat the following comment/section', () => {
+    // 内层字段(path/source)的完整路径同样以 `skills.alpha.` 为前缀 → 也是命中;
+    // 不折叠嵌套就先用内层偏移剪过一次,再用外层偏移剪**已缩短的字符串** → 越界吃掉后面
+    const out = spliceRemoveSkill(SRC, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    // `[tool]` 表头也走 —— 该 section 空了,与对象层的级联一致(删键 → 删 section)。
+    // 上方那条 `# ── tool ──` 注释**留在原地**(用户的文字,deck 没创建它)——
+    // 这就是"孤注释"的既定形态,不是漏删。
+    expect(out.src).toBe(`[deck]
+max_cards = 10
+
+# ── tool ──
+# ── combo ──
+[combo.weekly]
+prompt = "keep me"
+`)
+  })
+})
+
 describe('units + line endings', () => {
   it('a non-ASCII file splices at the right place (code units, not bytes)', () => {
     // 若实现把 offset 当字节用,`→` 之后的所有定位都会偏 —— 这里用"删完必须与写死的期望相同"抓它
