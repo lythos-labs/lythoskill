@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/10 18:47:57
+> 自动生成于 2026/9/10 18:50:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 382 | 进行中: 1, 待验收: 0, 已完成: 319 |
+| Tasks | 382 | 进行中: 1, 待验收: 1, 已完成: 319 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 107 | 已接受: 102 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (17)
+### 待办 (16)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -94,15 +94,14 @@
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
-- [ ] **TASK-20260910184110804**: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 
 ### 进行中 (1)
 
 - 🔄 **TASK-20260910181747676**: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20260910184110804**: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 
 ### 已完成 (319)
 
