@@ -19,6 +19,12 @@
  *
  * 消费方:link.ts(fan-out 策略 + hazard 警告)、per-run.ts(渲染 per-run 调用)。
  * 本文件不含行为逻辑,只有数据 + 纯函数索引。
+ *
+ * **范围边界**(owner 2026-09-10):deck 要解决的是**我们自己的方案与各 CLI 的适配** ——
+ * 这正是 symlink 与 cp(snapshot)两种模式存在的理由。**不深入 CLI 自己的课题**:
+ * 本表只记"该选哪种模式 / 要提醒用户什么"所必需的事实,不承担追查某家 CLI 内部缺陷的工程。
+ * 这也是每行都带 source URL 的原因 —— 需要更深的事实就去看上游,不在这里长第二份文档;
+ * 而"这家 CLI 的某个 bug 什么时候修"不是本表的信息,是上游的。
  */
 
 export const SYMLINK_TIERS = ["docs", "issue", "hazard"] as const;
