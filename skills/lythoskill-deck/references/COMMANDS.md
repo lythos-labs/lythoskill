@@ -18,7 +18,6 @@ Options:
   --deck <path>              Specify skill-deck.toml path (default: find upward from cwd)
   --workdir <dir>            Specify working directory (default: cwd)
   --mode <symlink|snapshot>  Link mode: symlink (default) or snapshot (cp)
-  --no-backup                Skip tar backup when removing non-symlink entries
   --alias <name>             Explicit alias for the skill (default: basename of path)
   --type <type>              Target section: innate | tool (default: tool)
   --dry-run                  Show plan without executing (add)
