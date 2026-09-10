@@ -6,7 +6,8 @@
  * Does NOT touch the cold pool (use `deck prune` for material-layer GC).
  */
 
-import { parse as parseToml, stringify as stringifyToml } from "@iarna/toml";
+import { parse as parseToml } from "@iarna/toml";
+import { spliceRemoveSkill } from "./toml-splice.js";
 import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
@@ -126,30 +127,20 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
     io.exit(1)
   }
 
-  if (deck[section]?.skills) {
-    if (Array.isArray(deck[section].skills)) {
-      // Legacy string-array format
-      deck[section].skills = deck[section].skills.filter((name: string) => {
-        const a = name.split("/").pop() || name;
-        return a !== alias;
-      });
-      if (deck[section].skills.length === 0) {
-        delete deck[section].skills;
-      }
-    } else if (typeof deck[section].skills === "object") {
-      // Dict format
-      delete deck[section].skills[alias];
-      if (Object.keys(deck[section].skills).length === 0) {
-        delete deck[section].skills;
-      }
-    }
-    // Clean up empty section
-    if (Object.keys(deck[section] || {}).length === 0) {
-      delete deck[section];
-    }
+  // ── 写回:AST 定位 + 文本区间 splice(ADR-20260910152957509 §规格)──
+  // 这里**不再**改对象再 stringify:那条路会删光整份文件的注释、并重排没让改的键。
+  // 三种形状(table / [section.skills] 内联条目 / legacy 数组)与空容器级联都在 splice 里,
+  // 定位不到或解析失败一律报错退出,**绝不**退回整份重写。
+  const src = readFileSync(DECK_PATH, "utf-8");
+  const spliced = spliceRemoveSkill(src, section, alias);
+  if (!spliced.ok) {
+    io.error(`❌ Cannot remove "${alias}" from skill-deck.toml`);
+    io.error(`   why:  ${spliced.message}`);
+    io.error(`   fix:  the file was NOT modified — fix the deck by hand or report this shape`);
+    io.exit(1);
+    return;
   }
-
-  writeFileSync(DECK_PATH, stringifyToml(deck));
+  if (spliced.src !== src) writeFileSync(DECK_PATH, spliced.src);
   io.log(`📝 Removed "${alias}" from [${section}.skills] in ${DECK_PATH}`);
 
   // ── 删 working set symlink ──────────────────────────────────

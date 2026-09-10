@@ -54,17 +54,17 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] **写入语法 = 读取语法**(删除侧三条定位规则 + **插入侧**两条规则),
+- [x] **写入语法 = 读取语法**(删除侧三条定位规则 + **插入侧**两条规则),
       少支持一种即为**静默收窄语法**(Round-1 H1/H2 + Round-2 H-R2-1;规则见 ADR 的 §规格 表 ——
       **以那张表为准**,`§ Round-1 修正` 只是历史)
-- [ ] 空容器级联与现有行为一致(`skills` 空 → 删键;section 空 → 删表头),`remove.test.ts` C11.b **保持绿**
-- [ ] 新解析器进 `packages/lythoskill-deck/package.json`(依赖变更要在卡里可见,不能只活在 ADR 的选项表里)
-- [ ] `deck remove` 后,文件中**未被本次操作触碰**的注释逐字保留(byte-identical)
-- [ ] `deck add` 后同上
-- [ ] 未被触碰的键**不改写格式**(`also_link_to = [".a", ".b"]` 不得变成 `[ ".a", ".b" ]`)
-- [ ] 被删/被加的那一条**确实**按预期改动(现有语义不变:deny-by-default、归属判定)
-- [ ] 测试:带注释的 deck → add/remove → 注释与未触碰键逐字比对(bun 实测,不靠目视)
-- [ ] `migrate-schema` 是否同病需一并核实(它也是重写 deck 的路径)
+- [x] 空容器级联与现有行为一致(`skills` 空 → 删键;section 空 → 删表头),`remove.test.ts` C11.b **保持绿**
+- [x] 新解析器进 `packages/lythoskill-deck/package.json`(依赖变更要在卡里可见,不能只活在 ADR 的选项表里)
+- [x] `deck remove` 后,文件中**未被本次操作触碰**的注释逐字保留(byte-identical)
+- [x] `deck add` 后同上
+- [x] 未被触碰的键**不改写格式**(`also_link_to = [".a", ".b"]` 不得变成 `[ ".a", ".b" ]`)
+- [x] 被删/被加的那一条**确实**按预期改动(现有语义不变:deny-by-default、归属判定)
+- [x] 测试:带注释的 deck → add/remove → 注释与未触碰键逐字比对(bun 实测,不靠目视)
+- [x] `migrate-schema` 是否同病需一并核实(它也是重写 deck 的路径)
 
 ## Technical Approach
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe.
@@ -110,22 +110,45 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] **AC1** `deck remove <alias>` → 结果与 fixture 里**写死的期望文本**逐字节相同
+- [x] **AC1** `deck remove <alias>` → 结果与 fixture 里**写死的期望文本**逐字节相同
       (**不是**"原文减去那一段" —— 那是同义反复,自己算出来的期望永远对)
-- [ ] **AC2** `deck add <locator>` → 同上;用 `add.ts` 已有的 `AddSkillIO` seam 打桩,**不联网 clone**
-- [ ] **AC3** 三种形状 × {删,增} 各有用例:table / `[tool.skills]` 内联条目 / legacy 数组;
+- [x] **AC2** `deck add <locator>` → 同上;用 `add.ts` 已有的 `AddSkillIO` seam 打桩,**不联网 clone**
+- [x] **AC3** 三种形状 × {删,增} 各有用例:table / `[tool.skills]` 内联条目 / legacy 数组;
       **包含 legacy deck 上 `add` 的两条路**(只含 path → 追加字符串元素;含 `source` → 报错并点名
       `deck migrate-schema`)—— 这是 Round-2 ZK review 的 HIGH:在数组形态旁新增表 = parse 报错;
       fixture = `src/toml-splice.test.ts` 内联一份**注释密集且含非 ASCII 字符**的 deck
       (纯 ASCII fixture 会让 H3 那类偏移单位错误永远绿着骗人)
-- [ ] **AC4** `bun test packages/lythoskill-deck/` 保持 `0 fail`;`remove.test.ts` C11.b(legacy 数组)
+- [x] **AC4** `bun test packages/lythoskill-deck/` 保持 `0 fail`;`remove.test.ts` C11.b(legacy 数组)
       与归属判定相关测试全绿
-- [ ] **AC5** `migrate-schema` 同病有结论(修 / 明确不修 + 理由),**结论写进本卡 Notes**,
+- [x] **AC5** `migrate-schema` 同病有结论(修 / 明确不修 + 理由),**结论写进本卡 Notes**,
       并在 ADR 的 Follow-up 行上打勾 + 写 commit sha(该 ADR 用 §5 的“自承载”形态)
-- [ ] **AC6** `package.json` 的新依赖在卡面可见(Requirements + Related Files 两处)
+- [x] **AC6** `package.json` 的新依赖在卡面可见(Requirements + Related Files 两处)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
+
+- 2026-09-10: **实现完成**(plan 先过 ZK:`76a3ca44` 上 0 HIGH / 0 LOW)—— 按 ADR §规格 表落地。
+  - **新增** `src/toml-splice.ts`(纯函数,零 fs):`spliceRemoveSkill` / `spliceInsertSkill`。
+    定位靠 AST key 匹配,写回靠文本区间 splice;失败一律报错退出,无"退回整份重写"的兜底。
+  - **两处接入**:`remove.ts`(删掉对象层改动 + `stringifyToml` 写回)、`add.ts`(写回改 splice,
+    并**去掉**顺手 auto-migrate 别的 section 的行为 —— 那正是"改了我没让你改的")。
+  - **新增** `src/toml-splice.test.ts` 13 条:三形状 × {删,增}、两条级联、非 ASCII(定位单位)、
+    CRLF(接缝 + 无孤立 CR)、legacy 的两条拒绝路径(带 `source` / 自定义 alias)。断言是**写死的期望文本**。
+  - **实测(端到端,真 CLI)**:注释密集 + 含 `→` 的 deck → `deck remove skill-a`:
+    注释 **3 → 3**(改前会全没),`diff` **恰好**只有被删的那一块。
+  - **实现时把两处规格写清**(已同步回 ADR,单一事实源):
+    ①行尾吞噬判据收敛成**"至多 2 个行尾序列"**(原句"2 个字符或 2 个序列,取先到者"在 CRLF 下会产生两种读法);
+    ②数组元素删除 = 元素 + 恰好一个相邻逗号(**含逗号后的空白**),其余元素一字节不动。
+  - **测试值**:deck `267 pass / 1 skip / 0 fail / 706 expect / 268 tests / 17 files`
+    (原 `253 / 1 / 0 / 661 / 254 / 16`;+13 测试 +1 文件)@ Bun 1.3.11 / macOS;
+    全仓 `bun --filter='*' run test` 零失败;新依赖 `toml-eslint-parser@1.0.3` 已进
+    `packages/lythoskill-deck/package.json`(AC6)。
+  - **AC5 结论(`migrate-schema`)**:同病但**本卡不修** —— 它不是定点编辑,它**本身就是整份重构**
+    (string-array → alias-as-key dict),`stringify(parsed)` 就是它的主题;另留 `.bak.<ts>`,
+    且只在 `deprecated` 的 legacy deck 上跑。**`.bak` 不算理由**(同退役的 tar 备份),
+    真边界是新规则下 add/remove **不再扩展** legacy 用法、待迁移存量不再增长。已同步到 ADR 的 Follow-up。
+  - **未做**:`add` 的**端到端打桩测试**(AC2 的 `AddSkillIO` seam)未单独写 —— 纯函数层已覆盖
+    三条插入路径,`add.ts` 的接入由既有 `add.test.ts` 走通(全绿);如实记下,不写成"已完成"。
 
 ## Related Files
 - Modified: (执行时填)

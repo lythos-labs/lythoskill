@@ -18,6 +18,7 @@ import {
 import { homedir } from 'node:os'
 import { dirname, join, basename, resolve } from 'node:path'
 import { parse as parseToml, stringify as stringifyToml } from '@iarna/toml'
+import { spliceInsertSkill } from './toml-splice.js'
 import {
   ColdPool,
   buildFetchPlan,
@@ -441,8 +442,18 @@ export async function addSkill(
         entry.source = `https://github.com/${parsed.owner}/${parsed.repo}/blob/${rawRef}${skillRel}/SKILL.md`
       }
     }
-    deck[skillType].skills[alias] = entry
-    writeFileSync(deckPath, stringifyToml(deck))
+    // 写回:AST 定位 + 文本区间 splice(ADR-20260910152957509 §规格)。
+    // **不再** stringify 整份文档 —— 那条路会删光注释重排未触碰的键;
+    // 也不再顺手 auto-migrate 别的 section(那正是"改了我没让你改的东西")。
+    const src = readFileSync(deckPath, 'utf-8')
+    const spliced = spliceInsertSkill(src, skillType, alias, entry)
+    if (!spliced.ok) {
+      console.error(`❌ Cannot add "${alias}" to skill-deck.toml`)
+      console.error(`   why:  ${spliced.message}`)
+      console.error(`   fix:  the file was NOT modified`)
+      exit(1)
+    }
+    if (spliced.src !== src) writeFileSync(deckPath, spliced.src)
     console.log(`📝 Added "${alias}" to [${skillType}.skills] in ${deckPath}`)
   } else {
     const header = [
