@@ -257,6 +257,68 @@ export function parseDeckCombos(
   return Object.keys(combo).filter(k => k !== 'prompt')
 }
 
+// ── Decision logs: per-cell naming + collect-time merge ──────────────────
+//
+// Why per-cell names (TASK-20260909010121918): the 2026-09-09 run had five cells
+// per side sharing one workdir, each mandated to write `decision-log.jsonl`.
+// Filename is a constant, so the cells shared a path — last writer won, and
+// side-a kept only S1a's 9 entries. A per-cell filename removes the shared path
+// entirely: no write contention, no ordering assumption, no atomicity needed.
+// Rejected alternative (append-only read-then-append in one op) stays racy on
+// any multi-step append and silently depends on every agent obeying it.
+
+/** Legacy name — a workdir with exactly one decision-writing cell. */
+export const LEGACY_DECISION_LOG = 'decision-log.jsonl'
+
+/**
+ * Cell id → its own decision-log filename.
+ *
+ * The id is slugged to `[A-Za-z0-9_-]`: no `/` or `\` (an id cannot write
+ * outside the workdir or into a subdirectory) and no `.` (the result can never
+ * be `.`/`..` or a hidden file). Empty/absent id → the legacy single-cell name.
+ *
+ * Pure: string → string. No IO.
+ */
+export function decisionLogName(cellId?: string): string {
+  if (!cellId) return LEGACY_DECISION_LOG
+  const slug = cellId.replace(/[^A-Za-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '')
+  return slug ? `decision-log-${slug}.jsonl` : LEGACY_DECISION_LOG
+}
+
+/** True for `decision-log.jsonl` and `decision-log-<cell-id>.jsonl` alike. */
+export function isDecisionLogName(name: string): boolean {
+  return /^decision-log(-[^/]+)?\.jsonl$/.test(name)
+}
+
+/** One cell's log, as read from disk. `cell` is the id used for merge order. */
+export interface DecisionLogSource {
+  cell: string
+  content: string
+}
+
+/**
+ * Merge per-cell decision logs into one JSONL stream.
+ *
+ * Lossless by construction: every non-empty line of every source is kept
+ * verbatim (no dedupe, no field injection, no JSON re-parse), sources ordered
+ * by cell id so the same inputs always produce the same bytes. The per-cell
+ * files are NOT consumed — they stay as provenance, since a merged line carries
+ * no cell attribution and `t` is cell-relative, not a wall clock.
+ *
+ * Pure: DecisionLogSource[] → string. No IO.
+ */
+export function mergeDecisionLogs(sources: DecisionLogSource[]): string {
+  const ordered = [...sources].sort((a, b) => (a.cell < b.cell ? -1 : a.cell > b.cell ? 1 : 0))
+  const lines: string[] = []
+  for (const source of ordered) {
+    for (const line of source.content.split('\n')) {
+      const trimmed = line.trim()
+      if (trimmed) lines.push(trimmed)
+    }
+  }
+  return lines.length > 0 ? lines.join('\n') + '\n' : ''
+}
+
 // ── buildAgentsMd ────────────────────────────────────────────────────────
 
 /**
@@ -319,6 +381,10 @@ export function buildAgentsMd(params: {
     '## Output Contract',
     '- MANDATORY: `decision-log.jsonl` — one JSON line per decision:',
     '  `{"t":<seconds>,"phase":"setup|content|design|output","decision":"...","reason":"..."}`',
+    '- MANDATORY when other cells share this directory: name yours',
+    '  `decision-log-<cell-id>.jsonl` (`decision-log-s1a.jsonl`) instead. Two cells on one',
+    '  filename means last-writer-wins — one cell\'s whole trail is erased. Per-cell names',
+    '  never collide, and the run merges them into one `decision-log.jsonl` when it collects.',
   )
 
   return lines.join('\n')

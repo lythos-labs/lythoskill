@@ -5,7 +5,7 @@ import { homedir, tmpdir } from 'node:os'
 import { ZodError } from 'zod'
 import { formatPlanOutput, type ArenaResult, buildArenaPrompt } from './runner'
 import { parseArenaToml, buildExecutionPlan } from './arena-toml'
-import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckCombos, parseDeckSkills, buildAgentsMd } from './preflight'
+import { buildArchiveSidePlan, buildCopyPlan, buildPreparePlan, parseDeckCombos, parseDeckSkills, buildAgentsMd, isDecisionLogName, mergeDecisionLogs, LEGACY_DECISION_LOG } from './preflight'
 import { checkSkillExistence, formatSkillWarnings, resolveColdPoolDir } from './preflight'
 import { resolveSingleMode } from './host'
 
@@ -677,6 +677,31 @@ async function archiveRun(args: string[], io: ArenaCliIO) {
         log(`   ${planEntry.side}/${entry.name} → ${dest}`)
       } catch (e) {
         warn(`⚠️  Failed to copy ${planEntry.side}/${entry.name}: ${e instanceof Error ? e.message : e}`)
+      }
+    }
+
+    // ── Collect: merge per-cell decision logs into one decision-log.jsonl ──
+    // Cells sharing a side workdir each wrote `decision-log-<cell-id>.jsonl`
+    // (TASK-20260909010121918). Reconstructing the single-file view here is
+    // what makes the merged log possible to read; the per-cell files were
+    // just copied and stay as provenance. A lone legacy `decision-log.jsonl`
+    // is already the merged view — nothing to do.
+    const logNames = entries
+      .filter(e => e.isFile() && isDecisionLogName(e.name))
+      .map(e => e.name)
+      .sort()
+    // A lone `decision-log.jsonl` IS the merged view — do not rewrite it.
+    const needsMerge = logNames.length > 1 || (logNames.length === 1 && logNames[0] !== LEGACY_DECISION_LOG)
+    if (needsMerge) {
+      try {
+        const sources = logNames.map(name => ({
+          cell: name,
+          content: readFileSync(join(sideOutDir, name), 'utf-8'),
+        }))
+        writeFileSync(join(sideOutDir, LEGACY_DECISION_LOG), mergeDecisionLogs(sources))
+        log(`   ${planEntry.side}/${LEGACY_DECISION_LOG} ← merged ${logNames.length} per-cell log(s)`)
+      } catch (e) {
+        warn(`⚠️  Failed to merge decision logs for ${planEntry.side}: ${e instanceof Error ? e.message : e}`)
       }
     }
   }

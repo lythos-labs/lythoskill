@@ -12,11 +12,11 @@ try { await import('@lythos/agent-adapter-deepseek-serve') } catch { /* package 
 try { await import('@lythos/agent-adapter-deepseek-harness') } catch { /* package not installed */ }
 try { await import('@lythos/agent-adapter-codex') } catch { /* package not installed */ }
 import { runComparativeJudge } from './comparative-judge'
-import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan } from './arena-toml'
+import { parseArenaToml, buildExecutionPlan, type ArenaToml, type ExecutionPlan, type ExecutionCell } from './arena-toml'
 import { resolvePlayer, resolveSides } from './player'
 import { aggregateAllStats } from './stats'
 import type { SideStats } from './stats'
-import { buildCopyPlan, buildAgentsMd, parseDeckCombos } from './preflight'
+import { buildCopyPlan, buildAgentsMd, parseDeckCombos, decisionLogName, mergeDecisionLogs, type DecisionLogSource } from './preflight'
 
 // ── ArenaIO interface (Intent/Plan/Execute fractal pattern) ───────────────
 
@@ -99,8 +99,11 @@ export function buildArenaPrompt(opts: {
   deckPath: string
   outputDir?: string
   preflightReport?: string
+  /** Cell id — when set, the mandated log is `decision-log-<id>.jsonl` (per-cell). */
+  cellId?: string
 }): string {
   const out = opts.outputDir ?? opts.cwd
+  const logName = decisionLogName(opts.cellId)
   const lines = [
     'You are running an arena evaluation cell.',
     '',
@@ -108,7 +111,11 @@ export function buildArenaPrompt(opts: {
     `Deck: ${opts.deckPath}`,
     `Produce output to: ${out}/`,
     '',
-    'MANDATORY — write decision-log.jsonl to the output directory.',
+    `MANDATORY — write ${logName} to the output directory.`,
+    ...(opts.cellId
+      ? ['That per-cell name is yours alone: the workdir is shared with other cells,',
+         'and a shared filename means the last writer erases everyone else\'s trail.']
+      : []),
     'Each line is one JSON object with: t (seconds elapsed),',
     'phase (setup/content/design/output), decision (what you chose),',
     'reason (why). This is your decision trail — the only way the',
@@ -130,6 +137,18 @@ export function buildArenaPrompt(opts: {
   }
   lines.push('', 'TASK:', opts.brief)
   return lines.join('\n')
+}
+
+// ── Cell identity ─────────────────────────────────────────────────────────
+
+/**
+ * Deterministic cell id for a planned cell.
+ *
+ * Cells of one side share a workdir (`work/<side>/`), so the id is what keeps
+ * their decision logs — and any other per-cell artifact — from sharing a path.
+ */
+export function cellIdOf(cell: ExecutionCell): string {
+  return `${cell.side}-run-${cell.run}`
 }
 
 // ── Plan formatting ───────────────────────────────────────────────────────
@@ -257,6 +276,7 @@ export async function runArenaFromToml(opts: {
         cwd: workDir,
         deckPath: cell.deck,
         outputDir: workDir,
+        cellId: cellIdOf(cell),
       })
       const agentResult = await ioWithDefaults.agentSpawn({
         player: resolvePlayer(cell.player),
@@ -332,6 +352,26 @@ export async function runArenaFromToml(opts: {
       if (!verdictsBySide.has(cell.side)) verdictsBySide.set(cell.side, [])
       verdictsBySide.get(cell.side)!.push(errVerdict)
     }
+  }
+
+  // ── Collect: merge per-cell decision logs into one decision-log.jsonl ───
+  // Cells sharing a side workdir each wrote their own file (see cellIdOf);
+  // the merged file is what a reader/judge opens, the per-cell files stay as
+  // provenance. Written only when at least one cell produced a log.
+  const logSources: DecisionLogSource[] = []
+  for (const cell of plan.cells) {
+    const logPath = join(artifactsDir, 'work', cell.side, decisionLogName(cellIdOf(cell)))
+    try {
+      if (ioWithDefaults.exists(logPath)) {
+        logSources.push({ cell: cellIdOf(cell), content: ioWithDefaults.readFile(logPath) })
+      }
+    } catch (e) {
+      io.log?.(`⚠️ Failed to read decision log for ${cellIdOf(cell)}: ${e instanceof Error ? e.message : e}`)
+    }
+  }
+  if (logSources.length > 0) {
+    ioWithDefaults.writeFile(join(artifactsDir, 'decision-log.jsonl'), mergeDecisionLogs(logSources))
+    io.log?.(`[arena] merged ${logSources.length} per-cell decision log(s) → ${artifactsDir}/decision-log.jsonl`)
   }
 
   // Aggregate + comparative
