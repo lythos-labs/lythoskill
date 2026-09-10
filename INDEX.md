@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/10 11:37:20
+> 自动生成于 2026/9/10 11:43:01
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 377 | 进行中: 0, 待验收: 0, 已完成: 316 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 102 | 已接受: 98 |
+| ADRs | 103 | 已接受: 99 |
 
 ---
 
@@ -578,6 +578,7 @@ _无_
 - ✅ **ADR-20260910112404500** (02-accepted): deck-removal-boundary-is-ownership-not-directory-containment-k8s-ownerreferences
 - ✅ **ADR-20260910113131220** (02-accepted): player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge
 - ✅ **ADR-20260910113534807** (02-accepted): architectural-decisions-must-ride-in-adrs-not-implementation-card-technical-approach-sections
+- ✅ **ADR-20260910113730375** (02-accepted): zk-review-object-must-be-commit-pinned-folded-commits-are-unreviewed
 
 ---
 
