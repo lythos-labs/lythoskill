@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-09-10 | Created |
 | in-progress | 2026-09-10 | Started |
+| review | 2026-09-10 | Deliverables committed |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -116,6 +117,9 @@
      `startsWith` 探针的**结果从未被消费**(`tables` 与 `absent` 走同一条路)—— 讽刺的是那个裸文本比较
      正是模块头注释警告的**静默收窄语法**反面教材,**只因为它是死的才无害**。(B)
   5. **非 ASCII alias 插入**返回 `would-corrupt`(裸 `γ` 作键非法):与"宁拒不写坏"一致,但可能是潜在限制。(A)
+
+  **未执行的一项(写明,不假装完成)**:inbox/outbox 的**实时 PK 红绿**形态没跑 —— 本轮只跑了
+  "单角色 side deck vs 零上下文"这一对;PK 是**另一个假设**(对抗式配对是否提高暴露率),留给下一轮。
 
   **结论(第三段闸该怎么落地)**:原则(**评审者不能是作者**)有效且已被本日实证;但 **deck 组合的正当性在于
   "注入方法并让它可归因"**,不在于"抓得更多" —— 本轮同尺打平。要把"更高判别力"作为主张,需要**更大的靶子与更多轮**,
