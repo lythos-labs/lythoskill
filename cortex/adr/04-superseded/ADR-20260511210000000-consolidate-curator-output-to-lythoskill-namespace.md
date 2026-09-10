@@ -1,3 +1,8 @@
+---
+supersedes: []
+superseded_by: EPIC-20260520124010693
+---
+
 # ADR-20260511210000000: Consolidate curator output to `~/.agents/lythoskill/curator/`
 
 ## Status History

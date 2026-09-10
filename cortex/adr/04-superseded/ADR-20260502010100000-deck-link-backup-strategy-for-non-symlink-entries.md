@@ -1,3 +1,8 @@
+---
+supersedes: []
+superseded_by: ADR-20260910112404500
+---
+
 # ADR-20260502010100000: deck link backup strategy for non-symlink entries
 
 ## Status History

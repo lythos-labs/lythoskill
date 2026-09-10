@@ -36,7 +36,12 @@ function findEpicTemplatePath(): string {
 
 export function createTaskTemplate(id: string, title: string): string {
   const today = new Date().toISOString().split('T')[0];
-  return `# ${id}: ${title}
+  return `---
+supersedes: []
+superseded_by: null
+---
+
+# ${id}: ${title}
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->

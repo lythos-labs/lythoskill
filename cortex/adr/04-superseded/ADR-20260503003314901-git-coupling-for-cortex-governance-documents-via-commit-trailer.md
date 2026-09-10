@@ -1,3 +1,8 @@
+---
+supersedes: []
+superseded_by: ADR-20260613182316950
+---
+
 # ADR-20260503003314901: git-coupling for cortex governance documents via commit trailer
 
 ## Status History

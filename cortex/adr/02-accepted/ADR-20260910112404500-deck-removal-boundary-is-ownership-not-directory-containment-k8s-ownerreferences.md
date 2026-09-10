@@ -1,3 +1,8 @@
+---
+supersedes: [ADR-20260502010100000]
+superseded_by: null
+---
+
 # ADR-20260910112404500: deck-removal-boundary-is-ownership-not-directory-containment-k8s-ownerreferences
 
 ## Status History

@@ -4,12 +4,13 @@
  * Thin skill router — delegates to command modules.
  */
 
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { loadConfig } from './config.js';
 import { initWorkflow } from './commands/init.js';
 import { createTask } from './commands/task.js';
 import { createEpic } from './commands/epic.js';
 import { createAdr } from './commands/adr.js';
+import { setSupersededBy, addSupersedes } from './lib/adr-relations.js';
 import { listAll } from './commands/list.js';
 import { showStats, showNextIds } from './commands/stats.js';
 import { probeStatus } from './commands/probe.js';
@@ -355,6 +356,28 @@ async function main(): Promise<void> {
           const by = parseFlag(restArgs.slice(1), '--by');
           const note = by ? `Superseded by ${by}` : 'Superseded';
           moveAdr(adrId, 'superseded', config, { note });
+
+          // 取代关系写进**两侧的 frontmatter**(机器可读):旧的那份说"该去读谁",
+          // 新的那份记"我替代了谁"。散文备注只有人读,而这关系首先是给 agent 读的 ——
+          // 真实事故:外部 reviewer 读到一份已被整条取代的 ADR,照着它描述了已经不存在的实现。
+          const supDir = `${config.adrDir}/${config.adrSubdirs.superseded}`;
+          const supFile = readdirSync(supDir).find(f => f.startsWith(adrId));
+          if (supFile) {
+            const p = `${supDir}/${supFile}`;
+            const next = by ? setSupersededBy(readFileSync(p, 'utf-8'), by) : readFileSync(p, 'utf-8');
+            if (by) writeFileSync(p, next);
+          }
+          if (by) {
+            for (const dir of [config.adrSubdirs.proposed, config.adrSubdirs.accepted]) {
+              const d = `${config.adrDir}/${dir}`;
+              if (!existsSync(d)) continue;
+              const f = readdirSync(d).find(x => x.startsWith(by));
+              if (!f) continue;
+              const p = `${d}/${f}`;
+              writeFileSync(p, addSupersedes(readFileSync(p, 'utf-8'), adrId));
+              break;
+            }
+          }
         }
         break;
       }

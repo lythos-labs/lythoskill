@@ -1,3 +1,8 @@
+---
+supersedes: [ADR-20260503003314901]
+superseded_by: null
+---
+
 # ADR-20260613182316950: Clarify commit-trailer semantics — Closes is review-then-done, Review is dev-complete-to-review
 
 ## Status History
