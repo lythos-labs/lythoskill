@@ -53,8 +53,9 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] **写入语法 = 读取语法**:三条定位规则全支持(table / `[tool.skills]` 内联条目 / legacy 数组),
-      少支持一种即为**静默收窄语法**(Round-1 ZK review H1+H2;规则在 ADR § Round-1 修正)
+- [ ] **写入语法 = 读取语法**(删除侧三条定位规则 + **插入侧**两条规则),
+      少支持一种即为**静默收窄语法**(Round-1 H1/H2 + Round-2 H-R2-1;规则见 ADR 的 §规格 表 ——
+      **以那张表为准**,`§ Round-1 修正` 只是历史)
 - [ ] 空容器级联与现有行为一致(`skills` 空 → 删键;section 空 → 删表头),`remove.test.ts` C11.b **保持绿**
 - [ ] 新解析器进 `packages/lythoskill-deck/package.json`(依赖变更要在卡里可见,不能只活在 ADR 的选项表里)
 - [ ] `deck remove` 后,文件中**未被本次操作触碰**的注释逐字保留(byte-identical)
@@ -106,9 +107,12 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] **AC1** `deck remove <alias>` → 结果与「原文减去那一段」**逐字节相同**(前缀/后缀相等,不是“diff 看起来对”)
+- [ ] **AC1** `deck remove <alias>` → 结果与 fixture 里**写死的期望文本**逐字节相同
+      (**不是**"原文减去那一段" —— 那是同义反复,自己算出来的期望永远对)
 - [ ] **AC2** `deck add <locator>` → 同上;用 `add.ts` 已有的 `AddSkillIO` seam 打桩,**不联网 clone**
-- [ ] **AC3** 三种形状各一条用例:table / `[tool.skills]` 内联条目 / legacy 数组;
+- [ ] **AC3** 三种形状 × {删,增} 各有用例:table / `[tool.skills]` 内联条目 / legacy 数组;
+      **包含 legacy deck 上 `add` 的两条路**(只含 path → 追加字符串元素;含 `source` → 报错并点名
+      `deck migrate-schema`)—— 这是 Round-2 ZK review 的 HIGH:在数组形态旁新增表 = parse 报错;
       fixture = `src/toml-splice.test.ts` 内联一份**注释密集且含非 ASCII 字符**的 deck
       (纯 ASCII fixture 会让 H3 那类偏移单位错误永远绿着骗人)
 - [ ] **AC4** `bun test packages/lythoskill-deck/` 保持 `0 fail`;`remove.test.ts` C11.b(legacy 数组)

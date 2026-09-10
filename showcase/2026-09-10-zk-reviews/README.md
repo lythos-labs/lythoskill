@@ -12,6 +12,9 @@ stops the same false positive from consuming another round.
 | Log | Object under review | Pinned commit | Round |
 |---|---|---|---|
 | `904-plan-round1.md` | `TASK-20260910152029904` + `ADR-20260910152957509` (the **plan**, before execution) | `6ac2324d` | 1 |
+| `904-plan-round2.md` | same plan, after the round-1 fixes | `125670ef` | 2 |
+| `5092-round1.md` | `TASK-20260910110545092` (executed work) | `6ac2324d` | 1 |
+| `5092-round2.md` | same, after the corrections it refuted | `adfac4e0` | 2 |
 
 ## Independence, stated in layers
 
