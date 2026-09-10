@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/10 15:51:21
+> 自动生成于 2026/9/10 15:54:20
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 378 | 进行中: 0, 待验收: 0, 已完成: 317 |
+| Tasks | 378 | 进行中: 1, 待验收: 0, 已完成: 317 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 106 | 已接受: 102 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (16)
+### 待办 (15)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -93,11 +93,10 @@
 - [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
-- [ ] **TASK-20260910152029904**: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260910152029904**: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
 
 ### 待验收 (0)
 
