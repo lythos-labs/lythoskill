@@ -387,6 +387,32 @@ After user says "LGTM": `git tag -a v0.X.0 -m "feat: description"`
 3. **ZK-review your own work before requesting review**: spawn a fresh zero-knowledge reviewer (pass-by-reference: task card path + `git log --grep TASK-xxx` commits). Skeptical, severity-rated findings on two questions: are the checked acceptance boxes honestly supported, and does the evidence support the conclusions. Verify its P1 claims yourself (reviewers are sensors, not oracles), then fix or register follow-ups. Self-review has a structural blind spot (knowledge curse, self-graded homework) — 2026-07-17: a ZK reviewer caught an A/B report headline that misread its own primary evidence.
 4. `bunx @lythos/project-cortex@0.19.1 review TASK-xxx`
 5. **Stop here.** Never use `done` — that requires user acceptance.
+
+## Reporting Discipline (review & status reports)
+
+How you report a task's completion is part of the review surface — the owner
+accepts or rejects based on what you wrote, so the report carries the same
+burden as the work. Two rules, both from AGENTS.md §3:
+
+**Structure: 5W1H, not private shorthand.** Answer What (what was produced),
+Why (which problem it closes), Where (carrier — `file:line`, TASK-/ADR-/EPIC-id,
+commit hash), When (date the claim was verified), Who (who verified it, by what
+method), How (the check that proves it). Take the 3-5 that apply — never fewer
+than the owner needs to verify without asking a follow-up. A verdict word
+(score, gate, severity, "P1", "pass") must define its criteria **in the same
+report**: an undefined scale cannot be disagreed with, so it is not a review.
+
+**Posture: you report, the owner decides.** Never assign the owner a task,
+never pre-authorize their decision ("just nod and it's done"), never write
+agreement as the default path. A pending decision is options + consequence
+("A or B — here is what each costs"), fully formed, with the choice left open.
+This is the mirror of *ZK agents are sensors, not bosses*: that rule stops a
+reviewer from commanding an executor; this one stops an executor from
+commanding the owner. Pre-framing consent is a default-value play against this
+project's anti-default discipline.
+
+Scribe's `What + Why + Done + Raw ref` handoff contract is the same rule at
+handoff scope — one convention, two carriers.
 ## Milestone Protocol (Prevents Fake Completion)
 Every task must define at creation:
 - **Exit criteria**: one sentence defining "done enough"

@@ -153,6 +153,14 @@ anti-jargon bar: a writer in a hurry produces telegraphic fragments that
 decode to nothing for a zero-context reader; forcing What/Why/Done + ref
 per item forces complete, checkable sentences at write time.
 
+This contract is the **handoff-scope instance of the project's 5W1H reporting
+rule** (AGENTS.md §3 — What / Why / Where / When / Who / How; scribe's `Done`
+≈ When + How). One convention, two carriers: cortex applies it to review and
+status reports, scribe to every resumption item. Same two hard bars — no
+private vocabulary the reader cannot resolve from the repo or the glossary,
+and any verdict word (score, gate, severity) must define its criteria in the
+same file. An undefined scale cannot be disagreed with, so it is not a report.
+
 Write sentences like these, not telegraphic fragments. The ❌ samples below
 are synthesized typical shorthand (any user's, not a specific person's words).
 The writer acts as
