@@ -111,3 +111,8 @@ which no acceptance criterion asked for.
     found, not smoothed over.
   - `cortex probe`: my card's "Status History 为空" warning was pre-existing (the card shipped
     without the table); filled in above. Remaining probe findings are unrelated to this card.
+  - **State walk left to the owner.** The `Task: TASK-20260909010121918 review` trailer is
+    illegal from `backlog` (allowed target: `in-progress`), so the post-commit hook rejects it.
+    The executor does not run task state transitions. Commit series:
+    `a226ebae` (fix) → `b5ed0831` (tests) → `2a6d4e5d` (docs) → `9273b935` (ADR) →
+    `173beddf` (hook: adr accept + INDEX regen; it swept this card's update into its commit).
