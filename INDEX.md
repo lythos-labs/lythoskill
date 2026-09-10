@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/11 00:17:27
+> 自动生成于 2026/9/11 00:23:44
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 383 | 进行中: 0, 待验收: 2, 已完成: 321 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 107 | 已接受: 102 |
+| ADRs | 108 | 已接受: 103 |
 
 ---
 
@@ -588,6 +588,7 @@ _无_
 - ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
 - ✅ **ADR-20260910152957509** (02-accepted): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
 - ✅ **ADR-20260910181957316** (02-accepted): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
+- ✅ **ADR-20260911002229529** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 
 ---
 

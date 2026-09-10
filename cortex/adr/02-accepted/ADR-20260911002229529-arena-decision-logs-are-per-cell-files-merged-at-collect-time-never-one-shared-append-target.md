@@ -14,6 +14,7 @@ tasks: [TASK-20260909010121918]
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-09-10 | Created |
+| accepted | 2026-09-10 | Accepted |
 
 ## Background
 
