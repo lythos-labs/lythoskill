@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/9/10 18:45:53
+> 自动生成于 2026/9/10 18:47:57
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 382 | 进行中: 1, 待验收: 2, 已完成: 317 |
+| Tasks | 382 | 进行中: 1, 待验收: 0, 已完成: 319 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 107 | 已接受: 101 |
+| ADRs | 107 | 已接受: 102 |
 
 ---
 
@@ -100,12 +100,11 @@
 
 - 🔄 **TASK-20260910181747676**: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260910152029904**: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
-- 🔍 **TASK-20260910184349139**: ADR frontmatter carries task and epic relations too - and the fields must have a reader
+_无_
 
-### 已完成 (317)
+### 已完成 (319)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -424,6 +423,8 @@
 - ✅ ~~TASK-20260909155425926~~: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
 - ✅ ~~TASK-20260910110545092~~: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
 - ✅ ~~TASK-20260910111600389~~: deck-fanout-deletion-must-be-ownership-scoped-not-directory-containment
+- ✅ ~~TASK-20260910152029904~~: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
+- ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
 
 ### 悬置 (3)
 
@@ -585,7 +586,7 @@
 - ✅ **ADR-20260910120047122** (02-accepted): unlisted-fan-out-targets-must-not-be-silent-silence-is-declared-never-default
 - ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
 - ✅ **ADR-20260910152957509** (02-accepted): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
-- 🤔 **ADR-20260910181957316** (01-proposed): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
+- ✅ **ADR-20260910181957316** (02-accepted): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
 
 ---
 
