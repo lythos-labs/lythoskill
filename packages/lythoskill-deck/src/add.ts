@@ -329,7 +329,14 @@ export async function addSkill(
   })
 
   if (fetchResult.status === 'failed') {
-    rmSync(fetchPlan.targetDir, { recursive: true, force: true })
+    // 归属守卫(同 TASK-20260910111600389):只清**本次尝试才出现**的东西。
+    // `status: 'failed'` 有两条来路,其中 localhost 那条在 exists 检查**之前**
+    // 就返回了 —— 于是 targetDir 可能是运行前就存在的目录(用户自己放那儿的),
+    // 却照样被 recursive 删掉。没有 alreadyExists 这个闸,这就是一个和
+    // fan-out 那五处同类的可达路径:未证所有权 + 递归删除。
+    if (!fetchPlan.alreadyExists) {
+      rmSync(fetchPlan.targetDir, { recursive: true, force: true })
+    }
     console.error(`❌ Failed to fetch: ${fetchResult.message ?? 'unknown error'}`)
     // Two layers of evidence: the probe's per-URL failures + git's own error.
     if (probe?.failures && probe.failures.length > 0) {

@@ -636,3 +636,95 @@ describe('formatLockDriftHint (HATEOAS lock-drift guidance)', () => {
     expect(second).toContain('(unchanged)')
   })
 })
+
+// ── 归属守卫(TASK-20260910111600389)──────────────────────────
+// 这里曾经在每次 link 时把 fan-out 目录里的**每一个非 symlink 条目**
+// recursive 删掉,再配一个 tar 备份兜底。两处都撤了:
+//   · 删除的安全边界是所有权,不是"它在我扫的这个目录里"—— fan-out 目标
+//     可以是别的项目的 .claude/skills,或某个 CLI 的全局配置;
+//   · 那个备份本身不可解(成员带 ../ 前缀),所以"已备份"是一句假承诺。
+// 下面的用例钉住新语义:外来的东西一律存活,deck 自己的快照仍可替换。
+
+describe('ownership guard — link never deletes what it cannot prove it created', () => {
+  function deckWith(targets: string[]): string {
+    return `[deck]
+max_cards = 10
+working_set = ".claude/skills"
+cold_pool = "cold-pool"
+also_link_to = [${targets.map(t => `"${t}"`).join(', ')}]
+
+[tool.skills.my-alias]
+path = "github.com/owner/repo/skill"
+`
+  }
+
+  function setup(targets: string[], mode?: 'symlink' | 'snapshot') {
+    const projectDir = makeTmp()
+    placeSkill(join(projectDir, 'cold-pool'), 'github.com/owner/repo/skill')
+    const deckPath = join(projectDir, 'skill-deck.toml')
+    writeFileSync(deckPath, deckWith(targets))
+    return { projectDir, deckPath, mode }
+  }
+
+  it('a foreign real directory inside a fan-out target survives the audit sweep', async () => {
+    const { projectDir, deckPath } = setup(['.claude/skills', '.kimi/skills'])
+    // 用户（或另一个工具）在这个扇出目录里放了自己的东西,名字与 deck 声明无关
+    const foreign = join(projectDir, '.kimi', 'skills', 'handwritten-by-user')
+    mkdirSync(foreign, { recursive: true })
+    writeFileSync(join(foreign, 'SKILL.md'), '---\nname: mine\n---\n# 不是 deck 建的\n')
+
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+
+    // 存活 —— 这是这条防线存在的全部意义
+    expect(existsSync(join(foreign, 'SKILL.md'))).toBe(true)
+    // 且如实报告,不静默:告诉 agent 它是什么、为什么不动、怎么处置
+    const out = lines.join('\n')
+    expect(out).toContain('handwritten-by-user')
+    expect(out).toContain('not deck')
+    // 声明内的条目照常建好
+    expect(lstatSync(join(projectDir, '.kimi', 'skills', 'my-alias')).isSymbolicLink()).toBe(true)
+  })
+
+  it('a foreign entry occupying a declared alias refuses replacement; other skills still link', async () => {
+    const { projectDir, deckPath } = setup(['.claude/skills'])
+    const occupied = join(projectDir, '.claude', 'skills', 'my-alias')
+    mkdirSync(occupied, { recursive: true })
+    writeFileSync(join(occupied, 'SKILL.md'), '---\nname: pre-existing\n---\n')
+
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+
+    const st = lstatSync(occupied)
+    expect(st.isSymbolicLink()).toBe(false)
+    expect(readFileSync(join(occupied, 'SKILL.md'), 'utf-8')).toContain('pre-existing')
+    // 拒绝要说清 why + fix,不能只是沉默
+    const out = lines.join('\n')
+    expect(out).toContain('Refusing to replace')
+    expect(out).toContain("is not deck's")
+  })
+
+  it("deck's OWN snapshot in the working set is still replaced on re-link (no regression)", async () => {
+    const { projectDir, deckPath } = setup(['.claude/skills'], 'snapshot')
+    await linkDeck(deckPath, projectDir, { noBackup: true, mode: 'snapshot' })
+
+    const dest = join(projectDir, '.claude', 'skills', 'my-alias')
+    expect(lstatSync(dest).isDirectory()).toBe(true)
+    expect(lstatSync(dest).isSymbolicLink()).toBe(false)
+
+    // 第二次运行:此时它已在 state 的 managed_dests 里 —— deck 认得出自己的产物
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true, mode: 'snapshot' }))
+    expect(lines.join('\n')).not.toContain('Refusing to replace')
+    expect(existsSync(join(dest, 'SKILL.md'))).toBe(true)
+
+    // state 里留下了认领登记 —— 下次运行靠它,不靠"目录包含"猜
+    const state = JSON.parse(readFileSync(join(projectDir, 'skill-deck.state'), 'utf-8'))
+    expect(state.skills[0].managed_dests).toContain(dest)
+  })
+
+  it('dormancy: a default deck with no foreign entries prints no ownership warning', async () => {
+    const { projectDir, deckPath } = setup(['.claude/skills', '.agents/skills'])
+    const lines = captureConsole(() => linkDeck(deckPath, projectDir, { noBackup: true }))
+    const out = lines.join('\n')
+    expect(out).not.toContain('not deck')
+    expect(out).not.toContain('Refusing to replace')
+  })
+})

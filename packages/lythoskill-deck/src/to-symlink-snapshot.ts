@@ -12,7 +12,8 @@ import { resolve, dirname, join, relative } from 'node:path'
 import { homedir } from 'node:os'
 import { findDeckToml, expandHome } from './link.js'
 import { parseDeck } from './parse-deck.js'
-import { removeEntryForRelink } from './safe-remove.js'
+import { removeEntryForRelink, deckOwnsEntry } from './safe-remove.js'
+import { readStateFile, writeStateFile, ownershipContextFor } from './state-file.js'
 import { ColdPool, parseLocator } from '@lythos/cold-pool'
 import { findSource } from './link.js'
 import { parse as parseToml } from '@iarna/toml'
@@ -49,18 +50,11 @@ function writeLock(projectDir: string, lock: SkillDeckLock): void {
 }
 
 function readState(projectDir: string): SkillDeckState | null {
-  const statePath = join(projectDir, 'skill-deck.state')
-  if (!existsSync(statePath)) return null
-  try {
-    return JSON.parse(readFileSync(statePath, 'utf-8'))
-  } catch {
-    return null
-  }
+  return readStateFile(projectDir)
 }
 
 function writeState(projectDir: string, state: SkillDeckState): void {
-  const statePath = join(projectDir, 'skill-deck.state')
-  writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n')
+  writeStateFile(projectDir, state)
 }
 
 function getProjectAndDeck(cliDeckPath?: string, cliWorkdir?: string, io: SymlinkSnapshotIO = defaultIO) {
@@ -110,7 +104,8 @@ export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?
     io.exit(1)
   }
 
-  // Check current mode
+  // Check current mode — 仅用于给人看的提示。**不作为删除依据**:
+  // lstat 只能说"路径上有个真实目录",说不出"这个目录是 deck 建的"。
   let currentMode: 'snapshot' | 'symlink' | 'missing' = 'missing'
   try {
     const st = lstatSync(dest)
@@ -127,8 +122,15 @@ export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?
     io.exit(1)
   }
 
-  // Remove snapshot, create symlink
-  rmSync(dest, { recursive: true, force: true })
+  // Remove snapshot, create symlink —— 先判归属。真实目录只有 state 记录在案
+  // (deck 自己 pin 的 snapshot)才删;别的东西占了这个名字 → 停下报错,不删。
+  const cleared = removeEntryForRelink(dest, ownershipContextFor(COLD_POOL, PROJECT_DIR))
+  if (!cleared.removed && cleared.present) {
+    io.error(`❌ Refusing to replace ${match.alias}: ${dest} is not deck's`)
+    io.error(`   why:  ${cleared.reason}`)
+    io.error(`   fix:  move or remove it yourself, then re-run; no changes were made`)
+    io.exit(1)
+  }
   symlinkSync(source.path, dest)
   io.log(`🔄 ${match.alias}: snapshot → symlink (target: ${relative(PROJECT_DIR, source.path)})`)
 
@@ -142,13 +144,17 @@ export function toSymlinkSkill(target: string, cliDeckPath?: string, cliWorkdir?
     writeLock(PROJECT_DIR, lock)
   }
 
-  // Update state (operational: linked_at, mode)
+  // Update state (operational: linked_at, mode, 认领登记)
   const state = readState(PROJECT_DIR)
   if (state) {
     const stateSkill = state.skills.find(s => s.alias === match.alias)
     if (stateSkill) {
       stateSkill.linked_at = new Date().toISOString()
       stateSkill.mode = 'symlink'
+      // 认领登记要保持与磁盘一致:这里刚把一个 snapshot 换成 symlink,
+      // 该路径仍是 deck 的(dest 那份兜底证明还在),但 managed_dests 里
+      // 若少了它,下一次 link 就可能把它判成外来。
+      stateSkill.managed_dests = [...new Set([...(stateSkill.managed_dests ?? []), resolve(dest)])].sort()
     }
     writeState(PROJECT_DIR, state)
   }
@@ -189,7 +195,17 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
   } catch {}
 
   if (currentMode === 'snapshot') {
-    io.log(`⏭️  ${match.alias} is already in snapshot mode (real directory)`)
+    // 有真实目录 ≠ 那是 deck 的 snapshot。查一下再说话 —— 之前这里无条件
+    // 报"已经是 snapshot 模式",对外来目录就是一句假话(虽然没删东西)。
+    const own = deckOwnsEntry(dest, ownershipContextFor(COLD_POOL, PROJECT_DIR))
+    if (own.owned) {
+      io.log(`⏭️  ${match.alias} is already in snapshot mode (deck's pinned copy)`)
+    } else {
+      io.error(`❌ ${match.alias} is a real directory, but not deck's — refusing to touch it`)
+      io.error(`   why:  ${own.reason}`)
+      io.error(`   fix:  move or remove it yourself if you want deck to manage this alias`)
+      io.exit(1)
+    }
     return
   }
 
@@ -198,9 +214,15 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
     io.exit(1)
   }
 
-  // Remove symlink, cp snapshot — lstat-verified symlink above, so this is
-  // unlink-only (never recursive into target; Goose #11600 class)
-  removeEntryForRelink(dest)
+  // Remove symlink, cp snapshot —— 先判归属:只有指向本 deck cold pool 的
+  // symlink 才清得动,别的东西占了这个名字 → 停下报错,不删。
+  const cleared = removeEntryForRelink(dest, ownershipContextFor(COLD_POOL, PROJECT_DIR))
+  if (!cleared.removed && cleared.present) {
+    io.error(`❌ Refusing to replace ${match.alias}: ${dest} is not deck's`)
+    io.error(`   why:  ${cleared.reason}`)
+    io.error(`   fix:  move or remove it yourself, then re-run; no changes were made`)
+    io.exit(1)
+  }
   cpSync(source.path, dest, { recursive: true })
   io.log(`🧊 ${match.alias}: symlink → snapshot (pinned copy from ${relative(PROJECT_DIR, source.path)})`)
 
@@ -232,6 +254,8 @@ export function toSnapshotSkill(target: string, cliDeckPath?: string, cliWorkdir
     if (stateSkill) {
       stateSkill.linked_at = new Date().toISOString()
       stateSkill.mode = 'snapshot'
+      // 认领登记:这个真实目录是 deck 刚 pin 的,记下来下次才删得动
+      stateSkill.managed_dests = [...new Set([...(stateSkill.managed_dests ?? []), resolve(dest)])].sort()
     }
     writeState(PROJECT_DIR, state)
   }

@@ -7,34 +7,52 @@
  */
 
 import { parse as parseToml, stringify as stringifyToml } from "@iarna/toml";
-import { existsSync, readFileSync, writeFileSync, rmSync, lstatSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
 import { parseDeck } from "./parse-deck.js";
 import { ColdPool } from "@lythos/cold-pool";
-import { homedir } from "node:os";
 import { validateAlias } from "./path-guard.js";
-import { removeSymlinkOnly } from "./safe-remove.js";
+import { removeSymlinkOnly, deckOwnsEntry, type OwnershipContext } from "./safe-remove.js";
+import { ownershipContextFor } from "./state-file.js";
 
 /**
- * 删除工作集条目。Goose #11600 防线:lstat 判定,是 symlink 就只删链接本身
- * (无 recursive,cold pool 真身永不被触碰);真实目录(如手工 snapshot)保持
- * 历史 recursive 行为。不用 existsSync 判定 — 它跟随链接,会漏掉断链。
+ * 删除工作集条目。两道防线:
+ *
+ *  1. Goose #11600:是 symlink 就只删链接本身(无 recursive,cold pool 真身
+ *     永不被触碰)。不用 existsSync 判定 — 它跟随链接,会漏掉断链。
+ *  2. 所有权(k8s ownerReferences,TASK-20260910111600389):**先判归属再删**。
+ *     真实目录只有 state 记录在案(deck 自己建的 snapshot)才删;别的东西占了
+ *     这个 alias → 报错留在原地,不删。fan-out 目标可能是别的项目的
+ *     `.claude/skills`,往里 recursive 删不是 deck 的权限。
+ *
+ * 该点的失败**不污染其余动作**:返回值只用于报告,deck.toml 条目与其余链接照删。
  */
-function removeLinkedEntry(linkPath: string, io: DeckIO, label: string): void {
-  let st;
-  try {
-    st = lstatSync(linkPath);
-  } catch {
+function removeLinkedEntry(
+  linkPath: string,
+  io: DeckIO,
+  label: string,
+  ownership: OwnershipContext,
+): void {
+  const verdict = deckOwnsEntry(linkPath, ownership);
+
+  if (!verdict.present) {
     io.log(`  ⚠️  ${label} not found: ${linkPath}`);
     return;
   }
-  if (st.isSymbolicLink()) {
+  if (!verdict.owned) {
+    io.error(`❌ Not removing ${label} — ${linkPath} is not deck's`);
+    io.error(`   why:  ${verdict.reason}`);
+    io.error(`   fix:  move or remove it yourself if it is stale; the deck entry and other links are still removed`);
+    return;
+  }
+
+  if (verdict.via === "symlink-into-coldpool") {
     removeSymlinkOnly(linkPath);
     io.log(`  🗑️  Removed ${label}: ${linkPath}`);
   } else {
     rmSync(linkPath, { recursive: true, force: true });
-    io.log(`  🗑️  Removed ${label} (real dir): ${linkPath}`);
+    io.log(`  🗑️  Removed ${label} (deck's snapshot): ${linkPath}`);
   }
 }
 
@@ -75,6 +93,10 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
   if (ALSO_LINK_TO_RESULT.deprecated) {
     io.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
   }
+
+  const COLD_POOL = expandHome(deck.deck?.cold_pool || "~/.agents/skill-repos", PROJECT_DIR);
+  // 归属判定输入装配一次,两个删除点共用(见 removeLinkedEntry 的第 2 道防线)
+  const OWNERSHIP = ownershipContextFor(COLD_POOL, PROJECT_DIR);
 
   // ── 定位目标 ────────────────────────────────────────────────
 
@@ -132,23 +154,18 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   // ── 删 working set symlink ──────────────────────────────────
 
-  removeLinkedEntry(join(WORKING_SET, alias), io, "symlink");
+  removeLinkedEntry(join(WORKING_SET, alias), io, "symlink", OWNERSHIP);
 
   // ── 删 also_link_to symlinks ─────────────────────────────────
 
   for (const target of ALSO_LINK_TO) {
-    removeLinkedEntry(join(target, alias), io, "also_link_to symlink");
+    removeLinkedEntry(join(target, alias), io, "also_link_to symlink", OWNERSHIP);
   }
 
   // ── Metadata cleanup ────────────────────────────────────────
 
   try {
-    const deck = parseToml(deckRaw) as any;
-    const coldPoolRaw = deck.deck?.cold_pool || '~/.agents/skill-repos';
-    const coldPoolPath = coldPoolRaw.startsWith('~/')
-      ? join(homedir(), coldPoolRaw.slice(2))
-      : resolve(PROJECT_DIR, coldPoolRaw);
-    const pool = new ColdPool(coldPoolPath);
+    const pool = new ColdPool(COLD_POOL);
     pool.metadata.removeReference(match.path, DECK_PATH);
   } catch (e: any) {
     io.warn(`⚠️  Metadata cleanup skipped: ${e.message}`);

@@ -48,6 +48,16 @@ const alias = flagValue('--alias')
 const type = flagValue('--type')
 const format = flagValue('--format')
 const noBackup = args.includes('--no-backup')
+// 已退役开关。保留为**接受但无作用的 no-op + 一句说明**,不做成硬错误:
+// 老脚本里可能还带着它,直接报错只会让人以为是新版本的 bug。
+// 但不静默 —— 这个旗标的存在本身在暗示"不传它就有备份",而备份已经没有了。
+// 假的安全承诺与假 source 同类(no-source-no-rule),必须让人知道它不作数。
+// 见 TASK-20260910111600389 R10。
+if (noBackup) {
+  console.warn('⚠️  --no-backup is retired and no longer does anything (it is accepted for compatibility).')
+  console.warn('   why:  deck no longer deletes entries it cannot prove it created, so there is nothing to back up')
+  console.warn('   what: nothing was ever backed up on this path — removing the flag will not change behavior')
+}
 const dryRun = args.includes('--dry-run')
 const remote = args.includes('--remote')
 const execFlag = args.includes('--exec')
@@ -71,7 +81,6 @@ const HELP_CONFIG = {
     { flag: '--deck <path>', description: 'Specify skill-deck.toml path (default: find upward from cwd)' },
     { flag: '--workdir <dir>', description: 'Specify working directory (default: cwd)' },
     { flag: '--mode <symlink|snapshot>', description: 'Link mode: symlink (default) or snapshot (cp)' },
-    { flag: '--no-backup', description: 'Skip tar backup when removing non-symlink entries' },
 
     { flag: '--alias <name>', description: 'Explicit alias for the skill (default: basename of path)' },
     { flag: '--type <type>', description: 'Target section: innate | tool (default: tool)' },

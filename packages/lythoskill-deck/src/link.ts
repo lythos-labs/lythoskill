@@ -12,9 +12,8 @@ import YAML from "yaml";
 import { createHash } from "node:crypto";
 import {
   existsSync, mkdirSync, readFileSync, readdirSync,
-  symlinkSync, cpSync, lstatSync, rmSync, statSync, writeFileSync,
+  symlinkSync, cpSync, lstatSync, statSync, writeFileSync,
 } from "node:fs";
-import { execFileSync } from "node:child_process";
 import { resolve, dirname, join, basename, relative, sep } from "node:path";
 import { homedir } from "node:os";
 import { ColdPool, parseLocator } from "@lythos/cold-pool";
@@ -29,7 +28,12 @@ import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 import { safeResolveInDir } from "./path-guard.js";
 import { targetModeOverride } from "./cli-layout.js";
 import { collectFanOutWarnings } from "./layout-policy.js";
-import { removeSymlinkOnly, removeEntryForRelink } from "./safe-remove.js";
+import {
+  removeSymlinkOnly,
+  removeEntryForRelink,
+  deckOwnsEntry,
+} from "./safe-remove.js";
+import { readStateFile, writeStateFile, ownershipLedgerFrom } from "./state-file.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
 
@@ -131,29 +135,19 @@ export function findSource(name: string, coldPool: string, _projectDir: string):
   return { path: null };
 }
 
-// ── 备份工具 ────────────────────────────────────────────────
-
-function calculateDirSize(dir: string): number {
-  let total = 0;
-  try {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const p = join(dir, entry.name);
-      if (entry.isDirectory()) {
-        total += calculateDirSize(p);
-      } else if (entry.isFile()) {
-        total += statSync(p).size;
-      }
-    }
-  } catch {}
-  return total;
-}
-
-function formatBackupDate(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-}
-
-const BACKUP_SIZE_THRESHOLD = 100 * 1024 * 1024; // 100MB
+// ── 备份工具(已退役)────────────────────────────────────────
+// 这里曾有 calculateDirSize / formatBackupDate / BACKUP_SIZE_THRESHOLD 与一段
+// tar czf 备份。随 fan-out 删除语义收束到所有权判据一并撤除 —— 依据:
+//
+//  1. 外来条目现在**永不删除**(deck 只删自己能证明是自己建的),所以没有东西
+//     需要备份。
+//  2. 那个备份本身是不可解的:tar 成员名是 `"./" + relative(PROJECT_DIR, …)`,
+//     目标在项目外时(恰恰是最危险的情形)会生成 `../` 前缀成员 —— bsdtar 3.5.3
+//     能创建这个归档但拒绝解出(`Path contains '..'`,exit=1,加不加 `-C` 都一样)。
+//     它打印的"已备份"是无条件打的,所以它是一条**假的安全承诺**。
+//
+// 判断依据是所有权而不是备份,所以撤掉它不是削弱安全 —— 是换掉一个不成立的机制。
+// 见 TASK-20260910111600389 / safe-remove.ts 头注释。
 
 // ── Lock/State 读写工具 ─────────────────────────────────────
 
@@ -171,16 +165,11 @@ function writeLock(projectDir: string, lock: SkillDeckLock): void {
 }
 
 function readState(projectDir: string): SkillDeckState | null {
-  const statePath = join(projectDir, "skill-deck.state");
-  if (!existsSync(statePath)) return null;
-  try {
-    return JSON.parse(readFileSync(statePath, "utf-8"));
-  } catch { return null; }
+  return readStateFile(projectDir);
 }
 
 function writeState(projectDir: string, state: SkillDeckState): void {
-  const statePath = join(projectDir, "skill-deck.state");
-  writeFileSync(statePath, JSON.stringify(state, null, 2) + "\n");
+  writeStateFile(projectDir, state);
 }
 
 /**
@@ -294,6 +283,11 @@ export function formatLockDriftHint(shouldWriteLock: boolean): string[] {
   ];
 }
 
+/**
+ * `noBackup` 已退役:deck 现在只删自己认领的条目,没有东西需要备份。
+ * 参数保留是为了不打断既有调用方(含测试),传它不再改变任何行为。
+ * CLI 面的 `--no-backup` 同理,见 help 文案。
+ */
 export async function linkDeck(cliDeckPath?: string, cliWorkdir?: string, opts?: { noBackup?: boolean; mode?: 'symlink' | 'snapshot'; skipHealthFetch?: boolean }): Promise<void> {
 const MODE = opts?.mode ?? 'symlink'
 const cliDeck = cliDeckPath || process.argv.find((_, i, a) => a[i - 1] === "--deck");
@@ -514,12 +508,33 @@ if (
   console.warn(`   cold_pool:   ${resolvedColdPool}`);
 }
 
+// ── 删除守卫上下文（所有权：k8s ownerReferences）─────────────
+// deck 只删它能证明是自己建的东西。判据 = 指向本 deck cold pool 的 symlink,
+// 或 state 记录在案的条目。**不是**"它在我扫的这个目录里" —— fan-out 目标可能是
+// 别的项目的 .claude/skills 或用户的全局 CLI 配置。
+// 语义与理由见 TASK-20260910111600389 / safe-remove.ts 头注释。
+
+const PREV_STATE = readState(PROJECT_DIR);
+
+const OWNERSHIP_LEDGER = ownershipLedgerFrom(PREV_STATE, COLD_POOL, PROJECT_DIR);
+const OWNERSHIP = OWNERSHIP_LEDGER.ctx;
+
+// 本次运行实际创建的绝对路径,按 alias 归集 → 写进 state.managed_dests。
+// 这是"认领登记":**两处** —— 账本(本次运行即时可用,供后续清位判定)与
+// state(跨运行可用)。只登记 state 会让本次运行证明不了自己的产物。
+const createdDestsByAlias = new Map<string, Set<string>>();
+function recordCreated(alias: string, dest: string): void {
+  const set = createdDestsByAlias.get(alias) ?? new Set<string>();
+  set.add(resolve(dest));
+  createdDestsByAlias.set(alias, set);
+  OWNERSHIP_LEDGER.claim(dest);
+}
+
 // ── 目录收束（复用于 working_set 和 also_link_to）────────
 function reconcileTargetDir(
   targetDir: string,
   declared: DeclaredSkill[],
   declaredNames: Set<string>,
-  noBackup: boolean | undefined,
   mode: 'symlink' | 'snapshot',
   PROJECT_DIR: string,
 ): void {
@@ -547,62 +562,55 @@ function reconcileTargetDir(
     console.log(`  💡 ${override.reason}`);
   }
 
-  const nonSymlinks: string[] = [];
+  // ── 审计:目录里非己的条目一律不动 ────────────────────────
+  // 这里曾经把**每一个非 symlink 条目 recursive 删掉**,并配一个 tar 备份兜底。
+  // 两处都撤了:删除的安全边界是所有权不是包含关系;而那个备份实际不可解
+  // (项目外目标会生成 `../` 前缀成员,bsdtar 拒绝解出),是条假的安全承诺。
+  // 现在这一遍只报告 —— 声明名上的冲突由下面的 alias 循环给出更具体的动作。
+  const foreign: string[] = [];      // 不是 deck 的:别人的 skill / 别的项目 / 别的 CLI
+  const staleOwned: string[] = [];   // 是 deck 的,但已不在声明里:旧 snapshot / 旧链接
   try {
     for (const entry of readdirSync(targetDir)) {
       if (entry.startsWith("_") || entry.startsWith(".")) continue;
+      if (declaredNames.has(entry)) continue;
       const entryPath = join(targetDir, entry);
-      try {
-        const st = lstatSync(entryPath);
-        if (!st.isSymbolicLink()) nonSymlinks.push(entry);
-      } catch { continue; }
+      const verdict = deckOwnsEntry(entryPath, OWNERSHIP);
+      if (!verdict.present) continue;
+      if (!verdict.owned) {
+        // 真实目录/文件、指向别处的 symlink —— 都不是 deck 建的
+        if (!staleOwned.includes(entry)) foreign.push(entry);
+      } else if (verdict.via === "state-record") {
+        // deck 自己建的 snapshot 但已不在声明里 —— 可回收,但**不自动删**
+        // (snapshot 是某个 HEAD 的唯一副本,删了就赔不回来;与 link.ts 的
+        //  working-set 切换检测同一立场:给精确 rm 提示,由用户决定)
+        staleOwned.push(entry);
+      }
+      // 指向 cold pool 的 symlink 且未声明 → 交给下面的回收遍处理
     }
   } catch {}
 
-  if (nonSymlinks.length > 0) {
-    let totalSize = 0;
-    for (const e of nonSymlinks) totalSize += calculateDirSize(join(targetDir, e));
-
-    if (!noBackup && totalSize > BACKUP_SIZE_THRESHOLD) {
-      console.error(`❌ Found ${nonSymlinks.length} real directories in ${relative(PROJECT_DIR, targetDir)} (> 100MB total).`);
-      console.error(`   Manual review required: ${nonSymlinks.join(", ")}`);
-      console.error("   Use --no-backup to skip backup, or clean up manually.");
-      process.exit(1);
-    }
-
-    if (!noBackup) {
-      const bakName = `skills.bak.${formatBackupDate(new Date())}.tar.gz`;
-      const bakPath = join(PROJECT_DIR, ".claude", bakName);
-      mkdirSync(join(PROJECT_DIR, ".claude"), { recursive: true });
-      const tarArgs = ["czf", bakPath, "--", ...nonSymlinks.map(e => "./" + relative(PROJECT_DIR, join(targetDir, e)))];
-      try {
-        execFileSync("tar", tarArgs, { cwd: PROJECT_DIR, stdio: "pipe" });
-        console.log(`📦 Backed up ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} to .claude/${bakName}`);
-      } catch (err: any) {
-        console.error(`❌ Backup failed: ${err.message || err}`);
-        console.error("   Use --no-backup to skip backup, or fix the issue and retry.");
-        process.exit(1);
-      }
-    } else {
-      console.log(`⚠️  --no-backup: removing ${nonSymlinks.length} entr${nonSymlinks.length === 1 ? "y" : "ies"} without backup`);
-    }
-
-    for (const e of nonSymlinks) rmSync(join(targetDir, e), { recursive: true, force: true });
+  if (foreign.length > 0 || staleOwned.length > 0) {
+    const n = (a: string[]) => a.length;
+    console.warn(`⚠️  ${n(foreign) + n(staleOwned)} entr${n(foreign) + n(staleOwned) === 1 ? "y" : "ies"} in ${relative(PROJECT_DIR, targetDir) || targetDir} left untouched`);
+    console.warn(`   what: ${[...foreign, ...staleOwned].join(", ")}`);
+    console.warn(`   why:  deck only removes entries it can prove it created — a symlink into its cold pool, or a snapshot recorded in skill-deck.state. These are neither.`);
+    console.warn(`         They may be yours, another project's, or another CLI's; deleting them is not deck's call.`);
+    console.warn(`   fix:  if they are stale, remove them yourself: rm -r ${[...foreign, ...staleOwned].map(e => join(targetDir, e)).join(" ")}`);
   }
 
+  // ── 回收:只删自己建的链接(指向 cold pool 的 symlink)──────
+  // 保留这一遍是必要的:用户直接改 toml 删条目时,工作集靠它收敛回声明态。
+  // 收紧的是判据 —— 指向别处的 symlink 是外来的,报告不删。
   try {
     for (const entry of readdirSync(targetDir)) {
       if (entry.startsWith("_") || entry.startsWith(".")) continue;
-      if (!declaredNames.has(entry)) {
-        const entryPath = join(targetDir, entry);
-        try {
-          const st = lstatSync(entryPath);
-          if (!st.isSymbolicLink()) continue;
-        } catch { continue; }
-        // Goose #11600 防线:已 lstat 确认是 symlink,只删链接本身,绝不 recursive 进目标
-        removeSymlinkOnly(entryPath);
-        console.log(`  🗑️  Removed: ${entry}`);
-      }
+      if (declaredNames.has(entry)) continue;
+      const entryPath = join(targetDir, entry);
+      const verdict = deckOwnsEntry(entryPath, OWNERSHIP);
+      if (!verdict.owned || verdict.via !== "symlink-into-coldpool") continue;
+      // Goose #11600 防线:已确认是 symlink,只删链接本身,绝不 recursive 进目标
+      removeSymlinkOnly(entryPath);
+      console.log(`  🗑️  Removed: ${entry}`);
     }
   } catch {}
 
@@ -617,8 +625,15 @@ function reconcileTargetDir(
       console.error(`   source: ${item.sourcePath}`);
       continue;
     }
-    // 清位:旧条目是 symlink → 只删链接(不递归进 cold pool);真实目录(旧 snapshot)→ recursive
-    removeEntryForRelink(dest);
+    // 清位:先判归属。旧链接(指向 cold pool 的 symlink)与旧 snapshot(state 记录在案)
+    // 是 deck 的,可清;别的东西占了这个名字 → 拒绝并报错,绝不删。
+    const cleared = removeEntryForRelink(dest, OWNERSHIP);
+    if (!cleared.removed && cleared.present) {
+      console.error(`❌ Refusing to replace ${item.alias}: ${dest} is not deck's`);
+      console.error(`   why:  ${cleared.reason}`);
+      console.error(`   fix:  move or remove it yourself, then re-run deck link; continuing with other skills`);
+      continue;
+    }
     try {
       mkdirSync(dirname(dest), { recursive: true });
       if (linkMode === 'snapshot') cpSync(item.sourcePath, dest, { recursive: true });
@@ -627,6 +642,7 @@ function reconcileTargetDir(
       console.error(`❌ Link failed: ${item.alias}: ${err.message || err}`);
       continue;
     }
+    recordCreated(item.alias, dest);
     console.log(`  🔗 ${item.alias}`);
   }
 }
@@ -637,7 +653,7 @@ function reconcileTargetDir(
 // alias），打印 HATEOAS 警告：旧目录可能属于另一个仍在使用的 agent，
 // 所以给出精确的 rm 提示，由用户决定是否清理。
 
-const prevState = readState(PROJECT_DIR);
+const prevState = PREV_STATE;
 const prevWorkingSet = prevState?.resolved_paths?.working_set;
 if (prevWorkingSet && resolve(prevWorkingSet) !== resolvedWorkingSet) {
   const leftovers: string[] = [];
@@ -659,13 +675,13 @@ if (prevWorkingSet && resolve(prevWorkingSet) !== resolvedWorkingSet) {
 
 const declaredNames = new Set(declared.map(d => d.alias));
 console.log('📁 working_set: ' + relative(PROJECT_DIR, WORKING_SET));
-	reconcileTargetDir(WORKING_SET, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
+	reconcileTargetDir(WORKING_SET, declared, declaredNames, MODE, PROJECT_DIR);
 
 // also_link_to fan-out (POSSE pattern, ADR-20260517152850372)
 for (const target of ALSO_LINK_TO) {
   console.log('');
   console.log('📋 also_link_to: ' + relative(PROJECT_DIR, target));
-  reconcileTargetDir(target, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
+  reconcileTargetDir(target, declared, declaredNames, MODE, PROJECT_DIR);
 }
 
 // ── CLI-layout policy warnings(数据驱动;默认 .claude+.agents/skills 对零警告) ──
@@ -688,8 +704,15 @@ for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO])) {
     continue;
   }
 
-  // 幂等:已存在则删除重建。symlink 只删链接本身(#11600 防线);真实目录 recursive
-  removeEntryForRelink(dest);
+  // 幂等:已存在则删除重建 —— **先判归属**。旧链接与 state 记录在案的 snapshot
+  // 是 deck 的,可清;别的东西占了这个名字 → 拒绝并报错,绝不删。
+  const wsCleared = removeEntryForRelink(dest, OWNERSHIP);
+  if (!wsCleared.removed && wsCleared.present) {
+    console.error(`❌ Refusing to replace ${item.alias}: ${dest} is not deck's`);
+    console.error(`   why:  ${wsCleared.reason}`);
+    console.error(`   fix:  move or remove it yourself, then re-run deck link; continuing with other skills`);
+    continue;
+  }
 
   try {
     mkdirSync(dirname(dest), { recursive: true });
@@ -702,6 +725,8 @@ for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO])) {
     console.error(`❌ Link failed: ${item.alias}: ${err.message}`);
     continue;
   }
+
+  recordCreated(item.alias, dest);
 
   // 提取元数据
   const skillMdPath = join(item.sourcePath, "SKILL.md");
@@ -853,6 +878,10 @@ const newState: SkillDeckState = {
     dest: resolve(PROJECT_DIR, s.dest),
     mode: s.mode,
     deck_managed_dirs: s.deck_managed_dirs,
+    // 认领登记:本次实际创建的全部路径(工作集 + 每个 fan-out 目标)。
+    // 下次运行靠它证明这些条目归 deck 管 —— 没有这一项,deck 自己的
+    // fan-out snapshot(cline `.clinerules` 的强制 copy)会被自己判成外来。
+    managed_dests: [...(createdDestsByAlias.get(s.alias) ?? [])].sort(),
   })),
   constraints,
 };

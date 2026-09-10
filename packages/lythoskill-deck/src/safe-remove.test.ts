@@ -13,7 +13,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, symlinkSync, lstatSync, 
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 
-import { removeSymlinkOnly, removeEntryForRelink } from './safe-remove.ts'
+import { removeSymlinkOnly, removeEntryForRelink, type OwnershipContext } from './safe-remove.ts'
 import { removeSkill, type DeckIO } from './remove.ts'
 
 let cleanup: string[] = []
@@ -84,22 +84,83 @@ describe('removeSymlinkOnly', () => {
   })
 })
 
-describe('removeEntryForRelink', () => {
-  it('symlink → link gone, target intact; real dir → removed recursively', () => {
-    const root = makeTmp()
-    const { skillDir } = makeColdPoolSkill(root)
-    const link = join(root, 'ws', 'precious')
-    mkdirSync(join(root, 'ws'), { recursive: true })
-    symlinkSync(skillDir, link)
-    removeEntryForRelink(link)
-    expect(existsSync(link)).toBe(false)
-    expect(existsSync(join(skillDir, 'SKILL.md'))).toBe(true)
+describe('removeEntryForRelink — 归属判定先行(k8s ownerReferences)', () => {
+  /** 空账本:什么都没认领过。所有"外来"判定的基线。 */
+  function ctxFor(coldPool: string, managed: string[] = []): OwnershipContext {
+    return { coldPool: resolve(coldPool), managedDests: new Set(managed.map(p => resolve(p))) }
+  }
 
-    const real = join(root, 'ws', 'oldsnap')
-    mkdirSync(real, { recursive: true })
-    writeFileSync(join(real, 'SKILL.md'), 'x')
-    removeEntryForRelink(real)
-    expect(existsSync(real)).toBe(false)
+  it('owned symlink → link gone, cold-pool target byte-identical', () => {
+    const root = makeTmp()
+    const { coldPool, skillDir } = makeColdPoolSkill(root)
+    const ws = join(root, 'ws')
+    mkdirSync(ws, { recursive: true })
+    const link = join(ws, 'precious')
+    symlinkSync(skillDir, link)
+
+    const outcome = removeEntryForRelink(link, ctxFor(coldPool))
+    expect(outcome).toEqual({ removed: true, via: 'symlink-into-coldpool' })
+    expect(existsSync(link)).toBe(false)
+    expect(readFileSync(join(skillDir, 'SKILL.md'), 'utf-8')).toBe(COLD_CONTENT)
+  })
+
+  it('REFUSES a real directory the deck never recorded, and leaves it intact', () => {
+    // 曾经的形态:无条件 rmSync(recursive) —— 一道"清位"就能吃掉用户手写的
+    // skill、别的项目的 fan-out 目录。安全边界是所有权,不是目录包含关系。
+    const root = makeTmp()
+    const { coldPool } = makeColdPoolSkill(root)
+    const ws = join(root, 'ws')
+    const foreign = join(ws, 'handwritten')
+    mkdirSync(foreign, { recursive: true })
+    writeFileSync(join(foreign, 'SKILL.md'), '---\nname: mine\n---\n# 用户手写的\n')
+
+    const outcome = removeEntryForRelink(foreign, ctxFor(coldPool))
+    expect(outcome.removed).toBe(false)
+    if (outcome.removed) throw new Error('unreachable')
+    expect(outcome.present).toBe(true)
+    expect(outcome.reason).toContain('cannot prove it created it')
+    // 目录与内容原封不动 —— 这是这条防线存在的全部意义
+    expect(existsSync(foreign)).toBe(true)
+    expect(readFileSync(join(foreign, 'SKILL.md'), 'utf-8')).toContain('用户手写的')
+  })
+
+  it('removes a real directory the deck DID record (its own pinned snapshot)', () => {
+    const root = makeTmp()
+    const { coldPool } = makeColdPoolSkill(root)
+    const ws = join(root, 'ws')
+    const snap = join(ws, 'oldsnap')
+    mkdirSync(snap, { recursive: true })
+    writeFileSync(join(snap, 'SKILL.md'), 'x')
+
+    const outcome = removeEntryForRelink(snap, ctxFor(coldPool, [snap]))
+    expect(outcome).toEqual({ removed: true, via: 'state-record' })
+    expect(existsSync(snap)).toBe(false)
+  })
+
+  it('REFUSES a symlink pointing outside this deck cold pool (another project / global config)', () => {
+    const root = makeTmp()
+    const { coldPool } = makeColdPoolSkill(root)
+    const otherProject = join(root, 'other-project', 'skill')
+    mkdirSync(otherProject, { recursive: true })
+    writeFileSync(join(otherProject, 'SKILL.md'), '---\nname: theirs\n---\n')
+    const ws = join(root, 'ws')
+    mkdirSync(ws, { recursive: true })
+    const link = join(ws, 'theirs')
+    symlinkSync(otherProject, link)
+
+    const outcome = removeEntryForRelink(link, ctxFor(coldPool))
+    expect(outcome.removed).toBe(false)
+    if (outcome.removed) throw new Error('unreachable')
+    expect(outcome.reason).toContain('outside this deck')
+    expect(lstatSync(link).isSymbolicLink()).toBe(true)
+    expect(existsSync(join(otherProject, 'SKILL.md'))).toBe(true)
+  })
+
+  it('missing path → present:false, so callers proceed with creation', () => {
+    const root = makeTmp()
+    const { coldPool } = makeColdPoolSkill(root)
+    const outcome = removeEntryForRelink(join(root, 'ws', 'nope'), ctxFor(coldPool))
+    expect(outcome).toEqual({ removed: false, present: false })
   })
 })
 

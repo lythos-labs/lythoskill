@@ -43,7 +43,6 @@ bunx @lythos/skill-deck@0.19.1 link
 | `--alias <name>` | Explicit alias (default: basename of path) | — |
 | `--type <type>` | Target section for `add`: `innate`, `tool`, `transient` | `tool` |
 | `--mode <mode>` | Link mode: `symlink` (default) or `snapshot` | `symlink` |
-| `--no-backup` | Skip tar backup when removing non-symlink entries | — |
 | `--dry-run` | Show plan without executing | — |
 | `--exec` | For `refresh`: execute git pull instead of plan-only | — |
 
@@ -60,6 +59,17 @@ bunx @lythos/skill-deck@0.19.1 link
 - Fanning the same deck into two dirs scanned by one CLI warns about duplicate-name discovery (opencode #46327).
 - A skill source inside the fan-out dir is refused (symlink-cycle ENAMETOOLONG class, opencode #45961).
 - `.clinerules` fans out as snapshot copies — Cline does not follow symlinks there.
+
+**Ownership guard.** deck only removes an entry it can prove it created — a symlink resolving into
+this deck's cold pool, or a path recorded in `skill-deck.state` (working set + every fan-out target
+it wrote). Anything else is reported and left alone. Directory containment is deliberately *not*
+the safety boundary: a fan-out target can be another project's `.claude/skills`, or a CLI's global
+config, and "it is inside a directory I write to" does not make it deck's. The same predicate gates
+`remove`, `to-symlink`, `to-snapshot`, and the reconciler.
+
+There is no backup path: nothing needs backing up once deletion is ownership-scoped, and the old
+tar archive was never restorable anyway (its members carried `../` prefixes). `--no-backup` is
+accepted but inert, and says so when used.
 
 Default decks (`.claude/skills` + `.agents/skills`) emit zero layout warnings and behave exactly as before.
 

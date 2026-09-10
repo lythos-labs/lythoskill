@@ -202,7 +202,7 @@ describe('normalizeSkillsSh', () => {
 // the probe's per-URL failure detail.
 
 import { spyOn } from 'bun:test'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { addSkill, type AddSkillIO } from './add.ts'
 import { ColdPool, buildFetchPlan, parseLocator } from '@lythos/cold-pool'
 
@@ -295,6 +295,80 @@ describe('addSkill advisory probe branch', () => {
         .rejects.toThrow('HARD_EXIT_1')
 
       expect(errLines.join('\n')).toContain('Network probe was inconclusive')
+    } finally {
+      errSpy.mockRestore()
+      warnSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  // ── 归属守卫(TASK-20260910111600389,AC4 全仓复查发现的第六处)──────
+  // `status:'failed'` 有两条来路,localhost 那条在 exists 检查**之前**返回 ——
+  // 于是 targetDir 可能压根不是本次运行建的,却照样被 recursive 删掉。
+  // 规则与前五处同一条:只清自己能证明是本次创建的东西。
+
+  it('fetch failure does NOT delete a pre-existing targetDir (alreadyExists gate)', async () => {
+    const { workdir, deckPath, targetDir } = makeAddSandbox()
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const warnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const exitCodes: number[] = []
+
+    // 运行前这儿就有东西(用户自己放的 / 别的工具放的)。
+    // buildFetchPlan 观测到这一点 → alreadyExists: true,闸门据此拒绝清理。
+    mkdirSync(targetDir, { recursive: true })
+    writeFileSync(join(targetDir, 'SKILL.md'), '---\nname: mine\n---\n# 我自己的\n')
+
+    const io: AddSkillIO = {
+      probe: (async () => undefined) as any,
+      // 模拟 localhost 那条来路:它在 exists 检查**之前**就返回 failed,
+      // 于是"已存在"与"failed"同时为真 —— 没有闸门时用户的目录就被吃掉了。
+      fetchPlan: ((() => ({
+        status: 'failed',
+        targetDir,
+        message: 'localhost locators have no remote; nothing to fetch',
+      })) as any),
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io))
+        .rejects.toThrow('HARD_EXIT_1')
+      expect(existsSync(join(targetDir, 'SKILL.md'))).toBe(true)
+      expect(readFileSync(join(targetDir, 'SKILL.md'), 'utf-8')).toContain('我自己的')
+    } finally {
+      errSpy.mockRestore()
+      warnSpy.mockRestore()
+      rmSync(workdir, { recursive: true, force: true })
+    }
+  })
+
+  it('fetch failure DOES clean up a partial clone this run created (alreadyExists: false)', async () => {
+    const { workdir, deckPath, targetDir } = makeAddSandbox()
+    const errSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const warnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const exitCodes: number[] = []
+
+    // 注意:targetDir 必须由**这次 fetch 尝试**造出来,不能在调用前就存在 ——
+    // `alreadyExists` 来自 buildFetchPlan 对真实 fs 的观测,不是 mock 能改的字段。
+    // 这正合闸门的语义:它问的是"运行前这儿有没有东西"。
+    expect(existsSync(targetDir)).toBe(false)
+
+    const io: AddSkillIO = {
+      probe: (async () => undefined) as any,
+      fetchPlan: ((() => {
+        // 模拟 git clone 写了一半然后失败:目录在本次尝试中才出现
+        mkdirSync(targetDir, { recursive: true })
+        writeFileSync(join(targetDir, 'partial'), 'half-written by a failed git clone')
+        return { status: 'failed', targetDir, message: 'git clone exploded halfway' }
+      }) as any),
+      exit: hardExitSentinel(exitCodes),
+    }
+
+    try {
+      await expect(addSkill('github.com/acme/widgets', { deck: deckPath, workdir }, io))
+        .rejects.toThrow('HARD_EXIT_1')
+      // 本次尝试的残留物:清掉,否则下次 add 会撞上半个仓库
+      expect(existsSync(targetDir)).toBe(false)
     } finally {
       errSpy.mockRestore()
       warnSpy.mockRestore()

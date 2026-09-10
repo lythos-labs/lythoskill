@@ -17,6 +17,13 @@ export const StateSkillSchema = z.object({
   dest: z.string(),
   mode: z.enum(["symlink", "snapshot"]).default("symlink"),
   deck_managed_dirs: z.array(z.string()).default([]),
+  /**
+   * 本 deck 创建过的**全部**绝对路径(symlink 与 fan-out 目标都算)。
+   * 删除守卫用它证明归属(k8s ownerReferences):只删这个集合里的条目。
+   * 与 `dest` 的区别:`dest` 只是工作集那一个,fan-out(cline `.clinerules`
+   * 的强制 snapshot 等)只有这里记。语义见 TASK-20260910111600389。
+   */
+  managed_dests: z.array(z.string()).default([]),
 });
 
 // ── 单个已链接 Skill (完整) ─────────────────────────────────
