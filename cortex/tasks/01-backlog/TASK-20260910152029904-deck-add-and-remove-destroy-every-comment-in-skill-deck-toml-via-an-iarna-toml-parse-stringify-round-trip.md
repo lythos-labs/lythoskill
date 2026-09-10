@@ -21,9 +21,9 @@
 ```
 第二次复现里 `# section comment for skill-b` 与 `[tool.skills.skill-b]` 一起消失 ——
 即 **`deck remove` 会删掉整个文件的所有注释**,不管那一条是否与被删的技能有关。
-`deck add` 同路径(`add.ts:445` / `:468`)。
+`deck add` 的原地重写同路径(`add.ts:445`;**同文件 `:468` 是新建文件分支,没有既有注释可吞,不在本条范围**)。
 
-**根因**:`remove.ts:152` 与 `add.ts:445/468` 都走
+**根因**:`remove.ts:152` 与 `add.ts:445` 都走
 `parseToml(raw)` → 改对象 → `stringify`(`@iarna/toml`)→`writeFileSync`。
 注释不在解析出来的对象里,序列化器自然写不回来;数组间距由序列化器决定。
 
@@ -38,6 +38,9 @@
 - **定性边界**:丢的是注释与格式,**不是技能数据**;技能、冷池、symlink 都不受影响。
   所以这不是 data-loss 级,是"文档与 diff 信噪比"级。
 
+**修成什么样(别修错方向)**:删块之后,紧贴其上方那条看起来属于它的注释**留在原地**(orphan)——
+那是用户的文字,deck 没创建它就没有删它的授权(同 `ADR-20260910112404500` 的判据)。
+本卡要修的是"deck 顺手把**整个文件的注释**都吞掉",不是反过来去清理孤注释。
 来源:执行 `TASK-20260910110545092` 的 B19 收口、真跑 `also-link-to-bdd` 时由
 task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本卡独立复现并扩大范围。
 
@@ -50,6 +53,10 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
+- [ ] **写入语法 = 读取语法**:三条定位规则全支持(table / `[tool.skills]` 内联条目 / legacy 数组),
+      少支持一种即为**静默收窄语法**(Round-1 ZK review H1+H2;规则在 ADR § Round-1 修正)
+- [ ] 空容器级联与现有行为一致(`skills` 空 → 删键;section 空 → 删表头),`remove.test.ts` C11.b **保持绿**
+- [ ] 新解析器进 `packages/lythoskill-deck/package.json`(依赖变更要在卡里可见,不能只活在 ADR 的选项表里)
 - [ ] `deck remove` 后,文件中**未被本次操作触碰**的注释逐字保留(byte-identical)
 - [ ] `deck add` 后同上
 - [ ] 未被触碰的键**不改写格式**(`also_link_to = [".a", ".b"]` 不得变成 `[ ".a", ".b" ]`)
@@ -99,25 +106,30 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] **AC1** 带注释的 deck → `deck remove <alias>` → `diff` 只显示被删的那一块,**无其他行变化**
-- [ ] **AC2** 带注释的 deck → `deck add <locator>` → 同上
-- [ ] **AC3** 回归测试钉住:注释保留 + 未触碰键格式不变(新增测试文件或并入现有 deck toml 测试)
-- [ ] **AC4** 现有语义零回归:`bun test packages/lythoskill-deck/` 保持 `0 fail`,归属判定相关测试全绿
-- [ ] **AC5** `migrate-schema` 的同类风险有结论(修 / 明确不修 + 理由)
+- [ ] **AC1** `deck remove <alias>` → 结果与「原文减去那一段」**逐字节相同**(前缀/后缀相等,不是“diff 看起来对”)
+- [ ] **AC2** `deck add <locator>` → 同上;用 `add.ts` 已有的 `AddSkillIO` seam 打桩,**不联网 clone**
+- [ ] **AC3** 三种形状各一条用例:table / `[tool.skills]` 内联条目 / legacy 数组;
+      fixture = `src/toml-splice.test.ts` 内联一份**注释密集且含非 ASCII 字符**的 deck
+      (纯 ASCII fixture 会让 H3 那类偏移单位错误永远绿着骗人)
+- [ ] **AC4** `bun test packages/lythoskill-deck/` 保持 `0 fail`;`remove.test.ts` C11.b(legacy 数组)
+      与归属判定相关测试全绿
+- [ ] **AC5** `migrate-schema` 同病有结论(修 / 明确不修 + 理由),**结论写进本卡 Notes**,
+      并在 ADR 的 Follow-up 行上打勾 + 写 commit sha(该 ADR 用 §5 的“自承载”形态)
+- [ ] **AC6** `package.json` 的新依赖在卡面可见(Requirements + Related Files 两处)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
 
 ## Related Files
 - Modified: (执行时填)
-- Added: (执行时填:测试 + 可能的行级编辑实现)
-- 相关:`packages/lythoskill-deck/src/remove.ts:152`、`src/add.ts:445/468`
+- Added: `src/toml-splice.test.ts`(三形状 + 非 ASCII fixture);`packages/lythoskill-deck/package.json` 增一个解析器依赖(**不是**行级编辑实现)
+- 相关:`packages/lythoskill-deck/src/remove.ts:152`(对象层改动后的写回;**legacy 数组分支在 `:130-138`**)、`src/add.ts:445`(原地重写,会吞注释);**`add.ts:468` 是新建文件分支 —— 没有既有注释可吞,不要顺手改它**(`add.test.ts:244` 钉着该行为)
 - 相关卡:`TASK-20260910110545092`(发现来源)、`TASK-20260910111600389`(归属语义,本卡不动)
-- 相关 ADR:`cortex/adr/01-proposed/ADR-20260910152957509-*.md`(本卡的决策载体)、`ADR-20260910112404500`(所有权判据,同向)
+- 相关 ADR:`cortex/adr/02-accepted/ADR-20260910152957509-*.md`(本卡的决策载体)、`ADR-20260910112404500`(所有权判据,同向)
 
 ## Git Commit Message
 ```
-feat(scope): description (TASK-20260910152029904)
+fix(deck): description (TASK-20260910152029904)
 
 - Detail 1
 - Detail 2

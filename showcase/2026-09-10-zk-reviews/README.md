@@ -1,0 +1,27 @@
+# ZK review logs — 2026-09-10
+
+Round logs from zero-knowledge reviews, kept **verbatim**. A review log is not a summary of a
+review: it is the artifact the *next* round reads. Convergence in this project's protocol does not
+depend on re-deriving the previous round's findings — it depends on the reviewer being able to see
+the earlier gap list and the author's response to it (`zk-review.md` → Step 3, "fork 语义").
+
+So: do not tidy these files, do not fold corrections into them, and do not delete a finding that
+later turned out wrong — a refuted finding, left standing next to its refutation, is exactly what
+stops the same false positive from consuming another round.
+
+| Log | Object under review | Pinned commit | Round |
+|---|---|---|---|
+| `904-plan-round1.md` | `TASK-20260910152029904` + `ADR-20260910152957509` (the **plan**, before execution) | `6ac2324d` | 1 |
+
+## Independence, stated in layers
+
+Both reviewers are **knowledge-independent**: each was launched with a zero-context prompt and read
+only the card/ADR, `AGENTS.md`, and the repo — never the author's session or reasoning.
+
+They are **not orchestration-independent**: the same session and the same orchestrator launched
+them, so they are not a second party in the sense `TASK-20260910110545092` B6 distinguishes. A
+verdict here says "an agent without the author's context could not find these problems" — it does
+not say "someone else has reviewed this".
+
+`904-plan-round1.md` was pinned to `6ac2324d`; its own report records `bun 1.3.11 / Darwin 24.6.0`
+and the independently re-run baseline (`253 pass / 1 skip / 0 fail / 661 expect`).
