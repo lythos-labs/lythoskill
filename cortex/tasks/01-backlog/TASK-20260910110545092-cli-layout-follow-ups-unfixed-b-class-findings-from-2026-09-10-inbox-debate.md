@@ -125,6 +125,33 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       重建后 `git diff --quiet skills/` 应为空,非空即说明产物此前是陈的。
       **注**:这不是本卡的 B 类历史项,是本次善后**顺带实测**出来的同类(产物 vs 来源不同步)。
 
+**治理机制本身**
+
+- [ ] **B21(新,2026-09-10 实测发现)** **`probe` 的 empty-shell 检测对 ADR 恒为假** ——
+      `cortex adr "<title>"` 刚建出来、一字未填的 ADR,**报 `0 empty shell(s)`**。
+      **实测复现(不是推断)**:
+      ```bash
+      bun packages/lythoskill-project-cortex/src/cli.ts adr "throwaway shell detection probe"
+      bun packages/lythoskill-project-cortex/src/cli.ts probe
+      #   ✅ cortex/adr/01-proposed: 1 consistent
+      #   ⚠️  Found 0 empty shell(s):
+      ```
+      **根因(读码确认)**:`commands/probe.ts:10-14` 的三条 pattern 是
+      `^- \[ \] ⚠️ PLACEHOLDER_` / `^- \[ \] 需求\d` / `^<!-- 填写` ——
+      全是**任务卡形态**(复选框 + 中文注释)。而 ADR 模板的占位形态是
+      `**Choice**: ⚠️ PLACEHOLDER_SCHEME`(无 `- [ ] ` 前缀)、裸 `-` 项目符号、
+      `<!-- ⚠️ REQUIRED: ... -->`(英文)。**三条 pattern 一条也匹配不上。**
+      而 `probe.ts:556` 明确把 `adrFiles` 传进了 `detectEmptyShells` ——
+      **扫了,但永远扫不出来**。
+      影响:`ADR` 是"决策的家",而**空 ADR 与填好的 ADR 在 probe 眼里没有区别**;
+      S5 ADR 的决策驱动第 2 条(「`probe` 只测空壳,测不了语义」)实际比写下的更弱 ——
+      对 ADR **连空壳都测不了**。
+      **修**:①ADRs 用 ADR 自己的占位形态补 pattern(至少
+      `^\*\*Choice\*\*:.*PLACEHOLDER_` 与「所有必填段均为裸 `-`」两式);
+      ②补一条单测:CLI 建 ADR → 未填 → `isEmptyShell` 必须为 `true`
+      (现在这条测试会红,正是它该红);③顺带核对 EPIC 模板是否同病。
+      **注**:与 B20 同类 —— 都是本次善后**顺带实测**出来的、机制自身的静默失效。
+
 **历史记录措辞**(就地改,不保留为"历史" —— 见 `feedback_handoff_typos_must_be_fixed`)
 
 - [ ] **B4** 卡面 :64 / `daily/2026-09-09.md:20` 的「Goose #11600 防线」措辞夸大:
@@ -239,6 +266,11 @@ B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
 
 - [ ] `cortex probe` 通过(本卡非空壳)
+- [ ] **B20**:pre-commit 重建触发条件覆盖「任一包的 `src/**` 且该包有 `skill/` 产物」;
+      并补 dormancy 式校验(重建后 `git diff --quiet skills/` 为空)
+- [ ] **B21**:`probe` 能抓出**未填的 ADR** —— 终结条件 = 一条单测:
+      `cortex adr` 建出的原始模板 → `isEmptyShell` 为 `true`(现在这条测试会红);
+      并核对 EPIC 模板是否同病
 - [ ] **B2**:`~/.config/goose/skills` 进 `triggerDirs`(`cli-layout.ts:175`),该目录触发
       data-loss 警告,有测试钉死 —— **且 `cli-layout.test.ts:49` 的
       `toEqual(['.goose/skills'])` 已从"钉住漏报"改为"钉住两目录 + 行为"**;
@@ -287,6 +319,13 @@ B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
     但**产物侧未修** —— 故本条保留在本卡,不在 ADR 里假装已解决。
   - B6 条目下已补指针:规矩落在 `ADR-20260910113730375`(accepted,2026-09-10),
     **但"以后怎么写"与"已写错的那两处文字"是两件事**,后者仍在本卡。
+- 2026-09-10: **新增 B21**(S6 收尾时实测发现)。**`probe` 的 empty-shell 检测对 ADR 恒为假** ——
+  用 CLI 现建一个一字未填的 ADR,`probe` 报 `0 empty shell(s)`(实测复现,非推断,复现命令见该条)。
+  根因:`probe.ts:10-14` 的三条 pattern 全是**任务卡形态**;`adrFiles` 虽然被传进了
+  `detectEmptyShells`(`:556`),但 ADR 模板的占位形态一条都匹配不上 —— **扫了,永远扫不出来**。
+  这条同时**加强了 S5 ADR 的决策驱动第 2 条**:原文说「`probe` 只测空壳,测不了语义」,
+  实测是**对 ADR 连空壳都测不了**。已在 B21 条目内一并订正该措辞的力度。
+  (与 B20 同类:都是机制自身的**静默**失效 —— 没有红,没有输出,与"检查过且安全"不可区分。)
 - 2026-09-10: `daily/2026-09-09.md` 就地修正完成(:20 交付段措辞 + 环境标注 + 证据落盘缺口;
   :29 P6 尾巴 —— opencode windows hazard **已撤除**,原文"已标注待复勘"不再成立)。
   **卡面正文不改** —— 由原卡 `## Notes` 注记承担(judge 定调:`completed` 保留,注记比改状态诚实)。
