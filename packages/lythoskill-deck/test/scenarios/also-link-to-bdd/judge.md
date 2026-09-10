@@ -30,9 +30,23 @@ Agent was asked to verify `also_link_to` fan-out across 3 targets (`.claude/skil
 | `kimi_a_restored` | After re-add + link, .kimi/skills/skill-a is a symlink | 1 | `lstat` → isSymbolicLink() = true |
 | `cold_pool_intact` | cold-pool skills untouched by remove | 1 | Both SKILL.md files exist with original content |
 | `decision_log` | decision-log.jsonl has valid entries | 1 | ≥6 lines with step/decision/reason/ts |
+| `foreign_dir_preserved` | A real directory deck never created, placed inside `.agents/skills`, still exists after re-link | 1 | `lstat` → isDirectory() = true |
+| `foreign_symlink_preserved` | A symlink into another project, placed inside `.agents/skills`, still exists after re-link | 1 | `lstat` → isSymbolicLink() = true; `readlink` unchanged |
+| `foreign_reported` | Both foreign entries are reported as left untouched, with a why + a concrete `rm -r` suggestion | 1 | link stderr mentions both names + "left untouched" + a `rm -r` line |
+| `foreign_target_intact` | The foreign symlink's target file is untouched (nothing recursed into it) | 1 | target `SKILL.md` exists with original content |
 
 ## Verdict
 
 - **PASS**: all 1-weight criteria met
-- **PARTIAL**: 14+ criteria met
-- **FAIL**: <14 criteria met
+- **PARTIAL**: 17+ criteria met
+- **FAIL**: <17 criteria met
+
+## Notes
+
+- The `foreign_*` criteria pin the **ownership** boundary (`TASK-20260910111600389`,
+  ADR-20260910112404500): deck removes only what it can prove it created. Criteria
+  `claude_a_removed` / `agents_a_removed` / `kimi_a_removed` are **not** in tension with it —
+  those entries are symlinks into this deck's own cold pool, i.e. deck created them.
+- `decision_log`: `ts` values must all come from one clock source. It is provenance, not a
+  timeline — do not compare it against file mtimes or commit times
+  (`reproduce-sh-bdd-contract.md`).
