@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/10 18:20:24
+> 自动生成于 2026/9/10 18:37:38
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 380 | 进行中: 1, 待验收: 1, 已完成: 317 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 107 | 已接受: 102 |
+| ADRs | 107 | 已接受: 101 |
 
 ---
 
@@ -495,7 +495,7 @@
 - ❌ **ADR-20260501091724816** (03-rejected): Rename cold pool to skill_library terminology alignment with Hermes ecosystem
 - ✅ **ADR-20260501092809000** (02-accepted): skills branch preserves `skills/` directory prefix to avoid dual locator standards
 - ✅ **ADR-20260501170000000** (02-accepted): Description Preference Learning via Arena — Pilot Results
-- ✅ **ADR-20260502010100000** (02-accepted): deck link backup strategy for non-symlink entries
+- 📦 **ADR-20260502010100000** (04-superseded): deck link backup strategy for non-symlink entries
 - ✅ **ADR-20260502012643244** (02-accepted): FQ-only locator — 删除 bare-name 与隐式策略 fallback
 - ✅ **ADR-20260502012643344** (02-accepted): 项目自身 skill 通过 `localhost/me/<name>` symlink 自举，删除 `cold_pool="."` 特例
 - ✅ **ADR-20260502012643444** (02-accepted): `deck add` 写入 FQ + 删除 `--via skills.sh` 后端

@@ -170,6 +170,9 @@ cold pool 的 symlink"是**形状** —— 它断言的是"这看起来像我建
   - 同类复查:仓内其余 `rmSync(..., {recursive:true})` 是否都在所有权证明之后可达。
 
 ## Related
+- **Supersedes**: `ADR-20260502010100000`(deck link 的 tar 备份策略)—— 整条作废:删除授权改成所有权之后,
+  "删之前先备份"这个句式所暗示的**越权是常态**不再成立;且那个 tar 本身不可解(成员带 `../` 前缀)。
+  本 ADR 的「已知边界」节记录了它的替代机制仍然不完美的地方(判据是形状而非出身)。
 - Related ADR: ADR-20260508230803515(curator 不做 feed-adapter —— "未经治理引入"的同类事故)
 - Related ADR: ADR-20260507190157540(snapshot/symlink 模式语义)
 - Related Task: TASK-20260910111600389
