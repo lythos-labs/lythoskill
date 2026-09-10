@@ -59,6 +59,26 @@ bunx @lythos/skill-deck@0.19.1 link
 - Fanning the same deck into two dirs scanned by one CLI warns about duplicate-name discovery (opencode #46327).
 - A skill source inside the fan-out dir is refused (symlink-cycle ENAMETOOLONG class, opencode #45961).
 - `.clinerules` fans out as snapshot copies — Cline does not follow symlinks there.
+- A fan-out target **no surveyed CLI scans** prints an **info** line (`<dir>: no layout data — hazards unknown`). Silence would read as "checked, and safe"; it is not — it means deck has no data for that directory. See *Unlisted targets* below.
+
+**Unlisted targets — silence is earned, not default.** The survey covers 16 CLIs; a target outside
+it gets no hazard analysis, and the two checks above both no-op on it. Printing nothing there would
+make `also_link_to = [".some-new-cli/skills"]` indistinguishable from a target that was checked and
+came back clean — a missing rule read as a passed rule. So the info line is the default. To silence
+it for a directory you *know* is out of scope, declare that knowledge:
+
+```toml
+[deck]
+also_link_to = [".agents/skills", ".some-new-cli/skills"]
+# gitignore-style acknowledgement: listed = silent. Suffix-matched, so one
+# pattern covers both relative and absolute spellings of the same dir.
+acknowledged_unlisted = [".some-new-cli/skills"]
+```
+
+The declaration is the source of the silence, and `skill-deck.toml` is git-tracked and reviewed —
+which is the whole point. Two properties worth knowing: the acknowledgement suppresses **only** the
+"no layout data" line, never a data-loss hazard (it is not a mute switch), and it is not checked for
+staleness — a pattern that matches nothing stays quietly inert. Rationale: **ADR-20260910120047122**.
 
 **Ownership guard.** deck only removes an entry it can prove it created — a symlink resolving into
 this deck's cold pool, or a path recorded in `skill-deck.state` (working set + every fan-out target

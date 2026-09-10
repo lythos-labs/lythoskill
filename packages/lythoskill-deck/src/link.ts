@@ -48,6 +48,19 @@ export function expandHome(p: string, base: string): string {
   return resolve(base, p);
 }
 
+/**
+ * `acknowledged_unlisted`:声明「这些 fan-out 目标没有 layout 数据,是已知的」。
+ *
+ * gitignore 式 —— 列出来即静默,不列则默认发声。**声明不展开 ~、不 resolve
+ * 绝对路径**:这些是模式不是目标,`dirMatches` 按后缀匹配,所以
+ * `.some-cli/skills` 同时命中相对与绝对写法的同一个目录。
+ * 非字符串项静默丢弃(TOML 打错类型不该让 link 崩)。
+ */
+export function parseAcknowledgedUnlisted(raw: any): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((v: any) => typeof v === 'string' && v.trim()).map((v: string) => v.trim());
+}
+
 export function parseAlsoLinkTo(raw: any, projectDir: string): { targets: string[], deprecated: boolean } {
   if (Array.isArray(raw)) {
     return {
@@ -352,6 +365,8 @@ const ALSO_LINK_TO = ALSO_LINK_TO_RESULT.targets;
 if (ALSO_LINK_TO_RESULT.deprecated) {
   console.warn('⚠️  Deprecation: also_link_to as comma-separated string is deprecated. Use TOML array: also_link_to = [".agents/skills"]');
 }
+// 名单外 fan-out 目标的静默豁免(gitignore 式):声明即静默。见 layout-policy.ts。
+const ACKNOWLEDGED_UNLISTED = parseAcknowledgedUnlisted(parsedToml.deck?.acknowledged_unlisted);
 
 // ── 收集声明 ────────────────────────────────────────────────
 
@@ -685,8 +700,12 @@ for (const target of ALSO_LINK_TO) {
 }
 
 // ── CLI-layout policy warnings(数据驱动;默认 .claude+.agents/skills 对零警告) ──
-for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO])) {
-  console.warn(`⚠️  [${w.severity}] ${w.message}`);
+// info 级(名单外目标)也用 ⚠️ 会让"没有 layout 数据"看起来像告警;两者语气不同,图标分开。
+for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO], {
+  acknowledgedUnlisted: ACKNOWLEDGED_UNLISTED,
+})) {
+  const icon = w.severity === 'info' ? 'ℹ️ ' : '⚠️ ';
+  console.warn(`${icon} [${w.severity}] ${w.message}`);
   console.warn(`   ref: ${w.ref}`);
 }
 
