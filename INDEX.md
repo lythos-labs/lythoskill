@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/10 15:32:18
+> 自动生成于 2026/9/10 15:51:21
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 378 | 进行中: 0, 待验收: 1, 已完成: 316 |
+| Tasks | 378 | 进行中: 0, 待验收: 0, 已完成: 317 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 106 | 已接受: 102 |
 
@@ -99,11 +99,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20260910110545092**: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
+_无_
 
-### 已完成 (316)
+### 已完成 (317)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -420,6 +420,7 @@ _无_
 - ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 - ✅ ~~TASK-20260909152255103~~: deck UX: ZK trial 5/10 — combo discoverability and vocabulary orientation
 - ✅ ~~TASK-20260909155425926~~: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
+- ✅ ~~TASK-20260910110545092~~: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
 - ✅ ~~TASK-20260910111600389~~: deck-fanout-deletion-must-be-ownership-scoped-not-directory-containment
 
 ### 悬置 (3)
