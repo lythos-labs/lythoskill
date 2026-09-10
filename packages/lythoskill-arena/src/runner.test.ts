@@ -348,3 +348,181 @@ deck = "/tmp/deck.toml"
     expect(logs.some(l => l.includes('deck link') && l.includes('exit 1'))).toBe(true)
   })
 })
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Per-cell decision logs (TASK-20260909010121918)
+//
+// Cells of one side share a workdir (`work/<side>/`). Before the fix, every
+// cell was told to write the same `decision-log.jsonl` there, so a run with
+// runs_per_side > 1 kept only the last cell's trail. Cell id → per-cell file
+// name; the run merges them at collect time.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('buildArenaPrompt — per-cell decision-log name', () => {
+
+  it('cellId → mandates the per-cell filename, not the shared one', () => {
+    const prompt = buildArenaPrompt({
+      brief: 'test',
+      cwd: '/tmp/arena-cell',
+      deckPath: '/tmp/test-deck.toml',
+      cellId: 'claude-run-1',
+    })
+    expect(prompt).toContain('MANDATORY — write decision-log-claude-run-1.jsonl')
+    expect(prompt).toContain('shared with other cells')
+  })
+
+  it('no cellId → legacy single-cell filename (arena single keeps its contract)', () => {
+    const prompt = buildArenaPrompt({
+      brief: 'test',
+      cwd: '/tmp/arena-cell',
+      deckPath: '/tmp/test-deck.toml',
+    })
+    expect(prompt).toContain('MANDATORY — write decision-log.jsonl')
+    expect(prompt).not.toContain('shared with other cells')
+  })
+
+  it('two cells of one side are told two different filenames', () => {
+    const base = { brief: 't', cwd: '/tmp/c', deckPath: '/tmp/d.toml' }
+    const a = buildArenaPrompt({ ...base, cellId: 'side-a-run-1' })
+    const b = buildArenaPrompt({ ...base, cellId: 'side-a-run-2' })
+    expect(a).toContain('decision-log-side-a-run-1.jsonl')
+    expect(b).toContain('decision-log-side-a-run-2.jsonl')
+  })
+})
+
+describe('runArenaFromToml — collect merges per-cell decision logs', () => {
+
+  const TOML_TWO_SIDES_TWO_RUNS = `
+[arena]
+task = "Write a hello world function"
+criteria = ["completeness"]
+runs_per_side = 2
+
+[[side]]
+name = "claude"
+player = "claude"
+deck = "/tmp/deck.toml"
+
+[[side]]
+name = "kimi"
+player = "kimi"
+deck = "/tmp/deck.toml"
+`
+
+  it('merges every cell log into <artifactsDir>/decision-log.jsonl', async () => {
+    const files = new Map<string, string>()
+    const cellLogs = new Map<string, string>([
+      ['/tmp/arena-out/work/claude/decision-log-claude-run-1.jsonl', '{"t":0,"phase":"setup","decision":"claude cell 1","reason":"r"}\n'],
+      ['/tmp/arena-out/work/claude/decision-log-claude-run-2.jsonl', '{"t":0,"phase":"setup","decision":"claude cell 2","reason":"r"}\n'],
+      ['/tmp/arena-out/work/kimi/decision-log-kimi-run-1.jsonl', '{"t":0,"phase":"setup","decision":"kimi cell 1","reason":"r"}\n'],
+      ['/tmp/arena-out/work/kimi/decision-log-kimi-run-2.jsonl', '{"t":0,"phase":"setup","decision":"kimi cell 2","reason":"r"}\n'],
+    ])
+
+    const mockIO: ArenaIO = {
+      log: () => {},
+      mkdir: () => {},
+      writeFile: (path: string, data: string) => { files.set(path, data) },
+      readFile: (path: string) => {
+        if (cellLogs.has(path)) return cellLogs.get(path)!
+        if (path === '/tmp/deck.toml') return 'skills = ["test"]'
+        throw new Error(`Unexpected read: ${path}`)
+      },
+      readdir: () => [],
+      cp: () => {},
+      spawn: async () => ({ exitCode: 0, stderr: '' }),
+      agentSpawn: async () => ({ stdout: 'ok', stderr: '', durationMs: 10 }),
+      exists: (path: string) => path === '/tmp/deck.toml' || cellLogs.has(path),
+      chdir: () => {},
+    }
+
+    await runArenaFromToml({
+      toml: parseArenaToml(TOML_TWO_SIDES_TWO_RUNS),
+      taskPath: '/tmp/task.md',
+      outDir: '/tmp/arena-out',
+      io: mockIO,
+    })
+
+    const merged = files.get('/tmp/arena-out/decision-log.jsonl')
+    expect(merged).toBeDefined()
+    // Every cell survives — the failure mode was losing all but one.
+    expect(merged).toContain('claude cell 1')
+    expect(merged).toContain('claude cell 2')
+    expect(merged).toContain('kimi cell 1')
+    expect(merged).toContain('kimi cell 2')
+    expect(merged!.trim().split('\n')).toHaveLength(4)
+    // Deterministic: ordered by cell id.
+    expect(merged).toBe(
+      '{"t":0,"phase":"setup","decision":"claude cell 1","reason":"r"}\n' +
+      '{"t":0,"phase":"setup","decision":"claude cell 2","reason":"r"}\n' +
+      '{"t":0,"phase":"setup","decision":"kimi cell 1","reason":"r"}\n' +
+      '{"t":0,"phase":"setup","decision":"kimi cell 2","reason":"r"}\n'
+    )
+  })
+
+  it('the prompt each cell actually receives names its own log file', async () => {
+    const prompts: string[] = []
+    const files = new Map<string, string>()
+
+    const mockIO: ArenaIO = {
+      log: () => {},
+      mkdir: () => {},
+      writeFile: (path: string, data: string) => { files.set(path, data) },
+      readFile: (path: string) => {
+        if (path === '/tmp/deck.toml') return 'skills = ["test"]'
+        throw new Error(`Unexpected read: ${path}`)
+      },
+      readdir: () => [],
+      cp: () => {},
+      spawn: async () => ({ exitCode: 0, stderr: '' }),
+      agentSpawn: async (opts: { brief: string }) => {
+        prompts.push(opts.brief)
+        return { stdout: '', stderr: '', durationMs: 1 }
+      },
+      exists: (path: string) => path === '/tmp/deck.toml',
+      chdir: () => {},
+    }
+
+    await runArenaFromToml({
+      toml: parseArenaToml(TOML_TWO_SIDES_TWO_RUNS),
+      taskPath: '/tmp/task.md',
+      outDir: '/tmp/arena-out',
+      io: mockIO,
+    })
+
+    // Two cells per side share ONE workdir — the prompts must not name one file.
+    expect(prompts).toHaveLength(4)
+    expect(prompts[0]).toContain('MANDATORY — write decision-log-claude-run-1.jsonl')
+    expect(prompts[1]).toContain('MANDATORY — write decision-log-claude-run-2.jsonl')
+    expect(prompts[2]).toContain('MANDATORY — write decision-log-kimi-run-1.jsonl')
+    expect(prompts[3]).toContain('MANDATORY — write decision-log-kimi-run-2.jsonl')
+    expect(new Set(prompts.map(p => p.match(/write (\S+\.jsonl)/)?.[1])).size).toBe(4)
+  })
+
+  it('no cell produced a log → no merged file invented', async () => {
+    const files = new Map<string, string>()
+    const mockIO: ArenaIO = {
+      log: () => {},
+      mkdir: () => {},
+      writeFile: (path: string, data: string) => { files.set(path, data) },
+      readFile: (path: string) => {
+        if (path === '/tmp/deck.toml') return 'skills = ["test"]'
+        throw new Error(`Unexpected read: ${path}`)
+      },
+      readdir: () => [],
+      cp: () => {},
+      spawn: async () => ({ exitCode: 0, stderr: '' }),
+      agentSpawn: async () => ({ stdout: '', stderr: '', durationMs: 1 }),
+      exists: (path: string) => path === '/tmp/deck.toml',
+      chdir: () => {},
+    }
+
+    await runArenaFromToml({
+      toml: parseArenaToml(TOML_TWO_SIDES_TWO_RUNS),
+      taskPath: '/tmp/task.md',
+      outDir: '/tmp/arena-out',
+      io: mockIO,
+    })
+
+    expect(files.has('/tmp/arena-out/decision-log.jsonl')).toBe(false)
+  })
+})

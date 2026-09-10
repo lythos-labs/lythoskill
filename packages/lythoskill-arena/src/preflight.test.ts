@@ -11,6 +11,9 @@
  */
 
 import { describe, it, expect } from 'bun:test'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import {
   parseDeckSkills,
   checkSkillExistence,
@@ -18,6 +21,11 @@ import {
   buildCopyPlan,
   resolveColdPoolDir,
   formatSkillWarnings,
+  decisionLogName,
+  isDecisionLogName,
+  mergeDecisionLogs,
+  LEGACY_DECISION_LOG,
+  type DecisionLogSource,
 } from './preflight'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -653,5 +661,140 @@ describe('buildAgentsMd vocabulary gloss (F3)', () => {
     expect(md).toContain('**innate**')
     expect(md).toContain('**tool**')
     expect(md).toContain('**max_cards**')
+  })
+})
+
+// ═══════════════════════════════════════════════════════════════════════════
+// decision logs — per-cell naming (TASK-20260909010121918)
+//
+// Defect: five cells per side shared one workdir and one mandated filename
+// (`decision-log.jsonl`). Filename is a constant → shared path → last writer
+// wins; the 2026-09-09 side-a log lost S3a/S4a/S5a entirely.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('decisionLogName', () => {
+
+  it('per-cell id → per-cell filename', () => {
+    expect(decisionLogName('s1a')).toBe('decision-log-s1a.jsonl')
+    expect(decisionLogName('claude-run-2')).toBe('decision-log-claude-run-2.jsonl')
+  })
+
+  it('two distinct cell ids never share a path', () => {
+    expect(decisionLogName('s1a')).not.toBe(decisionLogName('s3a'))
+  })
+
+  it('no id → legacy single-cell name', () => {
+    expect(decisionLogName()).toBe(LEGACY_DECISION_LOG)
+    expect(decisionLogName('')).toBe(LEGACY_DECISION_LOG)
+  })
+
+  it('id cannot escape the workdir (no separators, no traversal, no dotfile)', () => {
+    expect(decisionLogName('../evil')).toBe('decision-log-evil.jsonl')
+    expect(decisionLogName('a/b')).toBe('decision-log-a-b.jsonl')
+    expect(decisionLogName('claude run 1')).toBe('decision-log-claude-run-1.jsonl')
+    for (const hostile of ['../evil', 'a/b', '..', './x', 'a\\b', '..\0']) {
+      const name = decisionLogName(hostile)
+      expect(name).not.toContain('/')
+      expect(name).not.toContain('\\')
+      expect(name.startsWith('.')).toBe(false)
+      expect(isDecisionLogName(name)).toBe(true)
+    }
+  })
+
+  it('separator-only id degrades to the legacy name, never to a bare prefix', () => {
+    expect(decisionLogName('///')).toBe(LEGACY_DECISION_LOG)
+  })
+})
+
+describe('isDecisionLogName', () => {
+
+  it('accepts the legacy name and per-cell names', () => {
+    expect(isDecisionLogName('decision-log.jsonl')).toBe(true)
+    expect(isDecisionLogName('decision-log-s1a.jsonl')).toBe(true)
+  })
+
+  it('rejects unrelated files', () => {
+    expect(isDecisionLogName('decision-log.jsonl.bak')).toBe(false)
+    expect(isDecisionLogName('decision-log.txt')).toBe(false)
+    expect(isDecisionLogName('my-decision-log.jsonl')).toBe(false)
+    expect(isDecisionLogName('judge-verdict.json')).toBe(false)
+  })
+})
+
+describe('mergeDecisionLogs', () => {
+
+  const s1a: DecisionLogSource = {
+    cell: 's1a',
+    content: '{"t":0,"phase":"setup","decision":"picked palette","reason":"theme"}\n',
+  }
+  const s3a: DecisionLogSource = {
+    cell: 's3a',
+    content: '{"t":0,"phase":"setup","decision":"resolved id","reason":"card"}\n',
+  }
+
+  it('keeps every line from every cell — nothing is dropped', () => {
+    const merged = mergeDecisionLogs([s1a, s3a])
+    expect(merged).toContain('picked palette')
+    expect(merged).toContain('resolved id')
+    expect(merged.trim().split('\n')).toHaveLength(2)
+  })
+
+  it('order is by cell id, not input order — same inputs, same bytes', () => {
+    const a = mergeDecisionLogs([s1a, s3a])
+    const b = mergeDecisionLogs([s3a, s1a])
+    expect(a).toBe(b)
+    expect(a.indexOf('picked palette')).toBeLessThan(a.indexOf('resolved id'))
+  })
+
+  it('lines are kept verbatim — no re-encoding, no injected field', () => {
+    const odd: DecisionLogSource = { cell: 'x', content: 'not json at all\n{"t":1,"phase":"p","decision":"d","reason":"r"}' }
+    const merged = mergeDecisionLogs([odd])
+    expect(merged).toContain('not json at all')
+    expect(JSON.parse(merged.trim().split('\n')[1])).toEqual({ t: 1, phase: 'p', decision: 'd', reason: 'r' })
+  })
+
+  it('blank lines are not entries; each line keeps exactly one newline', () => {
+    const gappy: DecisionLogSource = { cell: 'g', content: '\n{"t":1,"phase":"p","decision":"d","reason":"r"}\n\n' }
+    expect(mergeDecisionLogs([gappy])).toBe('{"t":1,"phase":"p","decision":"d","reason":"r"}\n')
+  })
+
+  it('a lone legacy file merges to itself (idempotent)', () => {
+    const content = '{"t":0,"phase":"setup","decision":"d","reason":"r"}\n'
+    expect(mergeDecisionLogs([{ cell: LEGACY_DECISION_LOG, content }])).toBe(content)
+  })
+
+  it('no sources → empty string (callers can skip writing)', () => {
+    expect(mergeDecisionLogs([])).toBe('')
+  })
+})
+
+describe('decision-log — 2-writer concurrency (real fs)', () => {
+
+  it('two cells writing concurrently in ONE workdir both survive the merge', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'arena-decision-log-'))
+    try {
+      // Two cells, one shared workdir, one writer each, interleaved by an await.
+      // Before the fix both paths were the same constant, so this write pair
+      // clobbered and the merge below would lose one cell's only entry.
+      const write = async (cellId: string, line: string) => {
+        await Bun.sleep(0)
+        writeFileSync(join(dir, decisionLogName(cellId)), line + '\n', 'utf-8')
+      }
+      await Promise.all([
+        write('s1a', '{"t":0,"phase":"setup","decision":"cel a","reason":"ra"}'),
+        write('s3a', '{"t":0,"phase":"setup","decision":"cell b","reason":"rb"}'),
+      ])
+
+      const merged = mergeDecisionLogs([
+        { cell: 's1a', content: await Bun.file(join(dir, decisionLogName('s1a'))).text() },
+        { cell: 's3a', content: await Bun.file(join(dir, decisionLogName('s3a'))).text() },
+      ])
+
+      expect(merged).toContain('cel a')
+      expect(merged).toContain('cell b')
+      expect(merged.trim().split('\n')).toHaveLength(2)
+    } finally {
+      rmSync(dir, { recursive: true, force: true })
+    }
   })
 })
