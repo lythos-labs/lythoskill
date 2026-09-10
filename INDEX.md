@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/10 11:25:24
+> 自动生成于 2026/9/10 11:32:07
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 377 | 进行中: 0, 待验收: 0, 已完成: 316 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 100 | 已接受: 96 |
+| ADRs | 101 | 已接受: 97 |
 
 ---
 
@@ -576,6 +576,7 @@ _无_
 - ✅ **ADR-20260828004129233** (02-accepted): player adapter lifecycle policy aliases renames and version support ranges
 - ✅ **ADR-20260828005453077** (02-accepted): incubate standalone general-purpose zk review skill
 - ✅ **ADR-20260910112404500** (02-accepted): deck-removal-boundary-is-ownership-not-directory-containment-k8s-ownerreferences
+- ✅ **ADR-20260910113131220** (02-accepted): player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge
 
 ---
 
