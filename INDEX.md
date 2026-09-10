@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/9/9 22:57:14
+> 自动生成于 2026/9/10 11:25:19
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 375 | 进行中: 0, 待验收: 0, 已完成: 315 |
+| Tasks | 377 | 进行中: 0, 待验收: 0, 已完成: 315 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 99 | 已接受: 95 |
+| ADRs | 100 | 已接受: 96 |
 
 ---
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (15)
+### 待办 (17)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -93,6 +93,8 @@
 - [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
+- [ ] **TASK-20260910110545092**: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
+- [ ] **TASK-20260910111600389**: deck-fanout-deletion-must-be-ownership-scoped-not-directory-containment
 
 ### 进行中 (0)
 
@@ -573,6 +575,7 @@ _无_
 - ✅ **ADR-20260828004129143** (02-accepted): host-agent handoff as default execution mode when arena runs inside an agent
 - ✅ **ADR-20260828004129233** (02-accepted): player adapter lifecycle policy aliases renames and version support ranges
 - ✅ **ADR-20260828005453077** (02-accepted): incubate standalone general-purpose zk review skill
+- ✅ **ADR-20260910112404500** (02-accepted): deck-removal-boundary-is-ownership-not-directory-containment-k8s-ownerreferences
 
 ---
 
