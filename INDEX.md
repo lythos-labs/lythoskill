@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/10 19:00:42
+> 自动生成于 2026/9/11 00:08:29
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 383 | 进行中: 0, 待验收: 2, 已完成: 319 |
+| Tasks | 383 | 进行中: 0, 待验收: 0, 已完成: 321 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 107 | 已接受: 102 |
 
@@ -100,12 +100,11 @@
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260910181747676**: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
-- 🔍 **TASK-20260910184110804**: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
+_无_
 
-### 已完成 (319)
+### 已完成 (321)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -425,6 +424,8 @@ _无_
 - ✅ ~~TASK-20260910110545092~~: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
 - ✅ ~~TASK-20260910111600389~~: deck-fanout-deletion-must-be-ownership-scoped-not-directory-containment
 - ✅ ~~TASK-20260910152029904~~: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
+- ✅ ~~TASK-20260910181747676~~: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
+- ✅ ~~TASK-20260910184110804~~: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 - ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
 
 ### 悬置 (3)
