@@ -141,6 +141,8 @@ bunx @lythos/skill-deck@latest validate
 | `[deck]` | `max_cards` | No | `10` | Max skills active in the working set |
 | `[deck]` | `cold_pool` | No | `~/.agents/skill-repos` | Root directory for cloned skill repos |
 | `[deck]` | `working_set` | No | `.claude/skills` | Directory where symlinks are created |
+| `[deck]` | `also_link_to` | No | `[]` | Extra fan-out targets — the same skills linked into other CLIs' dirs (POSSE pattern). Each target must be the directory that CLI **scans for skills** (`.claude/skills`), **not its config root** (`~/.claude`, `~/.config`) — a config root gets a warning naming the dir to use instead |
+| `[deck]` | `acknowledged_unlisted` | No | `[]` | gitignore-style: fan-out targets you know are outside the surveyed CLI-layout set, so their `no layout data` info line stops printing. Never suppresses a data-loss hazard, and never the config-root warning |
 | `[innate]` | `skills.<name>.path` | Yes* | — | Always loaded; agent cannot override |
 | `[tool]` | `skills.<name>.path` | Yes* | — | Available for agent to invoke |
 | `[transient]` | `skills.<name>.path` | Yes* | — | Time-bounded skills (auto-expire) |
