@@ -29,10 +29,22 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **数据层自检**
 
-- [ ] **B2** goose data-loss 漏报:`cli-layout.ts`goose 行
-      `fanOutTargets` 含 `~/.config/goose/skills`,但 hazard `recursive-unlink-delete` 的
+- [ ] **B2** goose data-loss 漏报:`cli-layout.ts:166` goose 行
+      `fanOutTargets` 含 `~/.config/goose/skills`,但 `:175` hazard `recursive-unlink-delete` 的
       `triggerDirs` 只有 `[".goose/skills"]`;`collectTriggerHazards`(`layout-policy.ts:32-45`)只查 `triggerDirs` → 用户 `also_link_to` 该目录时 data-loss
-      警告不触发。修:`triggerDirs` 扩为两目录(`dirMatches` 归一化直接支持,一行)。
+      警告不触发。
+      **修:两处,不是一处**(2026-09-10 复核修正 —— 原写"一行"是错的):
+      1. **数据行** `cli-layout.ts:175`:`triggerDirs` 扩为
+         `[".goose/skills", "~/.config/goose/skills"]`(`dirMatches` 归一化直接支持)。
+      2. **断言行** `cli-layout.test.ts:49`:
+         `expect(h.triggerDirs).toEqual(['.goose/skills'])` —— 它把漏报**钉成绿的**。
+         只改数据不改这里,测试立刻红(这其实是好事:红了才证明断言有效);
+         但红之后若只是把断言跟着改成新值而**不补**"该目录确实触发警告"的行为用例,
+         就只是把"钉住旧行为"换成"钉住新数据形状",漏报仍可能复现。
+         故此处要改成 `toContain` 两目录**并**新增一条 `collectTriggerHazards` 行为断言。
+      **为什么原判"一行"会错**:判据来自数据行目视,而这条断言和它同文件同 describe ——
+      测试与实现出自同一处理解时,测试不是独立的第二意见,是同一处理解的第二份抄写
+      (同 `targetModeOverride` 只喂 cline 一个输入的结构)。
       附:范围裁剪需注释说明 #11600 的引用范围。
 - [ ] **B13** `perRoleScoping` schema 债:自由文本进 typed schema、**全仓零消费方**、
       无 `layoutProblems` 检查。修:`layoutProblems()` 加非空 + 长度上限检查。
@@ -43,6 +55,23 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 - [ ] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
       unpersisted`),导致 qwen 行只能按"候选顺序首名"补录。定性 = **取证过程未留痕**,
       非"调研方式不可靠"。修:确立普查证据的落盘位置与命名。
+      **同一段还有第二例(2026-09-10 复核新发现)**:P2 的独立验证(ZK re-trial,
+      `8.5/10` gate ≥7)全部落在 `/tmp/arena-p2-adapter-retrial/`
+      (`adversarial.test.ts` + `decision-log.jsonl` + `self-report.md`),**未入仓**。
+      仓里 `showcase/` + `reproduce.sh` 协议**存在**(ADR-20260518024500631;
+      20 个 showcase 条目 + `test/scenarios/*/reproduce.sh`),但 P2 该批
+      **零条目、零 scenario、零 verdict 产物** —— 协议没被套用。
+      核查(2026-09-10):
+      - deck 现有 5 个 BDD scenario,只有 `deck-remove-bdd` 与
+        `to-symlink-snapshot-bdd` 带 `judge-verdict.json` + `decision-log.jsonl`;
+        **覆盖 fan-out 的那一个 `also-link-to-bdd` 两个产物都没有** ——
+        它是 IoC handoff 式(Step 3 只打提示,不执行),2026-05-19 建后**从未被真正跑过**,
+        最后一次触碰还是 `9f22d497 docs(readme)`(文档提交,未复验)。
+      - 故"fan-out 有可复盘的 E2E"这句话**目前不成立**:有脚本,无裁决。
+      修:(1) `/tmp` 那份是**唯一副本**,先落盘 —— 它是本卡"已证伪/已证实"断言的原始证据;
+      (2) 定案普查证据与 ZK 证据的统一落盘位置与命名;(3) 复验并盘活 `also-link-to-bdd`
+      (并对齐新归属语义,见下条),使其产出 verdict 产物。
+      注:`/tmp` 随重启清空 —— 本条有时间敏感性。
 
 **IO 分离 / 测试**
 
@@ -53,6 +82,17 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       `renderPerRun` 不动;测试改为纯函数走真 tmp + 入口只留零副作用 smoke。
 - [ ] **B10** `safe-remove.test.ts:101-103` 递归删除测试只断言目录消失、**无嵌套内容断言** ——
       Bun 若把 `recursive` 退化成 no-op 仍绿。修:补一行嵌套文件断言。
+- [ ] **B19(新,2026-09-10 加)** `also-link-to-bdd/reproduce.sh` 的断言与**新归属语义**相冲:
+      其 PHASE 2 断言 "10. `.agents/skills/skill-a` does NOT exist / 11. `.kimi/skills/skill-a`
+      does NOT exist" —— 那是**目录包容**语义下的期望。`TASK-20260910111600389`
+      (已收,commit `e2edc52e`)把边界改成 **k8s ownerReferences 式归属判定**:
+      证明不了"是我建的"就不删,改为 warn + 给 `rm -r` 建议。
+      照原样重放,该场景会得到"条目仍在 + 一条 warning",而脚本说它该消失 ——
+      **复现者会以为是回归**。修:PHASE 2 拆两路 ——
+      (a) deck 自己建的 entry → 仍应被删(= 原断言,保留);
+      (b) 外来真实目录占位 → 应**留下** + 出 warning(新增,钉新边界)。
+      另:该场景无 `judge-verdict.json` / `decision-log.jsonl`(见上条),复验时一并补。
+      **这条不是历史问题** —— 是本次善后(fan-out 归属修复)**派生**出的既有资产失配。
 
 **文档 / 注释**
 
@@ -74,13 +114,63 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       @ Bun 1.3.11 / macOS;`214/0/0` 仅在 git spawn 探针成功时成立。
 - [ ] **B6** 「独立测试」混淆两层:知识独立(prompt 零上下文)**达成**,
       编排独立(同 session)**未达成**。措辞需分层。
+      载体 = 原卡 Progress Log 的 `212 tests independently reproduced` /
+      `ZK re-trial 8.5/10` 两句:「独立」在那里同时被用来指
+      (i) 结论不是自证的(prompt 零上下文 → **成立**)、
+      (ii) 结论是被别人验的(不同 session / 不同方 → **不成立**:折入是同 session 同 agent 做的)。
+      这两件事必须分开写 —— 否则 (i) 的成立会被读成 (ii) 的成立。
+      **这正是 S6 ADR 要立的规矩的对象**(评审对象须 commit-pinned)。
 
-**Owner 裁决项(不在本卡自裁)**
+> **B4/B5 的改法**:卡面(`04-completed/TASK-20260909155425926`)正文**不改** ——
+> 项目纪律禁止重写已收卡(见 Technical Approach)。卡面的错由**原卡 `## Notes` 注记**
+> 承担(写明哪句错了、错在哪、以什么为准);`daily/2026-09-09.md` 是**活文档**,
+> 下任 agent 当事实读,故**就地改**(`feedback_handoff_typos_must_be_fixed`)。
+> 两处的处理不同,是刻意的。
 
-- [ ] **B17** CI `bun-version: latest` ×7(`test.yml` 5 处 + `release.yml` 2 处)未 pin ——
-      `node:fs` 兼容层语义随版本漂移;真正的钉是 dormancy 测试不是版本号,但 pin + 升级窗口是加固。
-- [ ] **B18** 名单外 CLI 的 advisory 静默(默认 fallback):与"治理层"叙事有缝隙。
-      "默认静默 vs 默认提示(info 级)"是产品取向,非技术题。
+**Owner 裁决项(不在本卡自裁)** —— 每条给:陈述(事实)/ 选项 / 影响
+
+### B17 — CI 的 Bun 版本未 pin
+
+**陈述(2026-09-10 复核实测)**:`bun-version: latest` 全仓 **8 处**(judge 记的 ×7 漏了
+`deploy-pages.yml:30`)—— `.github/workflows/test.yml` 5 处(`:20/:58/:91/:117/:143`)+
+`release.yml` 2 处(`:30/:121`)+ `deploy-pages.yml` 1 处(`:30`)。
+背景:B11 立了"`node:*` 是 Bun 兼容层,行为假设必须有 Bun 实测测试钉死"的纪律 ——
+那么"跑在哪个 Bun 上"就从一个无关细节变成了**证据的一部分**:同一条 dormancy 测试,
+Bun 1.3 与 2.x 下的通过与否可能不同,而 CI 不告诉你是哪个。
+
+**选项**
+| | 做法 | 代价 |
+|---|---|---|
+| **A** | 维持 `latest` | 零维护;但 CI 绿不说明本地绿,且失败会以"上游改了"的形式突然出现,不可预算 |
+| **B** | pin 到具体版本(如 `1.3.11`,与 judge 复跑环境一致)+ 手动升级窗口 | 需一条"何时升"的规矩,否则变成无人升的死版本;换来"CI 结论可归因到版本" |
+| **C** | pin major.minor(如 `1.3.x`) | 折中:吃补丁不吃 breaking;但"1.3.x 内行为是否可能变"本身未证,等于把不确定性留在中间 |
+
+**影响**:A 与项目的"行为假设必须有测试钉死"纪律有张力(测试钉住了行为,却没钉住解释器);
+C 引入一个未证的中间假设。**我倾向 B**,但这是"要不要为此付维护成本"的取舍,归 owner。
+
+### B18 — 名单外 fan-out 目标:零 advisory 与"已检查且安全"不可区分
+
+**陈述(2026-09-10 复核,顺带定位)**:`collectTriggerHazards` 与 `collectDuplicateScans`
+(`layout-policy.ts:32-72`)都是先 `layoutsScanning(t)` 再遍历命中行。目标目录不属于任何已知
+layout 时,`layoutsScanning` 返回 `[]` → 两个循环都不进 → **零输出**。
+于是 `also_link_to = [".some-new-cli/skills"]` 与 `[".claude/skills"]`(默认 deck,
+经设计休眠)**在输出上完全一样**。而"没有输出"对人/agent 的读法是"检查过了,没问题",
+不是"没有这份数据"。这与 `no-source-no-rule` 的推论同形:**缺失的规则被读成了通过的规则**。
+(注:`deck per-run <未知 id>` 那条**不静默** —— `per-run.ts:42-46` 返回 error + 支持列表。
+本项说的只有 fan-out 警告这条路。)
+
+**选项**
+| | 做法 | 代价 |
+|---|---|---|
+| **A** | 维持默认静默 | 默认 deck 零噪音(有 dormancy 测试保着);代价是名单外目标拿到的是**假的安全感** |
+| **B** | 名单外目标出 **info 级**一行(`<dir>: no layout data — hazards unknown`) | 与"治理层"叙事一致;代价是任何非标准目标都加一行,可能被当噪音而学会忽略 → 警告疲劳 |
+| **C** | 只在**非默认** deck 上出(info),默认 deck 静默 | 保住默认零噪音;但"默认/非默认"的判据要定,规则变复杂 |
+
+**影响**:这是产品取向不是技术题 —— B 是"诚实优先",A 是"信噪比优先",
+两者都能自洽,但**必须选一个并写进 README**,否则下个 agent 会按自己的偏好改回去。
+现状(A)的问题不是"它错了",是"它是个没人做过的决定"。归 owner。
+
+B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
 
 **已由前置完成(记 done,不在本卡重复)**
 
@@ -107,7 +197,10 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
 
 - [ ] `cortex probe` 通过(本卡非空壳)
-- [ ] **B2**:`~/.config/goose/skills` 进 `triggerDirs`,该目录触发 data-loss 警告,有测试钉死
+- [ ] **B2**:`~/.config/goose/skills` 进 `triggerDirs`(`cli-layout.ts:175`),该目录触发
+      data-loss 警告,有测试钉死 —— **且 `cli-layout.test.ts:49` 的
+      `toEqual(['.goose/skills'])` 已从"钉住漏报"改为"钉住两目录 + 行为"**;
+      用 mutation test 证明新断言能抓住旧行为(`triggerDirs` 改回单目录 → 必须红)
 - [ ] **B13**:`layoutProblems()` 对 `perRoleScoping` 有非空 + 长度检查
 - [ ] **B3**:`verifiedBy` 字段落地,仅 qwen 行标 `restored`,`layoutProblems()` 对
       "restored 且 note 为空"报错;16 行普查数据未改
@@ -115,7 +208,13 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 - [ ] **B10**:`safe-remove` 递归删除测试断言嵌套文件内容
 - [ ] **B8**:deck README 不含 `buildPrunePlan` / `executePrunePlan` 的虚假宣称
 - [ ] **B11/B12**:`AGENTS.md` 语义层纪律成文;`safe-remove.ts` 注释引 Bun 实测测试而非 Node 文档
-- [ ] **B4/B5/B6**:卡面与 daily 措辞修正完成,`## Notes` 记录了修正项
+- [ ] **B4/B5/B6**:`daily/2026-09-09.md` **就地**修正完成;卡面**经原卡 Notes 注记**修正
+      (正文不动),原卡 Notes 记录了修正项
+- [ ] **取证未留痕**:`/tmp/arena-p2-adapter-retrial/` 的 ZK 证据已落盘入仓;普查证据与 ZK 证据
+      的**落盘位置与命名**已成文(否则本条只是把这一份挪个地方,下批照样丢)
+- [ ] **B19**:`also-link-to-bdd` 已对齐新归属语义(自建 → 删;外来 → 留 + warn),
+      且产出 `decision-log.jsonl` + `judge-verdict.json`(与 `deck-remove-bdd` /
+      `to-symlink-snapshot-bdd` 同形 —— 现在只有这两个有产物)
 - [ ] **B17/B18**:已整理成可裁决形态并呈现 owner,结论(或"待裁决")落在本卡 Notes
 - [ ] `bun test packages/lythoskill-deck/` 全程保持 `0 fail`,测试数变化只在有意的增删处
 
@@ -123,10 +222,29 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 <!-- Update during execution, with timestamps -->
 
 - 2026-09-10: 卡创建(judge must #1)。前置段 S1(B1)与 S2(改名)在开卡同批执行。
+- 2026-09-10: **卡面回填 + 原卡注记**(善后计划 S4)。四处修正:
+  (1) **B2 的改法从「一行」改写为两处** —— 数据行 `cli-layout.ts:175` **加**
+  断言行 `cli-layout.test.ts:49`(原判只看了数据行,漏了那条把漏报钉成绿的断言);
+  (2) **B17 计数 7 → 8**(judge 漏了 `deploy-pages.yml:30`),B17/B18 改写为
+  「陈述 + 选项 + 影响」的可裁决形态;
+  (3) **新增 B19** —— `also-link-to-bdd` 与新的归属语义相冲(本次善后**派生**的既有资产失配);
+  (4) **「取证未留痕」补第二例** —— P2 的 ZK 证据只在 `/tmp/arena-p2-adapter-retrial/`,
+  未入仓;仓里 `showcase/` + `reproduce.sh` 协议该批**零套用**(核查见该条)。
+- 2026-09-10: `daily/2026-09-09.md` 就地修正完成(:20 交付段措辞 + 环境标注 + 证据落盘缺口;
+  :29 P6 尾巴 —— opencode windows hazard **已撤除**,原文"已标注待复勘"不再成立)。
+  **卡面正文不改** —— 由原卡 `## Notes` 注记承担(judge 定调:`completed` 保留,注记比改状态诚实)。
+- 2026-09-10: 原卡 `TASK-20260909155425926` 的 `## Notes` 已补注记(证伪对照表 +
+  Follow-up 指针 + 删除边界被证伪一节)。**S1/S2/S3 的前置产物一并登记**:
+  S1 = `e2edc52e` 同批;S2 改名 = `981d48b9` 前批;S3 ADR = `981d48b9` + 收口 `ac859c14`。
 
 ## Related Files
 - Modified:
+  - `daily/2026-09-09.md`(S4:@20 交付段措辞/环境标注/证据落盘缺口;@29 P6 尾巴)
+  - `cortex/tasks/04-completed/TASK-20260909155425926-cli-adapter-hardening-symlink-tiers-hazard-classes-per-run-dirs.md`
+    (S4:补 `## Notes`,唯一一处被允许的 `04-completed/` 改动)
 - Added:
+  - (本卡自身,`01-backlog/`;执行时按下述清单落)
+  - 执行时预计动的:待落盘位置定案后回填 `/tmp/arena-p2-adapter-retrial/` 的证据
 
 ## Git Commit Message
 ```
@@ -149,11 +267,38 @@ fix(deck): cli-layout follow-ups - B-class findings from inbox-debate (TASK-2026
 `adapter-policy.test.ts`、`cli.ts:160` 门面串、`link.ts` 散文注释)。以实际 grep 为准。
 
 **刻意不做的**:不重开普查、不换人工名单、不引入自动发现 —— 见 two-axis ADR 的 rejected
-alternatives。
+alternatives。**该 ADR 已落地**:
+`cortex/adr/02-accepted/ADR-20260910113131220-player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge.md`
+(2026-09-10 收口,`ac859c14`)。其 rejected alternatives 一节即本条所指,可直接引用而非复述。
 
 **改名已落地(2026-09-10,与本卡开卡同批)**:`adapter-registry.ts` → `cli-layout.ts`,
 `adapter-policy.ts` → `layout-policy.ts`,`CliAdapter`/`AdapterHazard`/`ADAPTER_REGISTRY`/
 `adaptersScanning`/`adapterById`/`registryProblems` → `CliLayout`/`Hazard`/`CLI_LAYOUTS`/
 `layoutsScanning`/`layoutById`/`layoutProblems`。**本卡全部活引用已同步到新名**。
 下方「不要以 defender 的估算为准」一段里的旧文件名是**历史陈述**(记录当时漏了什么),
-保留不改。测试计数改名前后逐字相同:`213 pass / 1 skip / 0 fail / 544 expect / 16 files`。
+保留不改。
+测试计数:**改名前后**逐字相同 —— `213 pass / 1 skip / 0 fail / 544 expect / 16 files`
+@ Bun 1.3.11 / macOS。**注(2026-09-10,同日追加)**:该值是**改名时点**的值,此后
+`TASK-20260910111600389`(commit `e2edc52e`,归属判定 + 新增测试)把它推到了
+`227 pass / 1 skip / 0 fail / 589 expect / 228 tests / 16 files`。
+**引用任何测试计数时必须带"哪个 commit + 什么环境"** —— 裸值正是 B5 的坑,
+本卡不该在 Notes 里自己再踩一次。
+
+**B17 / B18 结论:待裁决(unresolved)** —— 已整理成「陈述 + 选项 + 影响」形态呈 owner
+(见 Requirements 对应小节),但 owner 尚未拍板。**本卡不自裁**。两条都不是技术题:
+B17 是"要不要为可归因性付版本维护成本",B18 是"诚实优先还是信噪比优先"。
+回填此处的时机 = owner 给出结论时。
+
+**S4 回填时发现的两件事(2026-09-10)**
+
+1. **"fan-out 有可复盘的 E2E"目前不成立**(详见 Requirements「取证未留痕」第二例)。
+   协议在、脚本在,**裁决不在**:deck 现有 5 个 BDD scenario 里只有 2 个带 verdict 产物,
+   而**唯一覆盖 fan-out 的 `also-link-to-bdd` 恰好没有**,且从未被执行过
+   (Step 3 是 IoC 提示,最后一次触碰是 `9f22d497 docs(readme)`)。
+   → 记 B19,并对齐新归属语义。
+2. **B2 的"一行"是错的**(见 Requirements B2)。成因值得记:判据取自**数据行目视**,
+   而那条把漏报钉成绿的断言**就在同文件同 describe 里** ——
+   测试与实现出自同一处理解时,测试不是独立的第二意见,是同一处理解的第二份抄写。
+   这与 `targetModeOverride` 只喂 cline 一个输入是同一种病。
+   → 已被 S5 ADR(提案纪律)与 S6 ADR(评审对象须 commit-pinned)分别从
+   "决策落盘"与"评审对象"两侧收口。

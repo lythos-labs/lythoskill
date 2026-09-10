@@ -90,3 +90,47 @@ fix(deck): adapter policy tiers from 16-CLI survey — Goose unlink hazard, per-
 ```
 
 ## Notes
+
+### 已知未修(2026-09-10 辩论确认)
+
+2026-09-10 的 inbox-debate 试验(challenge 式质询,`playground/2026-09-10-inbox-debate/`)
+对本卡全部宣称做了逐条复核。sober judge 终裁 = **附条件维持**,缺陷清单分三态:
+**A = 已修** / **B = 已证实的事实且未修** / **C = 未验证方案**。
+
+本卡在**收卡时点**成立,其中若干条**次日被部分证伪**。按 judge 原话:
+> `completed` 的成色 = 收卡时点成立、次日被部分证伪 —— **注记比改状态诚实,`completed` 保留**。
+
+故状态**不动**(`completed`),正文**不改**(项目纪律:已收卡不重写),错在下面逐条注明。
+
+**本卡正文中已被证伪/需要限定的话(以本节为准)**
+
+| 卡面 | 原话 | 2026-09-10 复核结论 |
+|---|---|---|
+| `:64` | `safe-remove.ts`(unlink-only 删除 — **Goose #11600 防线**) | **措辞夸大**。judge 实查父 commit:旧代码**无可达的**"递归进 symlink 目标"路径 —— 没有被挡住的实际漏洞。真实价值 = 显式不变式 + 断链修复 + 防未来回退 |
+| `:71` | 「Tests **213 pass / 0 fail**」 | **裸值 + 缺环境**。这是**条件值**,非不变量:canonical 调用下为 `213 pass / 1 skip / 544 expect / 16 files` @ Bun 1.3.11 / macOS;`214/0/0` 仅在 git spawn 探针成功时成立。引用须带环境 |
+| Progress Log | `212 tests **independently** reproduced` / `ZK re-trial 8.5/10` | **「独立」混淆两层**。知识独立(prompt 零上下文)→ **达成**;编排独立(被评方之外的方验证)→ **未达成**(折入是同 session 同 agent 做的)。原文两处「独立」读起来像后者,实际只有前者 |
+| Progress Log | 本卡与 daily 谓「六处删除点审计无 data-loss 路径」 | **次日被部分证伪**。见下一节 |
+| 正文 | `adapter-registry.ts` / `adapter-policy.ts` / `CliAdapter` 等 | **已改名**(2026-09-10):`cli-layout.ts` / `layout-policy.ts` / `CliLayout` 等。原因 = 与 `@lythos/agent-adapter` 的 `registry.ts` 撞名且无交叉文档(debate B14/C4/C5),见下 |
+
+**删除边界被证伪(2026-09-10 新卡收口)**
+
+`TASK-20260910111600389`(commit `e2edc52e`,ADR-20260910112404500)查明:本卡交付的 fan-out
+删除用的是**目录包容**(containment)边界,而非**归属**(ownership)边界 ——
+当 `also_link_to` 指向**项目外**目录(另一个项目的 `.claude/skills`、用户的全局 CLI 配置)时,
+可递归删掉 deck **从未创建过**的东西。本卡"六处删除点审计无 data-loss 路径"的结论,
+对**默认 deck 工作集**成立,对 **fan-out 目标**不成立 —— 而 fan-out 正是本卡的交付内容;
+且那次审计的范围本身不全,2026-09-10 的全仓复扫又在 `add.ts:332` 找到一处未覆盖的删除。
+已改为 k8s `ownerReferences` 式归属判定:证明不了"是我建的"就不删,改为 warn + 给 `rm -r` 建议。
+**另**:本卡同时退役了备份路径(`--no-backup` 保留但 inert)—— 归档不可解(含 `../` 前缀的 tar 成员),
+"假的安全承诺"与假 source 同类。
+
+### Follow-up
+
+- **未修项(judge 判 B 类)全部落到** `cortex/tasks/01-backlog/TASK-20260910110545092-cli-layout-follow-ups-unfixed-b-class-findings-from-2026-09-10-inbox-debate.md`
+  —— 含 B2/B3/B4/B5/B6/B8/B9/B10/B11/B12/B13 + 取证未留痕 + 两条 owner 裁决项(B17/B18)。
+- **命名与轴归属** → `cortex/adr/02-accepted/ADR-20260910113131220-player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge.md`
+- **删除边界** → `cortex/adr/02-accepted/ADR-20260910112404500-deck-removal-boundary-is-ownership-not-directory-containment-k8s-ownerreferences.md`
+- **本卡的独立验证证据只在 `/tmp/arena-p2-adapter-retrial/`,未入仓** —— 仓里
+  `showcase/` + `reproduce.sh` 协议(ADR-20260518024500631)本批**零套用**。随重启即失。
+- **`also-link-to-bdd/reproduce.sh` 与本卡的新归属语义相冲**(其 PHASE 2 仍断言
+  "所有目标里 skill-a 都不存在"),且从未产出 verdict 产物 → 见 follow-up 卡 B19。
