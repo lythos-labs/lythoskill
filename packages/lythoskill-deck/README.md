@@ -180,13 +180,14 @@ Different agents scan different directories. Set `working_set` in `skill-deck.to
 Deck separates pure logic from IO:
 
 ```
-deck.toml → RefreshPlan / PrunePlan (pure) → execute with injectable IO
+deck.toml  → RefreshPlan (deck, pure)          → execute with injectable IO
+cold pool  → PrunePlan   (@lythos/cold-pool, pure) → execute with injectable IO
 ```
 
-- **Plan**: `buildRefreshPlan()`, `buildPrunePlan()` — pure functions, unit-testable
-- **Execute**: `executeRefreshPlan(plan, io)`, `executePrunePlan(plan, io)` — IO injected (`gitPull`, `delete`, `log`)
+- **Refresh** (this package): `buildRefreshPlan()` / `executeRefreshPlan(plan, io)` in `src/refresh-plan.ts` — IO injected (`gitPull`, `delete`, `log`).
+- **Prune** (`@lythos/cold-pool`): `buildPrunePlan(coldPoolPath)` / `executePrunePlan(plan, io)` in its `src/prune-plan.ts`. Prune plans from the **cold pool**, not from `deck.toml` — deck declares what to keep, the cold pool is what accumulates — so the functions live there, not here.
 
-This enables testing without real git operations. Full pattern: [Intent / Plan / Execute](https://github.com/lythos-labs/lythoskill/blob/main/cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md).
+Full pattern: [Intent / Plan / Execute](https://github.com/lythos-labs/lythoskill/blob/main/cortex/wiki/01-patterns/2026-05-04-intent-plan-execute-fractal-architecture-pattern.md).
 
 ## Test Coverage
 

@@ -8,9 +8,9 @@
 import { describe, it, expect, afterEach } from 'bun:test'
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readdirSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { tmpdir } from 'node:os'
+import { tmpdir, homedir } from 'node:os'
 
-import { renderPerRun, perRun, type PerRunIO } from './per-run.ts'
+import { renderPerRun, perRun, targetsFromDeck, type PerRunIO } from './per-run.ts'
 
 let cleanup: string[] = []
 afterEach(() => {
@@ -69,6 +69,28 @@ describe('renderPerRun — unsupported CLIs', () => {
     expect(r.error).toMatch(/Unknown CLI/)
     expect(r.error).toMatch(/kimi/)
     expect(r.error).toMatch(/crush/)
+  })
+})
+
+describe('targetsFromDeck — pure, no filesystem (B9)', () => {
+  // 这一组**不写任何文件**:抽这个纯函数之前,覆盖同一段逻辑必须造真 deck
+  it('working_set alone → one absolute target', () => {
+    expect(targetsFromDeck({ deck: { working_set: '.claude/skills' } }, '/proj'))
+      .toEqual(['/proj/.claude/skills'])
+  })
+
+  it('working_set + also_link_to → ordered, all absolute', () => {
+    expect(targetsFromDeck({ deck: { working_set: '.claude/skills', also_link_to: ['.agents/skills', '~/.kimi/skills'] } }, '/proj'))
+      .toEqual(['/proj/.claude/skills', '/proj/.agents/skills', join(homedir(), '.kimi/skills')])
+  })
+
+  it('missing [deck] → the documented default, not a crash', () => {
+    expect(targetsFromDeck({}, '/proj')).toEqual(['/proj/.claude/skills'])
+  })
+
+  it('deprecated string form is still accepted', () => {
+    expect(targetsFromDeck({ deck: { working_set: '.claude/skills', also_link_to: '.agents/skills' } }, '/proj'))
+      .toEqual(['/proj/.claude/skills', '/proj/.agents/skills'])
   })
 })
 

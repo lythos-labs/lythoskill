@@ -77,7 +77,26 @@ export interface CliLayout {
   source: string;
   /** 验证日(ISO date) */
   verifiedAt: string;
+  /**
+   * 这一行的**取证出身**。缺省 = "survey"(2026-09-09 那轮普查当场取证)。
+   * `"restored"` = 原普查报告未持久化,该行是按候选顺序**补录**的 —— 所有 16 行
+   * 的 `verifiedAt` 都是普查日,单看它读不出"这行是补的"(B3:一个日期字段
+   * 同时承载 普查日/复核日/补录日 三件事,补录出身只活在 note 散文里)。
+   * 约束:标了 restored 的行**必须**在 note 里写明补录经过(layoutProblems 强制)。
+   */
+  verifiedBy?: "survey" | "restored";
 }
+
+/** verifiedBy 的合法取值(闭集,与 SYMLINK_TIERS / HAZARD_SEVERITIES 同形) */
+export const VERIFIED_BY = ["survey", "restored"] as const;
+
+/**
+ * perRoleScoping 的长度上限。**这不是风格偏好,是 prose guard**:该字段是
+ * "一行数据",散文会长成第二份文档(与 hazards[].note 的边界同)。取 200 =
+ * 当前最长行 140(dsh 的 ctx.skills 那条)**再留 60 字符余量** —— 数字有出处,
+ * 不是拍的;真有一行需要更长时,该改的是数据形态而不是这个数。
+ */
+export const PER_ROLE_SCOPING_MAX = 200;
 
 /**
  * 普查宣称 16 家。2026-09-09 取证窗口(/tmp,14:55–15:45)可复核 15 家的
@@ -172,7 +191,11 @@ export const CLI_LAYOUTS: readonly CliLayout[] = [
         severity: "data-loss",
         ref: "https://github.com/aaif-goose/goose/issues/11600",
         note: "Removing a project-linked skill via Goose recursively deletes the symlink TARGET (cold-pool content). Never remove deck skills through the Goose UI — use `deck remove`. Deck's own unlink path never recurses into a symlink target",
-        triggerDirs: [".goose/skills"],
+        // 该 issue 描述的是 Goose **UI 的删除动作**,与目录位置无关 —— 所以
+        // triggerDirs 覆盖 goose 扫描的**每一个**目录,而不只是项目内那个
+        // (B2:只写 .goose/skills 时,`also_link_to = ["~/.config/goose/skills"]`
+        // 这个同样会被 Goose 扫到、同样能被 UI 删的目标,一句话都不报)。
+        triggerDirs: [".goose/skills", "~/.config/goose/skills"],
       },
     ],
     source: "https://block.github.io/goose/docs/tutorials/using-skills",
@@ -388,6 +411,7 @@ export const CLI_LAYOUTS: readonly CliLayout[] = [
     ],
     source: "https://github.com/QwenLM/qwen-code/blob/main/docs/users/features/skills.md",
     verifiedAt: "2026-09-09",
+    verifiedBy: "restored",
   },
 ];
 
@@ -481,7 +505,8 @@ export function targetModeOverride(dir: string): { mode: "snapshot"; reason: str
 
 /**
  * 数据自检(测试 + 未来 validate 命令用):
- * 每行 id 唯一、tier/severity 合法、source 是 URL、verifiedAt 是 ISO 日期。
+ * 每行 id 唯一、tier/severity 合法、source 是 URL、verifiedAt 是 ISO 日期、
+ * verifiedBy 合法且补录行有 note 交代、perRoleScoping 非空且不超长。
  * 行数缺口(普查 16 vs 实际落行)显式报告,不静默。
  */
 export function layoutProblems(): string[] {
@@ -494,6 +519,18 @@ export function layoutProblems(): string[] {
       problems.push(`${a.id}: invalid symlinkTier ${a.symlinkTier}`);
     if (!/^https?:\/\//.test(a.source)) problems.push(`${a.id}: source is not a URL: ${a.source}`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(a.verifiedAt)) problems.push(`${a.id}: verifiedAt not ISO date: ${a.verifiedAt}`);
+    // B3:补录出身必须显式且带交代 —— verifiedAt 一个日期读不出"这行是补的"
+    if (a.verifiedBy !== undefined && !(VERIFIED_BY as readonly string[]).includes(a.verifiedBy))
+      problems.push(`${a.id}: invalid verifiedBy ${a.verifiedBy}`);
+    if (a.verifiedBy === "restored" && !a.hazards.some(h => h.note?.trim()))
+      problems.push(`${a.id}: verifiedBy=restored but no hazard note records how it was restored`);
+    // B13:schema 债 —— perRoleScoping 是"一行数据",空着等于没答,散文会长成第二份文档
+    if (!a.perRoleScoping?.trim()) problems.push(`${a.id}: perRoleScoping is empty`);
+    else if (a.perRoleScoping.length > PER_ROLE_SCOPING_MAX)
+      problems.push(
+        `${a.id}: perRoleScoping is ${a.perRoleScoping.length} chars (max ${PER_ROLE_SCOPING_MAX}) — ` +
+          `it is a one-line datum; long prose belongs in a source doc, not this table`
+      );
     for (const h of a.hazards) {
       if (!(HAZARD_SEVERITIES as readonly string[]).includes(h.severity))
         problems.push(`${a.id}: hazard ${h.id} invalid severity ${h.severity}`);

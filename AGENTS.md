@@ -134,6 +134,8 @@ Principle: **intelligence in SKILL.md, stable integration in npm, mechanical glu
 
     Live instances, both sides: ADR-20260910120047122's "为什么不去重" (dropped) and its "层级错位" section (kept) — same one-question test in both: *does the edge case cost one line of output, or lose one piece of information?*
 
+11. **`node:*` is Bun's compat layer — prove behavior with a test, never with Node docs.** Reading `node:fs` / `node:path` / TOML docs and asserting "this is how it behaves" is an unsourced rule wearing a citation (see `feedback_no_source_no_rule`'s repo-side twin). Any behavioral assumption about these modules — symlink handling, `existsSync` following links, broken-link semantics, error shapes — must be nailed by a test that actually runs under Bun, and the interpreter version is pinned so the claim is attributable (see §9). Live instance: `safe-remove.ts`'s lstat/broken-link discipline cites the two `safe-remove.test.ts` cases, not the Node docs.
+
 #### Action Discipline (both directions)
 
 Impulses are normal — what matters is whether they connect directly to action. The goal is what's good for the project and the work, never the fastest way to make the user feel better.

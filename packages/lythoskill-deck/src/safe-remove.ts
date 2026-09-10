@@ -22,7 +22,10 @@
  * 纪律:
  *   - lstat 判定(不跟随链接):symlink 与真实目录走不同分支
  *   - 断链也要能删(existsSync 会跟随链接漏掉断链,所以不用它判定)
- *     → 见 safe-remove.test.ts 的实测断言,不引 Node 文档语义
+ *     → 证据是**在 Bun 下真跑过**的两条测试,不是 Node 文档:
+ *       `removeSymlinkOnly` 的 "cold-pool target content survives byte-identical"
+ *       (lstat 分支)与 "removes broken symlinks (existsSync-based code leaked these)"
+ *       (断链分支)。`node:*` 是 Bun 的兼容层,文档语义不等于运行时行为(AGENTS.md §2 规则 11)
  *   - 判定(deckOwnsEntry)与执行(remove*)分离:判据不删东西,删除不猜归属
  */
 

@@ -6,11 +6,31 @@ import { createHash } from 'node:crypto';
 import type { WorkflowConfig } from '../types.js';
 import { parseFrontmatter } from '../lib/frontmatter.js';
 
-/** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent. */
+/** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent.
+ *
+ * Two families, because the templates do not share a placeholder shape:
+ * - **task / epic** produce checkbox placeholders (`- [ ] ⚠️ PLACEHOLDER_…`) that the filling
+ *   agent deletes, so a surviving checkbox is a reliable "never touched" marker.
+ * - **ADR** produces none of those: its required sections are bare `-` bullets and a
+ *   `**Choice**: ⚠️ PLACEHOLDER_SCHEME` line, with `<!-- ⚠️ REQUIRED: … -->` comments that
+ *   **stay** in a filled ADR (they are instructions, not placeholders). Before B21 the three
+ *   task patterns matched nothing in an ADR while `detectEmptyShells` was still being handed
+ *   `adrFiles` — scanned, and could never fire. An empty ADR and a filled one looked identical.
+ *
+ * The two ADR patterns below are chosen to be decidable rather than heuristic, and were
+ * checked against every ADR in this repo (112 files, 0 hits — see the probe test):
+ * - the untouched `**Choice**` line — never survives filling, since the choice must be written;
+ * - a `REQUIRED` comment whose section holds no content at all (comment → blank → next heading).
+ * A tempting third candidate, "a bullet with nothing after it" (`/^-\s*$/`), was **rejected**:
+ * it fired on two hand-filled ADRs in this repo that legitimately contain one, i.e. it would
+ * have manufactured coverage claims about files that are fine.
+ */
 export const EMPTY_SHELL_PATTERNS: RegExp[] = [
   /^- \[ \] ⚠️ PLACEHOLDER_/m,
   /^- \[ \] 需求\d/m,
   /^<!-- 填写/m,
+  /^\*\*Choice\*\*: ⚠️ PLACEHOLDER_/m,
+  /^<!-- ⚠️ REQUIRED:[^\n]*-->\s*\n\s*\n(?=#)/m,
 ];
 
 /** Check whether a markdown content string contains empty-shell placeholders. Pure function, no IO.

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { filterEmptyShells, isEmptyShell, EMPTY_SHELL_PATTERNS, extractStatusHistory } from "./probe.js";
+import { createAdrTemplate } from "../lib/template.js";
 
 describe("isEmptyShell — pure content detection, no filesystem", () => {
   it("detects PLACEHOLDER_ requirement", () => {
@@ -113,16 +114,48 @@ describe("extractStatusHistory", () => {
 });
 
 describe("EMPTY_SHELL_PATTERNS", () => {
-  it("has exactly 3 patterns", () => {
-    expect(EMPTY_SHELL_PATTERNS.length).toBe(3);
-  });
-
   it("patterns are multiline-aware", () => {
     for (const pat of EMPTY_SHELL_PATTERNS) {
       expect(pat.multiline).toBe(true);
     }
   });
+
+  // 原本这里断言 `length === 3` —— 它钉的是形状而不是行为,所以模板合法增长时
+  // 它会红,而真正的失效(ADR 恒不被检测)它一句话都说不出(B21)。换成行为断言。
+
+  it("an unfilled ADR is a shell — templates do not share a placeholder shape (B21)", () => {
+    // 任务卡是 `- [ ] ⚠️ PLACEHOLDER_…`;ADR 是 `**Choice**: ⚠️ PLACEHOLDER_SCHEME`
+    // + 裸 `-` 项目符号,一条任务卡 pattern 都匹配不上 —— 加 pattern 前这里是 false
+    expect(isEmptyShell(createAdrTemplate("ADR-20260101000000001", "t"))).toBe(true);
+  });
+
+  it("a filled ADR is NOT a shell — REQUIRED comments stay in filled files", () => {
+    // 那些 `<!-- ⚠️ REQUIRED: … -->` 是**指令**不是占位符:填好的 ADR 里它们还在,
+    // 所以任何把它们当 marker 的检测都会把每一篇 ADR 误报成空壳
+    expect(isEmptyShell(filledAdr())).toBe(false);
+  });
+
+  it("an ADR with Choice written but a required section still empty is a shell", () => {
+    // 部分填写的形态:Choice 换了,但背景/驱动/影响仍是空的(只剩指令注释)
+    const partial = createAdrTemplate("ADR-20260101000000002", "t")
+      .replace("**Choice**: ⚠️ PLACEHOLDER_SCHEME", "**Choice**: Option B");
+    expect(isEmptyShell(partial)).toBe(true);
+  });
+
+  it("a bullet with nothing after it is NOT a marker (measured: 2 hand-filled ADRs have one)", () => {
+    // 曾被考虑作为 ADR 空壳的第二式,已否决:`/^-\\s*$/` 在本仓 112 篇 ADR 里
+    // 命中 2 篇**填好的**,即它会制造关于健康文件的覆盖率假象。
+    const content = "# ADR-1: t\n\n## Decision Drivers\n<!-- ⚠️ REQUIRED: x -->\n- why\n\n- \n\n## Options\n- a real bullet\n";
+    expect(isEmptyShell(content)).toBe(false);
+  });
 });
+
+/** 一篇"填好了的" ADR:占位符换掉,每个 REQUIRED 段后面接上内容。 */
+function filledAdr(): string {
+  return createAdrTemplate("ADR-20260101000000003", "t")
+    .replace("**Choice**: ⚠️ PLACEHOLDER_SCHEME", "**Choice**: Option B (selected)")
+    .replace(/^(<!-- ⚠️ REQUIRED:[^\n]*-->)$/gm, "$1\n\nFilled-in prose for this required section.");
+}
 
 describe("filterEmptyShells — pure filtering by path strings, no filesystem", () => {
   const backlogShell = "TASK-20260101000000001: cortex/tasks/01-backlog/TASK-20260101000000001-some-task.md";

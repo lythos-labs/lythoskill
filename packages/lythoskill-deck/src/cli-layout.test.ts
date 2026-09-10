@@ -15,6 +15,7 @@ import {
   targetModeOverride,
   layoutProblems,
   layoutById,
+  PER_ROLE_SCOPING_MAX,
 } from './cli-layout.ts'
 
 describe('cli-layout data integrity', () => {
@@ -33,6 +34,21 @@ describe('cli-layout data integrity', () => {
     }
   })
 
+  it('qwen is the only row whose provenance is "restored" (B3)', () => {
+    // verifiedAt 16 行同为普查日,单看它读不出"这行是补的" —— 补录出身必须显式
+    const restored = CLI_LAYOUTS.filter(a => a.verifiedBy === 'restored').map(a => a.id)
+    expect(restored).toEqual(['qwen-code'])
+    const qwen = layoutById('qwen-code')!
+    expect(qwen.hazards.some(h => /restored|unpersisted/i.test(h.note))).toBe(true)
+  })
+
+  it('perRoleScoping is non-empty and stays a one-line datum (B13)', () => {
+    for (const a of CLI_LAYOUTS) {
+      expect(a.perRoleScoping.trim().length, `${a.id}`).toBeGreaterThan(0)
+      expect(a.perRoleScoping.length, `${a.id}`).toBeLessThanOrEqual(PER_ROLE_SCOPING_MAX)
+    }
+  })
+
   it('docs-tier set is exactly the survey-verified four', () => {
     const docsTier = CLI_LAYOUTS.filter(a => a.symlinkTier === 'docs').map(a => a.id).sort()
     expect(docsTier).toEqual(['claude-code', 'codex', 'gemini-cli', 'roo-code'])
@@ -46,7 +62,10 @@ describe('cli-layout data integrity', () => {
     const h = goose.hazards.find(x => x.id === 'recursive-unlink-delete')!
     expect(h.severity).toBe('data-loss')
     expect(h.ref).toMatch(/11600/)
-    expect(h.triggerDirs).toEqual(['.goose/skills'])
+    expect(h.triggerDirs).toContain('.goose/skills')
+    // B2:同一个动作(Goose UI 删除)对 goose 扫到的**每个**目录都成立,
+    // 所以 ~/.config/goose/skills 也必须激活 —— 只写项目内那个是漏报
+    expect(h.triggerDirs).toContain('~/.config/goose/skills')
   })
 
   it('data-loss hazards must have triggerDirs (no warn-on-every-deck)', () => {
@@ -54,6 +73,23 @@ describe('cli-layout data integrity', () => {
       for (const h of a.hazards) {
         if (h.severity === 'data-loss') {
           expect(h.triggerDirs?.length, `${a.id}/${h.id}`).toBeGreaterThan(0)
+        }
+      }
+    }
+  })
+
+  it('a data-loss hazard covers every EXCLUSIVE fan-out target of its own layout (B2, property)', () => {
+    // 不变量版(比钉字面值强):hazard 描述的是**动作**(如 Goose UI 删除),
+    // 动作落在该 CLI 扫到的哪个目录上都一样 —— 所以除**共享目录**外必须全覆盖。
+    // 共享目录(.agents/skills 等,≥2 家扫描)是刻意的例外:默认 deck 就扇进它,
+    // 覆盖它会让每个默认 deck 次次报警(cli-layout.ts hazard.triggerDirs 注释)。
+    // 这条不变量在 B2 修复前是红的 —— 它抓的是**整类**漏报,不是那一行。
+    for (const a of CLI_LAYOUTS) {
+      const exclusive = a.fanOutTargets.filter(t => layoutsScanning(t).length === 1)
+      for (const h of a.hazards) {
+        if (h.severity !== 'data-loss') continue
+        for (const t of exclusive) {
+          expect(h.triggerDirs, `${a.id}/${h.id} must cover exclusive target ${t}`).toContain(t)
         }
       }
     }

@@ -129,11 +129,18 @@ describe('removeEntryForRelink — 归属判定先行(k8s ownerReferences)', () 
     const { coldPool } = makeColdPoolSkill(root)
     const ws = join(root, 'ws')
     const snap = join(ws, 'oldsnap')
-    mkdirSync(snap, { recursive: true })
+    // B10:嵌套内容 + 嵌套**目录**两层。只断言"顶层目录不见了"证不了递归真的走到底
+    // (一个只 unlink 目录项的实现在非空目录上会抛错,而把 recursive 退化成
+    //  "删掉能删的" 的实现在这里就会留下内层)—— 所以断言到最里层那份文件上。
+    const deep = join(snap, 'nested', 'deeper')
+    mkdirSync(deep, { recursive: true })
     writeFileSync(join(snap, 'SKILL.md'), 'x')
+    writeFileSync(join(deep, 'SKILL.md'), 'y')
 
     const outcome = removeEntryForRelink(snap, ctxFor(coldPool, [snap]))
     expect(outcome).toEqual({ removed: true, via: 'state-record' })
+    expect(existsSync(join(deep, 'SKILL.md'))).toBe(false)
+    expect(existsSync(join(snap, 'nested'))).toBe(false)
     expect(existsSync(snap)).toBe(false)
   })
 

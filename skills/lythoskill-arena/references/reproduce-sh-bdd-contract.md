@@ -48,6 +48,17 @@ Verdict: PASS (all 1-weight) / PARTIAL (6+) / FAIL (<6)
 {"step":"...","decision":"...","reason":"...","ts":"ISO timestamp"}
 ```
 
+**`ts` is provenance, not a clock — never build a timeline from it.** The field is written by
+the agent role-playing the scenario, and the agent's timestamps can contradict the filesystem
+around them: the 2026-09-10 inbox-debate run's log carries internal `ts` values of 23:20–23:45
+while the file's own mtime is 22:52 and the fold-back commit landed at 22:56:31. Wall-clock
+ordering is therefore **unusable** across artifacts. Order events by *logical constraint*
+(A must precede B because B's input is A's output) or by *filesystem anchors* (commit order,
+`git log`), and when the two disagree, the logical constraint wins. Rule + rationale:
+`ADR-20260910113730375` (evidence hygiene). Rationale for keeping `ts` at all: it is still
+evidence that the run happened, and a same-file monotonic sequence is normally fine — it just
+is not comparable against mtimes or commit times.
+
 ### Idempotency
 
 All commands are idempotent. Exit 0 includes no-op. IoC instructions

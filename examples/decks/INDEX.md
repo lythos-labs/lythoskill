@@ -96,6 +96,19 @@ working_set = ".agents/skills"    # Codex CLI, OpenClaw, Windsurf
 #       - ~/.agents/skills
 ```
 
+> **Every target is the directory that CLI scans for skills — never its config root.**
+> `~/.claude` and `~/.config` are the famous paths (settings live there), which is exactly why they get
+> typed by mistake: `deck link` would create skill entries inside them, next to `settings.json`.
+> The same applies to `also_link_to`. The CLI warns and names the right directory:
+>
+> ```
+> ⚠️  [warning] /Users/u/.claude: not a skills dir — it contains .claude/skills / ~/.claude/skills.
+>    Fan-out creates skill entries directly inside the dir named here; name the skills dir instead.
+> ```
+>
+> There is no acknowledgement key for this one — unlike `acknowledged_unlisted` (which says "I know
+> there is no data for this dir"), here the survey table does have the answer, and it says the target is wrong.
+
 See [deck README](../../packages/lythoskill-deck/README.md) for platform-specific onboarding guides.
 
 ## Raw URLs

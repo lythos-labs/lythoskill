@@ -111,6 +111,8 @@ fix(deck): adapter policy tiers from 16-CLI survey — Goose unlink hazard, per-
 | Progress Log | `212 tests **independently** reproduced` / `ZK re-trial 8.5/10` | **「独立」混淆两层**。知识独立(prompt 零上下文)→ **达成**;编排独立(被评方之外的方验证)→ **未达成**(折入是同 session 同 agent 做的)。原文两处「独立」读起来像后者,实际只有前者 |
 | Progress Log | 本卡与 daily 谓「六处删除点审计无 data-loss 路径」 | **次日被部分证伪**。见下一节 |
 | 正文 | `adapter-registry.ts` / `adapter-policy.ts` / `CliAdapter` 等 | **已改名**(2026-09-10):`cli-layout.ts` / `layout-policy.ts` / `CliLayout` 等。原因 = 与 `@lythos/agent-adapter` 的 `registry.ts` 撞名且无交叉文档(debate B14/C4/C5),见下 |
+| Progress Log | `ZK re-trial 8.5/10 PASS` | **覆盖范围未写 = 会被读成"当前状态 8.5"**(debate B7)。正确读法:`8.5 @ c8ebcc76`。折入 `2686e0d4`(**6 文件 / +56 / −8**)之后的 HEAD **未经任何独立评审** —— 本次辩论是该状态的首次外部审视,且折入带进的 opencode windows claim 后来被证伪(`65b02db7` 删除) |
+| 交付物 | `10 个对抗用例`(ZK 套件) | **其中一条从未绿过**(2026-09-10 实测)。`showcase/2026-09-09-p2-cli-layout-zk-retrial/adversarial.test.ts` 的 **ADV-7** 对今天的树红,对**它所 pin 的 `c8ebcc76` 同样红**(用当时的 `adapter-policy.ts` 复现:11 ≠ 期望 1;`collectDuplicateScans` 自那以来逻辑未变)。即门的 headline `8.5/10` **没有携带自己套件里的红**。产物已逐字落盘(含这条红的),见该 bundle README |
 
 **删除边界被证伪(2026-09-10 新卡收口)**
 

@@ -38,6 +38,20 @@ jobs:
       - name: site deck snippets stay within validated decks
         run: bun scripts/check-site-deck-snippets.ts
       - run: bun packages/lythoskill-creator/src/cli.ts align
+      # Generated-artifact drift (B20). COMMANDS.md is produced by running
+      # `bun src/cli.ts --help`, so it derives from src/ — and the pre-commit hook only
+      # rebuilt skills/ when packages/*/skill/ itself was touched. Result: a src-only
+      # commit could ship an artifact documenting a retired flag (e2edc52e → 18a6d1cc).
+      # The build is deterministic (verified: two consecutive runs produce zero diff), so
+      # "rebuild and diff" is a machine-decidable gate rather than a heuristic.
+      - name: generated skill artifacts are in sync with source
+        run: |
+          bun packages/lythoskill-creator/src/cli.ts build --all
+          if ! git diff --quiet -- skills/; then
+            echo "::error::skills/ is stale relative to packages/ source. Run the build and commit the result:"
+            git diff --name-only -- skills/
+            exit 1
+          fi
       - name: test report
         if: always()
         run: bun scripts/test-report.ts

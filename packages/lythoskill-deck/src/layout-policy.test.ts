@@ -35,6 +35,17 @@ describe('collectFanOutWarnings — goose #11600 trigger', () => {
     expect(warnings[0].ref).toMatch(/11600/)
   })
 
+  it('the global goose dir triggers it too (B2 — the UI action is location-independent)', () => {
+    const warnings = collectFanOutWarnings(['~/.config/goose/skills'])
+    expect(warnings.map(w => w.severity)).toEqual(['data-loss'])
+    expect(warnings[0].ref).toMatch(/11600/)
+  })
+
+  it('the ABSOLUTE form of the global goose dir triggers as well', () => {
+    const warnings = collectFanOutWarnings(['/Users/u/.config/goose/skills'])
+    expect(warnings.map(w => w.severity)).toEqual(['data-loss'])
+  })
+
   it('shared .agents/skills alone does NOT trigger the goose warning', () => {
     const warnings = collectFanOutWarnings(['.agents/skills'])
     expect(warnings.filter(w => w.severity === 'data-loss')).toEqual([])

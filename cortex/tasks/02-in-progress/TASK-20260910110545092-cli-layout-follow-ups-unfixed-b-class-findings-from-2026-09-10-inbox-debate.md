@@ -30,7 +30,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **数据层自检**
 
-- [ ] **B2** goose data-loss 漏报:`cli-layout.ts:166` goose 行
+- [x] **B2** goose data-loss 漏报:`cli-layout.ts:166` goose 行
       `fanOutTargets` 含 `~/.config/goose/skills`,但 `:175` hazard `recursive-unlink-delete` 的
       `triggerDirs` 只有 `[".goose/skills"]`;`collectTriggerHazards`(`layout-policy.ts:32-45`)只查 `triggerDirs` → 用户 `also_link_to` 该目录时 data-loss
       警告不触发。
@@ -47,13 +47,13 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       测试与实现出自同一处理解时,测试不是独立的第二意见,是同一处理解的第二份抄写
       (同 `targetModeOverride` 只喂 cline 一个输入的结构)。
       附:范围裁剪需注释说明 #11600 的引用范围。
-- [ ] **B13** `perRoleScoping` schema 债:自由文本进 typed schema、**全仓零消费方**、
+- [x] **B13** `perRoleScoping` schema 债:自由文本进 typed schema、**全仓零消费方**、
       无 `layoutProblems` 检查。修:`layoutProblems()` 加非空 + 长度上限检查。
-- [ ] **B3** `verifiedAt` 语义混:16 行同为 `2026-09-09`,但该字段同时承载
+- [x] **B3** `verifiedAt` 语义混:16 行同为 `2026-09-09`,但该字段同时承载
       "普查日 / 复核日 / 补录日"三事件,qwen 行的补录出身只活在 note 散文里。
       修:加 `verifiedBy: "survey" | "restored"` 可选字段,仅 qwen 行标 `restored`;
       `layoutProblems()` 加「restored 行必须有非空 note」自检。**普查本体一行不动。**
-- [ ] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
+- [~] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
       unpersisted`),导致 qwen 行只能按"候选顺序首名"补录。定性 = **取证过程未留痕**,
       非"调研方式不可靠"。修:确立普查证据的落盘位置与命名。
       **同一段还有第二例(2026-09-10 复核新发现)**:P2 的独立验证(ZK re-trial,
@@ -73,17 +73,28 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       (2) 定案普查证据与 ZK 证据的统一落盘位置与命名;(3) 复验并盘活 `also-link-to-bdd`
       (并对齐新归属语义,见下条),使其产出 verdict 产物。
       注:`/tmp` 随重启清空 —— 本条有时间敏感性。
+      **✅ 已落地(2026-09-10)**:(1) 三份产物**逐字**落盘到
+      `showcase/2026-09-09-p2-cli-layout-zk-retrial/`(+ README 写明它 pin 的是哪个 commit、
+      以及"为什么逐字不改"—— 改了就不再是那个 commit 的证据);(2) 落盘位置**沿用既有协议**
+      (`showcase/<date>-<slug>/` + `reproduce.sh`,ADR-20260518024500631),不新发明约定;
+      (3) 见下条:场景已全量复跑,verdict 产物仍缺(需 agent + judge)。
+      **顺带实测出的一件事**:该 bundle 的 10 条对抗用例对今天的树 **9 过 1 红**,
+      红的那条(ADV-7)**对它所 pin 的 `c8ebcc76` 同样红**(已用当时的 `adapter-policy.ts` 复现)
+      —— 即 ZK 门自己的套件里有一条从未绿过的用例,而门报的是 `8.5/10`。详见 bundle README。
 
 **IO 分离 / 测试**
 
-- [ ] **B9** per-run 半继承:`per-run.ts:97-107` 的 `PerRunIO` 只覆盖 error/exit/log
+- [x] **B9** per-run 半继承:`per-run.ts:97-107` 的 `PerRunIO` 只覆盖 error/exit/log
       (该注的注了),而 `:114-130` 加载段 fs 全裸(existsSync / findFileSync / readFileSync),
       导致 `per-run.test.ts:9/21/78` 被迫 `mkdtempSync` 写真 tmp 才能测入口。
       修:抽 `loadPerRunTargets(deckPath, workdir)` 纯函数(TOML 读盘留在入口一行),
       `renderPerRun` 不动;测试改为纯函数走真 tmp + 入口只留零副作用 smoke。
-- [ ] **B10** `safe-remove.test.ts:101-103` 递归删除测试只断言目录消失、**无嵌套内容断言** ——
+- [x] **B10** `safe-remove.test.ts:101-103` 递归删除测试只断言目录消失、**无嵌套内容断言** ——
       Bun 若把 `recursive` 退化成 no-op 仍绿。修:补一行嵌套文件断言。
-- [ ] **B19(新,2026-09-10 加)** `also-link-to-bdd/reproduce.sh` 的断言与**新归属语义**相冲:
+- [~] **B19(新,2026-09-10 加)** ⚠️ **本条的立论已被实测推翻,见 `## Progress Log` 2026-09-10 末条** ——
+      该场景 PHASE 2 的断言 9-11 在新归属语义下**照常成立**(那些条目是 deck 自己建的 symlink,
+      归属判定允许删);已实测全量重放 1-19 全过。**仍缺的是 verdict 产物**(需 agent + judge 跑一轮),
+      已按"大 gap 先跳"记录,不假装完成。原文保留如下(它记录了当时为什么这么判):
       其 PHASE 2 断言 "10. `.agents/skills/skill-a` does NOT exist / 11. `.kimi/skills/skill-a`
       does NOT exist" —— 那是**目录包容**语义下的期望。`TASK-20260910111600389`
       (已收,commit `e2edc52e`)把边界改成 **k8s ownerReferences 式归属判定**:
@@ -97,17 +108,17 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **文档 / 注释**
 
-- [ ] **B8** deck `README.md:124-125` drift:宣称 `executePrunePlan(plan, io) — IO injected
+- [x] **B8** deck `README.md:124-125` drift:宣称 `executePrunePlan(plan, io) — IO injected
       (gitPull, delete, log)`,但 `executePrunePlan` **和** `buildPrunePlan` 在 src 均不存在
       (src 无 prune 模块,双零命中)。修:删行或标 `planned`。
-- [ ] **B11** `AGENTS.md` 缺成文纪律:「`node:*` 是 Bun 兼容层;不得拿 Node 文档语义当行为
+- [x] **B11** `AGENTS.md` 缺成文纪律:「`node:*` 是 Bun 兼容层;不得拿 Node 文档语义当行为
       论证依据;行为假设必须有 Bun 实测测试钉死」。
-- [ ] **B12** `safe-remove.ts:9-10` 注释引 Node 语义(lstat 不跟随)而非 Bun 实测测试。
+- [x] **B12** `safe-remove.ts:9-10` 注释引 Node 语义(lstat 不跟随)而非 Bun 实测测试。
       修:改引 `safe-remove.test.ts:48-60`。
 
 **构建管线**
 
-- [ ] **B20(新,2026-09-10 实测发现)** 生成式 skill 产物**不会因 `src/` 变更而重建**。
+- [x] **B20(新,2026-09-10 实测发现)** 生成式 skill 产物**不会因 `src/` 变更而重建**。
       `.husky/pre-commit:117` 的触发条件是:
       ```bash
       STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/skill/' || true)
@@ -128,7 +139,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **治理机制本身**
 
-- [ ] **B21(新,2026-09-10 实测发现)** **`probe` 的 empty-shell 检测对 ADR 恒为假** ——
+- [x] **B21(新,2026-09-10 实测发现)** **`probe` 的 empty-shell 检测对 ADR 恒为假** ——
       `cortex adr "<title>"` 刚建出来、一字未填的 ADR,**报 `0 empty shell(s)`**。
       **实测复现(不是推断)**:
       ```bash
@@ -155,13 +166,13 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **历史记录措辞**(就地改,不保留为"历史" —— 见 `feedback_handoff_typos_must_be_fixed`)
 
-- [ ] **B4** 卡面 :64 / `daily/2026-09-09.md:20` 的「Goose #11600 防线」措辞夸大:
+- [x] **B4** 卡面 :64 / `daily/2026-09-09.md:20` 的「Goose #11600 防线」措辞夸大:
       judge 实查父 commit,**旧代码无可达的"递归进 symlink 目标"路径**。真实价值 =
       显式不变式 + 断链修复 + 防未来回退。
-- [ ] **B5** 测试数无环境标注且值本身不稳:卡面 :71 裸写「213 pass / 0 fail」。
+- [x] **B5** 测试数无环境标注且值本身不稳:卡面 :71 裸写「213 pass / 0 fail」。
       实为**条件值** —— canonical 调用下 `213 pass / 1 skip / 544 expect / 16 files`
       @ Bun 1.3.11 / macOS;`214/0/0` 仅在 git spawn 探针成功时成立。
-- [ ] **B6** 「独立测试」混淆两层:知识独立(prompt 零上下文)**达成**,
+- [x] **B6** 「独立测试」混淆两层:知识独立(prompt 零上下文)**达成**,
       编排独立(同 session)**未达成**。措辞需分层。
       载体 = 原卡 Progress Log 的 `212 tests independently reproduced` /
       `ZK re-trial 8.5/10` 两句:「独立」在那里同时被用来指
@@ -173,7 +184,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       规则本身 + claims-not-scores 表述表 + 证据卫生条款,落在
       `zk-review.md` / `AGENTS.md` § ZK Review Gate / `cortex task done` 提示三处。
       **本条仍要做**:ADR 写的是"以后怎么写",本卡这条要改的是**已经写错的那两处文字**。
-- [ ] **B7** 卡面 Progress Log 引 `ZK re-trial 8.5/10` 时**未写覆盖范围**。
+- [x] **B7** 卡面 Progress Log 引 `ZK re-trial 8.5/10` 时**未写覆盖范围**。
       judge 特别裁决一:8.5 **只覆盖 `c8ebcc76`**;特别裁决二:折入 `2686e0d4` 后
       的 HEAD **未经任何独立评审**(本次辩论是该状态首次外部审视)。
       缺了这一句,读者必然把 8.5 读成"当前状态 8.5" —— 而折入 diff 是 **6 文件 / +56 / −8**,
@@ -313,7 +324,7 @@ B17/B18 的结论回填到本卡 `## Notes`。
 - [ ] **B16**:`decision-log` 的时序不可用性**在产出端或其契约里有落点** ——
       修时间戳来源,或在 `reproduce-sh-bdd` 契约写明「decision-log 不是时钟」。
       仅在 ADR 里声明"别信它"不算完成(ADR-20260910113730375 证据卫生条款)
-- [ ] **取证未留痕**:`/tmp/arena-p2-adapter-retrial/` 的 ZK 证据已落盘入仓;普查证据与 ZK 证据
+- [x] **取证未留痕**:`/tmp/arena-p2-adapter-retrial/` 的 ZK 证据已落盘入仓;普查证据与 ZK 证据
       的**落盘位置与命名**已成文(否则本条只是把这一份挪个地方,下批照样丢)
 - [ ] **B19**:`also-link-to-bdd` 已对齐新归属语义(自建 → 删;外来 → 留 + warn),
       且产出 `decision-log.jsonl` + `judge-verdict.json`(与 `deck-remove-bdd` /
@@ -336,7 +347,28 @@ B17/B18 的结论回填到本卡 `## Notes`。
 - [x] **ADR Follow-up 豁免成文(owner "第二吧")**:`ADR-20260910113534807 §5` +
       writing-guide 一节 + `template.ts` 的 `Follow-up:` 行注释;界线三条(派生新义务 /
       需独立计划 / 待 owner 裁决 → 仍开卡)写明,防退化成"什么都能不开卡"
-- [ ] `bun test packages/lythoskill-deck/` 全程保持 `0 fail`,测试数变化只在有意的增删处
+- [x] **B2(数据)**:`triggerDirs` 覆盖 goose 的**两个**独占目录,且新增的**不变量**测试
+      (data-loss hazard 必须覆盖本行 layout 的每个独占目标)在旧值下**实测会红**
+- [x] **B3 / B13(数据自检)**:`verifiedBy` 闭集 + restored 行必须有 note;`perRoleScoping`
+      非空 + 长度上限(200,出处=当前最长 140 + 余量);两条都有对全部 16 行的断言
+- [x] **B9 / B10(测试独立性)**:`targetsFromDeck` 纯函数 + 4 条**不写文件**的测试;
+      快照删除补嵌套两层内容断言
+- [x] **B8 / B11 / B12(文档与注释)**:deck README 的 PrunePlan 归位到 `@lythos/cold-pool`;
+      `AGENTS.md §2` 第 11 条(`node:*` 兼容层纪律);`safe-remove.ts` 改引 Bun 实测测试
+- [x] **B20(构建管线)**:pre-commit 触发条件扩到"有 skill 产物的包的 `src/`"+ 陈旧即发声;
+      CI 新增机器可判定门(`build --all && git diff --quiet skills/`)—— **首次运行即抓到真陈产物**
+- [x] **B21(治理机制)**:ADR 的两条空壳 pattern(未填 `**Choice**` / REQUIRED 段无内容)+
+      4 条行为断言;**实测**:CLI 新建未填 ADR 从"报 0"变成"报 1";EPIC 模板实测无此病;
+      两条被否决的候选(裸 `-`、按数量断言)留在注释里,防下个 agent 重提
+- [x] **B16(证据卫生)**:`ts` 不是时钟写进 `reproduce-sh-bdd-contract.md`(产出端契约),
+      不只写在 ADR 里
+- [~] **B19 / 取证未留痕(部分)**:场景已**真跑**并新增 PHASE 5 钉新边界;ZK 证据已落盘
+      `showcase/2026-09-09-p2-cli-layout-zk-retrial/`;**仍缺 = verdict 产物**(需 agent + judge
+      跑一轮)—— 按 owner"大 gap 先跳"记录,不假装完成
+- [x] **CI 全绿(本批顺带修复)**:`CLI_TABLE drift tripwire` 报 deck `per-run` 缺表
+      (守卫按设计工作,是表错了)—— 已补;本地复跑 CI 全部步骤零失败
+- [x] `bun test packages/lythoskill-deck/` 全程保持 `0 fail`,测试数变化只在有意的增删处
+      (本卡累计:`227 → 249 pass`,`0 fail` 未破)
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
@@ -448,6 +480,56 @@ B17/B18 的结论回填到本卡 `## Notes`。
     (B18 原批 `236 / 1 / 0 / 602 / 237`;差值 = 本轮新增 8 条层级错位测试)。
     cortex = `135 pass / 0 fail / 275 expect / 7 files` @ Bun 1.3.11 / macOS。
 
+- 2026-09-10: **本卡剩余项批量收口(14 项 done / 2 项部分,owner 指示"大 gap 先跳")**。
+  两句 owner 定调贯穿本批:①**范围边界**「我们**不应该去深入 CLI 自己的课题**」——
+  本表只记"选哪种模式(symlink / cp)+ 要提醒用户什么"所必需的事实;②**框架纪律**
+  「**不要自作聪明去推测各种奇葩写法,明明你们 agents 可以帮忙修正回正路到 toml 里**」。
+  - **B2(实测修好,并升级成不变量)**:goose 的 `triggerDirs` 补上 `~/.config/goose/skills`。
+    关键在**测试形态**的更换:原打算把断言从 `toEqual(['.goose/skills'])` 改成 `toContain` 两个值,
+    实际改成了一条**不变量** —— *data-loss hazard 必须覆盖它自己 layout 的每一个**独占**目标*
+    (共享目录如 `.agents/skills` 是刻意的例外:默认 deck 就扇进它,覆盖它会让每个默认 deck 报警)。
+    这条不变量抓的是**整类漏报**,不是那一行。**已实测它有牙**:把值改回旧写法 → 2 条红。
+  - **B13 / B3**:`layoutProblems()` 补 `perRoleScoping` 非空 + 长度上限(200,出处=当前最长行 140
+    再留 60 余量,**不是拍的数字**),与 `verifiedBy` 字段(闭集,仅 qwen 行 = `restored`,
+    且 restored 行必须在 note 里交代补录经过)。
+  - **B9** 抽 `targetsFromDeck(deck, projectDir)` 纯函数 —— 读盘留在入口一行,
+    新增 4 条**不写任何文件**的测试;覆盖同一段逻辑的成本从"文件系统"降回"逻辑"。
+  - **B10** 快照删除测试补**嵌套两层**的内容断言(只断言顶层目录消失,证不了递归走到底)。
+  - **B8** 不是删行而是**归位**:`buildPrunePlan`/`executePrunePlan` **存在**,但属于
+    `@lythos/cold-pool`(prune 从冷池规划,不从 `deck.toml`)—— 原文把两个包的架构混成一句了。
+  - **B11 / B12**:`AGENTS.md §2` 立第 11 条(`node:*` 是 Bun 兼容层,行为假设必须有 Bun 实测测试);
+    `safe-remove.ts` 的纪律改为**点名两条 Bun 下真跑过的测试**,不引 Node 文档。
+  - **B20(机制)**:`.husky/pre-commit` 的触发条件从"只认 `packages/*/skill/`"扩到
+    "**或任一有 skill 产物的包的 `src/`**",并在重建后**主动报出**"产物此前是陈的"那一行;
+    CI 另加一步机器可判定的门:`build --all && git diff --quiet skills/`。
+    **这道门第一次运行就抓到了真东西** —— 本批改的 arena 契约确实还没重建进 `skills/`。
+  - **B21(机制,实测)**:`probe` 的 empty-shell pattern 全是任务卡形态,对 ADR **恒为假**
+    (`adrFiles` 传进去了,一条也匹配不上)。补两式(未填的 `**Choice**: ⚠️ PLACEHOLDER_`;
+    REQUIRED 注释后直接接标题=该段无内容),**实测复现**:CLI 新建未填 ADR → 现在报
+    `Found 1 empty shell(s): ADR-20260910150422162`(改前 0)。
+    两条**被否决**的候选也留档:①`/^-\s*$/`(裸 `-`)在本仓 112 篇 ADR 里命中 **2 篇填好的**
+    —— 它会制造关于健康文件的覆盖率假象;②按 pattern 数量断言(`length === 3`)钉的是形状不是行为,
+    模板合法增长时它红,而真正的失效它说不出话 —— 已换成 4 条行为断言。EPIC 模板**已实测**无此病。
+  - **B16**:`decision-log` 的时间戳矛盾在**契约里**收口(`reproduce-sh-bdd-contract.md`:
+    「`ts` 是出处,不是时钟」+ 逻辑约束优先 + 保留 `ts` 的理由),不只写在 ADR 里。
+  - **B19(实测推翻立论)**:全量**真跑**了 `also-link-to-bdd` 的 PHASE 1-4(19 条断言全过)——
+    **PHASE 2 的 9-11 在新归属语义下照常成立**(那些条目是 deck 自己建的 symlink,归属判定允许删),
+    原文"相冲"的判读是错的。新增 PHASE 5 把**真正的新边界**钉住(外来真实目录 / 外来 symlink
+    在 fan-out 目标里**必须留下** + 三件套报告,已实测 20-23 全过)。
+    **仍缺**:verdict 产物(需 agent + judge 跑一轮)→ 按 owner"大 gap 先跳"记录,不假装完成。
+  - **B7 / B4 / B5 / B6**:daily 侧与卡面 Notes 侧**已在前批完成**,本批复核确认并在 AC 里勾掉;
+    B7 的覆盖范围行补进原卡 Notes(见下条)。
+  - **原卡 Notes 追加一行(B7 的落点)**:`ZK re-trial 8.5/10` 须读作 `8.5 @ c8ebcc76`;
+    折入 `2686e0d4`(6 文件 / +56 / −8)后的 HEAD **未经任何独立评审**。
+  - **本批实测值**:deck `249 pass / 1 skip / 0 fail / 657 expect / 250 tests / 16 files`;
+    cortex `138 pass / 0 fail / 3xx expect / 7 files`;全仓 `bun --filter='*' run test` **零失败**;
+    CI 其余步骤本地复跑全绿(cortex BDD 13/13、example decks 29/29、site snippets 61、
+    align 75 passed)。@ Bun 1.3.11 / macOS。
+  - **顺带修好的一条真红**:GitHub CI 自 2026-09-10 03:45 起失败 ——
+    `scripts/check-site-commands.test.ts` 的 **CLI_TABLE drift tripwire** 报 deck 的 `per-run`
+    不在守卫表里(P2 批新增子命令时漏更新)。**守卫按设计工作,是表错了**;
+    与 2026-08-28 的 `update` 漏项同一类,已补并注明出处。
+
 ## Related Files
 - Modified:
   - `daily/2026-09-09.md`(S4:@20 交付段措辞/环境标注/证据落盘缺口;@29 P6 尾巴)
@@ -547,3 +629,32 @@ alternatives。**该 ADR 已落地**:
    这与 `targetModeOverride` 只喂 cline 一个输入是同一种病。
    → 已被 S5 ADR(提案纪律)与 S6 ADR(评审对象须 commit-pinned)分别从
    "决策落盘"与"评审对象"两侧收口。
+
+### 这张卡到底改了什么(相对"改之前 link 也能用")
+
+**前提**:改动之前 `deck link` **是能用的**。默认 deck(`.claude/skills` + `.agents/skills`)
+从头到尾零警告、行为不变 —— 而且今天仍然如此(有 dormancy 测试钉着)。本卡与其承接的 P2 批
+**不是"修好了一个坏东西"**,而是:已经把机制跑对了的地方,把**"错了也不说话"改成会说话**。
+按用户可见度分三层:
+
+**一、真的会改变 `deck link` 输出的(用户能看见)**
+- `also_link_to` 指到 CLI 的**配置根**(`~/.claude`、`~/.config`)→ 新的 `warning`,并点名该用哪个目录。
+  此前要么什么都不说,要么一行**可被豁免**的 info。
+- `~/.config/goose/skills` 当 fan-out 目标 → 此前**漏报** data-loss 警告(B2),现在会报。
+- 名单外目标 → 一行 info;确知无关可用 `acknowledged_unlisted` 声明静默(B18)。
+- 警告块**位置前移**到收束之前(此前印在几十行 `🔗` 之后 = 墓志铭)。
+
+**二、不改变输出、但改机制(用户看不见,影响未来每一次)**
+- CI 的解释器 pin 到 `1.3.11` + 写死的升级窗口(B17)—— "CI 绿"从此**可归因**。
+- `probe` 现在**能**发现空 ADR(此前 pattern 全是任务卡形态,对 ADR 恒为假 → 机制静默失效)。
+- pre-commit 与 CI 各自新增"产物 vs 来源"同步门(B20);CI 那道**第一次运行就抓到一份真陈产物**。
+- `decision-log` 契约写明「`ts` 是出处,不是时钟」(B16)。
+
+**三、不改行为,只改"我们说的话是否准确"**
+B2/B3/B13(数据)、B8/B11/B12(文档与注释)、B9/B10(测试的独立性)、B19(场景对齐),
+以及 B4/B5/B6/B7(历史记录里被夸大或缺失的限定)。
+
+**边界说明(防止把这张卡读大)**:本卡**不含任何删除路径的修复**。删除边界从"目录包容"
+改为"归属"(k8s `ownerReferences`)是**上一张卡** `TASK-20260910111600389`(已收,
+commit `e2edc52e`)—— 但它正是本卡多数"为什么现在敢报"的前提:不知道归属时,报出来的建议
+也只能是"你自己确认"。本卡唯一的 data-loss 相关项(B2)是**警告漏报**,不是删除行为本身出错。

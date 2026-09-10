@@ -92,6 +92,22 @@ export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
   return result;
 }
 
+// ── deck → per-run 目标 ──────────────────────────────────────
+
+/**
+ * 从**已解析**的 deck 配置算出 per-run 目标(绝对路径列表)。
+ *
+ * **纯函数**:只吃 parse 后的对象 + 项目目录,不碰文件系统 —— 于是它的测试不需要
+ * 写任何真文件。B9:抽出来之前,working_set/also_link_to 的解析与 `existsSync` /
+ * `readFileSync` 混在入口里,逼得测试必须 `mkdtempSync` 造真 deck 才能测到这一段;
+ * 覆盖这段的代价因此变成了文件系统,而不是逻辑。**读盘留在入口那一行**。
+ */
+export function targetsFromDeck(deck: any, projectDir: string): string[] {
+  const workingSet = expandHome(deck.deck?.working_set || ".claude/skills", projectDir);
+  const { targets: also } = parseAlsoLinkTo(deck.deck?.also_link_to, projectDir);
+  return [resolve(workingSet), ...also.map(t => resolve(t))];
+}
+
 // ── CLI 入口 ─────────────────────────────────────────────────
 
 export interface PerRunIO {
@@ -124,10 +140,9 @@ export function perRun(cliId: string, cliDeckPath?: string, cliWorkdir?: string,
   }
 
   const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
+  // 读盘只在这一行;解析与目标计算在 targetsFromDeck(纯函数,可单测)
   const deck = parseToml(readFileSync(DECK_PATH, "utf-8")) as any;
-  const workingSet = expandHome(deck.deck?.working_set || ".claude/skills", PROJECT_DIR);
-  const { targets: also } = parseAlsoLinkTo(deck.deck?.also_link_to, PROJECT_DIR);
-  const targets = [resolve(workingSet), ...also.map(t => resolve(t))];
+  const targets = targetsFromDeck(deck, PROJECT_DIR);
 
   const result = renderPerRun(cliId, targets);
   if (result.error) {

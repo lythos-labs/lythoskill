@@ -92,7 +92,10 @@ const CLI_TABLE: CliSpec[] = [
     source: 'packages/lythoskill-deck/src/cli.ts',
     shape: 'subcommand',
     // dispatch: switch (command) + HELP_CONFIG — packages/lythoskill-deck/src/cli.ts
-    commands: ['link', 'add', 'refresh', 'update', 'validate', 'remove', 'to-symlink', 'to-snapshot', 'migrate-schema'],
+    // `per-run` added here 2026-09-10: the drift tripwire caught it missing (deck's
+    // per-run shipped in the P2 batch without updating this table) — same miss class
+    // as `update` on 2026-08-28. The guard fired as designed; the table was wrong.
+    commands: ['link', 'add', 'refresh', 'update', 'validate', 'remove', 'to-symlink', 'to-snapshot', 'per-run', 'migrate-schema'],
     ignoreDispatch: ['json'], // mode comparison, not a subcommand
   },
   {
