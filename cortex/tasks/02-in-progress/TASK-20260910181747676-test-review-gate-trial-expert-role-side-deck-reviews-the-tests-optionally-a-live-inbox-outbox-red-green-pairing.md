@@ -59,9 +59,14 @@
 **它不是什么**(写清以免范围蔓延):不是重写 ZK Review 协议、不是引入新工具链、
 不是要求所有卡都加第三段闸 —— 先在一张卡上跑通再谈推广。
 
-**机制现状(别把它读成"尚不存在")**:side deck 的**载体是现成能力** ——
-`arena single --deck <path|url> --brief "<任务>"` 本来就是"指定任意 deck 独立跑";deck 就是本仓
-"角色 + 知识"的载体。**缺的是组合与数字**,不是能力。候选形态:
+**机制现状(别把它读成"尚不存在")**:这条链是本项目**刻意搭的**"结合点":
+①`deck` 负责**目标位置**(`working_set` / `also_link_to` 把任意技能集扇出到任意目录,symlink / snapshot 两种模式);
+②**CLI 能指定技能目录**(`deck per-run <cli>` 渲染 `--skills-dir` / `skill-path` 一类参数)。
+两者相加 = **给一个 agent 任意技能集、放在任意房间、完全不动主工作集** —— 这正是 side deck 评审者要的形态。
+`arena single --deck <path> --brief "<任务>"` 只是这条链上的一个封装,**直接跑 CLI 命令行同样可以**。
+**缺的是组合与数字**,不是能力。
+**房间**:临时跑在 `playground/<date>-<slug>/` 开一个小 room(gitignored),**不污染本仓** ——
+这是沙箱纪律问题,不是代码问题(`arena single` 写 cwd 是正确行为)。候选形态:
 1. **单角色 side deck**:deck 声明"专家角色 + 需要的 skill",评审者据此写/审测试;
 2. **对抗 pairing**:inbox/outbox 两方,红绿对打(需要确认 inbox/outbox 当前是 local skill 的状态);
 3. **追问驱动**:`grill-me` 一类持续追问的 skill 作为驱动,检验它是否把"我没验"逼出来。
