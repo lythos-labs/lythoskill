@@ -104,6 +104,27 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 - [ ] **B12** `safe-remove.ts:9-10` 注释引 Node 语义(lstat 不跟随)而非 Bun 实测测试。
       修:改引 `safe-remove.test.ts:48-60`。
 
+**构建管线**
+
+- [ ] **B20(新,2026-09-10 实测发现)** 生成式 skill 产物**不会因 `src/` 变更而重建**。
+      `.husky/pre-commit:117` 的触发条件是:
+      ```bash
+      STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '^packages/.*/skill/' || true)
+      ```
+      —— 只有 `packages/*/skill/` 下的改动才触发 `build --all`。
+      但 `packages/lythoskill-creator/src/build.ts:54` 的 COMMANDS.md 是**跑 `bun src/cli.ts --help`
+      生成**的,即**派生自 `src/`**。于是**改了 `src/cli.ts` 却不碰 `packages/*/skill/` 的提交,
+      产物不会更新**。
+      **实测实例**:`e2edc52e`(本次善后卡 #7)把 `--no-backup` 从 `cli.ts` 的 `HELP_CONFIG`
+      里摘了,但 `skills/lythoskill-deck/references/COMMANDS.md` 直到 `18a6d1cc`
+      (因为恰好改了一个 `packages/*/skill/` 文件才顺带重建)才跟上 ——
+      中间这段时间里,**发出去的 skill 产物在文档化一个已退役的 flag**。
+      影响面:冷池里被 `deck refresh` 安装的就是 `skills/` 产物,agent 读的也是它。
+      **修**:触发条件改为「`packages/*/skill/**` **或** 任一包的 `src/**` 且该包有 `skill/` 产物」
+      (或更保守:直接对 `packages/**/src/**` 也重建);并补一条 dormancy 式校验 ——
+      重建后 `git diff --quiet skills/` 应为空,非空即说明产物此前是陈的。
+      **注**:这不是本卡的 B 类历史项,是本次善后**顺带实测**出来的同类(产物 vs 来源不同步)。
+
 **历史记录措辞**(就地改,不保留为"历史" —— 见 `feedback_handoff_typos_must_be_fixed`)
 
 - [ ] **B4** 卡面 :64 / `daily/2026-09-09.md:20` 的「Goose #11600 防线」措辞夸大:
