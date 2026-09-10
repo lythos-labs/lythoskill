@@ -100,6 +100,19 @@ try {
   const tips: string[] = []
   if (proposedADRs > 0) tips.push(`${proposedADRs} proposed ADR → 配套实现已落地？cortex adr accept <id>`)
   if (reviewTasks > 0) tips.push(`${reviewTasks} in review → 验收通过？cortex done <id>`)
+
+  // 新增模块 = C1 的候选(引入消费者在本模块之外的抽象)。这是一条**提示**,
+  // 不是覆盖性断言:它不断言"缺 ADR",只把问题搬到必经路径上(commit)。
+  // 刻意**不阻断** —— 形式检查做成门会误报,而误报会被学会绕过
+  // (见 ADR-20260910113534807 Option C)。提示的误报代价是一行输出。
+  const added = git(['diff', '--cached', '--name-only', '--diff-filter=A'])
+  const addedSrc = added.ok
+    ? added.stdout.split('\n').filter((f: string) => /^packages\/[^/]+\/src\/.+\.ts$/.test(f) && !f.endsWith('.test.ts'))
+    : []
+  if (addedSrc.length > 0) {
+    const named = addedSrc.map((f: string) => f.split('/').slice(1, 3).join('/')).join(', ')
+    tips.push(`new module(s): ${named} → 这是一个决策吗？是的话先落 cortex adr（卡面 Technical Approach 不能是唯一记录）`)
+  }
   if (activeEpics > 0) {
     tips.push(`${activeEpics} active epic → 任务全完成？cortex epic done <id>`)
   } else {

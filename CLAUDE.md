@@ -6,6 +6,8 @@
 > **⚠️ Compaction-safe reminder.** Before any release, version, git remote, or npm command, re-read [`AGENTS.md` → Release & Auth Workflow](./AGENTS.md#release--auth-workflow). Auth (`.git/config`, `~/.ssh/`, `.github-token`, `.npm-access`) is **pre-configured — do not modify**. Versions move via `bunx @lythos/skill-creator bump`, never `jq`/`python`/hand-edit. Past Claude sessions corrupted the git remote URL after losing context — this warning lives at the top so a post-compaction agent sees it on the next read.
 >
 > **Cortex trailer + lane discipline.** After compaction, you may not remember the trailer syntax or epic lane rules. Quick reference: commit message trailers (`Closes: TASK-xxx`, `Task: TASK-xxx review`, `ADR: ADR-xxx accept`) are parsed by `.husky/post-commit` and auto-create follow-up commits. Epic lanes are dual-track (`main` + `emergency`, max 1 active each). For full details see [`AGENTS.md` → Project Governance (Cortex)](./AGENTS.md#project-governance-cortex).
+>
+> **📌 Work that is not in `cortex/` did not happen.** Project state — tasks, ADRs, epics, wiki — is written **only** through `bun packages/lythoskill-project-cortex/src/cli.ts <cmd>` (shorthand: `cortex task` / `cortex adr` / `cortex epic`). Neither `.claude/memory/` nor `~/.claude/projects/.../memory/` is project state: they are **yours alone**, unreadable by the other agents on this repo, and they do not travel with git. If you fixed something, decided something, or found something a later agent needs, it goes in a **card or an ADR** — not in memory, not in a scratch file, not in your context. **Compaction is the power cut; only git-tracked files survive it.**
 
 ## Claude-Specific Notes
 

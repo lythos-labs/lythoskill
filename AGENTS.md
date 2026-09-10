@@ -4,6 +4,17 @@
 > If you are Claude Code, read [`CLAUDE.md`](./CLAUDE.md) instead — it points back here.
 > Human contributors: see [README.md](./README.md).
 
+> **📌 Work that is not in `cortex/` did not happen — and you will not remember it.**
+> Project state (tasks, ADRs, epics, wiki) is written **only** through
+> `@lythos/project-cortex`: `cortex task` / `cortex adr` / `cortex epic` (shorthand for
+> `bun packages/lythoskill-project-cortex/src/cli.ts <cmd>`). Your own context, a scratch
+> file, a chat message, or a private note is **not** project state — the next agent cannot
+> read it, and after compaction neither can you. **Compaction is the power cut; only
+> git-tracked files survive it.** If you concluded something, fixed something, or decided
+> something worth keeping, it belongs in a card or an ADR. Do not hold it in your head and
+> do not park it in a file nobody reads. (Restated in §0 Boot First and §3 Task Design — this
+> is the one rule most often lost mid-session, so it is stated three times on purpose.)
+
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
 > Auth is **pre-configured — do not modify**.
 > GitHub PAT lives in the system keychain (`security find-generic-password -s 'lythos-agent-pat' -w` on macOS; `secret-tool lookup org lythos-labs scope agent` on Linux), not in repo files.
@@ -36,6 +47,8 @@ bun packages/lythoskill-project-cortex/src/cli.ts probe
 ```
 
 Why this order: dependencies → skills → session state → ground truth → drift check. `deck link` also syncs `.agents/skills/` (cross-platform fallback) — dual output is normal. Source paths (`packages/*/skill/`) are readable immediately; `.claude/skills/` is the runtime working set, not the SSOT.
+
+**And as you work — land it in cortex, not in your head.** Non-trivial work (>1 file, CLI surface, new tests) gets a `cortex task` card *before* the code, not after. A decision gets a `cortex adr`. This is not bookkeeping for its own sake: it is the only mechanism by which the next agent (or you, post-compaction) can find out what you did. An unrecorded change is indistinguishable from a change that never happened.
 
 **After executing — read, in order:**
 
@@ -138,6 +151,10 @@ Tell-tales of intent hijacking: **rename the ask** ("by X you probably mean Y"),
 ## Z3 — Operations
 
 ### 3. Task Design
+
+**Where project state lives (third and last statement of this rule).** Tasks, ADRs, and epics are authored **through the cortex CLI** — `cortex task "<title>"`, `cortex adr "<title>"`, `cortex epic "<title>" --lane main|emergency`. The CLI generates the ID, places the file in the right directory, and the directory *is* the status. Hand-creating or hand-moving these files breaks the state machine, `probe`, and the post-commit trailer dispatch — always use the CLI (see §3 Task Lifecycle: "Always CLI, never `mv`"). **If you find yourself tracking work in any other place — a scratch file, an editor buffer, your own memory — stop: that work is not persisted and will be lost.** The three statements of this rule: top of file, §0 Boot First, here.
+
+**And if the card makes a decision, the ADR comes first** — the Technical Approach may reference it, never be its only record. Criteria (hit ≥2 of C1–C6) + why a written-but-unreferenced doc is an *invalid* landing point: [Decision Records](#decision-records--a-cards-technical-approach-is-not-one).
 
 #### ZK Review Gate (Mandatory Pre-Assignment)
 

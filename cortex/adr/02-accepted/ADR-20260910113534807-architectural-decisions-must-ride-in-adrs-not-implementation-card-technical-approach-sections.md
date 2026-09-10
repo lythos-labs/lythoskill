@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-09-10 | Created |
 | accepted | 2026-09-10 | Accepted |
+| accepted | 2026-09-10 | 执行方式扩写(owner 定调):落点二 = routine 必经路径提示植入;并补「无 inbound ref 的落点是无效落点」。状态未变 —— 此行只记录**接受后本文档被改过**,以免读者把改后文本当成被接受的原文 |
 
 ## Background
 <!-- ⚠️ REQUIRED: Problem description and context. Empty = shell, blocked by probe. -->
@@ -158,13 +159,52 @@ Technical Approach 是**意图陈述**,不是**决策记录**。审阅者面对�
 - 与 ADR-20260910113131220 一致:该 ADR 的「rejected alternatives」一节正是 C5 的产物 ——
   **本 ADR 是那次善后中提炼出的通则**,不是新增负担。
 
-**4. 执行方式(刻意不自动化)**
-- 不扩 `probe`(Option C 的理由是原则性的)。
-- 落点 = **文档纪律**:写进 `skills/lythoskill-project-cortex/references/writing-guide.md`
-  + `AGENTS.md` 对应节(含上面 C1–C6 判据表)。
+**4. 执行方式:两个落点 —— 文档纪律 + 必经路径植入(刻意不做成「门」)**
+
+> **先记录为什么「只写文档」本身就是已被证伪的方案**(owner 2026-09-10,本 ADR 最该被
+> 记住的一句):
+> > 「放进文档 → 丢到一边 → 甚至 agents md 也没有 ref → **最后就是写是写了,没有 agent 主动看到**。」
+>
+> 这条链的三段各有独立失效点,且**越往后越致命**:
+> 1. **放进文档** = 写下了,但文档不主动找人。
+> 2. **丢到一边** = 没人引用的文档,检索不到、不会路过,等于不存在。
+> 3. **连 `AGENTS.md` 也没有 ref** = 连"该文件里记了什么"都无从得知 ——
+>    此时**"已记录"与"未记录"在行为上不可区分**。
+>
+> 故本 ADR 的验收标准**不是"写了吗",是"一个不知情的 agent 会不会撞上它"**。
+> **文档的合规度量是发现性,不是存在性。** 这一条同时是对落点一本身的约束:
+> 落点一若没有从入口文档指向它的 ref,落点一就只是第二段的那个"丢到一边"。
+> (现状:`AGENTS.md:242` 已有指向 `writing-guide.md` 的 ref —— 这一环是本次必须保住的。)
+
+- **落点一:文档纪律。** 写进 `packages/lythoskill-project-cortex/skill/references/writing-guide.md`
+  (**SOURCE**;改完须 `bun packages/lythoskill-creator/src/cli.ts build lythoskill-project-cortex`
+  重建 `skills/` 产物 —— `skills/` 是 build output,直接改它会被下次 build 覆盖)
+  + `AGENTS.md` 对应节(含上面 C1–C6 判据表 + **反指回本文件的 ref**)。
+  **无 inbound ref 的落点是无效落点** —— 见上。
+- **落点二:routine 的必经路径上做提示植入(owner 2026-09-10 补充定调:
+  「在 routine 的几乎必经之路上做足提醒」)。** 依据是:文档只在 agent **恰好去读它的那一刻**
+  生效,而这两次事故的失效点不是"agent 读了却没照做",是**根本没去读**。
+  故把提醒放到流程**几乎必然经过**的位置:
+  | 必经点 | 载体 | 内容 |
+  |---|---|---|
+  | 创建卡(`cortex task`) | `commands/task.ts` 输出 | 要做决策就先备好 ADR;Technical Approach 不得是唯一记录 |
+  | **写 Technical Approach** | `lib/template.ts` 的模板注释 | 同一条,且落在**误行为发生的那一行上** |
+  | 创建 ADR(`cortex adr`) | `commands/adr.ts` 输出 | 最常被跳过的两件事:OPTIONS(含被拒的)、CRITERIA(评分须同文档定义) |
+  | 每次 commit | `hooks/pre-commit.ts` 的 governance waterline | 新增 `packages/*/src/` 模块 → "这是一个决策吗" |
+- **为什么"提示"可以、"门"不可以(与 Option C 不矛盾,是刻意的区分)**:
+  - Option C 被拒的是**门** —— 一个产生 pass/fail 的**覆盖性断言**。它的误报制造
+    "已检查过"的假象,而假象会被学会绕过 → **比没有检查更差**。
+  - 这里是**提示** —— 它**不断言**"缺 ADR",只把问题搬到必经路径上,不产生覆盖信号。
+    误报的代价 = 一行输出。**没有假象可制造,就没有可绕过的对象。**
+  - 判据:一个检查若**输出的是覆盖率**(通过/不通过),必须能机器判定语义 —— 做不到就别做;
+    若**输出的只是提醒**,形式触发即可,因为它不冒充结论。
 - **诚实记录本方案的已知弱点**:判据仍由 agent 自评,故存在"我这条不命中"的自我豁免路径。
   这是**接受的代价** —— 对立面(Option C 的机器检查)被证伪,而"更严的形式检查"
   只会制造可绕过的假象。**接受一个诚实的软规则,优于一个会撒谎的硬检查。**
+- **植入挡不住的事(必须写明)**:一个**完全绕过 cortex CLI** 的 agent 收不到任何上述提示。
+  CLI 面植入的覆盖面 = "用了 CLI 的 agent"。对这一盲区,唯一的手段是
+  `AGENTS.md` 层面的规矩强化(「必须用 cortex 做项目级落盘」,已在文件顶 / §0 / §3 三处重述)
+  —— 且**仍不是硬保证**。本 ADR 不假装它是。
 
 ## Impact
 <!-- ⚠️ REQUIRED: Positive / negative / follow-up. Empty = shell, blocked by probe. -->
@@ -179,11 +219,21 @@ Technical Approach 是**意图陈述**,不是**决策记录**。审阅者面对�
   - 判据靠自评,存在自我豁免路径(**接受**,理由见 Decision 第 4 条)
   - 不产生任何机器可验证的通过/失败信号 —— 本 ADR 的合规**只能靠人读**,
     这一点必须写明,以免下个 agent 误以为 `probe` 绿了就等于合规了
+  - **本 ADR 自己就活在这个弱点里**:它的落点一(文档)正是"写是写了,没人看到"的
+    高发形态。落点二(必经路径植入)是对它的补偿,而**补偿本身也有覆盖边界**
+    (见 Decision 第 4 条末:绕开 CLI 的 agent 收不到)
+  - 无自动化回归:**没有任何测试会因为"文档失去 inbound ref"而变红**。
+    发现性一旦退化,退化是静默的 —— 这是接受的代价,不是被忽略的
 - **Follow-up**:
-  - `skills/lythoskill-project-cortex/references/writing-guide.md`:加"何时该开 ADR"一节
-    (判据表 C1–C6 + ≥2 门槛 + 反例)
+  - `packages/lythoskill-project-cortex/skill/references/writing-guide.md`(SOURCE,改后重建
+    `skills/` 产物):加"何时该开 ADR"一节(判据表 C1–C6 + ≥2 门槛 + 反例)
   - `AGENTS.md`:在治理节写明同一判据,并与 `:110` 的既有规则交叉引用
-  - 两处都要写明**「probe 绿 ≠ 决策已落盘」** —— 这是本 ADR 最容易被误读的一点
+  - **两处都要从 `AGENTS.md` 有 inbound ref**(现状 `:242` 已满足;若未来重排章节,
+    保住这条 ref 是硬要求 —— 无 ref = 无效落点)
+  - **落点二四处植入**(2026-09-10 已落地,见 Related Task `TASK-20260910110545092`):
+    `src/commands/task.ts` / `src/lib/template.ts` 的 `## Technical Approach` 注释 /
+    `src/commands/adr.ts` / `src/hooks/pre-commit.ts` 的 governance waterline
+  - 三处都要写明**「probe 绿 ≠ 决策已落盘」** —— 这是本 ADR 最容易被误读的一点
 
 ## Related
 - Related ADR: **ADR-20260508230803515**(curator 不做 feed-adapter;事故 1;其决策驱动第 1 条
