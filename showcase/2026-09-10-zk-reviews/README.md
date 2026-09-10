@@ -14,6 +14,8 @@ stops the same false positive from consuming another round.
 | `904-plan-round1.md` | `TASK-20260910152029904` + `ADR-20260910152957509` (the **plan**, before execution) | `6ac2324d` | 1 |
 | `904-plan-round2.md` | same plan, after the round-1 fixes | `125670ef` | 2 |
 | `904-plan-round3.md` | same plan, after the round-2 fixes — **converged, 0 HIGH** | `e369729e` | 3 |
+| `904-plan-delta.md` | the folded LOWs, delta pass | `b290c42e` | delta |
+| `904-plan-delta-confirm.md` | the wording-only folds — **0 HIGH / 0 LOW, executable** | `76a3ca44` | delta-confirm |
 | `5092-round1.md` | `TASK-20260910110545092` (executed work) | `6ac2324d` | 1 |
 | `5092-round2.md` | same, after the corrections it refuted | `adfac4e0` | 2 |
 

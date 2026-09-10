@@ -141,4 +141,14 @@ fix(deck): description (TASK-20260910152029904)
 - Detail 2
 ```
 
+## ZK Review（plan 阶段）
+
+**评审对象**:本卡 + `ADR-20260910152957509`。**结论:`76a3ca44` 上 0 HIGH / 0 LOW —— executable as it stands。**
+五份 log 逐字留档:`showcase/2026-09-10-zk-reviews/904-plan-*.md`(r1 3 HIGH → r2 1 HIGH → r3 0 HIGH → delta → delta-confirm)。
+
+**未计分、但点名留档的残留**(评审者原话 "seen and explicitly not scored"):正文另有四处散文里的
+"字节"(Decision Drivers 3/4、Option C 正文、Rationale 的"删哪几个字节"),都意指"文件的那一段";
+**所有规范性单位表述已正确**(Choice 行 = 文本区间 UTF-16 code unit;规格表 = `[node.range[0], node.range[1])`),
+实现者不会被误导成字节偏移。Option C 正文那句哪天顺手收,不值得单独一轮。
+
 ## Notes
