@@ -224,6 +224,11 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
   仓内文件无一处含错值 —— 只有按那个形状 grep commit log 的人会撞到死哈希。
   按仓库纪律**不改写已推送的历史**:以本行更正,而不 force-push。
 
+- 2026-09-10: **补全记账(grilling 指出后核对)**:`a5756b4f`(把护栏两条消息分支钉住)这一笔
+  **不是"折后未评"** —— 评审者在**同一个 sha** 上复核过(它自己的收尾原话:"The pin works … collapsing
+  the two branches myself gives 1 red … Verified at `a5756b4f`"),即折入纪律的**选项①(对 delta 再送审)**
+  已满足。此前卡面只记了更早那一笔(`12a9fcb8`)的「折后未评」,没记这一笔 —— **是记账不完整,不是流程缺失**。
+
 ## Related Files
 - Modified: (执行时填)
 - Added: `src/toml-splice.test.ts`(三形状 + 非 ASCII fixture);`packages/lythoskill-deck/package.json` 增一个解析器依赖(**不是**行级编辑实现)

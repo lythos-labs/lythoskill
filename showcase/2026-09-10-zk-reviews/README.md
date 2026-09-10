@@ -31,3 +31,20 @@ not say "someone else has reviewed this".
 
 `904-plan-round1.md` was pinned to `6ac2324d`; its own report records `bun 1.3.11 / Darwin 24.6.0`
 and the independently re-run baseline (`253 pass / 1 skip / 0 fail / 661 expect`).
+
+## 全部 log(逐字)
+
+- `5092-round1.md`
+- `5092-round2.md`
+- `904-impl-round1.md`
+- `904-impl-round2.md`
+- `904-impl-round3.md`
+- `904-impl-round4.md`
+- `904-impl-round5.md`
+- `904-impl-round6-delta.md`
+- `904-impl-round6.md`
+- `904-plan-delta-confirm.md`
+- `904-plan-delta.md`
+- `904-plan-round1.md`
+- `904-plan-round2.md`
+- `904-plan-round3.md`
