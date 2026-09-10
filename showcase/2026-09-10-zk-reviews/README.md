@@ -32,6 +32,16 @@ not say "someone else has reviewed this".
 `904-plan-round1.md` was pinned to `6ac2324d`; its own report records `bun 1.3.11 / Darwin 24.6.0`
 and the independently re-run baseline (`253 pass / 1 skip / 0 fail / 661 expect`).
 
+## 同一份工作的第三种审法(对照)
+
+| Log | 方法 | 特点 |
+|---|---|---|
+| `grilling-5092-904.md` | matt 的 `grilling`(= `grill-me`)skill | **设计树 + frontier**:不问"这句话成立吗",问"哪些决策从没人问过"。14 问 / 34 个事实它自己查完 |
+
+对照价值:**六轮 claim-verification 一次也没产出过它那些问题** —— 协议自身的自相矛盾、循环的终止条件、
+评审者"是谁"(模型多样性从未记录)、一张待办卡的验收可以假通过、用户模拟层从未被跑、14 份 log 里 7 份没进索引、
+daily 已过期。**同一份工作,换一种问法,问出来的是另一类东西。**
+
 ## 全部 log(逐字)
 
 - `5092-round1.md`
