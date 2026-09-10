@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/9/10 18:40:27
+> 自动生成于 2026/9/10 18:45:53
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 380 | 进行中: 1, 待验收: 1, 已完成: 317 |
+| Tasks | 382 | 进行中: 1, 待验收: 2, 已完成: 317 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 108 | 已接受: 101 |
+| ADRs | 107 | 已接受: 101 |
 
 ---
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (16)
+### 待办 (17)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -94,14 +94,16 @@
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
+- [ ] **TASK-20260910184110804**: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 
 ### 进行中 (1)
 
 - 🔄 **TASK-20260910181747676**: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 
-### 待验收 (1)
+### 待验收 (2)
 
 - 🔍 **TASK-20260910152029904**: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
+- 🔍 **TASK-20260910184349139**: ADR frontmatter carries task and epic relations too - and the fields must have a reader
 
 ### 已完成 (317)
 
@@ -584,7 +586,6 @@
 - ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
 - ✅ **ADR-20260910152957509** (02-accepted): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
 - 🤔 **ADR-20260910181957316** (01-proposed): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
-- 🤔 **ADR-20260910184026975** (01-proposed): throwaway old relation probe 2
 
 ---
 
