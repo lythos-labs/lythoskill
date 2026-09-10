@@ -107,8 +107,9 @@ function finalize(original: string, next: string): SpliceResult {
       ok: false,
       code: 'would-corrupt',
       message:
-        `the spliced result would not parse (${err?.message ?? err}) — refusing to write. ` +
-        `This deck uses a shape this writer does not model; the file is byte-identical to before.`,
+        `the spliced result would not parse (${err?.message ?? err}) — refusing to write, the file is ` +
+        `byte-identical to before. This is a defect in the splice, not an unmodelled deck shape: the ` +
+        `entry was located, so report it with the deck that triggered it.`,
     }
   }
   return { ok: true, src: next }
@@ -144,6 +145,8 @@ interface Located {
   group?: Node[]
   /** 一次剪掉的**整段**(用于"连空表头一起走"的级联:两个相邻节点合成一个区间) */
   range?: [number, number]
+  /** 组内命中是否位于**内联表**内(结构性信号;决定要不要按条目合并区间 + 按逗号剪) */
+  groupInInline?: boolean
 }
 
 function locate(body: Node[], src: string, section: string, alias: string): Located | undefined {
@@ -212,9 +215,13 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
   //    (点号字段可能拆成多条 kv,所以是"一组"而不是"一个")。
   const wantFull = `${section}.skills.${alias}`
   const hits: Node[] = []
-  walkKv(body, [], (kv, path) => {
+  let hitsInInline = false
+  walkKv(body, [], (kv, path, inInline) => {
     const full = path.join('.')
-    if (full === wantFull || full.startsWith(`${wantFull}.`)) hits.push(kv)
+    if (full === wantFull || full.startsWith(`${wantFull}.`)) {
+      hits.push(kv)
+      hitsInInline = hitsInInline || inInline
+    }
   })
   if (hits.length > 0) {
     // **折叠嵌套命中,只留最外层**(R3-H1):内联表的**内层字段**也是命中
@@ -231,24 +238,29 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
         secTable && secTable !== owner && (secTable.body?.length ?? 0) === 0 && isAdjacent(src, secTable, owner!)
           ? secTable.range[0]
           : owner!.range[0]
-      return { node: outer[0], group: outer, range: [extend, owner!.range[1]] }
+      return { node: outer[0], group: outer, groupInInline: hitsInInline, range: [extend, owner!.range[1]] }
     }
-    return { node: outer[0], group: outer }
+    return { node: outer[0], group: outer, groupInInline: hitsInInline }
   }
 
   return undefined
 }
 
 /** 全树遍历:回调拿到每个 key-value 及其**完整路径**(含所在表的点号段) */
-function walkKv(nodes: Node[], prefix: string[], cb: (kv: Node, path: string[]) => void): void {
+function walkKv(
+  nodes: Node[],
+  prefix: string[],
+  cb: (kv: Node, path: string[], inInline: boolean) => void,
+  inInline = false,
+): void {
   for (const n of nodes) {
     if (n.type === 'TOMLTable' && n.body) {
-      walkKv(n.body, [...prefix, ...keySegments(n)], cb)
+      walkKv(n.body, [...prefix, ...keySegments(n)], cb, false)
     } else if (n.type === 'TOMLKeyValue') {
       const path = [...prefix, ...keySegments(n)]
-      cb(n, path)
+      cb(n, path, inInline)
       const inner = (n.value as any)?.body
-      if (Array.isArray(inner)) walkKv(inner, path, cb) // 内联表体(如 skills = { alpha.path = … })
+      if (Array.isArray(inner)) walkKv(inner, path, cb, true) // 内联表体:结构性信号,不是文本猜测
     }
   }
 }
@@ -324,9 +336,12 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
     // R4-H1:组内命中若在**内联表内部**(`skills = { alpha.path = …, beta.path = … }`),
     // 每条都是"条目",必须像数组元素一样**连一个相邻逗号**一起剪 —— 否则会留下悬挂逗号
     // (首/中字段则直接变成非法,被结果护栏拦下 = 用户被挡住)。
-    const inInline = (n: Node) => /\{[^}]*$/.test(src.slice(Math.max(0, n.range[0] - 400), n.range[0]))
+    const inInline = hit.groupInInline === true
+    // 同一 entry 的多个字段(alpha.path / alpha.role)会**各拿一次同一个逗号** →
+    // 两个区间重叠;直接按原偏移量依次剪 = R3-H1 那类越界。所以内联表内**先合并重叠区间**。
+    // 只在表形态外不合并:合并会把表形态里的空行一起吞掉(实测)。
     const cutOne = (n: Node): [number, number] => {
-      if (!inInline(n)) return [n.range[0], n.range[1] + lineEndingRun(src, n.range[1])]
+      if (!inInline) return [n.range[0], n.range[1] + lineEndingRun(src, n.range[1])]
       const after = src.slice(n.range[1]).match(/^(\s*),/)
       if (after) {
         const commaEnd = n.range[1] + after[1].length + 1
@@ -337,9 +352,24 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
       if (before) return [n.range[0] - before[0].length, n.range[1]]
       return [n.range[0], n.range[1]]
     }
-    const ranges = hit.group.map(cutOne).sort((x, y) => y[0] - x[0])
+    const raw = hit.group.map(cutOne).sort((x, y) => x[0] - y[0])
+    const merged: [number, number][] = []
+    for (const r of raw) {
+      const last = merged[merged.length - 1]
+      if (inInline && last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1])
+      else merged.push([r[0], r[1]])
+    }
+    // 被删的 entry 是 map 的**最后一个**时,它前面那个逗号会变成悬空的 `, }` ——
+    // 连同逗号与空白一起收回(只在"紧接着就是 `}`"时做,所以不会动到分隔存活条目的逗号)
+    if (inInline) {
+      for (const m of merged) {
+        if (!/^[ \t]*\}/.test(src.slice(m[1]))) continue
+        const before = src.slice(0, m[0]).match(/,[ \t]*$/)
+        if (before) m[0] -= before[0].length
+      }
+    }
     let out = src
-    for (const [rs, re] of ranges) out = out.slice(0, rs) + out.slice(re)
+    for (const [rs, re] of merged.sort((x, y) => y[0] - x[0])) out = out.slice(0, rs) + out.slice(re)
     // 内联 map 被清空 → 连 map 的键一起走(否则留 `skills = {  }` 残渣);
     // section 随之空 → 表头一并走(与对象层级联一致)
     const parsed2 = parseTOMLLoose(out)

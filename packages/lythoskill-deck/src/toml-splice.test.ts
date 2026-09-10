@@ -441,6 +441,72 @@ describe('ZK-impl round-4:R4-H1 内联 map 的字段条目 + 判别性测试', (
   })
 })
 
+
+describe('ZK-impl round-5:entry 的多字段 / 混合 map / 结构性 inInline', () => {
+  const D = '[deck]\nmax_cards = 10\n\n[tool]\n'
+
+  it('one entry with two dotted fields goes as ONE entry (overlapping ranges merged)', () => {
+    // 每个字段都会"各拿一次同一个逗号" → 区间重叠;不合并就是 R3-H1 那类越界
+    const out = spliceRemoveSkill(D + 'skills = { alpha.path = "P", alpha.role = "R", beta.path = "b" }\n', 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe(D + 'skills = { beta.path = "b" }\n')
+  })
+
+  it('field + nested inline table inside the same entry', () => {
+    const out = spliceRemoveSkill(D + 'skills = { alpha.path = "P", alpha.meta = { x = "y" }, beta.path = "b" }\n', 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe(D + 'skills = { beta.path = "b" }\n')
+  })
+
+  it('a dotted entry in the MIDDLE of a mixed map (neighbours untouched)', () => {
+    const out = spliceRemoveSkill(D + 'skills = { a = { path = "1" }, b.path = "2", c = { path = "3" } }\n', 'tool', 'b')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe(D + 'skills = { a = { path = "1" }, c = { path = "3" } }\n')
+  })
+
+  it('a multi-field entry at the END of the map: merged ranges + the now-dangling comma go together', () => {
+    // 判别性场景:最后那个字段没有后继逗号 → 它去拿**前面**那个,而上一个字段已经吃过它 → 区间重叠。
+    // 把 merge 关掉这条会变成 would-corrupt;不收回前导逗号则会留下 `{ "b",  }` 残渣。
+    const out = spliceRemoveSkill(D + 'skills = { beta.path = "b", alpha.path = "P", alpha.role = "R" }\n', 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe(D + 'skills = { beta.path = "b" }\n')
+  })
+
+  it('a map whose `{` is far away still works (structural signal, not a 400-char text window)', () => {
+    const long = 'x'.repeat(500)
+    const out = spliceRemoveSkill(D + `skills = { note = "${long}", alpha.path = "P" }\n`, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain(`note = "${long}"`)
+    expect(out.src).not.toContain('alpha')
+    expect(() => parseTOML(out.src, { range: true })).not.toThrow()
+  })
+
+  it('interior comments: a comment BETWEEN key-values of the removed table goes with the node', () => {
+    // 规格「注释」那一行说范围内的注释随节点走 —— 这条此前没有用例(评审要求重开)
+    const src = `[deck]
+max_cards = 10
+
+[tool.skills.alpha]
+path = "p"
+# 这是块内注释:属于这个块
+role = "r"
+
+[combo.weekly]
+prompt = "k"
+`
+    const out = spliceRemoveSkill(src, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).not.toContain('这是块内注释')
+    expect(out.src).toContain('[combo.weekly]')
+  })
+})
+
 describe('units + line endings', () => {
   it('a non-ASCII file splices at the right place (code units, not bytes)', () => {
     // 若实现把 offset 当字节用,`→` 之后的所有定位都会偏 —— 这里用"删完必须与写死的期望相同"抓它
