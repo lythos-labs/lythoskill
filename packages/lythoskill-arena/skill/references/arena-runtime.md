@@ -47,6 +47,15 @@ kimi --print --afk                   ← agent Shell tool uses process.cwd()
 
 **Fix**: serial runs use `process.chdir(workDir)` before agent start. Each side has independent persistent workdir (`artifactsDir/work/<side>/`).
 
+**Consequence for decision logs**: that workdir is per **side**, not per cell — every run of a
+side shares it. A constant filename is therefore a shared path, and with `runs_per_side > 1`
+the last cell's `decision-log.jsonl` overwrites the others' (2026-09-09 incident, five cells
+per side, one survivor). So each cell is mandated to write `decision-log-<cell-id>.jsonl`
+(`cellIdOf` = `<side>-run-<n>`), and the runner's collect phase merges them into
+`artifactsDir/decision-log.jsonl` — lossless, ordered by cell id, per-cell files retained.
+`archive` does the same merge per side. Rule: `mergeDecisionLogs` in
+`packages/lythoskill-arena/src/preflight.ts`.
+
 ## vs / single Mode Alignment
 
 | Dimension | single | vs |

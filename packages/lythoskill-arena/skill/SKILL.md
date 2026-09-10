@@ -75,7 +75,7 @@ flowchart TD
 ```
 🤖→🔧 prepare-workdir --out /tmp/arena-xxx --brief "task"
     CLI exits: ✅ Workdir ready → 🤖 spawn subagent
-🤖 Agent tool spawn: subagent executes in workdir, writes artifacts + decision-log.jsonl
+🤖 Agent tool spawn: subagent executes in workdir, writes artifacts + decision-log-&lt;cell-id&gt;.jsonl
 🤖→🔧 archive --from /tmp/arena-xxx --to ./playground --sides side-a
     CLI exits: ✅ Archive complete → 🤖 done
 🤖→🔧 deck link parent deck (restore)
@@ -87,7 +87,7 @@ flowchart TD
 🤖→🔧 prepare-workdir × N (each side isolated, each with own deck)
     CLI exits: ✅ Workdir ready × N → 🤖 spawn N subagents in parallel
 🤖 Agent tool spawn ×N, run_in_background=true
-🤖 Collect artifacts + decision-logs from all sides
+🤖 Collect: merge each side's per-cell decision logs → {side}/decision-log.jsonl
 🤖 Spawn judge subagent: score per criteria → report.md
 🤖→🔧 archive --from /tmp/arena-xxx --to ./playground --sides side-a,side-b
 🤖→🔧 deck link parent deck (restore)
@@ -129,10 +129,10 @@ See `references/player-setup.md` for player discovery, installation, and API key
    ```
 
 2. **Dispatch** — spawn subagent with decision-log mandate
-   - Prompt MUST include: "Your working directory is {workDir}. Deck: {deckPath}. Task: {brief}. MANDATORY: write decision-log.jsonl to your CWD. Each line records a decision you made and why."
+   - Prompt MUST include: "Your working directory is {workDir}. Deck: {deckPath}. Task: {brief}. MANDATORY: write decision-log-{cellId}.jsonl to your CWD. Each line records a decision you made and why." — one cell id per cell, never a shared name.
 
-3. **Observe** — collect decision-log, not just artifacts
-   - Read `decision-log.jsonl` from workdir
+3. **Observe** — collect decision-logs, not just artifacts
+   - Read every `decision-log-*.jsonl` from workdir, or the merged `decision-log.jsonl` after the collect step
    - Check: did the subagent follow the skill's declared SOP?
    - Check: did the subagent stop at decision points and ask, or did it guess?
    - Check: are the decisions traceable to the skill's instructions?
@@ -178,18 +178,25 @@ If ANY fail → fix before proceeding.
 
 ### 3. Dispatch — parallel spawn
 
-One subagent per side:
+One subagent per cell:
 
 ```
 subagent prompt:
   "You are an arena cell. Your working directory: {workDir}.
    Deck: {deckPath}.
    Task: {brief}
-   MANDATORY: write decision-log.jsonl to your CWD.
+   MANDATORY: write decision-log-{cellId}.jsonl to your CWD.
    Each line: {"t":<seconds>,"phase":"...","decision":"...","reason":"..."}"
 ```
 
 All subagents run in PARALLEL. Each writes to its own isolated workdir. No file conflicts.
+
+> **Cell id is mandatory when cells share a workdir.** Several cells of one side may
+> run against the *same* workdir — a filename is a path, so two cells mandated to write
+> the same `decision-log.jsonl` means the last writer erases the others (2026-09-09 run:
+> side-a kept S1a's 9 entries, S3a/S4a/S5a gone). Give every cell a distinct id
+> (`s1a`, `s3a`, …) and a per-cell name: the files cannot collide, and the collect step
+> below merges them. A cell alone in its workdir may keep the bare `decision-log.jsonl`.
 
 > **Platform note**: `run_in_background` (or your platform's async spawn equivalent) keeps parent unblocked. Subagent inherits parent CWD — include `"Your working directory is {workDir}"` in the prompt so it cd's to the right place. Subagent skills load from the working set directory in that workdir (default `.claude/skills/`).
 
@@ -198,7 +205,11 @@ All subagents run in PARALLEL. Each writes to its own isolated workdir. No file 
 After ALL complete:
 
 **1. Collect**
-- Gather artifacts + `decision-log.jsonl` from each side's workdir
+- Gather artifacts from each side's workdir
+- Decision logs: each cell wrote `decision-log-<cell-id>.jsonl`. Read them per cell (they are
+  the attributable evidence) or let `archive` merge them into one `decision-log.jsonl` per
+  side — see the Archive step below. The merge is lossless and ordered by cell id, but a
+  merged line carries no cell attribution, so the per-cell files are kept.
 
 **2. Judge**
 - Spawn judge subagent with all artifacts as context
@@ -206,7 +217,7 @@ After ALL complete:
 
 **3. Archive (same behavior as CLI `--out`)**
 
-Use `archive` command (same copy logic as CLI `single` mode). Plan-first: dry-run to review what will be copied, then execute.
+Use `archive` command (same copy logic as CLI `single` mode). Plan-first: dry-run to review what will be copied, then execute. `archive` is also the collect step for decision logs: when a side holds per-cell logs (`decision-log-<cell-id>.jsonl`), it merges them into `<out>/<side>/decision-log.jsonl` and leaves the per-cell files in place. A side whose only log is the bare `decision-log.jsonl` is already merged and is copied untouched.
 
 ```bash
 # Plan-first
@@ -230,7 +241,8 @@ bunx @lythos/skill-arena@{{PACKAGE_VERSION}} archive \
 |------|----------|---------|
 | `report.md` | YES | Comparative analysis + verdict |
 | `README.md` | YES | Deck configs, task brief, run metadata |
-| `{side}/decision-log.jsonl` | YES | Agent reasoning per side |
+| `{side}/decision-log.jsonl` | YES | Agent reasoning per side — merged from the per-cell logs by `archive` |
+| `{side}/decision-log-<cell-id>.jsonl` | YES | Per-cell reasoning; the only attributable view (a merged line does not name its cell) |
 | `{side}/artifacts/*` | YES | HTML, docx, pdf, etc. |
 | `reproduce.sh` | NO | Shell script recording `prepare-workdir` + `archive` commands (agent spawn is manual, CLI commands are reproducible) |
 
