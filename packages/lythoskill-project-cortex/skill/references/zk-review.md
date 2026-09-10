@@ -219,6 +219,43 @@ ZK Review 不是一个时点，也不只一个对象。可复用的形态是**�
 - `arena single --deck <path> --brief "<任务>"` 只是这条链上的一个封装；**直接跑 CLI 命令行同样可以**，
   而且更透明。
 
+### 两种 ZK Review：按载体分（各有跑通的 SOP）
+
+同一件事有两种载体，用途不同、**判据相同**（独立性分层 + commit-pinning + 落盘继承）：
+
+| | **replay 型** | **角色特化专家型（side deck）** |
+|---|---|---|
+| 载体 | `test/scenarios/<slug>-bdd/`：`reproduce.sh` + `judge.md`（+ 产出的 `decision-log.jsonl` / `judge-verdict.json`） | 一个 **deck**（= 角色 + 知识）+ 一个**独立房间** |
+| 用途 | **主体自己的内部 loop**：可复跑、产物可留档、回归可重放 | 需要**"某类人"的视角**：测试专家、文档读者、怀疑论者、领域审计 |
+| 判据来源 | `judge.md` 的条目表（权重 + 验证方式） | 该 deck 的角色定义 / 你给的评审任务 |
+| 何时用 | 已知场景、要**重复**跑、要**回归** | 要**换一种问法**、要**另一双眼睛** |
+
+**SOP A — replay 型（2026-09-10 实跑，`also-link-to-bdd`）**
+
+1. `bash reproduce.sh` —— 它建 fixture + 跑确定性步骤，并把**指令打到 stdout**（IoC：stdout 即 prompt）；
+2. 派一个**零上下文 agent** 照 stdout 的 PHASE 逐条干（写 `decision-log.jsonl`，`ts` 取**单一时钟源**）；
+3. 派**另一个**独立 agent 当 judge：只读 `judge.md` + fixture，**不采信 player 的产物**，自己重放中间态；
+4. 产物落盘到 scenario 目录；`judge-verdict.json` 写 `reviewed_commit` 与**分层** `independence`
+   （knowledge 达成 / orchestration **不**达成 —— 两层分开写，见本文档开头）。
+
+**SOP B — 角色特化专家型（2026-09-10 实跑，`grilling` skill）**
+
+三种跑法，**代价递增、隔离递增**：
+1. **直接派 sub-agent + 把 skill 的路径给它**（本次用法）：最快；代价是**没有专属技能目录**，
+   它读到什么取决于你给了什么路径，且**房间纪律全靠 sub-agent 自觉**。
+2. **先给它准备一个专属 skill dir，再让 sub-agent 去读**：把该角色的 skill 扇出到一个专属目录
+   （`deck` 的 `working_set` / `also_link_to`，或 `deck per-run <cli>`)——
+   它看到的是**被封好的一套角色知识**，不是散落的路径。
+3. **`arena single --deck <path|url> --brief "<评审任务>"`**：最重、隔离最好；
+   跑在 `playground/<date>-<slug>/` 小房间里，**完全不碰主工作集**。
+
+三种都要：**逐字留档**（本次 `showcase/2026-09-10-zk-reviews/grilling-5092-904.md`），
+并在本节/卡面写清**用哪一种、为什么** —— 否则下一位只看到结论，看不到它的强度边界。
+
+**为什么两种都要有**：replay 型回答"**上次定的东西现在还成立吗**"（回归），
+角色特化型回答"**有没有一件事从没人问过**"（发现）。2026-09-10 的对照很干净：
+六轮 claim-verification 没产出过 grilling 那 14 问里的**任何一条**。
+
 ### 收敛与折入
 
 - **收敛判据**：新 gap < 2 且全部低优先级（本文档既有标准）。计划闸与实现闸**各自**收敛。
