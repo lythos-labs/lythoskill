@@ -60,6 +60,7 @@ bunx @lythos/skill-deck@0.19.1 link
 - A skill source inside the fan-out dir is refused (symlink-cycle ENAMETOOLONG class, opencode #45961).
 - `.clinerules` fans out as snapshot copies — Cline does not follow symlinks there.
 - A fan-out target **no surveyed CLI scans** prints an **info** line (`<dir>: no layout data — hazards unknown`). Silence would read as "checked, and safe"; it is not — it means deck has no data for that directory. See *Unlisted targets* below.
+- A fan-out target that is **not a skills dir but a CLI's config root** (or a container of config roots) prints a **warning**. See *Wrong-level targets* below.
 
 **Unlisted targets — silence is earned, not default.** The survey covers 16 CLIs; a target outside
 it gets no hazard analysis, and the two checks above both no-op on it. Printing nothing there would
@@ -79,6 +80,37 @@ The declaration is the source of the silence, and `skill-deck.toml` is git-track
 which is the whole point. Two properties worth knowing: the acknowledgement suppresses **only** the
 "no layout data" line, never a data-loss hazard (it is not a mute switch), and it is not checked for
 staleness — a pattern that matches nothing stays quietly inert. Rationale: **ADR-20260910120047122**.
+
+**Wrong-level targets — a config root is not a skills dir.** The primary scenario of a fan-out
+target is *the directory a CLI scans for skills*. `~/.claude` and `~/.config` are more famous paths
+than `~/.claude/skills` and `~/.config/goose/skills`, so they are what people reach for; fan-out then
+creates skill entries directly inside them, mixing skills into `settings.json`'s directory. When a
+target is not a skills dir but **contains one the survey knows** (at any depth), `deck link` warns:
+
+```
+⚠️  [warning] /Users/u/.claude: not a skills dir — it contains .claude/skills / ~/.claude/skills.
+   Fan-out creates skill entries directly inside the dir named here; name the skills dir instead.
+```
+
+The message names the dirs to use, because the survey already knows them. Three properties:
+
+- **No mute switch.** `acknowledged_unlisted` covers "we have no data for this dir"; this is the
+  opposite — the table has the answer and says the config is wrong. There is no legitimate deck that
+  fans skills into a CLI's config root, so no declaration silences it.
+- **One verdict per target.** A wrong-level target does not *also* get the "no layout data" info line
+  — two lines would contradict each other, and the info line's advice (acknowledge it) would not work.
+- **Derived, not heuristic.** The check is the reverse of `layoutsScanning`: it fires only when a
+  known `fanOutTargets` entry sits underneath the given dir. It does not try to classify arbitrary
+  directories. Home and root themselves (`also_link_to = ["~"]`) are *not* covered here — that shape
+  takes deliberate construction, and `working_set` is already refused outright for it
+  (see *Safety guards*, first line). Known boundary, not an oversight.
+
+The evidence is our own usage, which anyone can re-measure:
+`grep -rh '^\s*working_set\s*=' examples/ showcase/ skill-deck.toml` → 67 of 68 declared targets are
+a `skills` dir (`.claude/skills` ×60, `.agents/skills` ×4, `~/.claude/skills`, `.cursor/skills`); the
+68th is `"skills"`, the build-output collision already forbidden by ADR-20260519144445916. **Zero**
+config roots. The normal shape is measured, not assumed — which is what makes a single cheap signal
+enough here. Rationale: **ADR-20260910120047122 § 名单外 vs 层级错位**.
 
 **Ownership guard.** deck only removes an entry it can prove it created — a symlink resolving into
 this deck's cold pool, or a path recorded in `skill-deck.state` (working set + every fan-out target

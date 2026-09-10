@@ -686,6 +686,18 @@ if (prevWorkingSet && resolve(prevWorkingSet) !== resolvedWorkingSet) {
   }
 }
 
+// ── CLI-layout policy warnings(数据驱动;默认 .claude+.agents/skills 对零警告) ──
+// 刻意排在收束**之前**:一条指向错层级目标的警告,如果印在几十行 🔗 之后,
+// 就是墓志铭而不是守卫 —— 写明「目标配错了」的价值在于它出现在还没读过去的时候。
+// info 级(名单外目标)也用 ⚠️ 会让"没有 layout 数据"看起来像告警;两者语气不同,图标分开。
+for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO], {
+  acknowledgedUnlisted: ACKNOWLEDGED_UNLISTED,
+})) {
+  const icon = w.severity === 'info' ? 'ℹ️ ' : '⚠️ ';
+  console.warn(`${icon} [${w.severity}] ${w.message}`);
+  console.warn(`   ref: ${w.ref}`);
+}
+
 // ── 收束 working set ────────────────────────────────────────
 
 const declaredNames = new Set(declared.map(d => d.alias));
@@ -697,16 +709,6 @@ for (const target of ALSO_LINK_TO) {
   console.log('');
   console.log('📋 also_link_to: ' + relative(PROJECT_DIR, target));
   reconcileTargetDir(target, declared, declaredNames, MODE, PROJECT_DIR);
-}
-
-// ── CLI-layout policy warnings(数据驱动;默认 .claude+.agents/skills 对零警告) ──
-// info 级(名单外目标)也用 ⚠️ 会让"没有 layout 数据"看起来像告警;两者语气不同,图标分开。
-for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO], {
-  acknowledgedUnlisted: ACKNOWLEDGED_UNLISTED,
-})) {
-  const icon = w.severity === 'info' ? 'ℹ️ ' : '⚠️ ';
-  console.warn(`${icon} [${w.severity}] ${w.message}`);
-  console.warn(`   ref: ${w.ref}`);
 }
 
 // ── 收集元数据 ──────────────────────────────────────────────

@@ -421,6 +421,49 @@ export function dirMatches(dir: string, pattern: string): boolean {
 }
 
 /**
+ * dir 里面有哪些 CLI 扫描的 skills 目录?(即 dir 是配置根 / 配置根的容器,
+ * 而不是 skills 目录本身)
+ *
+ * 用途:fan-out 目标写错层级。`~/.claude` 是 settings.json 的家、`~/.config`
+ * 是所有 CLI 配置的家,都比 `skills` 目录出名 —— 顺手写下来就是错的;而 fan-out
+ * 把 skill 条目**直接建在它命名的那个目录里面**(目标目录 + 别名,不额外加一层),
+ * 差这一层当场可见(skills 和 settings.json / 各 app 配置混在一层)。
+ *
+ * 判据只用表里已有的数据,不发明启发式:
+ *   - dir 本身就是表里的某个 skills 目录 → 层级没错,返回 []
+ *   - dir 是表里某个 skills 目录的**上层**(任意层)→ 命中,返回那些目录的原始写法
+ *     (可直接抄进 toml)。两种书写形态都要认:
+ *     (A) 同为相对写法:`kn.startsWith(norm + "/")`
+ *     (B) 运行时是 expandHome 后的绝对路径、表里是相对写法,两者只在后缀上
+ *         见面:取 kn 的逐层前缀 p,看 dir 是否以 p 结尾(边界对齐,同 layoutsScanning)
+ *
+ * 去重后按表序返回;**不**刻意合并 `.claude/skills` 与 `~/.claude/skills` ——
+ * 绝对路径的 dir 无法区分用户想的是家目录那个还是项目里那个,列全比猜一个诚实。
+ *
+ * 刻意不做:把 `~` / `.` / 任意大目录判成错层级 —— 那些只有故意才写得出来
+ * (AGENTS.md §2 规则 10),不为它们建规则。这里只认**表里已知的那些位置**。
+ */
+export function skillsDirsUnder(dir: string): string[] {
+  if (layoutsScanning(dir).length > 0) return [];
+  const norm = normalizeDir(dir);
+  const hits: string[] = [];
+  for (const layout of CLI_LAYOUTS) {
+    for (const k of layout.fanOutTargets) {
+      const kn = normalizeDir(k);
+      let inside = kn.startsWith(norm + "/");
+      if (!inside) {
+        const segs = kn.split("/");
+        for (let i = 1; i < segs.length && !inside; i++) {
+          const p = segs.slice(0, i).join("/");
+          inside = norm === p || norm.endsWith("/" + p);
+        }
+      }
+      if (inside && !hits.includes(k)) hits.push(k);
+    }
+  }
+  return hits;
+}
+/**
  * 该 fan-out 目标的链接模式覆盖 + 原因。
  * 只认 hazard 的 triggerDirs(如 .clinerules = 实测不跟随 → snapshot);
  * 共享 .agents/skills 上"unverified"不构成覆盖理由 — deck 默认投影是

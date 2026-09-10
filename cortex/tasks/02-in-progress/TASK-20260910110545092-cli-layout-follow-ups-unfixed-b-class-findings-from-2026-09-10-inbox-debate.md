@@ -255,6 +255,14 @@ layout 时,`layoutsScanning` 返回 `[]` → 两个循环都不进 → **零输�
 豁免**只关掉"无数据"这条**,名单内的 data-loss hazard 照常发声;
 豁免模式**不检测陈旧**(匹配不到任何目标的模式静默失效)——接受,并写明是记账项而非自动检查项。
 
+**✅ 追加边界(2026-09-10,owner 现场)= 层级错位出 warning,豁免不适用**。
+owner 原话:「**如果敢配全局目录到 skill 目录,我都觉得首先要警告了**」+
+「**不要自作聪明去推测各种奇葩写法,明明你们 agents 可以帮忙修正回正路到 toml 里**」。
+→ 名单外目标实为两类:表里**没有**这个位置(info,如上)vs 表里**有**且写着对的目录
+(`~/.claude`、`~/.config` → warning)。判据只用表内数据(`skillsDirsUnder`),
+不发明启发式、不模糊匹配、不自动改写;修正动作是 agent 把正确目录写回 toml。
+落 `ADR-20260910120047122` 同名追加节,执行细节见 `## Progress Log` 末条。
+
 B17/B18 的结论回填到本卡 `## Notes`。
 
 **已由前置完成(记 done,不在本卡重复)**
@@ -318,6 +326,13 @@ B17/B18 的结论回填到本卡 `## Notes`。
       验收点:①`layoutsScanning(t) === []` 时必出 1 行(info 级);②声明过则**零输出**;
       ③豁免**不**抑制 data-loss(反例测试:`['.goose/skills']` + 豁免 → 仍出 data-loss);
       ④默认 deck 与全部 docs-tier 目录仍零输出(dormancy 未破);⑤取向写进 deck README
+- [x] **B18 追加边界(owner 现场)**:层级错位(配置根不是 skills 目录)出 warning。
+      验收点:①`~/.claude`、`~/.config`、`.agents` 均命中(含绝对路径写法);
+      ②目标**就是**表里的 skills 目录时不命中(`.claude/skills` / `.roo/skills` / `.qwen/skills` → 零输出);
+      ③`acknowledged_unlisted` 声明后**仍然** warning(豁免不适用);
+      ④同一目标只出一个结论(不再同时出 info 行);
+      ⑤文案点名该用的目录(不猜写法:绝对路径目标列出两种写法);
+      ⑥`~` / `.` 不判(已知边界,README 写明);⑦默认 deck dormancy 未破
 - [x] **ADR Follow-up 豁免成文(owner "第二吧")**:`ADR-20260910113534807 §5` +
       writing-guide 一节 + `template.ts` 的 `Follow-up:` 行注释;界线三条(派生新义务 /
       需独立计划 / 待 owner 裁决 → 仍开卡)写明,防退化成"什么都能不开卡"
@@ -387,13 +402,51 @@ B17/B18 的结论回填到本卡 `## Notes`。
     把该目标加进 `acknowledged_unlisted` 再跑 → 该行**消失**(`grep -c` = 0)。
   - **B18 实现中改了两处原判**:①`FanOutWarning.severity` 是闭合联合,加 `info` 必须同时
     改渲染端(`link.ts`),否则 info 行会挂着 `⚠️` —— 会把"缺数据"读成"有危险";
-    ②`normalizeDir` 从 `cli-layout.ts` 私有改为导出,否则同一目录的两种写法
-    (`.new/skills` 与 `./.new/skills`)会出两行。**不导出去重键就得自己再造一个归一化** ——
-    那是"启发式当规格"。
+    ②~~`normalizeDir` 从 `cli-layout.ts` 私有改为导出,否则同一目录的两种写法
+    (`.new/skills` 与 `./.new/skills`)会出两行~~ —— **此项已撤除,见上一条**:
+    导出与去重一起撤回,`normalizeDir` 至今仍是私有。此处保留删除线而非删除,
+    是因为"曾经这么想过、为什么撤回"本身是下一位需要的信息(不做也要留痕)。
   - **B17 复核修正**:卡面记的 8 处已全数复核命中(`test.yml` 5 + `release.yml` 2 +
     `deploy-pages.yml` 1);另发现 `deploy-pages.yml` 用的是 `setup-bun@v1` 而另两个是 `@v2` ——
     **不在本条范围**(pin 的是解释器不是 action),已写进 ADR 的顺带记账,免得下次复核
     把它当成新发现。
+- 2026-09-10: **B18 追加边界行为:层级错位**(owner 现场追加裁决,落在同一篇 ADR)。
+  owner 原话:「**说到底,deck toml 在预设的主要场景是什么,千万不要搞错这个来故意为难自己。
+  说白了,如果敢配全局目录到 skill 目录,我都觉得首先要警告了**」+
+  「**因为现在有 agent,我反而可以认为在有 cli 那个前置知识后,我们是可以发现
+  『看上去意图很奇怪的配置』的**」+「**这个类似垃圾邮件原理**」+
+  「**不要自己去自作多情/自作聪明去『推测』各种奇葩写法,明明你们 agents 可以帮忙修正回正路到 toml 里**」。
+  - **它修的是原决策的一个洞**:名单外目标其实有两类 ——(a) 表里**没有**这个位置
+    (`.some-new-cli/skills`,该说"没有数据"),(b) 表里**有**这个位置且写着对的目录
+    (`~/.claude`、`~/.config`,该说"这不是 skills 目录")。原决策把 (b) 也塞进了 (a) 的
+    info 行 —— **手里有答案却说自己没数据**,这是这份输出第二次说谎
+    (第一次是"零输出读成查过了",即本 ADR 的由来)。
+  - **常态形状是量出来的,不是假设的**:`grep -rh '^\s*working_set\s*=' examples/ showcase/
+    skill-deck.toml` → 68 条里 67 条是 skills 目录,第 68 条是 `"skills"`(build-output 撞名,
+    已被 `ADR-20260519144445916` 禁止),**配置根 0 条**。所以一个廉价信号就够
+    (垃圾邮件原理:不枚举坏样本,只要低误报率的信号;误报代价是一行,漏报代价是 skills 进配置根)。
+  - **判据只用表内数据**:`skillsDirsUnder(dir)` = 表里某个 `fanOutTargets` 位于 dir **之下**
+    (任意深度;`.config` 这类"配置根的容器"也算 —— 只判直接父目录会漏掉 owner 点名的那个),
+    绝对路径用后缀对齐认(同 `layoutsScanning`)。**不发明启发式**,不模糊匹配,不自动改写。
+  - **四条边界**:①豁免不适用(`acknowledged_unlisted` 的语义与这条相反,给它开关 =
+    一个"我就要把 skills 建在配置根上"的按钮);②一个目标一个结论(不再同时出 info 行,
+    否则两行互相矛盾,且 info 行的建议对 warning 无效);③**不猜写法**——绝对路径目标同时列出
+    `.claude/skills` 与 `~/.claude/skills`,不替用户挑(代码无法知道他想的是家目录还是项目内);
+    ④**不判 `~` / `.` / 任意大目录**——只有故意才写得出来(§2 规则 10),`working_set` 那侧
+    已在 `link.ts:510` 直接拒绝,这是**已知边界不是遗漏**。
+  - **一处顺带修正(不是新功能)**:警告块从收束**之后**移到**之前**。印在几十行 `🔗` 之后的
+    警告是墓志铭不是守卫 —— 写明"目标配错了"的价值在于它出现在读者还没读过去的时候。
+    无测试钉住该顺序(已实查),故移动零测试改动。
+  - **实测复现**:`/tmp/wronglevel/`(`HOME` 指向 fixture,不碰真家目录)——
+    `also_link_to = ["~/.claude", ".agents"]` 且**两者都进了 `acknowledged_unlisted`** →
+    `deck link` 仍出两行 `⚠️ [warning] ... not a skills dir — it contains ...`,
+    且排在 `📁 working_set:` 之前;换成正常 deck(`.claude/skills` + `.agents/skills` +
+    `~/.qwen/skills`)→ 策略行数 `0`。
+  - 判据的两侧现在都有实例:`AGENTS.md §2` 规则 10 补了"**笔误 → 守头部**"与
+    "**故意构造 → 不写 handler**"的分野,并点名"你不要自作聪明推测奇葩写法"。
+  - **本批实测值**:deck = `244 pass / 1 skip / 0 fail / 615 expect / 245 tests / 16 files`
+    (B18 原批 `236 / 1 / 0 / 602 / 237`;差值 = 本轮新增 8 条层级错位测试)。
+    cortex = `135 pass / 0 fail / 275 expect / 7 files` @ Bun 1.3.11 / macOS。
 
 ## Related Files
 - Modified:
@@ -401,9 +454,13 @@ B17/B18 的结论回填到本卡 `## Notes`。
   - `cortex/tasks/04-completed/TASK-20260909155425926-cli-adapter-hardening-symlink-tiers-hazard-classes-per-run-dirs.md`
     (S4:补 `## Notes`,唯一一处被允许的 `04-completed/` 改动)
   - **B18**:`packages/lythoskill-deck/src/layout-policy.ts`(severity 加 `info`、
-    `FanOutOptions`、`collectUnlistedTargets`)、`src/link.ts`(`parseAcknowledgedUnlisted`
-    + 读 toml + 分级渲染)、`src/cli-layout.ts`(`normalizeDir` 导出,供去重)、
-    `src/layout-policy.test.ts`(+9 测试)、`packages/lythoskill-deck/README.md` § Safety guards
+    `FanOutOptions`、`collectUnlistedTargets`;追加 `collectWrongLevelTargets`)、
+    `src/link.ts`(`parseAcknowledgedUnlisted` + 读 toml + 分级渲染 + 警告块前移到收束之前)、
+    `src/cli-layout.ts`(追加 `skillsDirsUnder`;`normalizeDir` **未**导出,去重已撤)、
+    `src/layout-policy.test.ts`(+9 测试,+8 层级错位测试)、
+    `packages/lythoskill-deck/README.md` § Safety guards(含 *Wrong-level targets*)
+  - **B18 追加边界**同批:`AGENTS.md §2` 规则 10 补两侧分野、
+    `cortex/adr/02-accepted/ADR-20260910120047122-…md` 追加 § 层级错位
   - **B17**:`.github/workflows/{test,release,deploy-pages}.yml`、`AGENTS.md §9`
 - Added:
   - (本卡自身,`02-in-progress/`;执行时按下述清单落)
@@ -459,16 +516,23 @@ alternatives。**该 ADR 已落地**:
   `[deck] acknowledged_unlisted = [...]` **显式声明**(gitignore 式)。
   owner 原话:「**B18 按照 B 可以,另外增加 deck 能力标记类似 gitignored 的东西
   豁免静默就好吧**」。决策:**ADR-20260910120047122**(accepted)。
+- **B18 追加边界 = 层级错位出 warning**(owner 现场追加,同 ADR)。owner 原话:
+  「**如果敢配全局目录到 skill 目录,我都觉得首先要警告了**」。名单外目标分两类:
+  表里**没有**这个位置(info)**vs** 表里**有**且写着对的目录(`~/.claude` / `~/.config` → warning),
+  后者豁免管不着。判据只用表内数据,不猜写法、不自动改写 —— 修正由 agent 写回 toml。
 
 **本批实测值**(引用纪律见下):`bun test packages/lythoskill-deck/` =
-`236 pass / 1 skip / 0 fail / 602 expect / 237 tests / 16 files` @ Bun 1.3.11 / macOS。
-改动前同命令 = `227 / 1 / 0 / 589 / 228 / 16`(差值全部来自 B18 新增的 9 条测试)。
+`244 pass / 1 skip / 0 fail / 615 expect / 245 tests / 16 files` @ Bun 1.3.11 / macOS。
+改动前同命令 = `227 / 1 / 0 / 589 / 228 / 16`(差值来自 B18 新增的 9 条 + 层级错位 8 条测试)。
 
-**B18 的实现边界(三条,ADR 里也写了,这里留操作口径)**:
+**B18 的实现边界(四条,ADR 里也写了,这里留操作口径)**:
 1. 豁免**只关掉"无数据"这一条**。反例测试钉死:`collectFanOutWarnings(['.goose/skills'],
    { acknowledgedUnlisted: ['.goose/skills'] })` 仍必须出 `data-loss`。
 2. 豁免**不检测陈旧** —— 匹配不到目标的模式静默失效。这是记账项,不是自动检查项。
 3. 信息级用 `ℹ️` 渲染、排在最后;`⚠️` 保留给 data-loss/warning。混用会把"缺数据"读成"有危险"。
+4. **层级错位**是 warning 且**无豁免**:豁免的语义是"我知道这里没有数据",这条是
+   "表里有数据且说这个配置是错的",两者相反。给后者开关 = 一个"我就要把 skills 建在
+   配置根上"的按钮,而没有一个真实 deck 需要它。
 
 **S4 回填时发现的两件事(2026-09-10)**
 

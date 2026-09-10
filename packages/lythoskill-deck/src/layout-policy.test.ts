@@ -57,6 +57,63 @@ describe('collectFanOutWarnings — opencode #46327 duplicate-scan', () => {
   })
 })
 
+describe('collectFanOutWarnings — wrong-level targets (config root, not skills dir)', () => {
+  it('~/.claude warns and names the dir to use instead', () => {
+    // 最常见的笔误:配置根比 skills 目录出名,顺手写下来就是错的
+    const warnings = collectFanOutWarnings(['.claude/skills', '~/.claude'])
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0].severity).toBe('warning')
+    expect(warnings[0].message).toContain('not a skills dir')
+    expect(warnings[0].message).toContain('~/.claude/skills')
+  })
+
+  it('the ABSOLUTE form warns too — runtime targets are always expandHome-resolved', () => {
+    // 判据必须走后缀:toml 写 `~/.claude`,link.ts 交给策略的是 /Users/u/.claude
+    const warnings = collectFanOutWarnings(['/Users/u/.claude', '/proj/.agents'])
+    expect(warnings.map(w => w.severity)).toEqual(['warning', 'warning'])
+    expect(warnings[1].message).toContain('.agents/skills')
+  })
+
+  it('an unknown project\'s .claude still warns — the mistake is positional, not per-project', () => {
+    const warnings = collectFanOutWarnings(['/somewhere/else/.claude'])
+    expect(warnings.map(w => w.severity)).toEqual(['warning'])
+  })
+
+  it('~/.config warns — any depth counts, not just the immediate parent', () => {
+    // 「全局目录」的典型:`~/.config` 不是某个 CLI 的配置根,是**配置根们的家**
+    // (goose/opencode/crush/kimi/amp 的 skills 目录都在它下面)。只判「父目录」
+    // 会漏掉它 —— 而它恰恰是最容易被顺手写进来的那个。
+    const warnings = collectFanOutWarnings(['~/.config'])
+    expect(warnings.map(w => w.severity)).toEqual(['warning'])
+    expect(warnings[0].message).toContain('~/.config/goose/skills')
+  })
+
+  it('the correct skills dirs do NOT warn (no self-trip on the table own entries)', () => {
+    // 每个 CLI 只列一个目标 —— 列两个才会触发 duplicate-scan(那是另一条检查)
+    expect(collectFanOutWarnings(['.claude/skills', '.roo/skills', '~/.qwen/skills'])).toEqual([])
+  })
+
+  it('acknowledged_unlisted does NOT silence it — the exemption covers "no data", not "known wrong"', () => {
+    const warnings = collectFanOutWarnings(['~/.claude'], {
+      acknowledgedUnlisted: ['~/.claude'],
+    })
+    expect(warnings.map(w => w.severity)).toEqual(['warning'])
+  })
+
+  it('and it does not ALSO get the info line — one target, one verdict', () => {
+    // 两行会互相打架:info 说「没有数据」,warning 说「数据里有对的答案」,
+    // 而 info 的 ref 会诱导用户去加一个对 warning 无效的豁免开关
+    const warnings = collectFanOutWarnings(['~/.claude'])
+    expect(warnings).toHaveLength(1)
+  })
+
+  it('a deeper dir under a known skills dir is NOT wrong-level (no over-reach)', () => {
+    // `.agents/skills/foo` 是 skills 目录里面,不是配置根 —— 走名单外 info
+    const warnings = collectFanOutWarnings(['.agents/skills/foo'])
+    expect(warnings.map(w => w.severity)).toEqual(['info'])
+  })
+})
+
 describe('collectFanOutWarnings — unlisted targets (B18, ADR-20260910120047122)', () => {
   it('a target no CLI scans emits ONE info line, not silence', () => {
     const warnings = collectFanOutWarnings(['.claude/skills', '.some-new-cli/skills'])

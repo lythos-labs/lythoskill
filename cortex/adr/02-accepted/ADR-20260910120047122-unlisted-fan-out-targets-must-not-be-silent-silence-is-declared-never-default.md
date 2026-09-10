@@ -8,6 +8,7 @@
 | proposed | 2026-09-10 | Created |
 | accepted | 2026-09-10 | Owner 裁决 B18 = 选项 B(诚实优先),并追加豁免标记 |
 | accepted | 2026-09-10 | Accepted |
+| accepted | 2026-09-10 | 追加边界行为:层级错位(配置根不是 skills 目录)出 warning,且豁免不适用 —— 见 § 层级错位 |
 
 ## Background
 
@@ -145,6 +146,96 @@ A 与 B 都能自洽,区别只在"诚实优先"还是"信噪比优先"。
   - `packages/lythoskill-deck/README.md` § Safety guards 写明取向(**已落地**,B18 自身的要求:
     "必须选一个并写进 README,否则下个 agent 会按自己的偏好改回去")。
   - 普查报告未持久化 = **取证未留痕**,与本条独立,仍在善后卡上。
+
+## 层级错位:配置根不是 skill 目录(2026-09-10 追加边界行为)
+
+owner 追加裁决,三句话:
+
+> "如果敢配全局目录到 skill 目录,我都觉得首先要警告了"
+> "因为现在有 agent,我反而可以认为在有 cli 那个前置知识后,我们是可以发现「看上去意图很奇怪的配置」的"
+> "这个类似垃圾邮件原理"
+> "不要自己去自作多情/自作聪明去「推测」各种奇葩写法,明明你们 agents 可以帮忙修正回正路到 toml 里"
+
+### 背景:名单外的目标有两种,原决策只处理了一种
+
+原决策给"目标不在普查范围内"统一发了 info 一行 + 可声明的静默。但名单外分两类,
+而它们的**表内状态相反**:
+
+| | 例子 | 表里的状态 | 该说什么 |
+|---|---|---|---|
+| (a) 表里没有这个位置 | `.some-new-cli/skills` | **不知道** | "没有数据"(info) |
+| (b) 表里有这个位置,且写着对的目录 | `~/.claude`、`~/.config` | **知道,而且指错了** | "这不是 skills 目录"(warning) |
+
+把 (b) 塞进 (a) 的 info 行,是这份输出第二次说谎 —— 第一次是"零输出读成查过了",
+这次是"手里有答案却说自己没数据"。
+
+### 为什么 (b) 是**最容易**发生的一类,而不是刁钻构造
+
+fan-out 的语义是"把 skills 放进去";而挑目标时,**出名的路径是配置根,不是 skills 目录**:
+`~/.claude` 是 `settings.json` 的家,`~/.config` 是所有 CLI 配置的家 —— 先浮出来的是它们。
+`link.ts` 的 `reconcileTargetDir` 按 `dest = join(targetDir, alias)` 把条目**直接建在目标目录里**,
+所以差这一层当场可见:skills 与 `settings.json` 混在一层。
+
+**常态形状是量出来的**(可复跑):
+`grep -rh '^\s*working_set\s*=' examples/ showcase/ skill-deck.toml` →
+68 条声明目标里 **67 条是 skills 目录**(`.claude/skills` ×60、`.agents/skills` ×4、
+`~/.claude/skills`、`.cursor/skills`),第 68 条是 `"skills"`(与 build output 撞名,
+已被 ADR-20260519144445916 禁止),**配置根 0 条**。
+
+这就是"垃圾邮件原理"的用处:**不必枚举坏样本,只要一个低误报率的廉价信号**。
+误报的代价是一行输出,漏报的代价是 skills 进配置根 —— 不对称时选会说话的那边。
+
+### 判据(只用表里已有的数据,不发明启发式)
+
+| 项 | 规则 |
+|---|---|
+| 触发 | 表里某个 `fanOutTargets` 条目位于目标**之下**(任意深度);`.claude` 与 `.config` 都算 |
+| 不触发 | 目标**就是**表里的 skills 目录(层级没错) |
+| 绝对路径 | 后缀对齐识别(`/Users/u/.claude` ↔ 表里 `.claude`),与 `layoutsScanning` 同一谓词 |
+| 文案 | 点名该用的目录:`not a skills dir — it contains .claude/skills / ~/.claude/skills` |
+| 级别 | `warning`(与 info 分开:这不是缺数据) |
+| 豁免 | **无**(见边界 1) |
+
+### 四条边界
+
+1. **豁免不适用。** `acknowledged_unlisted` 的语义是"我知道这里没有数据";这里是"表里有数据,
+   而且说这个配置是错的"。二者相反 —— 给后者一个开关等于给一个"我就要把 skills 建在配置根上"
+   的按钮,而没有真实 deck 需要它。
+2. **一个目标一个结论。** 层级错位不再同时出 info 行:两行互相矛盾(一行说没数据,一行说数据里
+   有答案),而 info 行的建议(加进 `acknowledged_unlisted`)对 warning 无效 —— 用户照做之后
+   警告还在,只会以为豁免坏了。
+3. **不猜写法、不作纠正。** owner:*"不要自作聪明去推测各种奇葩写法,明明你们 agents 可以帮忙
+   修正回正路到 toml 里"*。检查只做两件事:**判定异常** + **点名表里正确的目录**;
+   修正动作是把正确目录写回 `skill-deck.toml` —— 那是 agent 的一步编辑,不是代码的一步推断。
+   推论:绝对路径的目标同时列出 `.claude/skills` 与 `~/.claude/skills`,**不**替用户挑一个
+   (代码无法知道他想的是家目录那个还是项目里那个);也不做模糊匹配、不做自动改写。
+4. **不判 `~` / `.` / 任意大目录。** 那些只有故意才写得出来(AGENTS.md §2 规则 10),不为它们
+   建规则。`working_set` 指到家目录或根已在 `link.ts` 直接拒绝;本条只管 fan-out 目标,
+   且只认**表里已知的那些位置**。这是已知边界,不是遗漏。
+
+### 与"不去重"用的是同一条判据
+
+见上文 *为什么不去重*:代价是**一行输出**还是**丢一条信息**?
+- 层级错位:代价是**信息错位**(skills 进配置根),而信号直接来自表 → **做**。
+- 重复目标 / `~`:代价只有一行,且只有故意才付得出来 → **不做**。
+
+### 落地
+
+- `packages/lythoskill-deck/src/cli-layout.ts`:`skillsDirsUnder(dir)`(表内数据,零新来源)
+- `packages/lythoskill-deck/src/layout-policy.ts`:`collectWrongLevelTargets`(warning)+ 名单外
+  collector 对层级错位目标让路(边界 2)
+- `packages/lythoskill-deck/src/link.ts`:警告块移到收束**之前** —— 印在几十行 `🔗` 之后的警告
+  是墓志铭不是守卫
+- `packages/lythoskill-deck/README.md` § *Wrong-level targets*(含"我们自己的用法"那段实测)
+- `AGENTS.md` §2 规则 10:本条是"该做"的那一侧样例(与"不去重"互为对照)
+
+### 影响
+
+- **Positive**:最常见的误配在写入前就被点名,且给出可抄的正确值;表里已有答案的场景不再
+  伪装成"没有数据"。
+- **Negative**:长目标列表里多一行 warning。刻意:写错层级是他自己做的动作,那一刻正是该看一眼的时刻。
+- **接受**:`.config` 这类"配置根的容器"会列出多个候选目录(它在表里确实有多个),
+  文案更长但**不猜**;宁可多列,不可替用户选。
 
 ## Related
 - Related ADR: **ADR-20260910113131220**(two-axis taxonomy / 闭数据哲学)—— 本条是那张闭数据集
