@@ -393,6 +393,54 @@ prompt = "keep me"
   })
 })
 
+
+describe('ZK-impl round-4:R4-H1 内联 map 的字段条目 + 判别性测试', () => {
+  const MAP2 = '[deck]\nmax_cards = 10\n\n[tool]\nskills = { alpha.path = "a", beta.path = "b" }\n'
+
+  it('R4-H1: removing the last field of a dotted map entry keeps the file valid (no dangling comma)', () => {
+    const out = spliceRemoveSkill(MAP2, 'tool', 'beta')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe('[deck]\nmax_cards = 10\n\n[tool]\nskills = { alpha.path = "a" }\n')
+  })
+
+  it('R4-H1b: removing a non-last field keeps the file valid too', () => {
+    const out = spliceRemoveSkill(MAP2, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe('[deck]\nmax_cards = 10\n\n[tool]\nskills = { beta.path = "b" }\n')
+  })
+
+  it('R4-H1c: emptying the map leaves no `skills = {  }` residue', () => {
+    const one = '[deck]\nmax_cards = 10\n\n[tool]\nskills = { alpha.path = "a" }\n\n[combo.weekly]\nprompt = "k"\n'
+    const out = spliceRemoveSkill(one, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).not.toContain('skills =')
+    expect(out.src).not.toContain('[tool]')
+    expect(out.src).toContain('[combo.weekly]')
+  })
+
+  it('the adjacency gate is pinned: a comment between the empty section and the table must survive', () => {
+    // 删掉 isAdjacent 判据(合并区间)会把这行注释一起吃掉 —— 这条测试就是它的判别性
+    const src = '[deck]\nmax_cards = 10\n\n[tool]\n# 这段注释是用户的文字\n[tool.skills]\nalpha = { path = "x" }\n'
+    const out = spliceRemoveSkill(src, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain('# 这段注释是用户的文字')
+    expect(out.src).not.toContain('alpha')
+  })
+
+  it('the EOF path uses the insertion point, not a scan (LF file with CRLF inside a string)', () => {
+    const lf = '[deck]\nmax_cards = 10\nprompt = """\r\ninside\r\n"""\n'
+    const out = spliceInsertSkill(lf, 'innate', 'alpha', { path: 'p' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    // 末尾插入的分隔符必须跟随**该处**的行尾(LF),不被字符串里的 CRLF 带偏
+    expect(out.src).toMatch(/"""\n\n\[innate\.skills\.alpha\]/)
+  })
+})
+
 describe('units + line endings', () => {
   it('a non-ASCII file splices at the right place (code units, not bytes)', () => {
     // 若实现把 offset 当字节用,`→` 之后的所有定位都会偏 —— 这里用"删完必须与写死的期望相同"抓它

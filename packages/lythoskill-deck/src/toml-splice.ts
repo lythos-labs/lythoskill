@@ -231,10 +231,7 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
         secTable && secTable !== owner && (secTable.body?.length ?? 0) === 0 && isAdjacent(src, secTable, owner!)
           ? secTable.range[0]
           : owner!.range[0]
-      // 清空的是**内联 map 的最后一个字段**时,留下 `skills = {  }` 是残渣 → 连 map 一起走
-      const mapOwner = kvInTable(secTable ?? owner, src, 'skills')
-      const start = mapOwner && (mapOwner.value as any)?.body?.length === outer.length ? mapOwner.range[0] : extend
-      return { node: outer[0], group: outer, range: [Math.min(start, owner!.range[0]), Math.max(mapOwner?.range[1] ?? 0, owner!.range[1])] }
+      return { node: outer[0], group: outer, range: [extend, owner!.range[1]] }
     }
     return { node: outer[0], group: outer }
   }
@@ -254,6 +251,24 @@ function walkKv(nodes: Node[], prefix: string[], cb: (kv: Node, path: string[]) 
       if (Array.isArray(inner)) walkKv(inner, path, cb) // 内联表体(如 skills = { alpha.path = … })
     }
   }
+}
+
+/** 解析失败返回 undefined(用在"剪完再看一眼"的场合,不抛) */
+function parseTOMLLoose(src: string): Node[] | undefined {
+  try {
+    const ast = parseTOML(src, { range: true }) as unknown as { body: Node[] }
+    return ast.body?.[0]?.body ?? []
+  } catch {
+    return undefined
+  }
+}
+
+/** 找到某 section 下**已被清空**的 `skills = { }` 键(用于把残渣一并剪掉) */
+function findEmptySkillsMap(src: string, body: Node[], section: string): Node | undefined {
+  const secT = tableByKey(body, src, section)
+  const kv = kvInTable(secT, src, 'skills')
+  const inner = (kv?.value as any)?.body
+  return kv && Array.isArray(inner) && inner.length === 0 ? kv : undefined
 }
 
 /** 两个节点之间只有空白(用于"相邻才连表头一起删"的判断) */
@@ -306,11 +321,36 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
   // ── ⑤ 点号键家族:一组 key-value 逐个剪掉(从后往前,避免下标失效)──
   if (hit.range) return finalize(src, cut(src, hit.range[0], hit.range[1]))
   if (hit.group) {
-    const ranges = hit.group
-      .map(n => [n.range[0], n.range[1] + lineEndingRun(src, n.range[1])] as const)
-      .sort((x, y) => y[0] - x[0])
+    // R4-H1:组内命中若在**内联表内部**(`skills = { alpha.path = …, beta.path = … }`),
+    // 每条都是"条目",必须像数组元素一样**连一个相邻逗号**一起剪 —— 否则会留下悬挂逗号
+    // (首/中字段则直接变成非法,被结果护栏拦下 = 用户被挡住)。
+    const inInline = (n: Node) => /\{[^}]*$/.test(src.slice(Math.max(0, n.range[0] - 400), n.range[0]))
+    const cutOne = (n: Node): [number, number] => {
+      if (!inInline(n)) return [n.range[0], n.range[1] + lineEndingRun(src, n.range[1])]
+      const after = src.slice(n.range[1]).match(/^(\s*),/)
+      if (after) {
+        const commaEnd = n.range[1] + after[1].length + 1
+        const ws = src.slice(commaEnd).match(/^[ \t]*/)?.[0].length ?? 0
+        return [n.range[0], commaEnd + ws]
+      }
+      const before = src.slice(0, n.range[0]).match(/,(\s*)$/)
+      if (before) return [n.range[0] - before[0].length, n.range[1]]
+      return [n.range[0], n.range[1]]
+    }
+    const ranges = hit.group.map(cutOne).sort((x, y) => y[0] - x[0])
     let out = src
     for (const [rs, re] of ranges) out = out.slice(0, rs) + out.slice(re)
+    // 内联 map 被清空 → 连 map 的键一起走(否则留 `skills = {  }` 残渣);
+    // section 随之空 → 表头一并走(与对象层级联一致)
+    const parsed2 = parseTOMLLoose(out)
+    if (parsed2) {
+      const mapKv = findEmptySkillsMap(out, parsed2, section)
+      if (mapKv) {
+        const secT = tableByKey(parsed2, out, section)
+        const wholeAt = secT && (secT.body?.length ?? 0) === 1 && isAdjacent(out, secT, mapKv) ? secT.range[0] : mapKv.range[0]
+        out = cut(out, wholeAt, mapKv.range[1])
+      }
+    }
     return finalize(src, out)
   }
 
@@ -420,10 +460,8 @@ export function spliceInsertSkill(
   // 没有同前缀 table:落到文件末尾(保持一行空行)
   const trimmed = src.replace(/[\r\n]+$/, '')
   const tail = src.slice(trimmed.length)
-  // R2-H2 / R3-LOW:按**插入点之前最后一个行尾**判,不扫全文 ——
-  // 多行字符串里出现 CRLF 的 LF 文件会被全文扫描误导成 CRLF。
-  const before = src.slice(0, trimmed.length)
-  const nl = before.lastIndexOf('\n')
-  const eol = nl > 0 && before[nl - 1] === '\r' ? '\r\n' : '\n'
+  // R4-LOW:判据就是**插入点本身**(与 lastTable 路径同一条),不扫全文、也不猜前一个换行 ——
+  // 那两个版本各错一个方向(多行字符串里的另一种行尾会把它带偏)。
+  const eol = lineEndingAt(src, trimmed.length)
   return finalize(src, trimmed + eol + eol + text.replace(/\n/g, eol) + tail)
 }
