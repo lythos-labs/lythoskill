@@ -504,6 +504,30 @@ Full setup details and troubleshooting: [release-auth-workflow.md](packages/lyth
 
 All packages + root share one version. Bump via `bunx @lythos/skill-creator@0.19.1 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow handles npm publish, GitHub Release, and Pages deploy.
 
+#### Bun version pin — CI and local must name the same interpreter
+
+Every `bun-version:` in `.github/workflows/` is an **exact version**, never `latest` — currently
+`1.3.11`, the same version the test baselines are quoted under. Check the set with
+`grep -rn "bun-version" .github/workflows/` (8 occurrences across `test.yml`, `release.yml`,
+`deploy-pages.yml`; only the first in each file carries the comment).
+
+Why pinned: this repo's discipline is that behavioral assumptions about the `node:*` compat layer
+must be nailed down by tests actually run under Bun (§4 / B11). `latest` breaks that — the same
+dormancy test can pass on 1.3 and fail on 2.x, and a green CI run would not say which interpreter it
+certifies. **CI green is a claim; it needs a version to be attributable to.**
+
+Upgrading is a deliberate act, never background drift:
+
+1. Read the Bun release notes for `node:*`, the test runner, TOML, and `fs` behavior changes.
+2. Run the full suite on the new version locally, both packages, and write the new baseline as a
+   claim: `236 pass / 1 skip / 0 fail / 602 expect @ Bun <new> / macOS` — never a bare pass count.
+3. Move **all 8** occurrences plus the version string above in **one** commit, and say in the
+   message what you checked in step 1.
+4. Do not fold an upgrade into an unrelated change: a red suite otherwise becomes ambiguous between
+   your change and the interpreter.
+
+Rationale and the rejected alternatives (`latest`; `1.3.x` minor-pinning): **ADR-20260910120047160**.
+
 #### New package checklist
 
 - Add to `scripts/publish.sh` `PACKAGES` array before first release.
