@@ -107,7 +107,7 @@ Principle: **intelligence in SKILL.md, stable integration in npm, mechanical glu
 1. **Stop if goal is unclear.** Do not infer, extrapolate, or fill in blanks. Ask.
 2. **Do not change the goal.** User says "draw a diagram" → do not refactor code.
 3. **Do not guess emotions.** "The user seems angry" is projection, not fact. "The user said this is wrong" is fact — verify, then respond.
-4. **"I think / 我觉得" = start an ADR.** User is exploring options, not issuing a command. Write an ADR capturing trade-offs; do not jump to implementation.
+4. **"I think / 我觉得" = start an ADR.** User is exploring options, not issuing a command. Write an ADR capturing trade-offs; do not jump to implementation. (This triggers on **user phrasing**; [Decision Records](#decision-records--a-cards-technical-approach-is-not-one) triggers on **decision content** — an OR, not the same rule.)
 5. **System silence is not permission.** If the platform prompts "the user has not said anything," stop, summarize state, ask for next step.
 6. **Git provenance over design assumption.** `git log --oneline -5 <file>` beats guessing why code looks wrong. This repo's small-granularity commits make this a 5-second operation.
 7. **See a bug, fix a bug — no "not my code."** Broken test, mismatched import, stale comment — fix it. Provenance is for learning, not for excusing.
@@ -212,6 +212,19 @@ cortex review TASK-xxx  → 03-review (STOP — user marks done)
 **Reports use 5W1H, not private shorthand.** A completion or status report answers **What** (what was produced), **Why** (which problem it closes), **Where** (carrier — `file:line`, TASK-/ADR-/EPIC-id, commit hash), **When** (date the claim was verified), **Who** (who verified it, by what method), **How** (the check that proves it). Take the 3–5 that apply; never fewer than a reader needs to verify the claim without asking a follow-up. Two hard bars: **(a)** no private vocabulary — a term the reader cannot resolve from the repo or `cortex/wiki/04-ssot/glossary.md` is jargon, gloss it or drop it; **(b)** any verdict word (score, grade, gate, severity, "P1") must define its criteria **in the same document** — an undefined scale is an unsourced rule, which under no-source-no-rule is worse than no scale at all. The ZK gate's "8.5/10" is the cautionary instance: a number with no stated criteria cannot be disagreed with, which is the opposite of what a review is for. Scribe's `What + Why + Done + Raw ref` contract for resumption items is this same rule at handoff scope.
 
 **Always CLI, never `mv`** — CLI updates Status History; manual moves cause probe mismatches. **English-only slugs** — task/epic titles must be ASCII (portable paths).
+
+#### Decision Records — a card's Technical Approach is not one
+
+**Rule** ([ADR-20260910113534807](cortex/adr/02-accepted/ADR-20260910113534807-architectural-decisions-must-ride-in-adrs-not-implementation-card-technical-approach-sections.md)):
+any decision that **introduces or changes an abstraction, a module boundary, a package boundary, a named concept, or a closed data set** must be recorded in an **ADR**. A card's Technical Approach **may reference** that ADR; it **must not be the only record**.
+
+**Why the carrier matters, not the section**: two same-shape incidents four months apart — `feed-adapters.ts` (2026-05, upstream [ADR-20260508230803515](cortex/adr/02-accepted/ADR-20260508230803515-curator-does-not-wrap-external-skill-discovery-apis-as-feed-adapters-agent-web-fetch-beats-hand-rolled-adapters.md)) and `adapter-registry.ts` (2026-09, [ADR-20260910113131220](cortex/adr/02-accepted/ADR-20260910113131220-player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge.md)). Both decisions rode in a Technical Approach and never entered a carrier anyone could object to — **a one-line statement of intent offers nothing to push against**: no options to reject, no rejected alternative to question. Incident 2's collision lived two months with zero cross-documentation; the cleanup (7-file rename + ADR + follow-up card) bought nothing back. Incident 2's Technical Approach was **present and filled in**, which is why "add a mandatory card field" is not the fix — cards are closed and archived with the task; ADRs stay searchable.
+
+**Test — hit ≥ 2 and it must be an ADR**: **C1** new module/abstraction whose consumers live outside it · **C2** new or renamed **concept name** (registry / adapter / hub / resolver / layout …) · **C3** chooses a **host** package or a **boundary** · **C4** closed/curated data set claiming facts about the outside world · **C5** rejected alternatives (the rejection needs a home) · **C6** a competent reviewer could reasonably ask "did you consider X?" — *Calibration*: incident 2 scores 6/6, incident 1 scores 5/6; a typo or one-line fix scores 0–1, no ADR.
+
+**`probe` green ≠ decision recorded.** `probe` detects **empty shells** (blank required sections) — form, not semantics. A card with a full Technical Approach passes cleanly while its decision is nowhere on disk. Extending `probe` to detect this was considered and **rejected**: "is this a decision" is semantic, and a form-only keyword check misfires both ways — and a check that misfires gets learned around, which is worse than no check because it manufactures a false "already checked". **Accepted weakness, on the record**: the test is self-assessed, so a "this doesn't count" exemption exists. An honest soft rule beats a lying hard check.
+
+Cross-ref: hard rule 4 below triggers on **user phrasing** ("I think / 我觉得"); this one triggers on **decision content**. It is an **OR**. Full guidance + the C1–C6 table: [writing-guide.md](packages/lythoskill-project-cortex/skill/references/writing-guide.md).
 
 #### Commit Trailers
 
