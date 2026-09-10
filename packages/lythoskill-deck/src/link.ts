@@ -27,8 +27,8 @@ import {
 import { parseDeck } from "./parse-deck.js";
 import { resolveDeckPathSync, fetchDeckUrl, isUrl } from "./resolve-deck.js";
 import { safeResolveInDir } from "./path-guard.js";
-import { targetModeOverride } from "./adapter-registry.js";
-import { collectFanOutWarnings } from "./adapter-policy.js";
+import { targetModeOverride } from "./cli-layout.js";
+import { collectFanOutWarnings } from "./layout-policy.js";
 import { removeSymlinkOnly, removeEntryForRelink } from "./safe-remove.js";
 
 // ── 路径工具 ────────────────────────────────────────────────
@@ -65,7 +65,7 @@ function hashContent(content: string): string {
 /**
  * 循环链拒绝(opencode #45961 ENAMETOOLONG 崩溃类):source 位于 fan-out
  * 目录内部时,创建的 symlink 会成为自引用环。正常 deck(cold pool 在
- * project 外)永不触发 — dormancy 守护在 adapter-policy 测试中。
+ * project 外)永不触发 — dormancy 守护在 layout-policy 测试中。
  */
 export function wouldCreateCycle(source: string, targetDir: string): boolean {
   const src = resolve(source);
@@ -540,7 +540,7 @@ function reconcileTargetDir(
 
   mkdirSync(targetDir, { recursive: true });
 
-  // registry 模式覆盖(Cline 类 copy 目标);docs 级目标返回 undefined → 行为不变
+  // 数据模式覆盖(Cline 类 copy 目标);docs 级目标返回 undefined → 行为不变
   const override = targetModeOverride(targetDir);
   const effectiveMode = override?.mode ?? mode;
   if (override) {
@@ -668,7 +668,7 @@ for (const target of ALSO_LINK_TO) {
   reconcileTargetDir(target, declared, declaredNames, opts?.noBackup, MODE, PROJECT_DIR);
 }
 
-// ── Adapter policy warnings(registry 驱动;默认 .claude+.agents/skills 对零警告) ──
+// ── CLI-layout policy warnings(数据驱动;默认 .claude+.agents/skills 对零警告) ──
 for (const w of collectFanOutWarnings([WORKING_SET, ...ALSO_LINK_TO])) {
   console.warn(`⚠️  [${w.severity}] ${w.message}`);
   console.warn(`   ref: ${w.ref}`);

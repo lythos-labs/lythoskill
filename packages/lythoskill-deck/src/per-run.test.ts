@@ -52,19 +52,19 @@ describe('renderPerRun — crush (config, repeatable list)', () => {
   })
 })
 
-describe('renderPerRun — unsupported adapters', () => {
-  it('role-kind adapter (roo-code) is refused with reason', () => {
+describe('renderPerRun — unsupported CLIs', () => {
+  it('role-kind CLI (roo-code) is refused with reason', () => {
     const r = renderPerRun('roo-code', ['/a'])
     expect(r.error).toMatch(/role/)
     expect(r.error).toMatch(/kimi/)
   })
 
-  it('none-kind adapter (codex) explains its mechanism', () => {
+  it('none-kind CLI (codex) explains its mechanism', () => {
     const r = renderPerRun('codex', ['/a'])
     expect(r.error).toMatch(/--profile switches config, not skills/)
   })
 
-  it('unknown id lists supported adapters', () => {
+  it('unknown id lists supported CLIs', () => {
     const r = renderPerRun('nope', ['/a'])
     expect(r.error).toMatch(/Unknown CLI/)
     expect(r.error).toMatch(/kimi/)

@@ -1,13 +1,13 @@
 #!/usr/bin/env bun
 /**
- * adapter-smoke.test.ts — pinned-version smoke: deck link against docs-tier dirs
+ * cli-layout-smoke.test.ts — pinned-version smoke: deck link against docs-tier dirs
  *
  * 探针纪律的落地项(round-2 adapter depreciation discipline item c):
  * fixture deck → linkDeck → docs-tier fan-out 目录里的每个条目都必须满足
  *   1) 是 symlink(非拷贝)  2) 绝对路径  3) 无环  4) 解析到含 SKILL.md 的目录
- * 且默认 fan-out 对零 adapter 警告(dormancy)。
+ * 且默认 fan-out 对零 layout 警告(dormancy)。
  *
- * Run: bun test packages/lythoskill-deck/src/adapter-smoke.test.ts
+ * Run: bun test packages/lythoskill-deck/src/cli-layout-smoke.test.ts
  */
 
 import { describe, it, expect, afterEach } from 'bun:test'
@@ -47,7 +47,7 @@ function makeDocsTierDeck(root: string): { deckPath: string; skillDir: string } 
     'working_set = ".claude/skills"',       // claude-code (docs tier)
     'cold_pool = "./pool"',
     // docs-tier branded dirs, deliberately NOT mixing with the shared
-    // .agents/skills (that combo = same adapter scanning two roots = dup WARN)
+    // .agents/skills (that combo = same CLI scanning two roots = dup WARN)
     'also_link_to = [".roo/skills", ".gemini/skills"]',
     '',
     '[innate.skills.docs-tier-skill]',
@@ -85,15 +85,15 @@ describe('docs-tier smoke — deck link against docs-tier fan-out dirs', () => {
     }
   })
 
-  it('default + docs-tier fan-out emits ZERO adapter warnings (dormancy)', async () => {
+  it('default + docs-tier fan-out emits ZERO layout warnings (dormancy)', async () => {
     const root = makeTmp()
     const { deckPath } = makeDocsTierDeck(root)
     captureWarnings()
 
     await linkDeck(deckPath, root, { noBackup: true, skipHealthFetch: true })
 
-    const adapterWarnings = warnings.filter(w => w.includes('[data-loss]') || w.includes('[warning]') || w.includes('[adapter]'))
-    expect(adapterWarnings).toEqual([])
+    const layoutWarnings = warnings.filter(w => w.includes('[data-loss]') || w.includes('[warning]'))
+    expect(layoutWarnings).toEqual([])
   })
 
   it('hazard-triggering fan-out (.goose/skills) DOES warn at link time', async () => {

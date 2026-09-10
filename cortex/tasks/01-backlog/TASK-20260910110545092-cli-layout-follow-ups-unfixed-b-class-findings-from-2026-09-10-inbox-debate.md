@@ -29,18 +29,17 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 **数据层自检**
 
-- [ ] **B2** goose data-loss 漏报:`adapter-registry.ts`(→`cli-layout.ts`)goose 行
+- [ ] **B2** goose data-loss 漏报:`cli-layout.ts`goose 行
       `fanOutTargets` 含 `~/.config/goose/skills`,但 hazard `recursive-unlink-delete` 的
-      `triggerDirs` 只有 `[".goose/skills"]`;`collectTriggerHazards`(`adapter-policy.ts`→
-      `layout-policy.ts:32-45`)只查 `triggerDirs` → 用户 `also_link_to` 该目录时 data-loss
+      `triggerDirs` 只有 `[".goose/skills"]`;`collectTriggerHazards`(`layout-policy.ts:32-45`)只查 `triggerDirs` → 用户 `also_link_to` 该目录时 data-loss
       警告不触发。修:`triggerDirs` 扩为两目录(`dirMatches` 归一化直接支持,一行)。
       附:范围裁剪需注释说明 #11600 的引用范围。
 - [ ] **B13** `perRoleScoping` schema 债:自由文本进 typed schema、**全仓零消费方**、
-      无 `registryProblems` 检查。修:`registryProblems()` 加非空 + 长度上限检查。
+      无 `layoutProblems` 检查。修:`layoutProblems()` 加非空 + 长度上限检查。
 - [ ] **B3** `verifiedAt` 语义混:16 行同为 `2026-09-09`,但该字段同时承载
       "普查日 / 复核日 / 补录日"三事件,qwen 行的补录出身只活在 note 散文里。
       修:加 `verifiedBy: "survey" | "restored"` 可选字段,仅 qwen 行标 `restored`;
-      `registryProblems()` 加「restored 行必须有非空 note」自检。**普查本体一行不动。**
+      `layoutProblems()` 加「restored 行必须有非空 note」自检。**普查本体一行不动。**
 - [ ] **取证未留痕**:2026-09-09 的 16-CLI 普查报告未持久化(`original survey report
       unpersisted`),导致 qwen 行只能按"候选顺序首名"补录。定性 = **取证过程未留痕**,
       非"调研方式不可靠"。修:确立普查证据的落盘位置与命名。
@@ -92,7 +91,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 <!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe. -->
 
 - **合并同类改**,避免多轮触碰同一函数:
-  B2 + B13 + B3 都动 `registryProblems()` / hazard 数据 → 一次改完再测。
+  B2 + B13 + B3 都动 `layoutProblems()` / hazard 数据 → 一次改完再测。
 - **B9 抽取**参照包内既有形态:`refresh-plan.ts` 的 plan builder 已是"纯函数 + 入口读盘"范式,
   照抄其形状,不要发明新分层。
 - **B8/B11/B12 是删/加行级改动**,风险低但需与代码实况对齐 —— 改前先 grep 确认宣称物确实不存在
@@ -109,8 +108,8 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 
 - [ ] `cortex probe` 通过(本卡非空壳)
 - [ ] **B2**:`~/.config/goose/skills` 进 `triggerDirs`,该目录触发 data-loss 警告,有测试钉死
-- [ ] **B13**:`registryProblems()` 对 `perRoleScoping` 有非空 + 长度检查
-- [ ] **B3**:`verifiedBy` 字段落地,仅 qwen 行标 `restored`,`registryProblems()` 对
+- [ ] **B13**:`layoutProblems()` 对 `perRoleScoping` 有非空 + 长度检查
+- [ ] **B3**:`verifiedBy` 字段落地,仅 qwen 行标 `restored`,`layoutProblems()` 对
       "restored 且 note 为空"报错;16 行普查数据未改
 - [ ] **B9**:`loadPerRunTargets` 是纯函数,`renderPerRun` 签名与行为未变
 - [ ] **B10**:`safe-remove` 递归删除测试断言嵌套文件内容
@@ -134,7 +133,7 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
 fix(deck): cli-layout follow-ups - B-class findings from inbox-debate (TASK-20260910110545092)
 
 - B2 goose data-loss triggerDirs covers both scanned roots
-- B13 perRoleScoping schema check in registryProblems
+- B13 perRoleScoping schema check in layoutProblems
 - ...
 ```
 
@@ -151,3 +150,10 @@ fix(deck): cli-layout follow-ups - B-class findings from inbox-debate (TASK-2026
 
 **刻意不做的**:不重开普查、不换人工名单、不引入自动发现 —— 见 two-axis ADR 的 rejected
 alternatives。
+
+**改名已落地(2026-09-10,与本卡开卡同批)**:`adapter-registry.ts` → `cli-layout.ts`,
+`adapter-policy.ts` → `layout-policy.ts`,`CliAdapter`/`AdapterHazard`/`ADAPTER_REGISTRY`/
+`adaptersScanning`/`adapterById`/`registryProblems` → `CliLayout`/`Hazard`/`CLI_LAYOUTS`/
+`layoutsScanning`/`layoutById`/`layoutProblems`。**本卡全部活引用已同步到新名**。
+下方「不要以 defender 的估算为准」一段里的旧文件名是**历史陈述**(记录当时漏了什么),
+保留不改。测试计数改名前后逐字相同:`213 pass / 1 skip / 0 fail / 544 expect / 16 files`。

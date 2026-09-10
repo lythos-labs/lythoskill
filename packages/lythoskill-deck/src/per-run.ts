@@ -3,10 +3,10 @@
  * per-run.ts — per-run 集合切换渲染(zero-projection path)
  *
  * 从 deck 状态渲染 CLI 调用,让 skills 在"本次运行"可见 — 不写任何符号
- * 链接、不动工作集。形态来自 adapter-registry 的 perRunSwitch 数据:
+ * 链接、不动工作集。形态来自 cli-layout 的 perRunSwitch 数据:
  *   - kimi:  --skills-dir <dir>(可重复)| 持久化 extra_skill_dirs = [...]
  *   - crush: option skill-path <dir>(单路径)
- *   - 其余 flag/config adapter 按数据泛化渲染;role/none → 明确拒绝
+ *   - 其余 flag/config layout 按数据泛化渲染;role/none → 明确拒绝
  *
  * 用途:side-deck 派发(arena phase-switch 的零投影替代)、避免为一次性
  * 任务 relink 主工作集。
@@ -15,7 +15,7 @@
 import { parse as parseToml } from "@iarna/toml";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { adapterById, ADAPTER_REGISTRY } from "./adapter-registry.js";
+import { layoutById, CLI_LAYOUTS } from "./cli-layout.js";
 import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
 
 export interface PerRunResult {
@@ -30,22 +30,22 @@ export interface PerRunResult {
 }
 
 function supportedIds(): string[] {
-  // 数据驱动:kind 为 flag/config 的 adapter 可渲染
-  return ADAPTER_REGISTRY.filter(
+  // 数据驱动:kind 为 flag/config 的 layout 可渲染
+  return CLI_LAYOUTS.filter(
     a => a.perRunSwitch.kind === "flag" || a.perRunSwitch.kind === "config"
   ).map(a => a.id);
 }
 
 export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
-  const adapter = adapterById(cliId);
-  if (!adapter) {
+  const layout = layoutById(cliId);
+  if (!layout) {
     return {
       cli: cliId, argv: [], configLines: [], notes: [],
       error: `Unknown CLI "${cliId}". Supported: ${supportedIds().join(", ")}`,
     };
   }
-  const sw = adapter.perRunSwitch;
-  const result: PerRunResult = { cli: adapter.name, argv: [], configLines: [], notes: [] };
+  const sw = layout.perRunSwitch;
+  const result: PerRunResult = { cli: layout.name, argv: [], configLines: [], notes: [] };
 
   if (sw.kind === "flag") {
     if (sw.repeatable) {
@@ -53,12 +53,12 @@ export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
     } else {
       result.argv.push(sw.primary, targets[0] ?? "");
       if (targets.length > 1) {
-        result.notes.push(`${adapter.name} ${sw.primary} takes one dir; first target used, per-run invocation needed per dir`);
+        result.notes.push(`${layout.name} ${sw.primary} takes one dir; first target used, per-run invocation needed per dir`);
       }
     }
     if (sw.configKey) {
       result.configLines.push(`${sw.configKey} = ${JSON.stringify(targets)}`);
-      result.notes.push(`persistent form: ${sw.configKey} in ${adapter.name} config`);
+      result.notes.push(`persistent form: ${sw.configKey} in ${layout.name} config`);
     }
     return result;
   }
@@ -70,8 +70,8 @@ export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
       for (const t of targets) result.configLines.push(`option ${sw.primary} ${t}`);
       result.notes.push(
         sw.repeatable
-          ? `${adapter.name} ${sw.primary} is a repeatable list option — one line per dir`
-          : `${adapter.name} ${sw.primary} is single-path — one option line per dir`
+          ? `${layout.name} ${sw.primary} is a repeatable list option — one line per dir`
+          : `${layout.name} ${sw.primary} is single-path — one option line per dir`
       );
     }
     result.notes.push("config form: run inside the CLI, or place in its config file");
@@ -80,13 +80,13 @@ export function renderPerRun(cliId: string, targets: string[]): PerRunResult {
 
   if (sw.kind === "role") {
     result.error =
-      `${adapter.name} switches role/mode, not skill sets (perRunSwitch.kind = role) — ` +
+      `${layout.name} switches role/mode, not skill sets (perRunSwitch.kind = role) — ` +
       `per-run rendering not applicable. Supported: ${supportedIds().join(", ")}`;
     return result;
   }
 
   result.error =
-    `${adapter.name} has no per-run skill-dir mechanism` +
+    `${layout.name} has no per-run skill-dir mechanism` +
     (sw.note ? ` (${sw.note})` : "") +
     `. Supported: ${supportedIds().join(", ")}`;
   return result;

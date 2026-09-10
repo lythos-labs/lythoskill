@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * adapter-registry.ts — per-CLI adapter policy data (typed, sourced)
+ * cli-layout.ts — per-CLI skill-dir layout data (typed, sourced)
  *
  * 2026-09-09 CLI skill-dir 普查(16 家)的落地数据层。每行 = 一个 CLI 的:
  *   - symlink 保证分级(docs / issue / hazard)— deck fan-out 的策略输入
@@ -12,7 +12,7 @@
  * 来源纪律(ADR:无来源不成规则):
  *   - 每行 source = 一手文档/repo URL;hazards[].ref = 具体 issue/文档 URL
  *   - verifiedAt = 普查取证日(2026-09-09,/tmp 取证 stash + gh API json 可复核)
- *   - 季度复勘归 P6 监视哨;registryProblems() 是数据自检
+ *   - 季度复勘归 P6 监视哨;layoutProblems() 是数据自检
  *   - opencode "Windows non-discovery" 传闻 UNVERIFIED(2026-09-10 辩论撤销:原 ref 指向的
  *     docs 页 grep windows/symlink/junction/platform 零命中,无来源支撑该 claim)——
  *     季度复勘时优先查证;在拿到一手 ref 之前不得重新入库。
@@ -27,7 +27,7 @@ export type SymlinkTier = (typeof SYMLINK_TIERS)[number];
 export const HAZARD_SEVERITIES = ["data-loss", "warning", "info"] as const;
 export type HazardSeverity = (typeof HAZARD_SEVERITIES)[number];
 
-export interface AdapterHazard {
+export interface Hazard {
   /** 稳定 slug,供测试/策略引用:'recursive-unlink-delete' */
   id: string;
   severity: HazardSeverity;
@@ -39,7 +39,7 @@ export interface AdapterHazard {
    * 激活目录:fan-out 目标命中其中任一(后缀匹配)才在 link 时警告。
    * 共享目录(.agents/skills 全体扫描)上的 data-loss 危险不设激活目录会
    * 让每个默认 deck 每次启动都报警 — 显式数据胜过启发式(ADR 纪律)。
-   * 约束:severity = data-loss 的 hazard 必须设 triggerDirs(registryProblems 强制)。
+   * 约束:severity = data-loss 的 hazard 必须设 triggerDirs(layoutProblems 强制)。
    */
   triggerDirs?: string[];
 }
@@ -62,7 +62,7 @@ export interface PerRunSwitch {
   note?: string;
 }
 
-export interface CliAdapter {
+export interface CliLayout {
   /** 稳定 id(kebab),也是 per-run 渲染的 --cli 取值 */
   id: string;
   name: string;
@@ -72,7 +72,7 @@ export interface CliAdapter {
   perRunSwitch: PerRunSwitch;
   /** per-role 可见性形态,一行数据 */
   perRoleScoping: string;
-  hazards: AdapterHazard[];
+  hazards: Hazard[];
   /** 一手验证 URL */
   source: string;
   /** 验证日(ISO date) */
@@ -87,7 +87,7 @@ export interface CliAdapter {
  */
 export const SURVEY_CLAIMED_COUNT = 16;
 
-export const ADAPTER_REGISTRY: readonly CliAdapter[] = [
+export const CLI_LAYOUTS: readonly CliLayout[] = [
   {
     id: "claude-code",
     name: "Claude Code",
@@ -399,13 +399,13 @@ function normalizeDir(p: string): string {
 }
 
 /**
- * 哪些 adapter 会扫描 dir(如 ".agents/skills" / ".claude/skills")?
+ * 哪些 CLI 会扫描 dir(如 ".agents/skills" / ".claude/skills")?
  * 匹配规则:归一化后相等,或以 "/<target>" 结尾(覆盖 project/home 前缀差异)。
- * 不用 basename 匹配 — 裸 "skills" 目录(dsh 约定)会误命中所有 adapter。
+ * 不用 basename 匹配 — 裸 "skills" 目录(dsh 约定)会误命中所有 CLI。
  */
-export function adaptersScanning(dir: string): CliAdapter[] {
+export function layoutsScanning(dir: string): CliLayout[] {
   const norm = normalizeDir(dir);
-  return ADAPTER_REGISTRY.filter(a =>
+  return CLI_LAYOUTS.filter(a =>
     a.fanOutTargets.some(t => {
       const tn = normalizeDir(t);
       return norm === tn || norm.endsWith("/" + tn);
@@ -413,7 +413,7 @@ export function adaptersScanning(dir: string): CliAdapter[] {
   );
 }
 
-/** dir 是否命中 pattern(同 adaptersScanning 的后缀规则) */
+/** dir 是否命中 pattern(同 layoutsScanning 的后缀规则) */
 export function dirMatches(dir: string, pattern: string): boolean {
   const norm = normalizeDir(dir);
   const tn = normalizeDir(pattern);
@@ -428,7 +428,7 @@ export function dirMatches(dir: string, pattern: string): boolean {
  * docs 级目标返回 undefined = 保持 deck 全局 mode(AC:行为不变)。
  */
 export function targetModeOverride(dir: string): { mode: "snapshot"; reason: string } | undefined {
-  const cline = adapterById("cline");
+  const cline = layoutById("cline");
   const h = cline?.hazards.find(x => x.id === "clinerules-symlink-not-followed");
   if (cline && h?.triggerDirs?.some(td => dirMatches(dir, td))) {
     return { mode: "snapshot", reason: `Cline does not follow symlinks here — copy target (${h.ref})` };
@@ -441,10 +441,10 @@ export function targetModeOverride(dir: string): { mode: "snapshot"; reason: str
  * 每行 id 唯一、tier/severity 合法、source 是 URL、verifiedAt 是 ISO 日期。
  * 行数缺口(普查 16 vs 实际落行)显式报告,不静默。
  */
-export function registryProblems(): string[] {
+export function layoutProblems(): string[] {
   const problems: string[] = [];
   const seen = new Set<string>();
-  for (const a of ADAPTER_REGISTRY) {
+  for (const a of CLI_LAYOUTS) {
     if (!a.id || seen.has(a.id)) problems.push(`duplicate or missing id: ${a.id}`);
     seen.add(a.id);
     if (!(SYMLINK_TIERS as readonly string[]).includes(a.symlinkTier))
@@ -459,15 +459,15 @@ export function registryProblems(): string[] {
         problems.push(`${a.id}: hazard ${h.id} is data-loss without triggerDirs — would warn on every deck`);
     }
   }
-  if (ADAPTER_REGISTRY.length < SURVEY_CLAIMED_COUNT) {
+  if (CLI_LAYOUTS.length < SURVEY_CLAIMED_COUNT) {
     problems.push(
-      `registry has ${ADAPTER_REGISTRY.length} rows, survey claimed ${SURVEY_CLAIMED_COUNT} — ` +
+      `cli-layout table has ${CLI_LAYOUTS.length} rows, survey claimed ${SURVEY_CLAIMED_COUNT} — ` +
         `roster gap must be resolved by re-survey (P6 watch) or the missing row restored`
     );
   }
   return problems;
 }
 
-export function adapterById(id: string): CliAdapter | undefined {
-  return ADAPTER_REGISTRY.find(a => a.id === id);
+export function layoutById(id: string): CliLayout | undefined {
+  return CLI_LAYOUTS.find(a => a.id === id);
 }

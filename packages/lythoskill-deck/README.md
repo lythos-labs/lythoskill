@@ -53,7 +53,7 @@ bunx @lythos/skill-deck@0.19.1 link
 
 **Snapshot mode** (`--mode snapshot`): copies the source directory into the working set instead of symlinking. Snapshots are pinned to the cold pool version at link time. Use `deck to-symlink <alias>` to switch back.
 
-**Adapter policy layer** (`src/adapter-registry.ts`): per-CLI data from the 2026-09-09 16-CLI skill-dir survey — symlink guarantee tier (docs/issue/hazard), fan-out targets, per-run switching mechanisms, hazard flags with source URLs. `deck link` consults it:
+**CLI-layout policy layer** (`src/cli-layout.ts`): per-CLI data from the 2026-09-09 16-CLI skill-dir survey — symlink guarantee tier (docs/issue/hazard), fan-out targets, per-run switching mechanisms, hazard flags with source URLs. `deck link` consults it:
 
 - Symlink removal never recurses into link targets (Goose #11600 recursive-delete class) — cold-pool content is unlink-proof by construction, with dormancy tests.
 - Fan-out to `.goose/skills` prints a data-loss warning (removing deck skills via the Goose UI can delete cold-pool content); the shared `.agents/skills` dir stays quiet.
@@ -61,7 +61,7 @@ bunx @lythos/skill-deck@0.19.1 link
 - A skill source inside the fan-out dir is refused (symlink-cycle ENAMETOOLONG class, opencode #45961).
 - `.clinerules` fans out as snapshot copies — Cline does not follow symlinks there.
 
-Default decks (`.claude/skills` + `.agents/skills`) emit zero adapter warnings and behave exactly as before.
+Default decks (`.claude/skills` + `.agents/skills`) emit zero layout warnings and behave exactly as before.
 
 ## Exit codes
 

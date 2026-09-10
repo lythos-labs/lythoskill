@@ -157,7 +157,9 @@ switch (command) {
   case 'per-run': {
     const cliId = args[1] && !args[1].startsWith('-') ? args[1] : undefined
     if (!cliId) {
-      console.error('❌ Missing CLI id. Usage: deck per-run <cli>   (e.g. kimi, crush — see adapter registry)')
+      console.error('❌ Missing CLI id. Usage: deck per-run <cli>   (e.g. kimi, crush)')
+      console.error('   what: per-run renders a launch command that points a CLI at a skill dir, without relinking')
+      console.error('   fix:  deck per-run <any-id> — an unknown id prints the supported list')
       process.exit(1)
     }
     perRun(cliId, deckPath, workdir)

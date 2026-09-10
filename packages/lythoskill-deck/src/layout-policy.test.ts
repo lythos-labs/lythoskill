@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
 /**
- * adapter-policy.test.ts — fan-out 策略检查 + 循环链守卫
+ * layout-policy.test.ts — fan-out 策略检查 + 循环链守卫
  *
  * Dormancy 纪律:默认 deck(.claude/skills + .agents/skills)零警告;
  * 危险/误配置才发声。docs 级行为不变是 AC,这里是它的测试。
  *
- * Run: bun test packages/lythoskill-deck/src/adapter-policy.test.ts
+ * Run: bun test packages/lythoskill-deck/src/layout-policy.test.ts
  */
 
 import { describe, it, expect } from 'bun:test'
-import { collectFanOutWarnings } from './adapter-policy.ts'
+import { collectFanOutWarnings } from './layout-policy.ts'
 import { wouldCreateCycle } from './link.ts'
 
 describe('collectFanOutWarnings — default pair dormancy (AC: docs-tier no regression)', () => {
@@ -42,15 +42,15 @@ describe('collectFanOutWarnings — goose #11600 trigger', () => {
 })
 
 describe('collectFanOutWarnings — opencode #46327 duplicate-scan', () => {
-  it('same adapter scanning two fan-out dirs warns with duplicate-name ref', () => {
+  it('same CLI scanning two fan-out dirs warns with duplicate-name ref', () => {
     const warnings = collectFanOutWarnings(['.claude/skills', '.agents/skills', 'plugins/x/.agents/skills'])
     const opencodeDup = warnings.find(w => w.ref.match(/46327/))
     expect(opencodeDup).toBeDefined()
     expect(opencodeDup!.message).toMatch(/scans 2 fan-out dirs/)
   })
 
-  it('two DIFFERENT adapters sharing a convention is fine (single dir each)', () => {
-    // .claude/skills (claude) + .goose/skills (goose) — different adapters, no duplicate-scan;
+  it('two DIFFERENT CLIs sharing a convention is fine (single dir each)', () => {
+    // .claude/skills (claude) + .goose/skills (goose) — different CLIs, no duplicate-scan;
     // only the goose data-loss trigger fires
     const warnings = collectFanOutWarnings(['.claude/skills', '.goose/skills'])
     expect(warnings.filter(w => w.message.includes('fan-out dirs'))).toEqual([])
