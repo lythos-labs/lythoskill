@@ -35,6 +35,23 @@ interface Node {
 const keyText = (src: string, n: Node): string =>
   n.key ? src.slice(n.key.range[0], n.key.range[1]) : ''
 
+/**
+ * 一个 key 节点的**分段**(H2):`[tool.skills."alpha"]` 与 `[tool . skills . alpha]`
+ * 在读取侧都是同一个 `tool.skills.alpha`,所以只比较裸文本会把它们判成"不存在" ——
+ * 那就是**静默收窄语法**(`validate` 通过、`remove` 报错)。带引号/带空格的写法必须认。
+ */
+function keySegments(n: Node | undefined): string[] {
+  const parts = (n as any)?.key?.keys ?? (n as any)?.keys
+  if (Array.isArray(parts)) {
+    return parts.map((p: any) => (typeof p.name === 'string' ? p.name : p.value ?? ''))
+  }
+  return []
+}
+const keyIs = (n: Node | undefined, want: string[]): boolean => {
+  const got = keySegments(n)
+  return got.length === want.length && got.every((g, i) => g === want[i])
+}
+
 /** 该段的行尾风格(ADR §规格:插入用的分隔符**复制文件自己的行尾**) */
 function lineEndingAt(src: string, i: number): string {
   return src[i] === '\r' && src[i + 1] === '\n' ? '\r\n' : '\n'
@@ -71,13 +88,21 @@ function parse(src: string): Node[] | SpliceResult {
 
 const isErr = (x: unknown): x is SpliceResult => typeof x === 'object' && x !== null && 'ok' in x
 
-/** 顶层 table 节点里 key 精确等于 `k` 的那个(ADR §规格「定位」按 key 文本匹配,不用行/正则) */
-const tableByKey = (body: Node[], src: string, k: string): Node | undefined =>
-  body.find(n => n.type === 'TOMLTable' && keyText(src, n) === k)
+/** `[<section>]` 表节点(内联表形态的容器) */
+const sectionTable0 = (body: Node[], src: string, section: string): Node | undefined =>
+  tableByKey(body, src, section)
 
-/** `[<section>]` 表里某个 key 的 key-value 节点 */
-const kvInTable = (table: Node | undefined, src: string, k: string): Node | undefined =>
-  table?.body?.find(n => n.type === 'TOMLKeyValue' && keyText(src, n) === k)
+/** 顶层 table 节点里 key 分段等于 `want` 的那个(ADR §规格「定位」:按 key 匹配,不用行/正则) */
+const tableByKey = (body: Node[], _src: string, k: string): Node | undefined => {
+  const want = k.split('.')
+  return body.find(n => n.type === 'TOMLTable' && keyIs(n, want))
+}
+
+/** 某个表体里 key 分段等于 `k` 的 key-value 节点 */
+const kvInTable = (table: Node | undefined, _src: string, k: string): Node | undefined => {
+  const want = k.split('.')
+  return table?.body?.find(n => n.type === 'TOMLKeyValue' && keyIs(n, want))
+}
 
 /** 某个 alias 在 `<section>.skills` 下的三种形状 —— 见 ADR §规格「定位」的 ①②③ */
 interface Located {
@@ -87,6 +112,8 @@ interface Located {
   container?: Node
   /** true = 命中的是 legacy 数组里的元素(删除时要连一个相邻逗号一起走) */
   arrayElem?: boolean
+  /** true = 命中的是内联表里的条目(删除时同样要连一个相邻逗号走) */
+  mapEntry?: boolean
 }
 
 function locate(body: Node[], src: string, section: string, alias: string): Located | undefined {
@@ -102,8 +129,25 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
     return { node: inline, container: isOnlyEntry ? skillsTable : undefined }
   }
 
+  // ④ `[<section>] skills = { alias = { … } }` 内联表里的那个条目(H1:读取侧认它,写入侧就得认)
+  const map = kvInTable(sectionTable0(body, src, section), src, 'skills')
+  const mapBody = (map?.value as any)?.body
+  if (Array.isArray(mapBody)) {
+    const entry = mapBody.find((kv: Node) => keyIs(kv, [alias]))
+    if (entry) {
+      const sectionEmpties = (sectionTable0(body, src, section)?.body?.length ?? 0) === 1
+      const isOnlyEntry = mapBody.length === 1
+      return {
+        node: entry,
+        container: isOnlyEntry ? (sectionEmpties ? sectionTable0(body, src, section) : map) : undefined,
+        arrayElem: !isOnlyEntry,
+        mapEntry: true,
+      }
+    }
+  }
+
   // ③ legacy 数组 `[<section>] skills = [...]` 里的那个元素
-  const sectionTable = tableByKey(body, src, section)
+  const sectionTable = sectionTable0(body, src, section)
   const arr = kvInTable(sectionTable, src, 'skills')
   const elems = arr?.value?.elements
   if (arr && Array.isArray(elems)) {
@@ -132,12 +176,13 @@ export function basename(path: string): string {
 }
 
 /** 一个 map 在文中现存的"skills 形状" —— 决定插入侧能做什么(ADR §规格「插入(legacy 数组 section)」) */
-type SkillsShape = 'tables' | 'inline' | 'legacy-array' | 'absent'
+type SkillsShape = 'tables' | 'inline' | 'legacy-array' | 'inline-map' | 'absent'
 
 function skillsShape(body: Node[], src: string, section: string): { shape: SkillsShape; node?: Node } {
   const sectionTable = tableByKey(body, src, section)
   const arr = kvInTable(sectionTable, src, 'skills')
   if (arr?.value?.elements) return { shape: 'legacy-array', node: arr }
+  if (Array.isArray((arr?.value as any)?.body)) return { shape: 'inline-map', node: arr }
   if (tableByKey(body, src, `${section}.skills`)) return { shape: 'inline', node: sectionTable }
   if (body.some(n => n.type === 'TOMLTable' && keyText(src, n).startsWith(`${section}.skills.`)))
     return { shape: 'tables' }
@@ -164,7 +209,7 @@ export function spliceRemoveSkill(src: string, section: string, alias: string): 
     }
   }
 
-  // ── ③ legacy 数组元素:元素 + **恰好一个**相邻逗号(及其后的空白)一起走 ──
+  // ── ③④ 数组元素 / 内联表条目:元素 + **恰好一个**相邻逗号(及其后的空白)一起走 ──
   if (hit.arrayElem) {
     const el = hit.node
     const after = src.slice(el.range[1]).match(/^(\s*),/)
@@ -207,7 +252,6 @@ export function spliceInsertSkill(
   const body = parse(src)
   if (isErr(body)) return body
   const nodes = body as Node[]
-  const eol = lineEndingAt(src, 0)
   const { shape } = skillsShape(nodes, src, section)
 
   if (shape === 'legacy-array') {
@@ -239,19 +283,38 @@ export function spliceInsertSkill(
     return { ok: true, src: src.slice(0, at) + addition + src.slice(at) }
   }
 
+  if (shape === 'inline-map') {
+    // `[<section>] skills = { alpha = { … } }`:能表达 alias(**它就是键**)与 `source`(字段),
+    // 所以**不需要拒绝**;但**绝不**在旁边新增 `[<section>.skills.x]` 表 ——
+    // 那会让 TOML 抛 `Defining a key multiple times is invalid`(H1:把 deck 写坏)。
+    const map = kvInTable(tableByKey(nodes, src, section), src, 'skills')!
+    const lit = map.value!.range
+    const close = lit[1] - 1 // `}`
+    const wsBefore = src.slice(lit[0], close).match(/[ \t]*$/)?.[0].length ?? 0
+    const at = close - wsBefore
+    const fields = [`path = "${entry.path}"`]
+    if (entry.source) fields.push(`source = "${entry.source}"`)
+    const isEmpty = ((map.value as any).body ?? []).length === 0
+    const addition = `${isEmpty ? '' : ', '}${alias} = { ${fields.join(', ')} }`
+    return { ok: true, src: src.slice(0, at) + addition + src.slice(at) }
+  }
+
   const block = [`[${section}.skills.${alias}]`, `path = "${entry.path}"`]
   if (entry.source) block.push(`source = "${entry.source}"`)
-  const text = block.join(eol)
+  const text = block.join('\n')
 
+  const want = `${section}.skills.`
   const lastTable = [...nodes]
     .reverse()
-    .find(n => n.type === 'TOMLTable' && keyText(src, n).startsWith(`${section}.skills.`))
+    .find(n => n.type === 'TOMLTable' && keySegments(n).join('.').startsWith(want))
   if (lastTable) {
     const at = lastTable.range[1]
-    return { ok: true, src: src.slice(0, at) + eol + eol + text + src.slice(at) }
+    const eol = lineEndingAt(src, at) // H3:按**插入点**判行尾,不是 offset 0
+    return { ok: true, src: src.slice(0, at) + eol + eol + text.replace(/\n/g, eol) + src.slice(at) }
   }
   // 没有同前缀 table:落到文件末尾(保持一行空行)
   const trimmed = src.replace(/[\r\n]+$/, '')
   const tail = src.slice(trimmed.length)
-  return { ok: true, src: trimmed + (tail ? eol + eol : eol + eol) + text + tail }
+  const eol = lineEndingAt(src, Math.max(0, trimmed.length - 1))
+  return { ok: true, src: trimmed + eol + eol + text.replace(/\n/g, eol) + tail }
 }

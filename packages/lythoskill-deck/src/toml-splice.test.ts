@@ -11,6 +11,7 @@
  */
 
 import { describe, it, expect } from 'bun:test'
+import { parseTOML } from 'toml-eslint-parser'
 import { spliceRemoveSkill, spliceInsertSkill } from './toml-splice.ts'
 
 /** 注释密集 + 非 ASCII(`→` 让 code unit ≠ 字节)的常态 deck */
@@ -228,6 +229,73 @@ skills = [ "github.com/a/b/alpha", "github.com/a/b/beta" ]
     if (out.ok) return
     expect(out.code).toBe('unrepresentable')
     expect(out.message).toContain("custom alias 'custom'")
+  })
+})
+
+
+describe('ZK-impl round-1 的四个 HIGH:每条都钉一个"能红"的用例', () => {
+  const MAP = `[deck]
+max_cards = 10
+
+[tool]
+skills = { alpha = { path = "github.com/a/b/alpha" } }
+
+[combo.weekly]
+prompt = "keep"
+`
+
+  it('H1: insert into an inline-table map stays parseable (never a sibling table)', () => {
+    const out = spliceInsertSkill(MAP, 'tool', 'beta', { path: 'github.com/a/b/beta' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain(`skills = { alpha = { path = "github.com/a/b/alpha" }, beta = { path = "github.com/a/b/beta" } }`)
+    // 关键:结果必须还能被解析 —— 在旁边新增 [tool.skills.beta] 表会让 TOML 抛错
+    expect(() => parseTOML(out.src, { range: true })).not.toThrow()
+  })
+
+  it('H1b: the map form can carry source too (so it is never "unrepresentable")', () => {
+    const out = spliceInsertSkill(MAP, 'tool', 'beta', { path: 'p', source: 'https://x' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain('beta = { path = "p", source = "https://x" }')
+  })
+
+  it('H2: remove accepts the key spellings the reader accepts (quoted / spaced)', () => {
+    const quoted = `[tool.skills."alpha"]\npath = "x"\n\n[tool . skills . beta]\npath = "y"\n`
+    const r1 = spliceRemoveSkill(quoted, 'tool', 'alpha')
+    expect(r1.ok).toBe(true)
+    if (!r1.ok) return
+    expect(r1.src).not.toContain('alpha')
+    expect(r1.src).toContain('[tool . skills . beta]')
+    const r2 = spliceRemoveSkill(quoted, 'tool', 'beta')
+    expect(r2.ok).toBe(true)
+    if (!r2.ok) return
+    expect(r2.src).toContain('[tool.skills."alpha"]')
+  })
+
+  it('H2b: remove works on the inline-map shape, and cascades to the section header', () => {
+    const two = MAP.replace('skills = { alpha = { path = "github.com/a/b/alpha" } }',
+      'skills = { alpha = { path = "a" }, beta = { path = "b" } }')
+    const out = spliceRemoveSkill(two, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain('skills = { beta = { path = "b" } }')
+
+    const last = spliceRemoveSkill(MAP, 'tool', 'alpha')
+    expect(last.ok).toBe(true)
+    if (!last.ok) return
+    expect(last.src).not.toContain('skills =')
+    expect(last.src).not.toContain('[tool]')
+  })
+
+  it('H3: insert into a CRLF file uses CRLF at the insertion point (not LF from offset 0)', () => {
+    const crlf = '[deck]\r\nmax_cards = 10\r\n\r\n[tool.skills.alpha]\r\npath = "a"\r\n'
+    const out = spliceInsertSkill(crlf, 'tool', 'beta', { path: 'b' })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toContain('[tool.skills.alpha]\r\npath = "a"\r\n\r\n[tool.skills.beta]\r\npath = "b"')
+    // 混入裸 \n 就是"静默改了行尾"
+    expect(out.src).not.toMatch(/(?<!\r)\n/)
   })
 })
 

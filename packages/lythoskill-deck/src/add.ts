@@ -405,20 +405,11 @@ export async function addSkill(
       exit(1)
     }
 
-    // Auto-migrate old string-array format to dict
-    for (const section of ['innate', 'tool', 'combo'] as const) {
-      const sectionData = deck[section]
-      if (sectionData && Array.isArray(sectionData.skills)) {
-        const dict: Record<string, { path: string }> = {}
-        for (const name of sectionData.skills) {
-          const a = name.split('/').pop() || name
-          dict[a] = { path: name }
-        }
-        deck[section].skills = dict
-        console.log(`📝 Auto-migrated [${section}] from string-array to dict format`)
-      }
-    }
-
+    // 注意:**不再**顺手把别的 section 从 string-array 迁移成 dict。
+    // 那会重写整份文件(吞掉注释)、而且改的是"我没让你改的" section ——
+    // 迁移是 `deck migrate-schema` 的活(显式、留 .bak、用户点名才做)。
+    // 目标 section 是 legacy 形态时由 spliceInsertSkill 按规则处置(能表达就追加字符串元素,
+    // 表达不了就报错并点名 migrate-schema)——见 ADR-20260910152957509 §规格。
     // Ensure target section exists and is dict format
     if (!deck[skillType]) deck[skillType] = {}
     if (!deck[skillType].skills) deck[skillType].skills = {}
