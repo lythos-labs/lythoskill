@@ -72,52 +72,30 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
      Prepare it first, in full:  bunx @lythos/project-cortex adr "<decision-title>"
      Criteria (hit >= 2 of C1-C6): AGENTS.md § Decision Records -->
 
-**owner 定调(2026-09-10)**:「**那说明是解法有问题。参考类似 package.json 等的实际管理做法吧**」
+**决策已落 ADR,本节只引用(不得是唯一记录)**:
 
-即:**问题不在"选哪个库",在"用对象序列化器去写一份带注释的声明式文件"这个解法本身** ——
-`parse → 改对象 → stringify` 天生只认对象里的东西,注释与既有格式不在对象里,所以必然被丢弃。
-换一个有同样模型的对象序列化器不会有任何改善。
+> **ADR-20260910152957509** — *deck declaration writes must touch only the bytes they are about:
+> locate with an AST, splice back by range, never re-serialise the document*
 
-**成熟做法(这就是答案的形状)** —— 共同原则是**编辑"文档",不是编辑"对象"**:
-工具只动它被要求动的那一部分,其余逐字保留。
+一句话:定位用语法树(不用行/正则),写回只替换**这次操作所关于的那段字节**,其余逐字不动 ——
+注释与格式的保留因此是**结构性结果**,不是需要维护的特性。被拒选项与实测数字都在 ADR 里。
 
-| 参照 | 做法 |
-|---|---|
-| **Cargo**(`cargo add` / `cargo remove` 改 `Cargo.toml`) | 用 `toml_edit` —— **格式保留编辑**:注释、空白、键序、行内注释全部保留。TOML 生态里对这件事的标准答案 |
-| **Poetry**(改 `pyproject.toml`) | 用 `tomlkit`,同一思路(保存注释与格式) |
-| **npm**(改 `package.json`) | JSON 无注释,但它走的是弱一档的同一原则:**检测并保留缩进与行尾**(`@npmcli/package-json`),而不是拿默认格式化重写;且只重排它自己要管的段 |
+**为什么不是"换个库"**:根因是**用对象图重写整份文档**这个解法(`parse → 改对象 → stringify`),
+注释不在对象里,换任何同模型的对象序列化器都不改善(owner:「**那说明是解法有问题**」)。
+成熟做法(owner:「**参考类似 package.json 等的实际管理做法**」):Cargo 用 `toml_edit`、Poetry 用
+`tomlkit` 做格式保留编辑;npm 改 `package.json` 走弱一档的同一原则(保留缩进/行尾,只重排自己要管的段)。
 
-**因此选项重排(原表的最优项已作废)**:
+**实测候选(不是听说)**:
 
-| | 做法 | 判定 |
+| 候选 | 体积 | 结果 |
 |---|---|---|
-| **(a)** | **格式保留编辑**(与 Cargo / Poetry 同形) | **首选**。JS/TS 生态的候选:①`@taplo/lib`(taplo 是 Rust `toml_edit` 同族,WASM 形态);②自写行级编辑器(无新依赖,代价是必须自己处理 TOML 边界情形)` |
-| **(b)** | 继续 `@iarna/toml` 对象序列化 | **已判定为错**(本卡的成因),不再作为候选;换同类库同理 |
-| **(c)** | 只保留缩进/行尾(npm 的弱式) | **不够**:这份文件的人类文档载体正是注释,保不住注释等于没解决 |
+| `@taplo/lib` 0.5.0 | **35.6 MB** unpacked(WASM) | 未采用(为一次删/加键拉 35 MB 与"影响最小化"冲突) |
+| `toml-eslint-parser` 1.0.3 | **86 KB** + 1 依赖 | 逐 table 给出精确字节区间 |
+| AST 定位 + 区间 splice | — | 对本仓真实 deck:删一个 table → 注释 **9→9**、前后缀**逐字节相同**、reparse 通过、接缝复原原有空行样式 |
 
-**怎么实现 (a)(owner 追加指示 2026-09-10:「可能需要配合 ast 操作」)** —— 两个动作分开:
-
-1. **定位用 AST,不用正则、不用目视**:在 TOML 的语法树里找到 `[tool.skills.<alias>]`
-   这个 table 节点(以及 `add` 时要插入的位置)。正则/行匹配会被多行字符串、内联表、
-   引号里的 `#` 骗到 —— 那正是"启发式当规格"的老毛病(`feedback_heuristic_is_not_spec`)。
-2. **写回用范围替换**:取该节点的 `range`,对原文做**字节级 splice**;文件其余部分逐字不动
-   —— 注释、空行、键序、缩进全部天然保留,因为根本没被重写过。
-
-对应的两个实现族:
-
-| | 形态 | 取舍 |
-|---|---|---|
-| **(a1)** | **无损语法树编辑器**:`@taplo/lib`(taplo 的内核就是 lossless syntax tree + DOM 编辑,与 Rust `toml_edit` 同族) | 最贴近 Cargo/Poetry 的做法;代价 = 新依赖(WASM) |
-| **(a2)** | **AST 取 range + 自行 splice**:`toml-eslint-parser` 或 tree-sitter-toml 拿节点范围,只替换那段 | 依赖更轻/可复用既有工具链;代价 = splice 逻辑(缩进、空行、块边界)得自己维护并测 |
-
-两者共同点:**结构化定位 + 逐字写回**。核心不是"用哪个库",是**不把整份文档重新序列化**。
-
-**决策落点**:选 (a) 的 ① 意味着**引入新依赖**并**改变声明式真源的写入方式** ——
-命中判据 C1-C6(新依赖 / 改变既有机制)→ **须先落 ADR 再改实现**,本卡只引用该 ADR。
-选 ② 是把"格式保留"变成自己维护的实现,同样应在 ADR 里写明为何不走成熟库。
-
-**相关**:
-- 复现命令(留档,可直接重跑):造一个带注释与 `also_link_to` 的 deck,`deck remove <alias>` 后 `diff`。
+**本卡要做的事**(规格表在 ADR 的 Decision 节):`remove.ts` / `add.ts` 的写回路径改走 splice;
+核实 `migrate-schema` 是否同病;测试钉三件事 —— ①注释逐字保留 ②未触碰键格式不变
+③**无变化时不写文件**(mtime 不变)。
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
@@ -135,6 +113,7 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 - Added: (执行时填:测试 + 可能的行级编辑实现)
 - 相关:`packages/lythoskill-deck/src/remove.ts:152`、`src/add.ts:445/468`
 - 相关卡:`TASK-20260910110545092`(发现来源)、`TASK-20260910111600389`(归属语义,本卡不动)
+- 相关 ADR:`cortex/adr/01-proposed/ADR-20260910152957509-*.md`(本卡的决策载体)、`ADR-20260910112404500`(所有权判据,同向)
 
 ## Git Commit Message
 ```
