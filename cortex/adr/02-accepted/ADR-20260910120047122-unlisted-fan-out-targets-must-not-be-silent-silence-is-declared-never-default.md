@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-09-10 | Created |
 | accepted | 2026-09-10 | Owner 裁决 B18 = 选项 B(诚实优先),并追加豁免标记 |
+| accepted | 2026-09-10 | Accepted |
 
 ## Background
 

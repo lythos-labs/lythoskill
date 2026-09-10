@@ -8,6 +8,7 @@
 | proposed | 2026-09-10 | Created |
 | accepted | 2026-09-10 | Accepted |
 | accepted | 2026-09-10 | 执行方式扩写(owner 定调):落点二 = routine 必经路径提示植入;并补「无 inbound ref 的落点是无效落点」。状态未变 —— 此行只记录**接受后本文档被改过**,以免读者把改后文本当成被接受的原文 |
+| accepted | 2026-09-10 | 追加 **§5**:已 accept 的 ADR 的 Follow-up 由该 ADR 自身承载,不另开卡(owner 裁决,原话「已 accept 的 ADR 的 Follow-up 落地,由该 ADR 自身承载,不另开卡」)。状态未变 —— 同行上述,此行标记**文档再次被改** |
 
 ## Background
 <!-- ⚠️ REQUIRED: Problem description and context. Empty = shell, blocked by probe. -->
@@ -205,6 +206,40 @@ Technical Approach 是**意图陈述**,不是**决策记录**。审阅者面对�
   CLI 面植入的覆盖面 = "用了 CLI 的 agent"。对这一盲区,唯一的手段是
   `AGENTS.md` 层面的规矩强化(「必须用 cortex 做项目级落盘」,已在文件顶 / §0 / §3 三处重述)
   —— 且**仍不是硬保证**。本 ADR 不假装它是。
+
+## 5. 已 accept 的 ADR:其 Follow-up 由该 ADR 自身承载(不另开卡)
+
+**规则(owner 定调,2026-09-10)**:已 accept 的 ADR 的 Follow-up 落地,**由该 ADR 自身承载,
+不另开卡**。做法 = 在 `## Impact → Follow-up` 勾掉该项并在旁边写上 commit sha。
+
+**为什么这不是本 ADR 的自相矛盾。** 上一节要求"决策必须落 ADR,卡的 Technical Approach
+不得是唯一记录";这一节说"某些落地**不必**开卡"。两者不冲突,因为**卡与 ADR 承载的东西不同**:
+卡承载的是**需要自己的验收标准、自己的计划、或 owner 裁决的工作**;而一篇已 accept 的 ADR
+的 Follow-up 这三样都不需要 —— 它的验收标准就是 ADR 的 Impact 节本身,而 ADR 就是那份被
+评审过的决策。为它开卡 = 把同一份义务抄进第二个更弱的载体:卡随任务归档,ADR 留在库里可检索。
+**同一份义务有两个载体,实际上等于两个都不是**。
+
+**本条的出处就是它自己的反例。** 2026-09-10 落地本 ADR 那四个提示植入点的那批改动
+(5 个源文件 + `AGENTS.md` + `CLAUDE.md`,两个 commit)**完全没有卡**。它今天还能被追到,
+唯一原因是**本 ADR 自己的 Follow-up 列表点名了那四个落点**。是 ADR 承载了它;
+若当时另开一张卡,只会多出第二个可以忘记的地方。
+
+**边界 —— 这些情况仍然该开卡**:
+
+| 情况 | 为什么是卡 |
+|---|---|
+| Follow-up **派生出 ADR 从未声明过的新义务**(如"每季度复勘 16 家普查") | 那是带新验收标准的新工作,不是决策的推论 |
+| Follow-up **需要自己的计划**(多段、独立回滚点) | 卡是计划的载体,ADR 仍是决策的载体 |
+| Follow-up **卡在 owner 裁决上** | 卡是呈现选项的正确形态(本卡 B17/B18 即此例) |
+
+**判据一句话**:*这件事需要决策、计划、或 owner 输入吗?* 不需要 → 它是已做决策的**推论**,
+归 ADR 的 Follow-up。**为 ADR 自己的推论开卡,是在和 ADR 争夺记录权,不是在记录它。**
+
+**落点(两处,都要求从模板/指南可见)**:
+`packages/lythoskill-project-cortex/skill/references/writing-guide.md` 的
+"An accepted ADR carries its own follow-up" 一节(SOURCE,改后重建 `skills/`)+
+`src/lib/template.ts` 的 `## Impact` → `Follow-up:` 行下方注释
+(**落在写这份清单的那一行上**,同 §4 的落点二纪律)。
 
 ## Impact
 <!-- ⚠️ REQUIRED: Positive / negative / follow-up. Empty = shell, blocked by probe. -->

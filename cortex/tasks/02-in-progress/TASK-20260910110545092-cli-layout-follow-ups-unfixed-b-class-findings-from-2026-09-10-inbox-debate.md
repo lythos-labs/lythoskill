@@ -6,6 +6,7 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-09-10 | Created |
+| in-progress | 2026-09-10 | Started |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
@@ -217,6 +218,12 @@ Bun 1.3 与 2.x 下的通过与否可能不同,而 CI 不告诉你是哪个。
 **影响**:A 与项目的"行为假设必须有测试钉死"纪律有张力(测试钉住了行为,却没钉住解释器);
 C 引入一个未证的中间假设。**我倾向 B**,但这是"要不要为此付维护成本"的取舍,归 owner。
 
+**✅ 裁决(2026-09-10,owner)= B**。owner 原话:「**B17 基本按 B 比较好。升级本身就是一个
+比较严肃的问题。**」→ 8 处全部 pin 到 `1.3.11`(与测试基线同一版本),并配一条四步升级窗口;
+决策与"何时升"的规矩落在 `AGENTS.md §9「Bun version pin」`,理由落 **ADR-20260910120047160**
+(accepted)。**选项 C 的判词已写进 ADR**:它引入的"1.3.x 内行为不变"是一个**未证的假设**,
+而 B11 的要点正是"行为假设必须有出处"。
+
 ### B18 — 名单外 fan-out 目标:零 advisory 与"已检查且安全"不可区分
 
 **陈述(2026-09-10 复核,顺带定位)**:`collectTriggerHazards` 与 `collectDuplicateScans`
@@ -239,7 +246,16 @@ layout 时,`layoutsScanning` 返回 `[]` → 两个循环都不进 → **零输�
 两者都能自洽,但**必须选一个并写进 README**,否则下个 agent 会按自己的偏好改回去。
 现状(A)的问题不是"它错了",是"它是个没人做过的决定"。归 owner。
 
-B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
+**✅ 裁决(2026-09-10,owner)= B + 豁免标记**。owner 原话:
+「**B18 按照 B 可以,另外增加 deck 能力标记类似 gitignored 的东西豁免静默就好吧**」
+→ ①名单外目标默认出 **info 一行**;②新增 `[deck] acknowledged_unlisted = [...]`,
+**gitignore 式:列出即静默,不列即发声**。规则落 **ADR-20260910120047122**(accepted)。
+
+**两条被 ADR 显式记下的边界**(否则它就是个静音开关):
+豁免**只关掉"无数据"这条**,名单内的 data-loss hazard 照常发声;
+豁免模式**不检测陈旧**(匹配不到任何目标的模式静默失效)——接受,并写明是记账项而非自动检查项。
+
+B17/B18 的结论回填到本卡 `## Notes`。
 
 **已由前置完成(记 done,不在本卡重复)**
 
@@ -294,7 +310,14 @@ B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
 - [ ] **B19**:`also-link-to-bdd` 已对齐新归属语义(自建 → 删;外来 → 留 + warn),
       且产出 `decision-log.jsonl` + `judge-verdict.json`(与 `deck-remove-bdd` /
       `to-symlink-snapshot-bdd` 同形 —— 现在只有这两个有产物)
-- [ ] **B17/B18**:已整理成可裁决形态并呈现 owner,结论(或"待裁决")落在本卡 Notes
+- [x] **B17/B18**:已整理成可裁决形态并呈现 owner,结论(或"待裁决")落在本卡 Notes
+- [x] **B17(裁决 B)**:`.github/workflows/` 8 处 `bun-version` 全部为精确版本 `1.3.11`;
+      每个文件第一处上方有指向 `AGENTS.md §9` 的注释;`§9` 含"何时升"的四步窗口;
+      ADR-20260910120047160 记录选项 C 的拒绝理由
+- [x] **B18(裁决 B)**:名单外目标出 info 一行 + `acknowledged_unlisted` 豁免。
+      验收点:①`layoutsScanning(t) === []` 时必出 1 行(info 级);②声明过则**零输出**;
+      ③豁免**不**抑制 data-loss(反例测试:`['.goose/skills']` + 豁免 → 仍出 data-loss);
+      ④默认 deck 与全部 docs-tier 目录仍零输出(dormancy 未破);⑤取向写进 deck README
 - [ ] `bun test packages/lythoskill-deck/` 全程保持 `0 fail`,测试数变化只在有意的增删处
 
 ## Progress Log
@@ -332,15 +355,40 @@ B17/B18 的结论(或"待裁决")回填到本卡 `## Notes`。
 - 2026-09-10: 原卡 `TASK-20260909155425926` 的 `## Notes` 已补注记(证伪对照表 +
   Follow-up 指针 + 删除边界被证伪一节)。**S1/S2/S3 的前置产物一并登记**:
   S1 = `e2edc52e` 同批;S2 改名 = `981d48b9` 前批;S3 ADR = `981d48b9` + 收口 `ac859c14`。
+- 2026-09-10: **卡转 in-progress,执行 B17 + B18**(owner 裁决两条都取 B)。两条原是
+  "归 owner 的产品取向项",裁决到手后即开工 —— **裁决本身不足以让事情发生,落盘才算**:
+  两条各写了一篇 ADR(理由 + 被拒选项),并在**改动发生的那一层**各留一条可发现的入口
+  (B18 → deck README § Safety guards + info 行自带的 ref;B17 → 每个 workflow 文件第一处
+  上方的注释 + `AGENTS.md §9`)。
+  - **B18 的实测复现**(不是推演):`/tmp/b18check/` 造一个 `also_link_to` 含
+    `.some-new-cli/skills` 的 deck → `deck link` 输出
+    `ℹ️  [info] …/skills: no layout data — hazards unknown`(改动前此处**零输出**);
+    把该目标加进 `acknowledged_unlisted` 再跑 → 该行**消失**(`grep -c` = 0)。
+  - **B18 实现中改了两处原判**:①`FanOutWarning.severity` 是闭合联合,加 `info` 必须同时
+    改渲染端(`link.ts`),否则 info 行会挂着 `⚠️` —— 会把"缺数据"读成"有危险";
+    ②`normalizeDir` 从 `cli-layout.ts` 私有改为导出,否则同一目录的两种写法
+    (`.new/skills` 与 `./.new/skills`)会出两行。**不导出去重键就得自己再造一个归一化** ——
+    那是"启发式当规格"。
+  - **B17 复核修正**:卡面记的 8 处已全数复核命中(`test.yml` 5 + `release.yml` 2 +
+    `deploy-pages.yml` 1);另发现 `deploy-pages.yml` 用的是 `setup-bun@v1` 而另两个是 `@v2` ——
+    **不在本条范围**(pin 的是解释器不是 action),已写进 ADR 的顺带记账,免得下次复核
+    把它当成新发现。
 
 ## Related Files
 - Modified:
   - `daily/2026-09-09.md`(S4:@20 交付段措辞/环境标注/证据落盘缺口;@29 P6 尾巴)
   - `cortex/tasks/04-completed/TASK-20260909155425926-cli-adapter-hardening-symlink-tiers-hazard-classes-per-run-dirs.md`
     (S4:补 `## Notes`,唯一一处被允许的 `04-completed/` 改动)
+  - **B18**:`packages/lythoskill-deck/src/layout-policy.ts`(severity 加 `info`、
+    `FanOutOptions`、`collectUnlistedTargets`)、`src/link.ts`(`parseAcknowledgedUnlisted`
+    + 读 toml + 分级渲染)、`src/cli-layout.ts`(`normalizeDir` 导出,供去重)、
+    `src/layout-policy.test.ts`(+9 测试)、`packages/lythoskill-deck/README.md` § Safety guards
+  - **B17**:`.github/workflows/{test,release,deploy-pages}.yml`、`AGENTS.md §9`
 - Added:
-  - (本卡自身,`01-backlog/`;执行时按下述清单落)
+  - (本卡自身,`02-in-progress/`;执行时按下述清单落)
   - 执行时预计动的:待落盘位置定案后回填 `/tmp/arena-p2-adapter-retrial/` 的证据
+  - `cortex/adr/02-accepted/ADR-20260910120047122-unlisted-fan-out-targets-must-not-be-silent-silence-is-declared-never-default.md`
+  - `cortex/adr/02-accepted/ADR-20260910120047160-ci-bun-version-must-be-pinned-to-an-exact-version-never-latest.md`
 
 ## Git Commit Message
 ```
@@ -380,10 +428,26 @@ alternatives。**该 ADR 已落地**:
 **引用任何测试计数时必须带"哪个 commit + 什么环境"** —— 裸值正是 B5 的坑,
 本卡不该在 Notes 里自己再踩一次。
 
-**B17 / B18 结论:待裁决(unresolved)** —— 已整理成「陈述 + 选项 + 影响」形态呈 owner
-(见 Requirements 对应小节),但 owner 尚未拍板。**本卡不自裁**。两条都不是技术题:
-B17 是"要不要为可归因性付版本维护成本",B18 是"诚实优先还是信噪比优先"。
-回填此处的时机 = owner 给出结论时。
+**B17 / B18 结论(2026-09-10,owner 拍板):两条都取 B。**
+
+- **B17 = B**:8 处 `bun-version: latest` → `1.3.11`(与测试基线同一版本)。owner 原话:
+  「**升级本身就是一个比较严肃的问题。**」→ 升级走四步显式窗口(读 release notes →
+  全量本地复跑并按断言写新基线 → 8 处 + `AGENTS.md §9` 同一 commit 内一起动 →
+  不许折进无关改动)。决策:**ADR-20260910120047160**(accepted)。
+- **B18 = B + 豁免标记**:名单外 fan-out 目标默认出 info 一行;静默改由
+  `[deck] acknowledged_unlisted = [...]` **显式声明**(gitignore 式)。
+  owner 原话:「**B18 按照 B 可以,另外增加 deck 能力标记类似 gitignored 的东西
+  豁免静默就好吧**」。决策:**ADR-20260910120047122**(accepted)。
+
+**本批实测值**(引用纪律见下):`bun test packages/lythoskill-deck/` =
+`236 pass / 1 skip / 0 fail / 602 expect / 237 tests / 16 files` @ Bun 1.3.11 / macOS。
+改动前同命令 = `227 / 1 / 0 / 589 / 228 / 16`(差值全部来自 B18 新增的 9 条测试)。
+
+**B18 的实现边界(三条,ADR 里也写了,这里留操作口径)**:
+1. 豁免**只关掉"无数据"这一条**。反例测试钉死:`collectFanOutWarnings(['.goose/skills'],
+   { acknowledgedUnlisted: ['.goose/skills'] })` 仍必须出 `data-loss`。
+2. 豁免**不检测陈旧** —— 匹配不到目标的模式静默失效。这是记账项,不是自动检查项。
+3. 信息级用 `ℹ️` 渲染、排在最后;`⚠️` 保留给 data-loss/warning。混用会把"缺数据"读成"有危险"。
 
 **S4 回填时发现的两件事(2026-09-10)**
 
