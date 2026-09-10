@@ -279,6 +279,13 @@ Model: <model id from the host config, e.g. kimi-code/k3 — read default_model,
 
 (`calt13+ai` = the human's git email local part + `+ai` — same address, plus-addressed. If the human's git email changes, follow it.)
 
+**Trailers only walk legal FSM edges, and they fail loudly when they do not.** A card that was never
+started cannot go to review: `Task: TASK-<id> review` on a `backlog` card is rejected with
+`❌ Invalid transition … Allowed targets from "backlog": in-progress`. Walk `start` → `review` via the
+CLI, or use `Closes: TASK-<id>`, which is valid from any state. Read the post-commit output — the
+rejection is printed there, and a hook line you skim reads exactly like a hook line that did nothing
+(measured the hard way, twice on 2026-09-10).
+
 Ordering when cortex trailers are also present: cortex trailers (`Closes:`/`Review:`/…) first, then `Co-Authored-By:`, then `Model:` last. The cortex trailer parser (`packages/lythoskill-project-cortex/src/lib/trailer.ts`) is line-based over exactly five keys (`Task|ADR|Epic|Closes|Review`), so attribution lines never interfere — verified 2026-08-28 on the TASK-20260828141622777 commit series. Write messages with `git commit -F <file>` (apostrophes in `$()` heredocs break parsing — see Critical Gotchas).
 
 #### Task-Git Discipline

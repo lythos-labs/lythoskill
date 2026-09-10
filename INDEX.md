@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 00:12:31
+> 自动生成于 2026/9/11 00:17:27
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 383 | 进行中: 0, 待验收: 0, 已完成: 321 |
+| Tasks | 383 | 进行中: 0, 待验收: 2, 已完成: 321 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 107 | 已接受: 102 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (17)
+### 待办 (15)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -88,21 +88,20 @@
 - [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
 - [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
 - [ ] **TASK-20260908232322136**: bump rebuilds only 6 skills - pure-skill package version fields lag until pre-commit hook
-- [ ] **TASK-20260909010058114**: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - [ ] **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
-- [ ] **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (2)
 
-_无_
+- 🔍 **TASK-20260909010058114**: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
+- 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 
 ### 已完成 (321)
 
