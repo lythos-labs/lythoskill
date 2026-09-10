@@ -6,12 +6,11 @@
  * Does NOT touch the cold pool (use `deck prune` for material-layer GC).
  */
 
-import { parse as parseToml } from "@iarna/toml";
 import { spliceRemoveSkill } from "./toml-splice.js";
 import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { findDeckToml, expandHome, parseAlsoLinkTo } from "./link.js";
-import { parseDeck } from "./parse-deck.js";
+import { parseDeck, readDeckOrExplain } from "./parse-deck.js";
 import { ColdPool } from "@lythos/cold-pool";
 import { validateAlias } from "./path-guard.js";
 import { removeSymlinkOnly, deckOwnsEntry, type OwnershipContext } from "./safe-remove.js";
@@ -85,7 +84,14 @@ export function removeSkill(target: string, cliDeckPath?: string, cliWorkdir?: s
 
   const PROJECT_DIR = cliWorkdir ? resolve(cliWorkdir) : dirname(DECK_PATH);
   const deckRaw = readFileSync(DECK_PATH, "utf-8");
-  const deck = parseToml(deckRaw) as any;
+  // 读不了就说清楚(是什么/为什么/怎么修),不把 iarna 的 parser 栈甩给用户 ——
+  // 这条读法与 deck add 的写回路径共用(parse-deck.ts:readDeckOrExplain)。
+  const deckRead = readDeckOrExplain(deckRaw, DECK_PATH);
+  if (!deckRead.ok) {
+    for (const line of deckRead.lines) io.error(line);
+    io.exit(1);
+  }
+  const deck = deckRead.doc;
 
   const WORKING_SET = expandHome(deck.deck?.working_set || ".claude/skills", PROJECT_DIR);
 

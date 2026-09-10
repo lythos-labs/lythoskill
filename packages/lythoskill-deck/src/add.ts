@@ -32,6 +32,7 @@ import {
 import { probeConnectivity } from '@lythos/cold-pool/src/mirror.js'
 import { findDeckToml, expandHome } from './link.js'
 import { validateAlias } from './path-guard.js'
+import { readDeckOrExplain } from './parse-deck.js'
 
 /**
  * IO seam for addSkill (Intent/Plan/Execute convention; mirror.ts ProbeDeps precedent).
@@ -243,8 +244,13 @@ export async function addSkill(
   const pool = new ColdPool(coldPoolPath)
   const fetchPlan = buildFetchPlan(pool, parsed)
   const skillName = parsed.skill ? basename(parsed.skill) : parsed.repo!
-  let rawAlias = options.alias || skillName
-  try { validateAlias(rawAlias) } catch (e: any) {
+  // alias 的**唯一定值点**:纯字符串推导(--alias ?? locator 的 repo/skill 名),
+  // 不依赖冷池/网络/克隆,所以放在 dry-run 分支**之前**。dry-run 与实际执行读的是
+  // 同一个变量 —— 不是两份推导;唯一会在之后改它的是 @skill 发现(见下方 :368)。
+  // 曾经的形状是 `rawAlias` 声明在这儿、`const alias = rawAlias` 声明在 dry-run
+  // 分支之后 —— 于是 `deck add --dry-run` 必然抛 TDZ(TASK-20260910160707856)。
+  let alias = options.alias || skillName
+  try { validateAlias(alias) } catch (e: any) {
     console.error(`❌ Invalid alias: ${e.message}`)
     console.error('   Aliases may only contain letters, numbers, hyphens, and underscores.')
     exit(1)
@@ -257,7 +263,20 @@ export async function addSkill(
   }
 
   const fqPathBefore = fqOf(parsed) // pre-discovery — may be repo-level for @skill
+  // `@skill` 的 alias 要等克隆后读 SKILL.md 才知道(能按 frontmatter name 命中,
+  // 也可能落到目录名)。所以只有它,以及它派生出的 path,是"计划时还定不了"的两行。
+  const aliasIsProvisional = Boolean(skillFilter) && !options.alias
   if (dryRun) {
+    // 计划与真实执行的**可执行性**必须同判:deck 读不了 → 写回路径也会拒绝
+    // (见下方 readDeckOrExplain 那道闸),所以 dry-run 在这儿就停,不打印
+    // 一份跑不了的清单 —— 假的安全承诺与假 source 同类(TASK-20260910160707856 AC4)。
+    if (existsSync(deckPath)) {
+      const deckRead = readDeckOrExplain(readFileSync(deckPath, 'utf-8'), deckPath)
+      if (!deckRead.ok) {
+        for (const line of deckRead.lines) console.error(line)
+        exit(1)
+      }
+    }
     console.log(`🔎 Dry-run: deck add ${locator}`)
     console.log(`   Cold pool:  ${coldPoolPath}`)
     console.log(`   Deck:       ${deckPath}`)
@@ -268,7 +287,13 @@ export async function addSkill(
         ? 'dir exists (partial clone?)'
         : 'not in cold pool'
     console.log(`📂 Repo status: ${repoStatus}`)
-    if (!existsSync(join(fetchPlan.targetDir, '.git'))) {
+    // 复用/克隆判定按 executeFetchPlan 的口径:它只看**目录在不在**(不看 .git),
+    // 目录在就 already-present —— 不 clone;带 #ref 时那边会 fetch+checkout。
+    if (existsSync(fetchPlan.targetDir)) {
+      console.log(fetchPlan.ref
+        ? `🔄 Would fetch+checkout ref ${fetchPlan.ref} in the existing dir`
+        : `♻️  Would reuse the existing dir — no clone`)
+    } else {
       console.log(`📦 Would clone: ${fetchPlan.cloneUrl} --depth 1`)
     }
     if (parsed.skill) {
@@ -282,6 +307,11 @@ export async function addSkill(
     console.log(`\n📝 Would add to skill-deck.toml:`)
     console.log(`   [${skillType}.skills.${alias}]`)
     console.log(`   path = "${fqPathBefore}"`)
+    if (aliasIsProvisional) {
+      console.log(`   ⚠️  provisional: the lines above are pre-discovery — "@${skillFilter}"`)
+      console.log(`       is matched against SKILL.md after the clone, so the alias/path`)
+      console.log(`       actually written may be the discovered skill's directory name.`)
+    }
     console.log(`\n💡 Remove --dry-run to execute.`)
     return
   }
@@ -365,10 +395,9 @@ export async function addSkill(
     // If discovered by name, update skill path and alias
     const relPath = skillDir.slice(fetchPlan.targetDir.length + 1)
     parsed = { ...parsed, skill: relPath }
-    if (!options.alias) rawAlias = basename(relPath)  // use discovered dir name as alias
+    if (!options.alias) alias = basename(relPath)  // use discovered dir name as alias
   }
   const fqPath = fqOf(parsed)  // may be updated after @skill discovery
-  const alias = rawAlias       // finalized after potential @skill override
   if (!skillDir) {
     console.error(`❌ No SKILL.md found in downloaded repo`)
     console.error(`   Checked: ${fetchPlan.targetDir}`)
@@ -385,7 +414,13 @@ export async function addSkill(
 
   if (existsSync(deckPath)) {
     const deckRaw = readFileSync(deckPath, 'utf-8')
-    const deck = parseToml(deckRaw) as Record<string, any>
+    // 与 deck remove 共用同一条读法:读不了就给三件套消息,不甩 iarna 的栈。
+    const deckRead = readDeckOrExplain(deckRaw, deckPath)
+    if (!deckRead.ok) {
+      for (const line of deckRead.lines) console.error(line)
+      exit(1)
+    }
+    const deck = deckRead.doc
 
     // Alias collision check across all sections
     const allAliases = new Set<string>()

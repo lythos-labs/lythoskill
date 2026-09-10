@@ -24,9 +24,40 @@ happy-path cards with real content must NOT flag; TBD-filled cards MUST flag.
 
 ## Acceptance Criteria
 
-- [ ] A card with all sections literal "TBD" is flagged empty-shell by `cortex probe`
-- [ ] A fully-written card produces zero empty-shell findings (dormancy: no false positives)
-- [ ] New detector patterns covered by unit tests; cortex suite green
+- [x] A card with all sections literal "TBD" is flagged empty-shell by `cortex probe`
+- [x] A fully-written card produces zero empty-shell findings (dormancy: no false positives)
+- [x] New detector patterns covered by unit tests; cortex suite green
+
+## Progress Log
+
+- 2026-09-11 — landed. Env: bun 1.3.11, macOS 15.7.4 (Darwin 24.6.0, arm64).
+- **Pattern** (6th entry in `EMPTY_SHELL_PATTERNS`, `src/commands/probe.ts`):
+  `/^[ \t]*(?:[-*][ \t]+(?:\[[ xX]\][ \t]+)?)?(?:TBD|TODO|FIXME)[ \t]*[:：]?[ \t]*$/im`
+  — whole-line only: the line must carry nothing but the token (± list bullet / template-checkbox,
+  ± trailing colon). One rule, not three: *a line whose entire payload is a placeholder token is a
+  placeholder*. That is the discriminator against prose mentions.
+- **Mutation pins** (each mutation applied to a scratch copy of `probe.ts`, then restored; source
+  verified byte-identical to the pre-mutation copy, `git diff --stat` unchanged):
+  | mutation | tests that go red |
+  |---|---|
+  | drop the whole pattern | 5 unit + 1 `executeProbePlan` integration |
+  | drop `(?:[-*]…)?` prefix group | `detects a late fill that keeps the template's list punctuation` |
+  | drop `TODO\|FIXME` alternation | 4 (`list punctuation`, `TODO and FIXME`, `case-insensitively`, `trailing colon`) |
+  | drop the `i` flag | `matches the token case-insensitively` |
+  | drop `[:：]?` | `detects a lone token with a trailing colon` |
+  | replace with **rejected** free-text `/\b(?:TBD\|TODO\|FIXME)\b/i` | both DORMANCY tests + `patterns are multiline-aware` |
+- **Corpus measurement** (real exported detector, real scan semantics — `TASK-`/`EPIC-`/`ADR-` prefix):
+  540 scanned cards → **0 hits**. Whole repo, 17,259 `.md` files → **0 hits**.
+  The rejected free-text form hits **10 of the 540** — all of them filled (3 completed tasks,
+  3 done epics, 3 accepted ADRs, + this card itself), i.e. exactly the "manufactured coverage
+  claim about healthy files" failure mode the rejected `/^-\s*$/` bullet pattern was dropped for.
+- **Baseline**: `bun test packages/lythoskill-project-cortex/` — before 150 pass / 0 fail,
+  after **160 pass / 0 fail** (10 new tests: 7 `isEmptyShell`, 3 `executeProbePlan`, minus the
+  one split into three for 1:1 mutation pins). `bun packages/lythoskill-project-cortex/src/cli.ts probe`
+  on this repo: `540 documents checked, 0 empty shells (mode: default)` — unchanged, no new findings.
+- **Not covered, deliberately** (螺丝壳道场): `**TBD**`-style exotic spellings (no normalization —
+  hard rule 10: detect, don't guess), and fenced code blocks containing a bare `TODO` line
+  (0 instances in 17,259 files) — the pattern is fence-unaware by design.
 
 ## References
 

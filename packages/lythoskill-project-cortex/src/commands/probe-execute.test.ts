@@ -175,6 +175,61 @@ describe("executeProbePlan — with mock IO", () => {
     expect(report.emptyShells[0]).toContain("TASK-20260101000000004-test");
   });
 
+  // TASK-20260909010058114: a marker-less placeholder (section body literally "TBD") must reach
+  // the same finding as `⚠️ PLACEHOLDER_` — this is the end-to-end claim of AC1, through the same
+  // executeProbePlan the CLI runs, not just the pure predicate.
+  it("flags an all-TBD card as an empty shell (marker-less placeholder)", () => {
+    const files: Record<string, string> = {
+      "cortex/tasks/01-backlog/TASK-20260828212204402-kimi-probe-hardening.md": [
+        "# TASK-20260828212204402 — kimi probe hardening",
+        "",
+        "## Requirements",
+        "TBD",
+        "",
+        "## Approach",
+        "TBD",
+        "",
+        "## Acceptance Criteria",
+        "TBD",
+        "",
+      ].join("\n"),
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+
+    expect(report.emptyShells.length).toBe(1);
+    expect(report.emptyShells[0]).toContain("TASK-20260828212204402");
+  });
+
+  it("DORMANCY — a fully-written card yields zero empty-shell findings", () => {
+    const files: Record<string, string> = {
+      "cortex/tasks/01-backlog/TASK-20260101000000005-filled.md": [
+        "# TASK-20260101000000005: filled",
+        "",
+        "## Status History",
+        "",
+        "| Status | Date | Note |",
+        "|--------|------|------|",
+        "| backlog | 2026-01-01 | Created |",
+        "",
+        "## Requirements",
+        "- [x] Ship the reconciler",
+        "",
+        "## Technical Approach",
+        "- Read the lock, compare hashes, reconcile.",
+        "",
+        "## Acceptance Criteria",
+        "- [x] Suite green",
+        "",
+        "## Progress Log",
+        "- 2026-01-02: done.",
+        "",
+      ].join("\n"),
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+
+    expect(report.emptyShells).toEqual([]);
+  });
+
   // Wiki structure: every config dir must exist on disk, and every on-disk
   // subdir must be in config — drift in either direction is a finding.
   const allWikiDirsFixture: Record<string, string> = Object.fromEntries(

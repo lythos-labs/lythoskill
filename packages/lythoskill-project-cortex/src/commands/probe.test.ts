@@ -46,6 +46,89 @@ describe("isEmptyShell — pure content detection, no filesystem", () => {
   });
 });
 
+describe("isEmptyShell — marker-less placeholders (TASK-20260909010058114)", () => {
+  it("detects the arena-seeded all-TBD card, verbatim", () => {
+    // 形状逐字来自 playground/2026-09-09-arena-cortex-desc-ab/reproduce.sh 的种子卡:
+    // 每个 section 的正文就是一个裸 `TBD`,没有任何 ⚠️ PLACEHOLDER_ 标记。
+    // 加 pattern 之前这里是 false —— probe 把一张不可派单的卡当成填好的卡。
+    const content = [
+      "# TASK-20260828212204402 — kimi probe hardening",
+      "",
+      "## Requirements",
+      "TBD",
+      "",
+      "## Approach",
+      "TBD",
+      "",
+      "## Acceptance Criteria",
+      "TBD",
+      "",
+    ].join("\n");
+    expect(isEmptyShell(content)).toBe(true);
+  });
+
+  it("detects a late fill that keeps the template's list punctuation", () => {
+    // 模板那两行是 `- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_1`;懒惰的填法保留 bullet/checkbox,
+    // 只把标记词换掉 —— 这一条钉住 pattern 里那个可选前缀组。
+    expect(isEmptyShell("## Requirements\n- TBD\n")).toBe(true);
+    expect(isEmptyShell("## Requirements\n- [ ] TBD\n")).toBe(true);
+    expect(isEmptyShell("## Approach\n- [x] TODO\n")).toBe(true);
+  });
+
+  it("detects TODO and FIXME, not just TBD", () => {
+    // 这三种拼法是同一个占位概念,不是三条规则 —— 一张正文写着 TODO 的卡同样不可派单。
+    expect(isEmptyShell("## Approach\nTODO\n")).toBe(true);
+    expect(isEmptyShell("## Approach\nFIXME\n")).toBe(true);
+  });
+
+  it("matches the token case-insensitively", () => {
+    expect(isEmptyShell("## Approach\ntbd\n")).toBe(true);
+    expect(isEmptyShell("## Approach\nfixme\n")).toBe(true);
+  });
+
+  it("detects a lone token with a trailing colon (ASCII or full-width)", () => {
+    expect(isEmptyShell("## Approach\nTBD:\n")).toBe(true);
+    expect(isEmptyShell("## Approach\nTODO：\n")).toBe(true);
+  });
+
+  it("DORMANCY — prose mentions of TBD do not fire (measured: 10 healthy cards have one)", () => {
+    // 每一行都逐字取自本仓一张**填好的**卡/ADR。天真的 /TBD/i 会把这 10 张全部误报成空壳;
+    // 整行制(整行只有占位词)才是"占位符 vs 正文提及"的判据。
+    expect(isEmptyShell("| in-progress | 2026-05-04 | Pulled from backlog — T1 done, process.exit strategy TBD |\n")).toBe(false);
+    expect(isEmptyShell("- 关联 Epic: TBD(看是否合并到现有 deck-governance epic 或新开)\n")).toBe(false);
+    expect(isEmptyShell("- `wiki/02-architecture/skills-as-flat-controllers-evolution.md`（TBD，承载本 ADR 的深度论证 + 同生态对照）\n")).toBe(false);
+    expect(isEmptyShell("- **实现**: TBD — 先调研 `sub-agents-mcp`、`claude-code-controller`\n")).toBe(false);
+    expect(isEmptyShell("cursor   → ~/.cursor/skills/   (TBD: verify Cursor convention)\n")).toBe(false);
+  });
+
+  it("DORMANCY — a fully-written card produces zero empty-shell signals", () => {
+    const content = [
+      "# TASK-1: real work",
+      "",
+      "## Requirements",
+      "Ship the reconciler.",
+      "",
+      "## Technical Approach",
+      "- Step one: read the lock file.",
+      "- Step two: compare hashes, then reconcile.",
+      "",
+      "## Acceptance Criteria",
+      "- [x] Suite green",
+      "",
+      "## Progress Log",
+      "- 2026-09-11: implemented; 150 tests pass.",
+      "",
+    ].join("\n");
+    expect(isEmptyShell(content)).toBe(false);
+  });
+
+  it("DORMANCY — a token buried in a sentence is not a placeholder", () => {
+    // 整行制判据的边界:词得独占一行才算占位。
+    expect(isEmptyShell("## Background\nTODO items are tracked in cortex, not in code comments.\n")).toBe(false);
+    expect(isEmptyShell("## Background\nThe migration is TBD-dependent.\n")).toBe(false);
+  });
+});
+
 describe("isEmptyShell — lifecycle exemption", () => {
   const withStatusHistory = (statuses: string[], body: string): string => {
     const table = statuses.map(s => `| ${s} | 2026-06-13 | Note |`).join('\n');

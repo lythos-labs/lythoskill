@@ -25,6 +25,28 @@ import { parseRelations } from '../lib/adr-relations.js';
  * A tempting third candidate, "a bullet with nothing after it" (`/^-\s*$/`), was **rejected**:
  * it fired on two hand-filled ADRs in this repo that legitimately contain one, i.e. it would
  * have manufactured coverage claims about files that are fine.
+ *
+ * **Third family — the placeholder that carries no marker at all (TASK-20260909010058114).**
+ * An all-`TBD` card has none of the shapes above, so every pattern missed it and `cortex probe`
+ * called an unassignable card non-empty. Observed shape, verbatim from the arena seed that
+ * surfaced it (`playground/2026-09-09-arena-cortex-desc-ab/reproduce.sh`):
+ *
+ *     ## Requirements
+ *     TBD
+ *
+ * The pattern is **whole-line**: the line must carry nothing but the token — no prose — with
+ * markdown list punctuation allowed in front (bullet, and the checkbox the task template's
+ * `- [ ] ⚠️ PLACEHOLDER_…` leaves behind in the lazy fill `- [ ] TBD`), and an optional trailing
+ * colon. That is one rule, not three: *a line whose entire payload is a placeholder token is a
+ * placeholder*. It is also the discriminator against prose mentions, which is why the obvious
+ * `/TBD/i` was **rejected** — free-text matching hits 10 of this repo's 540 scanned cards, every
+ * one of them filled: three completed tasks, three done epics, three accepted ADRs (carrying
+ * e.g. `- 关联 Epic: TBD(看是否合并到现有 deck-governance epic)`), plus the very card that
+ * documents this bug. It would have manufactured empty-shell claims about healthy documents.
+ * Measured: the whole-line form hits 0 of those 540 — and 0 of all 17,259 markdown files in this
+ * repo. Fence-unaware by design: a fenced code block
+ * holding a bare `TODO` line would fire (0 instances in the 17,259), and no normalization is
+ * attempted for exotic spellings (`**TBD**`) — those are deliberate constructions, not slips.
  */
 export const EMPTY_SHELL_PATTERNS: RegExp[] = [
   /^- \[ \] ⚠️ PLACEHOLDER_/m,
@@ -32,12 +54,14 @@ export const EMPTY_SHELL_PATTERNS: RegExp[] = [
   /^<!-- 填写/m,
   /^\*\*Choice\*\*: ⚠️ PLACEHOLDER_/m,
   /^<!-- ⚠️ REQUIRED:[^\n]*-->\s*\n\s*\n(?=#)/m,
+  /^[ \t]*(?:[-*][ \t]+(?:\[[ xX]\][ \t]+)?)?(?:TBD|TODO|FIXME)[ \t]*[:：]?[ \t]*$/im,
 ];
 
 /** Check whether a markdown content string contains empty-shell placeholders. Pure function, no IO.
  *
- * Empty-shell = template placeholders (PLACEHOLDER_, 需求1, <!-- 填写) that
- * indicate the file was created by CLI but never filled by agent.
+ * Empty-shell = template placeholders (PLACEHOLDER_, 需求1, <!-- 填写), a section body
+ * that is nothing but a placeholder token (TBD / TODO / FIXME) — or an untouched
+ * template-shaped heading — indicating the file was never filled by an agent.
  *
  * **Exemption**: If Status History shows the task was actively worked on
  * (in-progress / review / completed / done / suspended / terminated),
