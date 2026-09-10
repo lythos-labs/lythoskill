@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/10 15:30:25
+> 自动生成于 2026/9/10 15:32:18
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 378 | 进行中: 0, 待验收: 1, 已完成: 316 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 106 | 已接受: 101 |
+| ADRs | 106 | 已接受: 102 |
 
 ---
 
@@ -581,7 +581,7 @@ _无_
 - ✅ **ADR-20260910113730375** (02-accepted): zk-review-object-must-be-commit-pinned-folded-commits-are-unreviewed
 - ✅ **ADR-20260910120047122** (02-accepted): unlisted-fan-out-targets-must-not-be-silent-silence-is-declared-never-default
 - ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
-- 🤔 **ADR-20260910152957509** (01-proposed): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
+- ✅ **ADR-20260910152957509** (02-accepted): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
 
 ---
 
