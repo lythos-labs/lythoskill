@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/10 15:04:28
+> 自动生成于 2026/9/10 15:09:45
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 377 | 进行中: 1, 待验收: 0, 已完成: 316 |
+| Tasks | 377 | 进行中: 0, 待验收: 1, 已完成: 316 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 105 | 已接受: 101 |
 
@@ -94,13 +94,13 @@
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 
-### 进行中 (1)
-
-- 🔄 **TASK-20260910110545092**: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20260910110545092**: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
 
 ### 已完成 (316)
 
