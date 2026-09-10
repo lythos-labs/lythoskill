@@ -5,6 +5,13 @@ Plugin architecture for agent backends. One interface, multiple implementations.
 **This package is the INTERFACE + REGISTRY + lightweight CLI adapters only.**
 Heavy adapters (daemon lifecycle, SSE parsing, PID management) live in independent packages:
 
+> **`REGISTRY` here means the player axis only** — open registration of *executable*
+> behavior via `registerAgent()`, extended by third-party implementers.
+> `@lythos/skill-deck` has a data table of CLI skill-directory layouts that is a
+> **different axis**: closed, sourced data (zero imports, zero behavior) recording
+> where each CLI looks for skills. The two axes never merge — see
+> `cortex/adr/02-accepted/ADR-20260910113131220-*` for the criteria that separate them.
+
 | Package | Player | Mechanism | Weight |
 |---------|--------|-----------|--------|
 | `@lythos/agent-adapter` | `kimi` | `kimi --print` | Light — pure CLI spawn |
