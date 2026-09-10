@@ -13,6 +13,9 @@
  *   - 每行 source = 一手文档/repo URL;hazards[].ref = 具体 issue/文档 URL
  *   - verifiedAt = 普查取证日(2026-09-09,/tmp 取证 stash + gh API json 可复核)
  *   - 季度复勘归 P6 监视哨;registryProblems() 是数据自检
+ *   - opencode "Windows non-discovery" 传闻 UNVERIFIED(2026-09-10 辩论撤销:原 ref 指向的
+ *     docs 页 grep windows/symlink/junction/platform 零命中,无来源支撑该 claim)——
+ *     季度复勘时优先查证;在拿到一手 ref 之前不得重新入库。
  *
  * 消费方:link.ts(fan-out 策略 + hazard 警告)、per-run.ts(渲染 per-run 调用)。
  * 本文件不含行为逻辑,只有数据 + 纯函数索引。
@@ -194,12 +197,6 @@ export const ADAPTER_REGISTRY: readonly CliAdapter[] = [
         severity: "warning",
         ref: "https://github.com/anomalyco/opencode/issues/45961",
         note: "Symlink cycle → ENAMETOOLONG crash. Deck guarantees acyclic absolute symlinks; a source inside the fan-out dir is refused at link time",
-      },
-      {
-        id: "windows-non-discovery-no-dedupe",
-        severity: "info",
-        ref: "https://opencode.ai/docs/skills/",
-        note: "Windows non-discovery documented at the docs page; no per-issue source captured for the broader symlink edge-case set — recheck at quarterly survey (P6 watch)",
       },
     ],
     source: "https://opencode.ai/docs/skills/",
