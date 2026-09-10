@@ -42,6 +42,15 @@ describe('cli-layout data integrity', () => {
     expect(qwen.hazards.some(h => /restored|unpersisted/i.test(h.note))).toBe(true)
   })
 
+  it('PER_ROLE_SCOPING_MAX keeps headroom over the longest row — re-derivable, not a one-off measurement (B13)', () => {
+    // 常数 200 的出处是「当时最长 140 + 余量」,而那次测量**没有留痕**(ZK review 5092 round-1 指出)。
+    // 这条断言不复现那个历史数字,它让**守卫的关系**可复现:任何一行长到贴着上限,它就红 ——
+    // 也就是"这个守卫不再守卫"的那一刻。与 B2 同形:不变量优于钉字面值。
+    const longest = Math.max(...CLI_LAYOUTS.map(a => a.perRoleScoping.length))
+    expect(longest).toBeLessThanOrEqual(PER_ROLE_SCOPING_MAX)
+    expect(PER_ROLE_SCOPING_MAX - longest).toBeGreaterThanOrEqual(20) // 余量仍在,不是刚好卡住
+  })
+
   it('perRoleScoping is non-empty and stays a one-line datum (B13)', () => {
     for (const a of CLI_LAYOUTS) {
       expect(a.perRoleScoping.trim().length, `${a.id}`).toBeGreaterThan(0)

@@ -527,7 +527,8 @@ B17/B18 的结论回填到本卡 `## Notes`。
   - **原卡 Notes 追加一行(B7 的落点)**:`ZK re-trial 8.5/10` 须读作 `8.5 @ c8ebcc76`;
     折入 `2686e0d4`(6 文件 / +56 / −8)后的 HEAD **未经任何独立评审**。
   - **本批实测值**(2026-09-10 ZK review 后复核,`@ Bun 1.3.11 / macOS`):deck
-    `253 pass / 1 skip / 0 fail / 661 expect / 254 tests / 16 files`;
+    `253 pass / 1 skip / 0 fail / 661 expect / 254 tests / 16 files`(见 Progress Log 末条:此前引的
+    `249 / 657 / 250` 是不可能成立的中途值,已更正);
     cortex `138 pass / 0 fail / 280 expect / 7 files`;全仓 `bun --filter='*' run test` **零失败**;
     CI 其余步骤本地复跑全绿(cortex BDD 13/13、example decks 29/29、site snippets 61、
     align 75 passed)。@ Bun 1.3.11 / macOS。
@@ -579,9 +580,17 @@ B17/B18 的结论回填到本卡 `## Notes`。
     B18 五点、wrong-level、dormancy、probe 抓空 ADR/EPIC、CLI_TABLE 修复、8/8 bun-version、
     CI 产物门、pre-commit 扩触发、`judge-verdict.json` 的 `reviewed_commit` 与 23 条判据一一对应、
     §5 三处落点、B16 的完整时序矛盾 —— 全部照实复核通过。
-  - **它明确说"查不到"的**(记下来,别当下次能查):player/judge 的**调用过程**本身
-    (独立性在树里不可证,by construction)、23 条 PHASE 断言的端到端(靠 agent 执行 IoC 脚本)、
-    改动前的零警告行为、`PER_ROLE_SCOPING_MAX = 200` 背后"当前最长 140"的出处(那是当次测量,没有留痕)。
+  - **它明确说"查不到"的**(记下来,别当下次能查;**完整七项在 log 里,下面是全部,不是摘要**):
+    ①player/judge 的**调用过程**本身(独立性在树里不可证,by construction);
+    ②23 条 PHASE 断言的端到端(靠 agent 执行 IoC 脚本);
+    ③改动前的零警告行为;
+    ④`PER_ROLE_SCOPING_MAX = 200` 背后"当前最长 140"的出处(当次测量,没有留痕)
+      → **round-2 已处置**:常量保留,但补了一条**可复现的关系断言**(最长行 ≤ 上限 且留 ≥20 余量),
+      使"守卫是否还在守卫"可重算(见 `cli-layout.test.ts`);
+    ⑤ADR Follow-up 行的勾选状态审计;
+    ⑥`~` / `.` 作为 fan-out 目标的实际行为;
+    ⑦deck BDD runner 对外部 CLI 的依赖。
+    (⑤⑥⑦ 是 harness 边界而非缺失证据,但上一版摘要只列了 4 项、读起来像穷尽 —— 已补全。)
 
 ## Related Files
 - Modified:
