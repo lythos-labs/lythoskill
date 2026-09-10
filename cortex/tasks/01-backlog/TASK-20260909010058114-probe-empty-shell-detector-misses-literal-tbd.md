@@ -58,6 +58,11 @@ happy-path cards with real content must NOT flag; TBD-filled cards MUST flag.
 - **Not covered, deliberately** (螺丝壳道场): `**TBD**`-style exotic spellings (no normalization —
   hard rule 10: detect, don't guess), and fenced code blocks containing a bare `TODO` line
   (0 instances in 17,259 files) — the pattern is fence-unaware by design.
+- **Landing note for the next reader**: the code landed in `5a853c71` (`docs(cortex): fix a dead
+  INDEX pointer…`) — a concurrently-running agent in this repo swept both agents' staged files into
+  its own commit before this card's commit ran. So `git log -- .../commands/probe.ts` points at a
+  `docs(cortex):` subject; the pattern, the 10 tests and this card's AC ticks are all in it. No
+  content was lost and nothing was rewritten (the commit is already on `origin/main`).
 
 ## References
 
