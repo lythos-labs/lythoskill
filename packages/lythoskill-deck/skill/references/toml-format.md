@@ -5,8 +5,8 @@
 | `working_set` | Yes | Agent-scanned directory. Default: `.claude/skills` |
 | `cold_pool` | Yes | Skill storage path. Use `"."` for local development. |
 | `max_cards` | No | Hard budget. Link refuses if total skills exceed this. |
-| `also_link_to` | No | Extra fan-out targets — the same skills linked into other CLIs' dirs (POSSE pattern). Array of paths; `~` expanded. |
-| `acknowledged_unlisted` | No | gitignore-style acknowledgement: fan-out targets you know are **outside the surveyed CLI-layout set**, so `deck link` stops printing `no layout data — hazards unknown` for them. Suffix-matched (one pattern covers relative and absolute spellings). Listed = silent; **absent = the info line still prints**. Suppresses only that line — never a data-loss hazard. Rationale: ADR-20260910120047122. |
+| `also_link_to` | No | Extra fan-out targets — the same skills linked into other CLIs' dirs (POSSE pattern). Array of paths; `~` expanded. **Each target must be the directory that CLI scans for skills** (`.claude/skills`), not its config root (`~/.claude`) — a config root warns, and the message names the dirs to use. |
+| `acknowledged_unlisted` | No | gitignore-style acknowledgement: fan-out targets you know are **outside the surveyed CLI-layout set**, so `deck link` stops printing `no layout data — hazards unknown` for them. Suffix-matched (one pattern covers relative and absolute spellings). Listed = silent; **absent = the info line still prints**. Suppresses only that line — never a data-loss hazard, and **never the config-root warning** (there the table *does* have data, and it says the target is wrong). Rationale: ADR-20260910120047122. |
 ## [innate] — Always-Active Skills
 Load every session. Consumes context permanently. Keep few and thin.
 
