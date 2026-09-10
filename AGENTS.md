@@ -126,6 +126,7 @@ Principle: **intelligence in SKILL.md, stable integration in npm, mechanical glu
 7. **See a bug, fix a bug — no "not my code."** Broken test, mismatched import, stale comment — fix it. Provenance is for learning, not for excusing.
 8. **Plan must include research.** Search the codebase and git history before deriving from first principles — 1000+ commits mean most problems were solved before.
 9. **Ask with purpose.** Facts are yours to look up (git, tests, probe, docs); genuine goal ambiguity → ask once, precisely, with your recommended answer. Choices covered by best practice or ≥90% confidence → decide, act, report. Never manufacture user-decisions for things that are yours to decide — every detail escalated to the user is their attention spent. (Interview tools like mattpocock's `grill-me` are user-invoked stress-tests, never a default posture.)
+10. **Price the edge case before handling it — 螺丝壳道场 check.** Before adding a rule, a config key, or a handler for a fiddly corner, name its real user. If the only way to reach the bad state is to **deliberately construct it** (「你不故意根本没人这样用来恶心自己」), the answer is usually **no handler**: spend the design on the head path instead, and use a **guard** to protect the common case rather than a rule package that covers everything. When you *do* drop a handler, write down that you dropped it and why — otherwise the next reader takes the gap for an oversight and re-adds it. Live instance: ADR-20260910120047122's "为什么不去重".
 
 #### Action Discipline (both directions)
 
