@@ -476,6 +476,28 @@ describe('ZK-impl round-5:entry 的多字段 / 混合 map / 结构性 inInline',
     expect(out.src).toBe(D + 'skills = { beta.path = "b" }\n')
   })
 
+  it('a line-form group containing an inline-table value does not drift (flag from surviving hits)', () => {
+    // 嵌套命中(alpha.meta 里的 x)会被折叠掉,但它不该把整组判成"内联形态" ——
+    // 那会找不到逗号、也不吞行尾,于是留下两行空行。判别性:旗标改回 OR 全部命中即红。
+    const src = '[deck]\nmax_cards = 10\n\n[tool]\nskills.alpha.path = "P"\nskills.alpha.meta = { x = 1 }\nskills.beta.path = "Q"\n'
+    const out = spliceRemoveSkill(src, 'tool', 'alpha')
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.src).toBe('[deck]\nmax_cards = 10\n\n[tool]\nskills.beta.path = "Q"\n')
+  })
+
+  it('the result guard uses the READER\'s parser, and says which of the two failures it is', () => {
+    // 实测分歧:多行内联表 @iarna(读取器)拒绝、toml-eslint(定位器)接受。
+    // 用定位器的解析器当护栏,会放行"工具自己读不了"的结果 —— 护栏守的必须是工具那一侧的契约。
+    const multi = '[deck]\nmax_cards = 10\n\n[tool]\nskills = {\n  alpha = { path = "p" }\n}\n'
+    const out = spliceInsertSkill(multi, 'tool', 'beta', { path: 'github.com/a/b/beta' })
+    expect(out.ok).toBe(false)
+    if (out.ok) return
+    expect(out.code).toBe('would-corrupt')
+    expect(out.message).toContain("cannot be read by the tool's own parser") // 是输入读不了,不是 splice 缺陷
+    expect(out.message).toContain('deck validate')
+  })
+
   it('a map whose `{` is far away still works (structural signal, not a 400-char text window)', () => {
     const long = 'x'.repeat(500)
     const out = spliceRemoveSkill(D + `skills = { note = "${long}", alpha.path = "P" }\n`, 'tool', 'alpha')

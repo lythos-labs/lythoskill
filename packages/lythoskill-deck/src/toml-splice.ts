@@ -18,6 +18,7 @@
  */
 
 import { parseTOML } from 'toml-eslint-parser'
+import { parse as parseTomlReader } from '@iarna/toml'
 
 /** 一次 splice 的结果。失败一律**报错而不退回整份重写**(ADR §规格「失败即不写」)。 */
 export type SpliceResult =
@@ -101,15 +102,28 @@ const isErr = (x: unknown): x is SpliceResult => typeof x === 'object' && x !== 
 function finalize(original: string, next: string): SpliceResult {
   if (next === original) return { ok: true, src: next }
   try {
-    parseTOML(next, { range: true })
+    // **用读取器自己的解析器**(`parseDeck`/`validate` 走 @iarna/toml)—— 实测两者在多行内联表上会分歧,
+    // 用定位器的解析器当护栏,会放行"工具自己读不了"的结果:护栏守的必须是**工具那一侧**的契约。
+    parseTomlReader(next)
   } catch (err: any) {
+    // 两种失败要分开说:①输入本来就工具读不了(那是 deck 的问题)②拼接引入了非法(那是 splice 的缺陷)。
+    // 混成一句话会把下一位送错方向 —— 而"送错方向"正是这张卡一路在修的东西。
+    let inputReadable = true
+    try {
+      parseTomlReader(original)
+    } catch {
+      inputReadable = false
+    }
+    const detail = `${err?.message ?? err}`
     return {
       ok: false,
       code: 'would-corrupt',
-      message:
-        `the spliced result would not parse (${err?.message ?? err}) — refusing to write, the file is ` +
-        `byte-identical to before. This is a defect in the splice, not an unmodelled deck shape: the ` +
-        `entry was located, so report it with the deck that triggered it.`,
+      message: inputReadable
+        ? `the spliced result would not parse (${detail}) — refusing to write, the file is byte-identical ` +
+          `to before. This is a defect in the splice, not an unmodelled deck shape: the entry was located, ` +
+          `so report it with the deck that triggered it.`
+        : `this deck cannot be read by the tool's own parser (${detail}) — refusing to write; the file is ` +
+          `byte-identical to before. Fix the deck first: 'deck validate' uses the same parser.`,
     }
   }
   return { ok: true, src: next }
@@ -215,12 +229,12 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
   //    (点号字段可能拆成多条 kv,所以是"一组"而不是"一个")。
   const wantFull = `${section}.skills.${alias}`
   const hits: Node[] = []
-  let hitsInInline = false
+  const hitsInInlineMap = new Map<Node, boolean>()
   walkKv(body, [], (kv, path, inInline) => {
     const full = path.join('.')
     if (full === wantFull || full.startsWith(`${wantFull}.`)) {
       hits.push(kv)
-      hitsInInline = hitsInInline || inInline
+      hitsInInlineMap.set(kv, inInline)
     }
   })
   if (hits.length > 0) {
@@ -229,6 +243,9 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
     // 若不折叠,先剪内层会让外层的 end 偏移失效 —— 剪裁会**越界吃掉后面的注释与 section**,
     // 而且结果往往仍可解析,所以结果护栏救不了它。
     const outer = hits.filter(h => !hits.some(o => o !== h && o.range[0] <= h.range[0] && o.range[1] >= h.range[1]))
+    // 旗标按**幸存下来**的 outer 算:嵌套命中(会被折叠掉的那个)若参与 OR,
+    // 会把一条**行形态**的组误判成内联形态 → 找不到逗号也就不吞行尾 → 留下两行空行漂移(实测)。
+    const outerInInline = outer.some(h => hitsInInlineMap.get(h) === true)
     const owner = tableByKey(body, src, `${section}.skills`) ?? tableByKey(body, src, section)
     const ownerBody = owner?.body ?? []
     const clearsOwner = owner !== undefined && ownerBody.length === outer.length && outer.every(h => ownerBody.includes(h))
@@ -238,9 +255,9 @@ function locate(body: Node[], src: string, section: string, alias: string): Loca
         secTable && secTable !== owner && (secTable.body?.length ?? 0) === 0 && isAdjacent(src, secTable, owner!)
           ? secTable.range[0]
           : owner!.range[0]
-      return { node: outer[0], group: outer, groupInInline: hitsInInline, range: [extend, owner!.range[1]] }
+      return { node: outer[0], group: outer, groupInInline: outerInInline, range: [extend, owner!.range[1]] }
     }
-    return { node: outer[0], group: outer, groupInInline: hitsInInline }
+    return { node: outer[0], group: outer, groupInInline: outerInInline }
   }
 
   return undefined
