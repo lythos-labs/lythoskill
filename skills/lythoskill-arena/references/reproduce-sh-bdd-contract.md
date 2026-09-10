@@ -48,6 +48,14 @@ Verdict: PASS (all 1-weight) / PARTIAL (6+) / FAIL (<6)
 {"step":"...","decision":"...","reason":"...","ts":"ISO timestamp"}
 ```
 
+**Scope — this is the single-agent BDD contract, not the arena-cell contract.** A BDD
+scenario has exactly one agent writing one log, so the bare `decision-log.jsonl` is correct
+here and is deliberately NOT renamed. Arena *cells* can share a workdir (several cells per
+side), where a constant filename is a shared path and the last writer erases the others —
+those write `decision-log-<cell-id>.jsonl` and the collect step merges them
+(TASK-20260909010121918; see arena-runtime.md § Agent CWD Behavior). Do not "fix" the BDD
+scenarios to per-cell names.
+
 **`ts` is provenance, not a clock — never build a timeline from it.** The field is written by
 the agent role-playing the scenario, and the agent's timestamps can contradict the filesystem
 around them: the 2026-09-10 inbox-debate run's log carries internal `ts` values of 23:20–23:45
