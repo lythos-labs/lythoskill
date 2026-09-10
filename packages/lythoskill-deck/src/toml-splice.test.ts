@@ -339,6 +339,10 @@ describe('ZK-impl round-2:级联走到底 / 点号键 / 结果护栏 / 空 map',
     if (out.ok) return
     expect(out.code).toBe('would-corrupt')
     expect(out.message).toContain('refusing to write')
+    // 两条分支必须能分辨:这是 **splice 缺陷**那条,不是"deck 读不了"那条 ——
+    // 混起来会把有真实缺陷的用户赶去修一个没问题的 deck(判别性:两分支合并即红)
+    expect(out.message).toContain('defect in the splice')
+    expect(out.message).not.toContain("cannot be read by the tool's own parser")
   })
 
   it('R2-H2: the EOF insert path also uses the file\'s own line ending', () => {

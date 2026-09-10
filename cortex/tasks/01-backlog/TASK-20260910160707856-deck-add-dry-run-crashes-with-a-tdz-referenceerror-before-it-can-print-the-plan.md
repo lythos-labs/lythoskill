@@ -27,6 +27,12 @@ ReferenceError: Cannot access 'alias' before initialization
 **为什么不是小事**:`--dry-run` 的用途正是"**动手之前先看清单**" —— 而它恰恰在看清单这一步崩。
 用户会以为 dry-run 成功了(或以为 deck 有问题),而真正的动作根本没被执行到判断。
 
+**同类的第二处(2026-09-10,ZK review 实测发现,先前存在)**:`deck remove` 在一个**读取器读不了的 deck**
+(实测:含多行内联表 —— `@iarna/toml` 拒、`toml-eslint-parser` 收)上,抛的是**原始 iarna 栈**,
+而不是一条说明。已在 `ddddcb16^:remove.ts:87` 复现(**与本卡同因**:崩在"本该给消息"的地方)。
+两处一起修:`remove` / `add` 的解析失败都走同一条 catch → 三件套消息(是什么 / 为什么 / 怎么修),
+不把栈直接甩给用户。
+
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
 - [ ] `deck add <github locator> --dry-run` 打印计划并 **exit 0**,不抛 TDZ

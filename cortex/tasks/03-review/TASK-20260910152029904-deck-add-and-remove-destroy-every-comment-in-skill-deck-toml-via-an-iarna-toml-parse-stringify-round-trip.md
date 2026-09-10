@@ -204,6 +204,20 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
   - **未计分但记下**:评审者指出"我的变异 harness 不在提交里",所以它**自己跑了变异**来核我的计数 ——
     这是对的(我的计数曾因 harness 自身坏了而假绿过);harness 是**一次性脚本**,不进仓。
 
+- 2026-09-10: **delta pass:Shippable at `937bb4b7` with the LOW list recorded**(评审者原话)。它做了三件事:
+  - **两条折叠都逐条实测复核**(不是读):漂移那条用它的原输入复现出干净输出、改回 OR 即 1 红;
+    护栏那条**两条分支都验了** —— 多行内联表(iarna 拒)走"deck 读不了"分支并点名 `deck validate`,
+    标量 `skills = "oops"`(iarna 收)走"splice 缺陷"分支;**并且没有假拒**:它把 7+15+12+6+4 套探针全重跑,
+    拒 0 / 非法 0。
+  - **又发现一条 LOW 并已收**:splice 侧的消息**没有断言钉住**(两分支合并后 38 pass / 0 fail)——
+    而这正是"把用户赶去修一个没问题的 deck"那类误导。已补断言(含 `defect in the splice` 且**不**含 deck 侧措辞),
+    并把两分支合并跑变异 → 1 红。
+  - **它主动交代了自己的一条副作用**:早前一次组合检查把"会触发 clone 的 locator"传给了 `deck add`,
+    在用户 home 的冷池里留下 `~/.agents/skill-repos/gitlab.com/a/`(空,`ETIMEDOUT`,没克隆成功)。
+    已核实整棵树**零文件**后删除,恢复原状;**github.com 未受影响**。主动报自己的副作用,值得记一笔。
+  - **另一条先前存在的同类缺陷**(`deck remove` 在读取器读不了的 deck 上抛原始 iarna 栈,`ddddcb16^:remove.ts:87` 可复现)
+    已记到 `TASK-20260910160707856`(与本卡无关)。
+
 ## Related Files
 - Modified: (执行时填)
 - Added: `src/toml-splice.test.ts`(三形状 + 非 ASCII fixture);`packages/lythoskill-deck/package.json` 增一个解析器依赖(**不是**行级编辑实现)
