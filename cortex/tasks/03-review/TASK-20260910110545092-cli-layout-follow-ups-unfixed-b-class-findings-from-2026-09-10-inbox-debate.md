@@ -60,8 +60,9 @@ B3 定性为**记账修复** —— 修的是"日期字段承载三件事",不�
       **同一段还有第二例(2026-09-10 复核新发现)**:P2 的独立验证(ZK re-trial,
       `8.5/10` gate ≥7)全部落在 `/tmp/arena-p2-adapter-retrial/`
       (`adversarial.test.ts` + `decision-log.jsonl` + `self-report.md`),**未入仓**。
-      仓里 `showcase/` + `reproduce.sh` 协议**存在**(ADR-20260518024500631;
-      20 个 showcase 条目 + `test/scenarios/*/reproduce.sh`),但 P2 该批
+      仓里 `showcase/` + `reproduce.sh` 协议**存在**(ADR-20260518024500631;`showcase/`
+      **19 个条目 @ `04b193f1`** 与若干 `test/scenarios/*/reproduce.sh` —— 计数一律带 pin,
+      不写会飘的裸数字),但 P2 该批
       **零条目、零 scenario、零 verdict 产物** —— 协议没被套用。
       核查(2026-09-10):
       - deck 现有 5 个 BDD scenario,只有 `deck-remove-bdd` 与
@@ -369,7 +370,10 @@ B17/B18 的结论回填到本卡 `## Notes`。
 - [x] **CI 全绿(本批顺带修复)**:`CLI_TABLE drift tripwire` 报 deck `per-run` 缺表
       (守卫按设计工作,是表错了)—— 已补;本地复跑 CI 全部步骤零失败
 - [x] `bun test packages/lythoskill-deck/` 全程保持 `0 fail`,测试数变化只在有意的增删处
-      (本卡累计:`227 → 249 pass`,`0 fail` 未破)
+      (本卡累计:`227 → 253 pass`,`0 fail` 未破)。
+      **本行的值是经 ZK review 更正后的**(见 `## Progress Log` 末条):原文写的 `249 / 657 / 250`
+      是本批**中途**测量到的值,写完没跟上最后一次加测试 —— 而那正是本卡要修的 B5 失效模式
+      (裸的、没跟上实际状态的测试计数)在本卡自己身上复发一次。
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
@@ -522,8 +526,9 @@ B17/B18 的结论回填到本卡 `## Notes`。
     B7 的覆盖范围行补进原卡 Notes(见下条)。
   - **原卡 Notes 追加一行(B7 的落点)**:`ZK re-trial 8.5/10` 须读作 `8.5 @ c8ebcc76`;
     折入 `2686e0d4`(6 文件 / +56 / −8)后的 HEAD **未经任何独立评审**。
-  - **本批实测值**:deck `249 pass / 1 skip / 0 fail / 657 expect / 250 tests / 16 files`;
-    cortex `138 pass / 0 fail / 3xx expect / 7 files`;全仓 `bun --filter='*' run test` **零失败**;
+  - **本批实测值**(2026-09-10 ZK review 后复核,`@ Bun 1.3.11 / macOS`):deck
+    `253 pass / 1 skip / 0 fail / 661 expect / 254 tests / 16 files`;
+    cortex `138 pass / 0 fail / 280 expect / 7 files`;全仓 `bun --filter='*' run test` **零失败**;
     CI 其余步骤本地复跑全绿(cortex BDD 13/13、example decks 29/29、site snippets 61、
     align 75 passed)。@ Bun 1.3.11 / macOS。
   - **顺带修好的一条真红**:GitHub CI 自 2026-09-10 03:45 起失败 ——
@@ -555,6 +560,28 @@ B17/B18 的结论回填到本卡 `## Notes`。
        (player 与 judge **两次独立**撞到;player 自己判成 "cosmetic, no action needed" ——
        **在不该收口的地方收了口**,值得留档)。owner 已给解法方向:**参考 Cargo(`toml_edit`)/ Poetry
        (`tomlkit`)的格式保留编辑,定位用 AST、写回用范围替换**,而不是继续用对象序列化器重写全文。
+
+- 2026-09-10: **Round-1 ZK review 落地并处置**(对象 pin `6ac2324d`;log 逐字留档
+  `showcase/2026-09-10-zk-reviews/5092-round1.md`)。结果 **1 HIGH + 7 LOW**,三处**证伪**:
+  - **HIGH = 本卡自己的 AC 引了一个不可能成立的测试基线**:原文 `249 / 657 / 250`,
+    而 pin 的 commit 上是 `253 / 1 / 0 / 661 / 254 / 16`;且 `04b193f1..HEAD` 对 deck 的测试文件
+    **零改动**、16 个文件里的 `it(` 字面计数就是 **254** —— 即 `250` **从未成立过**。
+    成因:我写这行时量的是**本批中途**的值,之后又加了 4 条 per-run 测试却没回头改。
+    **这正是本卡存在要修的 B5 失效模式(裸的、没跟上实际状态的计数)在本卡自己身上复发一次。**
+    → 已改成 `253 / 1 / 0 / 661 / 254` 并补上 `@ Bun 1.3.11 / macOS`。
+  - `cortex … 3xx expect` → 实测 **280**(`3xx` 是我当时没填的占位,不该进正式卡面)。
+  - `20 个 showcase 条目` → 写此句时是 **18**,pin 的那个 commit 上是 **19**(现 20)。
+    → 改成**带 pin 的计数**(`19 @ 04b193f1`),不再写会飘的裸数字 —— 同一条教训。
+  - **它独立复核并证实的**(不是照抄):ADV-7 在它自己 pin 的 `c8ebcc76` 上确实红(它把当时的
+    `adapter-policy.ts` 抽出来跑同一条断言 → 11 ≠ 1);ZK bundle 三份文件与 `/tmp` 原件**逐字节相同**;
+    B2 的 mutation test 确实是 **2 条红**且其中一条是**类别级不变量**而非钉字面值;
+    以及本卡对裁判那处措辞的更正**成立**(stdout 确实打印 `🗑️ Removed:`);
+    B18 五点、wrong-level、dormancy、probe 抓空 ADR/EPIC、CLI_TABLE 修复、8/8 bun-version、
+    CI 产物门、pre-commit 扩触发、`judge-verdict.json` 的 `reviewed_commit` 与 23 条判据一一对应、
+    §5 三处落点、B16 的完整时序矛盾 —— 全部照实复核通过。
+  - **它明确说"查不到"的**(记下来,别当下次能查):player/judge 的**调用过程**本身
+    (独立性在树里不可证,by construction)、23 条 PHASE 断言的端到端(靠 agent 执行 IoC 脚本)、
+    改动前的零警告行为、`PER_ROLE_SCOPING_MAX = 200` 背后"当前最长 140"的出处(那是当次测量,没有留痕)。
 
 ## Related Files
 - Modified:
