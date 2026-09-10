@@ -28,8 +28,9 @@
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] **side deck 形态实测**:用 deck 组合出一个"测试评审者"角色(候选素材:`lythoskill-sober` 质询 /
-      `lythoskill-coach` 规则 / `tdd` + `lythoskill-red-green-release` 红绿),给出可复跑的调用方式
+- [ ] **组一个"测试评审者" deck 并跑通**(**机制已有**:`arena single --deck <path> --brief "<任务>"` ——
+      命令行指定 deck、独立跑,不需要造新东西);候选素材:`lythoskill-sober` 质询 /
+      `lythoskill-coach` 规则 / `tdd` + `lythoskill-red-green-release` 红绿
 - [ ] **判别力对照实验**:同一批代码,分别让①作者②零上下文 agent③专家角色 side deck 写测试,
       用**同一套变异**打,记录各自抓住几条 —— 判据是**抓住数**,不是"测试数量"
 - [ ] **inbox/outbox 实时 PK 形态**(若时间允许):一方写红、一方让它绿,逐轮对打;
@@ -58,7 +59,9 @@
 **它不是什么**(写清以免范围蔓延):不是重写 ZK Review 协议、不是引入新工具链、
 不是要求所有卡都加第三段闸 —— 先在一张卡上跑通再谈推广。
 
-**候选形态(待实测,不是选型结论)**:
+**机制现状(别把它读成"尚不存在")**:side deck 的**载体是现成能力** ——
+`arena single --deck <path|url> --brief "<任务>"` 本来就是"指定任意 deck 独立跑";deck 就是本仓
+"角色 + 知识"的载体。**缺的是组合与数字**,不是能力。候选形态:
 1. **单角色 side deck**:deck 声明"专家角色 + 需要的 skill",评审者据此写/审测试;
 2. **对抗 pairing**:inbox/outbox 两方,红绿对打(需要确认 inbox/outbox 当前是 local skill 的状态);
 3. **追问驱动**:`grill-me` 一类持续追问的 skill 作为驱动,检验它是否把"我没验"逼出来。
