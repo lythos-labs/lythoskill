@@ -36,12 +36,7 @@ function findEpicTemplatePath(): string {
 
 export function createTaskTemplate(id: string, title: string): string {
   const today = new Date().toISOString().split('T')[0];
-  return `---
-supersedes: []
-superseded_by: null
----
-
-# ${id}: ${title}
+  return `# ${id}: ${title}
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->
@@ -161,7 +156,15 @@ category: ${category}
 
 export function createAdrTemplate(id: string, title: string): string {
   const today = new Date().toISOString().split('T')[0];
-  return `# ${id}: ${title}
+  return `---
+supersedes: []
+superseded_by: null
+# 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+epic: null
+tasks: []
+---
+
+# ${id}: ${title}
 
 ## Status History
 <!-- machine-parseable table: directory = current status, last row = latest record -->

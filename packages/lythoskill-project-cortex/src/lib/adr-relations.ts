@@ -20,6 +20,10 @@
 export interface AdrRelations {
   supersedes: string[]
   supersededBy: string | null
+  /** 本 ADR 挂靠的 epic(`## Related` 里的 `Related Epic` 的机器可读版) */
+  epic: string | null
+  /** 与本 ADR 相关的 task:来源 / 实现 / follow-up */
+  tasks: string[]
 }
 
 const FM = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/
@@ -27,7 +31,7 @@ const FM = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/
 /** 读现有关系;没有 frontmatter / 没有字段 → 空关系(不抛) */
 export function parseRelations(src: string): AdrRelations {
   const m = src.match(FM)
-  if (!m) return { supersedes: [], supersededBy: null }
+  if (!m) return { supersedes: [], supersededBy: null, epic: null, tasks: [] }
   const body = m[1]
   const list = body.match(/^supersedes:\s*\[(.*)\]\s*$/m)
   const single = body.match(/^superseded_by:\s*(.+?)\s*$/m)
@@ -36,11 +40,25 @@ export function parseRelations(src: string): AdrRelations {
     : []
   const raw = single?.[1]?.trim()
   const supersededBy = !raw || raw === 'null' || raw === '~' ? null : raw.replace(/^["']|["']$/g, '')
-  return { supersedes, supersededBy }
+  const epicM = body.match(/^epic:\s*(.+?)\s*$/m)
+  const epicRaw = epicM?.[1]?.trim()
+  const epic = !epicRaw || epicRaw === 'null' || epicRaw === '~' ? null : epicRaw.replace(/^["']|["']$/g, '')
+  const tasksM = body.match(/^tasks:\s*\[(.*)\]\s*$/m)
+  const tasks = tasksM && tasksM[1].trim()
+    ? tasksM[1].split(',').map(t => t.trim().replace(/^["']|["']$/g, '')).filter(Boolean)
+    : []
+  return { supersedes, supersededBy, epic, tasks }
 }
 
 function render(rel: AdrRelations): string {
-  return `---\nsupersedes: [${rel.supersedes.join(', ')}]\nsuperseded_by: ${rel.supersededBy ?? 'null'}\n---\n`
+  return (
+    `---\n` +
+    `supersedes: [${rel.supersedes.join(', ')}]\n` +
+    `superseded_by: ${rel.supersededBy ?? 'null'}\n` +
+    `epic: ${rel.epic ?? 'null'}\n` +
+    `tasks: [${rel.tasks.join(', ')}]\n` +
+    `---\n`
+  )
 }
 
 /** 确保文件有 frontmatter —— **必须在文件最顶端**(与 epic 模板同形;`^` 锚定也依赖这一点) */

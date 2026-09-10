@@ -232,3 +232,21 @@ describe("checkEpicAdrCompletion", () => {
     expect(result.proposedIds).toEqual(["ADR-20260507000000004"]);
   });
 });
+
+describe('findLinkedEpic — frontmatter first, body regex as fallback', () => {
+  it('reads epic from frontmatter when present (machine-readable wins)', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'coupling-fm-'))
+    const f = join(dir, 'ADR-1.md')
+    writeFileSync(f, '---\nsupersedes: []\nsuperseded_by: null\nepic: EPIC-111\ntasks: []\n---\n\n# ADR-1\n\n## Related\n- Related Epic: EPIC-999\n')
+    expect(findLinkedEpic(f)).toBe('EPIC-111')
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('falls back to the body line for ADRs written before frontmatter existed', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'coupling-body-'))
+    const f = join(dir, 'ADR-2.md')
+    writeFileSync(f, '# ADR-2\n\n## Related\n- Related Epic: EPIC-222\n')
+    expect(findLinkedEpic(f)).toBe('EPIC-222')
+    rmSync(dir, { recursive: true, force: true })
+  })
+})

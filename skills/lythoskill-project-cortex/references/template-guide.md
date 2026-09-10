@@ -46,8 +46,14 @@ ADR 的**文件最顶端**带一小段 frontmatter，只承载「取代关系」
 ---
 supersedes: [ADR-20260502010100000]   # 本 ADR 取代了谁（可多个）
 superseded_by: null                    # 本 ADR 被谁取代 —— 即「**最新的该去读哪一份**」
+epic: null                             # 挂靠的 epic（= `## Related` 里那条的机器可读版）
+tasks: []                              # 相关 task：来源 / 实现 / follow-up
 ---
 ```
+
+**与 task / epic 的关联也在这里**（同一个理由：`## Related` 那段是给人读的，这里是给 agent 读的）。
+消费方已有：`findLinkedEpic()` **先读 frontmatter**，没有才回退到正文的 `- Related Epic:` 正则
+（老 ADR 因此不用回填）。
 
 - `adr supersede <old> --by <new>` **两侧都写**：旧的那份得到 `superseded_by: <new>`，
   新的那份把 `<old>` 追加进 `supersedes`。

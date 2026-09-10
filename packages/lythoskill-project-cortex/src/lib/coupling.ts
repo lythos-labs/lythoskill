@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, basename } from 'node:path'
+import { parseRelations } from './adr-relations.js'
 
 const EPIC_ID_RE = /^EPIC-\d+/
 const ADR_ID_RE = /^ADR-\d+/
@@ -53,6 +54,9 @@ export function findLinkedAdrs(epicId: string, config: CouplingConfig): string[]
 export function findLinkedEpic(adrPath: string): string | null {
   try {
     const content = readFileSync(adrPath, 'utf-8')
+    // frontmatter 优先(机器可读的那份);老 ADR 没有 frontmatter 时回退到正文正则
+    const fromFm = parseRelations(content).epic
+    if (fromFm) return fromFm
     const m = content.match(/(?:关联 )?Epic:\s*(EPIC-\d+)/)
     return m ? m[1] : null
   } catch (e: any) {
