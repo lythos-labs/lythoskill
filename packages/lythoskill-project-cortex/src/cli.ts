@@ -137,6 +137,17 @@ function handleTaskTransition(
         'completed', config,
         { note: 'Done' },
       );
+      // 关卡的这一刻,评审结论被写进记录当作"通过"。这是一条**提示**,不是门:
+      // 它不断言"折后未评",只把问题搬到必经路径上(ADR-20260910113730375)。
+      // 刻意不阻断 —— 形式门会误报并被学会绕过;提示的误报代价是一行输出。
+      console.log('');
+      console.log('🔒 If you are citing a ZK score as this card\'s pass — pin it to a commit.');
+      console.log('   A review binds the commit it reviewed. Folding findings in afterwards');
+      console.log('   does NOT extend the review: if the folded diff is non-empty, either get a');
+      console.log('   second independent review of the delta, or mark `折后未评` in both the fold');
+      console.log('   commit message and this card — naming the delta scope and the commit the');
+      console.log('   old conclusion covers. Write `8.5 @ <sha>`, never a bare `8.5`.');
+      console.log('   Tests green ≠ the fold was reviewed.  ADR-20260910113730375');
       break;
     case 'complete':
       moveTask(
