@@ -1,6 +1,6 @@
 # Project Index
 
-> 自动生成于 2026/9/10 12:03:32
+> 自动生成于 2026/9/10 12:03:43
 
 ## 📊 概览
 
@@ -8,7 +8,7 @@
 |------|------|----------|
 | Tasks | 377 | 进行中: 1, 待验收: 0, 已完成: 316 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 105 | 已接受: 100 |
+| ADRs | 105 | 已接受: 101 |
 
 ---
 
@@ -579,7 +579,7 @@ _无_
 - ✅ **ADR-20260910113534807** (02-accepted): architectural-decisions-must-ride-in-adrs-not-implementation-card-technical-approach-sections
 - ✅ **ADR-20260910113730375** (02-accepted): zk-review-object-must-be-commit-pinned-folded-commits-are-unreviewed
 - ✅ **ADR-20260910120047122** (02-accepted): unlisted-fan-out-targets-must-not-be-silent-silence-is-declared-never-default
-- 🤔 **ADR-20260910120047160** (01-proposed): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
+- ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
 
 ---
 

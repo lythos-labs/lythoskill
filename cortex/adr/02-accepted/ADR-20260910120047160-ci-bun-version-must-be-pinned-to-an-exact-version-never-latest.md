@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-09-10 | Created |
 | accepted | 2026-09-10 | Owner 裁决 B17 = 选项 B;并定调"升级本身就是一个比较严肃的问题" |
+| accepted | 2026-09-10 | Accepted |
 
 ## Background
 
