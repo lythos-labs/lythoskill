@@ -177,6 +177,8 @@ write task → self-review → ZK Review (WHAT/WHY/HOW) → process gaps
 
 Three rounds is a practical ceiling — entering round 3 means the task design itself is suspect; rewrite the card, never spawn a 4th round.
 
+**Two gates, not one.** The gate above reviews the **plan**; a second, separate gate reviews the **implementation** — against the spec written before the code, with every fix mutation-pinned (revert it → a specific test must go red) and an explicit list of what the reviewer could not verify. Plan-stage review is where it is cheap: the plan is pure (a sentence to change), execution is IO (a card redone, data written, a commit pushed). The mechanics — carrier layering (ADR = decision, card = plan, review log = gate evidence), round-over-round forking, verbatim logs, the six rules that came out of a six-round implementation review — are in [ZK Review reference § 两段闸门](packages/lythoskill-project-cortex/skill/references/zk-review.md).
+
 **How to run** (use your own subagent tool): **pass by reference, not by value** — give the subagent the **file path** to the task card + the **file path** to AGENTS.md, never pasted content (this keeps the control plane minimal; the card is the SSOT). Prompt template + gap-processing rules (fill / challenge / ignore) + real cases: [ZK Review reference](packages/lythoskill-project-cortex/skill/references/zk-review.md). When a ZK agent reports a gap that the referenced docs already answer, challenge it — "did you read the reference?" Agent failure is not doc failure.
 
 **4 content types ZK Review most often exposes as missing** — check before spawning:
