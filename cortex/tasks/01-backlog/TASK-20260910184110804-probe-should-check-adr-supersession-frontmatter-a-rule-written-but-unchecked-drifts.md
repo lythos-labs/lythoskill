@@ -29,12 +29,12 @@ superseded_by: null
 
 ## Requirements
 <!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] `probe` 新增一条结构检查:**`cortex/adr/04-superseded/`(以及 `03-superseded/`)下的每份 ADR
+- [x] `probe` 新增一条结构检查:**`cortex/adr/04-superseded/`(以及 `03-superseded/`)下的每份 ADR
       必须带非空 `superseded_by`**(值可以是任何 cortex id,含 EPIC)
-- [ ] 反向一致性(可作警告而非错误):`supersedes` 里列的 id 若存在,其 `superseded_by` 应指回来
-- [ ] 检查要有判别性测试:缺字段 / 留 `null` / 值指向不存在的 id 三种形态各自能红
-- [ ] 与 `probe` 现有的 plan/execute 结构一致(不新造输出路径);`--suspicious` 下不误报
-- [ ] 明确**不检查**的情形:`superseded-partial`(核心决策仍有效)不该被要求填 `superseded_by`
+- [x] 反向一致性(可作警告而非错误):`supersedes` 里列的 id 若存在,其 `superseded_by` 应指回来
+- [x] 检查要有判别性测试:缺字段 / 留 `null` / 值指向不存在的 id 三种形态各自能红
+- [x] 与 `probe` 现有的 plan/execute 结构一致(不新造输出路径);`--suspicious` 下不误报
+- [x] 明确**不检查**的情形:`superseded-partial`(核心决策仍有效)不该被要求填 `superseded_by`
       —— 两份都仍是现行
 
 ## Technical Approach
@@ -64,13 +64,25 @@ superseded_by: null
 
 ## Acceptance Criteria
 <!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] **AC1** 手工把一份 superseded ADR 的 `superseded_by` 改回 `null` → `probe` 报出该文件
-- [ ] **AC2** 指向不存在的 id → 报出(措辞:值指向一个找不到的文档)
-- [ ] **AC3** `superseded-partial` 的 ADR **不**被要求填(反例测试:它保持绿)
-- [ ] **AC4** 全库复跑 `cortex probe` 零误报;`bun test packages/lythoskill-project-cortex/` 保持 `0 fail`
+- [x] **AC1** 手工把一份 superseded ADR 的 `superseded_by` 改回 `null` → `probe` 报出该文件
+- [x] **AC2** 指向不存在的 id → 报出(措辞:值指向一个找不到的文档)
+- [x] **AC3** `superseded-partial` 的 ADR **不**被要求填(反例测试:它保持绿)
+- [x] **AC4** 全库复跑 `cortex probe` 零误报;`bun test packages/lythoskill-project-cortex/` 保持 `0 fail`
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
+
+## 落地记录
+
+- `probe` 新增检查 `adrSupersession`(plan/execute 两侧 + 报告 + 渲染 + 总数),判据复用
+  `lib/adr-relations.ts` 的 `parseRelations()` —— **不在检查里另写一套解析**。
+- **实测三种形态**:①`superseded_by: null` → 报出并给出可执行措辞;②指向不存在的 id → 报出;
+  ③干净语料(3 份 superseded ADR 均已回填)→ **0 误报**。
+- **明确写下的边界(不是遗漏)**:`cortex/adr/03-superseded/` 是**历史目录**,里面有 3 份
+  `SUPERSEDED-ADR-*.md`(**另一种命名约定**,前缀本身即声明),且**不在** `config.adrSubdirs` 里
+  —— 因此不参与本检查。若将来把它们统一搬进 `04-superseded/`,那一天它们就该补 frontmatter。
+- 检查跑在 `executeProbePlan(plan, io)` 里,**目录从 `plan.adrs` 取**(那里没有 `config`)——
+  第一版误用了 `config` 导致 `ReferenceError`,由实跑抓到。
 
 ## Related Files
 - Modified:

@@ -364,6 +364,7 @@ describe("printProbeSummary — output UX", () => {
       deckLockDrift: [],
       deckStateDrift: [],
       checklistDrift: [],
+    adrSupersession: [],
       wikiStructureDrift: [],
       ...partial,
     };

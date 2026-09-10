@@ -1,5 +1,13 @@
 import { describe, it, expect } from "bun:test";
 import { filterEmptyShells, isEmptyShell, EMPTY_SHELL_PATTERNS, extractStatusHistory } from "./probe.js";
+import { parseRelations } from "../lib/adr-relations.js";
+
+/** 与 probe 里那条检查同判据的纯函数(检查本身跑在 IO 注入层,这里钉判据) */
+function isSupersededWithoutPointer(content: string, known: string[] = []): boolean {
+  const rel = parseRelations(content);
+  if (!rel.supersededBy) return true;
+  return rel.supersededBy.startsWith('ADR-') && !known.includes(rel.supersededBy);
+}
 import { createAdrTemplate } from "../lib/template.js";
 
 describe("isEmptyShell — pure content detection, no filesystem", () => {
@@ -253,3 +261,22 @@ describe("filterEmptyShells — pure filtering by path strings, no filesystem", 
     expect(filterEmptyShells(noMatch, 'active-only')).toEqual([]);
   });
 });
+
+describe('ADR supersession drift (guard for the frontmatter convention)', () => {
+  it('a superseded ADR with superseded_by: null is reported — null must not read as "not superseded"', () => {
+    const content = '---\nsupersedes: []\nsuperseded_by: null\n---\n\n# ADR-1: t\n'
+    expect(parseRelations(content).supersededBy).toBe(null) // 现状:null 无法自证"被取代"
+    expect(isSupersededWithoutPointer(content)).toBe(true)
+  })
+
+  it('a pointer at a non-existent ADR is not "resolved"', () => {
+    const content = '---\nsupersedes: []\nsuperseded_by: ADR-999\n---\n\n# ADR-2: t\n'
+    expect(isSupersededWithoutPointer(content, ['ADR-1'])).toBe(true)  // ADR-999 不在已知集合里
+    expect(isSupersededWithoutPointer(content, ['ADR-999'])).toBe(false)
+  })
+
+  it('a proper pointer resolves (no false positive on the real corpus shape)', () => {
+    const content = '---\nsupersedes: []\nsuperseded_by: ADR-20260910112404500\n---\n\n# ADR-3: t\n'
+    expect(isSupersededWithoutPointer(content, ['ADR-20260910112404500'])).toBe(false)
+  })
+})

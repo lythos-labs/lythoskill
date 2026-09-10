@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import type { WorkflowConfig } from '../types.js';
 import { parseFrontmatter } from '../lib/frontmatter.js';
+import { parseRelations } from '../lib/adr-relations.js';
 
 /** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent.
  *
@@ -112,6 +113,7 @@ export interface ProbePlan {
     coverageDrift: boolean;
     nonAsciiSlugs: boolean;
     checklistDrift: boolean;
+    adrSupersession: boolean;   // superseded ADR 必须带非空 superseded_by(取代约定的守卫)
     wikiStructure: boolean;
     deckLockDrift: boolean;
     deckStateDrift: boolean;
@@ -132,6 +134,7 @@ export interface ProbeReport {
   deckLockDrift: string[];
   deckStateDrift: string[];
   checklistDrift: string[];  // task files with unchecked checkboxes in review/completed
+  adrSupersession: string[];  // superseded ADRs missing a superseded_by pointer (or pointing nowhere)
   wikiStructureDrift: string[];  // config.wikiSubdirs vs actual cortex/wiki/ subdirs
   summary: {
     activeOnly: boolean;
@@ -148,6 +151,7 @@ export interface ProbeReport {
     hasDeckLockDrift: boolean;
     hasDeckStateDrift: boolean;
     hasChecklistDrift: boolean;
+    hasAdrSupersession: boolean;
     hasWikiStructureDrift: boolean;
   };
 }
@@ -400,6 +404,7 @@ export function buildProbePlan(
       coverageDrift: true,
       nonAsciiSlugs: true,
       checklistDrift: true,
+      adrSupersession: true,
       wikiStructure: true,
       deckLockDrift: true,
       deckStateDrift: true,
@@ -687,6 +692,35 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
   // ── Checklist drift (unchecked boxes in review tasks) ───────────────
   // Default: only review tasks (03-review). Completed tasks (04-completed) may
   // have historical template debt — use --include-completed-checklists to check them.
+  // ── ADR 取代关系:superseded 目录下的必须指出「最新的看哪一份」 ──
+  // 规则写在 ADR 模板的 frontmatter 里;这里是它的守卫 —— 手工搬过目录、或直接改状态行时,
+  // superseded_by 会停在 null,而读者会把 null 读成"没被取代"(缺失被读成通过)。
+  // 目录一律从 **plan.adrs** 取(executeProbePlan 只拿到 plan,没有 config)。
+  const adrSupersession: string[] = [];
+  if (plan.checks.adrSupersession) {
+    const known = new Set<string>();
+    for (const a of plan.adrs) {
+      for (const f of a.files) {
+        const m = f.match(/(ADR-\d+)/);
+        if (m) known.add(m[1]);
+      }
+    }
+    for (const a of plan.adrs) {
+      if (!a.statusKey.startsWith('superseded')) continue;
+      for (const f of a.files) {
+        const content = io.readFile(f);
+        if (content === null) continue;
+        const id = f.match(/(ADR-\d+)/)?.[1] ?? f;
+        const rel = parseRelations(content);
+        if (!rel.supersededBy) {
+          adrSupersession.push(`${id}: superseded but no superseded_by — a reader cannot tell what to read instead (${relative(io.cwd(), f)})`);
+        } else if (rel.supersededBy.startsWith('ADR-') && !known.has(rel.supersededBy)) {
+          adrSupersession.push(`${id}: superseded_by points at ${rel.supersededBy}, which does not exist`);
+        }
+      }
+    }
+  }
+
   const checklistDrift: string[] = [];
   if (plan.checks.checklistDrift) {
     function detectChecklistDrift(files: string[]): void {
@@ -747,7 +781,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       ? 'active-only'
       : 'default';
   const filteredEmptyShellCount = filterEmptyShells(emptyShells, emptyShellMode).length;
-  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length + checklistDrift.length + wikiStructureDrift.length;
+  const totalIssues = allStatusIssues.length + laneWarnings.length + couplingWarnings.length + staleBacklog.length + driftedEpics.length + filteredEmptyShellCount + coverageDrift.length + nonAsciiSlugs.length + deckLockDrift.length + deckStateDrift.length + checklistDrift.length + adrSupersession.length + wikiStructureDrift.length;
 
   return {
     statusResults: [...allTaskResults, ...allEpicResults, ...allAdrResults],
@@ -762,6 +796,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
     deckLockDrift,
     deckStateDrift,
     checklistDrift,
+    adrSupersession,
     wikiStructureDrift,
     summary: {
       activeOnly: plan.options.activeOnly,
@@ -778,6 +813,7 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       hasDeckLockDrift: deckLockDrift.length > 0,
       hasDeckStateDrift: deckStateDrift.length > 0,
       hasChecklistDrift: checklistDrift.length > 0,
+      hasAdrSupersession: adrSupersession.length > 0,
       hasWikiStructureDrift: wikiStructureDrift.length > 0,
     },
   };
@@ -959,6 +995,11 @@ export function printProbeSummary(report: ProbeReport, io: ProbeIO = defaultProb
   }
 
   // Checklist drift (unchecked boxes in review/completed tasks)
+  if (report.adrSupersession.length > 0) {
+    io.log('\n🔗 ADR supersession drift (superseded ADRs must point at what to read instead):');
+    for (const d of report.adrSupersession) io.log(`   ${d}`);
+  }
+
   if (report.checklistDrift.length > 0) {
     io.log('\n📋 Checklist drift (unchecked items in review/completed tasks):');
     for (const d of report.checklistDrift) {
