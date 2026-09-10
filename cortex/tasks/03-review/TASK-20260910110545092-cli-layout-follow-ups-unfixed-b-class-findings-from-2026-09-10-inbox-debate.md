@@ -592,6 +592,16 @@ B17/B18 的结论回填到本卡 `## Notes`。
     ⑦deck BDD runner 对外部 CLI 的依赖。
     (⑤⑥⑦ 是 harness 边界而非缺失证据,但上一版摘要只列了 4 项、读起来像穷尽 —— 已补全。)
 
+- 2026-09-10: **ZK review 收敛后折入的一笔,按 `ADR-20260910113730375` 标注为「折后未评」**。
+  评审对象是 `adfac4e0`(round-2 结论 = **0 HIGH / 1 LOW**,判定通过);此后折入 `12a9fcb8`,
+  **delta 范围**(非空,故必须标注):
+  ① `packages/lythoskill-deck/src/cli-layout.test.ts` 新增一条断言
+  (`PER_ROLE_SCOPING_MAX` 的余量可复算)—— **正是 round-2 那条 LOW**,评审者原话是
+  "should ride in whatever batch next touches `cli-layout.test.ts`",即**预先同意随批走**;
+  ② 卡面两处历史计数补 pin(`a7e776ab` / `e71bdeb5`)并注明口径不可复核。
+  **本笔未再送审**:delta 是"评审者点名的那条 LOW + 计数补 pin",不含规格或行为变更。
+  若后续再动本卡,需对 delta 重新送审(ADR-20260910113730375 选项①)。
+
 ## Related Files
 - Modified:
   - `daily/2026-09-09.md`(S4:@20 交付段措辞/环境标注/证据落盘缺口;@29 P6 尾巴)
