@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/9/10 15:57:27
+> 自动生成于 2026/9/10 18:20:24
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 378 | 进行中: 0, 待验收: 1, 已完成: 317 |
+| Tasks | 380 | 进行中: 1, 待验收: 1, 已完成: 317 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 106 | 已接受: 102 |
+| ADRs | 107 | 已接受: 102 |
 
 ---
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (15)
+### 待办 (16)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -93,10 +93,11 @@
 - [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
+- [ ] **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260910181747676**: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 
 ### 待验收 (1)
 
@@ -582,6 +583,7 @@ _无_
 - ✅ **ADR-20260910120047122** (02-accepted): unlisted-fan-out-targets-must-not-be-silent-silence-is-declared-never-default
 - ✅ **ADR-20260910120047160** (02-accepted): ci-bun-version-must-be-pinned-to-an-exact-version-never-latest
 - ✅ **ADR-20260910152957509** (02-accepted): deck-declaration-writes-must-touch-only-the-bytes-they-are-about-locate-with-an-ast-splice-back-by-range-never-reserialise-the-document
+- 🤔 **ADR-20260910181957316** (01-proposed): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
 
 ---
 
