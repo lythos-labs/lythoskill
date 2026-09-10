@@ -100,7 +100,7 @@ task agent 报出(它把"TOML 被加了内层空格"列为 anomaly),随后在本
 | 候选 | 体积 | 结果 |
 |---|---|---|
 | `@taplo/lib` 0.5.0 | **35.6 MB** unpacked(WASM) | 未采用(为一次删/加键拉 35 MB 与"影响最小化"冲突) |
-| `toml-eslint-parser` 1.0.3 | **86 KB** + 1 依赖 | 逐 table 给出精确字节区间 |
+| `toml-eslint-parser` 1.0.3 | **86 KB** + 1 依赖 | 逐 table 给出精确**文本**区间(UTF-16 code unit;不是字节 —— 见 ADR § Round-1 H3) |
 | AST 定位 + 区间 splice | — | 对本仓真实 deck:删一个 table → 注释 **9→9**、前后缀**逐字节相同**、reparse 通过、接缝复原原有空行样式 |
 
 **本卡要做的事**(规则以 ADR 的 `### 规格` 表为准,不在本卡复述):`remove.ts` / `add.ts` 的写回路径改走 splice;
