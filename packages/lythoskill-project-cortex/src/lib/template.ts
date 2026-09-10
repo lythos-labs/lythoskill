@@ -196,6 +196,12 @@ export function createAdrTemplate(id: string, title: string): string {
 - Positive:
 - Negative:
 - Follow-up:
+<!-- ^ Follow-up work of an ALREADY-ACCEPTED ADR is carried by THIS ADR — do not open a
+     separate card for it. Tick the item here and write the commit sha next to it.
+     A card is for work that needs its own criteria / plan / owner decision; an accepted
+     ADR's follow-up is that ADR's own consequence, and the ADR is where the next agent
+     will look for it. Boundary + the 2026-09-10 evidence: writing-guide.md →
+     "An accepted ADR carries its own follow-up" (ADR-20260910113534807 § 5). -->
 
 ## Related
 - Related ADR:

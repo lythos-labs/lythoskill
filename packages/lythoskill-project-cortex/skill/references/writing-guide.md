@@ -82,6 +82,41 @@ See also: `AGENTS.md` → Project Governance (same criteria, cross-referenced wi
 `"I think / 我觉得" = start an ADR` rule — that rule triggers on **user phrasing**, this
 one on **decision content**; it is an OR).
 
+### An accepted ADR carries its own follow-up — do not open a card for it
+
+**Rule**: landing the **Follow-up** items of an **already-accepted ADR** is carried by that
+ADR itself. Do not open a task card for it. Tick the item in `## Impact → Follow-up` and write
+the commit sha next to it.
+
+**Why**: a card exists to carry work that needs **its own acceptance criteria, its own plan, or
+an owner decision**. An accepted ADR's follow-up already has its criteria — the ADR is the
+reviewed decision, and its Impact section *is* the criteria. Opening a card copies that
+obligation into a second, weaker carrier: cards get archived with the task, ADRs stay
+searchable. Two carriers for one obligation also means two places to check whether it landed —
+and in practice that means **neither**.
+
+**The evidence is this rule's own origin.** The 2026-09-10 batch that landed
+ADR-20260910113534807's four prompt-injection sites (five source files + `AGENTS.md` +
+`CLAUDE.md`) ran under **no card at all**. It was not invisible only because the ADR's own
+Follow-up list named the sites. The ADR carried it; a card would have been a second place to
+forget.
+
+**Boundary — a card *is* right when**:
+
+| Situation | Why a card |
+|---|---|
+| The follow-up **spawns an obligation the ADR never stated** (e.g. "re-survey the 16 CLIs quarterly") | That is new work with new criteria, not a consequence of the decision |
+| The follow-up **needs its own plan** — multiple segments, independent rollback points | The card is the plan's carrier; the ADR stays the decision's |
+| The follow-up is **blocked on an owner decision** | A card is the right shape for presenting options |
+
+**The test**: *does this item need a decision, a plan, or owner input?* If no, it is a
+consequence of a decision already made — put it in the ADR's Follow-up list.
+**A card for an ADR's own consequence competes with the ADR instead of recording it.**
+
+Authority: **ADR-20260910113534807 § 5** (owner decision, 2026-09-10: *"已 accept 的 ADR 的
+Follow-up 落地,由该 ADR 自身承载,不另开卡"*). The ADR template's `Follow-up:` line carries the
+same reminder at the point where the list gets written.
+
 ## Task Writing
 - **Self-contained subagent bootloader**: A subagent reading only this card + AGENTS.md should have enough context to implement the work. No clarifying questions needed.
 - **Pass by reference, not by value**: The card is a **map**, not a warehouse. Don't copy ADR body or epic detail inline — link to them (`Refs: ADR-xxx`, `See EPIC-yyy #ThemeA`). Provide precise file paths and pointers so the reader navigates to source of truth.
