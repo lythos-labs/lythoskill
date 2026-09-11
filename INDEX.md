@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 09:35:17
+> 自动生成于 2026/9/11 09:59:40
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 384 | 进行中: 0, 待验收: 4, 已完成: 319 |
+| Tasks | 385 | 进行中: 0, 待验收: 3, 已完成: 320 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 108 | 已接受: 103 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (14)
+### 待办 (15)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -92,19 +92,19 @@
 - [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
+- [ ] **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (4)
+### 待验收 (3)
 
 - 🔍 **TASK-20260909010058114**: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - 🔍 **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
-- 🔍 **TASK-20260911080931450**: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
 
-### 已完成 (319)
+### 已完成 (320)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -425,6 +425,7 @@ _无_
 - ✅ ~~TASK-20260910181747676~~: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 - ✅ ~~TASK-20260910184110804~~: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 - ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
+- ✅ ~~TASK-20260911080931450~~: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
 
 ### 悬置 (3)
 
