@@ -520,9 +520,39 @@ Each `@lythos/*` package on npmjs.com must have one Trusted Publisher:
 
 Full setup details and troubleshooting: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
 
-#### Lock-step versioning
+#### Lock-step versioning — the release procedure
 
-All packages + root share one version. Bump via `bunx @lythos/skill-creator@0.19.2 bump` (writes root → aligns packages → builds skills), never by hand. Then: `bun install` → commit → `git push --follow-tags`. The `release` workflow handles npm publish, GitHub Release, and Pages deploy.
+All packages + root share one version, moved **only** through the CLI, never by hand.
+Full detail (auth/OIDC setup, first-publish for a new package, legacy fallbacks): [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+
+**The steps below are the ones you must not get wrong — each is here because omitting it fails *silently*.**
+
+```bash
+V=$(grep '"version"' package.json | head -1 | sed 's/.*: "//;s/".*//')   # current version
+bunx @lythos/skill-creator@$V bump patch --dry-run    # plan only; writes nothing
+bunx @lythos/skill-creator@$V bump patch              # patch | minor | major | X.Y.Z
+git status --short                                    # review what it touched
+git add -u && git commit -m "chore(release): vX.Y.Z"
+git tag -a vX.Y.Z -m "vX.Y.Z"                         # ← the bump does NOT do this
+git push --follow-tags
+```
+
+The bump does everything mechanical in one run: root version → align every `packages/*/package.json` → **`bun install`** (regenerates `bun.lock`) → update the `bunx @version` strings in `packages/*/README.md` → rebuild every skill. There is no separate `bun install` step.
+
+Three traps, in the order you will hit them:
+
+1. **The `@$V` specifier is the *current* version, not a literal.** A stale one installs a different creator than the repo's. Substitute it; never copy a pinned number out of this file — this file's own copy is rewritten by every bump for exactly that reason.
+2. **The bump does not create the tag, and the tag is the release.** `release.yml` fires on `on: push: tags: v*` and on nothing else. So **no tag = no release, with no error anywhere**: the commit lands on `main`, CI goes green, and npm keeps serving the old version. A *lightweight* tag fails the same way — `--follow-tags` pushes **annotated** tags only, so `git tag vX.Y.Z` (no `-a`) is silently skipped. Always `git tag -a`.
+3. **Bump target.** `patch` for fixes, refactors, test-only and docs riding along; `minor` for a new capability users can invoke; `major` for a breaking CLI/API change. Rhyme it with the commit type — `fix(…)` → patch, `feat(…)` → minor. On 0.x, minor is the ordinary feature bump. Unsure? Read the cadence: `git tag --sort=-v:refname | head -5`.
+
+**Verify the release started; do not assume it.**
+
+```bash
+export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"   # macOS
+gh run list --limit 3      # expect a `release` run on the tag: in_progress → success
+```
+
+The run publishes every package to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages. The pre-push hook separately syncs the `skills` branch (hexo-style).
 
 #### Bun version pin — CI and local must name the same interpreter
 
