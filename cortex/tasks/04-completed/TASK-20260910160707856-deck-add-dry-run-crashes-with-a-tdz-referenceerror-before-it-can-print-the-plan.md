@@ -8,6 +8,7 @@
 | backlog | 2026-09-10 | Created |
 | in-progress | 2026-09-10 | Started |
 | review | 2026-09-10 | Deliverables committed |
+| completed | 2026-09-11 | Done |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->

@@ -9,6 +9,7 @@
 | backlog | 2026-09-11 | Implemented + pinned; commits a226ebae (fix) → b5ed0831 (tests) → 2a6d4e5d (docs). Trailer `Task: … review` rejected (backlog → review is not a legal FSM edge) — state walk left to the owner. |
 | in-progress | 2026-09-10 | Started |
 | review | 2026-09-10 | Deliverables committed |
+| completed | 2026-09-11 | Done |
 
 ## Background
 

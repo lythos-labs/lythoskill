@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 10:02:58
+> 自动生成于 2026/9/11 10:04:28
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 385 | 进行中: 0, 待验收: 2, 已完成: 321 |
+| Tasks | 385 | 进行中: 0, 待验收: 0, 已完成: 323 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 108 | 已接受: 103 |
 
@@ -98,12 +98,11 @@
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
-- 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
+_无_
 
-### 已完成 (321)
+### 已完成 (323)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -417,11 +416,13 @@ _无_
 - ✅ ~~TASK-20260829090402490~~: implement deepseek-harness headless player adapter
 - ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
 - ✅ ~~TASK-20260909010058114~~: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
+- ✅ ~~TASK-20260909010121918~~: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - ✅ ~~TASK-20260909152255103~~: deck UX: ZK trial 5/10 — combo discoverability and vocabulary orientation
 - ✅ ~~TASK-20260909155425926~~: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
 - ✅ ~~TASK-20260910110545092~~: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate
 - ✅ ~~TASK-20260910111600389~~: deck-fanout-deletion-must-be-ownership-scoped-not-directory-containment
 - ✅ ~~TASK-20260910152029904~~: deck add and remove destroy every comment in skill-deck.toml via an iarna-toml parse-stringify round trip
+- ✅ ~~TASK-20260910160707856~~: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 - ✅ ~~TASK-20260910181747676~~: test-review gate trial - expert-role side deck reviews the tests, optionally a live inbox-outbox red-green pairing
 - ✅ ~~TASK-20260910184110804~~: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 - ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
