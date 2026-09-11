@@ -323,6 +323,38 @@ describe("executeProbePlan — with mock IO", () => {
     expect(report.staleBacklog[0]).toContain("TASK-20260101000000009");
   });
 
+  it("a backlog row with an unparseable date falls through to a row that parses (G2)", () => {
+    // The pre-routing regex required a `YYYY-MM-DD` shape, so it skipped `(unknown)` and
+    // matched a row that had a date. The first version of the routed scan took the last
+    // `backlog` row whatever its date: the age became NaN and the warning silently vanished.
+    const files: Record<string, string> = {
+      [`cortex/tasks/01-backlog/TASK-20260101000000021-test.md`]: `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| backlog | 2026-01-01 | Created |\n| backlog | (unknown) | Re-entered |\n`,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+
+    expect(report.staleBacklog.length).toBe(1);
+    expect(report.staleBacklog[0]).toContain("TASK-20260101000000021");
+  });
+
+  it("no backlog date parses at all → the check makes no claim (G2)", () => {
+    const files: Record<string, string> = {
+      [`cortex/tasks/01-backlog/TASK-20260101000000022-test.md`]: `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| backlog | (unknown) | Created |\n`,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+
+    expect(report.staleBacklog).toEqual([]);
+  });
+
+  it("the same guard covers epic drift (G2)", () => {
+    const files: Record<string, string> = {
+      "cortex/epics/01-active/EPIC-20260101000000023-a.md": `---\nlane: main\n---\n# Epic A\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| active | 2026-01-01 | Created |\n| active | (unknown) | Resumed |\n`,
+    };
+    const report = executeProbePlan(buildProbePlan(mockConfig), makeMockIO(files));
+
+    expect(report.driftedEpics.length).toBe(1);
+    expect(report.driftedEpics[0]).toContain("EPIC-20260101000000023");
+  });
+
   it("skips status consistency when activeOnly mode", () => {
     const files: Record<string, string> = {
       "cortex/tasks/01-backlog/TASK-20260101000000010-test.md": `# Task\n\n## Status History\n\n| Status | Date | Note |\n|--------|------|------|\n| in-progress | 2026-01-01 | Started |\n`,

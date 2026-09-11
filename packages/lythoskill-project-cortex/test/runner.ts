@@ -13,6 +13,7 @@ import { runCli, assertOutput, setupWorkdir } from '@lythos/test-utils/bdd-runne
 import { createTaskTemplate, createEpicTemplate, createAdrTemplate } from '../src/lib/template.js'
 import { ensureDir } from '../src/lib/fs.js'
 import { generateTimestampId } from '../src/lib/id.js'
+import { parse } from '../src/lib/status-history.js'
 
 // ── Types ─────────────────────────────────────────────────────
 
@@ -21,7 +22,10 @@ export interface Scenario {
   sourcePath: string
   given: {
     // Cortex docs to create before the test action
-    tasks?: Array<{ title: string; id?: string; status?: string }>
+    // `rawFile` = write the fixture's bytes verbatim instead of `createTaskTemplate` —
+    // the only way to materialise a card that did NOT come from the template, which is
+    // the whole class of card TASK-20260911080931450 is about.
+    tasks?: Array<{ title: string; id?: string; status?: string; rawFile?: string }>
     epics?: Array<{ title: string; id?: string; lane?: string; checklist?: string; status?: string }>
     adrs?: Array<{ title: string; id?: string; status?: string }>
   }
@@ -56,7 +60,57 @@ export interface Result {
 
 const SCENARIOS_DIR = join(import.meta.dir, 'scenarios')
 const CLI_PATH = resolve(import.meta.dir, '..', 'src', 'cli.ts')
+const PACKAGE_ROOT = resolve(import.meta.dir, '..')
 const BUN = 'bun'
+
+/** The task subdir ↔ status table, both directions (the Given DSL names the dir). */
+const TASK_SUBDIRS: Array<[string, string]> = [
+  ['01-backlog', 'backlog'],
+  ['02-in-progress', 'in-progress'],
+  ['03-review', 'review'],
+  ['04-completed', 'completed'],
+  ['05-suspended', 'suspended'],
+  ['06-terminated', 'terminated'],
+  ['07-archived', 'archived'],
+]
+
+function taskStatusFromDirHint(hint: string): string {
+  const hit = TASK_SUBDIRS.find(([dir]) => hint.includes(dir))
+  return hit ? hit[1] : 'backlog'
+}
+
+function taskSubdirForStatus(status: string): string {
+  const hit = TASK_SUBDIRS.find(([, st]) => st === status)
+  return hit ? hit[0] : '01-backlog'
+}
+
+/** The single task file under `cortex/tasks`, if there is exactly one. */
+function findAllTaskFiles(workdir: string): string[] {
+  const tasksDir = join(workdir, 'cortex', 'tasks')
+  const found: string[] = []
+  const walk = (dir: string): void => {
+    if (!existsSync(dir)) return
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) walk(full)
+      else if (entry.name.endsWith('.md') && entry.name.startsWith('TASK-')) found.push(full)
+    }
+  }
+  walk(tasksDir)
+  return found
+}
+
+/** The task file a Then assertion should read: the one in `04-completed/` when present
+ *  (the trailer scenarios), otherwise the only task file in the fixture. */
+function resolveTaskFileForAssertion(workdir: string): string | null {
+  const completedDir = join(workdir, 'cortex', 'tasks', '04-completed')
+  if (existsSync(completedDir)) {
+    const entries = readdirSync(completedDir).filter(f => f.endsWith('.md'))
+    if (entries.length > 0) return join(completedDir, entries[0])
+  }
+  const all = findAllTaskFiles(workdir)
+  return all.length === 1 ? all[0] : (all[0] ?? null)
+}
 
 // ── Scenario Loader ───────────────────────────────────────────
 
@@ -155,6 +209,19 @@ function parseScenario(mdPath: string): Scenario {
     // A cortex project initialized in a git repo
     if (/cortex project initialized/i.test(bullet)) {
       continue // handled by fixture setup
+    }
+    // A hand-written task `TASK-x` exists in `01-backlog/` with content from `test/fixtures/x.md`
+    // ("writer-damaged" is the same form; the adjective is documentation, not behaviour)
+    const rawMatch = bullet.match(/(?:hand-written|writer-damaged|raw)\s+task\s+`?([^`]+)`?\s+exists\s+in\s+`?([^`]+)`?\s+with\s+content\s+from\s+`?([^`]+)`?/i)
+    if (rawMatch) {
+      given.tasks = given.tasks || []
+      given.tasks.push({
+        id: rawMatch[1],
+        title: 'Raw fixture task',
+        status: taskStatusFromDirHint(rawMatch[2]),
+        rawFile: rawMatch[3],
+      })
+      continue
     }
     // A task `TASK-TEST-001` exists in `01-backlog/`
     const taskMatch = bullet.match(/task\s+`?([^`]+)`?\s+exists\s+in\s+`?([^`]+)`?/i)
@@ -290,6 +357,12 @@ function parseScenario(mdPath: string): Scenario {
       then.fileContains['__status_history__'].push(statusMatch[1])
       continue
     }
+    // The task file contains the verbatim Status History block
+    if (/verbatim status history block/i.test(bullet)) {
+      then.fileContains = then.fileContains || {}
+      then.fileContains['__verbatim_block__'] = ['verbatim']
+      continue
+    }
     // INDEX.md was regenerated
     const indexMatch = bullet.match(/INDEX\.md was regenerated/i)
     if (indexMatch) {
@@ -326,17 +399,25 @@ function setupCortexFixture(workdir: string, scenario: Scenario): void {
     const id = task.id || 'TASK-TEST-001'
     const title = task.title || 'Test Task'
     const status = task.status || 'backlog'
-    const subdir = status === 'backlog' ? '01-backlog' :
-                   status === 'in-progress' ? '02-in-progress' :
-                   status === 'review' ? '03-review' :
-                   status === 'completed' ? '04-completed' :
-                   status === 'suspended' ? '05-suspended' :
-                   status === 'terminated' ? '06-terminated' :
-                   status === 'archived' ? '07-archived' : '01-backlog'
+    const subdir = taskSubdirForStatus(status)
     const filename = `${id}-test-task.md`
     const dir = join(workdir, 'cortex', 'tasks', subdir)
     ensureDir(dir)
-    writeFileSync(join(dir, filename), createTaskTemplate(id, title))
+
+    // `rawFile`: the card's bytes come from the fixture verbatim — never through
+    // `createTaskTemplate`, which is the point (a template card always carries a correct
+    // `## Status History` section, so it can never reproduce this defect).
+    let content: string
+    if (task.rawFile) {
+      const fixture = resolve(PACKAGE_ROOT, task.rawFile)
+      if (!existsSync(fixture)) {
+        throw new Error(`raw fixture not found: ${task.rawFile} (resolved to ${fixture})`)
+      }
+      content = readFileSync(fixture, 'utf-8')
+    } else {
+      content = createTaskTemplate(id, title)
+    }
+    writeFileSync(join(dir, filename), content)
   }
 
   for (const epic of scenario.given.epics ?? []) {
@@ -485,30 +566,55 @@ function runAssertions(workdir: string, scenario: Scenario, cliResult: { code: n
       }
 
       if (pattern === '__status_history__') {
-        // Find the task file in 04-completed/ for status history check
-        const completedDir = join(workdir, 'cortex', 'tasks', '04-completed')
-        if (existsSync(completedDir)) {
-          const entries = readdirSync(completedDir).filter(f => f.endsWith('.md'))
-          if (entries.length === 0) {
-            errors.push('no completed task file found for status history assertion')
+        // Read the record with the SAME definition the CLI uses — `parse()` from
+        // lib/status-history.ts. A bespoke regex here is how the assertion and the CLI
+        // drift apart, which is exactly the class of defect this scenario exists for.
+        const taskFile = resolveTaskFileForAssertion(workdir)
+        if (!taskFile) {
+          errors.push('no task file found for status history assertion')
+        } else {
+          const content = readFileSync(taskFile, 'utf-8')
+          const record = parse(content)
+          const last = record.singleStatus ?? (record.lines.length > 0 ? record.lines[record.lines.length - 1] : null)
+          const rel = taskFile.slice(workdir.length + 1)
+          if (last === null) {
+            errors.push(`status history is empty or unreadable: ${rel}`)
           } else {
-            const content = readFileSync(join(completedDir, entries[0]), 'utf-8')
             for (const expected of expectedStrings) {
-              // Check last status history row contains expected status
-              // Match the Status History table and find the last data row
-              const tableMatch = content.match(/\|\s*Status\s*\|\s*Date\s*\|\s*Note\s*\|[\s\S]*?(\|\s*[^|]+\s*\|\s*[^|]+\s*\|\s*[^|]+\s*\|)\s*(?:\n## |\n#{1,2}\s|$)/)
-              if (tableMatch) {
-                const lastRow = tableMatch[1]
-                if (!lastRow.includes(expected)) {
-                  errors.push(`status history last record missing: "${expected}" in ${entries[0]}`)
-                }
-              } else {
-                // Fallback: just check content contains the status somewhere in table
-                if (!content.includes(`| ${expected} |`)) {
-                  errors.push(`status history missing: "${expected}" in ${entries[0]}`)
-                }
+              if (!last.toLowerCase().includes(expected.toLowerCase())) {
+                errors.push(`status history last record is "${last}", expected "${expected}" in ${rel}`)
               }
             }
+          }
+        }
+        continue
+      }
+
+      if (pattern === '__verbatim_block__') {
+        // The block is written verbatim: heading, comment, blank line, header, separator.
+        // "A heading + a bare row" must NOT satisfy this (AC1).
+        const taskFile = resolveTaskFileForAssertion(workdir)
+        if (!taskFile) {
+          errors.push('no task file found for verbatim block assertion')
+        } else {
+          const content = readFileSync(taskFile, 'utf-8')
+          const rel = taskFile.slice(workdir.length + 1)
+          const block = [
+            '## Status History',
+            '<!-- machine-parseable table: directory = current status, last row = latest record -->',
+            '',
+            '| Status | Date | Note |',
+            '|--------|------|------|',
+          ].join('\n')
+          if (!content.includes(block)) {
+            errors.push(`verbatim Status History block missing in ${rel}`)
+          }
+          // The table must be the one the reader reads: last row = last recorded status,
+          // and no vocabulary row may be left outside the table.
+          const record = parse(content)
+          const last = record.singleStatus ?? (record.lines.length > 0 ? record.lines[record.lines.length - 1] : null)
+          if (last === null) {
+            errors.push(`Status History is unreadable in ${rel}`)
           }
         }
         continue
