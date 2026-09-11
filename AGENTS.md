@@ -545,11 +545,22 @@ Three traps, in the order you will hit them:
 2. **The bump does not create the tag, and the tag is the release.** `release.yml` fires on `on: push: tags: v*` and on nothing else. So **no tag = no release, with no error anywhere**: the commit lands on `main`, CI goes green, and npm keeps serving the old version. A *lightweight* tag fails the same way — `--follow-tags` pushes **annotated** tags only, so `git tag vX.Y.Z` (no `-a`) is silently skipped. Always `git tag -a`.
 3. **Bump target.** `patch` for fixes, refactors, test-only and docs riding along; `minor` for a new capability users can invoke; `major` for a breaking CLI/API change. Rhyme it with the commit type — `fix(…)` → patch, `feat(…)` → minor. On 0.x, minor is the ordinary feature bump. Unsure? Read the cadence: `git tag --sort=-v:refname | head -5`.
 
-**Verify the release started; do not assume it.**
+**Verify the release started, and then that it actually published — do not assume either.**
 
 ```bash
 export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"   # macOS
-gh run list --limit 3      # expect a `release` run on the tag: in_progress → success
+gh run list --limit 3                  # expect a `release` run on the tag: in_progress → success
+gh release view vX.Y.Z                 # the GitHub Release the run creates
+
+# Confirm the publish landed on npm. DERIVE the names — never type them.
+# The npm names are NOT the directory names: deck is `@lythos/skill-deck`, arena is
+# `@lythos/skill-arena`, creator is `@lythos/skill-creator`. Guessing one of those
+# returns an EMPTY version, which reads exactly like a failed publish.
+for f in packages/*/package.json; do
+  n=$(grep '"name"' "$f" | head -1 | sed 's/.*: "//;s/".*//')
+  [ -n "$n" ] && echo "  $n $(npm view "$n" version 2>/dev/null | tail -1)"
+done
+# Every line must read the new version. An empty column is a name you invented.
 ```
 
 The run publishes every package to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages. The pre-push hook separately syncs the `skills` branch (hexo-style).
