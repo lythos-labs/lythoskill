@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 09:59:40
+> 自动生成于 2026/9/11 10:02:58
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 385 | 进行中: 0, 待验收: 3, 已完成: 320 |
+| Tasks | 385 | 进行中: 0, 待验收: 2, 已完成: 321 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 108 | 已接受: 103 |
 
@@ -98,13 +98,12 @@
 
 _无_
 
-### 待验收 (3)
+### 待验收 (2)
 
-- 🔍 **TASK-20260909010058114**: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - 🔍 **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 
-### 已完成 (320)
+### 已完成 (321)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -417,6 +416,7 @@ _无_
 - ✅ ~~TASK-20260828195535425~~: explain curator degraded entries on scan output
 - ✅ ~~TASK-20260829090402490~~: implement deepseek-harness headless player adapter
 - ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
+- ✅ ~~TASK-20260909010058114~~: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - ✅ ~~TASK-20260909152255103~~: deck UX: ZK trial 5/10 — combo discoverability and vocabulary orientation
 - ✅ ~~TASK-20260909155425926~~: CLI adapter hardening — symlink tiers, hazard classes, per-run dirs
 - ✅ ~~TASK-20260910110545092~~: cli-layout follow-ups - unfixed B-class findings from 2026-09-10 inbox-debate

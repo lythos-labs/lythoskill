@@ -69,8 +69,12 @@ happy-path cards with real content must NOT flag; TBD-filled cards MUST flag.
 - Judge finding: `playground/2026-09-09-arena-cortex-desc-ab/judge-verdict.md` §5.2
 - Detector source: probe implementation under `packages/lythoskill-project-cortex/src/`
 
+## Status History
+<!-- machine-parseable table: directory = current status, last row = latest record -->
 
+| Status | Date | Note |
+|--------|------|------|
+| backlog | 2026-09-08 | Created (reconstructed from card ID) |
 | in-progress | 2026-09-10 | Started |
-
-
 | review | 2026-09-10 | Deliverables committed |
+| completed | 2026-09-11 | Done |
