@@ -6,6 +6,7 @@
 |--------|------|------|
 | proposed | 2026-05-09 | Created |
 | accepted | 2026-05-17 | Accepted |
+| accepted | 2026-09-11 | 正文 §「未实施，仅记录决策草案」是写下时的真话，不是现状：`recordFingerprint` 与 `verifyFingerprint` 已落地在 `packages/lythoskill-cold-pool/src/metadata-db.ts`，并有 `metadata-db.test.ts` 覆盖。正文保留为时点记录，不修改 — 与本文下方「并发考虑」同例。 |
 
 ## 并发考虑（2026-05-09 补充）
 
