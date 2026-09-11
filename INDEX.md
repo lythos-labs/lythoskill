@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 00:25:02
+> 自动生成于 2026/9/11 09:08:12
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 383 | 进行中: 0, 待验收: 3, 已完成: 321 |
+| Tasks | 384 | 进行中: 1, 待验收: 3, 已完成: 319 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 108 | 已接受: 103 |
 
@@ -93,9 +93,9 @@
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260911080931450**: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
 
 ### 待验收 (3)
 
@@ -103,7 +103,7 @@ _无_
 - 🔍 **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
 
-### 已完成 (321)
+### 已完成 (319)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -133,13 +133,11 @@ _无_
 - ✅ ~~TASK-20260503132523380~~: Move root package.json dependencies to individual packages
 - ✅ ~~TASK-20260503132524022~~: Unify lockfile and workspace config — Bun-only
 - ✅ ~~TASK-20260503132525248~~: Standardize package.json template across all publishable packages
-- ✅ ~~TASK-20260503152002342~~: Implement alias resolution and collision detection in deck link
 - ✅ ~~TASK-20260503152003393~~: Make deck add write FQ paths with optional as-alias
 - ✅ ~~TASK-20260503152004433~~: Rename deck update to refresh and add per-skill arg
 - ✅ ~~TASK-20260503152005415~~: Add deck remove and deck prune commands
 - ✅ ~~TASK-20260503152006435~~: Add BDD scenarios for refactored deck CRUD
 - ✅ ~~TASK-20260503154354857~~: Bump actions/checkout to v5 for Node 24 compat
-- ✅ ~~TASK-20260503154401905~~: Make README + CI surface red-green refactor + coverage visible
 - ✅ ~~TASK-20260503235008935~~: Tracer bullet: test findDeckToml, expandHome, findSource pure functions
 - ✅ ~~TASK-20260503235009959~~: Reconciler core A: linkDeck empty deck and symlink creation
 - ✅ ~~TASK-20260503235011219~~: Reconciler core B: linkDeck deny-by-default and alias collision
@@ -433,7 +431,7 @@ _无_
 - ⏸️ **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - ⏸️ **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
 
-### 终止 (41)
+### 终止 (40)
 
 - 🛑 ~~TASK-20260423124059766~~: Define and implement lythos naming conventions and publish path
 - 🛑 ~~TASK-20260423162055407~~: Port skill-curator to lythoskill ecosystem
@@ -453,7 +451,6 @@ _无_
 - 🛑 ~~TASK-20260503132524651~~: Create root tsconfig.base.json and unify per-package tsconfig
 - 🛑 ~~TASK-20260503135205264~~: terminate
 - 🛑 ~~TASK-20260503135212184~~: --help
-- 🛑 ~~TASK-20260503152001333~~: Adopt alias-as-key dict schema for skill entries
 - 🛑 ~~TASK-20260505191950708~~: curator add: verify SKILL.md path exists within cloned monorepo before writing; clean up empty dir on clone failure
 - 🛑 ~~TASK-20260506001644451~~: T7: MCP server adapter feasibility assessment — sub-agents-mcp, claude-code-controller
 - 🛑 ~~TASK-20260506102619862~~: Implement distinct runtime behavior for innate/tool/combo skill types

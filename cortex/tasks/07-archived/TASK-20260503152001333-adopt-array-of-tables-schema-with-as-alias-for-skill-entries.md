@@ -1,12 +1,13 @@
 # TASK-20260503152001333: Adopt alias-as-key dict schema for skill entries
 
 ## Status History
-| terminated | 2026-05-03 | Superseded by alias-as-key dict schema (Decision D in ADR-20260503152000411) |<!-- machine-parseable table: directory = current status, last row = latest record -->
 
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-05-03 | Created per ADR-20260503152000411 Decision A |
 | backlog (revised) | 2026-05-03 | Schema 从 array-of-tables 切到 alias-as-key dict;ADR Decision A 已修订(方案 D selected) |
+| terminated | 2026-05-03 | Superseded by alias-as-key dict schema (Decision D in ADR-20260503152000411) | <!-- machine-parseable table: directory = current status, last row = latest record --> |
+| archived | 2026-09-11 | Archived |
 
 ## 背景与目标
 
