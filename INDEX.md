@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/9/11 09:08:12
+> 自动生成于 2026/9/11 09:35:17
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 384 | 进行中: 1, 待验收: 3, 已完成: 319 |
+| Tasks | 384 | 进行中: 0, 待验收: 4, 已完成: 319 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 108 | 已接受: 103 |
 
@@ -93,15 +93,16 @@
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260911080931450**: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
+_无_
 
-### 待验收 (3)
+### 待验收 (4)
 
 - 🔍 **TASK-20260909010058114**: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - 🔍 **TASK-20260909010121918**: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - 🔍 **TASK-20260910160707856**: deck add --dry-run crashes with a TDZ ReferenceError before it can print the plan
+- 🔍 **TASK-20260911080931450**: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
 
 ### 已完成 (319)
 
