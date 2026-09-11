@@ -7,6 +7,24 @@ import { build } from './build.js'
 
 const SEMVER_RE = /^(\d+)\.(\d+)\.(\d+)$/
 
+/**
+ * The set of skill products under `packages/` — a package is one **iff**
+ * `packages/<name>/skill/` exists (ADR-20260502234833756).
+ *
+ * Deliberately NOT derived from the directories that hold a `package.json`, and
+ * deliberately NOT filtered by the `lythoskill-` prefix — that ADR names the prefix
+ * filter as the thing not to do. Eight skill-only packages (coach, dreaming,
+ * project-onboarding, project-scribe, project-scribe-weekly, red-green-release,
+ * sober, writer) carry `skill/` with no `package.json`; filtering them out left
+ * their built `SKILL.md` one version behind on every release, and nothing local
+ * noticed — only CI's "generated skill artifacts are in sync with source" gate,
+ * after the release commit was already pushed.
+ */
+export function skillProductDirs(packagesDir: string): string[] {
+  if (!existsSync(packagesDir)) return []
+  return readdirSync(packagesDir).filter((n) => existsSync(join(packagesDir, n, 'skill')))
+}
+
 export interface BumpOpts {
   target: string
   dryRun: boolean
@@ -107,9 +125,7 @@ export async function bump(opts: BumpOpts) {
   // Step 5: rebuild skill outputs
   console.log('\n🛠️  Rebuilding skills (build --all equivalent)...')
   let built = 0
-  for (const name of pkgDirs) {
-    if (!name.startsWith('lythoskill-')) continue
-    if (!existsSync(join(packagesDir, name, 'skill'))) continue
+  for (const name of skillProductDirs(packagesDir)) {
     console.log(`\n=== Building ${name} ===`)
     await build(name)
     built++
