@@ -1,5 +1,5 @@
 ---
-last_consolidated: 2026-08-27
+last_consolidated: 2026-09-12
 sources:
   - "weekly/2026-W17.md"
   - "weekly/2026-W18.md"
@@ -13,11 +13,15 @@ sources:
   - "weekly/2026-W30.md"
   - "weekly/2026-W31.md"
   - "daily/2026-07-31.md"
+  - "weekly/2026-W36.md"
+  - "weekly/2026-W37.md"
+  - "daily/2026-09-10.md"
+  - "daily/2026-09-11.md"
   - "cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md"
-  - "cortex/adr/02-accepted/ (90 ADR files on disk)"
+  - "cortex/adr/02-accepted/ (106 ADR files on disk, counted 2026-09-12)"
 zk_validated: true
-zk_issues: 0
-zk_validator: "ZK subagent agent-0 — 2026-08-27 — 8/10 readability; P1 (§14 timeline, in pitfalls.md) + P2s fixed in place"
+zk_issues: 4
+zk_validator: "ZK subagent agent-0 — 2026-08-27 — 8/10 readability; P1 (§14 timeline, in pitfalls.md) + P2s fixed in place. 2026-09-12 cold-reader pass validated the entries-65-73 delta: 4 findings fixed in place (#70/#71 wording, qualifier legend, #51 truncated ADR id); pre-existing residue recorded in Anomalies item 5"
 ---
 
 # Key Decisions -- Current State
@@ -34,6 +38,11 @@ Each entry: **ADR ID**, one-line decision, and current status.
 - `⚠️ superseded by ADR-xxx` -- overruled; see superseding ADR for current rule
 - **git-history only** -- these ADRs exist on disk and in git, but do NOT represent
   current architectural truth. They are listed in Superseded ADRs below.
+
+Parenthetical qualifiers refine a status's scope and are per-entry: e.g.
+`ADR-level` = the decision stands but implementation is deferred/elsewhere;
+`build section only` = part of the ADR still governs. When a qualifier recurs,
+treat it as part of that row's status, not a new status kind.
 
 The `#` column is a global sequence assigned in consolidation order, NOT per-section
 position — new ADRs are appended to their topic section with the next global number,
@@ -94,6 +103,12 @@ Deck governance, cortex GTD state machine, and session handoff.
 | 61 | ADR-20260710111933808 | cortex/INDEX.md HATEOAS boundary: explicit is/is-not contract for derived-state curation — portal, not real-time status. | ✅ holds |
 | 62 | ADR-20260710172235956 | File-level Ground Truth removed from daily template; per-handoff "Verify Current State" section is the SSOT. | ✅ holds |
 | 63 | ADR-20260717161516538 | Mechanize boot routines, don't exhort (drift signals live in `deck link`/`refresh --exec`, not docs) + shed dead defensive text no longer needed by current-model agents ("K3 era"). Basis of the AGENTS.md v3 molt (806→418 lines); shed verdicts later proven by a 30-subject A/B rerun (cortex/wiki/03-lessons/2026-07-27: vocabulary redundancy ≠ behavior necessity). | ✅ holds |
+| 65 | ADR-20260910113534807 | Architectural decisions ride in ADRs, not in task-card "Technical Approach" sections. Cards execute; ADRs decide. | ✅ holds |
+| 66 | ADR-20260910113730375 | ZK review object must be commit-pinned. Folded-in commits are unreviewed — reviewing a moving target is a no-op. | ✅ holds |
+| 67 | ADR-20260910181957316 | Two-stage ZK review gates: plan gate reviews the spec (pure — a fix costs a sentence), implementation gate reviews landed code against the pre-written spec. Mechanizes 以终为始. Operating manual: `04-ssot/review-gates.md`. | ✅ holds |
+| 68 | ADR-20260910152957509 | Deck declaration writes touch only the bytes they are about: AST-locate + splice back by range, never reserialise the document (a TOML round-trip ate every comment in skill-deck.toml). | ✅ holds |
+| 69 | ADR-20260910112404500 | Deck removal boundary is ownership, not directory containment (k8s OwnerReferences analogy): fan-out targets outside the project must never be recursively cleaned. | ✅ holds |
+| 70 | ADR-20260910120047122 | Unlisted fan-out targets must not be silent: a target's absence must be explicitly declared, never implied by omission. | ✅ holds |
 
 ---
 
@@ -135,6 +150,7 @@ Agent-adapter plugin system, arena, Control Transfer Protocol, and test infrastr
 | 46 | ADR-20260502110308316 | Arena TOML declarative config. Player as facade, k8s-style spec. Replaces CLI flags. | ✅ holds |
 | 47 | ADR-20260518024500631 | Agent BDD evolve from `parseAgentMd` to `reproduce.sh` pattern. Self-executable, judge-separated, agent-native. | ✅ holds |
 | 48 | ADR-20260518155038335 | `reproduce.sh` + decision-log + logical framework. Verifying premise/conclusion stability as complement to cross-player vs. | ✅ holds |
+| 71 | ADR-20260910113131220 | Two axes never merge: the player axis is open registration (anyone may add an adapter); the cli-layout axis is a closed registry sourced from data in this repo (adding a CLI means editing the data, not self-registering). | ✅ holds |
 
 Key non-ADR decisions in this domain:
 - **Control Transfer Protocol**: CLI stdout/stderr = agent interrupt vectors. Plan-mode `--dry-run` + HATEOAS errors + path guards form a three-channel protocol that makes CLI-agent boundaries predictable.
@@ -150,10 +166,12 @@ Versioning, publishing, guard modules, and testing conventions.
 |---|-----|----------|--------|
 | 49 | ADR-20260424113917838 | Red-green-release heredoc migration patch design. Timestamp naming, no semver on patches, self-archiving after execution. | ✅ holds |
 | 50 | ADR-20260502233119561 | Bump command and lockstep versioning policy. All packages + root share one version. `bunx @lythos/skill-creator bump`, never hand-edit or use `jq`/`python`. | ✅ holds |
-| 51 | ADR-202605102330 | Centralized guard modules vs whack-a-mole. 4 centralized guards (path-guard, id-guard, pre-commit hooks, private-leak) instead of 59 individual bug fixes. | ✅ holds |
+| 51 | ADR-20260510233000000 | Centralized guard modules vs whack-a-mole. 4 centralized guards (path-guard, id-guard, pre-commit hooks, private-leak) instead of 59 individual bug fixes. (ID repaired 2026-09-12: was recorded truncated as `ADR-202605102330` — unaddressable.) | ✅ holds |
 | 52 | ADR-20260513144000000 | No hard-coded third-party mirror list. Trust boundary belongs to user. Only `LYTHOS_GH_MIRROR` remains. **Supersedes ADR-20260512191438745.** | ✅ holds |
 | 53 | ADR-20260513041030769 | No cross-package relative imports in `packages/src`. Pre-commit guard enforces this. | ✅ holds |
 | 54 | ADR-20260503180000000 | Unit test framework selection: curator-mind. Test file co-location with source. | ✅ holds |
+| 72 | ADR-20260910120047160 | CI bun version pinned to an exact version, never `latest`. | ✅ holds |
+| 73 | ADR-20260911002229529 | Arena decision logs are per-cell files, merged at collect time — never one shared append target (2-writer corruption). | ✅ holds |
 
 Key non-ADR decisions in this domain:
 - **Publish-time workspace:* rewrite**: Source stays `workspace:*` for local dev ergonomics. `publish.sh` rewrites to `^version` before `npm publish`, then `git checkout` restores. Pre-commit rejects `^x.y.z` on internal deps in source. Only correct resolution for dual-audience (local dev + npm consumer) tension.
@@ -271,6 +289,20 @@ Items discovered during consolidation that a weekly either missed or got wrong:
    experiments fast and kills decisively. Each rejection is documented in an ADR
    so future agents don't re-propose the same discarded idea.
 
+5. **2026-09-12 ZK cold-reader pass residue** (found validating entries 65-73;
+   pre-existing, not from this consolidation — for the next ADR audit): the
+   status legend defines three statuses but old rows carry unlisted variants
+   (#27 "build section only", #30 partial-supersede format); the "git-history
+   only" label's definition ("exist on disk and in git") contradicts the label;
+   where superseded ADRs physically live is told two ways (#30 says one file
+   moved to `03-superseded`, the Superseded table says "exist in the repository");
+   `POSSE` (#20) is never expanded; validator strings name session-scoped agent
+   ids (`agent-0`, `ae891a5`) that mean nothing to a later reader; pitfalls §2/§10
+   cite undated ADR/wiki counts (84 vs 83 ADRs, 53 vs 51 patterns) as evidence.
+   #51's truncated ADR id (recorded `ADR-202605102330`, real
+   `ADR-20260510233000000`) was repaired in place — the same defect class as
+   item 2 above.
+
 ---
 
 ## Quick Reference: When to Read Which ADR
@@ -286,4 +318,6 @@ Items discovered during consolidation that a weekly either missed or got wrong:
 | How cold pool works | ADR-20260507021957847 (cold-pool package) |
 | How testing works | ADR-20260518024500631 (Agent BDD reproduce.sh) |
 | How governance works | ADR-20260503003314901 (git-coupled trailers) |
+| How review/gates work | ADR-20260910181957316 (two-stage gates) |
+| How deck edits skill-deck.toml | ADR-20260910152957509 (AST splice) |
 | How the site works | ADR-20260528113712898 (two-path strategy) |

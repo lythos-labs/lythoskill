@@ -9,6 +9,7 @@
 > 维护：由 lythoskill-dreaming Phase 2 维护；判定规则见 ADR-20260613190449007。
 > 边界：`cortex index wiki` 生成器只写 `cortex/wiki/INDEX.md`，从不触碰本文件（generate-index.ts 只写 `join(config.wikiDir, 'INDEX.md')`，且 readWikiDir 过滤掉所有 INDEX.md）。
 > 初次分类：2026-08-28（56 篇日期戳 pattern；`weekly-synthesis-template.md` 是模板，不参与分层）。
+> 维护：2026-09-12 dreaming +1 篇（drift-classes → P1，被 `04-ssot/review-gates.md` 引用）。
 
 ## P0 / Active
 
@@ -37,6 +38,7 @@
 | [2026-05-27-path-convention](./2026-05-27-path-convention.md) | `working_set` / `cold_pool` 路径用词约定，已吸收进 `04-ssot/conventions.md` §3（Path Conventions）。 |
 | [2026-05-28-agent-skills-path-reference](./2026-05-28-agent-skills-path-reference.md) | 各 agent 的 skills 目录对照表（`.claude/skills` vs `.agents/skills`），结论已吸收进 `04-ssot/conventions.md` §3 与 §10；原文保留 14+ agent 的完整对照。 |
 | [2026-05-28-agent-evaluation-arena-pattern](./2026-05-28-agent-evaluation-arena-pattern.md) | "agent 出具的评估不可直接信，派第二个 agent 验证"的认知卫生模式，其 frontmatter 声明内容源自 `04-ssot/pitfalls.md` §10 与 `conventions.md` §5——知识以 SSOT 为准。 |
+| [2026-09-11-drift-classes-eight-named-ways-a-project-diverges-from-its-own-record](./2026-09-11-drift-classes-eight-named-ways-a-project-diverges-from-its-own-record.md) | 八类漂移的**权威分类原文**（命名即治理）：dreaming 卡与其检测 pass 委派至此，`04-ssot/review-gates.md` § Drift review 以 related 引用（委派而非吸收——本文即 SSOT）。W37 引用 1 次；第 2 个 weekly 引用时升 P0。 |
 
 ## P2 / Historical
 

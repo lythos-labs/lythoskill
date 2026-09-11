@@ -1,9 +1,9 @@
 ---
-last_consolidated: 2026-08-27
-sources: ["daily/2026-05-28.md", "daily/2026-06-01.md", "daily/2026-07-20.md", "daily/2026-07-27.md", "daily/2026-07-31.md", "weekly/2026-W23.md", "weekly/2026-W29.md", "weekly/2026-W31.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
+last_consolidated: 2026-09-12
+sources: ["daily/2026-05-28.md", "daily/2026-06-01.md", "daily/2026-07-20.md", "daily/2026-07-27.md", "daily/2026-07-31.md", "daily/2026-09-11.md", "weekly/2026-W23.md", "weekly/2026-W29.md", "weekly/2026-W31.md", "weekly/2026-W37.md", "cortex/wiki/01-patterns/2026-05-02-thin-skill-pattern.md", "AGENTS.md"]
 zk_validated: true
-zk_issues: 0
-zk_validator: "ZK subagent agent-0 — 2026-08-27 — validated §4 update + §12-15; P1 (§14 timeline) + P2s fixed in place; earlier sections validated by ZK subagent ae891a5 (2026-05-28)"
+zk_issues: 4
+zk_validator: "ZK subagent agent-0 — 2026-08-27 — validated §4 update + §12-15; P1 (§14 timeline) + P2s fixed in place; earlier sections validated by ZK subagent ae891a5 (2026-05-28). 2026-09-12 cold-reader pass validated the §16-20 delta: 4 findings fixed in place (TASK carrier ids, M-PIN/quote glosses, AGENTS.md line-number citation); pre-existing count inconsistencies (§2 vs §10) flagged in key-decisions Anomalies item 5"
 ---
 
 # Pitfalls — Recurring Failure Modes
@@ -225,3 +225,46 @@ The mirror image of evaluator surface-scan: **project agents defending existing 
 **Root cause**: API quota exhaustion surfaces as a generic 403 that looks like a normal stop. Long experiment batches kept their state only in conversation memory.
 
 **Fix**: Long batch work checkpoints to disk per batch (raw outputs written incrementally, not at the end). Recovery anchors must exist outside the handoff — the handoff is written at session end, which is exactly what didn't happen.
+
+## 16. Mutation Pin That Never Mutated
+
+**Symptom**: A mutation test reports "pass" while running against **unmutated** code — a green that certifies nothing.
+
+**Root cause**: String-replacement anchor didn't match, so nothing was replaced; the run was a no-op. A mutation "pass" and "did nothing" produce identical output — the most dangerous shape because it *looks* like the strongest evidence. (2026-09-11: executor's python anchor missed; caught by self-check, ~10 min lost.)
+
+**Fix**: After mutating, **verify the mutation took effect** (or count the reds) before trusting the result. A mutation pin that cannot go red is not a pin.
+
+## 17. Test and Implementation Share a Source
+
+**Symptom**: Removing a parsing rule (`| backlog (revised) |` no longer folded) silently drops a line of data — the **full suite stays green**.
+
+**Root cause**: The cross-check helper imported `statusToken` from the module under test, so the test inherited the very bug it existed to catch. The card (TASK-20260911080931450) itself carried the warning — "this repo already paid for a second transcription of the same understanding", i.e. a test written by the same mind as the implementation is the same understanding transcribed twice, not a second opinion — and the violation happened in that card's own tests.
+
+**Fix**: Test helpers define their own tokens/fixtures independently; add an M-PIN (mutation-pin test — revert the fix and this test must go red) that goes red when the rule is removed. Knowledge-independent ≠ copy-free.
+
+## 18. Fixtures on the Degenerate Point
+
+**Symptom**: Three different mutations (naive slice / month-day swap / local formatting) all `46 pass / 0 fail` — the function under test could be deleted with no signal.
+
+**Root cause**: Fixture values (month=01, day=01, local noon) sit exactly where multiple wrong implementations agree. Degenerate input makes mutations equivalent. **Related shape, same day**: a test asserting the *directory* of a corpus fixture (a frozen real task card from the 542-card corpus) went red the moment the corpus legally moved (archived) — pinning the present-tense location of movable state.
+
+**Fix**: Pick fixtures where implementations *diverge* (month≠day, local `[00:00,08:00)` window); pin `TZ` in-process and assert the pin took effect. Assert content + provenance, not location, for anything the system may legitimately move.
+
+## 19. A Wrong Explanation Overwriting a Correct Observation
+
+**Symptom**: An executor's environment report ("subprocess stdout invisible under `bun test`") was ruled a hallucination, and the record was rewritten with a different (wrong) reason.
+
+**Root cause**: The replication ran in `/tmp` — no `bunfig.toml`, coverage off — so the phenomenon didn't reproduce *there*, and "didn't happen in my environment" became "doesn't exist." The real cause (coverage-enabled `bun test` swallows `spawnSync` piped stdout; exit code stays correct) was **already documented at AGENTS.md line 353 (`[TEST]` gotcha) with the workaround** — the answer was in the record, unread. (Cite gotchas by tag, not line number — line numbers rot.)
+
+**Fix**: A/B the one environment variable that differs before ruling. When an observation conflicts with your replication, distrust the **scope** of your replication first. Never overwrite someone's observation with your explanation — record both, test which survives. "错误的因果说明躺上盘就会烂成教义" — and so does a wrong dismissal.
+
+## 20. Heredoc Binds to the Last Command of the Pipeline
+
+**Symptom**: `git commit -F - 2>&1 | tail -14 <<'EOF'` commits with an **empty message** (or hangs waiting on an editor); changes stay staged, command may background past its timeout.
+
+**Root cause**: In `A | B <<EOF`, the heredoc belongs to **B** (`tail`), not A (`git`).
+
+**Fix**: Write the message to a file first (`cat > /tmp/msg.txt <<'EOF' … EOF`), then `git commit -F /tmp/msg.txt`.
+
+> **Carriers (§16-20)**: all five incidents occurred on TASK-20260911080931450
+> (2026-09-11); raw accounts in `daily/2026-09-11.md` § Pitfalls.
