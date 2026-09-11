@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import type { WorkflowConfig } from '../types.js';
 import { parseFrontmatter } from '../lib/frontmatter.js';
 import { parseRelations } from '../lib/adr-relations.js';
+import { parse, read, statusToken, type StatusRow } from '../lib/status-history.js';
 
 /** Empty-shell detection patterns — template placeholders that indicate a file was created by CLI but never filled by agent.
  *
@@ -199,6 +200,24 @@ const defaultProbeIO: ProbeIO = {
   cwd: process.cwd,
 };
 
+/** The most recent row with this status whose Date cell actually parses.
+ *
+ *  Deliberately not "the last matching row": a row whose date is `(unknown)` — or any other
+ *  non-date — must not silently suppress the warning. The pre-routing regex required a
+ *  `YYYY-MM-DD` shape, so it skipped such rows and matched one that had a date; taking the
+ *  last matching row regardless broke that accidentally-correct fall-through (the age became
+ *  NaN and the check said nothing). When no row parses there is genuinely nothing to age,
+ *  and no claim is made.
+ */
+function lastDatedRow(rows: StatusRow[], status: string): StatusRow | null {
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const row = rows[i];
+    if (statusToken(row.status) !== status) continue;
+    if (!isNaN(new Date(row.date).getTime())) return row;
+  }
+  return null;
+}
+
 function scanDirWithIO(dir: string, prefix: string, io: ProbeIO): string[] {
   const files: string[] = [];
   if (!io.exists(dir)) return files;
@@ -217,49 +236,17 @@ function scanDirWithIO(dir: string, prefix: string, io: ProbeIO): string[] {
   return files;
 }
 
+/**
+ * The probe's view of a document's status record.
+ *
+ * The shape definition lives in `lib/status-history.ts` — one definition shared with the
+ * writer (`move.ts`) and with `flow.ts`. This function is a thin alias kept because the
+ * probe's callers and tests know the name; it holds no grammar of its own. Before
+ * `TASK-20260911080931450` it held a private copy, and that copy is exactly what let the
+ * CLI write a shape the CLI could not read.
+ */
 export function extractStatusHistory(content: string): { lines: string[]; hasSection: boolean; singleStatus: string | null } {
-  // 1. 优先查找 ## Status History section
-  const sectionMatch = content.match(/##\s+Status\s+History\s*\n([\s\S]*?)(?=\n##\s+|\n#{1,2}\s|$)/i);
-  if (sectionMatch) {
-    const sectionContent = sectionMatch[1];
-    const lines = sectionContent.split('\n').map(l => l.trim());
-
-    // 1a. 尝试解析 Markdown 表格（第一列 = Status）
-    const tableStatuses: string[] = [];
-    let inTable = false;
-    for (const line of lines) {
-      if (line.startsWith('|')) {
-        inTable = true;
-        // 跳过分隔行 |---|---|
-        if (/^\|[-\s|]+\|$/.test(line)) continue;
-        const cells = line.split('|').map(c => c.trim()).filter(c => c);
-        if (cells.length > 0 && cells[0].toLowerCase() !== 'status') {
-          tableStatuses.push(cells[0]);
-        }
-      } else if (inTable && !line.startsWith('|')) {
-        break;
-      }
-    }
-    if (tableStatuses.length > 0) {
-      return { lines: tableStatuses, hasSection: true, singleStatus: null };
-    }
-
-    // 1b. 回退到列表格式
-    const listItems = lines
-      .filter(l => l.startsWith('- ') || l.startsWith('* '))
-      .map(l => l.replace(/^[-*]\s+/, '').trim())
-      .filter(Boolean);
-    return { lines: listItems, hasSection: true, singleStatus: null };
-  }
-
-  // 2. 兼容旧格式 ## Status（单行状态）
-  const statusMatch = content.match(/##\s+Status\s*\n\s*(\S[^\n]*)/i);
-  if (statusMatch) {
-    const status = statusMatch[1].trim();
-    return { lines: [status], hasSection: true, singleStatus: status };
-  }
-
-  return { lines: [], hasSection: false, singleStatus: null };
+  return parse(content);
 }
 
 export function inferStatusFromPath(
@@ -554,8 +541,13 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       for (const f of backlogFiles) {
         const stat = io.readFile(f);
         if (stat === null) continue;
-        const createdMatch = stat.match(/\|\s*backlog\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
-        const dateStr = createdMatch ? createdMatch[1] : null;
+        // Through the shared record definition — a raw regex here was a third row-grammar
+        // in the same file, fence-blind and unanchored to the canonical table (the twin-scan
+        // class the fence ruling exists to prevent). Last `backlog` row = the most recent
+        // entry into backlog, which is the age this check is about. Measured 2026-09-11:
+        // identical dates to the old regex for all 14 backlog cards, 0 differences.
+        const backlogRow = lastDatedRow(read(stat), 'backlog');
+        const dateStr = backlogRow ? backlogRow.date : null;
         if (dateStr) {
           const age = now - new Date(dateStr).getTime();
           if (age > THREE_DAYS) {
@@ -573,8 +565,10 @@ export function executeProbePlan(plan: ProbePlan, io: ProbeIO = defaultProbeIO):
       for (const f of activeEpicFiles) {
         const content = io.readFile(f);
         if (content === null) continue;
-        const statusMatch = content.match(/\|\s*active\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|/);
-        const dateStr = statusMatch ? statusMatch[1] : null;
+        // Same routing as the backlog check above: canonical table only, last `active` row.
+        // Measured 2026-09-11: identical to the old regex for the single active epic.
+        const activeRow = lastDatedRow(read(content), 'active');
+        const dateStr = activeRow ? activeRow.date : null;
         if (dateStr) {
           const age = now - new Date(dateStr).getTime();
           if (age > THREE_DAYS) {

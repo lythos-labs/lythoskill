@@ -4,6 +4,7 @@ import type { WorkflowConfig } from '../types.js';
 import { ensureDir } from '../lib/fs.js';
 import { findDocById } from '../id-guard.js';
 import { generateIndex, generateWikiIndex } from '../generate-index.js';
+import { append, type DocKind } from '../lib/status-history.js';
 
 // ---------------------------------------------------------------------------
 // Status / directory mapping per doc kind
@@ -57,6 +58,7 @@ const EPIC_VALID_TRANSITIONS: Record<string, string[]> = {
 };
 
 interface DocKindConfig {
+  kind: DocKind;
   prefix: string;
   baseDir: (config: WorkflowConfig) => string;
   subdirs: (config: WorkflowConfig) => Record<string, string>;
@@ -66,6 +68,7 @@ interface DocKindConfig {
 }
 
 const TASK_KIND: DocKindConfig = {
+  kind: 'task',
   prefix: 'TASK-',
   baseDir: c => c.tasksDir,
   subdirs: c => c.taskSubdirs,
@@ -75,6 +78,7 @@ const TASK_KIND: DocKindConfig = {
 };
 
 const ADR_KIND: DocKindConfig = {
+  kind: 'adr',
   prefix: 'ADR-',
   baseDir: c => c.adrDir,
   subdirs: c => c.adrSubdirs,
@@ -84,6 +88,7 @@ const ADR_KIND: DocKindConfig = {
 };
 
 const EPIC_KIND: DocKindConfig = {
+  kind: 'epic',
   prefix: 'EPIC-',
   baseDir: c => c.epicsDir,
   subdirs: c => c.epicSubdirs,
@@ -118,36 +123,6 @@ function findDocFile(
     }
   }
   return null;
-}
-
-function appendStatusHistory(content: string, status: string, note: string): string {
-  const today = new Date().toISOString().split('T')[0];
-  const newLine = `| ${status} | ${today} | ${note} |`;
-
-  const sectionMatch = content.match(/(##\s+Status\s+History\s*\n[\s\S]*?)(\n##\s+|\n#{1,2}\s|$)/i);
-  if (!sectionMatch) {
-    return content + `\n\n| ${status} | ${today} | ${note} |\n`;
-  }
-
-  const section = sectionMatch[1];
-  const lines = section.split('\n');
-  let lastTableRow = -1;
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i].trim();
-    if (line.startsWith('|')) {
-      if (/^\|[-\s|]+\|$/.test(line)) continue;
-      lastTableRow = i;
-      break;
-    }
-  }
-
-  if (lastTableRow === -1) {
-    return content.replace(section, section + '\n' + newLine);
-  }
-
-  lines.splice(lastTableRow + 1, 0, newLine);
-  const newSection = lines.join('\n');
-  return content.replace(section, newSection);
 }
 
 interface MoveOptions {
@@ -224,7 +199,11 @@ ${anyStatusVerbs}     • Move ${labelLower} through valid intermediate states f
 
   const content = readFileSync(found.path, 'utf-8');
   const note = options.note || targetStatus.charAt(0).toUpperCase() + targetStatus.slice(1);
-  const updatedContent = appendStatusHistory(content, targetStatus, note);
+  // Date column convention is UTC (`toISOString`). The document ID is passed separately:
+  // it is local-time minted, so it is the wrong source for the *transition* date and the
+  // right source for the reconstructed *origin* row's date (see `append`).
+  const today = new Date().toISOString().split('T')[0];
+  const updatedContent = append(content, kind.kind, targetStatus, today, note, basename(found.path));
 
   ensureDir(destDir);
   writeFileSync(found.path, updatedContent);

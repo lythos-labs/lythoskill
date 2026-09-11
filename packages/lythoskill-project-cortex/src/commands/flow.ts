@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { WorkflowConfig } from '../types.js';
+import { read } from '../lib/status-history.js';
 
 interface ColumnDef {
   key: string;
@@ -33,22 +34,12 @@ function scanDir(dir: string, prefix: string): string[] {
 }
 
 function extractFirstDate(content: string): Date | null {
-  // Parse Status History table — first data row's Date column
-  const sectionMatch = content.match(/##\s+Status\s+History\s*\n([\s\S]*?)(?=\n##\s+|\n#{1,2}\s|$)/i);
-  if (!sectionMatch) return null;
-
-  const lines = sectionMatch[1].split('\n');
-  for (const line of lines) {
-    if (!line.startsWith('|')) continue;
-    if (/^\|[-\s|]+\|$/.test(line)) continue;
-    const cells = line.split('|').map(c => c.trim()).filter(c => c);
-    if (cells.length >= 2 && cells[0].toLowerCase() === 'status') continue;
-    if (cells.length >= 2) {
-      const parsed = new Date(cells[1]);
-      if (!isNaN(parsed.getTime())) return parsed;
-    }
-  }
-  return null;
+  // First data row of the canonical Status History table — the shape definition lives in
+  // `lib/status-history.ts`, shared with `probe.ts` and the writer (`move.ts`).
+  const rows = read(content);
+  if (rows.length === 0) return null;
+  const parsed = new Date(rows[0].date);
+  return isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function calculateAvgAge(files: string[]): number | null {
