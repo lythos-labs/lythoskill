@@ -1,6 +1,6 @@
 ---
 name: lythoskill-dreaming
-version: 0.19.2
+version: 0.19.3
 description: |
   Project memory consolidation — 夜有所梦 ("night dreams": the day's scattered
   notes get consolidated into long-term memory while "sleeping"). Daily (scribe) captures raw

@@ -80,14 +80,14 @@ Every `packages/*/package.json` and the root `package.json` carry the **same** v
 
 ```bash
 # Preview
-bunx @lythos/skill-creator@0.19.2 bump patch --dry-run
-bunx @lythos/skill-creator@0.19.2 bump 1.0.0 --dry-run
+bunx @lythos/skill-creator@0.19.3 bump patch --dry-run
+bunx @lythos/skill-creator@0.19.3 bump 1.0.0 --dry-run
 
 # Real run
-bunx @lythos/skill-creator@0.19.2 bump patch       # 0.7.2 → 0.7.3
-bunx @lythos/skill-creator@0.19.2 bump minor       # 0.7.2 → 0.8.0
-bunx @lythos/skill-creator@0.19.2 bump major       # 0.7.2 → 1.0.0
-bunx @lythos/skill-creator@0.19.2 bump 1.2.3       # explicit X.Y.Z
+bunx @lythos/skill-creator@0.19.3 bump patch       # 0.7.2 → 0.7.3
+bunx @lythos/skill-creator@0.19.3 bump minor       # 0.7.2 → 0.8.0
+bunx @lythos/skill-creator@0.19.3 bump major       # 0.7.2 → 1.0.0
+bunx @lythos/skill-creator@0.19.3 bump 1.2.3       # explicit X.Y.Z
 ```
 
 > The specifier is the repo's **current** version, substituted at build time — never a literal. It was hardcoded to `@0.16.0` until 2026-09-11, three versions stale, which is the same trap the specifier exists to avoid: a stale pin installs a different creator than the repo's.
@@ -105,7 +105,7 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 
 ## SKILL.md Source Files Are Templates
 
-`packages/*/skill/SKILL.md` contains placeholders (`0.19.2`, `@lythos/skill-creator`, `lythoskill-creator`, `src/cli.ts`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
+`packages/*/skill/SKILL.md` contains placeholders (`0.19.3`, `@lythos/skill-creator`, `lythoskill-creator`, `src/cli.ts`). They are re-rendered into `skills/<name>/SKILL.md` on every build. **Never replace them with literal values in source** — that breaks future renders.
 
 ## Release Order
 
