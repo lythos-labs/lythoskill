@@ -2,8 +2,9 @@
 
 > Sorted by creation date (newest first). Older entries may be superseded by newer ones.
 
-## 📚 Patterns (58)
+## 📚 Patterns (59)
 
+- **[2026-09-11]** [drift-classes-eight-named-ways-a-project-diverges-from-its-own-record](./01-patterns/2026-09-11-drift-classes-eight-named-ways-a-project-diverges-from-its-own-record.md)
 - **[2026-07-10]** [zk-review-trade-off-awareness](./01-patterns/2026-07-10-zk-review-trade-off-awareness.md)
 - **[2026-06-15]** [long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting](./01-patterns/2026-06-15-long-range-traceability-arena-web-share-from-idea-to-backlog-to-waiting.md)
 - **[2026-06-15]** [zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy](./01-patterns/2026-06-15-zk-review-cognitive-foundations-curse-of-knowledge-review-continuity-attention-economy.md)
