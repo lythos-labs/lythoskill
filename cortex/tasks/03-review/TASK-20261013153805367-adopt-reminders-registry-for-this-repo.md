@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-13 | Created |
 | in-progress | 2026-10-13 | Started |
+| review | 2026-10-13 | Deliverables committed |
 
 ## Background & Goals
 ADR-20261013143648588 的 follow-up 明确列出"本仓自用 cortex/REMINDERS.toml"且
