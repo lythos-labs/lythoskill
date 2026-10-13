@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-13 | Created |
 | in-progress | 2026-10-13 | Started |
+| review | 2026-10-13 | Deliverables committed |
 
 ## Background & Goals
 把站长在另一项目跑通的 session 级声明式提醒 registry(7 条目在册:heartbeat R0 /

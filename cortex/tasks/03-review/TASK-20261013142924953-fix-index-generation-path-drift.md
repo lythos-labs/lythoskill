@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-13 | Created |
 | in-progress | 2026-10-13 | Started |
+| review | 2026-10-13 | Deliverables committed |
 
 ## Background & Goals
 `cortex index` 生成的 `INDEX.md` 落点与文档漂移。文档（SKILL.md Directory Structure、
