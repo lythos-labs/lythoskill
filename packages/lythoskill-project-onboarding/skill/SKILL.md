@@ -45,6 +45,17 @@ git log --oneline -5
 
 Compare against handoff's **0. Verify Current State** section. If they diverge,
 handoff is stale — flag it and rely on real-time git output.
+
+### Layer 3b: CI 尾检 (always required)
+```bash
+export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"  # macOS
+gh run list --workflow=CI --limit 1    # expect: the latest main push = success
+```
+CI is the one piece of ground truth git cannot show you. If the latest main
+push is not `success`, triage it FIRST (per diagnosing-bugs) before starting
+new work — red CI is a previous session's dropped ball, and it does not age
+well (2026-10-13: three red pushes sat on main for ~6 hours because the
+post-push check was skipped). `gh` 401 = token expired, tell the user.
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:
 ```bash
@@ -88,6 +99,7 @@ After loading, summarize to user:
 - [ ] Layer 2: Find latest daily/, read handoff section
 - [ ] Assess freshness (git_commit match, date recency)
 - [ ] Layer 3: Verify with `git status` + `git log`
+- [ ] Layer 3b: CI 尾检 — `gh run list --workflow=CI --limit 1` is success; red → triage first
 - [ ] If handoff fresh → use directly
 - [ ] If handoff stale/missing → degraded exploration
 - [ ] Output summary to user
