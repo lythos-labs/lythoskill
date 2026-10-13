@@ -1,0 +1,30 @@
+# cortex/REMINDERS.toml — session 级提醒的声明式 registry(条目 SSOT,机读)
+# 协议/由来/并发 lease 锁=见 cortex/REMINDERS.md(先读它再改本表)
+# reconcile:入场读本表 → CronList 对照(按 prompt 内嵌 R-id 匹配)→ 缺员按条目 CronCreate(cron/prompt 照抄)
+# 字段:id / cron(5 字段,避 :00/:30) / recurring(false=一次性,pinned 日期) / expires(失效条件,命中即退役) / prompt(零上下文可执行:任务+指针+Done+别重做,≤8KiB)
+# 退役:删条目 + REMINDERS.md 留退役记录;id 不复用。
+# 模板保留中文原形(出处=站长已跑通项目);skill 正文与 references 为英文优先,字段含义以 references/registry-schema.md 为准。
+
+# ── 心跳(多 session 共用这个 repo 时才需要;协议全文=skill 的 references/lease-protocol.md)──
+# [[reminder]]
+# id = "R0"
+# cron = "33 8 * * *"
+# recurring = true
+# expires = "无常设 heartbeat=lease 续租,退役=机制本身废弃"
+# prompt = """R0 heartbeat(R0,registry=cortex/REMINDERS.toml;协议=cortex/REMINDERS.md「并发协议」节):读 .reminders-owner.lock/owner.json——①锁属本 session 且在租:把 lease_until 刷成 now+3 天,把当前 ISO 时间戳写进 .reminders-owner.lock/last-heartbeat(fork/clear 再确认要读的活性证据),顺手 CronList 按 cortex/REMINDERS.toml 补挂缺员,完事(无 chat 输出);②锁属他 session 且在租且 last-heartbeat 新鲜(2×R0 周期内):用 CronDelete 删掉自己所有 R 系 cron(自我清场),不再行动;③锁不存在/已过期/他主 last-heartbeat 过期(fork/clear 僵尸):mkdir 抢占或重写 owner.json、重挂在册提醒,然后在 daily 落一行「R0 接管锁(原因)」。"""
+
+# ── 周期提醒样例(照此形状写,内容随项目)──
+# [[reminder]]
+# id = "R1"
+# cron = "47 9 */2 * *"
+# recurring = true
+# expires = "条件写具体:什么发生了就降频/改派/退役"
+# prompt = """任务名(R1,registry=cortex/REMINDERS.toml):一句话任务。指针=具体文件/命令;Done=落在 daily 的一行可验证结果(允许「站长未回」这种负答案);别重做=明确什么不许再动。"""
+
+# ── 一次性提醒样例(日期 pinned 在 cron 里,firing 即自退役)──
+# [[reminder]]
+# id = "R2"
+# cron = "18 9 15 12 *"
+# recurring = false
+# expires = "触发即退役(Done 里包含删条目+留记录的步骤)"
+# prompt = """死期前检(R2,registry=cortex/REMINDERS.toml;一次性):做什么+读哪个决策文件;若已无关→确认零影响并在 cortex/REMINDERS.toml 退役本条(删条目+REMINDERS.md 退役记录留行);若仍依赖→升级重审。Done=文件回写一行状态+本条退役或升级件落盘。"""
