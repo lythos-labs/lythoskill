@@ -88,8 +88,11 @@ reminder-registry)/C3(宿主选择)命中,故 ADR 记录。
 - Negative: 每 session 入场多一次 CronList 对照(成本一次工具调用);skill 数 +1,
   deck 工作集增大一份。
 - Follow-up:
-  - [ ] 本仓自用 `cortex/REMINDERS.toml`(候选:R5 式 weekly 自动复盘、entropy-check
+  - [x] 本仓自用 `cortex/REMINDERS.toml`(候选:R5 式 weekly 自动复盘、entropy-check
     周期提醒、probe 清扫)——落地前另开卡,本条 ADR 不自动启动它;
+    **2026-10-13 落地 @ 0cf47731**(TASK-20261013153805367:R0 heartbeat + R1 weekly
+    复盘 + R2 probe 周清扫;entropy-check deliberate drop——pre-push 钩子已自管;
+    锁已抢,3 cron 在册核实)
   - [ ] `skill-deck.toml` 是否将 `lythoskill-reminders` 列入工作集,由站长定;
   - [ ] SKILL.md 完成后过 coach 评审(body 体积/description 质量)。
 <!-- ^ Follow-up work of an ALREADY-ACCEPTED ADR is carried by THIS ADR — do not open a
