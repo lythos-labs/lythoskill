@@ -367,7 +367,8 @@ function parseScenario(mdPath: string): Scenario {
     const indexMatch = bullet.match(/INDEX\.md was regenerated/i)
     if (indexMatch) {
       then.fileExists = then.fileExists || []
-      then.fileExists.push('INDEX.md')
+      // Since v0.20.0 the index lands at cortex/INDEX.md (config-derived), not CWD root
+      then.fileExists.push('cortex/INDEX.md')
       continue
     }
   }
