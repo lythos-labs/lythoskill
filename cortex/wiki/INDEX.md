@@ -124,12 +124,13 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
-## 🧭 SSOT (11)
+## 🧭 SSOT (12)
 
 - **[0000-00-00]** [agent-onboarding-guide](./04-ssot/agent-onboarding-guide.md)
 - **[0000-00-00]** [architecture](./04-ssot/architecture.md)
 - **[0000-00-00]** [pitfalls](./04-ssot/pitfalls.md)
 - **[0000-00-00]** [conventions](./04-ssot/conventions.md)
+- **[0000-00-00]** [review-gates](./04-ssot/review-gates.md)
 - **[0000-00-00]** [glossary](./04-ssot/glossary.md)
 - **[0000-00-00]** [player-prerequisites](./04-ssot/player-prerequisites.md)
 - **[0000-00-00]** [agent-onboarding-guide.zh](./04-ssot/agent-onboarding-guide.zh.md)
