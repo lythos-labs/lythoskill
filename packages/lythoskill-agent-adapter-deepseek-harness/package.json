@@ -1,6 +1,6 @@
 {
   "name": "@lythos/agent-adapter-deepseek-harness",
-  "version": "0.19.3",
+  "version": "0.20.0",
   "description": "DeepSeek Harness (dsh) headless player adapter for lythoskill arena",
   "type": "module",
   "scripts": {
