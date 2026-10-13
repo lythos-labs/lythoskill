@@ -1,6 +1,6 @@
 ---
 name: lythoskill-reminders
-version: 0.19.3
+version: 0.20.0
 description: |
   Reconciles a declarative session-reminder registry (cortex/REMINDERS.toml)
   against the host's session-scoped cron tools. The committed TOML is the
