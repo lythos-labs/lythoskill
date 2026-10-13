@@ -14,6 +14,7 @@ tasks: []
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-10-13 | Created |
+| accepted | 2026-10-13 | Accepted |
 
 ## Background
 站长在另一个项目沉淀了一套 session 级提醒的声明式 registry 并实测跑通(7 个在册条目:
