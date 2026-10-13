@@ -38,10 +38,10 @@ ADR-20261013143648588 是唯一决策记录,本节只引用不重复。执行要
 - 样例条目从站长项目原样收录并逐条注释"该字段为什么这样写"
 
 ## Acceptance Criteria
-- [ ] `bun packages/lythoskill-creator/src/cli.ts build lythoskill-reminders` 产物齐(SKILL.md+references+assets)
-- [ ] coach 评审通过(body 体积/description/渐进披露无 P1)
-- [ ] 全仓 `bun --filter='*' run test` 不红(skill-only 无测试,门槛是 build + 既有全绿)
-- [ ] 随 v0.20.0 一起 release(与 INDEX fix 合包,站长已定)
+- [x] `bun packages/lythoskill-creator/src/cli.ts build lythoskill-reminders` 产物齐(SKILL.md+references+assets)——5 文件,built @ v0.20.0
+- [x] coach 评审通过(body 体积/description/渐进披露无 P1)——一轮 subagent 评审:2 P1+2 P2+6 P3 全部就地修复;折后未评 delta=lease 协议 fork/clear 再确认(站长指认),已标注
+- [x] 全仓 `bun --filter='*' run test` 不红(skill-only 无测试,门槛是 build + 既有全绿)——v0.20.0 发布跑全仓 1283 pass / 0 fail
+- [x] 随 v0.20.0 一起 release(与 INDEX fix 合包,站长已定)——已发布:npm 14 包 0.20.0 + GitHub Release + site deploy 全绿(2026-10-13 核实)
 
 ## Progress Log
 - 2026-10-13 ADR-20261013143648588 经站长接受(选项 A);卡建于实现前。

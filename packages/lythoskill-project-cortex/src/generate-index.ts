@@ -249,10 +249,15 @@ ${adrs.map(a => {
 *此文件由 generate-index.ts 自动生成*
 `;
 
-  const indexPath = join(dirname(config.tasksDir), 'INDEX.md');
-  ensureDir(dirname(indexPath));
-  writeFileSync(indexPath, content);
-  console.log(`✅ Generated ${indexPath}`);
+  try {
+    const indexPath = join(dirname(config.tasksDir), 'INDEX.md');
+    ensureDir(dirname(indexPath));
+    writeFileSync(indexPath, content);
+    console.log(`✅ Generated ${indexPath}`);
+  } catch (err) {
+    // On the init path since v0.20.0 — a failed index write must not abort init
+    console.warn(`⚠️  Failed to generate INDEX.md: ${err}`);
+  }
 }
 
 // 生成 Wiki 索引
