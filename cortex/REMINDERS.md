@@ -29,6 +29,7 @@ TOML 是 SSOT(该挂什么钟),session cron 是派生易失态(现在挂着什�
 | R0 heartbeat | 2026-10-13 | 站长多 session(fork/clear 频繁)共用这个 repo,需要 lease 防护;prompt 照抄跑通原形 |
 | R1 weekly 复盘 | 2026-10-13 | W36 曾断链一周需 catch-up(09-12 daily 自记),周复盘靠人记会丢;调 scribe-weekly skill |
 | R2 probe 周清扫 | 2026-10-13 | probe issues 17→18 自然陈化(09-11→10-13 无人清扫),stale backlog/epic drift/wiki 结构漂移需要周期性处置 |
+| R3 dogfood 三日评审 | 2026-10-13 | 一次性;10-16 评审 registry 自挂三日表现,Done 内含自退役——一次性条目生命周期机制的实景测试 |
 
 不挂候选( deliberate drop ):entropy-check——pre-push 钩子已按 7 天间隔自管
 (2026-10-13 push 实证:"Last check 10s ago (< 604800s interval)"),再挂=重做。
