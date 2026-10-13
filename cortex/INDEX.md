@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/13 15:42:33
+> 自动生成于 2026/10/13 22:58:55
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 388 | 进行中: 0, 待验收: 3, 已完成: 323 |
+| Tasks | 390 | 进行中: 0, 待验收: 4, 已完成: 323 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 109 | 已接受: 104 |
 
@@ -76,7 +76,7 @@
 
 ## 📄 Tasks
 
-### 待办 (15)
+### 待办 (16)
 
 - [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
 - [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
@@ -93,16 +93,18 @@
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 - [ ] **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
+- [ ] **TASK-20261013225757554**: wire ci-gate into pre-push hook
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (3)
+### 待验收 (4)
 
 - 🔍 **TASK-20261013142924953**: fix index generation path drift
 - 🔍 **TASK-20261013144643210**: lythoskill-reminders skill
 - 🔍 **TASK-20261013153805367**: adopt reminders registry for this repo
+- 🔍 **TASK-20261013225251343**: ci-gate local CI gate and push-watch SOP
 
 ### 已完成 (323)
 
