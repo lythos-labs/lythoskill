@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/13 15:33:21
+> 自动生成于 2026/10/13 15:39:23
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 387 | 进行中: 0, 待验收: 2, 已完成: 323 |
+| Tasks | 388 | 进行中: 1, 待验收: 2, 已完成: 323 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 109 | 已接受: 104 |
 
@@ -94,9 +94,9 @@
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 - [ ] **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20261013153805367**: adopt reminders registry for this repo
 
 ### 待验收 (2)
 
