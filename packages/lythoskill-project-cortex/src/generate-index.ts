@@ -6,8 +6,9 @@
  */
 
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import type { WorkflowConfig } from './types.js';
+import { ensureDir } from './lib/fs.js';
 
 interface TaskInfo {
   id: string;
@@ -248,8 +249,10 @@ ${adrs.map(a => {
 *此文件由 generate-index.ts 自动生成*
 `;
 
-  writeFileSync('INDEX.md', content);
-  console.log('✅ Generated INDEX.md');
+  const indexPath = join(dirname(config.tasksDir), 'INDEX.md');
+  ensureDir(dirname(indexPath));
+  writeFileSync(indexPath, content);
+  console.log(`✅ Generated ${indexPath}`);
 }
 
 // 生成 Wiki 索引

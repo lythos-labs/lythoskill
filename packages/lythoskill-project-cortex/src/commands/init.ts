@@ -3,6 +3,7 @@ import { existsSync, writeFileSync, copyFileSync } from 'node:fs';
 import type { WorkflowConfig } from '../types.js';
 import { ensureDir } from '../lib/fs.js';
 import { DEFAULT_CONFIG, CONFIG_FILE } from '../config.js';
+import { generateIndex } from '../generate-index.js';
 
 const ASSETS_DIR = join(import.meta.dir, '../../assets');
 
@@ -72,6 +73,9 @@ export function initWorkflow(config: WorkflowConfig): void {
     writeFileSync(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2));
     console.log(`\n📝 Created config: ${CONFIG_FILE}`);
   }
+
+  // Fresh init: generate the initial INDEX.md so the documented tree is complete
+  generateIndex(config);
 
   console.log('\n✨ Workflow initialized!');
 }
