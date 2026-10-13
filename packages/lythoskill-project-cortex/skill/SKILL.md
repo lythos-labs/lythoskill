@@ -445,6 +445,17 @@ read `${CLAUDE_SKILL_DIR}/assets/TASK-TEMPLATE.md` (or ADR/EPIC). Or look at
 existing files in cortex/ — the playground examples are real CLI output.
 **INDEX.md is generated, not hand-edited.** Run `bunx @lythos/project-cortex@{{PACKAGE_VERSION}} index`
 after any status change. Manual edits will be overwritten.
+**bunx fails: `Cannot find module "./config.js" from .../bunx-501-.../src/cli.ts`.**
+The published package is NOT broken — Bun resolves the `./config.js` import to the
+sibling `config.ts`, so this error means the *local* bunx extraction lost files
+(interrupted write or OS temp reaping). bunx reuses its install dir under `$TMPDIR`
+(macOS: `/var/folders/.../T/bunx-501-@lythos/...`), so the error repeats byte-for-byte
+across runs. Fix: `rm -rf "$TMPDIR"/bunx-501-@lythos*` and re-run — bunx rebuilds from
+the intact tarball. Do NOT touch `BUN_INSTALL_CACHE_DIR` (that is the download cache,
+not the install dir — the wrong knob changes nothing), and do NOT hand-create cards as
+a workaround: CLI create is mandatory (manual creation breaks FSM + probe).
+Real case: 2026-10-13, `@0.19.1` — verifier confirmed tarball complete + clean install
+works end-to-end; only the cached extraction was corrupt.
 ## Supporting References
 Read these **only when the specific topic arises**:
 | When you need to… | Read |
