@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/13 22:58:55
+> 自动生成于 2026/10/14 16:57:15
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 390 | 进行中: 0, 待验收: 4, 已完成: 323 |
+| Tasks | 390 | 进行中: 0, 待验收: 0, 已完成: 327 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 109 | 已接受: 104 |
 
@@ -99,14 +99,11 @@
 
 _无_
 
-### 待验收 (4)
+### 待验收 (0)
 
-- 🔍 **TASK-20261013142924953**: fix index generation path drift
-- 🔍 **TASK-20261013144643210**: lythoskill-reminders skill
-- 🔍 **TASK-20261013153805367**: adopt reminders registry for this repo
-- 🔍 **TASK-20261013225251343**: ci-gate local CI gate and push-watch SOP
+_无_
 
-### 已完成 (323)
+### 已完成 (327)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -431,6 +428,10 @@ _无_
 - ✅ ~~TASK-20260910184110804~~: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 - ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
 - ✅ ~~TASK-20260911080931450~~: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
+- ✅ ~~TASK-20261013142924953~~: fix index generation path drift
+- ✅ ~~TASK-20261013144643210~~: lythoskill-reminders skill
+- ✅ ~~TASK-20261013153805367~~: adopt reminders registry for this repo
+- ✅ ~~TASK-20261013225251343~~: ci-gate local CI gate and push-watch SOP
 
 ### 悬置 (3)
 

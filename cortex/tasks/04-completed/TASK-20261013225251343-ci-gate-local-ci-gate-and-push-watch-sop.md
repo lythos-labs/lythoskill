@@ -8,6 +8,7 @@
 | backlog | 2026-10-13 | Created |
 | in-progress | 2026-10-13 | Started |
 | review | 2026-10-13 | Deliverables committed |
+| completed | 2026-10-14 | Done |
 
 ## Background & Goals
 2026-10-13 事故:`cortex index` 落点修复(v0.20.0)后,cortex BDD fixture 仍断言
