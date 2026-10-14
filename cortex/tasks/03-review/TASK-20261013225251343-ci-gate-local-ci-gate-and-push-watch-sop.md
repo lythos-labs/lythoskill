@@ -16,12 +16,12 @@
 BDD/validate/artifacts-sync 步骤。站长要求:"怎么让你能够严格执行不跳不漏"。
 
 ## Requirements
-- [ ] `scripts/ci-gate.ts`:单命令 = CI test job 的本地可跑超集(unit + cortex BDD + deck BDD + validate decks + site snippets + align + artifacts sync),collect-all 输出
-- [ ] AGENTS.md Submit 节:push 后 `gh run watch --exit-status` 盯到终态才可收尾;超时→一次性 backstop cron + daily open item;禁止以"CI running"结束回合
-- [ ] AGENTS.md Gotchas += [CI-GATE](本地 test gate ≠ CI gate,附事故实例)
-- [ ] onboarding SKILL.md boot 序列 += CI 尾检(上 push 的 CI 非 success → 先 triage)
-- [ ] build 同步 skills/ 产物
-- [ ] 跟进卡:把 ci-gate 接进 pre-push 钩子(.husky 改动需 qa-sweep 负测试,单独一轮)
+- [x] `scripts/ci-gate.ts`:单命令 = CI test job 的本地可跑超集(unit + cortex BDD + deck BDD + validate decks + site snippets + align + artifacts sync),collect-all 输出
+- [x] AGENTS.md Submit 节:push 后 `gh run watch --exit-status` 盯到终态才可收尾;超时→一次性 backstop cron + daily open item;禁止以"CI running"结束回合
+- [x] AGENTS.md Gotchas += [CI-GATE](本地 test gate ≠ CI gate,附事故实例)
+- [x] onboarding SKILL.md boot 序列 += CI 尾检(上 push 的 CI 非 success → 先 triage)
+- [x] build 同步 skills/ 产物
+- [x] 跟进卡:把 ci-gate 接进 pre-push 钩子(.husky 改动需 qa-sweep 负测试,单独一轮)
 
 ## Technical Approach
 无架构决策(脚本编排 + 文档/SOP),0/6 C-criteria,无需 ADR。
@@ -31,9 +31,9 @@ SOP 三层的取舍:行为层(AGENTS.md+onboarding)本卡落地;机械层(pre-pu
 独立成卡——guard 改动按仓规需 qa-sweep 负测试,不并进来。
 
 ## Acceptance Criteria
-- [ ] `bun scripts/ci-gate.ts` 本地全绿(本次 dogfood:改完先跑它再 push)
-- [ ] AGENTS.md/onboarding 改动 build 后同步到 skills/
-- [ ] 本卡 commit push 后 CI watch 到终态为 success(新 SOP 的第一次实战)
+- [x] `bun scripts/ci-gate.ts` 本地全绿(本次 dogfood:改完先跑它再 push)
+- [x] AGENTS.md/onboarding 改动 build 后同步到 skills/
+- [x] 本卡 commit push 后 CI watch 到终态为 success(新 SOP 的第一次实战)
 
 ## Progress Log
 - 2026-10-13 事故实况:CI run 38363612556/38364452973/38364722353 三连红,根因=cortex BDD fixture 断言旧行为;fixture 修正(25906116)后 CI 绿。

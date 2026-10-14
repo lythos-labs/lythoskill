@@ -20,14 +20,14 @@
 compaction/新 session 失忆; daily/scribe-weekly 获得定时触发入口。
 
 ## Requirements
-- [ ] 新建 skill-only 包 `packages/lythoskill-reminders/skill/`(无 npm 包,scribe/dreaming 先例)
-- [ ] SKILL.md:模型(SSOT vs 派生态)、reconcile 入场协议、prompt 零上下文契约、cron 卫生(5 字段/避 :00:30/8KiB/50 条上限)、条目生命周期(增/改/退役)
-- [ ] references/registry-schema.md:字段规范 + 带注释的真实条目样例
-- [ ] references/lease-protocol.md:多 session 并发租约协议全文(R0 三分支)
-- [ ] assets/:REMINDERS-TEMPLATE.toml + REMINDERS-TEMPLATE.md 起步模板
-- [ ] build → `skills/lythoskill-reminders/`,deck link 后 agent 可见
-- [ ] coach 评审一轮并吸收修改
-- [ ] 明确 `.reminders-owner.lock/` 属运行时态,须 gitignore、永不提交
+- [x] 新建 skill-only 包 `packages/lythoskill-reminders/skill/`(无 npm 包,scribe/dreaming 先例)
+- [x] SKILL.md:模型(SSOT vs 派生态)、reconcile 入场协议、prompt 零上下文契约、cron 卫生(5 字段/避 :00:30/8KiB/50 条上限)、条目生命周期(增/改/退役)
+- [x] references/registry-schema.md:字段规范 + 带注释的真实条目样例
+- [x] references/lease-protocol.md:多 session 并发租约协议全文(R0 三分支)
+- [x] assets/:REMINDERS-TEMPLATE.toml + REMINDERS-TEMPLATE.md 起步模板
+- [x] build → `skills/lythoskill-reminders/`,deck link 后 agent 可见
+- [x] coach 评审一轮并吸收修改
+- [x] 明确 `.reminders-owner.lock/` 属运行时态,须 gitignore、永不提交
 
 ## Technical Approach
 ADR-20261013143648588 是唯一决策记录,本节只引用不重复。执行要点:
