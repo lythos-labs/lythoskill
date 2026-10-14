@@ -139,7 +139,14 @@ if (import.meta.main) {
   }
   if (skipped.length > 0) {
     console.error(`❌ ${skipped.length} package(s) could not be verified (npm error / not published): ${skipped.join(', ')}`)
-    console.error(`   The guard fails CLOSED — an unverifiable manifest is not a clean manifest.`)
+    console.error(`   Usually this is npm replica propagation lag — the publish succeeded but`)
+    console.error(`   'npm view' hit a stale replica. It is recoverable, not a real failure:`)
+    console.error(`     1. Confirm the packages actually published:  npm view <pkg>@${tag} version`)
+    console.error(`     2. If they did -> re-run the workflow:  gh run rerun <run-id>`)
+    console.error(`        (the publish step is idempotent and skips already-published versions)`)
+    console.error(`     3. If a package is still 404 after >10 min it was never published —`)
+    console.error(`        check its Trusted Publisher on npmjs.com and scripts/publish.sh PACKAGES.`)
+    console.error(`   The guard still fails CLOSED — an unverifiable manifest is not a clean manifest.`)
   }
   process.exit(1)
 }

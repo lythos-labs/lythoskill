@@ -20,7 +20,7 @@
 > GitHub PAT lives in the system keychain (`security find-generic-password -s 'lythos-agent-pat' -w` on macOS; `secret-tool lookup org lythos-labs scope agent` on Linux), not in repo files.
 > `.github-token` and `.npm-access` are legacy fallbacks only; the release pipeline uses OIDC trusted publishing and stores no npm token in the repo.
 > Versions move via `bunx @lythos/skill-creator@0.20.1 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
-> Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+> Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md); failure-mode recovery: [release-troubleshooting.md](packages/lythoskill-creator/skill/references/release-troubleshooting.md).
 
 > **🚀 Bootstrap check**: If `.claude/skills/` is empty, run `bun packages/lythoskill-deck/src/cli.ts link` to populate the working set. Deck reconciles the working set against `skill-deck.toml` — symlinks from the cold pool (`~/.agents/skill-repos/`, where `deck add` clones repos) into `.claude/skills/`.
 
@@ -519,7 +519,7 @@ Each `@lythos/*` package on npmjs.com must have one Trusted Publisher:
 
 **New packages** need a first manual publish (classic token or local `publish.sh`) before the Trusted Publisher can be added, because npm cannot register a publisher for a non-existent package.
 
-Full setup details and troubleshooting: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md).
+Full setup details: [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md). Failure-mode recovery (verify-step 404, follow-up commit not landing, tag not firing, stale skill-only packages): [release-troubleshooting.md](packages/lythoskill-creator/skill/references/release-troubleshooting.md).
 
 #### Lock-step versioning — the release procedure
 
@@ -633,6 +633,7 @@ Rationale and the rejected alternatives (`latest`; `1.3.x` minor-pinning): **ADR
 | Why Bun over Node, ESM-only, monorepo conventions | `cortex/adr/02-accepted/ADR-20260503170000000-monorepo-toolchain-bun-only-and-root-package-json-conventions.md` |
 | Why lock-step versioning | `cortex/adr/02-accepted/ADR-20260502233119561-bump-command-and-lockstep-versioning-policy.md` |
 | Release & Auth full contract (publish order, bump internals) | [release-auth-workflow.md](packages/lythoskill-creator/skill/references/release-auth-workflow.md) |
+| Release failure-mode recovery (symptom → root cause → action → verify) | [release-troubleshooting.md](packages/lythoskill-creator/skill/references/release-troubleshooting.md) |
 | All CLI commands (dev + bunx forms) | `skills/lythoskill-project-cortex/references/COMMANDS.md` (auto-generated) |
 | Arena runtime (timeout mapping, CWD behavior, judge prompts, HATEOAS errors) | [arena-runtime.md](packages/lythoskill-arena/skill/references/arena-runtime.md) |
 | Hot files + recurring work patterns (full security context) | [project-hotspots.md](cortex/wiki/04-ssot/project-hotspots.md) |
