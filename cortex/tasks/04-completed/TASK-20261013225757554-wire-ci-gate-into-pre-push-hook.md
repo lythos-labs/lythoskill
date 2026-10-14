@@ -8,6 +8,7 @@
 | backlog | 2026-10-13 | Created |
 | in-progress | 2026-10-14 | Started |
 | review | 2026-10-14 | Deliverables committed |
+| completed | 2026-10-14 | Done |
 
 ## Background & Goals
 原前提（把 ci-gate 接进 pre-push 当机械护栏）被 owner 2026-10-14 重定向：ADR-20260512002131099 已定「pre-push 必须快（>15s 会被跳过）」，深门在 GitHub CI 本身（unit + BDD + codeql）。全量 ci-gate 只在 release 时本地跑。真正要堵的缺口不是「push 前没跑全量」,而是「push 后红 CI 放着没人看 6h」——那个已由 push-watch SOP（TASK-20261013225251343）+ backstop cron 覆盖，本卡只补一个非阻塞提醒。
