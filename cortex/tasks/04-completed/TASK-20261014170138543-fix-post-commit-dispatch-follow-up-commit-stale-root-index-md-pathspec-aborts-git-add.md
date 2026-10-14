@@ -8,6 +8,7 @@
 | backlog | 2026-10-14 | Created |
 | in-progress | 2026-10-14 | Started |
 | review | 2026-10-14 | Deliverables committed |
+| completed | 2026-10-14 | Done |
 
 ## Background & Goals
 post-commit 钩子的 follow-up commit(dispatchTrailers 里 `git add … && git commit`)在 trailer dispatch 后未落地,工作树脏着。handoff(2026-10-13 Pitfalls §2)已记 2 次(ADR accept、review trailers),2026-10-14 关四卡时第 3 次复现。

@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/14 17:04:19
+> 自动生成于 2026/10/14 17:04:30
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 391 | 进行中: 0, 待验收: 1, 已完成: 327 |
+| Tasks | 391 | 进行中: 0, 待验收: 0, 已完成: 328 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 109 | 已接受: 104 |
 
@@ -99,11 +99,11 @@
 
 _无_
 
-### 待验收 (1)
+### 待验收 (0)
 
-- 🔍 **TASK-20261014170138543**: fix post-commit dispatch follow-up commit: stale root INDEX.md pathspec aborts git add
+_无_
 
-### 已完成 (327)
+### 已完成 (328)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -432,6 +432,7 @@ _无_
 - ✅ ~~TASK-20261013144643210~~: lythoskill-reminders skill
 - ✅ ~~TASK-20261013153805367~~: adopt reminders registry for this repo
 - ✅ ~~TASK-20261013225251343~~: ci-gate local CI gate and push-watch SOP
+- ✅ ~~TASK-20261014170138543~~: fix post-commit dispatch follow-up commit: stale root INDEX.md pathspec aborts git add
 
 ### 悬置 (3)
 
