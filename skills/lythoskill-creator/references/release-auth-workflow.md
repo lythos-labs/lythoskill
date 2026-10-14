@@ -15,6 +15,11 @@ summary: |
 > **Read this before running any `git remote`, `npm publish`, `npm login`, or version-bump command.**
 > This contract is the single source of truth for who-writes-what during a release.
 > Past agents have damaged this state by improvising — assume the setup is intentional.
+>
+> **Failure mode?** If the release has already gone wrong (verify-step 404, trailer
+> follow-up commit not landing, tag not firing, skill-only packages stale), read
+> [`release-troubleshooting.md`](./release-troubleshooting.md) — symptom → root
+> cause → action → verify. This file is the happy-path contract; that one is recovery.
 
 Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **ADR-20260502234833756** (skill package identification).
 
@@ -22,7 +27,7 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 
 | Resource | Purpose | Rule |
 |----------|---------|------|
-| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
+| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:lythos-labs/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
 | GitHub PAT | `gh` CLI and agent API calls | Primary storage is the system keychain. `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
 | npm token | Publish to npmjs.com | **No long-lived token in the repo.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
@@ -74,7 +79,7 @@ If anything auth-related looks "broken", do not improvise a fix. Ask.
 
 ## Lock-step Versioning (One Version, All Packages)
 
-Every `packages/*/package.json` and the root `package.json` carry the **same** version. A bump rolls every package + root together. This includes private infrastructure packages (e.g. `lythoskill-test-utils`) — lock-step is monorepo-wide. Build is filtered separately (see next section).
+Every `packages/*/package.json` and the root `package.json` carry the **same** version. A bump rolls every package + root together. This includes infrastructure packages that are not skill products (e.g. `lythoskill-test-utils`, published to npm as `@lythos/test-utils`) — lock-step is monorepo-wide; "not a skill" does not mean "not published". Build is filtered separately (see next section).
 
 **Use the dedicated tool. Do not `jq`/`python`/`sed`/hand-edit.**
 
@@ -113,8 +118,9 @@ The canonical order is **test → bump → commit → push with tag**. This orde
 
 1. **Test** — `bun --filter='*' run test` and any BDD/reproduce gates.
 2. **Bump** — `bunx @lythos/skill-creator@<version> bump <patch|minor|major|X.Y.Z>`.
-3. **Commit** — `git commit -am "chore(release): vX.Y.Z"` (bump only; no tag yet).
-4. **Push with tag** — `git push origin main && git push --follow-tags` (or `git push --follow-tags` if the bump commit is already on origin).
+3. **Build all skills** — `bun packages/lythoskill-creator/src/cli.ts build --all`. The bump only rebuilds skill-shipping packages that carry a `package.json`; skill-only packages (`coach`, `dreaming`, `project-onboarding`, `project-scribe`, `project-scribe-weekly`, `red-green-release`, `sober`, `writer`) have no manifest so the bump cannot see them and leaves the old version in their built `skills/*/SKILL.md`. See [release-troubleshooting.md](./release-troubleshooting.md) §4.
+4. **Commit** — `git commit -am "chore(release): vX.Y.Z"` (bump + build; no tag yet).
+5. **Push with tag** — `git push origin main && git push --follow-tags` (or `git push --follow-tags` if the bump commit is already on origin).
 
 The annotated tag `vX.Y.Z` triggers `.github/workflows/release.yml`, which runs tests, publishes all packages to npm via OIDC trusted publishing (with provenance), creates the GitHub Release, and deploys the docs site to Pages.
 
@@ -124,10 +130,11 @@ If a package does not yet have an npm Trusted Publisher configured, fall back to
 
 1. **Test** — `bun --filter='*' run test`.
 2. **Bump** — `bunx @lythos/skill-creator@<version> bump <...>`.
-3. **Commit** — `git commit -am "chore(release): vX.Y.Z"`.
-4. **Publish** — `./scripts/publish.sh` pushes packages to npm.
-5. **Push** — `git push origin main` sends the bump commit to GitHub.
-6. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
+3. **Build all skills** — `bun packages/lythoskill-creator/src/cli.ts build --all` (same skill-only reason as the primary flow).
+4. **Commit** — `git commit -am "chore(release): vX.Y.Z"`.
+5. **Publish** — `./scripts/publish.sh` pushes packages to npm.
+6. **Push** — `git push origin main` sends the bump commit to GitHub.
+7. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
 
 Why npm before GitHub push in the legacy flow? So external consumers can install the new CLI before the docs site (and README) point at it. Why tag/release after push? So the annotated tag points to a commit that already exists on origin.
 
@@ -188,9 +195,22 @@ After the first publish, remove the secret and rely on OIDC.
 ### Watching a release
 
 ```bash
-gh run watch
-# or
-gh run list --workflow=release
+# Filter FIRST — an unfiltered `gh run list --limit 1` / `gh run watch` can grab
+# the wrong workflow (e.g. CodeQL) that triggered on the same push.
+gh run list --workflow=release --limit 1   # confirm it is the tag run
+gh run watch <run-id> --exit-status        # watch to a terminal state
+```
+
+After it reaches `success`, verify the publish actually landed. npm names differ
+from folder names (`@lythos/skill-deck`, not `packages/lythoskill-deck`) — derive,
+never type:
+
+```bash
+for f in packages/*/package.json; do
+  n=$(grep '"name"' "$f" | head -1 | sed 's/.*: "//;s/".*//')
+  [ -n "$n" ] && echo "$n $(npm view "$n@<version>" version 2>/dev/null | tail -1)"
+done
+# every line must read the new version; an empty column is a name you invented
 ```
 
 ## Commit Policy
