@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/14 17:47:21
+> 自动生成于 2026/10/14 18:04:31
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 392 | 进行中: 0, 待验收: 0, 已完成: 329 |
+| Tasks | 393 | 进行中: 0, 待验收: 1, 已完成: 329 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 109 | 已接受: 104 |
 
@@ -93,15 +93,15 @@
 - [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
 - [ ] **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
-- [ ] **TASK-20261013225757554**: wire ci-gate into pre-push hook
+- [ ] **TASK-20261014175122489**: release docs remaining gaps from zero-context review: name table cold-start pages rollback
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20261013225757554**: wire ci-gate into pre-push hook
 
 ### 已完成 (329)
 

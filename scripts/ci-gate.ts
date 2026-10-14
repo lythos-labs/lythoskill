@@ -8,8 +8,10 @@
  * still asserted the pre-fix INDEX.md location — CI went red on three
  * consecutive main pushes before anyone looked.
  *
- * Usage: bun scripts/ci-gate.ts
+ * Usage: bun scripts/ci-gate.ts   # release tool — full local replica of CI
  * Collects every step's result, prints a summary, exits 1 on any failure.
+ * Run before a RELEASE push. Everyday pushes let GitHub CI be the gate —
+ * ADR-20260512002131099: pre-push must stay fast (>15s gets skipped).
  * The site-build job (VitePress build etc.) is not replicated here.
  */
 

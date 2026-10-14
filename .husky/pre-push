@@ -20,6 +20,15 @@ else
   echo "   Install: brew install semgrep"
 fi
 
+# 0.5 Release-confirmation reminder (non-blocking) — 2026-10-13 incident: a red
+#      CI sat unnoticed for ~6h. Deliberately NOT a gate: ADR-20260512002131099
+#      — pre-push must stay fast (>15s gets skipped); the deep gate is GitHub CI
+#      itself. bun scripts/ci-gate.ts stays a release-only tool.
+echo ""
+echo "📌  如果这次是 release（推 tag）：记得确认发布落地"
+echo "    gh run list --workflow=release --limit 1 && gh run watch <id> --exit-status"
+echo "    然后核对 npm 版本（derive，别手打）。push 不是终点。"
+
 # 1. Governance waterline + CLI change awareness
 #    Agents see git changes — tip about what to verify before pushing.
 echo ""
