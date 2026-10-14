@@ -19,6 +19,25 @@ export interface DispatchOptions {
   cortexCli: string[]
 }
 
+/**
+ * Pathspecs staged by the follow-up commit after a trailer dispatch.
+ * MUST NOT contain the bare root `INDEX.md`: since TASK-20261013142924953 the
+ * main index lives at `cortex/INDEX.md` (generate-index.ts writes
+ * `join(dirname(config.tasksDir), 'INDEX.md')`) and the root `INDEX.md` was
+ * deleted. A stale `INDEX.md` pathspec makes `git add` abort with
+ * `fatal: pathspec 'INDEX.md' did not match any files` (exit 128) and stage
+ * NOTHING — so `git diff --cached --quiet` sees no staged changes and the
+ * follow-up commit silently never lands (recurred 2026-10-13 ×2, 2026-10-14).
+ * pre-commit.ts already uses the correct `cortex/INDEX.md`.
+ */
+export const DISPATCH_FOLLOWUP_ADD = [
+  'cortex/tasks',
+  'cortex/adr',
+  'cortex/epics',
+  'cortex/INDEX.md',
+  'cortex/wiki/INDEX.md',
+]
+
 export function dispatchTrailers(msg: string, sha: string, opts: DispatchOptions): number {
   const result = parseTrailers(msg)
 
@@ -42,7 +61,7 @@ export function dispatchTrailers(msg: string, sha: string, opts: DispatchOptions
   if (successes.length === 0) return 0
 
   // Follow-up commit
-  git(['add', 'cortex/tasks', 'cortex/adr', 'cortex/epics', 'cortex/wiki/INDEX.md', 'INDEX.md'])
+  git(['add', ...DISPATCH_FOLLOWUP_ADD])
   if (git(['diff', '--cached', '--quiet']).ok) return 0
 
   const subject = successes.length === 1
