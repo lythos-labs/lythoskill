@@ -8,6 +8,7 @@
 | backlog | 2026-10-14 | Created |
 | in-progress | 2026-10-14 | Started |
 | review | 2026-10-14 | Deliverables committed |
+| completed | 2026-10-14 | Done |
 
 ## Background & Goals
 release/ops 的 failure-mode 排障知识没有沉淀。2026-10-14 发布 v0.20.1 时,verify 步骤 404(实为 npm 副本传播延迟)、dispatch follow-up commit 不落地(根因=已死 pathspec)两个失败模式都靠现场读源码确认原理。owner 指令:把「症状→根因→动作→验证」沉淀成可执行的排障引用,AGENTS.md 至少指向它;让下一个 agent / 外部用户不再「不看源码不敢用」。
