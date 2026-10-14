@@ -27,7 +27,7 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 
 | Resource | Purpose | Rule |
 |----------|---------|------|
-| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:Caltara/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
+| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:lythos-labs/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
 | GitHub PAT | `gh` CLI and agent API calls | Primary storage is the system keychain. `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
 | npm token | Publish to npmjs.com | **No long-lived token in the repo.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
@@ -79,7 +79,7 @@ If anything auth-related looks "broken", do not improvise a fix. Ask.
 
 ## Lock-step Versioning (One Version, All Packages)
 
-Every `packages/*/package.json` and the root `package.json` carry the **same** version. A bump rolls every package + root together. This includes private infrastructure packages (e.g. `lythoskill-test-utils`) — lock-step is monorepo-wide. Build is filtered separately (see next section).
+Every `packages/*/package.json` and the root `package.json` carry the **same** version. A bump rolls every package + root together. This includes infrastructure packages that are not skill products (e.g. `lythoskill-test-utils`, published to npm as `@lythos/test-utils`) — lock-step is monorepo-wide; "not a skill" does not mean "not published". Build is filtered separately (see next section).
 
 **Use the dedicated tool. Do not `jq`/`python`/`sed`/hand-edit.**
 
@@ -130,10 +130,11 @@ If a package does not yet have an npm Trusted Publisher configured, fall back to
 
 1. **Test** — `bun --filter='*' run test`.
 2. **Bump** — `bunx @lythos/skill-creator@<version> bump <...>`.
-3. **Commit** — `git commit -am "chore(release): vX.Y.Z"`.
-4. **Publish** — `./scripts/publish.sh` pushes packages to npm.
-5. **Push** — `git push origin main` sends the bump commit to GitHub.
-6. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
+3. **Build all skills** — `bun packages/lythoskill-creator/src/cli.ts build --all` (same skill-only reason as the primary flow).
+4. **Commit** — `git commit -am "chore(release): vX.Y.Z"`.
+5. **Publish** — `./scripts/publish.sh` pushes packages to npm.
+6. **Push** — `git push origin main` sends the bump commit to GitHub.
+7. **Tag + Release** — `./scripts/publish-github-release.sh` creates/pushes `vX.Y.Z` and the GitHub Release.
 
 Why npm before GitHub push in the legacy flow? So external consumers can install the new CLI before the docs site (and README) point at it. Why tag/release after push? So the annotated tag points to a commit that already exists on origin.
 
