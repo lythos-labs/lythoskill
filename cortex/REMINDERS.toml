@@ -26,10 +26,4 @@ cron = "47 9 * * 1"
 recurring = true
 expires = "probe 连续两周 0 issue 且机制判稳→可降双周频(改表即生效)"
 prompt = """probe 漂移周清扫(R2,registry=cortex/REMINDERS.toml):跑 bun packages/lythoskill-project-cortex/src/cli.ts probe,对 issue 逐类处置:①stale backlog:>7 天的,能关则 cortex complete/terminate(附 git log 证据),该留的注明原因;②epic drift(活动 epic 与任务实况不符)按实况 epic done/suspend;③wiki 结构漂移:按 config 对齐修(config.ts wikiSubdirs 参照真实目录);④新类问题先落 daily 再开卡。Done=daily 里一行「probe 清扫:N issues → M(处置摘要)」。别重做:不重造检查项(probe 自己的判据就是清单);绝不手 mv 卡(一律 CLI,FSM 会拒非法迁移)。"""
-
-[[reminder]]
-id = "R3"
-cron = "37 9 16 10 *"
-recurring = false
-expires = "三日 dogfood 评审完成即自退役(Done 内含退役步骤)"
-prompt = """reminders dogfood 三日评审(R3,registry=cortex/REMINDERS.toml;一次性):registry 自 2026-10-13 自挂,今日做三日评审。做四件事:①读 .reminders-owner.lock/owner.json + last-heartbeat:lease 是否逐日连续续租(证据应为 10-14/15/16 逐日新鲜);②翻 daily/2026-10-1*.md:R0 有无异常接管行;R1(10-18 才首响,未响注明)/R2 若已 fire,Done 行是否落地;③评协议痛点:匹配键字面量稳不稳、fork/clear 再确认有无被触发、prompt 零上下文可执行性实测(<7/10 则开 UX 修复卡,不并入本评审);④落 daily 一行「reminders dogfood 三日评审:结论+痛点清单」,然后在 cortex/REMINDERS.toml 退役本条(删条目+REMINDERS.md 退役记录留行)。Done=评审行落 daily+本条退役。别重做:不改 R0/R1/R2 的 cron/prompt——有痛点开新卡说,不动在册条目。""""
+"

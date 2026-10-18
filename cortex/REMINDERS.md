@@ -39,8 +39,10 @@ TOML 是 SSOT(该挂什么钟),session cron 是派生易失态(现在挂着什�
 | 日期 | session | 原因(expired / handoff / fork-clear zombie / crash recovery) |
 |------|---------|--------------------------------------------|
 | 2026-10-13 | 830eb884-74d2-4bb0-ab9d-a5c2d6371267 (Kimi Code) | 首次设立,初始化抢锁 |
+| 2026-10-18 | 830eb884-74d2-4bb0-ab9d-a5c2d6371267 (Kimi Code) | lease 过期接管(10-17 到期;idle 期间 10-15/16 的 R0 fire 送达未处理,无续租;无 rival 争抢,owner.json 原样) |
 
 ## 退役记录(retirement log)
 
 | 日期 | 条目 | 退役原因(expires 条件命中) |
 |------|------|------------------------------|
+| 2026-10-18 | R3 dogfood 三日评审 | 三日评审完成落 daily/2026-10-18.md(fire 于 10-16,会话 idle 积压至 10-18 处理,迟到两天但仍完成四步);一次性生命周期机制实证闭环 |
