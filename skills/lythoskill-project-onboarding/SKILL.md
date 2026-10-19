@@ -46,19 +46,29 @@ git log --oneline -5
 Compare against handoff's **0. Verify Current State** section. If they diverge,
 handoff is stale — flag it and rely on real-time git output.
 
-### Layer 3b: CI 尾检 (always required)
+### Layer 3b: CI 尾检 (only when the project has CI)
+First survey the project's git shape — it decides whether a CI check exists
+at all and how to run it. Never assume a remote, a host, or a workflow.
+
+| Project shape | How to carry out this layer |
+|---------------|------------------------------|
+| Not a git repo, or no remote | Nothing to tail-check — say so, skip. Do not force it. |
+| Remote host is not GitHub | `gh` only speaks GitHub — use that host's CLI/web, or skip with a stated reason. |
+| GitHub repo with Actions | Discover the workflow name first (`gh run list --limit 5`) — never assume `CI` — then tail it (below). |
+| GitHub repo without Actions | Skip with a stated reason (no CI to tail). |
+
 ```bash
-gh run list --workflow=CI --limit 1    # expect: the latest main push = success
+gh run list --limit 5                      # discover YOUR project's workflow names
+gh run list --workflow=<name> --limit 1    # expect: the latest main push = success
 ```
-CI is the one piece of ground truth git cannot show you. If the latest main
-push is not `success`, triage it FIRST (per diagnosing-bugs) before starting
-new work — red CI is a previous session's dropped ball, and it does not age
-well (2026-10-13: three red pushes sat on main for ~6 hours because the
-post-push check was skipped). Uses ambient `gh` auth — never export a
-project-specific token here; this skill runs in projects it cannot know.
-Failure semantics: not logged in → `gh auth login`; 401 = token expired;
-404 = the logged-in account's token has no grant for this repo (fine-grained
-PAT repo list) — check `gh auth status` or the project's own auth doc.
+If the latest main push is not `success`, triage it FIRST before starting new
+work — red CI is a previous session's dropped ball, and it does not age
+well. Uses ambient `gh` auth — never export a project-specific token here;
+this skill runs in projects it cannot know. Failure semantics: not logged in →
+`gh auth login`; 401 = token expired; 404 = the logged-in account's token has
+no grant for this repo (fine-grained PAT repo list) — check `gh auth status`
+or the project's own auth doc. On projects with no CI this layer is a stated
+no-op — the rest of onboarding stands.
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:
 ```bash
@@ -102,7 +112,7 @@ After loading, summarize to user:
 - [ ] Layer 2: Find latest daily/, read handoff section
 - [ ] Assess freshness (git_commit match, date recency)
 - [ ] Layer 3: Verify with `git status` + `git log`
-- [ ] Layer 3b: CI 尾检 — `gh run list --workflow=CI --limit 1` is success; red → triage first
+- [ ] Layer 3b: CI 尾检 — survey git shape first (repo? remote? host? Actions?); if CI exists: discover workflow name via `gh run list --limit 5`, then `gh run list --workflow=<name> --limit 1` is success; red → triage first. No CI → stated no-op.
 - [ ] If handoff fresh → use directly
 - [ ] If handoff stale/missing → degraded exploration
 - [ ] Output summary to user

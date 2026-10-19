@@ -32,6 +32,13 @@ deck_managed_dirs:
 # Skill Arena
 > Test play for skills and deck configurations. Not "which is best" — "which is best for what."
 
+> **Invocation.** `arena <cmd>` below is shorthand for
+> `bunx @lythos/skill-arena@0.20.1 <cmd>` (no install), or
+> `lythoskill-arena <cmd>` if installed globally. The bare `arena` name is NOT
+> a registered bin — it is an in-repo alias convention in the lythoskill
+> monorepo. `deck <cmd>` likewise → `bunx @lythos/skill-deck@0.20.1 <cmd>`.
+> Want the shorthand? `alias arena='bunx @lythos/skill-arena@latest'` — optional.
+
 ## Decision Tree (READ FIRST)
 
 ```

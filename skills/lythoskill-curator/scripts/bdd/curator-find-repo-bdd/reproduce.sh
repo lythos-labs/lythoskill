@@ -10,7 +10,18 @@
 set -e
 
 TEST_DIR="/tmp/curator-find-repo-bdd-$(date +%Y%m%d-%H%M%S)"
-PROJECT="/Users/chariots/Downloads/lythoskill-main"
+
+# Repo root derived by walking up to the curator CLI sentinel — works from any
+# clone path and from the built skills/ copy. Never hardcode a machine path.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT="$SCRIPT_DIR"
+while [ "$PROJECT" != "/" ] && [ ! -f "$PROJECT/packages/lythoskill-curator/src/cli.ts" ]; do
+  PROJECT="$(dirname "$PROJECT")"
+done
+if [ ! -f "$PROJECT/packages/lythoskill-curator/src/cli.ts" ]; then
+  echo "❌ Repo root not found (no packages/lythoskill-curator/src/cli.ts above $SCRIPT_DIR)" >&2
+  exit 1
+fi
 
 echo "=== Step 1-2: No setup needed (uses real GitHub API) ==="
 echo "  Test dir: $TEST_DIR"
@@ -44,8 +55,8 @@ echo "    8. Total skill count"
 echo "    9. Recommended entry points (most interesting skills)"
 echo "   10. curator add command to add the entire repo"
 echo ""
-echo "  gh is already authed (token at $PROJECT/.github-token):"
-echo "    export GH_TOKEN=\$(cat $PROJECT/.github-token)"
+echo "  gh api needs a logged-in gh — use ambient auth (gh auth login);"
+echo "  do not export project-specific token files here."
 echo ""
 echo "  MANDATORY: write decision-log.jsonl to CWD ($TEST_DIR)"
 echo "  Each line: {\"step\":\"...\",\"decision\":\"...\",\"reason\":\"...\",\"ts\":\"...\"}"
