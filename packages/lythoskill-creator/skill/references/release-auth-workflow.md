@@ -18,16 +18,27 @@ summary: |
 >
 > **Failure mode?** If the release has already gone wrong (verify-step 404, trailer
 > follow-up commit not landing, tag not firing, skill-only packages stale), read
-> [`release-troubleshooting.md`](./release-troubleshooting.md) — symptom → root
-> cause → action → verify. This file is the happy-path contract; that one is recovery.
+> [`release-troubleshooting.md`](./release-troubleshooting.md) — symptom → root cause
+> action → verify. This file is the happy-path contract; that one is recovery.
 
 Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **ADR-20260502234833756** (skill package identification).
+
+> **Two audiences, two contracts.** (1) *Maintainers of this repo*: everything
+> below is the operative contract — run the values, scripts, and commands as
+> written. (2) *Users of the skill-creator product in other projects*: this
+> reference documents **one instance** of a release methodology. What
+> transfers is the *shape* — lock-step versioning, a keychain-stored PAT read
+> via a gitignored binding file, OIDC trusted publishing, a tag-triggered
+> pipeline, verify-don't-assume discipline. The tooling
+> (`@lythos/skill-creator bump`, `scripts/*.sh`, workflow display names such as
+> `CI`/`release`, and org/repo values such as `lythos-labs`/`lythoskill`) is
+> this repo's own: reimplement the shape with your project's tools and names.
 
 ## Authentication State — Pre-configured, Do Not Modify
 
 | Resource | Purpose | Rule |
 |----------|---------|------|
-| `.git/config` (origin URL) | Git push/fetch | Uses SSH alias `git@calt13.github.com:lythos-labs/lythoskill.git`. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
+| `.git/config` (origin URL) | Git push/fetch | Uses an SSH host alias on this machine: `git@calt13.github.com:lythos-labs/lythoskill.git`. Machine-local — your clone has its own remote shape. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
 | GitHub PAT | `gh` CLI and agent API calls | Primary storage is the system keychain. `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
 | npm token | Publish to npmjs.com | **No long-lived token in the repo.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
@@ -39,7 +50,7 @@ it lives in `.private/keychain-service` (gitignored; create it on a new machine
 first, any name you like), never in committed files:
 
 - **macOS**: `security find-generic-password -s "$(cat .private/keychain-service)" -w`
-- **Linux**: `secret-tool lookup org lythos-labs scope agent`
+- **Linux**: `secret-tool lookup org lythos-labs scope agent` — attribute values are this repo's; on your machine choose your own `org`/`scope`
 
 Store or rotate:
 
@@ -49,7 +60,7 @@ mkdir -p .private
 echo 'your-service-name' > .private/keychain-service
 security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
-# Linux
+# Linux (the --label and attribute values above are this repo's — choose your own)
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
 ```
 
@@ -61,7 +72,8 @@ export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-se
 
 ### Required PAT permissions
 
-Use a **fine-grained personal access token** scoped to `lythos-labs/lythoskill`:
+Use a **fine-grained personal access token** scoped to the repository (this
+repo's scope is `lythos-labs/lythoskill` — substitute yours):
 
 | Permission | Level | Why |
 |------------|-------|-----|
@@ -73,7 +85,8 @@ Use a **fine-grained personal access token** scoped to `lythos-labs/lythoskill`:
 | `actions` | write | Trigger/re-run/cancel workflow runs |
 | `metadata` | read | Auto-included by GitHub |
 
-Pre-fill link (permissions only; manually select the repository). Name the
+Pre-fill link (permissions only; manually select the repository; the
+`description` field is this repo's — set your own). Name the
 token to match your `.private/keychain-service` value so the mapping is obvious:
 
 ```
@@ -119,7 +132,7 @@ A package is a "skill product" iff `packages/<name>/skill/` exists. This filter 
 
 ## Release Order
 
-The canonical order is **test → bump → commit → push with tag**. This order is intentional and was settled after prior incidents (see `daily/2026-07-31.md` Key Decisions):
+The canonical order is **test → bump → commit → push with tag**. This order is intentional — it was settled after prior release incidents in this repo:
 
 1. **Test** — `bun --filter='*' run test` and any BDD/reproduce gates.
 2. **Bump** — `bunx @lythos/skill-creator@<version> bump <patch|minor|major|X.Y.Z>`.
@@ -176,7 +189,9 @@ npm supports OIDC trusted publishing and automatic provenance attestation when r
 
 ### Required one-time setup
 
-Each `@lythos/*` package on npmjs.com must have a Trusted Publisher pointing to:
+Each published npm package must have a Trusted Publisher registered on npmjs.com
+(in this repo: every `@lythos/*` package). Example — **this repo's values;
+substitute your org, repository, and workflow filename**:
 
 - **Organization/User:** `lythos-labs`
 - **Repository:** `lythoskill`
@@ -190,7 +205,7 @@ Until this is configured for a package, that package cannot be published by the 
 
 ### New packages
 
-A brand-new `@lythos/*` package has a chicken-and-egg problem: npm cannot add a Trusted Publisher for a package that does not yet exist. Options:
+A brand-new published package has a chicken-and-egg problem: npm cannot add a Trusted Publisher for a package that does not yet exist. Options:
 
 1. Manually publish the first version with a classic npm token, then add the Trusted Publisher.
 2. Temporarily add a `NPM_TOKEN` repository secret and use it for the first publish.
@@ -202,7 +217,7 @@ After the first publish, remove the secret and rely on OIDC.
 ```bash
 # Filter FIRST — an unfiltered `gh run list --limit 1` / `gh run watch` can grab
 # the wrong workflow (e.g. CodeQL) that triggered on the same push.
-gh run list --workflow=release --limit 1   # confirm it is the tag run
+gh run list --workflow=release --limit 1   # confirm it is the tag run (display name is this repo's)
 gh run watch <run-id> --exit-status        # watch to a terminal state
 ```
 
@@ -243,7 +258,7 @@ The script is the single source of truth for what gets published. Packages not i
 ./scripts/publish.sh
 ```
 
-Use this only when a package cannot be published by the Actions pipeline (e.g., missing npm Trusted Publisher during transition).
+Use this only when a package cannot be published by the Actions pipeline (e.g. missing npm Trusted Publisher during transition).
 
 The script reads `.npm-access`, configures the npm registry, runs `npm whoami` to verify auth, publishes packages in dependency order, and restores the original npm config on exit. Aborts on auth failure — fix `.npm-access`, never `npm login`.
 
@@ -265,7 +280,7 @@ The script looks for the GitHub PAT in this order:
 
 1. `GH_TOKEN` environment variable.
 2. macOS Keychain: `security find-generic-password -s "$(cat .private/keychain-service)" -w` — service name from the gitignored binding file; skipped if the file is absent
-3. Linux secret-tool: `secret-tool lookup org lythos-labs scope agent`
+3. Linux secret-tool: `secret-tool lookup org lythos-labs scope agent` — attribute values are this repo's; choose your own on your machine
 4. Legacy file: `.github-token` in the repo root.
 
 Recommended: store the token in the system keychain so it never sits in the filesystem:
@@ -275,7 +290,7 @@ Recommended: store the token in the system keychain so it never sits in the file
 # mkdir -p .private && echo 'your-service-name' > .private/keychain-service)
 security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
-# Linux
+# Linux (the --label and attribute values above are this repo's — choose your own)
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
 ```
 
@@ -301,6 +316,6 @@ This keeps npm, Git tags, and GitHub Releases in lock-step.
 | **`require()` in TypeScript source** | Pre-commit hook rejects with ESM-only ADR | Use `import` / `await import()` — never `require()` |
 | **SKILL.md edited, not rebuilt** | Skills directory stale, agent sees old instructions | `bunx @lythos/skill-creator@latest build` auto-runs in pre-commit when `skill/SKILL.md` changed |
 | **Wrong CWD for git commands** | `git add <file>` fails with "did not match" | Always `cd` to repo root first |
-| **Skills branch push race** | `[remote rejected] skills → skills (cannot lock ref)` | `git pull --rebase` then `git push` (concurrent agent sessions share the skills branch) |
+| **Skills branch push race** | `[remote rejected] skills → skills (cannot lock ref)` | `git pull --rebase` then `git push` (concurrent agent sessions share the skills branch — this repo's branching model) |
 | **New adapter, wrong package** | Heavy daemon code in base interface package | Lightweight CLI adapters → `@lythos/agent-adapter`. Daemon/SSE/port management → new `@lythos/agent-adapter-<name>` package |
 | **Test expects old adapter** | `listAgents()` no longer contains removed adapter | Update test expectations when removing adapters |

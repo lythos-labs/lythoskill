@@ -12,7 +12,18 @@ set -e
 TEST_DIR="/tmp/curator-find-bdd-$(date +%Y%m%d-%H%M%S)"
 COLD_POOL="$TEST_DIR/cold-pool"
 INDEX_DIR="$TEST_DIR/curator-index"
-PROJECT="/Users/chariots/Downloads/lythoskill-main"
+
+# Repo root derived by walking up to the curator CLI sentinel — works from any
+# clone path and from the built skills/ copy. Never hardcode a machine path.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT="$SCRIPT_DIR"
+while [ "$PROJECT" != "/" ] && [ ! -f "$PROJECT/packages/lythoskill-curator/src/cli.ts" ]; do
+  PROJECT="$(dirname "$PROJECT")"
+done
+if [ ! -f "$PROJECT/packages/lythoskill-curator/src/cli.ts" ]; then
+  echo "❌ Repo root not found (no packages/lythoskill-curator/src/cli.ts above $SCRIPT_DIR)" >&2
+  exit 1
+fi
 
 echo "=== Step 1: Create directory structure ==="
 mkdir -p "$COLD_POOL/localhost/me/test-skill" "$INDEX_DIR"

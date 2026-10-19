@@ -452,7 +452,7 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 | Resource | Purpose | Rule |
 |----------|---------|------|
-| `.git/config` origin URL | Git push/fetch | Uses SSH alias `calt13.github.com`. **Never** `git remote set-url` to embed a token or switch protocol. |
+| `.git/config` origin URL | Git push/fetch | Uses an SSH host alias on this machine (`calt13.github.com`; machine-local — your clone carries its own remote shape). **Never** `git remote set-url` to embed a token or switch protocol. |
 | `~/.ssh/` | SSH keys + alias config | Off-limits. Do not read/write/list inside. |
 | GitHub PAT | `gh` CLI and agent API calls | Stored in system keychain (see below). `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
 | npm token | Publish to npmjs.com | **No long-lived token.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |

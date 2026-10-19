@@ -51,14 +51,14 @@ handoff is stale — flag it and rely on real-time git output.
 gh run list --workflow=CI --limit 1    # expect: the latest main push = success
 ```
 CI is the one piece of ground truth git cannot show you. If the latest main
-push is not `success`, triage it FIRST (per diagnosing-bugs) before starting
-new work — red CI is a previous session's dropped ball, and it does not age
-well (2026-10-13: three red pushes sat on main for ~6 hours because the
-post-push check was skipped). Uses ambient `gh` auth — never export a
-project-specific token here; this skill runs in projects it cannot know.
-Failure semantics: not logged in → `gh auth login`; 401 = token expired;
-404 = the logged-in account's token has no grant for this repo (fine-grained
-PAT repo list) — check `gh auth status` or the project's own auth doc.
+push is not `success`, triage it FIRST before starting new work — red CI is a
+previous session's dropped ball, and it does not age well. Uses ambient `gh`
+auth — never export a project-specific token here; this skill runs in
+projects it cannot know. Failure semantics: not logged in → `gh auth login`;
+401 = token expired; 404 = the logged-in account's token has no grant for
+this repo (fine-grained PAT repo list) — check `gh auth status` or the
+project's own auth doc. `CI` is this example's workflow display name — use
+your project's (`gh run list` shows the names).
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:
 ```bash
