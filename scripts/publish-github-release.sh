@@ -96,7 +96,7 @@ if [ -z "$GH_TOKEN" ]; then
   echo ""
   echo "   macOS Keychain (recommended) — service name from your local binding file:"
   echo "     echo 'your-service-name' > $KEYCHAIN_SERVICE_FILE"
-  echo "     security add-generic-password -s \"\$(cat $KEYCHAIN_SERVICE_FILE)\" -a '\$USER' -w"
+  echo "     security add-generic-password -U -s \"\$(cat $KEYCHAIN_SERVICE_FILE)\" -a '\$USER' -w"
   echo ""
   echo "   Linux secret-tool:"
   echo "     secret-tool store --label='lythos-labs agent PAT' org lythos-labs scope agent"

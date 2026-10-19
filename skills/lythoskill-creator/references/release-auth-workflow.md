@@ -44,7 +44,8 @@ first, any name you like), never in committed files:
 Store or rotate:
 
 ```bash
-# macOS — create the binding file once, then store under that name
+# macOS — create the binding file once (.private/ is gitignored), then store under that name
+mkdir -p .private
 echo 'your-service-name' > .private/keychain-service
 security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
@@ -270,8 +271,9 @@ The script looks for the GitHub PAT in this order:
 Recommended: store the token in the system keychain so it never sits in the filesystem:
 
 ```bash
-# macOS — service name from your gitignored binding file
-security add-generic-password -s "$(cat .private/keychain-service)" -a "$USER" -w
+# macOS — service name from your gitignored binding file (create it first:
+# mkdir -p .private && echo 'your-service-name' > .private/keychain-service)
+security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
 # Linux
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent

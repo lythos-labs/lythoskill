@@ -470,7 +470,8 @@ never in committed files:
 To store or rotate:
 
 ```bash
-# macOS — create the binding file once, then store under that name
+# macOS — create the binding file once (.private/ is gitignored), then store under that name
+mkdir -p .private
 echo 'your-service-name' > .private/keychain-service
 security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 

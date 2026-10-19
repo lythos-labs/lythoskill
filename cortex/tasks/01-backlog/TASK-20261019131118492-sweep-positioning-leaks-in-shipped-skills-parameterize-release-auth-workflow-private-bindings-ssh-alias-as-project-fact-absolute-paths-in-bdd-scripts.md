@@ -51,7 +51,7 @@ as public documentation example — by design); `.github-token` / `.npm-access`
 daily/showcase/drafts/*.bak historical records (point-in-time, never edit).
 
 ## Requirements
-- [ ] P0: parameterize `release-auth-workflow.md` private bindings (SSH alias, PAT matrix scoping, pre-fill URL, secret-tool attributes) — generic release governance stays in the skill; private values become "your project's auth doc" with AGENTS.md §9 as the in-repo example
+- [ ] P0: parameterize `release-auth-workflow.md` private bindings (SSH alias, PAT matrix scoping, pre-fill URL, secret-tool attributes) — generic release governance stays in the skill; private values become "your project's auth doc" with AGENTS.md §9 as the in-repo example. Per agent-5 corroboration, parameterization has two layers: (i) VALUES → placeholders with "substitute yours" (secret-tool namespace gets the same "any name you like" note the macOS binding file has; PAT scope line; OIDC Trusted Publisher table); (ii) VENDOR-TOOLING SECTIONS (bump CLI, `scripts/publish*.sh`, `rewrite/check-*.ts`) → explicitly framed as "this repo's instance — methodology described, not instructions to run", with a "reimplement in your own tooling" note so the external fallback path doesn't fall into a wall. Also: drop/qualify the dead vendor-daily pointer (:121) and the vendor incident anecdote in the onboarding body (L56-57) + dangling `(per diagnosing-bugs)` pointer.
 - [ ] P1: `AGENTS.md:455` SSH alias reworded as machine-local description
 - [ ] P2: curator BDD `reproduce.sh` derive repo root from script location (both `test/scenarios/` and `skill/scripts/bdd/` copies; built output re-synced); showcase scripts optionally swept with the same pattern or documented as machine-local snapshots
 - [ ] Repeatability: add the external-consumer lens to the qa-sweep deck (examples/decks/qa-sweep.toml) — checks `skills/` for personal paths, personal key names, and vendor-specific values presented as methodology — so this sweep is a command, not a memory
@@ -73,6 +73,11 @@ C1-C6 then and open an ADR only if ≥2 criteria hit.
 
 ## Progress Log
 - 2026-10-19: Registered during TASK-20261019125608729 (keychain-binding fix). Audit method: external-consumer read of `skills/` + repo-wide greps for personal markers (`lythos-agent-pat`, `calt13`, `/Users/`).
+- 2026-10-19: Independent corroboration after the two-cut fix — external-consumer ZK read-through (subagent agent-5, zero-context, read-only) of the shipped files. Onboarding Layer 3b judged **context-clean** (ambient-auth wording verified line-by-line; failure semantics portable). release-auth-workflow.md leaks confirmed and sharpened:
+  - **P1 granularity**: the bump section and legacy-publish section *describe* vendor tooling rather than *transmit* methodology — `bunx @lythos/skill-creator@… bump` and `./scripts/*.sh` are presented as instructions but don't exist outside this repo; an external reader "falls into a wall" on the fallback path.
+  - **P2 adds**: `secret-tool org lythos-labs` namespace (×4) lacks the "any name you like" note the macOS binding file has; PAT scope line names the vendor repo without "substitute yours"; OIDC Trusted Publisher table lists vendor values as *the* values; dead pointer to vendor's private daily journal (:121); "skills branch" branching model presented as universal; onboarding body P2s — dangling `(per diagnosing-bugs)` pointer, dated vendor incident anecdote (L56-57) reads as gossip externally.
+  - **Confirmed portable (keep as methodology)**: `.private/keychain-service` gitignored-binding pattern (agent-5: "excellent portable methodology"), OIDC setup-node gotcha, tag-triggered pipeline shape, gh verification discipline.
+  - P0 requirement refined accordingly: parameterize VALUES **and** mark vendor-tooling sections as "our instance" vs universal methodology.
 
 ## Related Files
 - Modified: packages/lythoskill-creator/skill/references/release-auth-workflow.md; AGENTS.md; packages/lythoskill-curator/test/scenarios/*/reproduce.sh; packages/lythoskill-curator/skill/scripts/bdd/*/reproduce.sh; examples/decks/qa-sweep.toml (+ COMBO prompt)
