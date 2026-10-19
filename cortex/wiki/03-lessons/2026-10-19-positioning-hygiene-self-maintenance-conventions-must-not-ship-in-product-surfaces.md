@@ -27,7 +27,10 @@ Three live instances (all fixed and committed 2026-10-19):
    red-CI incident (commit `ee12884d` added a 3-layer SOP in one shot; the
    credential incantation rode along as "runnable as-is"). Fix: generic skills
    depend on ambient `gh` auth only; the project keeps its binding in
-   gitignored `.private/keychain-service`. ADR-20261019125409359.
+   gitignored `.private/keychain-service`. ADR-20261019125409359. Refinement
+   same day (owner: "撞这个墙也难受"): the layer's "always required" also
+   force-fit preconditions (repo? remote? GitHub? Actions?) — it now surveys
+   the project's git shape first and is a stated no-op when there is no CI.
 2. **Private values presented as methodology** — creator's
    `release-auth-workflow.md` (a shipped reference) stated lythos's keychain
    names, SSH alias, PAT permission matrix and org/repo values as if they were
