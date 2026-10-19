@@ -5,6 +5,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-09-09 | Created from wedge-path research synthesis (P4) |
+| in-progress | 2026-10-19 | Started |
+| suspended | 2026-10-19 | Blocked |
 
 ## Background & Goals
 

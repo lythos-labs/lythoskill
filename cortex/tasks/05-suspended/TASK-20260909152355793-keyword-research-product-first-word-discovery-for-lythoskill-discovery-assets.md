@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-09-09 | Created — user-framed variant of Gefei methodology |
+| in-progress | 2026-10-19 | Started |
+| suspended | 2026-10-19 | Blocked |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->

@@ -6,6 +6,8 @@
 | Status | Date | Note |
 |--------|------|------|
 | backlog | 2026-10-14 | Created |
+| in-progress | 2026-10-19 | Started |
+| suspended | 2026-10-19 | Blocked |
 
 ## Background & Goals
 用 `pi --model deepseek-flash` 做了一次零背景评审（读 release-auth-workflow.md + release-troubleshooting.md，不读源码/AGENTS.md）。它能正确重建流程+原理，但列了 11 个「零背景读者会卡住」的缺口。其中 3 个已修（repo 名 Caltara→lythos-labs、test-utils「private」措辞、legacy 流程缺 build --all，见 commit 3b5bd6a5）。本卡登记剩下的 8 个，避免流失。

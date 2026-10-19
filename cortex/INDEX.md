@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/10/14 18:04:33
+> 自动生成于 2026/10/19 10:03:56
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 393 | 进行中: 0, 待验收: 0, 已完成: 330 |
+| Tasks | 393 | 进行中: 0, 待验收: 0, 已完成: 331 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 109 | 已接受: 104 |
+| ADRs | 110 | 已接受: 104 |
 
 ---
 
@@ -76,24 +76,9 @@
 
 ## 📄 Tasks
 
-### 待办 (16)
+### 待办 (0)
 
-- [ ] **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
-- [ ] **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
-- [ ] **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
-- [ ] **TASK-20260828141622828**: publish player adapter support matrix
-- [ ] **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
-- [ ] **TASK-20260828195535479**: dedupe deck link metadata loop double link work
-- [ ] **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
-- [ ] **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
-- [ ] **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
-- [ ] **TASK-20260908232322136**: bump rebuilds only 6 skills - pure-skill package version fields lag until pre-commit hook
-- [ ] **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
-- [ ] **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
-- [ ] **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
-- [ ] **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
-- [ ] **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
-- [ ] **TASK-20261014175122489**: release docs remaining gaps from zero-context review: name table cold-start pages rollback
+_无_
 
 ### 进行中 (0)
 
@@ -103,7 +88,7 @@ _无_
 
 _无_
 
-### 已完成 (330)
+### 已完成 (331)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -416,6 +401,7 @@ _无_
 - ✅ ~~TASK-20260828195535425~~: explain curator degraded entries on scan output
 - ✅ ~~TASK-20260829090402490~~: implement deepseek-harness headless player adapter
 - ✅ ~~TASK-20260831170333599~~: probe deck-lock-drift hardcodes .claude/skills ignoring configured working_set
+- ✅ ~~TASK-20260908232322136~~: bump rebuilds only 6 skills - pure-skill package version fields lag until pre-commit hook
 - ✅ ~~TASK-20260909010058114~~: TASK-20260909010058114 — probe empty-shell detector misses literal "TBD"
 - ✅ ~~TASK-20260909010121918~~: TASK-20260909010121918 — arena decision-log last-writer-wins clobbers concurrent cells
 - ✅ ~~TASK-20260909152255103~~: deck UX: ZK trial 5/10 — combo discoverability and vocabulary orientation
@@ -436,11 +422,26 @@ _无_
 - ✅ ~~TASK-20261014170138543~~: fix post-commit dispatch follow-up commit: stale root INDEX.md pathspec aborts git add
 - ✅ ~~TASK-20261014174000330~~: sediment release troubleshooting: symptom-root-cause-action reference + actionable fail-closed errors
 
-### 悬置 (3)
+### 悬置 (18)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 - ⏸️ **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
 - ⏸️ **TASK-20260710115434689**: HATEOAS boundary convention for derived-state index documents
+- ⏸️ **TASK-20260828141622502**: discuss curator SQLite as wiki metadata index backend (ADR-20260613190449007 option D)
+- ⏸️ **TASK-20260828141622558**: spike ingest GitHub Issue into cortex task with manual approval gate
+- ⏸️ **TASK-20260828141622615**: PR template with cortex TASK-xxx link validation
+- ⏸️ **TASK-20260828141622828**: publish player adapter support matrix
+- ⏸️ **TASK-20260828141622918**: extract standalone lythoskill-zk skill from cortex and arena
+- ⏸️ **TASK-20260828195535479**: dedupe deck link metadata loop double link work
+- ⏸️ **TASK-20260828212204402**: harden kimi adapter probe follow-ups from TASK-777 reviews
+- ⏸️ **TASK-20260828220646204**: curator add post-clone index records hardcoded parsed status
+- ⏸️ **TASK-20260828232221671**: fix stale players-detect reference in arena configuration-schemas
+- ⏸️ **TASK-20260909150851116**: dogfood wedge path: prebuilt deck sharing + memory pipeline first-class
+- ⏸️ **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
+- ⏸️ **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
+- ⏸️ **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
+- ⏸️ **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
+- ⏸️ **TASK-20261014175122489**: release docs remaining gaps from zero-context review: name table cold-start pages rollback
 
 ### 终止 (40)
 
@@ -598,6 +599,7 @@ _无_
 - ✅ **ADR-20260910181957316** (02-accepted): two-stage-zk-review-gates-review-the-plan-before-execution-review-the-implementation-against-the-spec
 - ✅ **ADR-20260911002229529** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261013143648588** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+- 🤔 **ADR-20261014181605217** (01-proposed): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 
 ---
 
