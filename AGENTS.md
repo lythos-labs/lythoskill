@@ -17,7 +17,7 @@
 
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
 > Auth is **pre-configured — do not modify**.
-> GitHub PAT lives in the system keychain (`security find-generic-password -s 'lythos-agent-pat' -w` on macOS; `secret-tool lookup org lythos-labs scope agent` on Linux), not in repo files.
+> GitHub PAT lives in the system keychain — macOS: service name from your gitignored `.private/keychain-service`, read via `security find-generic-password -s "$(cat .private/keychain-service)" -w`; Linux: `secret-tool lookup org lythos-labs scope agent`. Not in repo files.
 > `.github-token` and `.npm-access` are legacy fallbacks only; the release pipeline uses OIDC trusted publishing and stores no npm token in the repo.
 > Versions move via `bunx @lythos/skill-creator@0.20.1 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
 > Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md); failure-mode recovery: [release-troubleshooting.md](packages/lythoskill-creator/skill/references/release-troubleshooting.md).
@@ -459,16 +459,20 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 
 #### GitHub token storage and permissions
 
-The agent reads the PAT from the system keychain:
+The agent reads the PAT from the system keychain. The macOS service name is a
+personal, machine-local binding — it lives in `.private/keychain-service`
+(gitignored; create it on a new machine before first use, any name you like),
+never in committed files:
 
-- **macOS**: `security find-generic-password -s 'lythos-agent-pat' -w`
+- **macOS**: `security find-generic-password -s "$(cat .private/keychain-service)" -w`
 - **Linux**: `secret-tool lookup org lythos-labs scope agent`
 
 To store or rotate:
 
 ```bash
-# macOS
-security add-generic-password -U -s "lythos-agent-pat" -a "$USER" -w
+# macOS — create the binding file once, then store under that name
+echo 'your-service-name' > .private/keychain-service
+security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
 # Linux
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
@@ -486,16 +490,18 @@ The PAT needs a **fine-grained personal access token** with these repository per
 | `actions` | write | Trigger/re-run/cancel workflow runs |
 | `metadata` | read | Auto-included by GitHub |
 
-Quick pre-fill link (permissions only; still manually select the repository):
+Quick pre-fill link (permissions only; still manually select the repository).
+Name the token to match your `.private/keychain-service` value so the mapping
+is obvious:
 
 ```
-https://github.com/settings/personal-access-tokens/new?name=lythos-agent-pat&description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
+https://github.com/settings/personal-access-tokens/new?description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
 ```
 
 For CLI use, export `GH_TOKEN` from the keychain:
 
 ```bash
-export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"
+export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"
 ```
 
 #### npm side — OIDC trusted publishing
@@ -552,7 +558,7 @@ Four traps, in the order you will hit them:
 **Verify the release started, and then that it actually published — do not assume either.**
 
 ```bash
-export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"   # macOS
+export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"   # macOS; service name from gitignored .private/keychain-service
 gh run list --limit 3                  # expect a `release` run on the tag: in_progress → success
 gh release view vX.Y.Z                 # the GitHub Release the run creates
 

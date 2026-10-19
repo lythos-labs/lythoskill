@@ -14,7 +14,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 TOKEN_FILE="$ROOT_DIR/.github-token"
-KEYCHAIN_SERVICE="lythos-agent-pat"
+# Machine-local keychain binding: the service name lives in a gitignored file
+# (this repo's convention; empty/absent = skip the keychain step entirely).
+KEYCHAIN_SERVICE_FILE="$ROOT_DIR/.private/keychain-service"
+KEYCHAIN_SERVICE=""
+if [ -f "$KEYCHAIN_SERVICE_FILE" ]; then
+  KEYCHAIN_SERVICE=$(cat "$KEYCHAIN_SERVICE_FILE")
+fi
 
 ROOT_VERSION=$(node -p "require('$ROOT_DIR/package.json').version")
 TAG="v$ROOT_VERSION"
@@ -55,7 +61,7 @@ resolve_token() {
     return 0
   fi
 
-  if command -v security >/dev/null 2>&1; then
+  if [ -n "$KEYCHAIN_SERVICE" ] && command -v security >/dev/null 2>&1; then
     local token
     token=$(security find-generic-password -s "$KEYCHAIN_SERVICE" -w 2>/dev/null || echo "")
     if [ -n "$token" ]; then
@@ -88,8 +94,9 @@ if [ -z "$GH_TOKEN" ]; then
   echo ""
   echo "   Store it in one of the following ways:"
   echo ""
-  echo "   macOS Keychain (recommended):"
-  echo "     security add-generic-password -s '$KEYCHAIN_SERVICE' -a '\$USER' -w"
+  echo "   macOS Keychain (recommended) — service name from your local binding file:"
+  echo "     echo 'your-service-name' > $KEYCHAIN_SERVICE_FILE"
+  echo "     security add-generic-password -s \"\$(cat $KEYCHAIN_SERVICE_FILE)\" -a '\$USER' -w"
   echo ""
   echo "   Linux secret-tool:"
   echo "     secret-tool store --label='lythos-labs agent PAT' org lythos-labs scope agent"

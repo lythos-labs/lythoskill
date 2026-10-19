@@ -34,16 +34,19 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 
 ### GitHub token storage
 
-Read the PAT from the system keychain:
+Read the PAT from the system keychain. The macOS service name is machine-local —
+it lives in `.private/keychain-service` (gitignored; create it on a new machine
+first, any name you like), never in committed files:
 
-- **macOS**: `security find-generic-password -s 'lythos-agent-pat' -w`
+- **macOS**: `security find-generic-password -s "$(cat .private/keychain-service)" -w`
 - **Linux**: `secret-tool lookup org lythos-labs scope agent`
 
 Store or rotate:
 
 ```bash
-# macOS
-security add-generic-password -U -s "lythos-agent-pat" -a "$USER" -w
+# macOS — create the binding file once, then store under that name
+echo 'your-service-name' > .private/keychain-service
+security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
 
 # Linux
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
@@ -52,7 +55,7 @@ secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
 For CLI sessions, export from the keychain:
 
 ```bash
-export GH_TOKEN="$(security find-generic-password -s 'lythos-agent-pat' -w)"
+export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"
 ```
 
 ### Required PAT permissions
@@ -69,10 +72,11 @@ Use a **fine-grained personal access token** scoped to `lythos-labs/lythoskill`:
 | `actions` | write | Trigger/re-run/cancel workflow runs |
 | `metadata` | read | Auto-included by GitHub |
 
-Pre-fill link (permissions only; manually select the repository):
+Pre-fill link (permissions only; manually select the repository). Name the
+token to match your `.private/keychain-service` value so the mapping is obvious:
 
 ```
-https://github.com/settings/personal-access-tokens/new?name=lythos-agent-pat&description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
+https://github.com/settings/personal-access-tokens/new?description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
 ```
 
 If anything auth-related looks "broken", do not improvise a fix. Ask.
@@ -259,15 +263,15 @@ The script creates an annotated tag `vX.Y.Z` from the current commit, pushes it 
 The script looks for the GitHub PAT in this order:
 
 1. `GH_TOKEN` environment variable.
-2. macOS Keychain: `security find-generic-password -s 'lythos-agent-pat' -w`
+2. macOS Keychain: `security find-generic-password -s "$(cat .private/keychain-service)" -w` — service name from the gitignored binding file; skipped if the file is absent
 3. Linux secret-tool: `secret-tool lookup org lythos-labs scope agent`
 4. Legacy file: `.github-token` in the repo root.
 
 Recommended: store the token in the system keychain so it never sits in the filesystem:
 
 ```bash
-# macOS
-security add-generic-password -s "lythos-agent-pat" -a "$USER" -w
+# macOS — service name from your gitignored binding file
+security add-generic-password -s "$(cat .private/keychain-service)" -a "$USER" -w
 
 # Linux
 secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
