@@ -648,6 +648,7 @@ Rationale and the rejected alternatives (`latest`; `1.3.x` minor-pinning): **ADR
 | Code conventions + naming rules (ESM-only, fence trick, file permissions, imports) | [conventions.md](cortex/wiki/04-ssot/conventions.md) |
 | Positive autonomy framework (four quadrants, token trap, team-member test) | [agent-autonomy lesson](cortex/wiki/03-lessons/2026-06-07-agent-autonomy-positive-decision-boundary.md) |
 | Agent-facing error design (HATEOAS, annotation mindset) | [annotation-mindset.md](cortex/wiki/01-patterns/2026-05-15-annotation-mindset-agent-facing-code-annotations-as-ioc-for-agent-behavior.md) |
+| Keep self-maintenance out of shipped surfaces (skills/docs/command names; the leak classes + the deterministic gate) | [positioning-hygiene lesson](cortex/wiki/03-lessons/2026-10-19-positioning-hygiene-self-maintenance-conventions-must-not-ship-in-product-surfaces.md) |
 | Agent adapter architecture (player abstraction) | [player-abstraction.md](cortex/wiki/01-patterns/2026-05-06-player-abstraction-agent-swappable-backend.md) |
 | Two axes — player (open registration of *behavior*) vs CLI-layout (closed *sourced data*); they never merge | [ADR-20260910113131220](cortex/adr/02-accepted/ADR-20260910113131220-player-axis-is-open-registration-cli-layout-axis-is-closed-sourced-data-two-axes-never-merge.md) |
 | Dormancy tests (fallback hint validation on happy path) | [dormancy-tests.md](cortex/wiki/01-patterns/2026-05-09-dormancy-property-test-for-fallback-hints.md) |
