@@ -8,6 +8,7 @@
 | backlog | 2026-10-19 | Created — findings registered from TASK-20261019125608729 execution |
 | in-progress | 2026-10-19 | Started |
 | review | 2026-10-19 | Deliverables committed |
+| completed | 2026-10-19 | Done |
 
 ## Background & Goals
 Owner insight (2026-10-19, while fixing the `lythos-agent-pat` hardcode): "我也
