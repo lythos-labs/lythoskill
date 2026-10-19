@@ -32,6 +32,8 @@ allowed-tools:
 > **Invocation.** `arena <cmd>` / `curator <cmd>` below are shorthand for
 > `bunx @lythos/skill-arena@…` / `bunx @lythos/skill-curator@…` (no install).
 > The bare names are not registered bins — in-repo alias convention only.
+> Want them? `alias arena='bunx @lythos/skill-arena@latest'`,
+> `alias curator='bunx @lythos/skill-curator@latest'` — optional.
 
 ## Core Practice
 

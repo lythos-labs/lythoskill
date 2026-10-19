@@ -25,6 +25,7 @@ when_to_use: |
 > **Invocation.** `arena <cmd>` mentions below mean
 > `bunx @lythos/skill-arena@0.20.1 <cmd>` (no install). `arena` is
 > not a registered bin — in-repo alias convention in the lythoskill monorepo only.
+> Want it? `alias arena='bunx @lythos/skill-arena@latest'` — optional.
 
 ## The Project's Memory System
 

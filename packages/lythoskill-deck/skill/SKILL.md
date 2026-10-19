@@ -42,6 +42,9 @@ deck_managed_dirs:
 > bin (the npm package registers `lythoskill-deck`). Same mapping: `arena` →
 > `@lythos/skill-arena`, `curator` → `@lythos/skill-curator`, `cortex` →
 > `@lythos/project-cortex`.
+> Want the shorthand? Register it yourself — e.g.
+> `alias deck='bunx @lythos/skill-deck@latest'` in your shell config.
+> Optional, your machine, your choice.
 
 ## Core Model
 

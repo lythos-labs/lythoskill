@@ -40,6 +40,7 @@ deck_managed_dirs:
 > `lythoskill-curator <cmd>` if installed globally. The bare name is NOT a
 > registered bin — in-repo alias convention only. `deck <cmd>` / `arena <cmd>`
 > map to `@lythos/skill-deck` / `@lythos/skill-arena` the same way.
+> Want the shorthand? `alias curator='bunx @lythos/skill-curator@latest'` — optional.
 
 ## Mental Model: Curator = the Curator's Perspective (策展者)
 
