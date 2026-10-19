@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/10/19 13:47:22
+> 自动生成于 2026/10/19 16:01:21
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 395 | 进行中: 0, 待验收: 1, 已完成: 332 |
+| Tasks | 396 | 进行中: 1, 待验收: 1, 已完成: 332 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 111 | 已接受: 105 |
+| ADRs | 112 | 已接受: 105 |
 
 ---
 
@@ -80,9 +80,9 @@
 
 _无_
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20261019134800662**: check-no-private-leaks tool plus commit-flow gate with negative test
 
 ### 待验收 (1)
 
@@ -602,6 +602,7 @@ _无_
 - ✅ **ADR-20261013143648588** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - 🤔 **ADR-20261014181605217** (01-proposed): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261019125409359** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+- 🤔 **ADR-20261019134800627** (01-proposed): private-leak gate — deterministic lint-style check wired into the commit flow
 
 ---
 

@@ -2,7 +2,7 @@
 # Pre-commit: ADR compliance + auto-rebuild skills + cortex governance (TypeScript)
 
 # 0. Guard-script sensitivity check — warn when modifying meta-layer guards
-STAGED_GUARDS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(\.husky/|scripts/pre-commit-|scripts/test-report|scripts/check-path-safety|scripts/adr-check)' || true)
+STAGED_GUARDS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(\.husky/|scripts/pre-commit-|scripts/test-report|scripts/check-path-safety|scripts/check-private-leaks|scripts/adr-check)' || true)
 
 if [ -n "$STAGED_GUARDS" ]; then
   echo ""

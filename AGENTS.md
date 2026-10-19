@@ -371,6 +371,7 @@ Each caused at least one real incident. Scan before committing. **New gotcha →
 **[VALIDATE]**
 - `[DONE]` Before claiming done: tests pass + TS compiles + CLI changed → README + new package → `scripts/publish.sh` + deck example changed → `deck validate`.
 - `[GUARD-SENSITIVE]` Modifying `.husky/`, `scripts/pre-commit-*.ts`, `scripts/check-path-safety.ts` → QA with a negative test proving the guard catches violations (use the qa-sweep deck).
+- `[LEAK]` Commit-flow leak gate: `scripts/check-private-leaks.sh` (pre-commit §0.8) blocks private **values** (`.private/*.env`) and **patterns** (built-in token shapes + your machine-local `.private/leak-patterns` — gitignore-style, listed = forbidden; seed YOUR home path there: machine paths are deliberately NOT built-in because generic fixtures like `/home/user`, `/Users/alice` are legal, and a misfiring check gets learned around). Audit committed surfaces anytime: `bash scripts/check-private-leaks.sh --all`. Exemptions (sanctioned quoting): historical records (`cortex/adr|tasks|wiki|INDEX`, `daily/`, `drafts/`, `archived-patches/`, `showcase/`), `*.test.ts` fixtures, committed run artifacts. Negative tests: `bun test scripts/check-private-leaks.test.ts`.
 
 **[REVERT]**
 - `[RECONCILE]` Reverting declarative files (`skill-deck.toml`, `package.json`) without re-running the reconciler (`deck link`, `bun install`) leaves derived state broken.
