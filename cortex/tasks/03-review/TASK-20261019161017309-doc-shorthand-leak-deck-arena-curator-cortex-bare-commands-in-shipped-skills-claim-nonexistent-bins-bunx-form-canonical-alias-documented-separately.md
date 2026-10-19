@@ -6,6 +6,7 @@
 |--------|------|------|
 | backlog | 2026-10-19 | Created — owner report |
 | in-progress | 2026-10-19 | Started |
+| review | 2026-10-19 | Deliverables committed |
 
 ## Background & Goals
 Owner report (2026-10-19): shipped skill docs present `deck link`, `arena
