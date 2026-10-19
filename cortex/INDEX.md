@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/19 13:46:45
+> 自动生成于 2026/10/19 13:47:22
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 395 | 进行中: 1, 待验收: 0, 已完成: 332 |
+| Tasks | 395 | 进行中: 0, 待验收: 1, 已完成: 332 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 111 | 已接受: 105 |
 
@@ -80,13 +80,13 @@
 
 _无_
 
-### 进行中 (1)
-
-- 🔄 **TASK-20261019131118492**: sweep positioning leaks in shipped skills — parameterize release-auth-workflow private bindings, SSH alias as project fact, absolute paths in BDD scripts
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20261019131118492**: sweep positioning leaks in shipped skills — parameterize release-auth-workflow private bindings, SSH alias as project fact, absolute paths in BDD scripts
 
 ### 已完成 (332)
 
