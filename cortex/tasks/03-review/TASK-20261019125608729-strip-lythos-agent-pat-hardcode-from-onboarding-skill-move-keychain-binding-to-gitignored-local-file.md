@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-19 | Created |
 | in-progress | 2026-10-19 | Started |
+| review | 2026-10-19 | Deliverables committed |
 
 ## Background & Goals
 Generic skills shipped from this repo must be context-clean; personal credential

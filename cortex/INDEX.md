@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/10/19 13:13:23
+> 自动生成于 2026/10/19 13:13:42
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 395 | 进行中: 1, 待验收: 0, 已完成: 331 |
+| Tasks | 395 | 进行中: 0, 待验收: 1, 已完成: 331 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 111 | 已接受: 104 |
+| ADRs | 111 | 已接受: 105 |
 
 ---
 
@@ -80,13 +80,13 @@
 
 - [ ] **TASK-20261019131118492**: sweep positioning leaks in shipped skills — parameterize release-auth-workflow private bindings, SSH alias as project fact, absolute paths in BDD scripts
 
-### 进行中 (1)
-
-- 🔄 **TASK-20261019125608729**: strip lythos-agent-pat hardcode from onboarding skill; move keychain binding to gitignored local file
-
-### 待验收 (0)
+### 进行中 (0)
 
 _无_
+
+### 待验收 (1)
+
+- 🔍 **TASK-20261019125608729**: strip lythos-agent-pat hardcode from onboarding skill; move keychain binding to gitignored local file
 
 ### 已完成 (331)
 
@@ -600,7 +600,7 @@ _无_
 - ✅ **ADR-20260911002229529** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261013143648588** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - 🤔 **ADR-20261014181605217** (01-proposed): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
-- 🤔 **ADR-20261019125409359** (01-proposed): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+- ✅ **ADR-20261019125409359** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 
 ---
 
