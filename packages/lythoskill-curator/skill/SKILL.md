@@ -35,6 +35,12 @@ deck_managed_dirs:
 > + composition taste.
 > CLI is mechanical glue (scan, query, tag, audit). Agent does the thinking.
 
+> **Invocation.** `curator <cmd>` below is shorthand for
+> `bunx @lythos/skill-curator@{{PACKAGE_VERSION}} <cmd>` (no install), or
+> `lythoskill-curator <cmd>` if installed globally. The bare name is NOT a
+> registered bin — in-repo alias convention only. `deck <cmd>` / `arena <cmd>`
+> map to `@lythos/skill-deck` / `@lythos/skill-arena` the same way.
+
 ## Mental Model: Curator = the Curator's Perspective (策展者)
 
 Curator is NOT a discovery engine. It's the **curator's personal knowledge base** —

@@ -29,6 +29,10 @@ allowed-tools:
 > Arena = multi-agent verification infra. Curator = memory.
 > Sober = the cognitive baseline connecting them.
 
+> **Invocation.** `arena <cmd>` / `curator <cmd>` below are shorthand for
+> `bunx @lythos/skill-arena@…` / `bunx @lythos/skill-curator@…` (no install).
+> The bare names are not registered bins — in-repo alias convention only.
+
 ## Core Practice
 
 These 7 practices keep decisions grounded in evidence, not impulse.

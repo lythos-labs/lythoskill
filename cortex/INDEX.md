@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/19 16:03:44
+> 自动生成于 2026/10/19 16:13:26
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 396 | 进行中: 0, 待验收: 0, 已完成: 334 |
+| Tasks | 397 | 进行中: 1, 待验收: 0, 已完成: 334 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 112 | 已接受: 106 |
 
@@ -80,9 +80,9 @@
 
 _无_
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20261019161017309**: doc shorthand leak — deck/arena/curator/cortex bare commands in shipped skills claim nonexistent bins; bunx form canonical, alias documented separately
 
 ### 待验收 (0)
 

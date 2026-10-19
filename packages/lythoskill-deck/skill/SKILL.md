@@ -35,6 +35,14 @@ deck_managed_dirs:
 # lythoskill-deck: Declarative Skill Deck Governance
 > What matters is not how many skills you have, but which ones the agent sees at the same time.
 
+> **Invocation.** Body text uses the `deck <cmd>` shorthand. Run commands as
+> `bunx @lythos/skill-deck@{{PACKAGE_VERSION}} <cmd>` (no install), or
+> `lythoskill-deck <cmd>` if installed globally. The bare `deck` name is an
+> in-repo alias convention in the lythoskill monorepo only — NOT a registered
+> bin (the npm package registers `lythoskill-deck`). Same mapping: `arena` →
+> `@lythos/skill-arena`, `curator` → `@lythos/skill-curator`, `cortex` →
+> `@lythos/project-cortex`.
+
 ## Core Model
 
 `skill-deck.toml` declares desired state. `deck link` makes the working set (default `.claude/skills/`) match — creates symlinks for declared skills, removes everything else. Deny-by-default: undeclared skills do not exist in the agent's view.
@@ -49,14 +57,14 @@ Cold Pool (~/.agents/skill-repos/)  →  deck add  →  skill-deck.toml  →  de
 When a task spans different skill sets, use **separate deck files per phase** instead of editing a single toml:
 
 ```bash
-# Phase 1 — brand design
-deck link --deck phase1-brand.toml --cold-pool ~/.agents/skill-repos
+# Phase 1 — brand design (full form: bunx @lythos/skill-deck@<version> link …)
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck phase1-brand.toml --cold-pool ~/.agents/skill-repos
 
 # Phase 2 — content creation (atomic switch, Phase 1 skills gone)
-deck link --deck phase2-content.toml --cold-pool ~/.agents/skill-repos
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck phase2-content.toml --cold-pool ~/.agents/skill-repos
 
 # Done — restore parent deck
-deck link --deck ./skill-deck.toml
+bunx @lythos/skill-deck@{{PACKAGE_VERSION}} link --deck ./skill-deck.toml
 ```
 
 Each phase deck is independently auditable. Never add/remove entries in-place when switching contexts — a wrong edit silently breaks the previous phase's composition. The reconciler handles the transition: old symlinks removed, new ones created, no state leaks.

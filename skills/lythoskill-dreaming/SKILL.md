@@ -22,6 +22,10 @@ when_to_use: |
 > dreams (夜有所梦 — dreaming consolidates it into the SSOT).
 > Scan → Consolidate → ZK Validate. Extract the "currently true" from scattered docs.
 
+> **Invocation.** `arena <cmd>` mentions below mean
+> `bunx @lythos/skill-arena@0.20.1 <cmd>` (no install). `arena` is
+> not a registered bin — in-repo alias convention in the lythoskill monorepo only.
+
 ## The Project's Memory System
 
 Project documentation works like human memory:
