@@ -46,29 +46,25 @@ git log --oneline -5
 Compare against handoff's **0. Verify Current State** section. If they diverge,
 handoff is stale — flag it and rely on real-time git output.
 
-### Layer 3b: CI 尾检 (only when the project has CI)
-First survey the project's git shape — it decides whether a CI check exists
-at all and how to run it. Never assume a remote, a host, or a workflow.
+### Layer 3b: Project shape survey → initialize the PROJECT's own conventions
+The generic skill does not require CI tail-checks — that was one project's
+rule, and a project's rules belong in the project's own agent-facing docs
+(AGENTS.md / CLAUDE.md), not in a universal onboarding gate. What this layer
+MUST do is survey the shape and hand the finding back:
 
-| Project shape | How to carry out this layer |
-|---------------|------------------------------|
-| Not a git repo, or no remote | Nothing to tail-check — say so, skip. Do not force it. |
-| Remote host is not GitHub | `gh` only speaks GitHub — use that host's CLI/web, or skip with a stated reason. |
-| GitHub repo with Actions | Discover the workflow name first (`gh run list --limit 5`) — never assume `CI` — then tail it (below). |
-| GitHub repo without Actions | Skip with a stated reason (no CI to tail). |
+| Project shape | What this layer does |
+|---------------|----------------------|
+| Not a git repo, or no remote | Note "no VCS remote" in the summary. Nothing to tail. |
+| Remote host is not GitHub | Note the host. `gh` cannot help there — the project's own docs would name the right CLI. |
+| GitHub repo with Actions | Note the workflows found (`gh run list --limit 5`). **Suggest initializing the project's AGENTS.md with a CI-tail-check line** if the project wants that discipline — the lythoskill repo's own AGENTS.md is one example of such a project-level rule. |
+| GitHub repo without Actions | Note "no CI". Offer the same AGENTS.md suggestion for whatever check the project does have (or none). |
 
-```bash
-gh run list --limit 5                      # discover YOUR project's workflow names
-gh run list --workflow=<name> --limit 1    # expect: the latest main push = success
-```
-If the latest main push is not `success`, triage it FIRST before starting new
-work — red CI is a previous session's dropped ball, and it does not age
-well. Uses ambient `gh` auth — never export a project-specific token here;
-this skill runs in projects it cannot know. Failure semantics: not logged in →
+Tailing CI only happens when the PROJECT's own conventions declare it — read
+the project's AGENTS.md/CLAUDE.md for that; if declared, use ambient `gh`
+auth (never export a project-specific token here; this skill runs in projects
+it cannot know). Failure semantics when you do tail: not logged in →
 `gh auth login`; 401 = token expired; 404 = the logged-in account's token has
-no grant for this repo (fine-grained PAT repo list) — check `gh auth status`
-or the project's own auth doc. On projects with no CI this layer is a stated
-no-op — the rest of onboarding stands.
+no grant for this repo — check `gh auth status` or the project's own auth doc.
 ## Degraded Exploration (no usable handoff)
 Only when Layer 2 fails. Read in this order:
 ```bash
@@ -112,7 +108,7 @@ After loading, summarize to user:
 - [ ] Layer 2: Find latest daily/, read handoff section
 - [ ] Assess freshness (git_commit match, date recency)
 - [ ] Layer 3: Verify with `git status` + `git log`
-- [ ] Layer 3b: CI 尾检 — survey git shape first (repo? remote? host? Actions?); if CI exists: discover workflow name via `gh run list --limit 5`, then `gh run list --workflow=<name> --limit 1` is success; red → triage first. No CI → stated no-op.
+- [ ] Layer 3b: Project shape survey — repo? remote? host? Actions? Record findings in the summary; if CI exists, SUGGEST writing a tail-check into the project's own AGENTS.md (project-level rule, not a universal gate). Only actually tail CI when the project's own docs declare it.
 - [ ] If handoff fresh → use directly
 - [ ] If handoff stale/missing → degraded exploration
 - [ ] Output summary to user
