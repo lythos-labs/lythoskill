@@ -12,6 +12,7 @@ tasks: []
 | Status | Date | Note |
 |--------|------|------|
 | proposed | 2026-10-19 | Created (owner directive) |
+| accepted | 2026-10-19 | Accepted |
 
 ## Background
 

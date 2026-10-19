@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-19 | Created — owner directive; scope refined after discovering existing value-guard |
 | in-progress | 2026-10-19 | Started |
+| review | 2026-10-19 | Deliverables committed |
 
 ## Background & Goals
 Owner directive (2026-10-19): the positioning-leak class (key names, machine
