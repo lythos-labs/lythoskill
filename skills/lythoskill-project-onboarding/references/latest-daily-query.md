@@ -1,7 +1,10 @@
 # Latest Daily Query
 
 > "Latest daily" is a predicate over dated filenames, not a position in a sort.
-> Canonical rule: this file. Decision record: `ADR-20261023182817984`.
+> This file carries the rationale shipped with the skill; the binding decision is
+> `ADR-20261023182817984`. The one-liner is copied inline into independently
+> installable packages (scribe-weekly, deck examples) by necessity — if a copy
+> disagrees with this file, this file wins and the copy is the bug.
 
 ## Canonical query
 
