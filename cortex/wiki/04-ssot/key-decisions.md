@@ -1,5 +1,5 @@
 ---
-last_consolidated: 2026-09-12
+last_consolidated: 2026-10-23
 sources:
   - "weekly/2026-W17.md"
   - "weekly/2026-W18.md"
@@ -19,9 +19,13 @@ sources:
   - "daily/2026-09-11.md"
   - "cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md"
   - "cortex/adr/02-accepted/ (106 ADR files on disk, counted 2026-09-12)"
-zk_validated: true
+  - "weekly/2026-W42.md"
+  - "weekly/2026-W43.md"
+  - "cortex/adr/02-accepted/ADR-20261023182817984-dynamic-views-are-queries-generated-indexes-are-projections.md"
+  - "cortex/adr/02-accepted/ADR-20261023183001417-templates-have-one-executable-carrier-shipped-copies-are-generated-or-pinned.md"
+zk_validated: false
 zk_issues: 4
-zk_validator: "ZK subagent agent-0 — 2026-08-27 — 8/10 readability; P1 (§14 timeline, in pitfalls.md) + P2s fixed in place. 2026-09-12 cold-reader pass validated the entries-65-73 delta: 4 findings fixed in place (#70/#71 wording, qualifier legend, #51 truncated ADR id); pre-existing residue recorded in Anomalies item 5"
+zk_validator: "ZK subagent agent-0 — 2026-08-27 — 8/10 readability; P1 (§14 timeline, in pitfalls.md) + P2s fixed in place. 2026-09-12 cold-reader pass validated the entries-65-73 delta: 4 findings fixed in place (#70/#71 wording, qualifier legend, #51 truncated ADR id); pre-existing residue recorded in Anomalies item 5. 2026-10-23 delta (#74/#75) added by the W43 consolidation — pending ZK validation; zk_validated flipped to false until that pass runs."
 ---
 
 # Key Decisions -- Current State
@@ -188,6 +192,15 @@ Key non-ADR decisions in this domain:
 | 57 | ADR-20260529215906255 | Curator catalog resolution: deck-aware vs independent discovery. Determines how curator resolves skill locators in context of active deck. | ✅ holds |
 
 ---
+
+## 7. Knowledge Carriers (SSOT vs copies)
+
+| # | ADR | Decision | Status |
+|---|-----|----------|--------|
+| 74 | ADR-20261023182817984 | Dynamic views are queries, not hand-maintained files; a generated index (`cortex/INDEX.md`) is a projection, never a second write target. `daily latest` stays a date-filtered one-liner rather than a command, because skills ship as text into projects where the CLI is not installed. | ✅ holds |
+| 75 | ADR-20261023183001417 | A template has exactly one executable carrier; anything shipped to adopters (`cortex init`, `skills/**`) is generated from it or pinned by a drift test. Hand-copied template bodies are not a supported carrier. Migration of `lib/template.ts` + `assets/*-TEMPLATE.md` to `templates/` is follow-up work. | ✅ holds |
+
+Full reasoning: `04-ssot/2026-10-23-ssot-vs-copy-dynamic-views-are-queries-templates-have-one-carrier.md`.
 
 ## Combo Evolution: Canonical ADR Lineage Trace
 

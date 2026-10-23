@@ -94,6 +94,12 @@ template under `templates/`; `cortex init` ships the same file; a test pins the
 rendered section list against the file (precedent:
 `status-history.test.ts` "one shape, no drift").
 
+**This exact drift was already named on 2026-09-11** — Class 1 "Carrier drift"
+in `01-patterns/2026-09-11-drift-classes-*` lists the same four carriers. Naming
+a drift class did not remove the instance; six weeks later the shapes still
+differ, because nothing owned the second carrier. The lesson is Rule 2 itself:
+a named drift still needs a mechanism (one carrier, or a pinned copy).
+
 ### Rule 3 — Docs reference, they do not inline
 
 A skill or wiki that needs to show a shape links the carrier path or shows a
@@ -120,6 +126,8 @@ a second consumer needs the result as data.
 - ADR-20261023182817984 — dynamic views are queries, generated indexes are
   projections
 - ADR-20261023183001417 — templates have one executable carrier
+- `01-patterns/2026-09-11-drift-classes-eight-named-ways-a-project-diverges-from-its-own-record.md`
+  — Class 1 (Carrier drift) is the taxonomy this entry's Rule 2 instantiates
 - TASK-20261023182807833 — the date-filtered lookup change that raised both
 - `packages/lythoskill-project-onboarding/skill/references/latest-daily-query.md`
   — canonical query, shipped with the skill
