@@ -623,7 +623,7 @@ Rationale and the rejected alternatives (`latest`; `1.3.x` minor-pinning): **ADR
 | `lythoskill-project-scribe` | Session handoff (daily context dump) | Save after commit batches (mid-session or close), "log this" |
 | `lythoskill-project-scribe-weekly` | Weekly pattern extraction | End of week, "weekly review" |
 | `lythoskill-project-onboarding` | Session context loader | Start of session, "what happened last time" |
-| `lythoskill-dreaming` | Memory consolidation → SSOT | "Consolidate docs", "SSOT sweep" |
+| `lythoskill-dreaming` | Memory consolidation → SSOT; eight-class drift pass over present-tense docs | "Consolidate docs", "SSOT sweep", "docs say X but the tests say Y" |
 | `lythoskill-coach` | SKILL.md quality review | Reviewing/optimizing a skill |
 
 ### 11. Pointer Index
@@ -634,6 +634,7 @@ Rationale and the rejected alternatives (`latest`; `1.3.x` minor-pinning): **ADR
 | When you need to… | Read |
 |-------------------|------|
 | Full memory pipeline (3-axis model + SSOT diagram) | [ZK Review reference § SSOT](packages/lythoskill-project-cortex/skill/references/zk-review.md) |
+| Eight drift classes + their detectors (doc↔code pass in dreaming Phase 3) | [drift-detection.md](packages/lythoskill-dreaming/skill/references/drift-detection.md) |
 | ZK Review methodology (prompt templates, gap processing, trial-usage, real cases) | [ZK Review reference](packages/lythoskill-project-cortex/skill/references/zk-review.md) |
 | What session jargon means (ZK review baseline for handoffs — deposit recurring terms here) | [Glossary](cortex/wiki/04-ssot/glossary.md) |
 | Intent/Plan/Execute deep dive (IO injection table, when/when-not) | [intent-plan-execute.md](packages/lythoskill-deck/skill/references/intent-plan-execute.md) |

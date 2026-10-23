@@ -142,6 +142,12 @@ arena single --player kimi --brief "Read cortex/wiki/04-ssot/architecture.md and
 
 If kimi also understands → document is broadly usable, not Claude-specific.
 
+**Drift pass over present-tense records (run alongside validation).** Run the eight
+questions in [`references/drift-detection.md`](./references/drift-detection.md)
+against records that claim to describe **now** — `cortex/wiki/04-ssot/`, `AGENTS.md`,
+skill guides. **Never sweep ADRs** (point-in-time; refresh on encounter with a status
+note). Output **findings, not verdicts**; each becomes a task, not an in-phase fix.
+
 ## Relationship with Other Tools
 
 | Tool | Role in Dreaming |
@@ -180,4 +186,5 @@ summary: |
 | When you need to… | Read |
 |--------------------|------|
 | Read the Hermes Curator field notes | [`references/hermes-dreaming-field-notes.md`](./references/hermes-dreaming-field-notes.md) |
-| See the ZK validation pattern in action | AGENTS.md § ZK Validation Pattern |
+| Run the eight-question drift pass | [`references/drift-detection.md`](./references/drift-detection.md) |
+| See the ZK validation pattern in action | AGENTS.md § ZK Review Gate |

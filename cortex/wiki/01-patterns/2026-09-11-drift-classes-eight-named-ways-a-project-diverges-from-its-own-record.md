@@ -1,6 +1,6 @@
 ---
 created: 2026-09-11
-updated: 2026-09-11
+updated: 2026-10-23
 category: pattern
 ---
 
@@ -18,18 +18,13 @@ The organising insight: **detectability is cheap; the missing ingredient is the 
 
 ## Details
 
-### The eight classes, their detectors, and their cost
+### The eight classes
 
-| # | Class | The question to ask | Cost |
-|---|---|---|---|
-| 1 | **Carrier drift** | How many carriers hold this shape? | grep |
-| 2 | **Grammar drift** | Who writes it and who reads it — one predicate? | read one module |
-| 3 | **Doctrine drift** | Does the *behaviour* this doc asserts match the code? | grep |
-| 4 | **Authorization drift** | Does the symbol this record names exist? | grep |
-| 5 | **Enforcement drift** | Who enforces this rule, over the same set? | grep + read the guard |
-| 6 | **Precondition drift** | Is this deferred decision's trigger still satisfiable? | needs a deferred-list — the only class no test assists |
-| 7 | **Repair drift** | **Which detector did I just turn green, and what was it detecting?** | introspection |
-| 8 | **Self-referential verification** | **When this test fails, what drives the failure?** | introspection |
+> **The canonical operational list** — each class, its question, and its detector —
+> lives in [`packages/lythoskill-dreaming/skill/references/drift-detection.md`](../../../packages/lythoskill-dreaming/skill/references/drift-detection.md),
+> which dreaming Phase 3 runs. This page is the discovery record: the context, the
+> worked examples, and why the symptomless classes need a different trigger. Do not
+> re-add a second copy of the questions here — that is this page's own class 1.
 
 ### Worked examples (all from one day)
 
@@ -56,12 +51,9 @@ The organising insight: **detectability is cheap; the missing ingredient is the 
 - A date assertion computed its expected value **with the same arithmetic as the implementation**. Three separate mutations survived: naive string slicing (deleting the *entire* normalisation the function existed for), month/day swap, and local-instead-of-UTC formatting — all **46 pass / 0 fail**.
 - The fixture ID that would have caught them was **degenerate**: month `01`, day `01`, 12:00 local. A degenerate input makes several distinct mutations produce the same output.
 
-### The two questions that cost nothing
+### Why classes 7 and 8 matter more
 
-Classes 7 and 8 are worth more than the other six combined, because the other six are "the thing drifted" while these two are "**the fixer drifted**" and "**you thought someone was watching, and no one was**". Both are answered by introspection, not tooling:
-
-- **"Which detector did I just turn green, and what was it detecting?"** — any repair that makes a signal disappear without making the underlying thing correct is drift wearing a clean shirt.
-- **"When this test fails, what drives the failure?"** — if the answer involves the module under test (it imports it, it reuses its arithmetic, or its fixture sits on the function's degenerate point), **it cannot test itself**.
+Classes 7 and 8 are worth more than the other six combined, because the other six are "the thing drifted" while these two are "**the fixer drifted**" and "**you thought someone was watching, and no one was**". Both are answered by introspection, not tooling; the canonical wording lives in the reference (§ The eight questions, per-class notes 7–8). The discovery record's own summary: any repair that makes a signal disappear without making the underlying thing correct is drift wearing a clean shirt, and a verification that shares the verified thing's assumptions can never redden.
 
 ### Symptomatic vs symptomless — why two different triggers exist
 
@@ -74,17 +66,24 @@ So a bug-driven archaeology is the *correct* trigger for the symptomatic classes
 
 ### The code-side proxy
 
-When comparing a record against reality, compare it against the **test suite**, not the source. Tests *execute*, so they cannot silently rot; a doc↔test disagreement is two authoritative assertions in direct conflict and is decidable. Doc↔source requires first *inferring* the source's contract — and that inference is itself an error source. **Test coverage therefore bounds how much of your documentation is falsifiable at all.**
+Compare records against the **test suite**, not the source; the operational rule and its rationale are in the canonical list (§ The code-side proxy). The discovery record's own conclusion: **test coverage bounds how much of your documentation is falsifiable at all.**
 
 ## When to Apply / When Not to Apply
 
-**Apply** to records that claim to describe the present: SSOT docs, `AGENTS.md`, skill guides, conventions.
+Scope, the ADR exclusion, and the findings-not-verdicts rule are normative and live in
+the canonical list above. Two rationales from this record are worth keeping here:
 
-**Do not apply to ADRs and other point-in-time records.** An ADR records the moment it was written; "the code later implemented it" does not make the ADR wrong. Sweeping ADRs produces a stream of "please update this historical document" noise. Refresh them **opportunistically, on encounter** — and by appending a status note, never by rewriting the body.
+- **Why ADRs are excluded.** An ADR records the moment it was written; "the code later
+  implemented it" does not make it wrong. Sweeping ADRs produces a stream of "please
+  update this historical document" noise. Refresh them opportunistically, on encounter,
+  by appending a status note — never by rewriting the body.
+- **Why findings, not verdicts.** A check that can be wrong gets learned around, and
+  being learned around is worse than no check: it manufactures the appearance of having
+  checked. This is the discriminator from `ADR-20260910113534807` Option C.
 
-**Report findings, not verdicts.** A check that outputs pass/fail must be machine-decidable semantically; where it is not, the output must be a *finding* for a reader to judge. This is the discriminator from `ADR-20260910113534807` Option C: a check that can be wrong gets learned around, and being learned around is worse than no check — it manufactures the appearance of having checked.
-
-**Do not build a full-corpus audit.** Sequence: (1) name the classes; (2) make each one's question a one-liner; (3) run them where the work already is; (4) only mechanise the ones that keep recurring.
+Do not build a full-corpus audit. The sequence that produced this pattern was: name
+the classes; make each question a one-liner; run them where the work already is; only
+mechanise the ones that keep recurring.
 
 ## Related
 

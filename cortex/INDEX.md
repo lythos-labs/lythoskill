@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/23 19:11:19
+> 自动生成于 2026/10/23 19:21:43
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 398 | 进行中: 0, 待验收: 0, 已完成: 336 |
+| Tasks | 398 | 进行中: 1, 待验收: 0, 已完成: 336 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 114 | 已接受: 108 |
 
@@ -80,9 +80,9 @@
 
 _无_
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
 
 ### 待验收 (0)
 
@@ -427,7 +427,7 @@ _无_
 - ✅ ~~TASK-20261019161017309~~: doc shorthand leak — deck/arena/curator/cortex bare commands in shipped skills claim nonexistent bins; bunx form canonical, alias documented separately
 - ✅ ~~TASK-20261023182807833~~: Fix latest-daily lookup with date-filtered query
 
-### 悬置 (18)
+### 悬置 (17)
 
 - ⏸️ **TASK-20260513035226597**: Evaluate bun publish vs npm publish + rewrite — bun ≥1.3 has bun publish; verify workspace:* auto-rewrite behavior via dry-run; if auto-rewrite confirmed, consider switching publish.sh to drop the explicit rewrite layer
 - ⏸️ **TASK-20260710115319209**: ZK Review methodology upgrade trade-off awareness in gap assessment
@@ -445,7 +445,6 @@ _无_
 - ⏸️ **TASK-20260909152355793**: keyword research: product-first word discovery for lythoskill discovery assets
 - ⏸️ **TASK-20260909155425927**: assurance-column investments — revalidation, conformance, constraint composition
 - ⏸️ **TASK-20260910185956645**: splice findings from the test-reviewer trial - trailing comma double-comma, blank line eaten, comment-cascade collision, dead code
-- ⏸️ **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
 - ⏸️ **TASK-20261014175122489**: release docs remaining gaps from zero-context review: name table cold-start pages rollback
 
 ### 终止 (40)
