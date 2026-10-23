@@ -13,8 +13,9 @@
 
 Every shipped skill that reads "the latest daily" uses
 `ls daily/*.md | sort | tail -1`, which encodes a date query as lexicographic
-position. It selected `daily/README.md` until 2026-05-05 (`cf74e930` renamed it
-to `_README.md`); that rename only works under en_US collation — under
+position. It selected `daily/README.md` until 2026-05-05 (`cf74e930` added
+`daily/_README.md`, `87dd6017` deleted `daily/README.md`); that rename only
+works under en_US collation — under
 `LC_ALL=C` / `env -i`, `_README.md` sorts after the dated files and is selected
 again. Reproduced 2026-10-23 with
 `env -i sh -c 'ls daily/*.md | sort | tail -1'` → `daily/_README.md`.
@@ -55,10 +56,16 @@ ordering is identical under en_US.UTF-8 and POSIX collation.
 
 ## Acceptance Criteria
 
-- [x] No executable call site uses `ls daily/*.md | sort | tail -1`; remaining
-      occurrences are the explicit "do not" teaching lines, ADR/history text,
-      and `drafts/` + `showcase/` snapshots (verified 2026-10-23 by grep).
-- [x] `env -i sh -c "<canonical query>"` → `2026-10-19.md` (not `_README.md`).
+- [x] No executable call site asks filename position for a date: grep for the
+      unfiltered form (`ls daily/*.md | sort | tail -N`, `ls daily/ | tail -N`)
+      returns only "do not" teaching lines, ADR/history text, tracked `.bak`
+      snapshots and untracked `playground/` demos. The live `[combo.weekly-retro]`
+      prompt in `skill-deck.toml` was still using `ls daily/ | tail -7` and was
+      fixed in the same pass (found by ZK review, 2026-10-23).
+- [x] `env -i sh -c "<canonical query>"` → the newest **dated** file, never
+      `_README.md` (at verification time 2026-10-23 it returned `2026-10-19.md`;
+      once `daily/2026-10-23.md` existed it returns that — the assertion is
+      "newest dated file", not a fixed name).
 - [x] Onboarding + scribe-weekly built mirrors match their sources (creator align).
 - [x] `cortex probe` reports no issue for this task; only the pre-existing
       `EPIC-20260828111425886` intake-umbrella drift remains (documented in
@@ -73,6 +80,12 @@ ordering is identical under en_US.UTF-8 and POSIX collation.
 - 2026-10-23 18:45 — edits landed (`5ee0e243`); `creator align` 75 passed.
 - 2026-10-23 19:05 — ZK reviewer found 3 P1 / 4 P2 in the ADRs; fixed in
   `e1f1c994` (fourth carrier, corpus counts, follow-up for `skill/assets/`).
+- 2026-10-23 19:40 — second ZK review, this time of the card + the shipped
+  flow: FLOW_OK (0 P1, 4 P2). Fixed: Background named the wrong commit for the
+  rename; AC1's "no executable call site" enumeration missed the live
+  `[combo.weekly-retro]` prompt in `skill-deck.toml` (now filtered); ADR corpus
+  count 52 → 51; the linked working set was still v0.20.1 from the shallow cold
+  pool (refreshed + relinked, `skill-deck.lock` re-recorded).
 
 ## Related Files
 - Modified: `AGENTS.md`, `packages/lythoskill-project-onboarding/skill/SKILL.md`,
@@ -105,8 +118,8 @@ fix(onboarding,scribe-weekly): latest-daily lookup filters dated filenames (TASK
   review; its migration is follow-up work, not part of this card.
 - Rejected: `daily latest --json` command package (no host package; skills run in
   adopter projects without the CLI). Revisit only with a second data consumer.
-- Rejected: `status:` frontmatter for "valid handoff" — 0/51 files carry it
-  (50 dated + `_README.md`).
+- Rejected: `status:` frontmatter for "valid handoff" — 0/52 files carried it
+  on 2026-10-23 (51 dated + `_README.md`); the point is the 0, not the denominator.
 - External review that motivated this card: dynamic views as queries is correct;
   "must be a command" is a deployment assumption, not an invariant.
 - Related ADRs: ADR-20261023182817984 (view = query), ADR-20261023183001417

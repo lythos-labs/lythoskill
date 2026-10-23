@@ -72,7 +72,7 @@ without accounting for where the command would run.
 - Needs a host package. `cortex` is wrong (governance state, not session
   journal); a new package is new publish/release surface.
 - The advertised semantics ("status valid + has handoff section") do not exist
-  in the corpus; implementing them means a schema migration across 52 files and
+  in the corpus; implementing them means a schema migration across 51 files and
   a change to scribe's write path, for one consumer.
 
 ### Option B — Date-filtered shell query (chosen)
