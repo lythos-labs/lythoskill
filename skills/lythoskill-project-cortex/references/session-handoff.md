@@ -42,7 +42,9 @@ Do NOT repeat what `git log`, `ls`, `cat` can reveal.
 - [ ] Confirm with user if unclear
 ```
 
-A full template is available at `${CLAUDE_SKILL_DIR}/assets/HANDOFF-TEMPLATE.md`.
+The full template is `HANDOFF-TEMPLATE.md` in the project root, written there by
+`cortex init` from the package's `templates/handoff.md` — the same file the CLI
+ships, not a copy under `${CLAUDE_SKILL_DIR}` (ADR-20261023183001417).
 ## For New Agent Entering a Project
 Read in this order:
 1. Latest `daily/YYYY-MM-DD.md` (if using scribe) — highest priority, session-specific context

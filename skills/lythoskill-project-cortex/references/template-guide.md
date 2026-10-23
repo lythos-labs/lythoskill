@@ -1,42 +1,61 @@
 # Template Field Guide
-Templates live in `${CLAUDE_SKILL_DIR}/assets/`. The CLI populates them
-automatically. This reference explains what each field means.
+
+**There is one carrier per template and the CLI is it.** The files live in the
+`@lythos/project-cortex` package under `templates/{task,epic,adr,handoff}.md`;
+`cortex task|epic|adr "<title>"` renders the card from them, and `cortex init`
+writes the same files into the adopter project (`cortex/tasks/TASK-TEMPLATE.md`,
+…). If a card in a project disagrees with `cortex task` output, the CLI is right
+and the copy is the bug (ADR-20261023183001417).
+
+This reference explains what each field means. It does not restate the section
+bodies — read the generated card for those.
+
 ## Task Template Fields
 | Field | Purpose |
 |-------|---------|
-| **Status History** | Table tracking status transitions with dates and notes |
-| **Background** | Link to parent EPIC or ADR. Why does this task exist? |
+| **Status History** | Machine-parseable table of status transitions; the directory mirrors it |
+| **Background & Goals** | Link to parent EPIC or ADR. Why does this task exist? |
 | **Requirements** | Checklist of what must be built |
-| **Technical Approach** | Implementation details, file paths, design notes |
+| **Technical Approach** | Implementation plan, file paths; decisions belong in an ADR |
 | **Acceptance Criteria** | Checklist of verifiable conditions for completion |
-| **Progress** | Timestamped updates during execution |
+| **Progress Log** | Timestamped updates during execution |
 | **Related Files** | Files to modify or create |
-| **Git Commit** | Suggested commit message with task ID |
-| **Milestone Declaration** | Exit criteria, deliverables, not-delivering, exit reason |
+| **Git Commit Message** | Suggested commit message with the task ID |
+| **Notes** | Anything the next agent needs that has no other carrier |
+
 ## Epic Template Fields
 | Field | Purpose |
 |-------|---------|
-| **Background Story** | Why does this feature exist? What problem does it solve? |
-| **Requirement Tree** | Workflowy-style nested requirements with trigger/requirement/output |
-| **Related Tasks** | Table linking derived tasks with status |
-| **Lessons Learned** | Retrospective notes after completion |
-| **Archive Criteria** | Checklist defining when the epic is "done" |
+| **Status History** | Machine-parseable table of status transitions |
+| **背景故事** (Background story) | Why does this feature exist? What problem does it solve? |
+| **需求树** (Requirement tree) | Workflowy-style nested requirements with trigger/requirement/output |
+| **技术决策** (Technical decisions) | Table linking the ADRs this epic rests on |
+| **关联任务** (Related tasks) | Table linking derived tasks with status |
+| **经验沉淀** (Lessons) | Retrospective notes after completion |
+| **归档条件** (Archive criteria) | Checklist defining when the epic is "done" |
+
 Use `#in-progress`, `#done`, `#blocked` tags on requirement tree nodes.
+The epic card also carries `lane` / `checklist_completed` frontmatter — see the
+carrier, not this table.
+
 ## ADR Template Fields
 | Field | Purpose |
 |-------|---------|
-| **Status** | Checkbox: Proposed / Accepted / Rejected / Superseded |
-| **Context** | What problem prompted this decision? |
+| **Status History** | Machine-parseable table of status transitions |
+| **Background** | What problem prompted this decision? |
+| **Decision Drivers** | Why the decision has to be made now |
 | **Options** | Each option with Pros/Cons analysis |
 | **Decision** | Which option was chosen and why |
-| **Consequences** | Positive, negative, and follow-up actions |
+| **Impact** | Positive, negative, and follow-up actions |
+| **Related** | Related ADRs / epics (the human-readable twin of the frontmatter) |
+
 ADR lifecycle: create in `01-proposed/`, move to `02-accepted/` (or `03-rejected/`)
 after decision. If later replaced, move to `04-superseded/` and link to the new ADR.
+
 ## Viewing Real Examples
-The CLI generates playground examples during `init`:
-- `cortex/tasks/01-backlog/TASK-*-playground-task.md`
-- `cortex/epics/01-active/EPIC-*-playground-epic.md`
-These are real CLI output, not hand-crafted samples.
+`cortex task "<title>"` writes a real card — that file is the example. There is
+no hand-maintained sample under the skill: a sample would be a second carrier
+and would drift.
 
 ## ADR frontmatter — 取代关系（机器可读）
 
