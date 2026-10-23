@@ -8,6 +8,7 @@
 | backlog | 2026-10-23 | Created |
 | in-progress | 2026-10-23 | Started |
 | review | 2026-10-23 | Deliverables committed |
+| completed | 2026-10-23 | Done |
 
 ## Background & Goals
 
@@ -86,6 +87,12 @@ ordering is identical under en_US.UTF-8 and POSIX collation.
   `[combo.weekly-retro]` prompt in `skill-deck.toml` (now filtered); ADR corpus
   count 52 → 51; the linked working set was still v0.20.1 from the shallow cold
   pool (refreshed + relinked, `skill-deck.lock` re-recorded).
+- 2026-10-23 20:05 — owner LGTM; moved to completed. **折后未评**: the second
+  review's conclusion covers `82dd974d`; its four findings were folded in
+  `b720d905` (delta = `skill-deck.toml` combo prompt, ADR/card counts, cold-pool
+  refresh + `skill-deck.lock` hash sync) and that delta has **not** had an
+  independent review. ADR-20260910113730375 asks for this marker rather than a
+  silent fold.
 
 ## Related Files
 - Modified: `AGENTS.md`, `packages/lythoskill-project-onboarding/skill/SKILL.md`,
