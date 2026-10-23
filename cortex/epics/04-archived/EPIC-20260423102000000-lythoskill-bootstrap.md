@@ -81,3 +81,5 @@ Skills:   lythoskill-* (trademarked prefix)
 - [x] GitHub repo created with CI/CD workflow
 - [x] README.md for skill repo discoverability
 - [x] CLAUDE.md for agent developer guidance
+
+> **Template note (2026-10-23)**: this card predates the single-carrier migration and uses section names the CLI no longer generates (`Background & Goal` / `Progress Record` / `Background Story` / `Requirement Tree`). Kept as written — historical record, not a shape to copy. See ADR-20261023183001417.

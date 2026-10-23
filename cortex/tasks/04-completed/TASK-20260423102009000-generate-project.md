@@ -39,3 +39,5 @@ Linked to: EPIC-20260423102000000, ADR-20260423101938000, ADR-20260423101950000
 ## Git Commit Format
 
 `(TASK-20260423102009000)`
+
+> **Template note (2026-10-23)**: this card predates the single-carrier migration and uses section names the CLI no longer generates (`Background & Goal` / `Progress Record` / `Background Story` / `Requirement Tree`). Kept as written — historical record, not a shape to copy. See ADR-20261023183001417.

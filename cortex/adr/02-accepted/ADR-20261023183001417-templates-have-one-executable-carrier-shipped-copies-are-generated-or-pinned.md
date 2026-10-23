@@ -138,19 +138,24 @@ circulation; Option C already failed once.
 - Negative: template edits now require the packaged `templates/` directory at
   runtime (dist/build must include it); one more file read per card creation.
 - Follow-up (migration; not part of the task that raised this ADR):
-  - [ ] Move `createTaskTemplate` / `createAdrTemplate` bodies to
-        `templates/task.md` / `templates/adr.md`.
-  - [ ] Point `cortex init` at `templates/`; delete `assets/*-TEMPLATE.md`.
-  - [ ] Delete `skill/assets/*-TEMPLATE.md` and update `skill/SKILL.md:444`
+  - [x] Move `createTaskTemplate` / `createAdrTemplate` bodies to
+        `templates/task.md` / `templates/adr.md`. — `74f47df6`
+  - [x] Point `cortex init` at `templates/`; delete `assets/*-TEMPLATE.md`.
+        — `74f47df6`
+  - [x] Delete `skill/assets/*-TEMPLATE.md` and update `skill/SKILL.md:444`
         (currently tells agents to read `${CLAUDE_SKILL_DIR}/assets/TASK-TEMPLATE.md`).
         Leaving this out satisfies the letter of "one carrier" while the
-        agent-facing copy remains.
-  - [ ] Add the section-parity drift test for all three templates.
-  - [ ] `packages/lythoskill-project-cortex/package.json` `files` already
+        agent-facing copy remains. — `74f47df6` (deletion) + `8b80bbec` (docs)
+  - [x] Add the section-parity drift test for all three templates.
+        — `8b80bbec`, `src/lib/template-drift.test.ts` (also pins "no second copy")
+  - [x] `packages/lythoskill-project-cortex/package.json` `files` already
         includes `templates` and `assets` (verified 2026-10-23) — re-check after
-        the `assets` removal.
-  - [ ] Audit existing cards written from the stale asset shape (1 archived epic
+        the `assets` removal. — kept as-is: `assets/` still carries the
+        `post-commit` hook, `templates/` carries all four carriers
+  - [x] Audit existing cards written from the stale asset shape (1 archived epic
         + 2 completed task cards found) — annotate, do not rewrite history.
+        — annotated in place: `EPIC-20260423102000000`,
+        `TASK-20260423102009000`, `TASK-20260512000000001`
 
 ## Migration notes (2026-10-23, while executing the follow-ups)
 
