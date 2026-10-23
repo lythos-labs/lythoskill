@@ -45,8 +45,8 @@ python3 -c "import datetime; d = datetime.date.today(); iso = d.isocalendar(); \
   print(f'Today: {d} ({d.strftime(\"%A\")}) — ISO W{iso.week}'); \
   print(f'Standard span: {mon}_to_{sun}')"
 
-# Daily surface — which days had activity?
-ls daily/*.md | sort | tail -7
+# Daily surface — which days had activity? (filter to dated names before sorting)
+ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -7
 
 # Git surface — what actually landed?
 git log --since="7 days ago" --oneline
@@ -131,7 +131,7 @@ User says yes → run weekly prep. User says no or ignores → write daily scrib
 
 ```bash
 # 1. Daily files from the past 7 days
-ls daily/*.md | sort | tail -7
+ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -7
 
 # 2. Git activity (for reference, not replay)
 git log --since="7 days ago" --oneline

@@ -48,8 +48,8 @@ python3 -c "import datetime; d = datetime.date.today(); iso = d.isocalendar(); \
   print(f'Standard ISO: {mon}_to_{sun}'); \
   print(f'If writing today, period should cover actual work days, not necessarily Mon-Sun')"
 
-# 1. Daily files — which days actually had work?
-ls daily/*.md | sort | tail -7
+# 1. Daily files — which days actually had work? (filter dated names first)
+ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -7
 
 # 2. Git activity — what actually got committed?
 git log --since="7 days ago" --oneline

@@ -50,6 +50,8 @@
 
 **daily/ directory doesn't exist**: Project never used scribe. This is normal
 for projects that only use cortex. Degrade to exploration silently.
-**Multiple daily files from today**: Read the latest one (by filename sort).
+**Multiple daily files from today**: Read the latest one — filter to dated
+filenames first, then sort (`references/latest-daily-query.md`). Never use
+`ls daily/*.md | sort | tail -1`: filename position is not a date order.
 Within a single file, if multiple handoff sections exist, read the **latest**
 (most recent) one — scribe prepends new handoffs to the top of the file.
