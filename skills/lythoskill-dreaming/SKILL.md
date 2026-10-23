@@ -62,22 +62,23 @@ project documentation is what this skill implements. Field notes:
 
 ### Phase 1: Scan — Start from weekly, not from raw
 
-**Primary index: the weekly chain.** Weeklies (W17-W22) are pre-built importance-ranked summaries. Each weekly already contains:
+**Primary index: the weekly chain.** Weeklies (W17–W43, 32 files) are pre-built importance-ranked summaries. Each weekly carries:
 
-- `core_thread` — the 1-2 most important clusters per week
-- `docs_now_stale` — ADRs/wiki that became outdated each week
-- `decisions_accepted` — which ADRs landed when
+- `core_thread` — the 1-2 most important clusters per week (31/32)
+- `decisions_accepted` — which ADRs landed when (32/32)
+- `docs_now_stale` — ADRs/wiki that became outdated (**12/32** — mostly the W17–W24 era, plus W25-v2 and W28; later weeklies record stalls as `quests_paused` / `parked_threads`, which appear in 32/32)
 - Anomalies surfaced — CLI renames, missing ADRs, build-then-reject cycles
 
 Start from weekly, not from raw scan:
 
 ```bash
 ls weekly/ | sort                          # Read all weeklies
-cat weekly/*.md | grep "docs_now_stale"    # Extract stale-doc index across all weeks
+cat weekly/*.md | grep "docs_now_stale"    # Stale-doc index, W17–W24 era
 cat weekly/*.md | grep "decisions_accepted" # Build ADR timeline from weekly
+cat weekly/*.md | grep "quests_paused\|parked_threads"  # Stalls in later weeklies
 ```
 
-**Why this is better**: 81 ADRs + 54 wiki + 25 dailies ≈ impossible to scan cold. The weekly chain is 6 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
+**Why this is better**: 121 ADRs + 130 wiki pages + 52 dailies (as of 2026-10-23) ≈ impossible to scan cold. The weekly chain is 32 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
 
 **Fallback** (only when weeklies are missing or incomplete):
 ```bash
@@ -146,7 +147,7 @@ If kimi also understands → document is broadly usable, not Claude-specific.
 questions in [`references/drift-detection.md`](./references/drift-detection.md)
 against records that claim to describe **now** — `cortex/wiki/04-ssot/`, `AGENTS.md`,
 skill guides. **Never sweep ADRs** (point-in-time; refresh on encounter with a status
-note). Output **findings, not verdicts**; each becomes a task, not an in-phase fix.
+note). Scope, output contract, and per-class detectors live in the reference.
 
 ## Relationship with Other Tools
 

@@ -22,8 +22,9 @@ The organising insight: **detectability is cheap; the missing ingredient is the 
 
 > **The canonical operational list** — each class, its question, and its detector —
 > lives in [`packages/lythoskill-dreaming/skill/references/drift-detection.md`](../../../packages/lythoskill-dreaming/skill/references/drift-detection.md),
-> which dreaming Phase 3 runs. This page is the discovery record: the context, the
-> worked examples, and why the symptomless classes need a different trigger. Do not
+> which dreaming Phase 3 runs. This page is the **non-normative** discovery record:
+> the context, the worked examples, and why the symptomless classes need a different
+> trigger — where its prose touches a per-class rule, the reference wins. Do not
 > re-add a second copy of the questions here — that is this page's own class 1.
 
 ### Worked examples (all from one day)

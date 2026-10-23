@@ -111,10 +111,13 @@ card's Technical Approach (ADR-20260910113534807).
 
 ## Drift review (dreaming)
 
-Projects diverge from their own records in **eight named classes** — canonical
-taxonomy in the pattern (see `related`): **carrier, grammar, doctrine,
-authorization, enforcement, precondition, repair, self-referential
-verification**. Dreaming scans **present-tense docs only** (SSOT / AGENTS.md /
+Projects diverge from their own records in **eight named classes** — carrier,
+grammar, doctrine, authorization, enforcement, precondition, repair,
+self-referential verification. The **operational list** (question + detector per
+class, scope, output contract) is
+[`packages/lythoskill-dreaming/skill/references/drift-detection.md`](../../../packages/lythoskill-dreaming/skill/references/drift-detection.md),
+run by dreaming Phase 3; the pattern in `related` is the discovery record and is
+**non-normative** for per-class rules. Dreaming scans **present-tense docs only** (SSOT / AGENTS.md /
 guides); ADRs are point-in-time records and are not scanned; the code-side
 proxy is the test suite — it executes, so it cannot rot silently (though a
 green suite only certifies what its pins pin; see Mutation pins and pitfalls

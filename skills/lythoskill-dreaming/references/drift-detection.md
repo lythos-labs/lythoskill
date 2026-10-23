@@ -6,8 +6,9 @@
 > a set of questions cheap enough to ask during Phase 3.
 
 The organising insight: **detectability is cheap; the missing ingredient is the
-question being asked.** Most of these are one `grep`. They are missed not because
-they are hard, but because nothing in the routine brings them up.
+question being asked.** Half of these are one `grep`; the rest are one read or a
+moment of introspection. They are missed not because they are hard, but because
+nothing in the routine brings them up.
 
 ## Scope: present-tense records only
 
@@ -30,7 +31,7 @@ was written; code implementing it later does not make the ADR wrong. Refresh one
 | 3 | **Doctrine drift** | Does the *behaviour* this doc asserts match the code? | grep |
 | 4 | **Authorization drift** | Does the symbol this record names exist? | grep |
 | 5 | **Enforcement drift** | Who enforces this rule, over the same set? | grep + read the guard |
-| 6 | **Precondition drift** | Is this deferred decision's trigger still satisfiable? | needs a deferred-list |
+| 6 | **Precondition drift** | Is this deferred decision's trigger still satisfiable? | grep deferred markers; ADR triggers read on encounter |
 | 7 | **Repair drift** | **Which detector did I just turn green, and what was it detecting?** | introspection |
 | 8 | **Self-referential verification** | **When this test fails, what drives the failure?** | introspection |
 
@@ -55,9 +56,13 @@ was written; code implementing it later does not make the ADR wrong. Refresh one
    that was later removed or superseded, so the trigger became unsatisfiable and the
    branch silently stopped being reachable. **The one class no test assists** — it
    needs a list of deferred decisions and their triggers, and that list usually has
-   no reader itself. When no list exists, grep the records for deferred markers
+   no reader itself. When no list exists, grep the present-tense corpus
+   (`cortex/wiki/04-ssot/`, `AGENTS.md`, skill guides) for deferred markers
    (`deferred`, `postpone`, `revisit when`, `someday`, `推迟`) and emit "no
-   deferred-trigger index exists" as its own finding.
+   deferred-trigger index exists" as its own finding. Expect false positives —
+   "implementation deferred" is not a revisit-trigger. A trigger that lives in an
+   ADR is read **on encounter** with that ADR; it does not count as a drift finding
+   against the ADR.
 7. **Repair drift.** An action taken to clear a symptom introduces a divergence the
    detector cannot see. Any repair that makes a signal disappear without making the
    underlying thing correct is drift wearing a clean shirt. Instances: hand-patching
@@ -75,11 +80,12 @@ was watching, and no one was**".
 ## The code-side proxy
 
 When comparing a record against reality, compare it against the **test suite**, not
-the source. Tests *execute*, so they cannot silently rot; a doc↔test disagreement is
-two authoritative assertions in direct conflict and is decidable. Doc↔source requires
-first *inferring* the source's contract — and that inference is itself an error
-source. **Test coverage therefore bounds how much of your documentation is
-falsifiable at all.**
+the source. Tests *execute*, so they cannot silently rot — though a green suite
+certifies only what its pins actually pin; a tautological or degenerate pin rots
+silently (class 8). A doc↔test disagreement is two authoritative assertions in
+direct conflict and is decidable. Doc↔source requires first *inferring* the
+source's contract — and that inference is itself an error source. **Test coverage
+therefore bounds how much of your documentation is falsifiable at all.**
 
 ## Output: findings, not verdicts
 
@@ -91,7 +97,8 @@ having checked.
 Record each finding with:
 
 - the **class** (1–8),
-- the **record and line** (`path:line`),
+- the **record and line** (`path:line`; use `path` alone when the finding is about
+  a whole file or its placement),
 - the **evidence** (grep output, test name, commit),
 - **what would settle it** (the test to add, the symbol to remove, the ADR to cite).
 
