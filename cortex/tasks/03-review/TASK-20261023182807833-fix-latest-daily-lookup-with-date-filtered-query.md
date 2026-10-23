@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-23 | Created |
 | in-progress | 2026-10-23 | Started |
+| review | 2026-10-23 | Deliverables committed |
 
 ## Background & Goals
 
@@ -23,14 +24,14 @@ in every surface that performs the lookup, with the rationale recorded once.
 
 ## Requirements
 
-- [ ] Canonical query is date-filtered:
+- [x] Canonical query is date-filtered:
       `ls daily/ 2>/dev/null | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1`
-- [ ] Onboarding SKILL.md (source + built mirror) uses the canonical query and
+- [x] Onboarding SKILL.md (source + built mirror) uses the canonical query and
       points at its rationale reference.
-- [ ] Scribe-weekly's `tail -7` call sites use the same date filter.
-- [ ] AGENTS.md session-close check and both SSOT onboarding guides use it.
-- [ ] Rationale reference added under onboarding `skill/references/`.
-- [ ] No new package, no `status:` frontmatter, no hand-maintained daily index
+- [x] Scribe-weekly's `tail -7` call sites use the same date filter.
+- [x] AGENTS.md session-close check and both SSOT onboarding guides use it.
+- [x] Rationale reference added under onboarding `skill/references/`.
+- [x] No new package, no `status:` frontmatter, no hand-maintained daily index
       (rationale + rejected alternatives live in ADR-20261023182817984).
 
 ## Technical Approach
@@ -54,20 +55,38 @@ ordering is identical under en_US.UTF-8 and POSIX collation.
 
 ## Acceptance Criteria
 
-- [ ] No executable call site uses `ls daily/*.md | sort | tail -1`; remaining
+- [x] No executable call site uses `ls daily/*.md | sort | tail -1`; remaining
       occurrences are the explicit "do not" teaching lines, ADR/history text,
       and `drafts/` + `showcase/` snapshots (verified 2026-10-23 by grep).
-- [ ] `env -i sh -c "<canonical query>"` → `2026-10-19.md` (not `_README.md`).
-- [ ] Onboarding + scribe-weekly built mirrors match their sources (creator align).
-- [ ] `cortex probe` clean for this task and ADR.
-- [ ] SSOT wiki entry references this ADR, not a duplicated rationale.
+- [x] `env -i sh -c "<canonical query>"` → `2026-10-19.md` (not `_README.md`).
+- [x] Onboarding + scribe-weekly built mirrors match their sources (creator align).
+- [x] `cortex probe` reports no issue for this task; only the pre-existing
+      `EPIC-20260828111425886` intake-umbrella drift remains (documented in
+      `daily/2026-10-19.md` as expected).
+- [x] SSOT wiki entry references this ADR, not a duplicated rationale.
 
 ## Progress Log
-<!-- Update during execution, with timestamps -->
+
+- 2026-10-23 18:28 — created; ADR-20261023182817984 drafted (Option B).
+- 2026-10-23 18:30 — sibling ADR-20261023183001417 drafted after finding the
+  template-carrier drift in the same review; both accepted.
+- 2026-10-23 18:45 — edits landed (`5ee0e243`); `creator align` 75 passed.
+- 2026-10-23 19:05 — ZK reviewer found 3 P1 / 4 P2 in the ADRs; fixed in
+  `e1f1c994` (fourth carrier, corpus counts, follow-up for `skill/assets/`).
 
 ## Related Files
-- Modified:
-- Added:
+- Modified: `AGENTS.md`, `packages/lythoskill-project-onboarding/skill/SKILL.md`,
+  `.../skill/references/output-formats.md`,
+  `packages/lythoskill-project-scribe-weekly/skill/SKILL.md`,
+  `.../skill/references/weekly-format.md`,
+  `packages/lythoskill-deck/skill/references/toml-format.md`,
+  `cortex/wiki/04-ssot/agent-onboarding-guide.md` + `.zh.md`,
+  built mirror under `skills/**`
+- Added: `packages/lythoskill-project-onboarding/skill/references/latest-daily-query.md`,
+  `cortex/adr/02-accepted/ADR-20261023182817984-*`,
+  `cortex/adr/02-accepted/ADR-20261023183001417-*`,
+  `cortex/wiki/04-ssot/2026-10-23-ssot-vs-copy-*`,
+  `weekly/2026-W43.md`
 
 ## Git Commit Message
 ```
@@ -86,7 +105,8 @@ fix(onboarding,scribe-weekly): latest-daily lookup filters dated filenames (TASK
   review; its migration is follow-up work, not part of this card.
 - Rejected: `daily latest --json` command package (no host package; skills run in
   adopter projects without the CLI). Revisit only with a second data consumer.
-- Rejected: `status:` frontmatter for "valid handoff" — 0/52 files carry it.
+- Rejected: `status:` frontmatter for "valid handoff" — 0/51 files carry it
+  (50 dated + `_README.md`).
 - External review that motivated this card: dynamic views as queries is correct;
   "must be a command" is a deployment assumption, not an invariant.
 - Related ADRs: ADR-20261023182817984 (view = query), ADR-20261023183001417
