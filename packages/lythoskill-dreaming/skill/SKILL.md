@@ -62,11 +62,11 @@ project documentation is what this skill implements. Field notes:
 
 ### Phase 1: Scan — Start from weekly, not from raw
 
-**Primary index: the weekly chain.** Weeklies (W17–W43, 32 files) are pre-built importance-ranked summaries. Each weekly carries:
+**Primary index: the weekly chain.** Weeklies (W17 onward) are pre-built importance-ranked summaries. Each weekly carries:
 
-- `core_thread` — the 1-2 most important clusters per week (31/32)
-- `decisions_accepted` — which ADRs landed when (32/32)
-- `docs_now_stale` — ADRs/wiki that became outdated (**12/32** — mostly the W17–W24 era, plus W25-v2 and W28; later weeklies record stalls as `quests_paused` / `parked_threads`, which appear in 32/32)
+- `core_thread` — the 1-2 most important clusters per week (most weeklies)
+- `decisions_accepted` — which ADRs landed when (every weekly)
+- `docs_now_stale` — ADRs/wiki that became outdated (**a minority** — mostly the W17–W24 era, plus W25-v2 and W28; later weeklies record stalls as `quests_paused` / `parked_threads` instead, which appear throughout)
 - Anomalies surfaced — CLI renames, missing ADRs, build-then-reject cycles
 
 Start from weekly, not from raw scan:
@@ -78,7 +78,7 @@ cat weekly/*.md | grep "decisions_accepted" # Build ADR timeline from weekly
 cat weekly/*.md | grep "quests_paused\|parked_threads"  # Stalls in later weeklies
 ```
 
-**Why this is better**: 117 ADRs + 130 wiki pages + 51 dailies (as of 2026-10-23) ≈ impossible to scan cold. The weekly chain is 32 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
+**Why this is better**: the corpus (100+ ADRs, 100+ wiki pages, 50+ dailies) is impossible to scan cold. The weekly chain tells you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
 
 **Fallback** (only when weeklies are missing or incomplete):
 ```bash
