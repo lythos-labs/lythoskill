@@ -1,6 +1,6 @@
 ---
 name: lythoskill-dreaming
-version: 0.20.1
+version: 0.21.0
 description: |
   Project memory consolidation — 夜有所梦 ("night dreams": the day's scattered
   notes get consolidated into long-term memory while "sleeping"). Daily (scribe) captures raw
@@ -23,7 +23,7 @@ when_to_use: |
 > Scan → Consolidate → ZK Validate. Extract the "currently true" from scattered docs.
 
 > **Invocation.** `arena <cmd>` mentions below mean
-> `bunx @lythos/skill-arena@0.20.1 <cmd>` (no install). `arena` is
+> `bunx @lythos/skill-arena@0.21.0 <cmd>` (no install). `arena` is
 > not a registered bin — in-repo alias convention in the lythoskill monorepo only.
 > Want it? `alias arena='bunx @lythos/skill-arena@latest'` — optional.
 
