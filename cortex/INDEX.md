@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/23 19:21:43
+> 自动生成于 2026/10/23 20:23:34
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 398 | 进行中: 1, 待验收: 0, 已完成: 336 |
+| Tasks | 398 | 进行中: 0, 待验收: 0, 已完成: 337 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 114 | 已接受: 108 |
 
@@ -80,15 +80,15 @@
 
 _无_
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20260911093602710**: dreaming - a drift-detection pass over present-tense docs, with eight named classes
+_无_
 
 ### 待验收 (0)
 
 _无_
 
-### 已完成 (336)
+### 已完成 (337)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -414,6 +414,7 @@ _无_
 - ✅ ~~TASK-20260910184110804~~: probe should check ADR supersession frontmatter - a rule written but unchecked drifts
 - ✅ ~~TASK-20260910184349139~~: ADR frontmatter carries task and epic relations too - and the fields must have a reader
 - ✅ ~~TASK-20260911080931450~~: cortex move appends Status History rows with no heading or table header - the CLI writes a format the CLI cannot read
+- ✅ ~~TASK-20260911093602710~~: dreaming - a drift-detection pass over present-tense docs, with eight named classes
 - ✅ ~~TASK-20261013142924953~~: fix index generation path drift
 - ✅ ~~TASK-20261013144643210~~: lythoskill-reminders skill
 - ✅ ~~TASK-20261013153805367~~: adopt reminders registry for this repo

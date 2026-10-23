@@ -9,6 +9,8 @@
 | in-progress | 2026-10-19 | Started |
 | suspended | 2026-10-19 | Blocked |
 | in-progress | 2026-10-23 | Resumed |
+| review | 2026-10-23 | Deliverables committed |
+| completed | 2026-10-23 | Done |
 
 ## Background & Goals
 <!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
