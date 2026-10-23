@@ -29,7 +29,9 @@ That encodes a semantic query ("latest by date") into an implementation detail
 
 - **2026-04-23 → 2026-05-05:** `daily/README.md` sorted after every `2026-*.md`
   under *both* en_US.UTF-8 and POSIX collation, so `tail -1` returned the README.
-  Commit `cf74e930` renamed it to `_README.md` ("sort fix").
+  On 2026-05-05, `cf74e930` added `daily/_README.md` and `87dd6017` deleted the
+  old `README.md` (two commits, neither titled as the rename; daily notes call
+  it "sort fix").
 - **2026-05-05 → now (latent):** the rename only works under en_US collation.
   Under `LC_ALL=C` / `env -i`, `_` (0x5F) sorts *after* digits (0x32), so
   `tail -1` selects `_README.md` again. Reproduced 2026-10-23:
@@ -47,7 +49,8 @@ without accounting for where the command would run.
 - The affected skills ship to **adopter projects**; onboarding/scribe are
   skill-only packages (`packages/lythoskill-project-onboarding/` has no
   `package.json`, no bin). A command is unavailable exactly where the skill runs.
-- `daily/*.md` has **no frontmatter `status:` field** (0 of 52 files), so a
+- `daily/*.md` has **no frontmatter `status:` field** (0 of 51 `.md` files at
+  this commit; 50 dated + `_README.md`), so a
   `latest = date max + status valid` query has nothing to read without first
   migrating the write side (scribe).
 - `cortex` already demonstrates the target shape: read models are generated

@@ -54,8 +54,9 @@ ordering is identical under en_US.UTF-8 and POSIX collation.
 
 ## Acceptance Criteria
 
-- [ ] `grep -rn "ls daily/\*\.md | sort | tail -1"` returns nothing outside
-      historical records (daily/, weekly/, drafts/, ADR text).
+- [ ] No executable call site uses `ls daily/*.md | sort | tail -1`; remaining
+      occurrences are the explicit "do not" teaching lines, ADR/history text,
+      and `drafts/` + `showcase/` snapshots (verified 2026-10-23 by grep).
 - [ ] `env -i sh -c "<canonical query>"` → `2026-10-19.md` (not `_README.md`).
 - [ ] Onboarding + scribe-weekly built mirrors match their sources (creator align).
 - [ ] `cortex probe` clean for this task and ADR.

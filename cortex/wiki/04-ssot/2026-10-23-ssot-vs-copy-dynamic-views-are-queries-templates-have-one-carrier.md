@@ -80,19 +80,22 @@ committed as cache, never edited. The same test applies to any proposed
 ### Rule 2 — Templates have one executable carrier
 
 A template is a closed set of section names that `probe`, hooks, and reviewers
-read. `cortex` shipped three carriers and they drifted:
+read. `cortex` shipped four carriers and they drifted:
 
 | Carrier | Who reads it | Drift |
 |---------|--------------|-------|
 | `src/lib/template.ts` (hardcoded) | CLI task/ADR creation | `Technical Approach`, `Progress Log`, `Impact` |
 | `templates/epic.md` | CLI epic creation | Chinese sections + `lane` frontmatter |
-| `assets/*-TEMPLATE.md` | nobody; copied by `cortex init` into adopters | `Cross-Package Impact Checklist`, `TDD Cycles`, `Options Considered`, `Consequences` |
+| `assets/*-TEMPLATE.md` | no code; copied by `cortex init` into adopters | `Cross-Package Impact Checklist`, `TDD Cycles`, `Options Considered`, `Consequences` |
+| `skill/assets/*-TEMPLATE.md` | agents, via `SKILL.md` ("read the template file") | a third shape; its Status History note still says `仅人工记录，不用于机器解析` although `probe` parses it |
 
-The asset copy is the worst shape: shipped to every adopter, validated by
-nothing, and different from what the tool produces. Decision: one artifact per
-template under `templates/`; `cortex init` ships the same file; a test pins the
-rendered section list against the file (precedent:
-`status-history.test.ts` "one shape, no drift").
+The two shipped copies are the worst shape: one is dead on arrival (nothing
+parses it), the other is what the skill tells agents to read, and neither is
+validated against what the tool produces. Decision: one artifact per template
+under `templates/`; `cortex init` ships the same file; a test pins the rendered
+section list against the file (precedent: `status-history.test.ts`
+"one shape, no drift"). The CLI-generated section set is canonical; asset-only
+sections are retired deliberately, not migrated by accident.
 
 **This exact drift was already named on 2026-09-11** — Class 1 "Carrier drift"
 in `01-patterns/2026-09-11-drift-classes-*` lists the same four carriers. Naming
