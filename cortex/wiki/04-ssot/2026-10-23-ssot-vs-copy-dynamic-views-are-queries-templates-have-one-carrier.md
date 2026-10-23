@@ -80,7 +80,8 @@ committed as cache, never edited. The same test applies to any proposed
 ### Rule 2 — Templates have one executable carrier
 
 A template is a closed set of section names that `probe`, hooks, and reviewers
-read. `cortex` shipped four carriers and they drifted:
+read. `cortex` shipped four carriers and they drifted (shapes as of 2026-10-23,
+before the migration):
 
 | Carrier | Who reads it | Drift |
 |---------|--------------|-------|
@@ -96,6 +97,15 @@ under `templates/`; `cortex init` ships the same file; a test pins the rendered
 section list against the file (precedent: `status-history.test.ts`
 "one shape, no drift"). The CLI-generated section set is canonical; asset-only
 sections are retired deliberately, not migrated by accident.
+
+**Current state (migrated 2026-10-23).** The four carriers are now one:
+`templates/{task,epic,adr,handoff}.md` are rendered by `src/lib/template.ts`;
+`cortex init` copies those same files into the adopter project; `assets/` keeps
+only the post-commit hook, and `skill/assets/` no longer exists. Two mechanisms
+hold it: `src/lib/template-drift.test.ts` pins each rendered section list to an
+explicit spec and fails if any `*-TEMPLATE.md` or `skill/assets/` copy
+reappears; the skill's rule is now "cards are generated, never copied" —
+`cortex task "<title>"` output *is* the example.
 
 **This exact drift was already named on 2026-09-11** — Class 1 "Carrier drift"
 in `01-patterns/2026-09-11-drift-classes-*` lists the same four carriers. Naming

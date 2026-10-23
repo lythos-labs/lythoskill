@@ -152,6 +152,30 @@ circulation; Option C already failed once.
   - [ ] Audit existing cards written from the stale asset shape (1 archived epic
         + 2 completed task cards found) — annotate, do not rewrite history.
 
+## Migration notes (2026-10-23, while executing the follow-ups)
+
+Three findings that the decision did not name; each is the same failure class,
+so they were fixed in the same pass rather than deferred:
+
+- **A fourth drift pair: the handoff template.** `skill/HANDOFF-TEMPLATE.md` and
+  `assets/HANDOFF-TEMPLATE.md` were different files (the skill copy carried the
+  "verify current state" block, the init copy did not), and
+  `skill/references/session-handoff.md` pointed at
+  `${CLAUDE_SKILL_DIR}/assets/HANDOFF-TEMPLATE.md` — a path that never existed.
+  Unified into `templates/handoff.md`; `cortex init` copies it verbatim (no
+  rendering: the handoff writer fills its fields). Its prose still says "copy to
+  your project root as `HANDOFF.md`", which contradicts this repo's daily-first
+  handoff convention (ADR-20260424125637347) — a *content* question left open
+  here, deliberately separated from the carrier fix.
+- **`skill/references/template-guide.md` described a template that no CLI
+  produces**: `Milestone Declaration`, ADR `Context`/`Consequences`, and a claim
+  that `init` generates playground examples (it does not). Rewritten to the
+  canonical section set of each carrier.
+- **`assets/` is now hooks only** (`post-commit`); every `*-TEMPLATE.md` under
+  `assets/` and all of `skill/assets/` are gone. The skill's rule is now
+  "cards are generated, never copied" — `cortex task "<title>"` output is the
+  example.
+
 ## Related
 - Related ADR: ADR-20261023182817984 (same SSOT-vs-copy principle applied to
   dynamic views)
