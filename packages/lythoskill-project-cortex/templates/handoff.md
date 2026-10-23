@@ -1,6 +1,11 @@
 # Session Handoff Template
 
-Copy this to your project root as `HANDOFF.md` and customize.
+Write the handoff into the project's own journal, not into a new file: in this
+repo that is `daily/YYYY-MM-DD.md`, as a `## Session Handoff` section at the top
+(ADR-20260424125637347). **Do not create or read `daily/HANDOFF.md`** — that path
+is deprecated. If the project has no daily journal, put this at the root as
+`HANDOFF.md` and record that convention in the project's own `AGENTS.md`.
+Customize the fields below; keep `## 0. 验证当前状态`.
 
 This template is designed based on arena experiment findings:
 - File exploration alone recovers ~70% of context (project identity, task content, decisions)
@@ -104,7 +109,7 @@ bun packages/lythoskill-project-cortex/src/cli.ts probe 2>/dev/null || echo "cor
 |------|------|------|
 | `skill-deck.toml` | ✅ committed | combo section 已提交 |
 | `README.md` | 📝 unstaged | 文档更新，待提交 |
-| `HANDOFF.md` | 🆕 untracked | 本文件，session 交接用 |
+| `daily/YYYY-MM-DD.md` | 🆕 untracked | 本文件，session 交接用 |
 | `playground/xxx.diff` | 📦 artifact only | 仅存在于实验目录，不在 working tree |
 
 ### 环境状态

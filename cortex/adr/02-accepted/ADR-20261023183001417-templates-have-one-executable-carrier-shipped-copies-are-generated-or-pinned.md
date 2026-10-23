@@ -168,10 +168,11 @@ so they were fixed in the same pass rather than deferred:
   `skill/references/session-handoff.md` pointed at
   `${CLAUDE_SKILL_DIR}/assets/HANDOFF-TEMPLATE.md` — a path that never existed.
   Unified into `templates/handoff.md`; `cortex init` copies it verbatim (no
-  rendering: the handoff writer fills its fields). Its prose still says "copy to
-  your project root as `HANDOFF.md`", which contradicts this repo's daily-first
-  handoff convention (ADR-20260424125637347) — a *content* question left open
-  here, deliberately separated from the carrier fix.
+  rendering: the handoff writer fills its fields). Its prose used to say "copy
+  to your project root as `HANDOFF.md`", contradicting this repo's daily-first
+  handoff convention (ADR-20260424125637347) — fixed in the same pass: the
+  template now writes into `daily/YYYY-MM-DD.md` and names `daily/HANDOFF.md`
+  as deprecated, keeping root `HANDOFF.md` only as the no-journal fallback.
 - **`skill/references/template-guide.md` described a template that no CLI
   produces**: `Milestone Declaration`, ADR `Context`/`Consequences`, and a claim
   that `init` generates playground examples (it does not). Rewritten to the
