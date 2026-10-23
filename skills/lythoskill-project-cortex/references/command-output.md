@@ -4,7 +4,7 @@ Agents should expect the following output patterns when invoking CLI commands.
 
 ### Creating a document
 ```bash
-bunx @lythos/project-cortex@0.20.1 adr "Choose database"
+bunx @lythos/project-cortex@0.21.0 adr "Choose database"
 ```
 Output:
 ```
@@ -13,7 +13,7 @@ Output:
 ```
 
 ```bash
-bunx @lythos/project-cortex@0.20.1 task "Fix login bug"
+bunx @lythos/project-cortex@0.21.0 task "Fix login bug"
 ```
 Output:
 ```
@@ -22,7 +22,7 @@ Output:
 ```
 
 ```bash
-bunx @lythos/project-cortex@0.20.1 epic "User auth system"
+bunx @lythos/project-cortex@0.21.0 epic "User auth system"
 ```
 Output:
 ```
@@ -32,7 +32,7 @@ Output:
 
 ### Project statistics
 ```bash
-bunx @lythos/project-cortex@0.20.1 stats
+bunx @lythos/project-cortex@0.21.0 stats
 ```
 Output:
 ```
@@ -68,7 +68,7 @@ Wiki:
 
 ### Consistency probe (read-only)
 ```bash
-bunx @lythos/project-cortex@0.20.1 probe
+bunx @lythos/project-cortex@0.21.0 probe
 ```
 Output when consistent:
 ```
