@@ -71,7 +71,7 @@ From [`skill-deck.toml`](../../skill-deck.toml) in the lythoskill repo itself:
 [combo.weekly-retro]
 prompt = """
 Weekly synthesis with prep-before-write:
-1. Gather: ls daily/ | tail -7, git log --since="7 days ago", cortex probe
+1. Gather: ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -7, git log --since="7 days ago", cortex probe
 2. Surface anomalies: superseded ADRs, CLI renames, missing ADRs
 3. Simulated-annealing ranking: dump → cluster → rank by confusion cost → freeze top 2
 4. Show prep report to user, confirm, then write weekly

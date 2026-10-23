@@ -25,8 +25,11 @@ cat CLAUDE.md
 Provides: how to work in this project, architecture, conventions.
 ### Layer 2: Session State (from latest daily file)
 ```bash
-# Find the most recent daily file
-ls daily/*.md 2>/dev/null | sort | tail -1
+# Find the most recent daily file.
+# Filter to dated filenames BEFORE sorting — never `ls daily/*.md | sort | tail -1`.
+# That form answers a date question with lexicographic position and has returned
+# README.md / _README.md twice (locale-dependent). See references/latest-daily-query.md.
+ls daily/ 2>/dev/null | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1
 # Read first section (## Session Handoff)
 ```
 
@@ -127,4 +130,5 @@ new handoffs to the top of the file.
 | When you need to… | Read |
 |--------------------|------|
 | Understand the CQRS architecture with scribe | [references/cqrs-architecture.md](./references/cqrs-architecture.md) |
+| Get the canonical "latest daily" query and why it filters before sorting | [references/latest-daily-query.md](./references/latest-daily-query.md) |
 | See detailed output format variants and edge cases | [references/output-formats.md](./references/output-formats.md) |
