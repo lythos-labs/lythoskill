@@ -91,8 +91,9 @@
 - **[2026-05-07]** [research-quality-audit](./02-research/2026-05-07-research-quality-audit.md)
 - **[2026-05-07]** [ai-agent-skills-ecosystem](./02-research/2026-05-07-ai-agent-skills-ecosystem.md)
 
-## 📖 Lessons (30)
+## 📖 Lessons (31)
 
+- **[2026-10-19]** [positioning-hygiene-self-maintenance-conventions-must-not-ship-in-product-surfaces](./03-lessons/2026-10-19-positioning-hygiene-self-maintenance-conventions-must-not-ship-in-product-surfaces.md)
 - **[2026-09-09]** [moo-pareto-article-expert-peer-review](./03-lessons/2026-09-09-moo-pareto-article-expert-peer-review.md)
 - **[2026-08-28]** [agent-ux-feedback-fresh-model-session](./03-lessons/2026-08-28-agent-ux-feedback-fresh-model-session.md)
 - **[2026-07-27]** [agents-md-shed-sections-ab-rerun-vocabulary-not-necessity](./03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md)
@@ -124,8 +125,9 @@
 - **[2026-05-02]** [skill-selection-case-study-pdf-report](./03-lessons/2026-05-02-skill-selection-case-study-pdf-report.md)
 - **[2026-05-02]** [how-i-govern-130-skills](./03-lessons/2026-05-02-how-i-govern-130-skills.md)
 
-## 🧭 SSOT (12)
+## 🧭 SSOT (13)
 
+- **[2026-10-23]** [ssot-vs-copy-dynamic-views-are-queries-templates-have-one-carrier](./04-ssot/2026-10-23-ssot-vs-copy-dynamic-views-are-queries-templates-have-one-carrier.md)
 - **[0000-00-00]** [agent-onboarding-guide](./04-ssot/agent-onboarding-guide.md)
 - **[0000-00-00]** [architecture](./04-ssot/architecture.md)
 - **[0000-00-00]** [pitfalls](./04-ssot/pitfalls.md)

@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/10/19 16:22:40
+> 自动生成于 2026/10/23 18:30:47
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 397 | 进行中: 0, 待验收: 0, 已完成: 335 |
+| Tasks | 398 | 进行中: 1, 待验收: 0, 已完成: 335 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 112 | 已接受: 106 |
+| ADRs | 114 | 已接受: 108 |
 
 ---
 
@@ -80,9 +80,9 @@
 
 _无_
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20261023182807833**: Fix latest-daily lookup with date-filtered query
 
 ### 待验收 (0)
 
@@ -606,6 +606,8 @@ _无_
 - 🤔 **ADR-20261014181605217** (01-proposed): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261019125409359** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261019134800627** (02-accepted): private-leak gate — deterministic lint-style check wired into the commit flow
+- ✅ **ADR-20261023182817984** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+- ✅ **ADR-20261023183001417** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 
 ---
 

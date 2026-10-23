@@ -50,7 +50,7 @@ bun packages/lythoskill-deck/src/cli.ts validate --deck skill-deck.toml
 bun packages/lythoskill-project-cortex/src/cli.ts probe
 
 # 4. Read the latest daily
-cat daily/$(ls daily/ | sort | tail -1)
+cat daily/$(ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1)
 ```
 
 ## 4. How Work Gets Done

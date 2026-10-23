@@ -339,7 +339,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 ```
 cortex list         # in-progress tasks with no recent commits — advance them now?
 git status --short  # uncommitted work that should be committed?
-ls daily/*.md | sort | tail -1   # today's daily written and matching HEAD?
+ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail -1   # today's daily written and matching HEAD?
 ```
 
 #### Critical Gotchas
