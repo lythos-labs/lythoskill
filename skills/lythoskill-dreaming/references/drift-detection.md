@@ -103,6 +103,41 @@ Record each finding with:
 - the **evidence** (grep output, test name, commit),
 - **what would settle it** (the test to add, the symbol to remove, the ADR to cite).
 
+What that looks like — illustrative; the four fields are the contract, the layout is not:
+
+```markdown
+### F1 — Class 3 (doctrine drift) — the doc's whitespace rule is not what the code does
+
+- **Record**: `docs/architecture.md:11-12`
+- **Evidence**: `src/slug.ts:4` replaces per character (`/\s/g`): `slugify("a  b")` → `"a--b"`, while the doc shows `hello-world`.
+- **Settle**: correct the doc, or switch to `/\s+/g` and update `src/slug.test.ts:9-11`.
+
+### F2 — Class 7 (repair drift) — a rejected ADR is filed where accepted ones live
+
+- **Record**: `cortex/adr/02-accepted/ADR-006-week-filenames.md` (placement)
+- **Evidence**: its own status history reads `rejected`; the directory is the machine-readable status.
+- **Settle**: move it, or note in place that the directory does not carry status.
+
+> Classes 4 and 8 asked; no instance in this pass.
+```
+
+Why this shape, field by field:
+
+- The **heading is the only line a skimmer reads** — so it is a claim, not a
+  topic, and it carries the class because the class is the finding's identity
+  across runs.
+- **Record first, one anchor.** It is what makes the finding falsifiable in a
+  single command — and the field whose omission turns a report into prose that
+  cannot be diffed against the next run.
+- **Evidence is proof, not retelling** — the smallest command or output that
+  separates an observed drift from a suspected one.
+- **Settle names an artifact** (test, symbol, ADR), which is what turns a
+  complaint into a decision the reader can make without redoing the analysis.
+- The closing **"asked; no instance"** line makes absence visible: without it,
+  a missing class is indistinguishable from a missed one.
+- Order by **class**, not severity: severity is a verdict, and this pass does
+  not emit verdicts.
+
 Repairs are **not** made inside Phase 3. A finding that needs code or doc changes
 becomes a task; Phase 3's own output is the SSOT revision plus the findings list.
 
