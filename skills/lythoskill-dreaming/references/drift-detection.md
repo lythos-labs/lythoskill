@@ -48,7 +48,8 @@ was written; code implementing it later does not make the ADR wrong. Refresh one
    independent basis to doubt the document.
 4. **Split the question in two.** The *fact* of divergence is cheap (grep the symbol).
    The *authorization* — why it was ever permitted — lives only in decision records.
-   Facts are cheap; authorization is expensive. Only the second half needs a pass.
+   Facts are cheap; authorization is expensive. Only the second half needs a pass —
+   and that pass is a read **on encounter** with the decision record, never an ADR sweep.
 5. **Enforcement drift.** Same rule, same family. A guard that covers a subset
    (renames only, one directory, one file type) while the doc claims the whole set.
    Also: a field declared with "a field must have a reader" that has no reader.

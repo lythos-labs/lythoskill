@@ -1,5 +1,5 @@
 ---
-last_consolidated: 2026-05-28
+last_consolidated: 2026-10-23
 sources: ["daily/2026-05-28.md", "AGENTS.md", "cortex/wiki/04-ssot/*", "memory/MEMORY.md"]
 zk_validated: false
 ---
@@ -10,7 +10,7 @@ zk_validated: false
 
 ## 0. Before You Read Anything
 
-You are about to enter a project with 1000+ commits, 81 ADRs, 54 wiki patterns, 25 dailies. **Do not scan.** The project has pre-built indexes specifically because raw scan → fabricate is the #1 failure mode.
+You are about to enter a project with 1,700+ commits, 110+ ADRs, 130+ wiki pages, 50+ dailies. **Do not scan.** The project has pre-built indexes specifically because raw scan → fabricate is the #1 failure mode.
 
 Your reading order:
 1. This guide (5 min) — mental model

@@ -1,0 +1,17 @@
+# Evidence manifest — TASK-20260911093602710 drift-pass A/B probe + review raw (generated 2026-10-23)
+# Anchors local-only raw evidence: the probe corpus lives in /tmp and the review transcripts
+# live in the Claude session dir; neither is committed. Content hashes are the durable anchor
+# (same convention as 2026-07-27-ab-rerun-evidence-manifest.sha256).
+# Verify (while the artifacts still exist): cd /tmp/drift-probe && tail -n +6 <this file> | shasum -a 256 -c -
+24ddc35202135adc81aeccf299f9f72c5bff038d4ed6f550437eaa82777973b4  before3/cold-pool/localhost/me/lythoskill-dreaming/SKILL.md
+14d42128568379c76b545dc96dc0a4fa10b1a6c8e3dfdfa186b27fe2535909c1  before3/work/cortex/wiki/04-ssot/architecture.md
+c1995109ba729616fc86a9c7112977c4385947921c7e5bd6fa1206eeb9d609e8  before3/work/cortex/wiki/04-ssot/conventions.md
+fb0730b30038a8d86f4df02293af1adc38e193e4b0fb242819d5f0997165bf99  before3/work/cortex/wiki/04-ssot/key-decisions.md
+6c644b1607aaad39e4bfec509df8e49a4bda94c4aa191ab6e27a3b4c64c13e3d  before3/work/cortex/wiki/04-ssot/pitfalls.md
+cb7eac38a3985f0c4968edeb3c3c9a62ba2dcc8d3da51fa586d57a0366adb768  after3/cold-pool/localhost/me/lythoskill-dreaming/SKILL.md
+0531b4a28a741d91f51f14a64d4839d1bc33cbf47b5aea5e490749a6d54b5b02  after3/cold-pool/localhost/me/lythoskill-dreaming/references/drift-detection.md
+9951bce4291f35edbfb8ae8677178fec01d9d531f57c4fc05e71c6e86f36c4a7  after3/work/cortex/wiki/04-ssot/architecture.md
+7465bb1002cc42b6fafb04cc0798f8a24b4b7878cfe268774bb43d42be299509  after3/work/cortex/wiki/04-ssot/conventions.md
+4e1a40b861d0d271c80e97e7f7dca67416f3a7214080752d095d77783d69ee27  after3/work/cortex/wiki/04-ssot/key-decisions.md
+3d37e6c87ce3c491f16fb3f99118d9eb0345aaca9a3e39ce56aadb5f40ea49dc  after3/work/cortex/wiki/04-ssot/pitfalls.md
+dff6446d0b49c851f2093a34bb9c174defe8f61a0549be845838ec03d4434ff9  /Users/chariots/.claude/projects/-Users-chariots-Downloads-lythoskill-main/b00cfc01-9e5d-4473-abfc-6faca977bde2/subagents/agent-afa857c4d6298b017.jsonl
