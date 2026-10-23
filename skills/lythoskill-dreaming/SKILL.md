@@ -78,7 +78,7 @@ cat weekly/*.md | grep "decisions_accepted" # Build ADR timeline from weekly
 cat weekly/*.md | grep "quests_paused\|parked_threads"  # Stalls in later weeklies
 ```
 
-**Why this is better**: 121 ADRs + 130 wiki pages + 52 dailies (as of 2026-10-23) ≈ impossible to scan cold. The weekly chain is 32 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
+**Why this is better**: 117 ADRs + 130 wiki pages + 51 dailies (as of 2026-10-23) ≈ impossible to scan cold. The weekly chain is 32 files that tell you *what mattered and what's outdated*. Weekly is dreaming's pre-built index — like Obsidian's map of content.
 
 **Fallback** (only when weeklies are missing or incomplete):
 ```bash
