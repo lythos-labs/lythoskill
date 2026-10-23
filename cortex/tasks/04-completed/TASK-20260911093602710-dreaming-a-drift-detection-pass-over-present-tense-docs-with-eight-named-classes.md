@@ -129,8 +129,8 @@
     - P3 记录不改:P3-4(review-gates/wiki 的摘要层重叠,双方都已声明 reference canonical / 自身非规范)、P3-5(Tier-1 措辞是 AC2 的刻意决定)、P3-6(`curator scan` 是既有全仓约定,超出本卡)。
     - **复审 delta 验证**:coach 复算 32 files / 31-32-12-32 字段计数 / 121-130-52 语料,逐条确认 P2-1、P2-2、P3-1..3 已解决,无回归,**VERDICT: PASS**。其新增的唯一 P3(`docs_now_stale` 的 era 标签)已按其给出的字面 settle 建议改掉;advisory "counts 会老化" 已用 `as of 2026-10-23` 回答 —— 两处 delta 均为复审自己建议的措辞,不涉及结论。
   - **复审钉点与 raw 落点**:coach PASS 的内容 = `SKILL.md` 191 行(`95139331`,即 `6cc31f71`(原 `060402d5`)的源)/ `references/drift-detection.md` 125 行(`0531b4a2`)。第 3 轮 coach 的原始 transcript 未入库(零上下文子进程,1.1 MB,`…/subagents/agent-afa857c4d6298b017.jsonl`);按本仓既有约定,raw 留原地、仓内钉内容哈希 —— 见 `cortex/wiki/03-lessons/2026-10-23-dreaming-drift-probe-manifest.sha256`(含该 transcript 与两变体产物,`shasum -c` 12/12 OK)。**复跑方式**:零上下文 agent 读 `skills/lythoskill-coach/SKILL.md` + `packages/lythoskill-dreaming/skill/` 全文,按 rubric 出报告;钉点哈希可判"评的是不是同一份内容"。
-  - **折后未评(3 处,均为计数/措辞,不涉结构)**:① `52 dailies` → `51 dailies`;② `121 ADRs` → `117 ADRs`(见 P2-1 的计数口径);③ class 4 note 末句澄清(见 AC3 delta ②)。现源:`SKILL.md` `fd372bea`(191 行)、reference `394eb5b5`(126 行)。
-  → Verify: `shasum -a 256 packages/lythoskill-dreaming/skill/SKILL.md` → `fd372bea…`;`shasum -a 256 packages/lythoskill-dreaming/skill/references/drift-detection.md` → `394eb5b5…`;`grep -c "117 ADRs" …/SKILL.md` → **1**
+  - **折后未评(4 处,均为计数/措辞,不涉结构)**:① `52 dailies` → `51 dailies`;② `121 ADRs` → `117 ADRs`(见 P2-1 的计数口径);③ class 4 note 末句澄清(见 AC3 delta ②);④ **计数快照改为量级**(`2df23759`,用户指示:依赖实时性的精确计数不参与任何结论,不值得花成本维护):`W17–W43, 32 files` → `W17 onward`;`31/32` / `32/32` / `12/32` → `most` / `every` / `a minority`;`117 ADRs + 130 wiki pages + 51 dailies (as of 2026-10-23)` → `100+ ADRs, 100+ wiki pages, 50+ dailies`。Phase 1 的论证与 reference 未动。现源:`SKILL.md` `09bbc16b`(191 行)、reference `394eb5b5`(126 行)。
+  → Verify: `shasum -a 256 packages/lythoskill-dreaming/skill/SKILL.md` → `09bbc16b…`;`shasum -a 256 packages/lythoskill-dreaming/skill/references/drift-detection.md` → `394eb5b5…`;`grep -c "100+ ADRs" …/SKILL.md` → **1**;`grep -c "31/32\|12/32\|51 dailies" …/SKILL.md` → **0**
 - [x] **AC5** 八类与八组当日实例的**发现记录**由 **wiki pattern** 承载;操作清单的单一载体是 `references/drift-detection.md`。**2026-10-23 修订**:coach 复审发现 reference 与 wiki 的八行问题表构成双载体(正是第 1 类「载体漂移」,当天制造),已删除 wiki 表格并改为指针;patterns INDEX 与 AC5 同步修正。本卡不抄第二份
   → Verify: `grep -cE '^\| [1-8] \|' packages/lythoskill-dreaming/skill/references/drift-detection.md` → **8**;同命令对 wiki pattern → **0**(表格已删,只剩指针)
 - [x] **AC6** 未引入覆盖率/通过与否检查。reference § Output 明确 "findings, never pass/fail verdicts unless machine-decidable";AC3 的 after 产物是 13 条 drift findings + 2 条 open code issues(可读、可复查),不是绿色/红色信号。
@@ -174,6 +174,18 @@
   - **P2-5** ZK 审的是不可达提交 —— 已注明 tree 相同(`de353cc7` = `1be3ff82`),内容等价;raw 由 manifest 锚定。
   - **P3 已修**:P3-2 patterns INDEX 的 "W43 引用 1 次" 经复核不成立(W43 只提到本卡),已改正;P3-4 reference class 4 note 与 ADR 排除对齐(换成第 3 处折后未评);P3-5 AC3 注明 Phase 1 刷新是同一次提交里的伴随改动(fixture 无 weeklies,无影响);P3-8 写清 117/130/51 的计数口径。
   - **P3 记账不改**:P3-1 的 `→ Verify:` 已补到 AC1–AC6;P3-3 `last_consolidated: 2026-10-23` 保留 —— 内容确实改为"截至今日为真",而 `zk_validated: false` 未动,如实表达"未做 ZK";P3-6 gate 日志路径在本地,结果已摘要进卡片;P3-7 reference 的 Source 是 provenance note,adopter 环境无该路径属预期。
+
+- 2026-10-23 — **方差复跑(用户要求:"用 zk agent 多 dreaming 几次,看看结果之间是否会有严重漂移")**。同一 fixture、同一 cold pool、同一份构建物、逐字同一 prompt,仅 `<DIR>` 不同;`run2`/`run3`/`run4` 三轮零上下文并行,与受控 `after3` 对比:
+  - **召回无漂移**:4/4 轮都找到全部 7 个埋点(列数矛盾、`strict` 假声明、空白折叠、writer/reader 不对称、`titleCase` 无测试、D1 过期、日期测试自指),连我自己的 fixture 预期被纠正的方向也一致(D1 的触发器**已触发**→ stale,而非"不可满足")。语义证据与 settle 动作逐条对应。
+  - **形态有漂移**:
+    - 输出格式 **3 种**:`### Fn — Class N`(after3/run4)、`## N. 标题 (class N)`(run2)、表格 `| # | Class | Record / line |`(run3)。
+    - **run2 全文 0 个 `path:line`** —— 直接违反 reference §Output 的显式契约,但仍找全了缺陷。契约写了,不保证被执行。
+    - 条数 13 / 10 / 10 / 10;差异在**粒度**(after3 拆出 util、deferred 索引、year<1000;run4 把 util 并入 class 1/4、把 ADR-006 单列;run2 把 strict 并进 class 3)。
+    - **同一事实的 class 标签不稳定**:`strict` = 3 / 4 / 3+4;ADR-003 被 rejected ADR 宣称取代 = class 7(run2/run4)、class 1(run2 §10 另一个面)、run3 完全没做成编号 finding(只在 key-decisions 记录 + 给 ADR-003 追加 status note);card round-trip 测试 = class 8(after3/run2)vs class 7(run3)。
+    - **副作用不一致**:3/4 轮新建 `01-patterns/INDEX.md`,run4 明确拒绝并说明理由;1/4 轮(run3)按 reference 允许的方式给 ADR-003 追加 status note,其余未改。**"ADR 逐字节未改"是 after3 这一次的观察,不是 skill 的不变量**;真正的不变量是"ADR 正文不改"。
+    - 成本:每轮另行派生 1–2 个嵌套 ZK subagent。
+  - **结论**:在"是否找到真相"轴上无严重漂移;在 skill 自己宣称的"结构化、可复跑"轴上,格式与粒度不稳定,`path:line` 契约 1/4 轮未执行。若没有下游程序消费 finding 格式,这属于外观差异;若要跨轮 diff/索引,则需在 reference 里钉一个**示例骨架**(非 schema)—— **未落地,留作用户决策点**。
+  - 原始产出在 `/tmp/drift-probe/{run2,run3,run4}/work/`,未入库;`compare.sh` 复算命令:`cd /tmp/drift-probe && bash compare.sh`。
 
 ## Related Files
 - `packages/lythoskill-dreaming/skill/SKILL.md`(**源**;Phase 3 = `### Phase 3: ZK Validate`,line 121)
