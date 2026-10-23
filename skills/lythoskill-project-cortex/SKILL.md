@@ -440,9 +440,11 @@ placement. Manual creation risks ID collision and template drift.
 **probe does not auto-fix.** It only surfaces inconsistencies between file location
 and internal status. Human decides whether to move the file or update the record.
 This is deliberate — status ambiguity requires human judgment.
-**Templates in assets/, not in SKILL.md.** If you need to see the template format,
-read `${CLAUDE_SKILL_DIR}/assets/TASK-TEMPLATE.md` (or ADR/EPIC). Or look at
-existing files in cortex/ — the playground examples are real CLI output.
+**Cards are generated, never copied.** The CLI is the only carrier: `cortex task "<title>"`
+writes the card, and that file is the shape — read it. There is no template copy under
+`${CLAUDE_SKILL_DIR}` to hand-copy from (ADR-20261023183001417). `cortex init` writes the
+same carriers into the project (`cortex/tasks/TASK-TEMPLATE.md`, …); if a card disagrees
+with what `cortex task` produces, the CLI is right and the copy is the bug.
 **INDEX.md is generated, not hand-edited.** Run `bunx @lythos/project-cortex@0.20.1 index`
 after any status change. Manual edits will be overwritten.
 **bunx fails: `Cannot find module "./config.js" from .../bunx-501-.../src/cli.ts`.**

@@ -1,13 +1,25 @@
 /**
- * Markdown templates for Task, Epic, and ADR.
- * Task / ADR remain hardcoded strings; Epic is rendered from
- * `packages/lythoskill-project-cortex/templates/epic.md` so it can carry
- * frontmatter (lane / checklist) + the workflowy callout out of band.
+ * Markdown templates for Task, Epic, ADR, and Handoff.
+ *
+ * Every card shape has exactly ONE carrier: a file under
+ * `packages/lythoskill-project-cortex/templates/`. Nothing is hardcoded here and
+ * nothing else ships a copy — `cortex init` copies the same files into the
+ * adopter project. ADR-20261023183001417.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
+
+/** The complete set of template carriers. Adding one means adding a reader + a test. */
+export const TEMPLATE_CARRIERS = {
+  task: 'task.md',
+  epic: 'epic.md',
+  adr: 'adr.md',
+  handoff: 'handoff.md',
+} as const;
+
+export type TemplateKind = keyof typeof TEMPLATE_CARRIERS;
 
 export interface EpicTemplateOptions {
   lane: 'main' | 'emergency';
@@ -16,80 +28,42 @@ export interface EpicTemplateOptions {
   laneOverrideReason?: string;
 }
 
-/** Locate the epic template file packaged alongside this CLI. */
-function findEpicTemplatePath(): string {
-  // src/lib/template.ts -> .../lythoskill-project-cortex/templates/epic.md
+/** Locate a template file packaged alongside this CLI. */
+export function findTemplatePath(kind: TemplateKind): string {
+  const file = TEMPLATE_CARRIERS[kind];
+  // src/lib/template.ts -> .../lythoskill-project-cortex/templates/<file>
   const here = dirname(fileURLToPath(import.meta.url));
   const candidates = [
-    resolve(here, '..', '..', 'templates', 'epic.md'),
-    resolve(here, '..', 'templates', 'epic.md'),
+    resolve(here, '..', '..', 'templates', file),
+    resolve(here, '..', 'templates', file),
     // Fallback: when run from monorepo root, project layout
-    resolve(process.cwd(), 'packages', 'lythoskill-project-cortex', 'templates', 'epic.md'),
+    resolve(process.cwd(), 'packages', 'lythoskill-project-cortex', 'templates', file),
   ];
   for (const p of candidates) {
     if (existsSync(p)) return p;
   }
   throw new Error(
-    `Epic template not found. Looked in: ${candidates.join(', ')}`
+    `${kind} template not found. Looked in: ${candidates.join(', ')}`
   );
 }
 
+/** Render a template, failing loudly on any placeholder it was not given. */
+function render(kind: TemplateKind, vars: Record<string, string>): string {
+  let out = readFileSync(findTemplatePath(kind), 'utf-8');
+  for (const [key, value] of Object.entries(vars)) {
+    out = out.replaceAll(`{{${key}}}`, value);
+  }
+  const left = out.match(/\{\{[A-Z0-9_]+\}\}/);
+  if (left) {
+    throw new Error(`${kind} template has unresolved placeholder ${left[0]}`);
+  }
+  return out;
+}
+
+const today = (): string => new Date().toISOString().split('T')[0];
+
 export function createTaskTemplate(id: string, title: string): string {
-  const today = new Date().toISOString().split('T')[0];
-  return `# ${id}: ${title}
-
-## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
-
-| Status | Date | Note |
-|--------|------|------|
-| backlog | ${today} | Created |
-
-## Background & Goals
-<!-- ⚠️ REQUIRED: Why is this task needed? What problem does it solve? Empty = shell, blocked by probe. -->
-
-## Requirements
-<!-- ⚠️ REQUIRED: List specific requirements. Keeping placeholders = shell. -->
-- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_1
-- [ ] ⚠️ PLACEHOLDER_REQUIREMENT_2
-
-## Technical Approach
-<!-- ⚠️ REQUIRED: Implementation plan, key decisions, references. Empty = shell, blocked by probe.
-
-     ⚠️ A DECISION DOES NOT BELONG IN THIS SECTION. If this card introduces or
-     changes an abstraction, a module boundary, a package boundary, a named
-     concept, or a closed data set — that is an architectural decision, and it
-     must be recorded in an ADR. This section may only REFERENCE that ADR; it
-     must never be the only record. A one-line statement of intent gives a
-     reviewer nothing to object to: no options to reject, no rejected
-     alternative to question. Two same-shape incidents (feed-adapters.ts 2026-05,
-     adapter-registry.ts 2026-09) both rode in exactly this section.
-
-     Prepare it first, in full:  bunx @lythos/project-cortex adr "<decision-title>"
-     Criteria (hit >= 2 of C1-C6): AGENTS.md § Decision Records -->
-
-## Acceptance Criteria
-<!-- ⚠️ REQUIRED: Testable acceptance criteria. Keeping placeholders = shell. -->
-- [ ] ⚠️ PLACEHOLDER_CRITERION_1
-- [ ] ⚠️ PLACEHOLDER_CRITERION_2
-
-## Progress Log
-<!-- Update during execution, with timestamps -->
-
-## Related Files
-- Modified:
-- Added:
-
-## Git Commit Message
-\`\`\`
-feat(scope): description (${id})
-
-- Detail 1
-- Detail 2
-\`\`\`
-
-## Notes
-`;
+  return render('task', { ID: id, TITLE: title, DATE: today() });
 }
 
 export function createEpicTemplate(
@@ -97,10 +71,6 @@ export function createEpicTemplate(
   title: string,
   options: EpicTemplateOptions
 ): string {
-  const today = new Date().toISOString().split('T')[0];
-  const templatePath = findEpicTemplatePath();
-  const raw = readFileSync(templatePath, 'utf-8');
-
   const skipLine = options.checklistSkippedReason
     ? `checklist_skipped_reason: ${escapeYamlScalar(options.checklistSkippedReason)}\n`
     : '';
@@ -108,14 +78,15 @@ export function createEpicTemplate(
     ? `lane_override_reason: ${escapeYamlScalar(options.laneOverrideReason)}\n`
     : '';
 
-  return raw
-    .replaceAll('{{LANE}}', options.lane)
-    .replaceAll('{{CHECKLIST_COMPLETED}}', options.checklistCompleted ? 'true' : 'false')
-    .replaceAll('{{CHECKLIST_SKIPPED_REASON_LINE}}', skipLine)
-    .replaceAll('{{LANE_OVERRIDE_REASON_LINE}}', overrideLine)
-    .replaceAll('{{ID}}', id)
-    .replaceAll('{{TITLE}}', title)
-    .replaceAll('{{DATE}}', today);
+  return render('epic', {
+    LANE: options.lane,
+    CHECKLIST_COMPLETED: options.checklistCompleted ? 'true' : 'false',
+    CHECKLIST_SKIPPED_REASON_LINE: skipLine,
+    LANE_OVERRIDE_REASON_LINE: overrideLine,
+    ID: id,
+    TITLE: title,
+    DATE: today(),
+  });
 }
 
 /** Quote a YAML scalar if it contains special characters. */
@@ -155,64 +126,5 @@ category: ${category}
 }
 
 export function createAdrTemplate(id: string, title: string): string {
-  const today = new Date().toISOString().split('T')[0];
-  return `---
-supersedes: []
-superseded_by: null
-# 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
-epic: null
-tasks: []
----
-
-# ${id}: ${title}
-
-## Status History
-<!-- machine-parseable table: directory = current status, last row = latest record -->
-
-| Status | Date | Note |
-|--------|------|------|
-| proposed | ${today} | Created |
-
-## Background
-<!-- ⚠️ REQUIRED: Problem description and context. Empty = shell, blocked by probe. -->
-
-## Decision Drivers
-<!-- ⚠️ REQUIRED: Why does this decision need to be made? -->
--
-
-## Options
-
-### Option A
-<!-- ⚠️ REQUIRED: Compare at least two options. Keeping placeholders = shell. -->
-**Pros**:
--
-
-**Cons**:
--
-
-### Option B
-<!-- ⚠️ REQUIRED: -->
-
-## Decision
-<!-- ⚠️ REQUIRED: Explicit choice + rationale. Keeping placeholders = shell. -->
-**Choice**: ⚠️ PLACEHOLDER_SCHEME
-
-**Rationale**:
-
-## Impact
-<!-- ⚠️ REQUIRED: Positive / negative / follow-up. Empty = shell, blocked by probe. -->
-- Positive:
-- Negative:
-- Follow-up:
-<!-- ^ Follow-up work of an ALREADY-ACCEPTED ADR is carried by THIS ADR — do not open a
-     separate card for it. Tick the item here and write the commit sha next to it.
-     A card is for work that needs its own criteria / plan / owner decision; an accepted
-     ADR's follow-up is that ADR's own consequence, and the ADR is where the next agent
-     will look for it. Boundary + the 2026-09-10 evidence: writing-guide.md →
-     "An accepted ADR carries its own follow-up" (ADR-20260910113534807 § 5). -->
-
-## Related
-- Related ADR:
-- Related Epic:
-`;
+  return render('adr', { ID: id, TITLE: title, DATE: today() });
 }

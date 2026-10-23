@@ -4,6 +4,7 @@ import type { WorkflowConfig } from '../types.js';
 import { ensureDir } from '../lib/fs.js';
 import { DEFAULT_CONFIG, CONFIG_FILE } from '../config.js';
 import { generateIndex } from '../generate-index.js';
+import { findTemplatePath, type TemplateKind } from '../lib/template.js';
 
 const ASSETS_DIR = join(import.meta.dir, '../../assets');
 
@@ -34,20 +35,19 @@ export function initWorkflow(config: WorkflowConfig): void {
     console.log(`✅ wiki/${dir}/`);
   }
 
-  // Copy templates
-  const templates = [
-    { src: 'TASK-TEMPLATE.md', dest: join(config.tasksDir, 'TASK-TEMPLATE.md') },
-    { src: 'EPIC-TEMPLATE.md', dest: join(config.epicsDir, 'EPIC-TEMPLATE.md') },
-    { src: 'ADR-TEMPLATE.md', dest: join(config.adrDir, 'ADR-TEMPLATE.md') },
-    { src: 'HANDOFF-TEMPLATE.md', dest: 'HANDOFF-TEMPLATE.md' },
+  // Copy the template carriers the CLI itself renders from — never a second copy.
+  // ADR-20261023183001417: what the adopter is told to write and what the CLI
+  // produces must be the same bytes.
+  const templates: Array<{ kind: TemplateKind; name: string; dest: string }> = [
+    { kind: 'task', name: 'TASK-TEMPLATE.md', dest: join(config.tasksDir, 'TASK-TEMPLATE.md') },
+    { kind: 'epic', name: 'EPIC-TEMPLATE.md', dest: join(config.epicsDir, 'EPIC-TEMPLATE.md') },
+    { kind: 'adr', name: 'ADR-TEMPLATE.md', dest: join(config.adrDir, 'ADR-TEMPLATE.md') },
+    { kind: 'handoff', name: 'HANDOFF-TEMPLATE.md', dest: 'HANDOFF-TEMPLATE.md' },
   ];
 
-  for (const { src, dest } of templates) {
-    const srcPath = join(ASSETS_DIR, src);
-    if (existsSync(srcPath)) {
-      copyFileSync(srcPath, dest);
-      console.log(`📋 ${src} → ${dest}`);
-    }
+  for (const { kind, name, dest } of templates) {
+    copyFileSync(findTemplatePath(kind), dest);
+    console.log(`📋 ${name} → ${dest}`);
   }
 
   // Install husky hooks (if husky is set up)
