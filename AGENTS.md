@@ -17,8 +17,8 @@
 
 > **⚠️ COMPACTION-SAFE — read this before any release, version, git remote, or npm command.** (Compaction = context window overflow — the agent loses conversation history. After compaction, re-read this section before touching auth, version, git, or npm.)
 > Auth is **pre-configured — do not modify**.
-> GitHub PAT lives in the system keychain — macOS: service name from your gitignored `.private/keychain-service`, read via `security find-generic-password -s "$(cat .private/keychain-service)" -w`; Linux: `secret-tool lookup org lythos-labs scope agent`. Not in repo files.
-> `.github-token` and `.npm-access` are legacy fallbacks only; the release pipeline uses OIDC trusted publishing and stores no npm token in the repo.
+> GitHub PAT lives in the gitignored `.github-token` at the repo root — read via `export GH_TOKEN="$(cat .github-token)"`. Owner decision 2026-10-31: keychain storage is deprecated; do not use `security find-generic-password` / `secret-tool`.
+> `.npm-access` is a legacy fallback only; the release pipeline uses OIDC trusted publishing and stores no npm token in the repo.
 > Versions move via `bunx @lythos/skill-creator@0.21.0 bump`, never by hand-editing `package.json` or `jq`/`python`/`sed`.
 > Full contract: [Release & Auth Workflow](packages/lythoskill-creator/skill/references/release-auth-workflow.md); failure-mode recovery: [release-troubleshooting.md](packages/lythoskill-creator/skill/references/release-troubleshooting.md).
 
@@ -455,30 +455,22 @@ Package inventory: root `package.json` workspaces. Skill-only packages (scribe, 
 |----------|---------|------|
 | `.git/config` origin URL | Git push/fetch | Uses an SSH host alias on this machine (`calt13.github.com`; machine-local — your clone carries its own remote shape). **Never** `git remote set-url` to embed a token or switch protocol. |
 | `~/.ssh/` | SSH keys + alias config | Off-limits. Do not read/write/list inside. |
-| GitHub PAT | `gh` CLI and agent API calls | Stored in system keychain (see below). `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
+| GitHub PAT | `gh` CLI and agent API calls | Stored in gitignored `.github-token` at the repo root (see below). Keychain storage is deprecated (owner decision 2026-10-31). |
 | npm token | Publish to npmjs.com | **No long-lived token.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
 
 #### GitHub token storage and permissions
 
-The agent reads the PAT from the system keychain. The macOS service name is a
-personal, machine-local binding — it lives in `.private/keychain-service`
-(gitignored; create it on a new machine before first use, any name you like),
-never in committed files:
+The agent reads the PAT from `.github-token` at the repo root — a single
+gitignored file, never committed:
 
-- **macOS**: `security find-generic-password -s "$(cat .private/keychain-service)" -w`
-- **Linux**: `secret-tool lookup org lythos-labs scope agent`
+- **Read / use**: `export GH_TOKEN="$(cat .github-token)"`
+- **Store or rotate**: write the new token into the file
+  (`printf '%s' '<new-token>' > .github-token`). Create it on a new machine
+  before first use.
 
-To store or rotate:
-
-```bash
-# macOS — create the binding file once (.private/ is gitignored), then store under that name
-mkdir -p .private
-echo 'your-service-name' > .private/keychain-service
-security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
-
-# Linux
-secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
-```
+Owner decision 2026-10-31: the previous keychain storage (macOS
+`security find-generic-password` via `.private/keychain-service`; Linux
+`secret-tool`) is **deprecated** — do not read from or write to it.
 
 The PAT needs a **fine-grained personal access token** with these repository permissions for `lythos-labs/lythoskill`:
 
@@ -494,18 +486,16 @@ The PAT needs a **fine-grained personal access token** with these repository per
 | `Dependabot alerts` | read | Read open dependency alerts for triage (without it: 403 "Resource not accessible by personal access token" on `/dependabot/alerts` — hit 2026-10-30, TASK-20261030204222091) |
 | `Security advisories` | read | Read GitHub-reviewed advisory details (severity, vulnerable ranges, patched versions) during the same triage |
 
-Quick pre-fill link (permissions only; still manually select the repository).
-Name the token to match your `.private/keychain-service` value so the mapping
-is obvious:
+Quick pre-fill link (permissions only; still manually select the repository):
 
 ```
 https://github.com/settings/personal-access-tokens/new?description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
 ```
 
-For CLI use, export `GH_TOKEN` from the keychain:
+For CLI use, export `GH_TOKEN` from `.github-token`:
 
 ```bash
-export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"
+export GH_TOKEN="$(cat .github-token)"
 ```
 
 #### npm side — OIDC trusted publishing
@@ -562,7 +552,7 @@ Four traps, in the order you will hit them:
 **Verify the release started, and then that it actually published — do not assume either.**
 
 ```bash
-export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"   # macOS; service name from gitignored .private/keychain-service
+export GH_TOKEN="$(cat .github-token)"   # gitignored .github-token at repo root (keychain deprecated 2026-10-31)
 gh run list --limit 3                  # expect a `release` run on the tag: in_progress → success
 gh release view vX.Y.Z                 # the GitHub Release the run creates
 

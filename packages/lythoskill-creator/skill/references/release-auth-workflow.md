@@ -27,8 +27,8 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 > below is the operative contract — run the values, scripts, and commands as
 > written. (2) *Users of the skill-creator product in other projects*: this
 > reference documents **one instance** of a release methodology. What
-> transfers is the *shape* — lock-step versioning, a keychain-stored PAT read
-> via a gitignored binding file, OIDC trusted publishing, a tag-triggered
+> transfers is the *shape* — lock-step versioning, a PAT read from a gitignored
+> file, OIDC trusted publishing, a tag-triggered
 > pipeline, verify-don't-assume discipline. The tooling
 > (`@lythos/skill-creator bump`, `scripts/*.sh`, workflow display names such as
 > `CI`/`release`, and org/repo values such as `lythos-labs`/`lythoskill`) is
@@ -40,35 +40,23 @@ Codified by **ADR-20260502233119561** (lock-step bump command and policy) and **
 |----------|---------|------|
 | `.git/config` (origin URL) | Git push/fetch | Uses an SSH host alias on this machine: `git@calt13.github.com:lythos-labs/lythoskill.git`. Machine-local — your clone has its own remote shape. **Never run `git remote set-url`** to embed a token, switch protocol, or "fix" anything. If `git push` fails, stop and ask. |
 | `~/.ssh/` | SSH keys + alias config | **Off-limits.** Do not read, list, cat, or write inside this directory — even diagnostically. If git/SSH fails, surface the error and ask the user. |
-| GitHub PAT | `gh` CLI and agent API calls | Primary storage is the system keychain. `.github-token` is a legacy fallback; do not create or update it unless explicitly asked. |
+| GitHub PAT | `gh` CLI and agent API calls | Stored in gitignored `.github-token` at the repo root (see below). Keychain storage is deprecated in this repo (owner decision 2026-10-31). |
 | npm token | Publish to npmjs.com | **No long-lived token in the repo.** The release pipeline uses OIDC trusted publishing from GitHub Actions. `.npm-access` is legacy fallback only. **Never run `npm login`.** |
 
 ### GitHub token storage
 
-Read the PAT from the system keychain. The macOS service name is machine-local —
-it lives in `.private/keychain-service` (gitignored; create it on a new machine
-first, any name you like), never in committed files:
+Read the PAT from `.github-token` at the repo root — a single gitignored file,
+never committed:
 
-- **macOS**: `security find-generic-password -s "$(cat .private/keychain-service)" -w`
-- **Linux**: `secret-tool lookup org lythos-labs scope agent` — attribute values are this repo's; on your machine choose your own `org`/`scope`
+- **Read / use**: `export GH_TOKEN="$(cat .github-token)"`
+- **Store or rotate**: `printf '%s' '<new-token>' > .github-token` (create it on
+  a new machine before first use)
 
-Store or rotate:
-
-```bash
-# macOS — create the binding file once (.private/ is gitignored), then store under that name
-mkdir -p .private
-echo 'your-service-name' > .private/keychain-service
-security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
-
-# Linux (the --label and attribute values above are this repo's — choose your own)
-secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
-```
-
-For CLI sessions, export from the keychain:
-
-```bash
-export GH_TOKEN="$(security find-generic-password -s "$(cat .private/keychain-service)" -w)"
-```
+Owner decision 2026-10-31: this repo's previous keychain storage (macOS
+`security find-generic-password` via `.private/keychain-service`; Linux
+`secret-tool`) is **deprecated** — do not read from or write to it. External
+projects adopting this shape may keep their own storage choice; the invariant
+is only that the token lives outside committed files.
 
 ### Required PAT permissions
 
@@ -88,8 +76,7 @@ repo's scope is `lythos-labs/lythoskill` — substitute yours):
 | `Security advisories` | read | Read GitHub-reviewed advisory details during the same triage |
 
 Pre-fill link (permissions only; manually select the repository; the
-`description` field is this repo's — set your own). Name the
-token to match your `.private/keychain-service` value so the mapping is obvious:
+`description` field is this repo's — set your own):
 
 ```
 https://github.com/settings/personal-access-tokens/new?description=OSS+maintenance+agent&expires_in=none&contents=write&issues=write&pull_requests=write&pages=write&workflows=write&actions=write
@@ -280,20 +267,18 @@ The script creates an annotated tag `vX.Y.Z` from the current commit, pushes it 
 
 The script looks for the GitHub PAT in this order:
 
-1. `GH_TOKEN` environment variable.
-2. macOS Keychain: `security find-generic-password -s "$(cat .private/keychain-service)" -w` — service name from the gitignored binding file; skipped if the file is absent
-3. Linux secret-tool: `secret-tool lookup org lythos-labs scope agent` — attribute values are this repo's; choose your own on your machine
-4. Legacy file: `.github-token` in the repo root.
+1. `GH_TOKEN` environment variable — **the standard path**: export it from
+   `.github-token` (`export GH_TOKEN="$(cat .github-token)"`).
+2. Legacy file: `.github-token` in the repo root.
+3. macOS Keychain / Linux secret-tool: **deprecated in this repo** (owner
+   decision 2026-10-31) — the script still checks them for backward
+   compatibility, but do not store new tokens there.
 
-Recommended: store the token in the system keychain so it never sits in the filesystem:
+Recommended: keep the token in the gitignored `.github-token` file and rotate
+by overwriting it:
 
 ```bash
-# macOS — service name from your gitignored binding file (create it first:
-# mkdir -p .private && echo 'your-service-name' > .private/keychain-service)
-security add-generic-password -U -s "$(cat .private/keychain-service)" -a "$USER" -w
-
-# Linux (the --label and attribute values above are this repo's — choose your own)
-secret-tool store --label="lythos-labs agent PAT" org lythos-labs scope agent
+printf '%s' '<new-token>' > .github-token   # .github-token is gitignored
 ```
 
 Run this **after** `./scripts/publish.sh` succeeds, or standalone to publish a GitHub release for a version that is already on npm. Do not re-run `publish.sh` just to create a release; it will attempt to re-publish to npm.
