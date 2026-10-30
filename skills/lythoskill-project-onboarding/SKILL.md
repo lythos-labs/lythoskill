@@ -100,10 +100,11 @@ missing or when verifying claims across a date range.
 A handoff whose git state matches HEAD is trustworthy for state — but before
 concluding "no prior art" on a live problem, scan the handoff's
 `### Batch Index` `read when` triggers. A matched trigger means the work
-already exists: follow its refs, don't re-derive. Weight **experiment
-(`playground/`, `runs/`) and research/wiki (`cortex/wiki/`) entries
-highest** — their carriers are quiet and surface no other way; a code batch
-leaves trails, an experiment or wiki batch leaves only this line.
+already exists: follow its refs, don't re-derive. Weight **experiment and
+research/wiki entries highest** (paths are project conventions — this
+repo's instances: `playground/`, `runs/`, `cortex/wiki/`) — their carriers
+are quiet and surface no other way; a code batch leaves trails, an
+experiment or wiki batch leaves only this line.
 
 If the first handoff's index doesn't match your problem, scan the next
 handoff section below — prepend days accumulate one index per session, and

@@ -68,7 +68,8 @@ If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
 ### Batch Index: carriers get a line, not prose
 
 The boundary above governs **prose, not presence**. A batch whose content
-fully lives in carriers (task card + ADR + commits + showcase) still gets
+fully lives in carriers (task card + ADR + commits + demo artifacts) still
+gets
 exactly one line in the handoff's `### Batch Index` — because onboarding
 reads the handoff first, and without that line the batch is invisible: the
 carrier holds the content, but nothing tells the next agent the batch exists
@@ -81,13 +82,15 @@ the daily never said.)
 
 **Highest-risk carriers — index these on sight.** The absence is most
 fatal for batches whose carriers are quiet by nature: **experiments**
-(`playground/`, `runs/` — a result directory exists on disk, but nothing
-ever announces it) and **research/wiki pages** (`cortex/wiki/` — a page
-sitting in the tree is not a page anyone opens). Code batches leave diffs,
-trails, and review noise; experiment and wiki batches leave files that look
-like background. A session that produced either gets its index line without
-debate — for quiet carriers, the `read when` trigger is the only door to
-the work.
+(result directories that exist on disk but are never announced) and
+**research/wiki pages** (pages sitting in the tree that nobody opens).
+Code batches leave diffs, trails, and review noise; experiment and wiki
+batches leave files that look like background. A session that produced
+either gets its index line without debate — for quiet carriers, the
+`read when` trigger is the only door to the work. The paths are project
+conventions, not part of the rule: name YOUR project's experiment dirs and
+wiki (this repo's instances: `playground/`, `runs/`, `cortex/wiki/` —
+cortex is optional, a wiki dir is whatever this project uses).
 
 Coverage rule: **every batch that has progressed since the last handoff gets
 ≥1 line** — whether or not its commits have landed yet. A batch = work
@@ -268,9 +271,10 @@ before commit the handoff gets a zero-knowledge pass, weighted at the top:
    line (a batch with commits but no line is a gap, however well-carried
    its content is), each line's refs actually resolve — a line with
    fabricated refs fails the check the same as a missing line — and
-   `git status --short -- playground/ runs/ cortex/wiki/` shows no
-   progressed quiet-carrier path without a line (the commit range cannot
-   see uncommitted experiments/wiki pages, the highest-risk class).
+   `git status --short -- <the project's quiet-carrier dirs>` (this repo:
+   `playground/`, `runs/`, `cortex/wiki/`; another project substitutes its
+   own) shows no progressed path without a line — the commit range cannot
+   see uncommitted experiments/wiki pages, the highest-risk class.
 4. Fix every unresolved item **on the spot**, then commit.
    - **Anti-bloat**: a fix = one-sentence gloss + a pointer, bounded by the
      Value Boundary above — a fix restores what `ls`/`git log` cannot
