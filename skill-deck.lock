@@ -59,7 +59,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-scribe",
-      "content_hash": "0742ec518d5348e1fd4aeb0f055ee718d41853d0cb8978cc5840365c2d200605"
+      "content_hash": "7d6fbfb1adea71685b6da13472a47ee9b9e1f5718e6962661220925d2ae09914"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
@@ -67,7 +67,7 @@
       "deck_niche": "",
       "type": "tool",
       "source": "github.com/lythos-labs/lythoskill/skills/lythoskill-project-onboarding",
-      "content_hash": "e0dd8306c46a64e3a7aed31bd0a242cb8eebab966a33842fa34246a86f111c01"
+      "content_hash": "e50525a70bca875ccc0da85c6c7d346a7bb607321bc5bae5c11f36efe2c8454b"
     },
     {
       "name": "github.com/lythos-labs/lythoskill/skills/lythoskill-coach",
