@@ -43,7 +43,7 @@
   "homepage": "https://github.com/lythos-labs/lythoskill/tree/main/packages/lythoskill-cold-pool#readme",
   "dependencies": {
     "@lythos/infra": "workspace:*",
-    "simple-git": "^3.36.0"
+    "simple-git": "^4.0.1"
   },
   "engines": {
     "bun": ">=1.0.0"

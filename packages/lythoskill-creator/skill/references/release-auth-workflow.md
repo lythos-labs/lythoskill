@@ -84,6 +84,8 @@ repo's scope is `lythos-labs/lythoskill` — substitute yours):
 | `workflows` | write | Push workflow file changes |
 | `actions` | write | Trigger/re-run/cancel workflow runs |
 | `metadata` | read | Auto-included by GitHub |
+| `Dependabot alerts` | read | Read open dependency alerts for triage (403 without it) |
+| `Security advisories` | read | Read GitHub-reviewed advisory details during the same triage |
 
 Pre-fill link (permissions only; manually select the repository; the
 `description` field is this repo's — set your own). Name the

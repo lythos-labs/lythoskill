@@ -491,6 +491,8 @@ The PAT needs a **fine-grained personal access token** with these repository per
 | `workflows` | write | Push workflow file changes |
 | `actions` | write | Trigger/re-run/cancel workflow runs |
 | `metadata` | read | Auto-included by GitHub |
+| `Dependabot alerts` | read | Read open dependency alerts for triage (without it: 403 "Resource not accessible by personal access token" on `/dependabot/alerts` — hit 2026-10-30, TASK-20261030204222091) |
+| `Security advisories` | read | Read GitHub-reviewed advisory details (severity, vulnerable ranges, patched versions) during the same triage |
 
 Quick pre-fill link (permissions only; still manually select the repository).
 Name the token to match your `.private/keychain-service` value so the mapping
