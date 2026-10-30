@@ -12,7 +12,7 @@ description: |
 
 ## When
 
-- Run `cortex epic "Second focus" --lane main`
+- Run `cortex epic create "Second focus" --lane main`
 
 ## Then
 

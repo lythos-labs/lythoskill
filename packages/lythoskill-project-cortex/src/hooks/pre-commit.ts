@@ -121,9 +121,9 @@ try {
     const stagedFiles = staged.ok ? staged.stdout.split('\n').filter(Boolean) : []
     const pkgCount = new Set(stagedFiles.filter((f: string) => f.startsWith('packages/')).map((f: string) => f.split('/')[1])).size
     if (pkgCount >= 2) {
-      tips.push(`0 active epic, ${pkgCount} packages touched → 值得追踪？cortex epic "..." --lane main`)
+      tips.push(`0 active epic, ${pkgCount} packages touched → 值得追踪？cortex epic create "..." --lane main`)
     } else if (stagedFiles.length > 0) {
-      tips.push('0 active epic → 本次改动跨多个 commit？cortex epic "..." --lane main')
+      tips.push('0 active epic → 本次改动跨多个 commit？cortex epic create "..." --lane main')
     }
   }
 

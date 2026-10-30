@@ -31,8 +31,8 @@ export function createWiki(title: string, config: WorkflowConfig, category: stri
      lesson    Retrospectives and post-mortems
      ssot      Single source of truth (conventions, decisions)
 
-   Usage:    bunx @lythos/project-cortex wiki "<title>" --category pattern|research|lesson|ssot
-   Example:  bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
+   Usage:    bunx @lythos/project-cortex wiki create "<title>" --category pattern|research|lesson|ssot
+   Example:  bunx @lythos/project-cortex wiki create "Dormancy property test" --category pattern
 
    Index regenerates automatically; to rebuild manually:
      bunx @lythos/project-cortex index wiki`);

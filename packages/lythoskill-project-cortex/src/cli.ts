@@ -28,23 +28,22 @@ function printHelp(): void {
 
 Commands:
   init                  Initialize cortex workflow directories
-  task "<title>"        Create a new Task
-  task create "<title>"  Create a new Task (explicit)
+  task create "<title>"  Create a new Task
   task list              List all tasks and epics (same as 'list')
   task <verb> <task-id>  Task state transition (start/review/done/complete/suspend/resume/reject/terminate/archive)
-  epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
+  epic create "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
                         --override bypasses the lane-full guard (max 1 per lane).
                         --skip-checklist bypasses the 5-question prompt.
   epic list              List all tasks and epics (same as 'list')
-  adr "<title>"         Create a new ADR
+  adr create "<title>"  Create a new ADR
   adr list               List all tasks and epics (same as 'list')
   list                  List all tasks and epics
   stats                 Show project statistics
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
-  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|research|lesson|ssot]
+  wiki create "<title>"  Create a new Wiki entry [--category pattern|research|lesson|ssot]
   probe                 Check status consistency (dir vs Status History)
                         --suspicious   Only report suspicious patterns (empty shells, stale, drift)
                         --include-completed-empty-shells  Include empty shells in completed/terminal dirs
@@ -77,8 +76,9 @@ Epic state machine:
 
 Examples:
   lythoskill-project-cortex init
-  lythoskill-project-cortex task "Fix login bug"
-  lythoskill-project-cortex epic "User auth system"
+  lythoskill-project-cortex task create "Fix login bug"
+  lythoskill-project-cortex epic create "User auth system" --lane main
+  lythoskill-project-cortex adr create "Choose database"
   lythoskill-project-cortex adr accept ADR-20260502234833756
   lythoskill-project-cortex epic done EPIC-20260503010218940`);
 }
@@ -118,6 +118,29 @@ function requireDocId(
 
    To list existing items:  bunx @lythos/project-cortex list${hint ? `\n\n   Note: ${hint}` : ''}`);
   process.exit(1);
+}
+
+/**
+ * Validate the title that follows an explicit `create` verb. A missing title or
+ * a flag in title position exits non-zero. Creation must never fall back to
+ * "treat whatever was typed as a title" — that fallback is what turned a
+ * hallucinated verb into a card the caller believed was a state transition.
+ */
+function requireCreateTitle(
+  title: string | undefined,
+  label: string,
+  usage: string,
+  example: string,
+  note = '',
+): string {
+  if (!title || title.startsWith('-')) {
+    console.error(`❌ ${label} title required after "create".
+
+   Usage:    ${usage}
+   Example:  ${example}${note ? `\n\n${note}` : ''}${title ? `\n\n   "${title}" looks like a flag, not a title.` : ''}`);
+    process.exit(1);
+  }
+  return title;
 }
 
 function handleTaskTransition(
@@ -200,14 +223,31 @@ async function main(): Promise<void> {
       break;
 
     case 'task': {
-      const TASK_VERBS = ['start', 'review', 'done', 'complete', 'suspend', 'resume', 'reject', 'terminate', 'archive', 'create', 'list'];
+      const TASK_VERBS = ['start', 'review', 'done', 'complete', 'suspend', 'resume', 'reject', 'terminate', 'archive'];
       // List form: `task list` (alias for `list`)
       if (arg === 'list') {
         listAll(config);
         break;
       }
+      // Create form: `task create "<title>"` — the ONLY creation form.
+      // A bare `task "<title>"` used to fall through here, which turned a
+      // hallucinated verb (`task close`, `task update`, …) into an empty-shell
+      // card plus a ✅ the agent read as "transition succeeded". Removed.
+      if (arg === 'create') {
+        const title = requireCreateTitle(
+          restArgs[0],
+          'Task',
+          'bunx @lythos/project-cortex task create "<title>"',
+          'bunx @lythos/project-cortex task create "Fix login redirect bug"',
+          `The title becomes the kebab-cased filename suffix; the new task lands
+   in cortex/tasks/01-backlog/. To list existing tasks:
+     bunx @lythos/project-cortex list`,
+        );
+        createTask(title, config);
+        break;
+      }
       // Subcommand form: `task <verb> <TASK-ID>` (state transition)
-      if (arg && TASK_VERBS.includes(arg) && arg !== 'create' && arg !== 'list') {
+      if (arg && TASK_VERBS.includes(arg)) {
         const taskId = requireDocId(restArgs[0], `task ${arg}`, 'TASK',
           arg === 'done' ? "'done' enforces review → completed. For trailer-driven any-status close, use 'complete'." :
           arg === 'complete' ? "'complete' allows any current status (trailer-driven). Use 'done' for strict review → completed." :
@@ -216,36 +256,50 @@ async function main(): Promise<void> {
         handleTaskTransition(arg, taskId, config);
         break;
       }
-      // Create form: `task create "<title>"` or `task "<title>"` (legacy)
-      let title: string;
-      if (arg === 'create' && restArgs[0]) {
-        title = restArgs[0];
-      } else if (arg) {
-        title = arg;
-      } else {
-        console.error(`❌ Task title or subcommand required.
+      // Anything else is NOT a title. Unknown verbs, typos and bare titles
+      // all land here and must create nothing.
+      if (!arg) {
+        console.error(`❌ Task subcommand required.
 
-   Create:    bunx @lythos/project-cortex task "<title>"
-             bunx @lythos/project-cortex task create "<title>"
+   Create:     bunx @lythos/project-cortex task create "<title>"
    Transition: bunx @lythos/project-cortex task <verb> <TASK-ID>
                (verbs: start, review, done, complete, suspend, resume, reject, terminate, archive)
-   Example:    bunx @lythos/project-cortex task "Fix login redirect bug"
+   Example:    bunx @lythos/project-cortex task create "Fix login redirect bug"
 
-   The title becomes the kebab-cased filename suffix; the new task lands
-   in cortex/tasks/01-backlog/. To list existing tasks:
-     bunx @lythos/project-cortex list`);
+   To list existing tasks:  bunx @lythos/project-cortex list`);
         process.exit(1);
       }
-      createTask(title, config);
-      break;
+      if (arg.startsWith('TASK-')) {
+        console.error(`❌ Missing task verb before ${arg}.
+
+   Usage:    bunx @lythos/project-cortex task <verb> ${arg}
+   Verbs:    start, review, done, complete, suspend, resume, reject, terminate, archive
+   Example:  bunx @lythos/project-cortex task start ${arg}
+
+   To list existing tasks:  bunx @lythos/project-cortex list`);
+        process.exit(1);
+      }
+      console.error(`❌ Unknown task subcommand: ${arg}
+
+   Supported subcommands:
+     create "<title>"     Create a task in cortex/tasks/01-backlog/
+     <verb> <TASK-ID>     start, review, done, complete, suspend, resume,
+                          reject, terminate, archive
+     list                 List all tasks and epics
+
+   Example:  bunx @lythos/project-cortex task create "Fix login redirect bug"
+
+   ⚠️  Bare \`task "<title>"\` is no longer supported: an unrecognized verb
+   silently created a card instead of failing. Always use \`task create\`.`);
+      process.exit(1);
     }
 
     case 'epic': {
       if (!arg) {
-        console.error(`❌ Epic title or subcommand required.
+        console.error(`❌ Epic subcommand required.
 
-   Create:    bunx @lythos/project-cortex epic "<title>" --lane main|emergency
-   Example:   bunx @lythos/project-cortex epic "User auth system" --lane main
+   Create:    bunx @lythos/project-cortex epic create "<title>" --lane main|emergency
+   Example:   bunx @lythos/project-cortex epic create "User auth system" --lane main
 
    Subcommands (state machine):
      epic done <EPIC-ID>     Move epic to done
@@ -273,23 +327,31 @@ async function main(): Promise<void> {
         }
         break;
       }
-      // Title form: create new epic.
-      // allFlags == process.argv.slice(3); arg (the title) is allFlags[0],
-      // so we look for flags starting at index 1.
-      const flagArgs = allFlags.slice(1);
-      const lane = parseFlag(flagArgs, '--lane');
-      const override = parseFlag(flagArgs, '--override');
-      const skipChecklistPresent = hasFlag(flagArgs, '--skip-checklist');
-      const skipChecklistReason = parseFlag(flagArgs, '--skip-checklist');
-      // If --skip-checklist is followed by another --flag (or nothing), treat reason as ''.
-      const skipChecklist = skipChecklistPresent
-        ? (skipChecklistReason && !skipChecklistReason.startsWith('--') ? skipChecklistReason : '')
-        : undefined;
+      // Create form: `epic create "<title>" --lane main|emergency` — the ONLY
+      // creation form. A bare `epic "<title>"` used to fall through here, so a
+      // hallucinated verb became a new epic instead of an error.
+      if (arg === 'create') {
+        const title = requireCreateTitle(
+          restArgs[0],
+          'Epic',
+          'bunx @lythos/project-cortex epic create "<title>" --lane main|emergency',
+          'bunx @lythos/project-cortex epic create "User auth system" --lane main',
+        );
+        // restArgs = [title, ...flags]; flags start at index 1.
+        const flagArgs = restArgs.slice(1);
+        const lane = parseFlag(flagArgs, '--lane');
+        const override = parseFlag(flagArgs, '--override');
+        const skipChecklistPresent = hasFlag(flagArgs, '--skip-checklist');
+        const skipChecklistReason = parseFlag(flagArgs, '--skip-checklist');
+        // If --skip-checklist is followed by another --flag (or nothing), treat reason as ''.
+        const skipChecklist = skipChecklistPresent
+          ? (skipChecklistReason && !skipChecklistReason.startsWith('--') ? skipChecklistReason : '')
+          : undefined;
 
-      // Fire-and-await the async create flow; map any rejection to a non-zero exit.
-      createEpic(arg, config, { lane, override, skipChecklist }).catch(err => {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        console.error(`❌ Epic creation failed: ${errMsg}
+        // Fire-and-await the async create flow; map any rejection to a non-zero exit.
+        createEpic(title, config, { lane, override, skipChecklist }).catch(err => {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          console.error(`❌ Epic creation failed: ${errMsg}
 
    Common causes & fixes:
      • Missing --lane: pass --lane main or --lane emergency
@@ -300,17 +362,34 @@ async function main(): Promise<void> {
        pass --skip-checklist "<reason>" in non-interactive contexts
 
    To see existing epics:    bunx @lythos/project-cortex list`);
-        process.exit(1);
-      });
-      break;
+          process.exit(1);
+        });
+        break;
+      }
+      // Anything else is NOT a title. Unknown verbs, typos and bare titles
+      // all land here and must create nothing.
+      console.error(`❌ Unknown epic subcommand: ${arg}
+
+   Supported subcommands:
+     create "<title>" --lane main|emergency   Create an epic
+     done <EPIC-ID>                           Move epic to done
+     suspend <EPIC-ID>                        Move epic to suspended
+     resume <EPIC-ID>                         Move suspended epic to active
+     list                                     List all tasks and epics
+
+   Example:  bunx @lythos/project-cortex epic create "User auth system" --lane main
+
+   ⚠️  Bare \`epic "<title>"\` is no longer supported: an unrecognized verb
+   silently created an epic instead of failing. Always use \`epic create\`.`);
+      process.exit(1);
     }
 
     case 'adr': {
       if (!arg) {
-        console.error(`❌ ADR title or subcommand required.
+        console.error(`❌ ADR subcommand required.
 
-   Create:    bunx @lythos/project-cortex adr "<title>"
-   Example:   bunx @lythos/project-cortex adr "Lock-step versioning across packages"
+   Create:    bunx @lythos/project-cortex adr create "<title>"
+   Example:   bunx @lythos/project-cortex adr create "Lock-step versioning across packages"
 
    Subcommands (state machine):
      adr accept <ADR-ID>                       Move ADR to accepted
@@ -381,8 +460,35 @@ async function main(): Promise<void> {
         }
         break;
       }
-      createAdr(arg, config);
-      break;
+      // Create form: `adr create "<title>"` — the ONLY creation form. A bare
+      // `adr "<title>"` used to fall through here, so a hallucinated verb
+      // became a new ADR instead of an error.
+      if (arg === 'create') {
+        const title = requireCreateTitle(
+          restArgs[0],
+          'ADR',
+          'bunx @lythos/project-cortex adr create "<title>"',
+          'bunx @lythos/project-cortex adr create "Lock-step versioning across packages"',
+        );
+        createAdr(title, config);
+        break;
+      }
+      // Anything else is NOT a title. Unknown verbs, typos and bare titles
+      // all land here and must create nothing.
+      console.error(`❌ Unknown ADR subcommand: ${arg}
+
+   Supported subcommands:
+     create "<title>"                            Create an ADR in 01-proposed/
+     accept <ADR-ID>                             Move ADR to accepted
+     reject <ADR-ID>                             Move ADR to rejected
+     supersede <ADR-ID> [--by <new-id>]          Move ADR to superseded
+     list                                        List all tasks and epics
+
+   Example:  bunx @lythos/project-cortex adr create "Lock-step versioning across packages"
+
+   ⚠️  Bare \`adr "<title>"\` is no longer supported: an unrecognized verb
+   silently created an ADR instead of failing. Always use \`adr create\`.`);
+      process.exit(1);
     }
 
     case 'list':
@@ -406,16 +512,15 @@ async function main(): Promise<void> {
       }
       break;
 
-    case 'wiki':
+    case 'wiki': {
       if (!arg) {
-        console.error(`❌ Wiki title required.
+        console.error(`❌ Wiki subcommand required.
 
-   Usage:     bunx @lythos/project-cortex wiki "<title>" [--category pattern|faq|research|lesson|ssot]
-   Example:   bunx @lythos/project-cortex wiki "Dormancy property test" --category pattern
+   Create:    bunx @lythos/project-cortex wiki create "<title>" [--category pattern|research|lesson|ssot]
+   Example:   bunx @lythos/project-cortex wiki create "Dormancy property test" --category pattern
 
    Categories (default: pattern):
      pattern   Reusable solutions and conventions
-     faq       Common questions
      research  Research notes and investigations
      lesson    Retrospectives and post-mortems
      ssot      Single source of truth (conventions, decisions)
@@ -424,11 +529,34 @@ async function main(): Promise<void> {
      bunx @lythos/project-cortex index wiki`);
         process.exit(1);
       }
+      // Create form: `wiki create "<title>"` — the ONLY creation form. A bare
+      // `wiki "<title>"` used to fall through here, so a hallucinated verb
+      // became a new wiki page instead of an error.
+      if (arg !== 'create') {
+        console.error(`❌ Unknown wiki subcommand: ${arg}
+
+   Supported subcommands:
+     create "<title>" [--category pattern|research|lesson|ssot]
+                        Create a wiki entry under cortex/wiki/
+
+   Example:  bunx @lythos/project-cortex wiki create "Dormancy property test" --category pattern
+
+   ⚠️  Bare \`wiki "<title>"\` is no longer supported: an unrecognized verb
+   silently created a wiki page instead of failing. Always use \`wiki create\`.`);
+        process.exit(1);
+      }
       {
-        const category = parseFlag(restArgs, '--category') || 'pattern';
-        createWiki(arg, config, category);
+        const title = requireCreateTitle(
+          restArgs[0],
+          'Wiki',
+          'bunx @lythos/project-cortex wiki create "<title>" [--category pattern|research|lesson|ssot]',
+          'bunx @lythos/project-cortex wiki create "Dormancy property test" --category pattern',
+        );
+        const category = parseFlag(restArgs.slice(1), '--category') || 'pattern';
+        createWiki(title, config, category);
       }
       break;
+    }
 
     case 'probe':
       probeStatus(config, {

@@ -20,29 +20,49 @@ Agent BDD relies on LLM inference for the verification step — CI has no LLM, s
 
 Wired into [`.github/workflows/test.yml`](../../.github/workflows/test.yml) via `bun run test:all` at repo root.
 
-### `@lythos/project-cortex` — 13 scenarios
+### `@lythos/project-cortex` — 33 scenarios
 
 `packages/lythoskill-project-cortex/test/scenarios/*.md`
 
 | File | Scenario |
 |------|----------|
 | [`adr-accept-moves-proposed.md`](../lythoskill-project-cortex/test/scenarios/adr-accept-moves-proposed.md) | ADR: accept moves proposed to accepted |
+| [`adr-bare-title-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/adr-bare-title-does-not-create.md) | ADR: the removed bare-title form creates no ADR |
+| [`adr-create-explicit-works.md`](../lythoskill-project-cortex/test/scenarios/adr-create-explicit-works.md) | ADR: explicit `create` still works |
+| [`adr-create-requires-title.md`](../lythoskill-project-cortex/test/scenarios/adr-create-requires-title.md) | ADR: `create` without a title fails |
 | [`adr-double-accept-rejected.md`](../lythoskill-project-cortex/test/scenarios/adr-double-accept-rejected.md) | ADR: accept from rejected is invalid |
 | [`adr-reject-moves-proposed.md`](../lythoskill-project-cortex/test/scenarios/adr-reject-moves-proposed.md) | ADR: reject moves proposed to rejected |
+| [`adr-unknown-verb-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/adr-unknown-verb-does-not-create.md) | ADR: unknown verb creates no ADR |
+| [`epic-bare-title-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/epic-bare-title-does-not-create.md) | Epic: the removed bare-title form creates no epic |
+| [`epic-create-explicit-works.md`](../lythoskill-project-cortex/test/scenarios/epic-create-explicit-works.md) | Epic: explicit `create` still works |
+| [`epic-create-flag-title-rejected.md`](../lythoskill-project-cortex/test/scenarios/epic-create-flag-title-rejected.md) | Epic: a flag in title position is refused (the runner appends `--skip-checklist`, so `create` never sees an empty arg list) |
 | [`epic-done-moves-active.md`](../lythoskill-project-cortex/test/scenarios/epic-done-moves-active.md) | Epic: done moves active to done |
-| [`epic-resume-moves-suspended.md`](../lythoskill-project-cortex/test/scenarios/epic-resume-moves-active.md) | Epic: resume moves suspended to active |
+| [`epic-resume-moves-suspended.md`](../lythoskill-project-cortex/test/scenarios/epic-resume-moves-suspended.md) | Epic: resume moves suspended to active |
 | [`epic-suspend-moves-active.md`](../lythoskill-project-cortex/test/scenarios/epic-suspend-moves-active.md) | Epic: suspend moves active to suspended |
+| [`epic-unknown-verb-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/epic-unknown-verb-does-not-create.md) | Epic: unknown verb creates no epic |
 | [`flow-shows-cfd-table.md`](../lythoskill-project-cortex/test/scenarios/flow-shows-cfd-table.md) | Flow: kanban CFD shows task counts and WIP limits |
 | [`lane-main-rejected.md`](../lythoskill-project-cortex/test/scenarios/lane-main-rejected.md) | Lane: main full rejects new epic |
 | [`lane-override-accepted.md`](../lythoskill-project-cortex/test/scenarios/lane-override-accepted.md) | Lane: override bypasses full lane |
+| [`status-history-handwritten-card.md`](../lythoskill-project-cortex/test/scenarios/status-history-handwritten-card.md) | Status History: a hand-written card gets the full block |
+| [`status-history-writer-damaged-card.md`](../lythoskill-project-cortex/test/scenarios/status-history-writer-damaged-card.md) | Status History: a buggy-writer card is repaired by its next transition |
 | [`task-backlog-to-completed-invalid.md`](../lythoskill-project-cortex/test/scenarios/task-backlog-to-completed-invalid.md) | Task: backlog to completed is invalid |
+| [`task-bare-title-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/task-bare-title-does-not-create.md) | Task: the removed bare-title form creates no card |
+| [`task-create-explicit-works.md`](../lythoskill-project-cortex/test/scenarios/task-create-explicit-works.md) | Task: explicit `create` still works |
+| [`task-create-requires-title.md`](../lythoskill-project-cortex/test/scenarios/task-create-requires-title.md) | Task: `create` without a title fails |
+| [`task-missing-verb-with-id.md`](../lythoskill-project-cortex/test/scenarios/task-missing-verb-with-id.md) | Task: ID without a verb fails with a hint |
+| [`task-unknown-verb-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/task-unknown-verb-does-not-create.md) | Task: unknown verb creates no card |
 | [`trailer-closes-multiple-tasks.md`](../lythoskill-project-cortex/test/scenarios/trailer-closes-multiple-tasks.md) | Trailer: multiple trailers close multiple tasks |
 | [`trailer-closes-task.md`](../lythoskill-project-cortex/test/scenarios/trailer-closes-task.md) | Trailer: Closes moves task to completed |
 | [`trailer-malformed-ignored.md`](../lythoskill-project-cortex/test/scenarios/trailer-malformed-ignored.md) | Trailer: malformed trailer is ignored |
+| [`wiki-bare-title-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/wiki-bare-title-does-not-create.md) | Wiki: the removed bare-title form creates no page |
+| [`task-create-flag-title-rejected.md`](../lythoskill-project-cortex/test/scenarios/task-create-flag-title-rejected.md) | Task: a flag-shaped title is refused |
+| [`wiki-create-explicit-works.md`](../lythoskill-project-cortex/test/scenarios/wiki-create-explicit-works.md) | Wiki: explicit `create` still works |
+| [`wiki-create-requires-title.md`](../lythoskill-project-cortex/test/scenarios/wiki-create-requires-title.md) | Wiki: `create` without a title fails |
+| [`wiki-unknown-verb-does-not-create.md`](../lythoskill-project-cortex/test/scenarios/wiki-unknown-verb-does-not-create.md) | Wiki: unknown verb creates no page |
 
 These cover the cortex FSM edges — task / epic / ADR transitions, trailer dispatch, lane discipline.
 
-### `@lythos/skill-deck` — 20 scenarios
+### `@lythos/skill-deck` — 20 scenarios (declared, **not loaded today** — see TASK-20261026023249282)
 
 `packages/lythoskill-deck/test/scenarios/*.ts` (TypeScript scenario objects, not Markdown — older shape; both forms drive the same runner.)
 
@@ -145,4 +165,5 @@ We track **scenario coverage** (how many declared invariants have a scenario), n
 - Line coverage on a custom runner would require instrumenting the runner itself; the marginal value is low until the codebase grows substantially
 - If the deck refactor produces enough imperative library code to warrant unit tests, `bun test --coverage` will be considered on top of (not instead of) scenario coverage
 
-Current totals: **34 CLI integration scenarios in CI · 5 agent BDD locally**.
+Current totals: **33 CLI integration scenarios actually run in CI** (cortex). The 20 deck scenarios below are declared but the runner loads none of them
+(`0/0 passed`) — [TASK-20261026023249282](../../cortex/tasks/01-backlog/TASK-20261026023249282-deck-bdd-runner-loads-zero-scenarios-so-test-bdd-is-vacuous-for-the-deck-half.md). **5 agent BDD locally**.

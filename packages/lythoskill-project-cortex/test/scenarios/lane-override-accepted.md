@@ -12,7 +12,7 @@ description: |
 
 ## When
 
-- Run `cortex epic "Emergency refactor" --lane main --override "security incident"`
+- Run `cortex epic create "Emergency refactor" --lane main --override "security incident"`
 
 ## Then
 

@@ -27,7 +27,7 @@
      alternative to question. Two same-shape incidents (feed-adapters.ts 2026-05,
      adapter-registry.ts 2026-09) both rode in exactly this section.
 
-     Prepare it first, in full:  bunx @lythos/project-cortex adr "<decision-title>"
+     Prepare it first, in full:  bunx @lythos/project-cortex adr create "<decision-title>"
      Criteria (hit >= 2 of C1-C6): AGENTS.md § Decision Records -->
 
 ## Acceptance Criteria

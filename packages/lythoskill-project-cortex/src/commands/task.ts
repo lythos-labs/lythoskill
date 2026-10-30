@@ -31,7 +31,7 @@ export function createTask(title: string, config: WorkflowConfig): void {
   console.log(`   "A decision" = it introduces or changes an abstraction, a module boundary,`);
   console.log(`   a package boundary, a named concept, or a closed data set.`);
   console.log(`   Prepare the ADR in full, then reference it from the card:`);
-  console.log(`     bunx @lythos/project-cortex adr "<decision-title>"`);
+  console.log(`     bunx @lythos/project-cortex adr create "<decision-title>"`);
   console.log(`   The Technical Approach may reference the ADR — it must not be the only record.`);
   console.log(`   Criteria (hit >= 2 of C1-C6): AGENTS.md § Decision Records`);
   console.log(``);
