@@ -5,7 +5,9 @@ description: |
   Session context dump. Self-assess what the conversation contains that has
   NO other carrier (no task, no ADR, no epic) — pitfalls, working-tree anomalies,
   why-we-chose-this, specific next steps — and write to daily/YYYY-MM-DD.md.
-  Things WITH structured carriers go to their carriers. Things WITHOUT
+  Things WITH structured carriers go to their carriers AND get one
+  Batch Index line in the handoff (refs + read-when trigger), so
+  carrier-complete batches stay visible to onboarding. Things WITHOUT
   carriers but needed by the next agent go here. Forms CQRS write-side pair
   with project-onboarding (read-side).
 when_to_use: |
@@ -43,7 +45,8 @@ see below).
 
 ```
 What came out of this conversation?
-  ├── Has a structured carrier (task/ADR/epic) → write to that carrier, not scribe
+  ├── Has a structured carrier (task/ADR/epic) → write to that carrier, not
+  │   scribe prose — AND give the batch one Batch Index line (below)
   └── No carrier → self-assess: does the next agent need to know this?
         ├── Yes → scribe
         └── No → don't write it
@@ -60,6 +63,59 @@ What came out of this conversation?
 | | Meta-observations that emerge mid-conversation |
 
 If the next agent can find it via `ls`, `cat`, or `git log` — don't repeat it.
+
+### Batch Index: carriers get a line, not prose
+
+The boundary above governs **prose, not presence**. A batch whose content
+fully lives in carriers (task card + ADR + commits + showcase) still gets
+exactly one line in the handoff's `### Batch Index` — because onboarding
+reads the handoff first, and without that line the batch is invisible: the
+carrier holds the content, but nothing tells the next agent the batch exists
+or when its carrier is worth opening. Production-side completeness is
+exactly what makes consumption-side absence fatal — the better a batch is
+governed, the more completely it vanishes from the session narrative without
+this rule. (Downstream incident: a five-carrier batch in another project
+left zero trace in the handoff; the next session had to archaeologize what
+the daily never said.)
+
+Coverage rule: **every batch that has progressed since the last handoff gets
+≥1 line** — whether or not its commits have landed yet. A batch = work
+toward one outcome, not each commit. Check coverage mechanically — no
+relying on session recall:
+
+```bash
+git log <last-handoff-HEAD>..HEAD --oneline
+```
+
+`<last-handoff-HEAD>` = the HEAD recorded in `### 0. Verify Current State`
+of the **immediately preceding handoff** — the handoff section directly
+below if you're prepending to today's file, else the first handoff of the
+latest earlier daily file. No prior handoff → index since session start.
+(The HEAD you record in `### 0` today is the next handoff's
+`<last-handoff-HEAD>` — the chain is the freshness contract.)
+
+Group the commits into batches; each batch names itself in the index.
+Meta-commits are not batch-bearing and need no line: the daily-file commit
+itself, post-commit-hook trailer follow-ups, pure lockfile/version churn. A
+batch whose carriers exist but are **not yet committed** still gets its line
+— refs point at the working-tree paths, marked `uncommitted`. Write `none`
+only when no batch progressed at all.
+
+Line shape — one line per batch; details stay in the carrier, never
+summarized here:
+
+```markdown
+- **<batch name, 3-8 words>** — refs: TASK-xxx, ADR-xxx, @a1b2c3 — read when: <trigger>
+```
+
+`refs` = **all carrier IDs the batch touched (TASK/ADR/EPIC/wiki) + one
+representative commit hash** — not every commit in the range. If a "batch"
+needs two lines to name its outcomes, it is two batches.
+
+`read when` is a **condition, not a summary** — "when the spec-vs-registered
+flow diverges again", not "about the spec-flow batch". It answers the
+reader's actual question: *I have this problem now — is there prior art,
+and where?*
 ## Pre-Handoff Checklist (mandatory before writing)
 ```bash
 # 1. Git state — snapshot LAST: after any deck link/refresh/release step,
@@ -192,7 +248,11 @@ before commit the handoff gets a zero-knowledge pass, weighted at the top:
 3. Charter the reviewer accordingly — this goes into the spawn prompt:
    effort goes on the resume pointers (the `**Resume**` field in
    `### 0. Verify Current State`) and the Temp Artifacts section — not on
-   task state or history.
+   task state or history — plus one mechanical check: every batch in
+   `git log <last-handoff-HEAD>..HEAD --oneline` has a `### Batch Index`
+   line (a batch with commits but no line is a gap, however well-carried
+   its content is), and each line's refs actually resolve — a line with
+   fabricated refs fails the check the same as a missing line.
 4. Fix every unresolved item **on the spot**, then commit.
    - **Anti-bloat**: a fix = one-sentence gloss + a pointer, bounded by the
      Value Boundary above — a fix restores what `ls`/`git log` cannot

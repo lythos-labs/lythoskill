@@ -6,7 +6,7 @@
 
 ## Format Philosophy
 
-**Daily = fact density for the next agent.** Skip everything recoverable via `ls`, `cat`, `git log`. Dump only what has NO other carrier (no task file, no ADR, no epic).
+**Daily = fact density for the next agent.** Skip everything recoverable via `ls`, `cat`, `git log` — *as prose*. Presence is a separate obligation: every batch that landed commits since the last handoff gets one `### Batch Index` line (refs + read-when trigger) even when its content is fully carried elsewhere. Dump only what has NO other carrier, but index everything that does.
 
 | Recoverable via exploration (~70%) | Must dump in scribe (~30%) |
 |:---|:---|
@@ -45,6 +45,12 @@ git diff COMMIT_HASH --stat
 git status --short
 git log --oneline -3
 ```
+
+### Batch Index
+
+> One line per batch that has progressed since the last handoff — committed or not. Coverage check: `git log LAST_HEAD..HEAD --oneline` — group commits into batches; each batch names itself here. `LAST_HEAD` = the HEAD recorded in `### 0` of the immediately preceding handoff (section below if prepending today; else first handoff of the latest earlier daily). Meta-commits (daily-file commit itself, hook trailer follow-ups, lockfile churn) need no line. Uncommitted batch → line with working-tree refs, marked `uncommitted`. `none` only if no batch progressed at all.
+
+- **Batch name (3-8 words)** — refs: all carrier IDs (TASK/ADR/EPIC/wiki) + one representative commit — read when: <the trigger condition that makes the next agent open this carrier, e.g. "when the spec-vs-registered flow diverges again">
 
 ### Completed
 
@@ -98,7 +104,8 @@ Each handoff is self-contained — all state needed for onboarding is in `### 0.
 | Sub-section | Required | Description |
 |:---|:---|:---|
 | **0. Verify Current State** | Yes | Git HEAD, Version, Deck, Branch, Active Epic/Task counts, Resume pointer (live session context). Plus verification commands. This is the SSOT for this session. |
-| **Completed** | Yes | Numbered list. Link to commits/tasks/ADRs. Include quantitative signals. |
+| **Batch Index** | Yes | One line per batch progressed since the last handoff: name, refs (all carrier IDs + one representative commit), `read when` trigger. Carriers hold the content; this holds the map. `none` only if nothing progressed. |
+| **Completed** | Yes | Numbered list of outcomes, with quantitative signals; may carry a carrier-backed batch for its numbers — an Index-listed batch may also appear here. A batch only in Completed and not in the Index is a coverage gap. |
 | **Key Decisions** | Yes | Bulleted list. One-line rationale per decision. |
 | **Pitfalls** | Yes if any | Bulleted list. Wrong → symptom → fix → root cause → time. |
 | **Next Steps** | Yes | Numbered list, prioritized. Each item follows the Resumption-Items contract: What + Why + Done + raw ref (see scribe SKILL.md). Specific, not vague. |
@@ -118,7 +125,7 @@ Prepend a new `## Session Handoff` section with a time qualifier:
 ...
 ```
 
-The onboarding skill always reads the **first** handoff section in the file. Earlier handoffs become historical record.
+The onboarding skill always reads the **first** handoff section in the file. Earlier handoffs become historical record — but the prepended handoff's Batch Index coverage range starts at the **directly preceding** handoff's recorded HEAD (the section immediately below), not at the top of the file. The HEAD recorded in `### 0` of each handoff is the next handoff's `LAST_HEAD`.
 
 ---
 
@@ -131,6 +138,7 @@ The onboarding skill always reads the **first** handoff section in the file. Ear
 | **Missing Temp Artifacts** | Next agent treats draft as canonical, modifies wrong file | Always list files that look real but aren't committed |
 | **No quantitative signals** | "Improved coverage" vs "coverage 33%→80%" — the latter is verifiable | Include numbers, commit hashes, test counts |
 | **Stale Verify Current State** | Next agent thinks handoff is fresh when it isn't | Update hash and state fields before writing handoff |
+| **Carrier-complete batch missing from handoff** | "Already on disk" gets read as "no need to index" — the better a batch is governed (task+ADR+commits+showcase), the more invisible it becomes to onboarding | Always give it one Batch Index line: name, refs (all carrier IDs + one representative commit), `read when` trigger. Coverage check: `git log LAST_HEAD..HEAD --oneline` |
 
 ---
 

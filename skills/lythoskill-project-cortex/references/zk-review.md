@@ -460,7 +460,7 @@ ZK agent 连续 6 轮 trial 给出 5/10，每次理由不同：
 
 ```
 Task 设计流程:
-  cortex task "title"
+  cortex task create "title"
     → 填模板（背景/需求/方案/验收）
     → 自审（4 类必补内容）
     → ZK Review（子 agent 读 task + AGENTS.md）
