@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/30 20:52:40
+> 自动生成于 2026/10/30 21:35:51
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 402 | 进行中: 0, 待验收: 0, 已完成: 339 |
+| Tasks | 402 | 进行中: 0, 待验收: 0, 已完成: 340 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 115 | 已接受: 109 |
 
@@ -76,10 +76,9 @@
 
 ## 📄 Tasks
 
-### 待办 (2)
+### 待办 (1)
 
 - [ ] **TASK-20261026023249282**: Deck BDD runner loads zero scenarios so test:bdd is vacuous for the deck half
-- [ ] **TASK-20261030204222091**: triage dependabot critical alert 1 on main and remediate
 
 ### 进行中 (0)
 
@@ -89,7 +88,7 @@ _无_
 
 _无_
 
-### 已完成 (339)
+### 已完成 (340)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -430,6 +429,7 @@ _无_
 - ✅ ~~TASK-20261023182807833~~: Fix latest-daily lookup with date-filtered query
 - ✅ ~~TASK-20261026022014248~~: Close hallucinated-verb fallback in cortex task CLI
 - ✅ ~~TASK-20261030150313437~~: scribe: carrier-backed batches must appear in handoff as batch index with refs and when-to-read
+- ✅ ~~TASK-20261030204222091~~: triage dependabot critical alert 1 on main and remediate
 
 ### 悬置 (17)
 

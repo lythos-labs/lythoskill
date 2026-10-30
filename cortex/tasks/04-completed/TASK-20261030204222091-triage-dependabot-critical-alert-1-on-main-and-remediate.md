@@ -7,6 +7,8 @@
 |--------|------|------|
 | backlog | 2026-10-30 | Created |
 | in-progress | 2026-10-30 | Started |
+| review | 2026-10-30 | Deliverables committed |
+| completed | 2026-10-30 | Done |
 
 ## Background & Goals
 2026-10-30, push output from GitHub: `GitHub found 1 vulnerability on
