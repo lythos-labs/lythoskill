@@ -48,7 +48,7 @@ cannot select the template under any order.
 ## Acceptance Criteria
 - [x] AC1 `grep -n "TASK-\\\\\\\\d{17}" packages/lythoskill-project-cortex/test/runner.ts` matches (card-only regex in place)
 - [x] AC2 `bun packages/lythoskill-project-cortex/test/runner.ts` → 33/33 passed; `bun --filter='@lythos/project-cortex' run test` → 219 tests exit 0
-- [ ] AC3 CI run on the fix commit → success (verified by watching the Actions run, per AGENTS.md never end on "CI running")
+- [x] AC3 CI run on the fix commit → success (verified by watching the Actions run, per AGENTS.md never end on "CI running") — run 41068223783 on `6c99fc9e` completed/success, watched to terminal state.
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
