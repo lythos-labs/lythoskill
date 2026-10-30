@@ -2,16 +2,16 @@
 ## Scenario: "Add real-time data feature"
 ### 1. Create Epic
 ```bash
-bunx @lythos/project-cortex epic "Real-time data updates"
+bunx @lythos/project-cortex epic create "Real-time data updates" --lane main
 # → cortex/epics/01-active/EPIC-20250420120100000-real-time-data-updates.md
 ```
 
 Fill in: background (why real-time?), requirement tree (SSE, backend job, UI).
 ### 2. Create ADRs for Technical Decisions
 ```bash
-bunx @lythos/project-cortex adr "SSE vs WebSocket for real-time"
+bunx @lythos/project-cortex adr create "SSE vs WebSocket for real-time"
 # → cortex/adr/01-proposed/ADR-20250420120200000-sse-vs-websocket.md
-bunx @lythos/project-cortex adr "Background job framework"
+bunx @lythos/project-cortex adr create "Background job framework"
 # → cortex/adr/01-proposed/ADR-20250420120200001-background-job-framework.md
 ```
 
@@ -19,8 +19,8 @@ After discussion: move accepted ADRs to `cortex/adr/02-accepted/`.
 
 ### 3. Derive Tasks from Epic
 ```bash
-bunx @lythos/project-cortex task "Implement SSE endpoint"
-bunx @lythos/project-cortex task "Build data generator job"
+bunx @lythos/project-cortex task create "Implement SSE endpoint"
+bunx @lythos/project-cortex task create "Build data generator job"
 ```
 
 Link each task to the epic and relevant ADR in its Background section.

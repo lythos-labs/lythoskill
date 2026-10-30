@@ -76,11 +76,11 @@ derives tasks       guides tasks        links to epic/adr
 ## CLI Commands
 ```bash
 # Create documents (CLI assigns timestamp ID, generates from template)
-bunx @lythos/project-cortex@0.21.0 task "Fix login bug"
-bunx @lythos/project-cortex@0.21.0 epic "User auth system" --lane main|emergency
-bunx @lythos/project-cortex@0.21.0 adr "Choose database"
+bunx @lythos/project-cortex@0.21.0 task create "Fix login bug"
+bunx @lythos/project-cortex@0.21.0 epic create "User auth system" --lane main|emergency
+bunx @lythos/project-cortex@0.21.0 adr create "Choose database"
 # Create a Wiki entry (dated, for knowledge capture)
-bunx @lythos/project-cortex@0.21.0 wiki "Your insight" --category pattern|faq|research|lesson|ssot
+bunx @lythos/project-cortex@0.21.0 wiki create "Your insight" --category pattern|research|lesson|ssot
 # Initialize cortex/ directory structure in current project
 bunx @lythos/project-cortex@0.21.0 init
 # Process commit trailers (used by post-commit hook)
@@ -355,7 +355,7 @@ An epic in `01-active/` means the decision is ratified and work is underway — 
 
 ```bash
 # 1. Create the epic (generates the file)
-bunx @lythos/project-cortex@0.21.0 epic "Implement kanban flow" --lane main
+bunx @lythos/project-cortex@0.21.0 epic create "Implement kanban flow" --lane main
 
 # 2. Commit the epic — pre-commit auto-accepts the linked ADR
 #    (ADR must reference the epic in its ## Related section: "Epic: EPIC-xxx")
@@ -440,7 +440,7 @@ placement. Manual creation risks ID collision and template drift.
 **probe does not auto-fix.** It only surfaces inconsistencies between file location
 and internal status. Human decides whether to move the file or update the record.
 This is deliberate — status ambiguity requires human judgment.
-**Cards are generated, never copied.** The CLI is the only carrier: `cortex task "<title>"`
+**Cards are generated, never copied.** The CLI is the only carrier: `cortex task create "<title>"`
 writes the card, and that file is the shape — read it. There is no template copy under
 `${CLAUDE_SKILL_DIR}` to hand-copy from (ADR-20261023183001417). `cortex init` writes the
 same carriers into the project (`cortex/tasks/TASK-TEMPLATE.md`, …); if a card disagrees
