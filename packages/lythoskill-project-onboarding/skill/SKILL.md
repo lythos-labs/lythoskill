@@ -95,6 +95,21 @@ missing or when verifying claims across a date range.
 | Daily exists, git_commit ≠ HEAD | ⚠️ Stale | Read handoff for context, but verify everything |
 | Daily exists, date >3 days old | ⚠️ Probably stale | Same as above |
 | No daily file found | ❌ Missing | Full degraded exploration |
+
+## Batch Index scan (read side of the write-side contract)
+A handoff whose git state matches HEAD is trustworthy for state — but before
+concluding "no prior art" on a live problem, scan the handoff's
+`### Batch Index` `read when` triggers. A matched trigger means the work
+already exists: follow its refs, don't re-derive. Weight **experiment
+(`playground/`, `runs/`) and research/wiki (`cortex/wiki/`) entries
+highest** — their carriers are quiet and surface no other way; a code batch
+leaves trails, an experiment or wiki batch leaves only this line.
+
+If the first handoff's index doesn't match your problem, scan the next
+handoff section below — prepend days accumulate one index per session, and
+every one of them is live until its commits are verified. Stale handoffs:
+scan too, but treat matched refs as leads to verify against current state,
+not settled prior art.
 ## Output Format
 After loading, summarize to user:
 ```
@@ -113,6 +128,7 @@ After loading, summarize to user:
 - [ ] Layer 3: Verify with `git status` + `git log`
 - [ ] Layer 3b: Project shape survey — repo? remote? host? Actions? Record findings in the summary; if CI exists, SUGGEST writing a tail-check into the project's own AGENTS.md (project-level rule, not a universal gate). Only actually tail CI when the project's own docs declare it.
 - [ ] If handoff fresh → use directly
+- [ ] Batch Index: scanned `read when` triggers for prior art matching your live problem (experiment/research/wiki entries especially) before concluding "no prior art"
 - [ ] If handoff stale/missing → degraded exploration
 - [ ] Output summary to user
 ## Gotchas

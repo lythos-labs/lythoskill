@@ -45,8 +45,9 @@ see below).
 
 ```
 What came out of this conversation?
-  ├── Has a structured carrier (task/ADR/epic) → write to that carrier, not
-  │   scribe prose — AND give the batch one Batch Index line (below)
+  ├── Has a structured carrier (task/ADR/epic/experiment/wiki) → write
+  │   to that carrier, not scribe prose — AND give the batch one Batch
+  │   Index line (below)
   └── No carrier → self-assess: does the next agent need to know this?
         ├── Yes → scribe
         └── No → don't write it
@@ -77,6 +78,16 @@ governed, the more completely it vanishes from the session narrative without
 this rule. (Downstream incident: a five-carrier batch in another project
 left zero trace in the handoff; the next session had to archaeologize what
 the daily never said.)
+
+**Highest-risk carriers — index these on sight.** The absence is most
+fatal for batches whose carriers are quiet by nature: **experiments**
+(`playground/`, `runs/` — a result directory exists on disk, but nothing
+ever announces it) and **research/wiki pages** (`cortex/wiki/` — a page
+sitting in the tree is not a page anyone opens). Code batches leave diffs,
+trails, and review noise; experiment and wiki batches leave files that look
+like background. A session that produced either gets its index line without
+debate — for quiet carriers, the `read when` trigger is the only door to
+the work.
 
 Coverage rule: **every batch that has progressed since the last handoff gets
 ≥1 line** — whether or not its commits have landed yet. A batch = work
@@ -248,11 +259,14 @@ before commit the handoff gets a zero-knowledge pass, weighted at the top:
 3. Charter the reviewer accordingly — this goes into the spawn prompt:
    effort goes on the resume pointers (the `**Resume**` field in
    `### 0. Verify Current State`) and the Temp Artifacts section — not on
-   task state or history — plus one mechanical check: every batch in
+   task state or history — plus two mechanical checks: every batch in
    `git log <last-handoff-HEAD>..HEAD --oneline` has a `### Batch Index`
    line (a batch with commits but no line is a gap, however well-carried
-   its content is), and each line's refs actually resolve — a line with
-   fabricated refs fails the check the same as a missing line.
+   its content is), each line's refs actually resolve — a line with
+   fabricated refs fails the check the same as a missing line — and
+   `git status --short -- playground/ runs/ cortex/wiki/` shows no
+   progressed quiet-carrier path without a line (the commit range cannot
+   see uncommitted experiments/wiki pages, the highest-risk class).
 4. Fix every unresolved item **on the spot**, then commit.
    - **Anti-bloat**: a fix = one-sentence gloss + a pointer, bounded by the
      Value Boundary above — a fix restores what `ls`/`git log` cannot
