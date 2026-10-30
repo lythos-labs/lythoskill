@@ -48,7 +48,10 @@ git log --oneline -3
 
 ### Batch Index
 
-> One line per batch that has progressed since the last handoff — committed or not. Coverage check: `git log LAST_HEAD..HEAD --oneline` — group commits into batches; each batch names itself here. `LAST_HEAD` = the HEAD recorded in `### 0` of the immediately preceding handoff (section below if prepending today; else first handoff of the latest earlier daily — always findable from the filename date pattern: newest dated daily, first `## Session Handoff` section; no recall needed). Meta-commits (daily-file commit itself, hook trailer follow-ups, lockfile churn) need no line. Uncommitted batch → line with working-tree refs, marked `uncommitted`. `none` only if no batch progressed at all. **Experiment (`playground/`, `runs/`) and research/wiki (`cortex/wiki/`) batches are the highest-risk omissions** — quiet carriers nobody stumbles onto; never let one pass without a line.
+> One line per batch that has progressed since the last handoff — committed or not. Coverage check: `git log LAST_HEAD..HEAD --oneline` — group commits into batches; each batch names itself here. `LAST_HEAD` = the HEAD recorded in `### 0` of the immediately preceding handoff (section below if prepending today; else first handoff of the latest earlier daily — always findable from the filename date pattern: newest dated daily, first `## Session Handoff` section; no recall needed). Meta-commits (daily-file commit itself, hook trailer follow-ups, lockfile churn) need no line. Uncommitted batch → line with working-tree refs, marked `uncommitted`. `none` only if no batch progressed at all. **Experiment and research/wiki batches are the highest-risk omissions**
+(this repo's instances: `playground/`, `runs/`, `cortex/wiki/` — another
+project names its own) — quiet carriers nobody stumbles onto; never let one
+pass without a line.
 
 - **Batch name (3-8 words)** — refs: all carrier IDs (TASK/ADR/EPIC/wiki) + one representative commit — read when: <the trigger condition that makes the next agent open this carrier, e.g. "when the spec-vs-registered flow diverges again">
 
