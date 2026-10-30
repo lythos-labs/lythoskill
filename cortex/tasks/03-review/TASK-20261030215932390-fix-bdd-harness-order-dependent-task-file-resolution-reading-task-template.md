@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-30 | Created |
 | in-progress | 2026-10-30 | Started |
+| review | 2026-10-30 | Deliverables committed |
 
 ## Background & Goals
 CI went red on main starting 2026-10-30 (`4683b8ee` onward, 9 consecutive
