@@ -55,7 +55,7 @@ cat daily/$(ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail
 
 ## 4. How Work Gets Done
 
-**Task lifecycle**: `cortex task "title"` → backlog → start → work → commit with `Closes: TASK-xxx` trailer → post-commit hook auto-moves to completed.
+**Task lifecycle**: `cortex task create "title"` → backlog → start → work → commit with `Closes: TASK-xxx` trailer → post-commit hook auto-moves to completed.
 
 **Deck validate before done**: every new/modified deck example must pass `deck validate --deck <path>`.
 

@@ -161,7 +161,7 @@ Tell-tales of intent hijacking: **rename the ask** ("by X you probably mean Y"),
 
 ### 3. Task Design
 
-**Where project state lives (third and last statement of this rule).** Tasks, ADRs, and epics are authored **through the cortex CLI** — `cortex task "<title>"`, `cortex adr "<title>"`, `cortex epic "<title>" --lane main|emergency`. The CLI generates the ID, places the file in the right directory, and the directory *is* the status. Hand-creating or hand-moving these files breaks the state machine, `probe`, and the post-commit trailer dispatch — always use the CLI (see §3 Task Lifecycle: "Always CLI, never `mv`"). **If you find yourself tracking work in any other place — a scratch file, an editor buffer, your own memory — stop: that work is not persisted and will be lost.** The three statements of this rule: top of file, §0 Boot First, here.
+**Where project state lives (third and last statement of this rule).** Tasks, ADRs, and epics are authored **through the cortex CLI** — `cortex task create "<title>"`, `cortex adr create "<title>"`, `cortex epic create "<title>" --lane main|emergency`. The CLI generates the ID, places the file in the right directory, and the directory *is* the status. Hand-creating or hand-moving these files breaks the state machine, `probe`, and the post-commit trailer dispatch — always use the CLI (see §3 Task Lifecycle: "Always CLI, never `mv`"). **If you find yourself tracking work in any other place — a scratch file, an editor buffer, your own memory — stop: that work is not persisted and will be lost.** The three statements of this rule: top of file, §0 Boot First, here.
 
 **And if the card makes a decision, the ADR comes first** — the Technical Approach may reference it, never be its only record. Criteria (hit ≥2 of C1–C6) + why a written-but-unreferenced doc is an *invalid* landing point: [Decision Records](#decision-records--a-cards-technical-approach-is-not-one).
 
@@ -232,7 +232,7 @@ Any deck file can be handed to a subagent as a task-scoped skill set: pass the f
 What transfers: shared legible state, enforced transitions, commit↔ticket traceability, small WIP. What's dropped: UI, fields, ceremony — the files ARE the tickets, git is the audit, diffs are the review surface. One agent-native addition: timestamp IDs make `ls` a time-range query, so an agent with no memory rebuilds state from the filesystem alone. Design: ADR-20260503222838594 (kanban pull), ADR-20260503003314901 (smart-commit coupling), [agent-OS framing](cortex/wiki/02-research/2026-05-17-arena-cli-archaeology-and-agent-os-design-principles.md).
 
 ```
-cortex task "title"     → 01-backlog     (then immediately fill Background/Requirements/Acceptance)
+cortex task create "title" → 01-backlog  (then immediately fill Background/Requirements/Acceptance)
 cortex start TASK-xxx   → 02-in-progress
 cortex review TASK-xxx  → 03-review (STOP — user marks done)
 ```
@@ -310,7 +310,7 @@ deck link  →  working set refreshed from cold pool  →  agent sees updated sk
 | **Load skills (do first)** | `bun packages/lythoskill-deck/src/cli.ts link` (shorthand: `deck link`) |
 | Run tests | `bun --filter='*' run test` |
 | Probe state | `bun packages/lythoskill-project-cortex/src/cli.ts probe` (shorthand: `cortex probe`) |
-| Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task "title"` (shorthand: `cortex task`) |
+| Create task | `bun packages/lythoskill-project-cortex/src/cli.ts task create "title"` (shorthand: `cortex task create`) |
 | ZK Review a task | Spawn ZK agent, WHAT/WHY/HOW on task card + AGENTS.md (pass paths) |
 | Arena quick run | `bun packages/lythoskill-arena/src/cli.ts single --deck <path> --brief "prompt"` (shorthand: `arena single`) |
 | Release | `bunx @lythos/skill-creator@0.21.0 bump` → `git push --follow-tags` → watch Actions (`gh run watch`) |

@@ -105,7 +105,7 @@ only the post-commit hook, and `skill/assets/` no longer exists. Two mechanisms
 hold it: `src/lib/template-drift.test.ts` pins each rendered section list to an
 explicit spec and fails if any `*-TEMPLATE.md` or `skill/assets/` copy
 reappears; the skill's rule is now "cards are generated, never copied" —
-`cortex task "<title>"` output *is* the example.
+`cortex task create "<title>"` output *is* the example.
 
 **This exact drift was already named on 2026-09-11** — Class 1 "Carrier drift"
 in `01-patterns/2026-09-11-drift-classes-*` lists the same four carriers. Naming

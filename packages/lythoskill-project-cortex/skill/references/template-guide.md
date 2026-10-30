@@ -2,9 +2,9 @@
 
 **There is one carrier per template and the CLI is it.** The files live in the
 `@lythos/project-cortex` package under `templates/{task,epic,adr,handoff}.md`;
-`cortex task|epic|adr "<title>"` renders the card from them, and `cortex init`
+`cortex task|epic|adr create "<title>"` renders the card from them, and `cortex init`
 writes the same files into the adopter project (`cortex/tasks/TASK-TEMPLATE.md`,
-…). If a card in a project disagrees with `cortex task` output, the CLI is right
+…). If a card in a project disagrees with `cortex task create` output, the CLI is right
 and the copy is the bug (ADR-20261023183001417).
 
 This reference explains what each field means. It does not restate the section
@@ -53,7 +53,7 @@ ADR lifecycle: create in `01-proposed/`, move to `02-accepted/` (or `03-rejected
 after decision. If later replaced, move to `04-superseded/` and link to the new ADR.
 
 ## Viewing Real Examples
-`cortex task "<title>"` writes a real card — that file is the example. There is
+`cortex task create "<title>"` writes a real card — that file is the example. There is
 no hand-maintained sample under the skill: a sample would be a second carrier
 and would drift.
 

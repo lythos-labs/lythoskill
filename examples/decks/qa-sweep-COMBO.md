@@ -28,7 +28,7 @@ Phase 4: agentic-actions-auditor
   - Audit .github/workflows/ for AI agent CI/CD risks
 
 Phase 5: task + fix
-  - For each finding: create a cortex task (bunx @lythos/project-cortex task "...")
+  - For each finding: create a cortex task (bunx @lythos/project-cortex task create "...")
   - Small-scope fixes: extract util / normalize interface → fix site-by-site with type checker
   - Large-scope restructures: invoke lythoskill-red-green-release heredoc (declarative target state)
   - sed -i is never the answer — survey with grep/sed (read-only), fix with proper tools

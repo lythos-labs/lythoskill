@@ -55,7 +55,7 @@ cat daily/$(ls daily/ | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$' | sort | tail
 
 ## 4. 工作方式
 
-**Task 生命週期**：`cortex task "title"` → backlog → start → 工作 → commit 時帶上 `Closes: TASK-xxx` trailer → post-commit hook 自動移到 completed。
+**Task 生命週期**：`cortex task create "title"` → backlog → start → 工作 → commit 時帶上 `Closes: TASK-xxx` trailer → post-commit hook 自動移到 completed。
 
 **做完前 deck validate**：每個新增或修改的 deck example 都必須通過 `deck validate --deck <path>`。
 

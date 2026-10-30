@@ -115,17 +115,17 @@ description: |
 
 ### Create Task
 ```bash
-bunx @lythos/project-cortex task "修复登录 bug"
+bunx @lythos/project-cortex task create "修复登录 bug"
 ```
 
 ### Create Epic
 ```bash
-bunx @lythos/project-cortex epic "用户认证系统"
+bunx @lythos/project-cortex epic create "用户认证系统" --lane main
 ```
 
 ### Create ADR
 ```bash
-bunx @lythos/project-cortex adr "选择数据库方案"
+bunx @lythos/project-cortex adr create "选择数据库方案"
 ```
 
 ### Init Workflow

@@ -136,7 +136,7 @@ bunx @lythos/project-cortex@latest probe
 |------|---------|
 | **Load skills (do first)** | `bunx @lythos/skill-deck@latest link` |
 | Probe state | `bunx @lythos/project-cortex@latest probe` |
-| Create task | `bunx @lythos/project-cortex@latest task "title"` |
+| Create task | `bunx @lythos/project-cortex@latest task create "title"` |
 | Start task | `bunx @lythos/project-cortex@latest start TASK-xxx` |
 | Review task | `bunx @lythos/project-cortex@latest review TASK-xxx` |
 | Arena quick run | `bunx @lythos/skill-arena@latest single --deck <path> --brief "prompt"` |

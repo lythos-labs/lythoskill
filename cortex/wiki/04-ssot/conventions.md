@@ -186,7 +186,7 @@ Manual file moves bypass state-history tracking and cause probe mismatches.
 Always use the CLI, never `mv` files by hand:
 
 ```
-cortex task "title"           # Create task in 01-backlog
+cortex task create "title"    # Create task in 01-backlog
 cortex start TASK-xxx         # Move to 02-in-progress
 cortex review TASK-xxx        # Move to 03-review
 cortex done TASK-xxx          # review -> completed

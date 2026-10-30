@@ -28,9 +28,9 @@ bunx @lythos/project-cortex@0.21.0 <command>
 bunx @lythos/project-cortex@0.21.0 init
 
 # Create governance documents
-bunx @lythos/project-cortex@0.21.0 task "Fix login bug"
-bunx @lythos/project-cortex@0.21.0 epic "User auth system"
-bunx @lythos/project-cortex@0.21.0 adr "Choose database"
+bunx @lythos/project-cortex@0.21.0 task create "Fix login bug"
+bunx @lythos/project-cortex@0.21.0 epic create "User auth system" --lane main
+bunx @lythos/project-cortex@0.21.0 adr create "Choose database"
 
 # Maintenance
 bunx @lythos/project-cortex@0.21.0 index   # Regenerate INDEX.md
@@ -45,16 +45,16 @@ bunx @lythos/project-cortex@0.21.0 list    # List all tasks and epics
 
 Commands:
   init                  Initialize cortex workflow directories
-  task "<title>"        Create a new Task
-  epic "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
+  task create "<title>" Create a new Task
+  epic create "<title>" --lane main|emergency [--override "<r>"] [--skip-checklist "<r>"]
                         Create a new Epic. --lane is required.
-  adr "<title>"         Create a new ADR
+  adr create "<title>"  Create a new ADR
   list                  List all tasks and epics
   stats                 Show project statistics
   next-id               Display timestamp ID format example
   index                 Generate INDEX.md and wiki/INDEX.md
   index wiki            Generate wiki/INDEX.md only
-  wiki "<title>"        Create a new Wiki entry [--category pattern|faq|lesson]
+  wiki create "<title>"  Create a new Wiki entry [--category pattern|research|lesson|ssot]
   probe                 Check status consistency (dir vs Status History)
   flow                  Show kanban CFD — count, avg age, WIP limits
   dispatch-trailers     Parse last commit for trailers and dispatch follow-up
@@ -142,10 +142,10 @@ Epics use **dual-track lanes** to enforce focus:
 
 ```bash
 # Create a focused epic (will reject if main lane is full)
-bunx @lythos/project-cortex@0.21.0 epic "User auth system" --lane main
+bunx @lythos/project-cortex@0.21.0 epic create "User auth system" --lane main
 
 # Override with reason (recorded in frontmatter)
-bunx @lythos/project-cortex@0.21.0 epic "Hotfix login" --lane main --override "security incident"
+bunx @lythos/project-cortex@0.21.0 epic create "Hotfix login" --lane main --override "security incident"
 ```
 
 Run `bunx @lythos/project-cortex@0.21.0 probe` to check lane occupancy and catch drift.
