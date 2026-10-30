@@ -90,14 +90,19 @@ function findAllTaskFiles(workdir: string): string[] {
   const found: string[] = []
   const walk = (dir: string): void => {
     if (!existsSync(dir)) return
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    for (const entry of readdirSync(dir, { withFileTypes: true }).sort()) {
       const full = join(dir, entry.name)
       if (entry.isDirectory()) walk(full)
-      else if (entry.name.endsWith('.md') && entry.name.startsWith('TASK-')) found.push(full)
+      // A real card only: TASK-<17-digit timestamp id>-<slug>.md. TASK-TEMPLATE.md
+      // also starts with "TASK-" and must never satisfy an assertion — and readdir
+      // order is filesystem-dependent (creation order on APFS, hash order on ext4),
+      // so the walk must not rely on encounter order either. CI went red 2026-10-30
+      // when a runner-image change flipped exactly this order (TASK-20261030215932390).
+      else if (/^TASK-\d{17}-.+\.md$/.test(entry.name)) found.push(full)
     }
   }
   walk(tasksDir)
-  return found
+  return found.sort()
 }
 
 /** The task file a Then assertion should read: the one in `04-completed/` when present
@@ -105,7 +110,7 @@ function findAllTaskFiles(workdir: string): string[] {
 function resolveTaskFileForAssertion(workdir: string): string | null {
   const completedDir = join(workdir, 'cortex', 'tasks', '04-completed')
   if (existsSync(completedDir)) {
-    const entries = readdirSync(completedDir).filter(f => f.endsWith('.md'))
+    const entries = readdirSync(completedDir).filter(f => f.endsWith('.md')).sort()
     if (entries.length > 0) return join(completedDir, entries[0])
   }
   const all = findAllTaskFiles(workdir)
