@@ -1,14 +1,14 @@
 # Project Index
 
-> 自动生成于 2026/10/23 20:23:34
+> 自动生成于 2026/10/30 15:21:36
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 398 | 进行中: 0, 待验收: 0, 已完成: 337 |
+| Tasks | 401 | 进行中: 1, 待验收: 1, 已完成: 337 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
-| ADRs | 114 | 已接受: 108 |
+| ADRs | 115 | 已接受: 109 |
 
 ---
 
@@ -76,17 +76,17 @@
 
 ## 📄 Tasks
 
-### 待办 (0)
+### 待办 (1)
 
-_无_
+- [ ] **TASK-20261026023249282**: Deck BDD runner loads zero scenarios so test:bdd is vacuous for the deck half
 
-### 进行中 (0)
+### 进行中 (1)
 
-_无_
+- 🔄 **TASK-20261026022014248**: Close hallucinated-verb fallback in cortex task CLI
 
-### 待验收 (0)
+### 待验收 (1)
 
-_无_
+- 🔍 **TASK-20261030150313437**: scribe: carrier-backed batches must appear in handoff as batch index with refs and when-to-read
 
 ### 已完成 (337)
 
@@ -609,6 +609,7 @@ _无_
 - ✅ **ADR-20261019134800627** (02-accepted): private-leak gate — deterministic lint-style check wired into the commit flow
 - ✅ **ADR-20261023182817984** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 - ✅ **ADR-20261023183001417** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
+- ✅ **ADR-20261026022854612** (02-accepted): 下面两项是与 task / epic 的机器可读关联(与 ## Related 段同一件事的两份)
 
 ---
 

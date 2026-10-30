@@ -7,6 +7,7 @@
 |--------|------|------|
 | proposed | 2026-06-07 | Created |
 | accepted | 2026-06-07 | Accepted |
+| accepted | 2026-10-26 | The bare form was removed early (0.21.0), not "after v1.0" as the body planned. External adopters reported agents inventing task verbs (`task close`, `task update`, …): the bare-title fallback turned each one into an empty-shell card plus a ✅. `cortex task create "<title>"` is now the only creation form; unknown subcommands exit non-zero. Body kept as the point-in-time record. See `ADR-20261026022854612` (the four-command decision) and `TASK-20261026022014248`. |
 
 ## 背景
 

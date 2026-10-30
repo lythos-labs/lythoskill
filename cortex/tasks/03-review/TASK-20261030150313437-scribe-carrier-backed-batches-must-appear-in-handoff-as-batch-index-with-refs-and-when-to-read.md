@@ -7,6 +7,7 @@
 |--------|------|------|
 | backlog | 2026-10-30 | Created |
 | in-progress | 2026-10-30 | Started |
+| review | 2026-10-30 | Deliverables committed |
 
 ## Background & Goals
 Downstream repo (humanizer project) reported via onboarding: a fully-governed

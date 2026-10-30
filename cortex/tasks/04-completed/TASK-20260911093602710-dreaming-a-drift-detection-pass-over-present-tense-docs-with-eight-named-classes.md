@@ -188,6 +188,39 @@
   - **后续(用户指示)**:对三种表达做了一次美学评估,并在 reference §Output 钉了**示例**(`7b66c36d`):两个 finding(含整文件 placement)+ 逐字段"为什么这么写"。选择的形状 = 标题是断言而非主题、`Record` 单锚点、`Evidence` 是最小证明、`Settle` 指名产物、结尾"asked; no instance"让缺席可见、按 class 排序(severity 是 verdict,本 pass 不输出 verdict)。**不是 schema** —— 正文契约仍是四个字段,示例只降低"知道契约但写成散文"的概率。
   - 原始产出在 `/tmp/drift-probe/{run2,run3,run4}/work/`,未入库;`compare.sh` 复算命令:`cd /tmp/drift-probe && bash compare.sh`。
 
+- 2026-10-26 — **复核"待用户裁决的 5 个判断点"**。用户质疑"把可推导的东西包装成判断了"。第一稿回复写成"全部可从仓内既有规则推导",**经独立复核后修正**:#1 是先于本卡的 accepted ADR,#2–#4 的载体由本卡自己新增(不算"既有"),#5 是一次真实的窄口径校准。修正后的逐条载体:
+
+  | # | 曾被列为"判断点" | 可推导来源 | 载体先于本 pass? | 结论 |
+  |---|---|---|---|---|
+  | 1 | 折后未评的记账方式(5 处) | `ADR-20260910113730375` §Decision 1(= §Options Option B 的规则原文):折入 diff 非空时,必须在 commit message **与**卡面标注「折后未评」,**写明 delta 范围与旧结论覆盖到哪个 commit**;`cortex task done` 的提示是同一规则的必经路径植入 | ✅ 2026-09-10 accepted | 按 ADR 执行,无需裁决 |
+  | 2 | class 7 "问到无实例" | `packages/lythoskill-dreaming/skill/references/drift-detection.md` §Output:结尾 `asked; no instance` 是输出格式的组成部分("makes absence visible") | ❌ 本卡新增 | **规则有效,但不构成"既有规则"** —— 载体是本卡自己写的 |
+  | 3 | 拒绝机械化 | 同 reference §Sequence 第 4 条("Only mechanise the ones that keep recurring")+ §Output("findings, never pass/fail verdicts");本卡 AC6 | ❌ 本卡新增 | 同上:是本次确立的契约,不是本次遵守的约束 |
+  | 4 | ADR 排除 | 同 reference §Scope("Do not sweep ADRs or other point-in-time records")+ `SKILL.md:149` | ❌ 本卡新增 | 同上 |
+  | 5 | manifest-only 证据 | `cortex/wiki/03-lessons/2026-07-27-agents-md-shed-sections-ab-rerun-vocabulary-not-necessity.md` Appendix B(raw 留原地、仓内提交校验和)+ AC4 实测 `shasum -c` 12/12 | ✅ 2026-07-27 | 既有先例 + 一次实测;**"摘要是否足以作为证据"这一层判断确实不在任何载体里** —— 这是唯一真实的、窄口径的判断点 |
+
+  **复核结论(修正版)**:
+
+  - #1 的引用位置先前写错(写成"§决策 2 / §影响"),正确位置是 **§Decision 1**
+    —— 该条以一句话重申 §Options Option B 的规则,而"写明 delta 范围与旧结论覆盖
+    到哪个 commit"这半句就在其中。
+  - #2–#4 的载体是**本卡自己新增的** `drift-detection.md`。因此"全部可从仓内既有
+    规则推导"这个说法**过头了**:这三条不是 pass 之前就存在的约束,而是这次 pass
+    确立、此后必须遵守的契约。把它们记成"执行了既有规则"会把新写的东西读成旧账。
+  - #5 是唯一成立的判断点,但口径很窄:载体给的是"raw 不入库、只钉哈希"的先例,
+    **没写**"一份 sha256 manifest 是否足以构成证据"。这一层由 AC4 的 `shasum -c`
+    12/12 结案,属于**本次校准**,应当如实记账,不该被并入"既有规则"。
+  - **实例核对**:`7b66c36d`(把 finding 格式钉成示例)自己就是 #1 那条规则的
+    **半执行**样本 —— message 写了 delta 范围("only the example and its rationale
+    are new"),但**没写旧结论覆盖到哪个 commit**(无 sha)。按 ADR-20260910113730375
+    §Decision 1 的要求,这是一次不完整的「折后未评」标注;同条 Cons 已经预言
+    "只写四个字的标注视为未标注",实际失效点比预言更早:写了范围、漏了 pin。
+
+  **结论**:handoff 里的"待用户裁决"措辞删去 —— 5 项里 4 项有可指称的载体
+  (其中 3 项是本卡自己确立的契约,#1 是先于本卡 accepted 的 ADR),第 5 项是
+  一次窄口径校准。真正的用户裁决对象是**带代价的取舍**(例:是否把同样的短形式
+  移除应用到 `adr`/`epic`,见 `TASK-20261026022014248`),而不是有现成规则可循的
+  执行细节。
+
 ## Related Files
 - `packages/lythoskill-dreaming/skill/SKILL.md`(**源**;Phase 3 = `### Phase 3: ZK Validate`,line 121)
 - `packages/lythoskill-dreaming/skill/references/`(新内容的落点;已有 `hermes-dreaming-field-notes.md`)
