@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/30 20:35:00
+> 自动生成于 2026/10/30 20:52:40
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 401 | 进行中: 0, 待验收: 2, 已完成: 337 |
+| Tasks | 402 | 进行中: 0, 待验收: 0, 已完成: 339 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 115 | 已接受: 109 |
 
@@ -76,20 +76,20 @@
 
 ## 📄 Tasks
 
-### 待办 (1)
+### 待办 (2)
 
 - [ ] **TASK-20261026023249282**: Deck BDD runner loads zero scenarios so test:bdd is vacuous for the deck half
+- [ ] **TASK-20261030204222091**: triage dependabot critical alert 1 on main and remediate
 
 ### 进行中 (0)
 
 _无_
 
-### 待验收 (2)
+### 待验收 (0)
 
-- 🔍 **TASK-20261026022014248**: Close hallucinated-verb fallback in cortex task CLI
-- 🔍 **TASK-20261030150313437**: scribe: carrier-backed batches must appear in handoff as batch index with refs and when-to-read
+_无_
 
-### 已完成 (337)
+### 已完成 (339)
 
 - ✅ ~~TASK-20260423102009000~~: Generate lythoskill Project Files
 - ✅ ~~TASK-20260423124059736~~: Create lythoskill ecosystem skill templates (creator/builder/curator)
@@ -428,6 +428,8 @@ _无_
 - ✅ ~~TASK-20261019134800662~~: check-no-private-leaks tool plus commit-flow gate with negative test
 - ✅ ~~TASK-20261019161017309~~: doc shorthand leak — deck/arena/curator/cortex bare commands in shipped skills claim nonexistent bins; bunx form canonical, alias documented separately
 - ✅ ~~TASK-20261023182807833~~: Fix latest-daily lookup with date-filtered query
+- ✅ ~~TASK-20261026022014248~~: Close hallucinated-verb fallback in cortex task CLI
+- ✅ ~~TASK-20261030150313437~~: scribe: carrier-backed batches must appear in handoff as batch index with refs and when-to-read
 
 ### 悬置 (17)
 
