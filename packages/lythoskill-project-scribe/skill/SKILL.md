@@ -102,8 +102,12 @@ git log <last-handoff-HEAD>..HEAD --oneline
 of the **immediately preceding handoff** — the handoff section directly
 below if you're prepending to today's file, else the first handoff of the
 latest earlier daily file. No prior handoff → index since session start.
-(The HEAD you record in `### 0` today is the next handoff's
-`<last-handoff-HEAD>` — the chain is the freshness contract.)
+"The last handoff" is never a recall question: the filename date pattern
+makes it visible — the newest `daily/YYYY-MM-DD.md` (filter dated names
+before sorting), first `## Session Handoff` section in it; on prepend days,
+the section directly below that one. (The HEAD you record in `### 0` today
+is the next handoff's `<last-handoff-HEAD>` — the chain is the freshness
+contract.)
 
 Group the commits into batches; each batch names itself in the index.
 Meta-commits are not batch-bearing and need no line: the daily-file commit
