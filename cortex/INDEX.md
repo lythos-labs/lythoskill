@@ -1,12 +1,12 @@
 # Project Index
 
-> 自动生成于 2026/10/30 15:21:36
+> 自动生成于 2026/10/30 20:35:00
 
 ## 📊 概览
 
 | 类型 | 总数 | 活跃/完成 |
 |------|------|----------|
-| Tasks | 401 | 进行中: 1, 待验收: 1, 已完成: 337 |
+| Tasks | 401 | 进行中: 0, 待验收: 2, 已完成: 337 |
 | Epics | 46 | 活跃: 1, 已完成: 41, 悬置: 2, 已归档: 2 |
 | ADRs | 115 | 已接受: 109 |
 
@@ -80,12 +80,13 @@
 
 - [ ] **TASK-20261026023249282**: Deck BDD runner loads zero scenarios so test:bdd is vacuous for the deck half
 
-### 进行中 (1)
+### 进行中 (0)
 
-- 🔄 **TASK-20261026022014248**: Close hallucinated-verb fallback in cortex task CLI
+_无_
 
-### 待验收 (1)
+### 待验收 (2)
 
+- 🔍 **TASK-20261026022014248**: Close hallucinated-verb fallback in cortex task CLI
 - 🔍 **TASK-20261030150313437**: scribe: carrier-backed batches must appear in handoff as batch index with refs and when-to-read
 
 ### 已完成 (337)
