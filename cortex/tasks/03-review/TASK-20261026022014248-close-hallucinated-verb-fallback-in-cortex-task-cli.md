@@ -126,11 +126,9 @@ note.
   → Verify: `grep -rnE "cortex (task|epic|adr|wiki) \"[a-z]" AGENTS.md templates/ examples/ \
     packages/*/skill/ packages/*/src/ packages/*/templates/ skills/ cortex/wiki/04-ssot/` → only
   the negative BDD scenarios (which quote the removed form on purpose) and point-in-time records.
-- [ ] **AC8** Full local gate green.
+- [x] **AC8** Full local gate green.
   → Verify: `bun scripts/ci-gate.ts` → all steps pass.
-- AC8 stays unticked on purpose: `ci-gate` runs 6/7, and the only red step
-  ("skill artifacts in sync") is structurally impossible to pass before the
-  generated `skills/` files are committed. Re-run after the commit and tick it.
+- AC8 ticked 2026-10-30 by the takeover session: `bun scripts/ci-gate.ts` → **all 7 steps green** (incl. "skill artifacts in sync"), run after the generated `skills/` files and cortex-source commits landed.
 
 ## Progress Log
 <!-- Update during execution, with timestamps -->
